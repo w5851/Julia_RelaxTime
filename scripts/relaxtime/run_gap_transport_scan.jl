@@ -47,14 +47,6 @@ const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference",
 const DEFAULT_PHASE_REFERENCE_LAYER = :accepted
 const DEFAULT_STRICT_PHASE_REFERENCE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT
 
-# These paths are retained only for explicit diagnostic CSV compatibility.  A
-# normal runtime invocation resolves through the versioned v2 adapter above;
-# it never discovers or merges the historical snapshot implicitly.
-const LEGACY_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
-const DEFAULT_PHASE_BOUNDARY_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "boundary.csv")
-const DEFAULT_PHASE_CEP_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "cep.csv")
-const DEFAULT_PHASE_CROSSOVER_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "crossover_dense.csv")
-
 function _load_runtime_phase_reference(opts)
     mode = opts.phase_reference_mode
     mode === :diagnostic && opts.phase_reference_root === nothing &&

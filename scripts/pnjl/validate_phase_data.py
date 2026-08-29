@@ -9,12 +9,16 @@ PNJL 相结构数据验证脚本
 
 用法：
     python scripts/pnjl/validate_phase_data.py [options]
+
+默认校验 v2 accepted phase-reference；旧 schema 仍可通过 --boundary、--spinodal、
+--crossover 显式传入。--phase-reference-layer strict 可用于 certified-only 对照。
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -37,10 +41,14 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
-LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
-DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
-DEFAULT_SPINODAL_PATH = LEGACY_PHASE_REFERENCE_ROOT / "spinodals.csv"
-DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+DEFAULT_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
+DEFAULT_PHASE_REFERENCE_LAYER = "accepted"
+DEFAULT_ACCEPTED_TABLE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT / "accepted" / "tables"
+DEFAULT_BOUNDARY_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "maxwell_surface_accepted_phase_map_v1.csv"
+DEFAULT_SPINODAL_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "spinodal_surface_accepted_phase_map_v1.csv"
+DEFAULT_CROSSOVER_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "crossover_surface_accepted_phase_map_v1.csv"
 
 
 @dataclass
@@ -73,6 +81,82 @@ def load_csv_data(path: Path) -> Tuple[List[str], List[Dict[str, float]]]:
             except ValueError:
                 continue
     return headers, rows
+
+
+def load_candidate_validation_data(
+    reference_root: Path = DEFAULT_PHASE_REFERENCE_ROOT,
+    layer: str = DEFAULT_PHASE_REFERENCE_LAYER,
+) -> Dict[str, Tuple[List[str], List[Dict[str, float]]]]:
+    """Load an Issue #130 phase layer into this validator's legacy-shaped view.
+
+    The validator predates the versioned phase-reference schema and operates
+    on numeric dictionaries.  This adapter keeps that reporting contract while
+    making the author-accepted v2 package the default input.  Explicit CSV
+    paths remain available to validate historical fixtures; no files are
+    written and no solver is called.
+    """
+    try:
+        from scripts.pnjl.phase_reference_adapter import load_phase_reference
+    except ImportError as exc:  # pragma: no cover - only reachable outside repo root
+        raise RuntimeError("cannot import the phase-reference adapter") from exc
+
+    bundle = load_phase_reference(reference_root, layer=layer)
+
+    boundary_headers = [
+        "xi", "T_MeV", "mu_transition_MeV", "rho_hadron", "rho_quark", "area_residual"
+    ]
+    boundary_rows: List[Dict[str, float]] = []
+    for row in bundle.tables.get("boundary", ()):
+        boundary_rows.append({
+            "xi": float(row["xi"]),
+            "T_MeV": float(row["T_MeV"]),
+            "mu_transition_MeV": float(row["muq_MeV"]),
+            "rho_hadron": float(row["rho_hadron"]),
+            "rho_quark": float(row["rho_quark"]),
+            "area_residual": float(row["area_residual"]),
+        })
+
+    spinodal_headers = [
+        "xi", "T_MeV", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV",
+        "rho_spinodal_hadron", "rho_spinodal_quark",
+    ]
+    spinodal_rows: List[Dict[str, float]] = []
+    for row in bundle.tables.get("spinodals", ()):
+        spinodal_rows.append({
+            "xi": float(row["xi"]),
+            "T_MeV": float(row["T_MeV"]),
+            "mu_spinodal_hadron_MeV": float(row["muq_spinodal_hadron_MeV"]),
+            "mu_spinodal_quark_MeV": float(row["muq_spinodal_quark_MeV"]),
+            "rho_spinodal_hadron": (
+                float(row["rho_spinodal_hadron"])
+                if row.get("rho_spinodal_hadron") is not None else float("nan")
+            ),
+            "rho_spinodal_quark": (
+                float(row["rho_spinodal_quark"])
+                if row.get("rho_spinodal_quark") is not None else float("nan")
+            ),
+        })
+
+    crossover_headers = [
+        "xi", "mu_MeV", "T_crossover_chiral_MeV", "rho_chiral"
+    ]
+    crossover_rows: List[Dict[str, float]] = []
+    for row in bundle.tables.get("crossover", ()):
+        physical_region = str(row.get("physical_region", "")).lower()
+        if physical_region not in ("", "crossover_below_cep"):
+            continue
+        crossover_rows.append({
+            "xi": float(row["xi"]),
+            "mu_MeV": float(row["muq_MeV"]),
+            "T_crossover_chiral_MeV": float(row["T_MeV"]),
+            "rho_chiral": float(row["rho"]),
+        })
+
+    return {
+        "boundary": (boundary_headers, boundary_rows),
+        "spinodals": (spinodal_headers, spinodal_rows),
+        "crossover": (crossover_headers, crossover_rows),
+    }
 
 
 def group_by_xi(rows: List[Dict[str, float]]) -> Dict[float, List[Dict[str, float]]]:
@@ -158,10 +242,13 @@ def check_monotonicity(
     return issues
 
 
-def validate_boundary_data(path: Path) -> List[ValidationIssue]:
+def validate_boundary_data(
+    path: Path,
+    data: Optional[Tuple[List[str], List[Dict[str, float]]]] = None,
+) -> List[ValidationIssue]:
     """验证 boundary.csv 数据"""
     issues = []
-    headers, rows = load_csv_data(path)
+    headers, rows = data if data is not None else load_csv_data(path)
     
     if not rows:
         issues.append(ValidationIssue(
@@ -224,10 +311,13 @@ def validate_boundary_data(path: Path) -> List[ValidationIssue]:
     return issues
 
 
-def validate_spinodal_data(path: Path) -> List[ValidationIssue]:
+def validate_spinodal_data(
+    path: Path,
+    data: Optional[Tuple[List[str], List[Dict[str, float]]]] = None,
+) -> List[ValidationIssue]:
     """验证 spinodals.csv 数据"""
     issues = []
-    headers, rows = load_csv_data(path)
+    headers, rows = data if data is not None else load_csv_data(path)
     
     if not rows:
         issues.append(ValidationIssue(
@@ -289,7 +379,10 @@ def group_crossover_by_xi(rows: List[Dict[str, float]]) -> Dict[float, List[Dict
     return groups
 
 
-def validate_crossover_data(path: Path) -> List[ValidationIssue]:
+def validate_crossover_data(
+    path: Path,
+    data: Optional[Tuple[List[str], List[Dict[str, float]]]] = None,
+) -> List[ValidationIssue]:
     """验证 crossover.csv 数据
     
     检查规则：
@@ -299,7 +392,7 @@ def validate_crossover_data(path: Path) -> List[ValidationIssue]:
     4. T_crossover 应在合理范围内（50-300 MeV）
     """
     issues = []
-    headers, rows = load_csv_data(path)
+    headers, rows = data if data is not None else load_csv_data(path)
     
     if not rows:
         issues.append(ValidationIssue(
@@ -431,9 +524,13 @@ def validate_crossover_data(path: Path) -> List[ValidationIssue]:
     return issues
 
 
-def print_statistics(path: Path, name: str) -> None:
+def print_statistics(
+    path: Path,
+    name: str,
+    data: Optional[Tuple[List[str], List[Dict[str, float]]]] = None,
+) -> None:
     """打印数据统计信息"""
-    headers, rows = load_csv_data(path)
+    headers, rows = data if data is not None else load_csv_data(path)
     if not rows:
         print(f"\n{name}: No data")
         return
@@ -465,17 +562,47 @@ def main() -> None:
     parser.add_argument("--boundary", type=Path, default=DEFAULT_BOUNDARY_PATH)
     parser.add_argument("--spinodal", type=Path, default=DEFAULT_SPINODAL_PATH)
     parser.add_argument("--crossover", type=Path, default=DEFAULT_CROSSOVER_PATH)
+    parser.add_argument(
+        "--phase-reference-root",
+        type=Path,
+        default=None,
+        help="Issue #130 phase-reference root; omitted uses the accepted v2 package",
+    )
+    parser.add_argument(
+        "--phase-reference-layer",
+        choices=["strict", "render", "accepted"],
+        default=None,
+        help="phase-reference layer; omitted uses accepted",
+    )
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
+
+    use_candidate = args.phase_reference_root is not None or (
+        DEFAULT_PHASE_REFERENCE_ROOT.is_dir()
+        and args.boundary == DEFAULT_BOUNDARY_PATH
+        and args.spinodal == DEFAULT_SPINODAL_PATH
+        and args.crossover == DEFAULT_CROSSOVER_PATH
+    )
+    candidate_data = (
+        load_candidate_validation_data(
+            args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT,
+            args.phase_reference_layer or DEFAULT_PHASE_REFERENCE_LAYER,
+        )
+        if use_candidate else None
+    )
+
+    boundary_data = candidate_data["boundary"] if candidate_data is not None else None
+    spinodal_data = candidate_data["spinodals"] if candidate_data is not None else None
+    crossover_data = candidate_data["crossover"] if candidate_data is not None else None
     
     print("=" * 60)
     print("PNJL Phase Data Validation")
     print("=" * 60)
     
     # 统计信息
-    print_statistics(args.boundary, "boundary.csv")
-    print_statistics(args.spinodal, "spinodals.csv")
-    print_crossover_statistics(args.crossover, "crossover.csv")
+    print_statistics(args.boundary, "boundary.csv", data=boundary_data)
+    print_statistics(args.spinodal, "spinodals.csv", data=spinodal_data)
+    print_crossover_statistics(args.crossover, "crossover.csv", data=crossover_data)
     
     # 验证
     print("\n" + "-" * 60)
@@ -483,9 +610,9 @@ def main() -> None:
     print("-" * 60)
     
     all_issues = []
-    all_issues.extend(validate_boundary_data(args.boundary))
-    all_issues.extend(validate_spinodal_data(args.spinodal))
-    all_issues.extend(validate_crossover_data(args.crossover))
+    all_issues.extend(validate_boundary_data(args.boundary, data=boundary_data))
+    all_issues.extend(validate_spinodal_data(args.spinodal, data=spinodal_data))
+    all_issues.extend(validate_crossover_data(args.crossover, data=crossover_data))
     
     if not all_issues:
         print("\n✓ All data passed validation!")
@@ -504,9 +631,13 @@ def main() -> None:
     print("\n" + "=" * 60)
 
 
-def print_crossover_statistics(path: Path, name: str) -> None:
+def print_crossover_statistics(
+    path: Path,
+    name: str,
+    data: Optional[Tuple[List[str], List[Dict[str, float]]]] = None,
+) -> None:
     """打印 crossover 数据统计信息"""
-    headers, rows = load_csv_data(path)
+    headers, rows = data if data is not None else load_csv_data(path)
     if not rows:
         print(f"\n{name}: No data")
         return

@@ -244,7 +244,10 @@ def test_plot_consumer_requires_explicit_candidate_root(tmp_path: Path) -> None:
     assert len(boundary) == len(ceps) == len(spinodals) == len(crossovers) == 1
     assert crossovers[0].T_deconf_MeV is None
     assert diagnostics["runtime_consumption"] is False
-    assert DEFAULT_BOUNDARY_PATH == ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1" / "boundary.csv"
+    assert DEFAULT_BOUNDARY_PATH == (
+        ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2" /
+        "accepted" / "tables" / "maxwell_surface_accepted_phase_map_v1.csv"
+    )
 
 
 def test_paper_p1_candidate_overlay_preserves_mu_scale_and_status(tmp_path: Path) -> None:

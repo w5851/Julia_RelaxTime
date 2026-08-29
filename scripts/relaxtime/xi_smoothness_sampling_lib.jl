@@ -78,12 +78,18 @@ function _read_boundary_anchors(path::String)
                 _is_comment(raw) && continue
                 header = raw
                 colmap = _parse_header_map(header)
-                for col in ("xi", "T_MeV", "mu_transition_MeV")
+                for col in ("xi", "T_MeV")
                     haskey(colmap, col) || throw(ArgumentError("$(path): missing required column in boundary_csv: $(col)"))
                 end
                 idx_xi = colmap["xi"]
                 idx_T = colmap["T_MeV"]
-                idx_mu = colmap["mu_transition_MeV"]
+                idx_mu = if haskey(colmap, "mu_transition_MeV")
+                    colmap["mu_transition_MeV"]
+                elseif haskey(colmap, "mu_MeV")
+                    colmap["mu_MeV"]
+                else
+                    throw(ArgumentError("$(path): missing required column in boundary_csv: mu_transition_MeV or mu_MeV"))
+                end
                 header_seen = true
                 continue
             end
@@ -92,7 +98,7 @@ function _read_boundary_anchors(path::String)
             parts = split(raw, ',')
             xi = _parse_required_float(parts, idx_xi; path=path, line_no=line_no, col="xi")
             T = _parse_required_float(parts, idx_T; path=path, line_no=line_no, col="T_MeV")
-            mu_transition = _parse_required_float(parts, idx_mu; path=path, line_no=line_no, col="mu_transition_MeV")
+            mu_transition = _parse_required_float(parts, idx_mu; path=path, line_no=line_no, col="mu_transition_MeV or mu_MeV")
             _xi_is_zero(xi) || continue
             push!(anchors, AnchorPoint("boundary", T, mu_transition))
         end
@@ -123,10 +129,19 @@ function _read_crossover_anchors(path::String)
                 for col in ("xi", "mu_MeV")
                     haskey(colmap, col) || throw(ArgumentError("$(path): missing required column in crossover_csv: $(col)"))
                 end
-                haskey(colmap, "T_crossover_chiral_MeV") || throw(ArgumentError("$(path): missing required column in crossover_csv: T_crossover_chiral_MeV"))
+                (haskey(colmap, "T_crossover_chiral_MeV") ||
+                 haskey(colmap, "T_crossover_MeV") ||
+                 haskey(colmap, "T_MeV")) ||
+                    throw(ArgumentError("$(path): missing required column in crossover_csv: T_crossover_chiral_MeV or T_MeV"))
                 idx_xi = colmap["xi"]
                 idx_mu = colmap["mu_MeV"]
-                idx_T = colmap["T_crossover_chiral_MeV"]
+                idx_T = if haskey(colmap, "T_crossover_chiral_MeV")
+                    colmap["T_crossover_chiral_MeV"]
+                elseif haskey(colmap, "T_crossover_MeV")
+                    colmap["T_crossover_MeV"]
+                else
+                    colmap["T_MeV"]
+                end
                 header_seen = true
                 continue
             end
@@ -135,7 +150,7 @@ function _read_crossover_anchors(path::String)
             parts = split(raw, ',')
             xi = _parse_required_float(parts, idx_xi; path=path, line_no=line_no, col="xi")
             mu = _parse_required_float(parts, idx_mu; path=path, line_no=line_no, col="mu_MeV")
-            T = _parse_required_float(parts, idx_T; path=path, line_no=line_no, col="T_crossover_chiral_MeV")
+            T = _parse_required_float(parts, idx_T; path=path, line_no=line_no, col="T_crossover_chiral_MeV or T_MeV")
             _xi_is_zero(xi) || continue
             push!(anchors, AnchorPoint("crossover", T, mu))
         end
@@ -165,6 +180,14 @@ end
 # near-phase-line 扰动窗口（T 和 μq 的半宽，单位 MeV）
 const NEAR_PHASE_DELTA_T_HALF = 18.0
 const NEAR_PHASE_DELTA_MUQ_HALF = 36.0
+const DEFAULT_BOUNDARY_CSV = normpath(joinpath(
+    @__DIR__, "..", "..", "data", "reference", "pnjl", "issue130_phase_reference_v2",
+    "accepted", "tables", "maxwell_surface_accepted_phase_map_v1.csv",
+))
+const DEFAULT_CROSSOVER_CSV = normpath(joinpath(
+    @__DIR__, "..", "..", "data", "reference", "pnjl", "issue130_phase_reference_v2",
+    "accepted", "tables", "crossover_surface_accepted_phase_map_v1.csv",
+))
 
 function sample_params(total::Int;
     seed::Int=42,
@@ -172,8 +195,8 @@ function sample_params(total::Int;
     near_count::Int=12,
     T_range::Tuple{Float64, Float64}=(50.0, 270.0),
     muq_range::Tuple{Float64, Float64}=(0.0, 360.0),
-    boundary_csv::String=joinpath("data", "reference", "pnjl", "legacy_phase_reference_v1", "boundary.csv"),
-    crossover_csv::String=joinpath("data", "reference", "pnjl", "crossover.csv"),
+    boundary_csv::String=DEFAULT_BOUNDARY_CSV,
+    crossover_csv::String=DEFAULT_CROSSOVER_CSV,
     near_delta_T_half::Float64=NEAR_PHASE_DELTA_T_HALF,
     near_delta_muq_half::Float64=NEAR_PHASE_DELTA_MUQ_HALF,
 )

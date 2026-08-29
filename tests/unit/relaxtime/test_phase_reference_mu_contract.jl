@@ -78,6 +78,18 @@ end
     @test legacy.mu_CEP == legacy.muq_CEP
 end
 
+@testset "phase equilibrium defaults to accepted reference" begin
+    data = Main.GapTransportScanPhaseEquilibrium.load_phase_boundary_data(0.0)
+    @test !isempty(data.T_values)
+    @test isfinite(data.T_CEP)
+    @test isfinite(data.muB_CEP)
+
+    crossover, xi_used = Main.GapTransportScanPhaseEquilibrium.load_crossover_reference(0.0)
+    @test crossover !== nothing
+    @test !isempty(crossover)
+    @test xi_used == 0.0
+end
+
 @testset "transport consumer preserves legacy/candidate phase parity" begin
     candidate_root = _write_candidate_phase_bundle(mktempdir())
     candidate = PRA.load_phase_reference_runtime(candidate_root)

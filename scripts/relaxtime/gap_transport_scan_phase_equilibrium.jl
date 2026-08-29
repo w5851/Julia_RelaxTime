@@ -18,9 +18,40 @@ function _column_index(header::AbstractVector{<:AbstractString}, names::Tuple{Va
     return nothing
 end
 
+const _DEFAULT_ACCEPTED_PHASE_REFERENCE_CACHE = Ref{Any}(nothing)
+const _LOCAL_PHASE_BOUNDARY_XI_CACHE = Ref{Union{Nothing,Vector{Float64}}}(nothing)
+const _LOCAL_PHASE_CROSSOVER_XI_CACHE = Ref{Union{Nothing,Vector{Float64}}}(nothing)
+
+@inline function _phase_boundary_xi_cache()
+    return isdefined(Main, :PHASE_BOUNDARY_XI_CACHE) ?
+        Main.PHASE_BOUNDARY_XI_CACHE : _LOCAL_PHASE_BOUNDARY_XI_CACHE
+end
+
+@inline function _phase_crossover_xi_cache()
+    return isdefined(Main, :PHASE_CROSSOVER_XI_CACHE) ?
+        Main.PHASE_CROSSOVER_XI_CACHE : _LOCAL_PHASE_CROSSOVER_XI_CACHE
+end
+
+function _default_phase_reference_root()
+    if isdefined(Main, :DEFAULT_PHASE_REFERENCE_ROOT)
+        return normpath(String(Main.DEFAULT_PHASE_REFERENCE_ROOT))
+    end
+    return normpath(joinpath(@__DIR__, "..", "..", "data", "reference", "pnjl", "issue130_phase_reference_v2"))
+end
+
+function _default_accepted_phase_reference()
+    isdefined(Main, :PhaseReferenceAdapter) ||
+        throw(ArgumentError("accepted phase-reference adapter is not loaded; include phase_reference_adapter.jl first"))
+    if _DEFAULT_ACCEPTED_PHASE_REFERENCE_CACHE[] === nothing
+        _DEFAULT_ACCEPTED_PHASE_REFERENCE_CACHE[] =
+            Main.PhaseReferenceAdapter.load_phase_reference_accepted_runtime(_default_phase_reference_root())
+    end
+    return _DEFAULT_ACCEPTED_PHASE_REFERENCE_CACHE[]
+end
+
 function load_phase_boundary_data(xi::Float64;
-    boundary_path::String=Main.DEFAULT_PHASE_BOUNDARY_PATH,
-    cep_path::String=Main.DEFAULT_PHASE_CEP_PATH,
+    boundary_path::Union{Nothing,String}=nothing,
+    cep_path::Union{Nothing,String}=nothing,
     phase_reference=nothing,
     phase_reference_mode::Symbol=:runtime,
 )
@@ -33,6 +64,17 @@ function load_phase_boundary_data(xi::Float64;
             require_certified=phase_reference_mode in (:runtime, :strict),
         )
     end
+
+    if boundary_path === nothing && cep_path === nothing
+        return Main.PhaseReferenceAdapter.boundary_data(
+            _default_accepted_phase_reference(),
+            xi;
+            require_certified=true,
+        )
+    end
+    (boundary_path === nothing || cep_path === nothing) &&
+        throw(ArgumentError("boundary_path and cep_path must be provided together for explicit CSV input"))
+
     T_CEP = NaN
     muq_CEP = NaN
     muB_CEP = NaN
@@ -157,22 +199,15 @@ end
 
 function available_phase_boundary_xis(; phase_reference=nothing)
     phase_reference !== nothing && return Main.PhaseReferenceAdapter.available_xi(phase_reference, :boundary)
-    if Main.PHASE_BOUNDARY_XI_CACHE[] !== nothing
-        return Main.PHASE_BOUNDARY_XI_CACHE[]
+    cache = _phase_boundary_xi_cache()
+    if cache[] !== nothing
+        return cache[]
     end
-    xis = Float64[]
-    if isfile(Main.DEFAULT_PHASE_BOUNDARY_PATH)
-        for line in eachline(Main.DEFAULT_PHASE_BOUNDARY_PATH)
-            startswith(line, "xi") && continue
-            parts = split(line, ',')
-            length(parts) >= 1 || continue
-            xi_val = tryparse(Float64, parts[1])
-            xi_val === nothing && continue
-            push!(xis, xi_val)
-        end
-    end
-    Main.PHASE_BOUNDARY_XI_CACHE[] = unique(sort(xis))
-    return Main.PHASE_BOUNDARY_XI_CACHE[]
+    cache[] = Main.PhaseReferenceAdapter.available_xi(
+        _default_accepted_phase_reference(),
+        :boundary,
+    )
+    return cache[]
 end
 
 function nearest_phase_boundary_xi(xi::Float64; phase_reference=nothing)
@@ -182,14 +217,23 @@ function nearest_phase_boundary_xi(xi::Float64; phase_reference=nothing)
     return xis[argmin(distances)]
 end
 
-function available_phase_crossover_xis(; phase_reference=nothing)
+function available_phase_crossover_xis(; phase_reference=nothing, crossover_path::Union{Nothing,String}=nothing)
     phase_reference !== nothing && return Main.PhaseReferenceAdapter.available_xi(phase_reference, :crossover)
-    if Main.PHASE_CROSSOVER_XI_CACHE[] !== nothing
-        return Main.PHASE_CROSSOVER_XI_CACHE[]
+    cache = _phase_crossover_xi_cache()
+    if crossover_path === nothing && cache[] !== nothing
+        return cache[]
     end
+    if crossover_path === nothing
+        cache[] = Main.PhaseReferenceAdapter.available_xi(
+            _default_accepted_phase_reference(),
+            :crossover,
+        )
+        return cache[]
+    end
+
     xis = Float64[]
-    if isfile(Main.DEFAULT_PHASE_CROSSOVER_PATH)
-        for line in eachline(Main.DEFAULT_PHASE_CROSSOVER_PATH)
+    if isfile(crossover_path)
+        for line in eachline(crossover_path)
             startswith(line, "xi") && continue
             parts = split(line, ',')
             length(parts) >= 1 || continue
@@ -198,12 +242,11 @@ function available_phase_crossover_xis(; phase_reference=nothing)
             push!(xis, xi_val)
         end
     end
-    Main.PHASE_CROSSOVER_XI_CACHE[] = unique(sort(xis))
-    return Main.PHASE_CROSSOVER_XI_CACHE[]
+    return unique(sort(xis))
 end
 
-function nearest_phase_crossover_xi(xi::Float64; phase_reference=nothing)
-    xis = available_phase_crossover_xis(; phase_reference=phase_reference)
+function nearest_phase_crossover_xi(xi::Float64; phase_reference=nothing, crossover_path::Union{Nothing,String}=nothing)
+    xis = available_phase_crossover_xis(; phase_reference=phase_reference, crossover_path=crossover_path)
     isempty(xis) && return nothing
     distances = abs.(xis .- xi)
     return xis[argmin(distances)]
@@ -243,7 +286,11 @@ function build_phase_tracker(xi::Float64, previous_solution=nothing, previous_ph
     return tracker, boundary_xi
 end
 
-function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+function load_crossover_reference(xi::Float64;
+    crossover_path::Union{Nothing,String}=nothing,
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
     if phase_reference !== nothing
         phase_reference_mode in (:runtime, :strict, :diagnostic) ||
             throw(ArgumentError("phase_reference_mode must be :runtime, :strict, or :diagnostic"))
@@ -256,15 +303,26 @@ function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_re
         return [(mu_MeV=row.muq_MeV, T_crossover_MeV=row.T_MeV) for row in rows],
             first(rows).xi
     end
-    isfile(Main.DEFAULT_PHASE_CROSSOVER_PATH) || return nothing, nothing
+
+    if crossover_path === nothing
+        rows = Main.PhaseReferenceAdapter.crossover_rows(
+            _default_accepted_phase_reference(),
+            xi;
+            require_certified=true,
+        )
+        isempty(rows) && return nothing, nothing
+        return [(mu_MeV=row.muq_MeV, T_crossover_MeV=row.T_MeV) for row in rows],
+            first(rows).xi
+    end
+    isfile(crossover_path) || return nothing, nothing
 
     header = nothing
     rows = NamedTuple{(:mu_MeV, :T_crossover_MeV), Tuple{Float64, Float64}}[]
     xi_used = xi
     exact_match_found = false
-    nearest_xi = nearest_phase_crossover_xi(xi)
+    nearest_xi = nearest_phase_crossover_xi(xi; crossover_path=crossover_path)
 
-    open(Main.DEFAULT_PHASE_CROSSOVER_PATH, "r") do io
+    open(crossover_path, "r") do io
         for raw_line in eachline(io)
             line = strip(raw_line)
             isempty(line) && continue
@@ -280,6 +338,9 @@ function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_re
             idx_T = findfirst(==("T_crossover_MeV"), header)
             if idx_T === nothing
                 idx_T = findfirst(==("T_crossover_chiral_MeV"), header)
+            end
+            if idx_T === nothing
+                idx_T = findfirst(==("T_MeV"), header)
             end
             (idx_xi === nothing || idx_mu === nothing || idx_T === nothing) && return nothing, nothing
 
@@ -306,11 +367,13 @@ function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_re
 end
 
 function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64;
+    crossover_path::Union{Nothing,String}=nothing,
     phase_reference=nothing,
     phase_reference_mode::Symbol=:runtime,
 )
     data, xi_used = load_crossover_reference(
         xi;
+        crossover_path=crossover_path,
         phase_reference=phase_reference,
         phase_reference_mode=phase_reference_mode,
     )

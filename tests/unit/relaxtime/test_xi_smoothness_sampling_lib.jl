@@ -172,5 +172,16 @@ end
             @test occursin("missing required column", msg)
             @test occursin("T_crossover_chiral_MeV", msg)
         end
+
+        @testset "repository defaults use accepted phase-reference tables" begin
+            default_rows = sample_params(
+                2;
+                seed=cfg.seed,
+                random_count=0,
+                near_count=2,
+            )
+            @test length(default_rows) == 2
+            @test all(r -> r.source == "near_phase_line", default_rows)
+        end
     end
 end
