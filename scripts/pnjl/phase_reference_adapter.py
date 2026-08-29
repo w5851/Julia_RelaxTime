@@ -24,7 +24,8 @@ from typing import Any, Iterable, Mapping
 
 SCHEMA_VERSION = "pnjl_issue130_phase_reference_adapter_v1"
 IMPORT_SCHEMA = "pnjl_issue130_phase_reference_import_v1"
-LAYERS = ("strict", "derived", "render")
+LAYERS = ("strict", "derived", "render", "accepted")
+IMPORT_SCHEMA_V2 = "pnjl_issue130_phase_reference_v2"
 
 _TABLES: dict[str, dict[str, Any]] = {
     "boundary": {
@@ -54,6 +55,33 @@ _TABLES: dict[str, dict[str, Any]] = {
         "render": None,
         "keys": ("xi", "T_MeV"),
         "numeric": ("xi", "T_MeV", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV"),
+    },
+}
+
+# v2 intentionally has no public ``derived`` layer.  Its render layer is a
+# complete structured display package, and accepted is an explicit downstream
+# candidate.  Keys and required numeric fields remain identical to v1 so the
+# normalizer and legacy-view conversion can be reused without changing units.
+_TABLES_V2: dict[str, dict[str, Any]] = {
+    "boundary": {
+        **_TABLES["boundary"],
+        "render": "maxwell_surface_render.csv",
+        "accepted": "maxwell_surface_accepted_phase_map_v1.csv",
+    },
+    "crossover": {
+        **_TABLES["crossover"],
+        "render": "crossover_surface_render.csv",
+        "accepted": "crossover_surface_accepted_phase_map_v1.csv",
+    },
+    "cep": {
+        **_TABLES["cep"],
+        "render": "cep_boundary_render.csv",
+        "accepted": "cep_boundary_accepted_phase_map_v1.csv",
+    },
+    "spinodals": {
+        **_TABLES["spinodals"],
+        "render": "spinodal_surface_render.csv",
+        "accepted": "spinodal_surface_accepted_phase_map_v1.csv",
     },
 }
 
@@ -167,10 +195,13 @@ def _read_table(path: Path, spec: Mapping[str, Any]) -> tuple[list[str], list[di
 
 def _is_interpolated(layer: str, row: Mapping[str, str]) -> bool:
     del layer  # The row's explicit layer/status is authoritative for all views.
+    source_status = row.get("source_status", "").lower()
     return (
         row.get("layer") == "interpolated_noncertified"
         or "interpolat" in row.get("status", "").lower()
         or "interpolat" in row.get("interpolation_method", "").lower()
+        or "interpolat" in source_status
+        or "unresolved" in source_status
     )
 
 
@@ -197,6 +228,8 @@ def _crossover_certified(layer: str, row: Mapping[str, str]) -> bool:
 
 
 def _cep_certified(row: Mapping[str, str]) -> bool:
+    if _is_interpolated("", row):
+        return False
     width = _float(row.get("T_high_MeV"), path=Path("<row>"), row_number=0, field="T_high_MeV") - _float(
         row.get("T_low_MeV"), path=Path("<row>"), row_number=0, field="T_low_MeV"
     )
@@ -304,15 +337,27 @@ def load_phase_reference(
     if layer not in LAYERS:
         raise PhaseReferenceContractError(f"layer must be one of {LAYERS}, got {layer!r}")
     manifest_path = root / "manifest.json"
+    if not manifest_path.is_file():
+        raise PhaseReferenceContractError(f"missing candidate manifest: {manifest_path}")
+    manifest = _read_json(manifest_path)
+    schema_version = manifest.get("schema_version")
+    if schema_version not in {IMPORT_SCHEMA, IMPORT_SCHEMA_V2}:
+        raise PhaseReferenceContractError("candidate import schema mismatch")
+    if schema_version == IMPORT_SCHEMA:
+        table_specs = _TABLES
+        allowed_layers = {"strict", "derived", "render"}
+    else:
+        table_specs = _TABLES_V2
+        allowed_layers = {"strict", "render", "accepted"}
+    if layer not in allowed_layers:
+        raise PhaseReferenceContractError(
+            f"layer {layer!r} is not available for schema {schema_version!r}"
+        )
     layer_root = root / layer
     layer_manifest_path = layer_root / "manifest.json"
-    for path in (manifest_path, layer_manifest_path):
-        if not path.is_file():
-            raise PhaseReferenceContractError(f"missing candidate manifest: {path}")
-    manifest = _read_json(manifest_path)
+    if not layer_manifest_path.is_file():
+        raise PhaseReferenceContractError(f"missing candidate manifest: {layer_manifest_path}")
     layer_manifest = _read_json(layer_manifest_path)
-    if manifest.get("schema_version") != IMPORT_SCHEMA:
-        raise PhaseReferenceContractError("candidate import schema mismatch")
     if manifest.get("runtime_consumption") is not False:
         raise PhaseReferenceContractError("candidate manifest must keep runtime_consumption=false")
     if manifest.get("reference_status") not in {"candidate", "imported_candidate"}:
@@ -320,7 +365,7 @@ def load_phase_reference(
 
     table_rows: dict[str, tuple[Mapping[str, Any], ...]] = {}
     row_counts: dict[str, int] = {}
-    for table, spec in _TABLES.items():
+    for table, spec in table_specs.items():
         filename = spec[layer]
         if filename is None:
             continue
@@ -340,12 +385,17 @@ def load_phase_reference(
         )
     if allow_runtime and layer == "render":
         raise PhaseReferenceContractError("render layer is visualization-only and cannot be runtime input")
+    if allow_runtime and layer == "accepted":
+        raise PhaseReferenceContractError(
+            "accepted layer is a downstream candidate and requires explicit promotion before runtime input"
+        )
 
     diagnostics = {
         "adapter_schema": SCHEMA_VERSION,
         "reference_status": manifest.get("reference_status"),
         "runtime_consumption": False,
         "layer": layer,
+        "schema_version": schema_version,
         "row_counts": row_counts,
         "uncertified_rows": uncertified,
         "allow_runtime": allow_runtime,
@@ -453,6 +503,14 @@ def build_runtime_view(
     caller-provided legacy tables.
     """
 
+    if candidate.layer == "render":
+        raise PhaseReferenceContractError(
+            "render layer is visualization-only and cannot be a runtime view"
+        )
+    if candidate.layer == "accepted":
+        raise PhaseReferenceContractError(
+            "accepted layer requires an explicit downstream consumer mode"
+        )
     legacy_tables = legacy_tables or {}
     merged: dict[str, tuple[Mapping[str, Any], ...]] = {}
     candidate_counts: dict[str, int] = {}

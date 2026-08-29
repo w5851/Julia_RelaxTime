@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-28"
+updated_at = "2026-08-29"
 
 [[tracks]]
 id = "issue130-phase"
@@ -476,6 +476,30 @@ evidence = [
   "sha:aa2086f428454bddcc087c4a1b2a9503d834c888",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "note:solver_free_preflight_candidate_certified_and_legacy_fallback_key_counts_20260828",
+]
+
+[[items]]
+id = "issue130-phase-reference-three-layer-accepted-map"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md"
+reason = "作者已确认以 strict、render、accepted 作为三层公共语义；derived 仅保留为内部构建证据。v2 的 render/spinodal 完整化、accepted 状态保留和 adapter smoke 已完成，当前等待作者审核后再决定下游默认与 legacy retirement。"
+next_action = "审核 data/reference/pnjl/issue130_phase_reference_v2 的三层覆盖、spinodal 完整表和 accepted 状态；审核前不切换 runtime 默认、不删除 legacy，也不重跑 solver。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md",
+  "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+  "file:data/reference/pnjl/issue130_phase_reference_v1/derived/tables/spinodal_surface_derived_reference_v1.csv",
+  "file:data/reference/pnjl/issue130_phase_reference_v1/render/manifest.json",
+  "file:data/reference/pnjl/issue130_phase_reference_v2/manifest.json",
+  "file:data/reference/pnjl/issue130_phase_reference_v2/AUDIT.md",
+  "file:data/reference/pnjl/issue130_phase_reference_v2/claim_ledger.json",
+  "file:tests/unit/python/test_issue130_phase_reference_v2.py",
+  "file:tests/unit/relaxtime/test_phase_reference_adapter.jl",
+  "note:author_authorized_three_layer_strict_render_accepted_plan",
 ]
 
 [[items]]

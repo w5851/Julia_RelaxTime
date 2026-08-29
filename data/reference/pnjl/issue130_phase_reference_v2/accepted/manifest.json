@@ -1,0 +1,123 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_manifest": {
+    "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+    "bytes": 16420
+  },
+  "source_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "schema_version": "pnjl_issue130_phase_reference_layer_v2",
+  "layer": "accepted",
+  "semantics": "author-review candidate downstream phase map derived from complete structured render tables",
+  "promotion_status": "awaiting_author_review",
+  "reference_write": false,
+  "runtime_consumption": false,
+  "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
+  "source_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "tables": {
+    "boundary": {
+      "source": {
+        "path": "render/tables/maxwell_surface_render.csv",
+        "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+        "bytes": 3042004
+      },
+      "output": {
+        "path": "accepted/tables/maxwell_surface_accepted_phase_map_v1.csv",
+        "sha256": "6005cdb6f1309b4719b71148d1b0f49a7d8e045ae24d02cb7482d96d9a681943",
+        "bytes": 4439108
+      },
+      "rows": 12537,
+      "source_status_counts": {
+        "strict_certified": 7162,
+        "unresolved": 0,
+        "interpolated_noncertified": 5375
+      }
+    },
+    "crossover": {
+      "source": {
+        "path": "render/tables/crossover_surface_render.csv",
+        "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+        "bytes": 785310
+      },
+      "output": {
+        "path": "accepted/tables/crossover_surface_accepted_phase_map_v1.csv",
+        "sha256": "197143c7abf314892e9ea82301bbc23bcf45f5de189a6c8c8200821db0a927bd",
+        "bytes": 1144584
+      },
+      "rows": 3135,
+      "source_status_counts": {
+        "strict_certified": 1343,
+        "unresolved": 0,
+        "interpolated_noncertified": 1792
+      }
+    },
+    "cep": {
+      "source": {
+        "path": "render/tables/cep_boundary_render.csv",
+        "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+        "bytes": 27047
+      },
+      "output": {
+        "path": "accepted/tables/cep_boundary_accepted_phase_map_v1.csv",
+        "sha256": "8eb262cc24ddcf8a9b6fa3a9c57d7bb6ffe7964a2b943bdf86189b2192e86b88",
+        "bytes": 45045
+      },
+      "rows": 161,
+      "source_status_counts": {
+        "strict_certified": 93,
+        "unresolved": 0,
+        "interpolated_noncertified": 68
+      }
+    },
+    "spinodals": {
+      "source": {
+        "path": "render/tables/spinodal_surface_render.csv",
+        "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+        "bytes": 2219976
+      },
+      "output": {
+        "path": "accepted/tables/spinodal_surface_accepted_phase_map_v1.csv",
+        "sha256": "eb6de8926d11edc0f2f4e02d85c318cb278ceccb577cb4b87147485440f2428b",
+        "bytes": 3555200
+      },
+      "rows": 11989,
+      "source_status_counts": {
+        "strict_certified": 6886,
+        "unresolved": 0,
+        "interpolated_noncertified": 5103
+      }
+    },
+    "coverage": {
+      "source": {
+        "path": "render/tables/mesh_coverage.csv",
+        "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+        "bytes": 40523
+      },
+      "output": {
+        "path": "accepted/tables/surface_coverage_mask.csv",
+        "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+        "bytes": 40523
+      },
+      "byte_preserved": true,
+      "rows": 483
+    }
+  },
+  "source_layer": "render",
+  "acceptance_status": "candidate_pending_author_review",
+  "acceptance_scope": "downstream_phase_map_only",
+  "interpolation_is_noncertified": true,
+  "strict_certificate_preserved": true,
+  "extrapolation": false,
+  "rows": {
+    "boundary": 12537,
+    "crossover": 3135,
+    "cep": 161,
+    "spinodals": 11989
+  }
+}
