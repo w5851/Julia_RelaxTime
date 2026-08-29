@@ -9,7 +9,10 @@ use ``default_downstream_layer`` for the author-promoted v2 package.
 ``load_phase_reference`` returns normalized in-memory rows.  ``to_legacy_views``
 is an opt-in, strict conversion for consumers that still need the historical
 column names; it refuses unresolved/non-certified rows by default so a caller
-cannot silently turn diagnostic evidence into runtime input.
+cannot silently turn diagnostic evidence into runtime input. Runtime assembly
+keeps certified strict rows first, then may use explicitly author-accepted
+non-certified rows as a marked fallback, and finally the immutable legacy
+snapshot.
 """
 
 from __future__ import annotations
@@ -109,7 +112,7 @@ class PhaseReferenceBundle:
 
 @dataclass(frozen=True)
 class PhaseReferenceRuntimeView:
-    """Certified candidate rows merged with an explicit legacy fallback view."""
+    """Strict rows merged with explicitly marked accepted and legacy fallbacks."""
 
     layer: str
     source: str
@@ -175,9 +178,11 @@ def _float(value: str | None, *, path: Path, row_number: int, field: str) -> flo
     return parsed
 
 
-def _bool(value: str | None, *, default: bool = False) -> bool:
+def _bool(value: str | bool | None, *, default: bool = False) -> bool:
     if value is None or value == "":
         return default
+    if isinstance(value, bool):
+        return value
     normalized = value.strip().lower()
     if normalized in {"true", "1", "yes"}:
         return True
@@ -344,6 +349,21 @@ def _normalize(table: str, layer: str, rows: Iterable[Mapping[str, str]]) -> tup
             }
         else:
             raise AssertionError(f"unknown phase-reference table: {table}")
+        # Keep the acceptance and support metadata available to the runtime
+        # merger.  ``certified`` remains the strict numerical certificate;
+        # ``runtime_eligible`` is only enabled for a row after an explicit
+        # fallback policy admits it.
+        item.update(
+            {
+                "source_status": row.get("source_status", ""),
+                "acceptance_status": row.get("acceptance_status", ""),
+                "interpolation_method": row.get("interpolation_method", ""),
+                "extrapolation": row.get("extrapolation", ""),
+                "coverage_status": row.get("coverage_status", ""),
+                "acceptance_scope": row.get("acceptance_scope", ""),
+                "runtime_eligible": bool(item["certified"]),
+            }
+        )
         normalized.append(item)
     return tuple(normalized)
 
@@ -416,7 +436,7 @@ def load_phase_reference(
         raise PhaseReferenceContractError("render layer is visualization-only and cannot be runtime input")
     if allow_runtime and layer == "accepted":
         raise PhaseReferenceContractError(
-            "accepted layer is a downstream candidate and requires explicit promotion before runtime input"
+            "accepted layer cannot be the primary runtime source; pass it through build_runtime_view"
         )
 
     diagnostics = {
@@ -519,17 +539,43 @@ def to_legacy_views(
     }
 
 
+def _accepted_fallback_eligible(table: str, row: Mapping[str, Any]) -> bool:
+    """Return whether an accepted row may fill a runtime candidate gap.
+
+    This deliberately does not change ``certified``.  The accepted layer is
+    admitted only as an explicitly marked, non-certified fallback when its
+    author-acceptance and common-support metadata are intact.
+    """
+
+    if row.get("acceptance_status") != "author_accepted_for_downstream":
+        return False
+    if _bool(row.get("extrapolation"), default=False):
+        return False
+    if row.get("coverage_status") not in {"native_support", "interpolated_common_support"}:
+        return False
+    if table == "crossover" and row.get("physical_region", "").lower() not in {
+        "",
+        "crossover_below_cep",
+    }:
+        return False
+    status = f"{row.get('status', '')} {row.get('source_status', '')}".lower()
+    return not any(token in status for token in ("unresolved", "ambiguous", "not_converged"))
+
+
 def build_runtime_view(
     candidate: PhaseReferenceBundle,
     *,
+    accepted_bundle: PhaseReferenceBundle | None = None,
+    accepted_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
     legacy_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
 ) -> PhaseReferenceRuntimeView:
-    """Build a solver-free certified-only view with per-key legacy fallback.
+    """Build a solver-free view with strict, accepted, then legacy fallback.
 
-    This mirrors the Julia runtime switch without writing either source.  The
-    candidate remains the preferred source; unresolved/interpolated rows are
-    omitted and only keys absent from that certified view are filled from the
-    caller-provided legacy tables.
+    The candidate remains the preferred source and only certified rows are
+    preferred.  When an explicit v2 ``accepted`` bundle is supplied, finite
+    author-accepted common-support rows may fill remaining keys while staying
+    ``certified=False`` and being marked ``accepted_fallback``.  The immutable
+    legacy source is the final fallback and remains the explicit rollback.
     """
 
     if candidate.layer == "render":
@@ -538,12 +584,24 @@ def build_runtime_view(
         )
     if candidate.layer == "accepted":
         raise PhaseReferenceContractError(
-            "accepted layer requires an explicit downstream consumer mode"
+            "accepted layer cannot be the primary runtime source; pass it as accepted_bundle"
         )
+    if accepted_bundle is not None and accepted_tables is not None:
+        raise PhaseReferenceContractError("pass accepted_bundle or accepted_tables, not both")
+    if accepted_bundle is not None:
+        if accepted_bundle.layer != "accepted":
+            raise PhaseReferenceContractError("accepted_bundle must load the accepted layer")
+        if accepted_bundle.manifest.get("promotion_status") != "accepted_for_downstream":
+            raise PhaseReferenceContractError(
+                "accepted bundle is not author-promoted for downstream fallback"
+            )
+        accepted_tables = accepted_bundle.tables
+    accepted_tables = accepted_tables or {}
     legacy_tables = legacy_tables or {}
     merged: dict[str, tuple[Mapping[str, Any], ...]] = {}
     candidate_counts: dict[str, int] = {}
-    fallback_counts: dict[str, int] = {}
+    accepted_counts: dict[str, int] = {}
+    legacy_counts: dict[str, int] = {}
 
     def key(table: str, row: Mapping[str, Any]) -> tuple[Any, ...]:
         spec = _TABLES[table]
@@ -551,33 +609,89 @@ def build_runtime_view(
 
     for table in _TABLES:
         certified = [row for row in candidate.tables.get(table, ()) if row.get("certified", False)]
-        rows = list(certified)
+        rows = []
+        for row in certified:
+            item = dict(row)
+            item["runtime_eligible"] = True
+            rows.append(item)
         seen = {key(table, row) for row in rows}
-        n_fallback = 0
+        n_accepted = 0
+        for row in accepted_tables.get(table, ()):
+            if not _accepted_fallback_eligible(table, row):
+                continue
+            row_key = key(table, row)
+            if row_key in seen:
+                continue
+            accepted = dict(row)
+            accepted.update(
+                {
+                    "source_layer": "accepted_fallback",
+                    "status": "accepted_fallback",
+                    "accepted_source_status": row.get("source_status", ""),
+                    "runtime_eligible": True,
+                    "certified": False,
+                }
+            )
+            rows.append(accepted)
+            seen.add(row_key)
+            n_accepted += 1
+        n_legacy = 0
         for row in legacy_tables.get(table, ()):
             row_key = key(table, row)
             if row_key in seen:
                 continue
             fallback = dict(row)
-            fallback.update({"source_layer": "legacy_fallback", "status": "legacy_fallback", "certified": True})
+            fallback.update(
+                {
+                    "source_layer": "legacy_fallback",
+                    "status": "legacy_fallback",
+                    "runtime_eligible": True,
+                    "certified": True,
+                }
+            )
             rows.append(fallback)
             seen.add(row_key)
-            n_fallback += 1
+            n_legacy += 1
         merged[table] = tuple(rows)
         candidate_counts[table] = len(certified)
-        fallback_counts[table] = n_fallback
+        accepted_counts[table] = n_accepted
+        legacy_counts[table] = n_legacy
+
+    accepted_enabled = bool(accepted_tables)
+    runtime_view = (
+        "certified_candidate_with_accepted_then_legacy_fallback"
+        if accepted_enabled
+        else "certified_candidate_with_legacy_fallback"
+    )
 
     return PhaseReferenceRuntimeView(
         layer=candidate.layer,
         source="candidate",
         tables=merged,
         diagnostics={
-            "runtime_view": "certified_candidate_with_legacy_fallback",
+            "runtime_view": runtime_view,
             "candidate_manifest_sha256": candidate.diagnostics.get("manifest_sha256", ""),
             "candidate_row_counts": candidate_counts,
-            "fallback_row_counts": fallback_counts,
+            "accepted_fallback_row_counts": accepted_counts,
+            "legacy_fallback_row_counts": legacy_counts,
+            # Keep the historical key as an alias for callers that only
+            # reported the final legacy fallback count.
+            "fallback_row_counts": legacy_counts,
             "fallback_enabled": True,
+            "fallback_order": "strict_candidate>accepted_downstream>legacy_snapshot"
+            if accepted_enabled
+            else "strict_candidate>legacy_snapshot",
             "fallback_reason": "candidate_key_absent_or_uncertified",
+            "accepted_manifest_sha256": (
+                accepted_bundle.diagnostics.get("manifest_sha256", "")
+                if accepted_bundle is not None
+                else ""
+            ),
+            "accepted_layer_manifest_sha256": (
+                accepted_bundle.diagnostics.get("layer_manifest_sha256", "")
+                if accepted_bundle is not None
+                else ""
+            ),
         },
     )
 

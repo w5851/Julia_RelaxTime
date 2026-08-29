@@ -6,10 +6,10 @@ updated_at = "2026-08-29"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "active"
-current_task = "issue130-phase-reference-legacy-retirement"
+current_task = "issue130-phase-reference-accepted-runtime-fallback"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "accepted 已获作者批准并作为下游分析默认；保持 strict runtime 与 legacy fallback/rollback 不变，先运行 solver-free legacy fallback coverage audit v2，未证明 fallback=0 前不做物理删除。"
+next_action = "accepted 已获作者批准并作为下游分析默认；按 strict→accepted→legacy 顺序完成 adapter 合同修订和 solver-free consumer audit v3，作者审核 fallback 矩阵前不做 legacy 物理删除。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -462,7 +462,7 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
 reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 仍是 candidate strict 未认证/缺键行的逐键 fallback 和显式 rollback 输入，必须先完成 solver-free 覆盖与消费者审计，不能沿用 RS allowlist 直接删除。"
-next_action = "accepted 已作为下游分析默认；legacy_audit_v2 仍为 retirement_inconclusive（fallback=382、active contract blocker=25、unknown active=0）；保留 snapshot，下一步迁移 strict runtime consumer 请求键/适配层并保持显式 rollback，fallback=0 前不物理删除。"
+next_action = "legacy_audit_v2 的 382 个 fallback 作为历史基线保留；accepted-runtime-fallback 合同先按资格规则接管可覆盖键并生成 audit v3，仍保留显式 legacy rollback，未完成 consumer 审核前不物理删除。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -486,6 +486,8 @@ evidence = [
   "sha:2b477aa1b0d876bc30dd4c0aa95ec948aef84a56",
   "note:legacy_audit_v2_post_acceptance_inconclusive_fallback382_active_contract_blockers25_unknown_active0_20260829",
   "review:accepted_downstream_default_keeps_strict_runtime_and_legacy_fallback",
+  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md",
+  "note:runtime_fallback_contract_revised_strict_then_accepted_then_legacy_pending_audit_v3",
   ]
 
 [[items]]
@@ -496,7 +498,7 @@ status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md"
 reason = "作者已审核 v2 strict/render/accepted 三层覆盖、spinodal 完整表、accepted 状态和代表图，并明确批准 accepted 作为下游分析默认；derived 仅保留为内部构建证据。"
-next_action = "accepted 已通过显式 solver-free promotion 脚本标记为 author_accepted_for_downstream；runtime strict/fallback 不变，后续由 legacy coverage audit 承接。"
+next_action = "accepted 已通过显式 solver-free promotion 脚本标记为 author_accepted_for_downstream；默认 runtime 仍以 strict 为 primary，accepted fallback 由独立合同任务承接并写入 audit v3。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -515,6 +517,28 @@ evidence = [
   "note:author_authorized_three_layer_strict_render_accepted_plan",
   "file:scripts/analysis/pnjl/promote_issue130_phase_reference_accepted.py",
   "review:author_accepted_downstream_default",
+]
+
+[[items]]
+id = "issue130-phase-reference-accepted-runtime-fallback"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md"
+reason = "legacy audit v2 显示 strict certificate 缺口直接落到旧 snapshot；作者已批准的 v2 accepted common-support 派生行在当前下游用途下更可信，因此修订此前禁止 accepted runtime 的合同。"
+next_action = "完成 Python/Julia adapter 与 consumer fixture；在不可变 candidate/accepted/legacy 输入上生成 solver-free audit v3，分别报告 accepted 与 legacy fallback、资格失败和显式 rollback；作者审核后再决定 legacy path/physical retirement。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md",
+  "file:scripts/pnjl/phase_reference_adapter.py",
+  "file:scripts/relaxtime/phase_reference_adapter.jl",
+  "file:scripts/relaxtime/run_gap_transport_scan.jl",
+  "file:tests/unit/python/test_pnjl_phase_reference_adapter.py",
+  "file:tests/unit/relaxtime/test_phase_reference_adapter.jl",
+  "sha:620845ece09749e64ea9a054df360b1035220c6a",
+  "note:strict_candidate_accepted_fallback_legacy_rollback_order",
 ]
 
 [[items]]

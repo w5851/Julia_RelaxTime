@@ -2,10 +2,11 @@
 
 The Issue #130 candidate uses versioned tables whose schema is intentionally
 different from the historical CSV files.  This module is the only boundary
-between those contracts.  Runtime selection is explicit and auditable: the
-candidate strict layer is the preferred source, only certified candidate rows
-are exposed, and missing keys may fall back to the legacy source.  The legacy
-source remains an explicit rollback path and is never deleted by this module.
+between those contracts.  Runtime selection is explicit and auditable:
+certified candidate rows are the preferred source, author-accepted
+common-support rows may be used as a marked non-certified fallback, and the
+immutable legacy source is the final fallback and explicit rollback path.  This
+module never deletes either source.
 """
 module PhaseReferenceAdapter
 
@@ -67,9 +68,9 @@ const _TABLE_FILES = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
 
 # v2 exposes exactly three public layers: strict, render and accepted.  The
 # former v1 ``derived`` tables remain an internal build input and are not
-# addressable through this map.  ``accepted`` is intentionally downstream-only
-# until a separate promotion decision; it must never become a runtime source
-# merely because its rows happen to be finite.
+# addressable through this map.  ``accepted`` is not a primary runtime source,
+# but an explicit fallback policy may admit its author-accepted common-support
+# rows while preserving their non-certified status.
 const _TABLE_FILES_V2 = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
     :strict => Dict{Symbol,Union{Nothing,String}}(
         :boundary => "maxwell_surface_strict_reference_v1.csv",
@@ -189,6 +190,18 @@ function _duplicate_key(table::Symbol, row, row_number::Int)
     end
 end
 
+function _row_metadata(row, certified::Bool)
+    return (
+        source_status=_string(_row_value(row, :source_status)),
+        acceptance_status=_string(_row_value(row, :acceptance_status)),
+        interpolation_method=_string(_row_value(row, :interpolation_method)),
+        extrapolation=_string(_row_value(row, :extrapolation)),
+        coverage_status=_string(_row_value(row, :coverage_status)),
+        acceptance_scope=_string(_row_value(row, :acceptance_scope)),
+        runtime_eligible=certified,
+    )
+end
+
 function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
     certified = _status_certified(table, row, layer, row_number)
     status = _string(_row_value(row, :status))
@@ -196,7 +209,7 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
     isempty(source_layer) && (source_layer = String(layer))
     if table === :boundary
         muq = _float(_row_value(row, :mu_MeV), table, row_number, :mu_MeV)
-        return (
+        return merge((
             xi=_float(_row_value(row, :xi), table, row_number, :xi),
             T_MeV=_float(_row_value(row, :T_MeV), table, row_number, :T_MeV),
             muq_MeV=muq,
@@ -207,10 +220,10 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
             certified=certified,
             status=status,
             source_layer=source_layer,
-        )
+        ), _row_metadata(row, certified))
     elseif table === :crossover
         muq = _float(_row_value(row, :mu_MeV), table, row_number, :mu_MeV)
-        return (
+        return merge((
             xi=_float(_row_value(row, :xi), table, row_number, :xi),
             muq_MeV=muq,
             muB_MeV=3.0 * muq,
@@ -221,13 +234,13 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
             certified=certified,
             status=status,
             source_layer=source_layer,
-        )
+        ), _row_metadata(row, certified))
     elseif table === :cep
         muq = _float(_row_value(row, :mu_CEP_proxy_MeV), table, row_number, :mu_CEP_proxy_MeV)
         low = _float(_row_value(row, :T_low_MeV), table, row_number, :T_low_MeV)
         high = _float(_row_value(row, :T_high_MeV), table, row_number, :T_high_MeV)
         midpoint = _float(_row_value(row, :T_midpoint_MeV), table, row_number, :T_midpoint_MeV)
-        return (
+        return merge((
             xi=_float(_row_value(row, :xi), table, row_number, :xi),
             muq_CEP_MeV=muq,
             muB_CEP_MeV=3.0 * muq,
@@ -239,11 +252,11 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
             status=status,
             boundary_mode=_string(_row_value(row, :boundary_mode)),
             source_layer=source_layer,
-        )
+        ), _row_metadata(row, certified))
     else
         hadron = _float(_row_value(row, :mu_spinodal_hadron_MeV), table, row_number, :mu_spinodal_hadron_MeV)
         quark = _float(_row_value(row, :mu_spinodal_quark_MeV), table, row_number, :mu_spinodal_quark_MeV)
-        return (
+        return merge((
             xi=_float(_row_value(row, :xi), table, row_number, :xi),
             T_MeV=_float(_row_value(row, :T_MeV), table, row_number, :T_MeV),
             muq_spinodal_hadron_MeV=hadron,
@@ -253,7 +266,7 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
             certified=certified,
             status=status,
             source_layer=source_layer,
-        )
+        ), _row_metadata(row, certified))
     end
 end
 
@@ -288,7 +301,7 @@ function _certified_runtime_source(source::PhaseReferenceSource)
     certified_counts = Dict{String,Int}()
     for (table, rows) in source.tables
         certified = filter(row -> row.certified, rows)
-        tables[table] = certified
+        tables[table] = [merge(row, (runtime_eligible=true,)) for row in certified]
         row_counts[String(table)] = length(rows)
         certified_counts[String(table)] = length(certified)
     end
@@ -310,11 +323,33 @@ function _table_key(table::Symbol, row)
     end
 end
 
-function _merge_certified_candidate_with_legacy(candidate::PhaseReferenceSource, legacy::PhaseReferenceSource)
+function _accepted_fallback_eligible(table::Symbol, row)
+    hasproperty(row, :acceptance_status) || return false
+    lowercase(_string(row.acceptance_status)) == "author_accepted_for_downstream" || return false
+    extrapolation = hasproperty(row, :extrapolation) ?
+        _bool(row.extrapolation, table, 0, :extrapolation; default=false) : false
+    extrapolation && return false
+    coverage = hasproperty(row, :coverage_status) ? lowercase(_string(row.coverage_status)) : ""
+    coverage in ("native_support", "interpolated_common_support") || return false
+    if table === :crossover && hasproperty(row, :physical_region)
+        region = lowercase(_string(row.physical_region))
+        region in ("", "crossover_below_cep") || return false
+    end
+    status = lowercase(join((_string(row.status), _string(row.source_status)), " "))
+    any(token -> occursin(token, status), ("unresolved", "ambiguous", "not_converged")) && return false
+    return true
+end
+
+function _merge_candidate_with_accepted_and_legacy(
+    candidate::PhaseReferenceSource,
+    accepted::Union{Nothing,PhaseReferenceSource},
+    legacy::PhaseReferenceSource,
+)
     candidate_runtime = _certified_runtime_source(candidate)
     tables = Dict{Symbol,Vector{NamedTuple}}()
     candidate_counts = Dict{String,Int}()
-    fallback_counts = Dict{String,Int}()
+    accepted_counts = Dict{String,Int}()
+    legacy_counts = Dict{String,Int}()
     for table in _TABLE_ORDER
         rows = NamedTuple[]
         seen = Set{Any}()
@@ -323,28 +358,69 @@ function _merge_certified_candidate_with_legacy(candidate::PhaseReferenceSource,
             push!(seen, _table_key(table, row))
         end
         candidate_counts[String(table)] = length(rows)
-        n_fallback = 0
+        n_accepted = 0
+        if accepted !== nothing
+            for row in get(accepted.tables, table, NamedTuple[])
+                _accepted_fallback_eligible(table, row) || continue
+                key = _table_key(table, row)
+                key in seen && continue
+                accepted_row = merge(row, (
+                    source_layer="accepted_fallback",
+                    status="accepted_fallback",
+                    accepted_source_status=hasproperty(row, :source_status) ? row.source_status : "",
+                    runtime_eligible=true,
+                    certified=false,
+                ))
+                push!(rows, accepted_row)
+                push!(seen, key)
+                n_accepted += 1
+            end
+        end
+        accepted_counts[String(table)] = n_accepted
+        n_legacy = 0
         for row in get(legacy.tables, table, NamedTuple[])
             key = _table_key(table, row)
             key in seen && continue
-            fallback_row = merge(row, (source_layer="legacy_fallback", status="legacy_fallback", certified=true))
+            fallback_row = merge(row, (
+                source_layer="legacy_fallback",
+                status="legacy_fallback",
+                runtime_eligible=true,
+                certified=true,
+            ))
             push!(rows, fallback_row)
             push!(seen, key)
-            n_fallback += 1
+            n_legacy += 1
         end
-        fallback_counts[String(table)] = n_fallback
+        legacy_counts[String(table)] = n_legacy
         tables[table] = rows
     end
+    accepted_enabled = accepted !== nothing
     diagnostics = merge(candidate_runtime.diagnostics, (
-        runtime_view="certified_candidate_with_legacy_fallback",
+        runtime_view=accepted_enabled ?
+            "certified_candidate_with_accepted_then_legacy_fallback" :
+            "certified_candidate_with_legacy_fallback",
         fallback_enabled=true,
+        fallback_order=accepted_enabled ?
+            "strict_candidate>accepted_downstream>legacy_snapshot" :
+            "strict_candidate>legacy_snapshot",
         fallback_reason="candidate_key_absent_or_uncertified",
         candidate_row_counts=candidate_counts,
-        fallback_row_counts=fallback_counts,
+        accepted_fallback_row_counts=accepted_counts,
+        legacy_fallback_row_counts=legacy_counts,
+        # Preserve the historical diagnostic key for existing consumers.
+        fallback_row_counts=legacy_counts,
         legacy_row_counts=legacy.diagnostics.row_counts,
+        accepted_manifest_sha256=accepted === nothing ? "" :
+            get(accepted.diagnostics, :candidate_manifest_sha256, ""),
+        accepted_layer_manifest_sha256=accepted === nothing ? "" :
+            get(accepted.diagnostics, :candidate_layer_manifest_sha256, ""),
         legacy_manifest_reference_status="legacy",
     ))
     return PhaseReferenceSource(:candidate, candidate.layer, candidate.root, true, tables, diagnostics)
+end
+
+function _merge_certified_candidate_with_legacy(candidate::PhaseReferenceSource, legacy::PhaseReferenceSource)
+    return _merge_candidate_with_accepted_and_legacy(candidate, nothing, legacy)
 end
 
 function _manifest(path::AbstractString)
@@ -384,7 +460,7 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
     get(layer_manifest, "layer", "") isa String || _error("candidate layer manifest has no layer identifier")
     if allow_runtime && layer in (:render, :accepted)
         layer === :render && _error("render layer is visualization-only and cannot be runtime input")
-        _error("accepted layer is a downstream candidate and cannot be runtime input")
+        _error("accepted layer cannot be the primary runtime source; pass it through the accepted fallback policy")
     end
     paths = Dict{Symbol,String}()
     for (table, filename) in table_files[layer]
@@ -402,6 +478,8 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
          row_counts=counts,
          uncertified_rows=uncertified,
          manifest_reference_status=String(get(manifest, "reference_status", "")),
+         promotion_status=String(get(manifest, "promotion_status", "")),
+         downstream_default_layer=String(get(manifest, "downstream_default_layer", "")),
          candidate_manifest_sha256=_file_sha256(joinpath(root_abs, "manifest.json")),
          candidate_layer_manifest_sha256=_file_sha256(joinpath(layer_root, "manifest.json")),
          source_root=root_abs,
@@ -420,6 +498,7 @@ function load_phase_reference_runtime_with_fallback(candidate_root::AbstractStri
     cep_path::AbstractString,
     crossover_path::AbstractString,
     spinodals_path::AbstractString,
+    accepted_root::Union{Nothing,AbstractString}=nothing,
 )
     layer in (:render, :accepted) &&
         _error("$(layer) layer is downstream-only and cannot be used for runtime fallback")
@@ -429,17 +508,69 @@ function load_phase_reference_runtime_with_fallback(candidate_root::AbstractStri
         crossover_path=crossover_path,
         spinodals_path=spinodals_path,
     )
+    accepted = nothing
+    accepted_error = ""
+    if accepted_root !== nothing && !isempty(String(accepted_root))
+        accepted = try
+            source = load_phase_reference(String(accepted_root); layer=:accepted)
+            get(source.diagnostics, :promotion_status, "") == "accepted_for_downstream" ||
+                _error("accepted package is not author-promoted for downstream fallback")
+            source
+        catch err
+            accepted_error = sprint(showerror, err)
+            nothing
+        end
+    end
     candidate = try
         load_phase_reference(candidate_root; layer=layer)
     catch err
+        if accepted !== nothing
+            empty_candidate = PhaseReferenceSource(
+                :candidate,
+                layer,
+                String(candidate_root),
+                false,
+                Dict{Symbol,Vector{NamedTuple}}(),
+                (
+                    schema_version="candidate_load_failed",
+                    candidate_schema_version="",
+                    row_counts=Dict{String,Int}(),
+                    uncertified_rows=0,
+                    manifest_reference_status="candidate",
+                    promotion_status="",
+                    downstream_default_layer="",
+                    candidate_manifest_sha256="",
+                    candidate_layer_manifest_sha256="",
+                    source_root=String(candidate_root),
+                    runtime_view="candidate_load_failed",
+                    fallback_enabled=true,
+                    candidate_load_error=sprint(showerror, err),
+                ),
+            )
+            merged = _merge_candidate_with_accepted_and_legacy(empty_candidate, accepted, legacy)
+            return PhaseReferenceSource(
+                merged.kind,
+                merged.layer,
+                merged.root,
+                merged.runtime_enabled,
+                merged.tables,
+                merge(merged.diagnostics, (accepted_load_error=accepted_error,)),
+            )
+        end
         diagnostics = merge(legacy.diagnostics, (
             runtime_view="legacy_fallback",
             fallback_enabled=true,
             fallback_reason="candidate_load_failed: " * sprint(showerror, err),
+            accepted_load_error=accepted_error,
         ))
         return PhaseReferenceSource(:legacy, :legacy, "", true, legacy.tables, diagnostics)
     end
-    return _merge_certified_candidate_with_legacy(candidate, legacy)
+    merged = accepted === nothing ?
+        _merge_certified_candidate_with_legacy(candidate, legacy) :
+        _merge_candidate_with_accepted_and_legacy(candidate, accepted, legacy)
+    accepted_error == "" && return merged
+    return PhaseReferenceSource(merged.kind, merged.layer, merged.root, merged.runtime_enabled, merged.tables,
+        merge(merged.diagnostics, (accepted_load_error=accepted_error,)))
 end
 
 function load_default_phase_reference_runtime(; project_root::AbstractString,
@@ -457,7 +588,13 @@ function load_default_phase_reference_runtime(; project_root::AbstractString,
     )
     source === :legacy && return load_legacy_phase_reference(; legacy_paths...)
     candidate_root = joinpath(reference_root, "issue130_phase_reference_v1")
-    return load_phase_reference_runtime_with_fallback(candidate_root; layer=layer, legacy_paths...)
+    accepted_root = joinpath(reference_root, "issue130_phase_reference_v2")
+    return load_phase_reference_runtime_with_fallback(
+        candidate_root;
+        layer=layer,
+        accepted_root=accepted_root,
+        legacy_paths...,
+    )
 end
 
 function _legacy_rows(path::AbstractString, table::Symbol)
@@ -533,14 +670,20 @@ function load_legacy_phase_reference(; boundary_path::AbstractString, cep_path::
     end
     return PhaseReferenceSource(:legacy, :legacy, "", true, tables,
         (schema_version="legacy", row_counts=row_counts, uncertified_rows=0,
-         manifest_reference_status="legacy", candidate_manifest_sha256="",
-         candidate_layer_manifest_sha256="", source_root="", runtime_view="legacy", fallback_enabled=false))
+         manifest_reference_status="legacy", promotion_status="", downstream_default_layer="",
+         candidate_manifest_sha256="", candidate_layer_manifest_sha256="", source_root="",
+         runtime_view="legacy", fallback_enabled=false))
 end
 
 source_kind(source::PhaseReferenceSource) = source.kind
 source_layer(source::PhaseReferenceSource) = source.layer
 source_runtime_enabled(source::PhaseReferenceSource) = source.runtime_enabled
 source_summary(source::PhaseReferenceSource) = source.diagnostics
+
+@inline function _runtime_eligible(row)
+    hasproperty(row, :runtime_eligible) && Bool(row.runtime_eligible) && return true
+    return hasproperty(row, :certified) && Bool(row.certified)
+end
 
 function available_xi(source::PhaseReferenceSource, table::Symbol)
     haskey(source.tables, table) || return Float64[]
@@ -565,10 +708,10 @@ end
 function boundary_data(source::PhaseReferenceSource, xi::Float64; require_certified::Bool=true)
     require_certified && !source.runtime_enabled && _error("phase-reference source is not runtime-enabled; pass require_certified=false for an explicit diagnostic view")
     rows = sort(_rows_at_xi(source, :boundary, xi), by=row -> row.T_MeV)
-    require_certified && any(!row.certified for row in rows) && _error("phase-reference boundary contains uncertified rows")
+    require_certified && any(!_runtime_eligible(row) for row in rows) && _error("phase-reference boundary contains runtime-ineligible rows")
     cep_rows = _rows_at_xi(source, :cep, xi)
     cep = isempty(cep_rows) ? nothing : first(sort(cep_rows, by=row -> row.xi))
-    require_certified && cep !== nothing && !cep.certified && _error("phase-reference CEP contains an uncertified row")
+    require_certified && cep !== nothing && !_runtime_eligible(cep) && _error("phase-reference CEP contains a runtime-ineligible row")
     return (
         T_values=Float64[row.T_MeV for row in rows],
         mu_values=Float64[row.muq_MeV for row in rows],
@@ -583,7 +726,7 @@ end
 function crossover_rows(source::PhaseReferenceSource, xi::Float64; require_certified::Bool=true)
     require_certified && !source.runtime_enabled && _error("phase-reference source is not runtime-enabled; pass require_certified=false for an explicit diagnostic view")
     rows = _rows_at_xi(source, :crossover, xi)
-    require_certified && any(!row.certified for row in rows) && _error("phase-reference crossover contains uncertified rows")
+    require_certified && any(!_runtime_eligible(row) for row in rows) && _error("phase-reference crossover contains runtime-ineligible rows")
     return sort(rows, by=row -> row.muq_MeV)
 end
 

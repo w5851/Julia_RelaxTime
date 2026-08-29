@@ -53,3 +53,27 @@ def test_source_smoke_rejects_solver_invocation() -> None:
     }
     with pytest.raises(ValueError, match="solver_called"):
         MODULE._validate_source_smoke(payload, "candidate-manifest")
+
+
+def test_source_smoke_accepts_author_accepted_fallback_view() -> None:
+    diagnostics = {
+        "runtime_view": "certified_candidate_with_accepted_then_legacy_fallback",
+        "fallback_enabled": True,
+        "fallback_order": "strict_candidate>accepted_downstream>legacy_snapshot",
+        "candidate_manifest_sha256": "candidate-manifest",
+        "accepted_manifest_sha256": "a" * 64,
+        "accepted_layer_manifest_sha256": "b" * 64,
+        "accepted_fallback_row_counts": {"boundary": 2},
+    }
+    payload = {
+        "schema_version": "pnjl_issue130_rs_runtime_consumer_smoke_v1",
+        "repo_head": MODULE.MERGE_SHA,
+        "solver_called": False,
+        "sources": {
+            "runtime": {"source_kind": "candidate", "runtime_enabled": True, "diagnostics": diagnostics},
+            "diagnostic": {"source_kind": "candidate", "runtime_enabled": False, "diagnostics": {"runtime_view": "diagnostic_all_rows"}},
+            "legacy": {"source_kind": "legacy", "runtime_enabled": True, "diagnostics": {"runtime_view": "legacy"}},
+        },
+        "consumer_points": [_point("runtime"), _point("diagnostic"), _point("legacy")],
+    }
+    MODULE._validate_source_smoke(payload, "candidate-manifest")

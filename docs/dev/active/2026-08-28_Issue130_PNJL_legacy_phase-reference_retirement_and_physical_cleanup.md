@@ -33,7 +33,8 @@ fallback、显式 rollback 和历史复现输入。PR #264 只完成了 canonica
 ### 非目标
 
 - 不调用 PNJL equilibrium solver，不重跑 C0/C1/C2、CEP、RS numerical 或 transport；
-- 不修改 Maxwell、crossover、CEP、spinodal 数值、容差或 adapter 的 fallback 语义；
+- 不修改 Maxwell、crossover、CEP、spinodal 数值或容差；adapter 的 fallback 语义由
+  独立的 2026-08-29 合同修订任务收束为 strict→accepted→legacy，并保留旧路径回退；
 - 不删除 `data/reference/pnjl/crossover.csv`（它是另一组历史 fixed-point 输入）；
 - 不删除 `docs/analysis/` 历史 evidence、raw rho-mu 外部归档指针或当前 candidate；
 - 不把 candidate 的 unresolved/non-certified 行强行标为 certified，也不以图像完整性
@@ -111,15 +112,32 @@ reference `0`。新增的旧审计契约测试已明确归类为 snapshot contra
 
 v2 审计保持 `solver_called=false`、`reference_write=false`、`runtime_consumption=false`，
 不修改 candidate/legacy tree，也不创建物理删除 PR。下一步仍是迁移 strict runtime
-consumer 的请求键/适配层并验证显式 legacy rollback，只有 fallback=0 且消费者/恢复
-边界完整后才可提出独立 physical-deletion PR。
+consumer 的请求键/适配层，并审计 accepted fallback 的资格与实际来源；只有新的
+fallback 矩阵确认无 active legacy 依赖、消费者/恢复边界完整后，才可提出独立
+physical-deletion PR。旧的 strict→legacy audit 数字继续保留为历史基线。
 
-### 阶段 B：fallback/path retirement（以阶段 A 证据为输入）
+#### 阶段 A.1：accepted fallback 合同修订（2026-08-29）
+
+作者指出 strict certificate 缺口直接落到 legacy 会优先使用较旧 snapshot，
+而 v2 `accepted` 中的作者审核非证书派生值在当前研究用途下更可信。独立任务
+`2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md` 已将 runtime
+顺序明确为 `strict candidate → accepted_downstream → legacy snapshot`：accepted
+只能以显式、逐键、带 provenance 的 fallback 进入，仍保留 `certified=false`，不
+能作为 primary runtime source。未接受、外推、support 外或 unresolved 行仍不能
+进入 accepted fallback；这些行才继续落到 legacy 或保持缺失。
+
+该修订不改变既有数值和 snapshot，只改变 adapter source selection。新的
+solver-free consumer audit v3 必须分别报告 accepted 与 legacy 的实际 fallback
+计数；在 audit v3 和作者审核完成前，不得物理删除 legacy snapshot。
+
+### 阶段 B：fallback/path retirement（以阶段 A 与 A.1 证据为输入）
 
 - [ ] 若仍有 active consumer 依赖 legacy，先迁移其请求键/适配层，保持显式
-  rollback，不改数值输入；为迁移增加 Julia/Python/workflow focused tests。
+  rollback；优先使用已接受的 common-support accepted fallback，不改数值输入；
+  为迁移增加 Julia/Python/workflow focused tests。
 - [ ] 在独立 PR 中更新 registry、默认路径和文档；验证 candidate-only runtime 与
-  显式 legacy rollback 均可用。此阶段仍不物理删除 snapshot。
+  显式 legacy rollback 均可用，并证明 accepted/legacy 的来源顺序与计数可追溯。
+  此阶段仍不物理删除 snapshot。
 
 ### 阶段 C：物理清理（再次单独授权）
 

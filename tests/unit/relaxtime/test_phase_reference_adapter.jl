@@ -34,11 +34,14 @@ function _write_candidate_fixture(root::AbstractString; unresolved::Bool=false, 
     return root
 end
 
-function _write_v2_candidate_fixture(root::AbstractString; accepted_noncertified::Bool=false)
-    _write_candidate_fixture(root)
+function _write_v2_candidate_fixture(root::AbstractString; accepted_noncertified::Bool=false, unresolved::Bool=false)
+    _write_candidate_fixture(root; unresolved=unresolved)
     manifest_path = joinpath(root, "manifest.json")
     manifest = replace(read(manifest_path, String),
         "pnjl_issue130_phase_reference_import_v1" => "pnjl_issue130_phase_reference_v2")
+    manifest = replace(manifest,
+        "\"reference_status\":\"candidate\"" =>
+            "\"reference_status\":\"candidate\",\"promotion_status\":\"accepted_for_downstream\",\"downstream_default_layer\":\"accepted\"")
     write(manifest_path, manifest)
 
     render_names = Dict(
@@ -191,13 +194,53 @@ end
     @test PRA.boundary_data(rollback, 0.0).mu_values == [301.0]
 end
 
+@testset "accepted non-certified rows are an explicit runtime fallback before legacy" begin
+    root = _write_v2_candidate_fixture(mktempdir(); accepted_noncertified=true, unresolved=true)
+    accepted_boundary = joinpath(root, "accepted", "tables", "maxwell_surface_accepted_phase_map_v1.csv")
+    write(accepted_boundary,
+        replace(read(accepted_boundary, String),
+            "candidate_pending_author_review" => "author_accepted_for_downstream",
+            "native_unresolved" => "interpolated_noncertified"))
+    legacy_root = mktempdir()
+    boundary = joinpath(legacy_root, "boundary.csv")
+    cep = joinpath(legacy_root, "cep.csv")
+    crossover = joinpath(legacy_root, "crossover.csv")
+    spinodals = joinpath(legacy_root, "spinodals.csv")
+    write(boundary, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark\n0.0,90.0,301.0,1.0,2.0\n")
+    write(cep, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV\n0.0,121.0,299.0,897.0\n")
+    write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,100.0,160.0,1.0\n")
+    write(spinodals, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV\n0.0,100.0,320.0,280.0\n")
+
+    runtime = PRA.load_phase_reference_runtime_with_fallback(
+        root;
+        accepted_root=root,
+        boundary_path=boundary,
+        cep_path=cep,
+        crossover_path=crossover,
+        spinodals_path=spinodals,
+    )
+    summary = PRA.source_summary(runtime)
+    @test summary.runtime_view == "certified_candidate_with_accepted_then_legacy_fallback"
+    @test summary.fallback_order == "strict_candidate>accepted_downstream>legacy_snapshot"
+    @test summary.accepted_fallback_row_counts["boundary"] == 1
+    @test summary.legacy_fallback_row_counts["boundary"] == 1
+    accepted_row = only(filter(row -> row.source_layer == "accepted_fallback", runtime.tables[:boundary]))
+    @test !accepted_row.certified
+    @test accepted_row.runtime_eligible
+    @test accepted_row.accepted_source_status == "interpolated_noncertified"
+    @test length(summary.accepted_manifest_sha256) == 64
+    @test length(summary.accepted_layer_manifest_sha256) == 64
+    @test PRA.boundary_data(runtime, 0.0).mu_values == [301.0, 300.0]
+end
+
 @testset "repository default uses candidate plus retired legacy snapshot" begin
     project_root = normpath(joinpath(@__DIR__, "..", "..", ".."))
     runtime = PRA.load_default_phase_reference_runtime(project_root=project_root)
     summary = PRA.source_summary(runtime)
     @test PRA.source_kind(runtime) === :candidate
-    @test summary.runtime_view == "certified_candidate_with_legacy_fallback"
+    @test summary.runtime_view == "certified_candidate_with_accepted_then_legacy_fallback"
     @test summary.fallback_enabled
+    @test sum(values(summary.accepted_fallback_row_counts)) > 0
     @test sum(values(summary.fallback_row_counts)) > 0
 
     rollback = PRA.load_default_phase_reference_runtime(project_root=project_root, source=:legacy)

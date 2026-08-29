@@ -182,7 +182,7 @@ def test_v2_exposes_render_and_accepted_without_public_derived(tmp_path: Path) -
     assert render.diagnostics["row_counts"]["spinodals"] == 1
     assert accepted.diagnostics["uncertified_rows"] == 0
     assert accepted.tables["boundary"][0]["muB_MeV"] == 900.0
-    with pytest.raises(PhaseReferenceContractError, match="downstream candidate"):
+    with pytest.raises(PhaseReferenceContractError, match="primary runtime source"):
         load_phase_reference(root, layer="accepted", allow_runtime=True)
     cep_path = root / "accepted" / "tables" / V2_TABLES["cep"][2]
     cep_path.write_text(
@@ -262,4 +262,98 @@ def test_runtime_view_uses_certified_candidate_then_legacy_fallback(tmp_path: Pa
     assert runtime.source == "candidate"
     assert runtime.diagnostics["runtime_view"] == "certified_candidate_with_legacy_fallback"
     assert runtime.diagnostics["fallback_row_counts"]["boundary"] == 1
+    assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"
+
+
+def test_runtime_view_uses_author_accepted_rows_before_legacy(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    strict_boundary = root / "strict" / "tables" / TABLES["boundary"]
+    strict_boundary.write_text(
+        strict_boundary.read_text(encoding="utf-8").replace(
+            "native,true,true", "rho_geometry_not_converged,false,true"
+        ),
+        encoding="utf-8",
+    )
+    accepted_boundary = root / "accepted" / "tables" / V2_TABLES["boundary"][2]
+    accepted_boundary.write_text(
+        accepted_boundary.read_text(encoding="utf-8").replace(
+            "strict_certified", "interpolated_noncertified", 1
+        ).replace(
+            "candidate_pending_author_review", "author_accepted_for_downstream", 1
+        ),
+        encoding="utf-8",
+    )
+
+    candidate = load_phase_reference(root, layer="strict")
+    accepted = load_phase_reference(root, layer="accepted")
+    legacy_row = dict(candidate.tables["boundary"][0])
+    legacy_row["T_MeV"] = 90.0
+    legacy_row["muq_MeV"] = 301.0
+    runtime = build_runtime_view(
+        candidate,
+        accepted_bundle=accepted,
+        legacy_tables={"boundary": [legacy_row]},
+    )
+
+    assert runtime.diagnostics["runtime_view"] == (
+        "certified_candidate_with_accepted_then_legacy_fallback"
+    )
+    assert runtime.diagnostics["accepted_fallback_row_counts"]["boundary"] == 1
+    assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 1
+    accepted_row = next(
+        row for row in runtime.tables["boundary"] if row["source_layer"] == "accepted_fallback"
+    )
+    assert accepted_row["certified"] is False
+    assert accepted_row["runtime_eligible"] is True
+    assert accepted_row["accepted_source_status"] == "interpolated_noncertified"
+    assert len(runtime.diagnostics["accepted_manifest_sha256"]) == 64
+    assert len(runtime.diagnostics["accepted_layer_manifest_sha256"]) == 64
+
+
+def test_runtime_view_rejects_unpromoted_accepted_bundle(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest.pop("promotion_status")
+    manifest.pop("downstream_default_layer")
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    candidate = load_phase_reference(root, layer="strict")
+    accepted = load_phase_reference(root, layer="accepted")
+    with pytest.raises(PhaseReferenceContractError, match="not author-promoted"):
+        build_runtime_view(candidate, accepted_bundle=accepted)
+
+
+def test_runtime_view_rejects_unaccepted_or_out_of_support_rows(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    strict_boundary = root / "strict" / "tables" / TABLES["boundary"]
+    strict_boundary.write_text(
+        strict_boundary.read_text(encoding="utf-8").replace(
+            "native,true,true", "rho_geometry_not_converged,false,true"
+        ),
+        encoding="utf-8",
+    )
+    accepted_boundary = root / "accepted" / "tables" / V2_TABLES["boundary"][2]
+    accepted_boundary.write_text(
+        accepted_boundary.read_text(encoding="utf-8").replace(
+            "strict_certified", "interpolated_noncertified", 1
+        ),
+        encoding="utf-8",
+    )
+    candidate = load_phase_reference(root, layer="strict")
+    accepted = load_phase_reference(root, layer="accepted")
+    legacy_row = dict(candidate.tables["boundary"][0])
+    legacy_row["T_MeV"] = 90.0
+    legacy_row["muq_MeV"] = 301.0
+
+    runtime = build_runtime_view(
+        candidate,
+        accepted_bundle=accepted,
+        legacy_tables={"boundary": [legacy_row]},
+    )
+
+    assert runtime.diagnostics["accepted_fallback_row_counts"]["boundary"] == 0
+    assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 1
     assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"

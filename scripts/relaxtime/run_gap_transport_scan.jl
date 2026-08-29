@@ -56,6 +56,7 @@ const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_den
 const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
 const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
 const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v1")
+const DEFAULT_ACCEPTED_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2")
 const LEGACY_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
 
 function _load_runtime_phase_reference(opts)
@@ -71,8 +72,10 @@ function _load_runtime_phase_reference(opts)
     mode === :legacy && return PhaseReferenceAdapter.load_legacy_phase_reference(; legacy...)
     root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root
     mode === :diagnostic && return PhaseReferenceAdapter.load_phase_reference(root; layer=opts.phase_reference_layer)
+    accepted_root = opts.phase_reference_root === nothing && isdir(DEFAULT_ACCEPTED_PHASE_REFERENCE_ROOT) ?
+        DEFAULT_ACCEPTED_PHASE_REFERENCE_ROOT : nothing
     return PhaseReferenceAdapter.load_phase_reference_runtime_with_fallback(
-        root; layer=opts.phase_reference_layer, legacy...
+        root; layer=opts.phase_reference_layer, accepted_root=accepted_root, legacy...
     )
 end
 
@@ -386,7 +389,12 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
                 "phase_reference_source" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_kind(phase_reference)),
                 "phase_reference_runtime_view" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_summary(phase_reference).runtime_view),
                 "phase_reference_fallback_reason" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_reason, "")),
+                "phase_reference_fallback_order" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_order, "")),
                 "phase_reference_candidate_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :candidate_manifest_sha256, "")),
+                "phase_reference_accepted_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_manifest_sha256, "")),
+                "phase_reference_accepted_layer_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_layer_manifest_sha256, "")),
+                "phase_reference_accepted_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_fallback_row_counts, "")),
+                "phase_reference_legacy_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :legacy_fallback_row_counts, "")),
 
                 # labels for plotting convenience
                 "y_label.sigma_over_T" => "σ/T",

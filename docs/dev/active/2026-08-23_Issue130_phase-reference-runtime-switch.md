@@ -6,10 +6,15 @@ reference 文件。
 
 ## Runtime 合同
 
-- 默认 source：`candidate`，layer：`strict`。
+- 默认 source：`candidate`，layer：`strict`。严格 certified 行仍优先；v2 accepted
+  common-support 行可按独立合同作为标记的非证书 fallback，legacy snapshot 为最后
+  fallback 和显式 rollback。
 - candidate 只暴露 `certified=true` 的行；`unresolved`、`ambiguous`、
-  `interpolated_noncertified` 永远保留在 candidate evidence 中，但不能进入 runtime view。
-- candidate 缺失的 boundary/crossover/CEP/spinodal key 才由 legacy source 补位，补位行标记
+  `interpolated_noncertified` 永远保留在 candidate evidence 中，不能直接作为
+  candidate primary runtime 行。
+- candidate 缺失或未认证的 boundary/crossover/CEP/spinodal key 先由符合资格的
+  accepted 行补位，标记 `source_layer=accepted_fallback`、`status=accepted_fallback`、
+  `certified=false`；仍缺失的 key 才由 legacy source 补位并标记
   `source_layer=legacy_fallback`、`status=legacy_fallback`。
 - `--phase-reference-mode legacy` 是显式 rollback；`diagnostic` 只允许审计 candidate，
   `render` 不得成为 runtime 输入。
@@ -25,8 +30,17 @@ reference 文件。
   dry-run 只检查 source resolution，不调用 equilibrium solver。
 - focused unit/integration、task-ledger、docs consistency、`git diff --check` 全部通过后，
   创建独立 runtime-switch PR；PR #260 已合并，并在合并 SHA 上完成 solver-free promotion/
-  consumer smoke。runtime view 为 `certified_candidate_with_legacy_fallback`，显式
-  `--phase-reference-mode legacy` rollback 通过；这些证据不等价于 RS 数值 production parity。
+  consumer smoke。历史 runtime view 为 `certified_candidate_with_legacy_fallback`；现行
+  v2 view 允许显式 accepted fallback，且 `--phase-reference-mode legacy` rollback 仍通过。
+  这些证据不等价于 RS 数值 production parity。
+
+### 合同修订说明（2026-08-29）
+
+原“certified-only + legacy”是 v1 runtime-switch 的历史状态。由于 v2 accepted
+包含作者已审核的 non-certified/common-support 派生行，继续让 strict 缺口直接落到
+较旧 legacy 会降低当前下游的输入可信度。现行 adapter 以
+`strict_candidate>accepted_downstream>legacy_snapshot` 为默认顺序；accepted 的
+认证状态、support、来源 hash 和逐表计数都写入 sidecar，显式 legacy rollback 保留。
 
 ## Handoff
 

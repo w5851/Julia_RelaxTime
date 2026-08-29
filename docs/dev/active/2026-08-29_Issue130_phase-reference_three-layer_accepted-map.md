@@ -166,8 +166,10 @@ ledger、adapter contract 和 solver-free consumer smoke 均有可追溯证据�
   `data/reference/pnjl/legacy_phase_reference_v1/`，与已合并的物理 retirement
   路径一致；原顶层 dense 路径继续保持不存在。
 - accepted 已完成作者审核并记录为 `accepted_for_downstream`；行级插值状态仍为
-  `interpolated_noncertified`，strict certificate 未被升级。runtime 默认、legacy
-  fallback/rollback 和数值输入保持不变。
+  `interpolated_noncertified`，strict certificate 未被升级。它仍不是 primary runtime
+  source，但自 2026-08-29 起，默认 runtime adapter 可在 strict key 缺失时按显式
+  策略使用 accepted fallback，再以 legacy snapshot 作最后回退；两种 fallback 均保留
+  逐行 provenance 和 rollback 语义。
 
 ## 9. accepted promotion 与 legacy audit v2（2026-08-29）
 
@@ -180,5 +182,7 @@ ledger、adapter contract 和 solver-free consumer smoke 均有可追溯证据�
   accepted 的 12,537/3,135/161/11,989 行分别保留原 source status 和非外推约束。
 - solver-free legacy coverage audit v2 已生成于
   `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`；
-  其 `retirement_inconclusive` 结果只进入 consumer/path retirement，不把 accepted
-  默认误写成 legacy 已可删除。
+  其 `retirement_inconclusive` 结果只进入 consumer/path retirement；accepted 插值行不
+  自动提升为 certified，但在作者接受、common-support、非外推且状态可用时可以作为
+  受控 runtime fallback。该顺序及其边界由新的 accepted-runtime-fallback 任务继续
+  审计，不能据此提前删除 legacy。
