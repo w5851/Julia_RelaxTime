@@ -25,14 +25,14 @@
       "sha256": "633ea61cc324716fc6e1191e6d990f76e6f25370297d12d518ad5ac5f740d8f8"
     },
     {
-      "bytes": 1675,
+      "bytes": 1734,
       "path": "decision.json",
-      "sha256": "3c4bfe30563f2c282016bec1e5b93b39bb4ba1c8ae1b09912e44f6b79d39e592"
+      "sha256": "33ccb981655e0a001b3cebe8e007f528940ac5cbbd7922f23592ff1dd0d8131e"
     },
     {
       "bytes": 2285,
       "path": "README.md",
-      "sha256": "5f134a6e13f243064af3228495a2e58d21a85dad63392a537a50deb0afeeebc3"
+      "sha256": "310dc5d388adf93e59bd1fc6acb5ecb92f88b9a2c08c038b9c2046b319a59ebe"
     },
     {
       "bytes": 1633,
@@ -67,10 +67,10 @@
     {
       "bytes": 149463,
       "path": "tables/reference_occurrences.csv",
-      "sha256": "5276b61dac2b2a52c95399f89dd74779491493cf21e633c5235878521abbdf69"
+      "sha256": "f9f3c4188173a37442b5cc631235b183a83aa526569ec0c69cc262e2203e5e0a"
     }
   ],
-  "generated_at_utc": "2026-08-29T06:43:17.196506+00:00",
+  "generated_at_utc": "2026-08-29T07:15:25.088918+00:00",
   "input_manifests": {
     "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
     "candidate_strict": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
@@ -82,7 +82,7 @@
   "legacy_tree_sha256": "c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6",
   "reference_write": false,
   "replay_run_id": "32451053476",
-  "repo_head": "3a8fea69e33208b797073b012428c268ddc3e502",
+  "repo_head": "b117b5c4429ffd3dbd3384b9efd4cab1d44d31da",
   "runtime_consumption": false,
   "runtime_reference_layer": "strict",
   "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_audit_v2",

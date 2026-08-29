@@ -1,7 +1,7 @@
-# Issue #130 PNJL legacy phase-reference retirement audit v1
+# Issue #130 PNJL legacy phase-reference retirement audit v2
 
 这是 solver-free 的阶段 A 审计，不调用 Julia/PNJL，不修改 reference，不删除文件。
-本次 repo HEAD：`3a8fea69e33208b797073b012428c268ddc3e502`。
+本次 repo HEAD：`b117b5c4429ffd3dbd3384b9efd4cab1d44d31da`。
 
 ## Verdict
 

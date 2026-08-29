@@ -2,8 +2,9 @@
 
 The candidate tables are deliberately not shaped like the historical files in
 ``data/reference/pnjl``.  This module is the small, solver-free boundary between
-those contracts.  It never writes the legacy files and it never selects the
-candidate implicitly.  Callers must provide the candidate root and layer.
+those contracts.  It never writes the legacy files.  Runtime callers must
+provide the candidate root and layer explicitly; display/analysis callers may
+use ``default_downstream_layer`` for the author-promoted v2 package.
 
 ``load_phase_reference`` returns normalized in-memory rows.  ``to_legacy_views``
 is an opt-in, strict conversion for consumers that still need the historical

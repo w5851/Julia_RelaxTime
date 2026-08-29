@@ -25,6 +25,7 @@
   "physical_deletion_eligible": false,
   "reference_write": false,
   "replay_run_id": "32451053476",
+  "repo_head": "b117b5c4429ffd3dbd3384b9efd4cab1d44d31da",
   "runtime_consumption": false,
   "runtime_reference_layer": "strict",
   "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_decision_v2",

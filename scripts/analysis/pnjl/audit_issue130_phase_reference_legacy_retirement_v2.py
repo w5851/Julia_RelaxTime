@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -66,6 +67,26 @@ def _refresh_manifest(output_root: Path, manifest: dict[str, Any]) -> None:
     write_json(output_root / "manifest.json", manifest)
 
 
+def _refresh_repo_head(output_root: Path, repo_root: Path) -> str:
+    """Replace v1 prose provenance with the head used for this v2 build."""
+
+    head = audit_v1.git_value(repo_root, "rev-parse", "HEAD")
+    for name in ("README.md", "AUDIT.md"):
+        path = output_root / name
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        if name == "README.md":
+            text = text.replace(
+                "# Issue #130 PNJL legacy phase-reference retirement audit v1",
+                "# Issue #130 PNJL legacy phase-reference retirement audit v2",
+                1,
+            )
+        text = re.sub(r"本次 repo HEAD：`[0-9a-f]+`", f"本次 repo HEAD：`{head}`", text)
+        path.write_text(text, encoding="utf-8", newline="\n")
+    return head
+
+
 def _append_claim(output_root: Path, accepted_status: str) -> None:
     claim_path = output_root / "tables" / "claim_ledger.json"
     claims = json.loads(claim_path.read_text(encoding="utf-8"))
@@ -103,6 +124,7 @@ def build_audit(
     # Reuse the reviewed v1 implementation for semantic key coverage and
     # consumer scanning, but write to a new immutable v2 evidence directory.
     audit_v1.build_audit(repo_root.resolve(), output_root)
+    repo_head = _refresh_repo_head(output_root, repo_root.resolve())
     package_root = (repo_root / PACKAGE_RELATIVE).resolve()
     package_manifest = read_json(package_root / "manifest.json")
     accepted_manifest = read_json(package_root / "accepted" / "manifest.json")
@@ -124,6 +146,7 @@ def build_audit(
             "accepted_manifest_sha256": sha256(package_root / "accepted" / "manifest.json"),
             "accepted_interpolated_rows_remain_noncertified": True,
             "runtime_reference_layer": "strict",
+            "repo_head": repo_head,
             "next_action": (
                 "retain legacy snapshot; accepted is the downstream analysis default, while strict "
                 "runtime still requires candidate-only migration and explicit fallback audit"
@@ -169,6 +192,7 @@ def build_audit(
             "accepted_runtime_consumption": accepted_manifest.get("runtime_consumption"),
             "accepted_reference_write": accepted_manifest.get("reference_write"),
             "accepted_interpolated_rows_noncertified": True,
+            "repo_head": repo_head,
         }
     )
     _refresh_manifest(output_root, manifest)
