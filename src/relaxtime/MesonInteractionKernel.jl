@@ -1,7 +1,7 @@
 """
     MesonInteractionKernel
 
-Phase-1 pure algebra backend for the three-flavor KMT meson interaction
+Phase-1/1.5 pure algebra backend for the three-flavor KMT meson interaction
 kernel.  The backend is deliberately parallel to `EffectiveCouplings`: it
 does not alter the PNJL mean-field solver or the legacy 0/8 propagator API.
 
@@ -31,14 +31,14 @@ struct KernelConvention
     source::Symbol
 end
 
-"""Return the Phase-1 convention used by the pure full-KMT builder."""
+"""Return the source-aligned convention used by the full-KMT builder."""
 @inline function default_kernel_convention()
     return KernelConvention(
-        :full_kmt_phase1,
+        :full_kmt_tian2026_eq3,
         :sqrt_2_over_3_identity,
         :phi_equals_sigma,
         :pseudoscalar_plus_scalar_minus,
-        :rehberg_mei_candidate,
+        :tian_et_al_2026_eq3,
     )
 end
 
@@ -128,16 +128,16 @@ function _build_channel(
     u, d, strange = phi
     sign = T(_channel_sign(channel))
 
-    # Candidate convention documented in
-    # docs/reference/formula/relaxtime/couplings/KMT_MFA_to_RPA_QuadraticKernel.md.
+    # Source-aligned convention from Tian et al., Phys. Rev. D 114, 034012
+    # (2026), Eq. (3), after identifying phi_f with sigma_f.
     K0 = G + sign * (K / T(3)) * (u + d + strange)
     K3 = G - sign * (K / T(2)) * strange
     K45 = G - sign * (K / T(2)) * d
     K67 = G - sign * (K / T(2)) * u
     K8 = G - sign * (K / T(6)) * (T(2) * u + T(2) * d - strange)
-    K03 = sign * (K / (T(2) * sqrt(T(6)))) * (u - d)
+    K03 = -sign * (K / (T(2) * sqrt(T(6)))) * (u - d)
     K08 = -sign * (sqrt(T(2)) * K / T(12)) * (u + d - T(2) * strange)
-    K38 = -sign * (K / (T(2) * sqrt(T(3)))) * (u - d)
+    K38 = sign * (K / (T(2) * sqrt(T(3)))) * (u - d)
 
     neutral = _symmetric_neutral_matrix(T, K0, K3, K8, K03, K08, K38)
     charged = ChargedKMTChannels{T}(K3, K45, K67)

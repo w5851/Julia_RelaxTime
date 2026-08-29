@@ -20,6 +20,7 @@ using Main.RelaxTime.EffectiveCouplings: calculate_effective_couplings
     K = 0.40
 
     @testset "结构与输入适配" begin
+        @test default_kernel_convention().source == :tian_et_al_2026_eq3
         kernel = build_full_kmt_interaction(SVector(-0.30, -0.20, -0.10); G=G, K=K)
         @test kernel isa FullKMTInteraction{Float64}
         @test Main.MesonInteractionKernel === Main.RelaxTime.MesonInteractionKernel
@@ -44,9 +45,9 @@ using Main.RelaxTime.EffectiveCouplings: calculate_effective_couplings
     @testset "不对称凝聚产生 0/3/8 交叉项" begin
         u, d, strange = -0.30, -0.20, -0.10
         kernel = build_full_kmt_interaction((u, d, strange); G=G, K=K)
-        expected_K03 = K / (2 * sqrt(6)) * (u - d)
+        expected_K03 = -K / (2 * sqrt(6)) * (u - d)
         expected_K08 = -sqrt(2) * K / 12 * (u + d - 2 * strange)
-        expected_K38 = -K / (2 * sqrt(3)) * (u - d)
+        expected_K38 = K / (2 * sqrt(3)) * (u - d)
 
         @test get_Kab(kernel, 0, 3, :P) ≈ expected_K03
         @test get_Kab(kernel, 3, 0, :P) ≈ expected_K03

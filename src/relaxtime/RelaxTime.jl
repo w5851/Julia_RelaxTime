@@ -45,6 +45,7 @@ include("PolarizationCache.jl")
 include("AFieldBuilder.jl")
 include("EffectiveCouplings.jl")
 include("MesonInteractionKernel.jl")
+include("MesonRPA.jl")
 include("MesonPropagator.jl")
 include("TotalPropagator.jl")
 include("MesonMass.jl")
@@ -67,6 +68,7 @@ using .PolarizationCache
 using .AFieldBuilder
 using .EffectiveCouplings
 using .MesonInteractionKernel
+using .MesonRPA
 using .MesonPropagator
 using .TotalPropagator
 using .MesonMass
@@ -87,7 +89,7 @@ end # module RelaxTime
 # 使现有代码中 `using Main.OneLoopIntegrals` 等引用继续工作。
 for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso,
               :PolarizationCache, :AFieldBuilder, :EffectiveCouplings,
-              :MesonInteractionKernel, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :MesonDensity, :MesonThermodynamics,
+              :MesonInteractionKernel, :MesonRPA, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :MesonDensity, :MesonThermodynamics,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
               :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
               :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)

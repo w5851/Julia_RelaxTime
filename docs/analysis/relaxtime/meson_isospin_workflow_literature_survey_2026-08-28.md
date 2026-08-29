@@ -33,6 +33,8 @@
 
 这三条链路可以组合，但文献通常不会一次性完成“完整 \(\mathcal K_{ab}\) + BQS 约束 + 全部 BU 介子热力学反馈 + 冻结线生产”。因此当前项目应把它们视为正交的模型选择，而不是一个开关。
 
+本轮补充的 Tian 等工作（Phys. Rev. D 114, 034012 (2026)，DOI：[10.1103/d7nm-y2vp](https://doi.org/10.1103/d7nm-y2vp)）提供了可直接复核的 Eq. (2)-(3) 有效四费米耦合展开，以及 Eq. (20)-(22)、(26) 的中性 `(0,3,8)` RPA 矩阵组织。该文采用 NJL、外磁场、Ritus 基底和 Pauli--Villars 正则化，化学势取味道相等，目标是极点质量而非 BU 密度或冻结线；因此在本项目中作为“公式/矩阵结构信源”，不作为 PNJL/BU 数值基线。
+
 ### 1.3 \(\mu_s=0.55\mu_u\) 是现象学消融设定，不是普适平衡条件
 
 Friesen 2019 和 Blaschke 2020 的相关工作确实使用了 \(\mu_u=\mu_d\)、\(\mu_s=0.55\mu_u\) 的案例；同时它们明确把这类 Case I/Case II 视作模型情景或现象学输入。它不是由 \(\rho_Q/\rho_B=0.4\)、\(\rho_S=0\) 自动推出的平衡解，也不能替代固定 \((T,\mu_B)\) 后求解 \(\mu_Q,\mu_S\) 的守恒荷路线。
@@ -464,8 +466,9 @@ Maslov & Blaschke（PRD 107, 094010, 2023）进一步在 2 味 PNJL 中保留介
 6. **Lopes et al.**, “Hot QCD at finite isospin density: confronting SU(3) NJL model with recent lattice data,” *Phys. Rev. D* **103**, 076023 (2021). [DOI](https://doi.org/10.1103/PhysRevD.103.076023) · [arXiv:2102.02844](https://arxiv.org/html/2102.02844).
 7. **Wu et al.**, “Pion properties at finite isospin chemical potential with isospin symmetry breaking,” *Chinese Phys. C* **41**, 124106 (2017). [DOI](https://doi.org/10.1088/1674-1137/41/12/124106).
 8. **Mei et al.**, “Mass spectra of neutral mesons \(K_0,\pi_0,\eta,\eta'\) at finite magnetic field, temperature and baryon chemical potential,” *Phys. Rev. D* **107**, 074018 (2023). [DOI](https://doi.org/10.1103/PhysRevD.107.074018) · [arXiv:2212.04778](https://arxiv.org/abs/2212.04778).
-9. **Blaschke et al.**, “Generalized Beth–Uhlenbeck approach to mesons and diquarks in hot, dense quark matter,” *Annals of Physics* **348**, 228–255 (2014). [DOI](https://doi.org/10.1016/j.aop.2014.06.002) · [arXiv:1305.3907](https://arxiv.org/abs/1305.3907).
-10. **Maslov & Blaschke**, “Effect of mesonic off-shell correlations in the PNJL equation of state,” *Phys. Rev. D* **107**, 094010 (2023). [DOI](https://doi.org/10.1103/PhysRevD.107.094010) · [arXiv:2301.09882](https://arxiv.org/abs/2301.09882).
+9. **Tian et al.**, “Mass spectra of charged kaons and pions at finite magnetic field, temperature, and density,” *Phys. Rev. D* **114**, 034012 (2026). [DOI](https://doi.org/10.1103/d7nm-y2vp).
+10. **Blaschke et al.**, “Generalized Beth–Uhlenbeck approach to mesons and diquarks in hot, dense quark matter,” *Annals of Physics* **348**, 228–255 (2014). [DOI](https://doi.org/10.1016/j.aop.2014.06.002) · [arXiv:1305.3907](https://arxiv.org/abs/1305.3907).
+11. **Maslov & Blaschke**, “Effect of mesonic off-shell correlations in the PNJL equation of state,” *Phys. Rev. D* **107**, 094010 (2023). [DOI](https://doi.org/10.1103/PhysRevD.107.094010) · [arXiv:2301.09882](https://arxiv.org/abs/2301.09882).
 
 ## 10. 本项目内的交叉引用
 
