@@ -1,16 +1,18 @@
 # Issue #130：PNJL legacy phase-reference retirement 与物理清理
 
 状态：active；这是 RS `prod_v1` 物理删除（PR #278）之后的独立 PNJL
-phase-reference follow-up。当前只建立可复现的 solver-free retirement 审计边界，
-不因 RS snapshot 已删除而自动删除 PNJL legacy snapshot。
+phase-reference follow-up。作者已确认 v2 `accepted` 是 phase-reference 下游的默认
+runtime source，strict 只在显式模式下使用；legacy 不再作为 runtime fallback/rollback。
+当前进入 path retirement，完成后再单独执行 PNJL legacy snapshot 物理删除。
 
 ## 1. 背景与目标
 
 Issue #130 已将
-`data/reference/pnjl/issue130_phase_reference_v1/strict` 设为 runtime 的首选
-candidate，并保留 `data/reference/pnjl/legacy_phase_reference_v1/` 作为逐键
-fallback、显式 rollback 和历史复现输入。PR #264 只完成了 canonical 根路径退役，
-并不等于 snapshot 可以物理删除。
+`data/reference/pnjl/issue130_phase_reference_v2/accepted` 设为 runtime 的默认
+下游输入，并保留 v2 strict 作为显式 certified-only 选项。历史
+`data/reference/pnjl/legacy_phase_reference_v1/` 不再承担逐键 fallback 或 rollback，
+但在 path retirement 完成前仍作为不可变历史审计输入保留。PR #264 只完成了旧
+canonical 根路径退役，并不等于 snapshot 可以立即物理删除。
 
 本任务的目标是按顺序完成：
 
@@ -174,7 +176,25 @@ snapshot hash 不一致、发现未登记 consumer、恢复引用不可达，或
 ## 7. DoD、风险与回退
 
 DoD 是阶段性而非自动连跳：每一阶段都有独立 evidence、PR 和作者审核；在阶段 C
-合并前 legacy snapshot 必须保持可读、可回退、可复现。风险主要是 candidate 的细网格
-与旧粗网格不共键、隐藏 consumer 依赖以及误把诊断层 unresolved 当作可运行数据；
-缓解方式是按真实 adapter key 审计、静态引用矩阵和精确 allowlist。任何阶段失败都回退
-到当前 `legacy_phase_reference_v1` snapshot，不重算数值、不删除证据。
+合并前 legacy snapshot 必须保持可读、可复现，并作为 Git 恢复边界保留。风险主要是
+candidate 的细网格与旧粗网格不共键、隐藏 consumer 依赖以及误把诊断层 unresolved
+当作可运行数据；缓解方式是按真实 adapter key 审计、静态引用矩阵和精确 allowlist。
+任何阶段失败都保留当前 snapshot 和历史 evidence，不重算数值、不修改物理容差。
+
+## 8. 当前 accepted-primary 重审结果（2026-08-29）
+
+作者已明确接受 `accepted` 作为所有 phase-reference 下游（包括 phase-guided transport）
+的默认输入，`strict` 只在显式模式下使用。当前 adapter 已移除可用的
+`strict→accepted→legacy` fallback/rollback 入口；legacy 仅由历史审计和恢复边界读取。
+
+solver-free v3 审计包：
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/`。
+审计固定 calculation SHA `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`，验证 accepted
+manifest promotion、strict certified-only、legacy snapshot bytes/SHA、同 ξ 邻近支持以及
+运行时 `legacy_fallback_rows=0`。legacy 与 accepted 的 exact key 仍不是同一网格，
+因此 coverage 表仅用于解释邻近支持，不能把 nearest row 伪装成 exact row。
+
+当前 verdict 为 `accepted_primary_runtime_ready_path_retirement_pending`：运行时已无
+legacy fallback/rollback，但 21 个 active path contract（默认路径、旧诊断入口和治理文本）
+仍需逐项迁移或明确标为历史工具。完成 path-retirement PR 并重新运行 v3 审计后，才生成
+独立 physical-deletion PR；删除 PR 只允许精确 allowlist，保留 Git 恢复边界和全部历史 evidence。

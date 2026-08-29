@@ -1,31 +1,33 @@
 # Issue #130：accepted phase-reference runtime fallback 合同修订
 
-状态：active。该任务修订此前“accepted 不得进入 runtime”的明确禁止，原因是
+状态：superseded（2026-08-29）。该任务曾修订此前“accepted 不得进入 runtime”的明确禁止，原因是
 legacy snapshot 的部分数值来自较旧、较稀疏的 reference，而当前 v2 `accepted`
 层已经过作者物理审核并覆盖了大量 strict certificate 缺口。本任务只调整
 adapter 的来源优先级和 provenance，不修改任何 phase 数值、equilibrium solver、
-Maxwell、容差或 C0/C1/C2 artifact。
+Maxwell、容差或 C0/C1/C2 artifact。当前合同已进一步收束为 accepted-primary；
+strict 仅显式启用，legacy 不再作为 runtime fallback/rollback。当前执行入口是
+`2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md`。
 
-## 1. 当前合同
+## 1. 已废止的 v1 合同（历史记录）
 
-runtime view 的固定顺序为：
+PR #280 之前曾拟定的 runtime view 顺序为：
 
 1. `strict` candidate 中通过现有 certificate predicate 的行；
 2. v2 `accepted` 中 `author_accepted_for_downstream`、非外推、处于
    `native_support` 或 `interpolated_common_support` 的行；
 3. versioned `legacy_phase_reference_v1` snapshot 的最后回退行。
 
-`accepted` 行可以是 `interpolated_noncertified`。进入 runtime view 后必须保留
+当时 `accepted` 行可以是 `interpolated_noncertified`。进入 runtime view 后必须保留
 `certified=false`，同时显式标记 `runtime_eligible=true`、
 `source_layer=accepted_fallback` 和原始 `source_status`。这表示“允许当前下游
 消费”，不表示通过 strict 数值证书，也不等于 accepted 可以作为主 runtime
 source。
 
-直接以 `accepted` 或 `render` 作为 primary runtime source 仍然拒绝。显式
+当时直接以 `accepted` 或 `render` 作为 primary runtime source 仍然拒绝。显式
 `--phase-reference-mode legacy` 仍是 rollback；传入自定义 candidate root 时，
 除非同时传入 accepted root，否则保持旧的 strict→legacy 行为。
 
-## 2. 为什么需要修订
+## 2. 为什么当时需要修订
 
 legacy coverage audit v2 记录了 382 个历史 fallback key，而 accepted v2 与
 strict candidate 的完整 key 集一致地覆盖了 strict 的 4,071 个未认证 boundary
@@ -97,3 +99,17 @@ strict 的大量 non-certified gap，但剩余的 34/190/0/31 行仍需 legacy �
 legacy snapshot，也不启动新的 PNJL/RS numerical run。若 accepted manifest、
 support 或状态字段校验失败，adapter 回退到已验证的 strict→legacy 路径，并在
 diagnostics 中保留错误；显式 legacy source 始终可用。
+
+## 7. 历史保留说明
+
+本文件中的 strict→accepted→legacy 表格、fallback 计数和 rollback 语义是
+superseded 的历史合同，仅用于解释 PR #280 之前的决策。不得据此配置当前 runtime；
+legacy snapshot 的读取只允许留在 retirement audit 或 byte-preserving 历史恢复工具中。
+
+## 8. 当前合同指针
+
+当前不再启用本文件第 1 节的 fallback 顺序。请使用
+`2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md`：
+accepted 是默认 runtime source，strict 是显式 certified-only 选项，legacy 既不
+fallback 也不 rollback；v3 覆盖审计位于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/`。

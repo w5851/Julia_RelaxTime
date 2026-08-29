@@ -9,10 +9,10 @@ use ``default_downstream_layer`` for the author-promoted v2 package.
 ``load_phase_reference`` returns normalized in-memory rows.  ``to_legacy_views``
 is an opt-in, strict conversion for consumers that still need the historical
 column names; it refuses unresolved/non-certified rows by default so a caller
-cannot silently turn diagnostic evidence into runtime input. Runtime assembly
-keeps certified strict rows first, then may use explicitly author-accepted
-non-certified rows as a marked fallback, and finally the immutable legacy
-snapshot.
+cannot silently turn diagnostic evidence into runtime input.  The default
+runtime consumer is the author-accepted v2 layer.  The strict layer remains an
+explicit certified-only mode; the historical legacy snapshot is not a runtime
+fallback or rollback path.
 """
 
 from __future__ import annotations
@@ -112,7 +112,7 @@ class PhaseReferenceBundle:
 
 @dataclass(frozen=True)
 class PhaseReferenceRuntimeView:
-    """Strict rows merged with explicitly marked accepted and legacy fallbacks."""
+    """Rows exposed to a runtime consumer with an auditable source policy."""
 
     layer: str
     source: str
@@ -142,9 +142,8 @@ def default_downstream_layer(reference_root: str | Path) -> str:
     """Select the default layer for downstream display/analysis consumers.
 
     The v2 package has an author-accepted ``accepted`` view for downstream
-    phase maps.  The v1 import remains compatible with ``strict``.  Runtime
-    callers must continue to select strict explicitly through the runtime
-    adapter; this helper is intentionally not used by solver paths.
+    phase maps and runtime consumers.  The v1 import remains compatible with
+    ``strict``.  ``strict`` is still available as an explicit runtime choice.
     """
 
     manifest = _read_json(Path(reference_root).resolve() / "manifest.json")
@@ -428,30 +427,155 @@ def load_phase_reference(
     uncertified = sum(
         1 for rows in table_rows.values() for row in rows if not bool(row.get("certified", False))
     )
-    if allow_runtime and uncertified:
+    if allow_runtime and layer != "accepted" and uncertified:
         raise PhaseReferenceContractError(
             f"runtime view rejected {uncertified} unresolved/non-certified candidate rows"
         )
     if allow_runtime and layer == "render":
         raise PhaseReferenceContractError("render layer is visualization-only and cannot be runtime input")
     if allow_runtime and layer == "accepted":
-        raise PhaseReferenceContractError(
-            "accepted layer cannot be the primary runtime source; pass it through build_runtime_view"
-        )
+        if manifest.get("promotion_status") != "accepted_for_downstream":
+            raise PhaseReferenceContractError(
+                "accepted layer is not author-promoted for runtime consumption"
+            )
+        ineligible = [
+            (table, row)
+            for table, rows in table_rows.items()
+            for row in rows
+            if not _accepted_fallback_eligible(table, row)
+        ]
+        if ineligible:
+            table, row = ineligible[0]
+            raise PhaseReferenceContractError(
+                f"accepted runtime rejected ineligible {table} row with key "
+                f"{tuple(row.get(field) for field in table_specs[table]['keys'])}"
+            )
+        table_rows = {
+            table: tuple(
+                {
+                    **row,
+                    "runtime_eligible": True,
+                    "runtime_source_layer": "accepted_primary",
+                    "accepted_source_layer": row.get("source_layer", ""),
+                }
+                for row in rows
+            )
+            for table, rows in table_rows.items()
+        }
+
+    runtime_row_counts = {
+        table: len(rows) for table, rows in table_rows.items()
+    }
+    runtime_noncertified_counts = {
+        table: sum(1 for row in rows if not row.get("certified", False))
+        for table, rows in table_rows.items()
+    }
 
     diagnostics = {
         "adapter_schema": SCHEMA_VERSION,
         "reference_status": manifest.get("reference_status"),
-        "runtime_consumption": False,
+        "runtime_consumption": bool(allow_runtime),
         "layer": layer,
         "schema_version": schema_version,
         "row_counts": row_counts,
         "uncertified_rows": uncertified,
         "allow_runtime": allow_runtime,
+        "runtime_view": (
+            "accepted_primary" if allow_runtime and layer == "accepted"
+            else "strict_certified_only" if allow_runtime and layer == "strict"
+            else "diagnostic_all_rows"
+        ),
+        "primary_layer": (
+            "accepted" if allow_runtime and layer == "accepted"
+            else "strict" if allow_runtime and layer == "strict"
+            else ""
+        ),
+        "fallback_enabled": False,
+        "fallback_order": (
+            "accepted_primary" if allow_runtime and layer == "accepted"
+            else "strict_primary" if allow_runtime and layer == "strict"
+            else ""
+        ),
+        "accepted_primary_row_counts": runtime_row_counts if allow_runtime and layer == "accepted" else {},
+        "accepted_primary_noncertified_row_counts": (
+            runtime_noncertified_counts if allow_runtime and layer == "accepted" else {}
+        ),
+        "accepted_manifest_sha256": (
+            sha256(manifest_path) if allow_runtime and layer == "accepted" else ""
+        ),
+        "accepted_layer_manifest_sha256": (
+            sha256(layer_manifest_path) if allow_runtime and layer == "accepted" else ""
+        ),
+        "legacy_fallback_row_counts": {table: 0 for table in table_rows},
+        "legacy_excluded_row_counts": {table: 0 for table in table_rows},
         "manifest_sha256": sha256(manifest_path),
         "layer_manifest_sha256": sha256(layer_manifest_path),
     }
     return PhaseReferenceBundle(root, layer, manifest, layer_manifest, table_rows, diagnostics)
+
+
+def _strict_runtime_bundle(bundle: PhaseReferenceBundle) -> PhaseReferenceBundle:
+    """Return the certified-only view used by an explicit strict consumer."""
+
+    if bundle.layer != "strict":
+        raise PhaseReferenceContractError("strict runtime requires the strict layer")
+    tables = {
+        table: tuple(
+            {
+                **row,
+                "runtime_eligible": True,
+                "runtime_source_layer": "strict_primary",
+            }
+            for row in rows
+            if row.get("certified", False)
+        )
+        for table, rows in bundle.tables.items()
+    }
+    counts = {table: len(rows) for table, rows in tables.items()}
+    diagnostics = dict(bundle.diagnostics)
+    diagnostics.update(
+        {
+            "runtime_consumption": True,
+            "runtime_view": "strict_certified_only",
+            "primary_layer": "strict",
+            "runtime_row_counts": counts,
+            "runtime_ineligible_row_counts": {
+                table: len(bundle.tables.get(table, ())) - len(rows)
+                for table, rows in tables.items()
+            },
+            "fallback_enabled": False,
+        }
+    )
+    return PhaseReferenceBundle(
+        bundle.root,
+        bundle.layer,
+        bundle.manifest,
+        bundle.layer_manifest,
+        tables,
+        diagnostics,
+    )
+
+
+def load_phase_reference_runtime(
+    reference_root: str | Path,
+    *,
+    layer: str = "accepted",
+) -> PhaseReferenceBundle:
+    """Load the explicit runtime layer.
+
+    ``accepted`` is the default runtime layer and admits only rows that carry
+    the author-acceptance, support and phase-exclusive metadata.  ``strict``
+    is an explicit opt-in certified-only view; uncertified strict rows are
+    omitted rather than silently delegated to a legacy snapshot.
+    """
+
+    if layer == "accepted":
+        return load_phase_reference(reference_root, layer=layer, allow_runtime=True)
+    if layer == "strict":
+        return _strict_runtime_bundle(load_phase_reference(reference_root, layer=layer))
+    raise PhaseReferenceContractError(
+        "runtime layer must be 'accepted' (default) or 'strict' (explicit)"
+    )
 
 
 def _require_certified(rows: Iterable[Mapping[str, Any]], table: str) -> None:
@@ -563,6 +687,75 @@ def _accepted_fallback_eligible(table: str, row: Mapping[str, Any]) -> bool:
     return not any(token in status for token in ("unresolved", "ambiguous", "not_converged"))
 
 
+def build_accepted_primary_runtime_view(
+    accepted: PhaseReferenceBundle,
+) -> PhaseReferenceRuntimeView:
+    """Build the accepted-primary view without any legacy fallback.
+
+    The row-level ``certified`` field is intentionally preserved.  A row may
+    therefore be runtime-eligible while remaining ``certified=False`` when it
+    came from an author-reviewed interpolation.  The additional provenance
+    fields make that distinction visible to downstream diagnostics.
+    """
+
+    if accepted.layer != "accepted":
+        raise PhaseReferenceContractError("accepted primary view requires the accepted layer")
+    if accepted.manifest.get("promotion_status") != "accepted_for_downstream":
+        raise PhaseReferenceContractError(
+            "accepted layer is not author-promoted for runtime consumption"
+        )
+
+    tables: dict[str, tuple[Mapping[str, Any], ...]] = {}
+    row_counts: dict[str, int] = {}
+    noncertified_counts: dict[str, int] = {}
+    for table, rows in accepted.tables.items():
+        ineligible = next(
+            (row for row in rows if not _accepted_fallback_eligible(table, row)),
+            None,
+        )
+        if ineligible is not None:
+            raise PhaseReferenceContractError(
+                f"accepted primary view rejected ineligible {table} row"
+            )
+        normalized = []
+        for row in rows:
+            item = dict(row)
+            item.update(
+                {
+                    "runtime_eligible": True,
+                    "runtime_source_layer": "accepted_primary",
+                    "accepted_source_layer": row.get("source_layer", ""),
+                }
+            )
+            normalized.append(item)
+        tables[table] = tuple(normalized)
+        row_counts[table] = len(normalized)
+        noncertified_counts[table] = sum(
+            1 for row in normalized if not row.get("certified", False)
+        )
+
+    diagnostics = {
+        "runtime_view": "accepted_primary",
+        "primary_layer": "accepted",
+        "fallback_enabled": False,
+        "fallback_order": "accepted_primary",
+        "fallback_reason": "",
+        "candidate_manifest_sha256": accepted.diagnostics.get("manifest_sha256", ""),
+        "accepted_manifest_sha256": accepted.diagnostics.get("manifest_sha256", ""),
+        "accepted_layer_manifest_sha256": accepted.diagnostics.get("layer_manifest_sha256", ""),
+        "accepted_primary_row_counts": row_counts,
+        "accepted_primary_noncertified_row_counts": noncertified_counts,
+        "legacy_fallback_row_counts": {table: 0 for table in tables},
+        "legacy_excluded_row_counts": {table: 0 for table in tables},
+    }
+    return PhaseReferenceRuntimeView(
+        layer="accepted",
+        source="accepted",
+        tables=tables,
+        diagnostics=diagnostics,
+    )
+
+
 def build_runtime_view(
     candidate: PhaseReferenceBundle,
     *,
@@ -570,154 +763,54 @@ def build_runtime_view(
     accepted_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
     legacy_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
 ) -> PhaseReferenceRuntimeView:
-    """Build a solver-free view with strict, accepted, then legacy fallback.
+    """Build a runtime view under the current accepted/strict contract.
 
-    The candidate remains the preferred source and only certified rows are
-    preferred.  When an explicit v2 ``accepted`` bundle is supplied, finite
-    author-accepted common-support rows may fill remaining keys while staying
-    ``certified=False`` and being marked ``accepted_fallback``.  The immutable
-    legacy source is the final fallback and remains the explicit rollback.
+    ``accepted_bundle`` is the preferred path and produces an accepted-primary
+    view.  Without it, the candidate is reduced to an explicit strict
+    certified-only view.  Legacy rows are rejected here; historical snapshot
+    comparison belongs to the dedicated retirement audit and is not a runtime
+    fallback.
     """
 
-    if candidate.layer == "render":
-        raise PhaseReferenceContractError(
-            "render layer is visualization-only and cannot be a runtime view"
-        )
-    if candidate.layer == "accepted":
-        raise PhaseReferenceContractError(
-            "accepted layer cannot be the primary runtime source; pass it as accepted_bundle"
-        )
     if accepted_bundle is not None and accepted_tables is not None:
         raise PhaseReferenceContractError("pass accepted_bundle or accepted_tables, not both")
+    if legacy_tables:
+        raise PhaseReferenceContractError(
+            "legacy fallback is retired from runtime; use the historical retirement audit"
+        )
     if accepted_bundle is not None:
-        if accepted_bundle.layer != "accepted":
-            raise PhaseReferenceContractError("accepted_bundle must load the accepted layer")
-        if accepted_bundle.manifest.get("promotion_status") != "accepted_for_downstream":
-            raise PhaseReferenceContractError(
-                "accepted bundle is not author-promoted for downstream fallback"
-            )
-        accepted_tables = accepted_bundle.tables
-    accepted_tables = accepted_tables or {}
-    legacy_tables = legacy_tables or {}
-    merged: dict[str, tuple[Mapping[str, Any], ...]] = {}
-    candidate_counts: dict[str, int] = {}
-    accepted_counts: dict[str, int] = {}
-    legacy_counts: dict[str, int] = {}
-    legacy_excluded_counts: dict[str, int] = {}
-
-    cep_limits: dict[float, float] = {}
-    for row in candidate.tables.get("cep", ()):
-        if row.get("certified", False):
-            cep_limits[float(row["xi"])] = float(row["muq_CEP_proxy_MeV"])
-    for row in accepted_tables.get("cep", ()):
-        if _accepted_fallback_eligible("cep", row):
-            cep_limits.setdefault(float(row["xi"]), float(row["muq_CEP_proxy_MeV"]))
-
-    def cep_limit(xi: float) -> float | None:
-        exact = cep_limits.get(float(xi))
-        if exact is not None:
-            return exact
-        nearby = [limit for key_xi, limit in cep_limits.items() if abs(key_xi - float(xi)) <= 1e-6]
-        return nearby[0] if nearby else None
-
-    def key(table: str, row: Mapping[str, Any]) -> tuple[Any, ...]:
-        spec = _TABLES[table]
-        return tuple(row.get(field) for field in spec["keys"])
-
-    for table in _TABLES:
-        certified = [row for row in candidate.tables.get(table, ()) if row.get("certified", False)]
-        rows = []
-        for row in certified:
-            item = dict(row)
-            item["runtime_eligible"] = True
-            rows.append(item)
-        seen = {key(table, row) for row in rows}
-        n_accepted = 0
-        for row in accepted_tables.get(table, ()):
-            if not _accepted_fallback_eligible(table, row):
-                continue
-            row_key = key(table, row)
-            if row_key in seen:
-                continue
-            accepted = dict(row)
-            accepted.update(
-                {
-                    "source_layer": "accepted_fallback",
-                    "status": "accepted_fallback",
-                    "accepted_source_status": row.get("source_status", ""),
-                    "runtime_eligible": True,
-                    "certified": False,
-                }
-            )
-            rows.append(accepted)
-            seen.add(row_key)
-            n_accepted += 1
-        n_legacy = 0
-        n_legacy_excluded = 0
-        for row in legacy_tables.get(table, ()):
-            if table == "crossover":
-                raw_muq = row.get("muq_MeV", row.get("mu_MeV"))
-                limit = cep_limit(float(row.get("xi"))) if raw_muq not in (None, "") else None
-                if limit is not None and float(raw_muq) > limit + 1e-9:
-                    n_legacy_excluded += 1
-                    continue
-            row_key = key(table, row)
-            if row_key in seen:
-                continue
-            fallback = dict(row)
-            fallback.update(
-                {
-                    "source_layer": "legacy_fallback",
-                    "status": "legacy_fallback",
-                    "runtime_eligible": True,
-                    "certified": True,
-                }
-            )
-            rows.append(fallback)
-            seen.add(row_key)
-            n_legacy += 1
-        merged[table] = tuple(rows)
-        candidate_counts[table] = len(certified)
-        accepted_counts[table] = n_accepted
-        legacy_counts[table] = n_legacy
-        legacy_excluded_counts[table] = n_legacy_excluded
-
-    accepted_enabled = bool(accepted_tables)
-    runtime_view = (
-        "certified_candidate_with_accepted_then_legacy_fallback"
-        if accepted_enabled
-        else "certified_candidate_with_legacy_fallback"
-    )
-
+        return build_accepted_primary_runtime_view(accepted_bundle)
+    if accepted_tables is not None:
+        raise PhaseReferenceContractError(
+            "accepted_tables must be loaded as an author-promoted accepted bundle"
+        )
+    if candidate.layer != "strict":
+        raise PhaseReferenceContractError("strict runtime view requires the strict layer")
+    strict_rows = {
+        table: tuple(
+            {
+                **row,
+                "runtime_eligible": True,
+                "runtime_source_layer": "strict_primary",
+            }
+            for row in rows
+            if row.get("certified", False)
+        )
+        for table, rows in candidate.tables.items()
+    }
     return PhaseReferenceRuntimeView(
-        layer=candidate.layer,
-        source="candidate",
-        tables=merged,
+        layer="strict",
+        source="strict",
+        tables=strict_rows,
         diagnostics={
-            "runtime_view": runtime_view,
+            "runtime_view": "strict_certified_only",
+            "primary_layer": "strict",
+            "fallback_enabled": False,
+            "fallback_order": "strict_primary",
             "candidate_manifest_sha256": candidate.diagnostics.get("manifest_sha256", ""),
-            "candidate_row_counts": candidate_counts,
-            "accepted_fallback_row_counts": accepted_counts,
-            "legacy_fallback_row_counts": legacy_counts,
-            "legacy_excluded_row_counts": legacy_excluded_counts,
-            # Keep the historical key as an alias for callers that only
-            # reported the final legacy fallback count.
-            "fallback_row_counts": legacy_counts,
-            "fallback_enabled": True,
-            "fallback_order": "strict_candidate>accepted_downstream>legacy_snapshot"
-            if accepted_enabled
-            else "strict_candidate>legacy_snapshot",
-            "fallback_reason": "candidate_key_absent_or_uncertified",
-            "accepted_manifest_sha256": (
-                accepted_bundle.diagnostics.get("manifest_sha256", "")
-                if accepted_bundle is not None
-                else ""
-            ),
-            "accepted_layer_manifest_sha256": (
-                accepted_bundle.diagnostics.get("layer_manifest_sha256", "")
-                if accepted_bundle is not None
-                else ""
-            ),
+            "strict_certified_row_counts": {
+                table: len(rows) for table, rows in strict_rows.items()
+            },
         },
     )
 
@@ -729,8 +822,10 @@ __all__ = [
     "PhaseReferenceRuntimeView",
     "SCHEMA_VERSION",
     "default_downstream_layer",
+    "build_accepted_primary_runtime_view",
     "build_runtime_view",
     "load_phase_reference",
+    "load_phase_reference_runtime",
     "sha256",
     "to_legacy_views",
 ]

@@ -1,7 +1,8 @@
 # Issue #130：phase reference 三层语义与 accepted 下游数据层
 
-状态：active；作者已确认 `accepted` 作为下游分析默认层，当前转入
-PNJL legacy fallback coverage audit。三层方案仍为 `strict → render → accepted`。
+状态：accepted；作者已确认 `accepted` 作为所有 phase-reference 下游（含 runtime）默认层，
+当前转入 PNJL legacy path-retirement。三层数据仍按 `strict → render → accepted` 的
+构建/展示关系保留，但这不是 runtime 优先级；strict 仅显式开启，legacy 不再 fallback/rollback。
 现有 v1 package 和历史 evidence 保持不可变；`derived` 降为 render 的内部构建
 输入与 provenance，不再作为下游公共语义层。
 
@@ -40,7 +41,7 @@ PNJL legacy fallback coverage audit。三层方案仍为 `strict → render → 
 - 不修改 Maxwell、crossover、CEP、spinodal 数值或任何物理容差；
 - 不把 interpolated/unresolved 行改写为 strict certified；
 - 不从 PNG 反向提取数据，不用 render 图像替代结构化数据；
-- 不在本任务中物理删除 PNJL legacy snapshot，不自动改变 strict runtime 默认；
+- 不在本任务中物理删除 PNJL legacy snapshot；runtime 默认切换与物理清理由后续独立任务承接；
 - 不修改现有 v1 package、v1 figure 或历史 manifest。
 
 ## 3. 三层数据合同
@@ -103,7 +104,8 @@ accepted 可以满足完整相结构下游查询，但不得被表述为 strict 
 - [x] 对 phase-map/Paper P1 display path 做 solver-free accepted consumer smoke；
   phase-guided/RS 的 runtime smoke 保持阻断，直到 accepted 通过作者审核并另立
   runtime-switch 变更。
-- [x] 保留 strict candidate、legacy fallback 和显式 rollback；不自动切换 solver runtime。
+- [x] 保留 strict candidate 的历史 provenance；旧 legacy fallback/rollback 合同已由
+  accepted-primary 任务取代，不切换 solver 数值路径。
 
 ### 阶段 E：作者审核与后续 retirement
 
@@ -113,8 +115,8 @@ accepted 可以满足完整相结构下游查询，但不得被表述为 strict 
   PNJL legacy physical-deletion PR。
 
 `accepted` 的默认范围仅为 phase-map、Paper P1 和其他明确允许派生/插值的分析消费者。
-Julia transport/runtime 仍固定使用 strict certified-only view、逐键 legacy fallback 和
-显式 legacy rollback；本次 promotion 不改变 solver runtime。
+Julia transport/runtime 当前使用 accepted-primary view；strict certified-only view 仅在
+显式模式开启，legacy snapshot 只供 retirement audit/history，promotion 不改变 solver 数值。
 
 审计 v2 已生成于
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`，
@@ -138,7 +140,8 @@ fallback coverage 仍未完成，不能进入物理删除。
 - 若 spinodal 与 render key 无法无歧义配对，停止并保留 v1；
 - 若 accepted 需要跨 support 外推，停止，不用插值掩盖缺口；
 - 若 consumer 依赖 strict certification 语义，accepted 只能作为显式研究视图；
-- 任一阶段失败均回退到现有 strict candidate + legacy fallback，不删除数据、不调用 solver。
+- 任一阶段失败均停止并保留现有 accepted/strict evidence，不删除数据、不调用 solver；legacy
+  snapshot 只作为物理删除前的历史恢复边界。
 
 ## 7. DoD
 
@@ -166,10 +169,9 @@ ledger、adapter contract 和 solver-free consumer smoke 均有可追溯证据�
   `data/reference/pnjl/legacy_phase_reference_v1/`，与已合并的物理 retirement
   路径一致；原顶层 dense 路径继续保持不存在。
 - accepted 已完成作者审核并记录为 `accepted_for_downstream`；行级插值状态仍为
-  `interpolated_noncertified`，strict certificate 未被升级。它仍不是 primary runtime
-  source，但自 2026-08-29 起，默认 runtime adapter 可在 strict key 缺失时按显式
-  策略使用 accepted fallback，再以 legacy snapshot 作最后回退；两种 fallback 均保留
-  逐行 provenance 和 rollback 语义。
+  `interpolated_noncertified`，strict certificate 未被升级。旧的“strict primary +
+  accepted/legacy fallback”文字仅是历史快照；当前 runtime 已改为 accepted-primary，
+  strict 仅显式启用，legacy 只保留给 retirement audit，不能据此自动回退或 rollback。
 
 ## 9. accepted promotion 与 legacy audit v2（2026-08-29）
 
@@ -183,6 +185,6 @@ ledger、adapter contract 和 solver-free consumer smoke 均有可追溯证据�
 - solver-free legacy coverage audit v2 已生成于
   `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`；
   其 `retirement_inconclusive` 结果只进入 consumer/path retirement；accepted 插值行不
-  自动提升为 certified，但在作者接受、common-support、非外推且状态可用时可以作为
-  受控 runtime fallback。该顺序及其边界由新的 accepted-runtime-fallback 任务继续
-  审计，不能据此提前删除 legacy。
+  自动提升为 certified。accepted-primary runtime 合同、strict 显式模式和 legacy
+  path/physical retirement 由 `2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md`
+  承接；v2 audit 数字仍作为历史基线，不覆盖新合同。

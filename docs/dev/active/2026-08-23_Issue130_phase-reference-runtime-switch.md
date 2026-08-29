@@ -1,10 +1,14 @@
 # Issue #130：phase-reference runtime switch 任务单
 
-状态：accepted。PR #259 已完成 Julia/Python consumer adapter migration，PR #260 已合并；本任务只处理
-独立的 runtime source switch，不改 solver、Maxwell、C0/C1/C2 artifact、物理容差或旧
-reference 文件。
+状态：accepted（历史合同已 superseded）。PR #259 已完成 Julia/Python consumer adapter
+migration，PR #260 已合并；本文件保留 v1 runtime-switch 的决策记录，不再作为当前配置说明。
+当前合同由 `2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md` 承接：
+accepted 是默认 runtime source，strict 只显式开启，legacy 不再作为 fallback/rollback。
 
 ## Runtime 合同
+
+> 以下条目记录 PR #260 合并前后的 v1 历史合同，仅用于 provenance；当前 runtime 不按
+> 这些条目启用 legacy fallback。请以 accepted-primary 任务单为准。
 
 - 默认 source：`candidate`，layer：`strict`。严格 certified 行仍优先；v2 accepted
   common-support 行可按独立合同作为标记的非证书 fallback，legacy snapshot 为最后
@@ -38,9 +42,10 @@ reference 文件。
 
 原“certified-only + legacy”是 v1 runtime-switch 的历史状态。由于 v2 accepted
 包含作者已审核的 non-certified/common-support 派生行，继续让 strict 缺口直接落到
-较旧 legacy 会降低当前下游的输入可信度。现行 adapter 以
-`strict_candidate>accepted_downstream>legacy_snapshot` 为默认顺序；accepted 的
-认证状态、support、来源 hash 和逐表计数都写入 sidecar，显式 legacy rollback 保留。
+较旧 legacy 会降低当前下游的输入可信度。现行 adapter 已改为
+`accepted_primary`；strict 只在显式模式下返回 certified-only 行，legacy fallback 和
+rollback API 已移除。详细覆盖与 path-retirement 边界见 accepted-primary 任务单和
+legacy audit v3。
 
 ## Handoff
 

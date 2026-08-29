@@ -61,7 +61,7 @@ function ScanOptions(
         tau_angle_nodes, tau_phi_nodes, tau_n_sigma_points, tau_threshold_subtraction,
         tau_asym_window, tau_asym_fit_min_points, tau_asym_extra_points,
         tau_interpolation_mode, propagator_xi_policy, sigma_cache_policy, sigma_grid_n,
-        integration_mode, gc_every_n, tr_p_nodes, tr_p_max_fm, nothing, :strict, :runtime,
+        integration_mode, gc_every_n, tr_p_nodes, tr_p_max_fm, nothing, :accepted, :runtime,
     )
 end
 
@@ -101,8 +101,8 @@ function print_usage()
     println("  --tr-p-nodes <int>          输运积分动量节点 (default 24)")
     println("  --tr-p-max <fm^-1>          输运积分 p 上限 (default 8.0)")
     println("  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
-    println("  --phase-reference-layer <strict|derived|render>  candidate layer (default strict)")
-    println("  --phase-reference-mode <runtime|diagnostic|legacy>  candidate gate or explicit legacy rollback (default runtime)")
+    println("  --phase-reference-layer <accepted|strict|render>  candidate layer (default accepted)")
+    println("  --phase-reference-mode <runtime|strict|diagnostic>  accepted runtime (default), explicit strict, or diagnostic view")
     println("  -h, --help                  显示帮助")
 end
 
@@ -142,7 +142,7 @@ function parse_args(args::Vector{String})
         :tr_p_nodes => 24,
         :tr_p_max => 8.0,
         :phase_reference_root => nothing,
-        :phase_reference_layer => :strict,
+        :phase_reference_layer => :accepted,
         :phase_reference_mode => :runtime,
     )
 
@@ -252,11 +252,11 @@ function parse_args(args::Vector{String})
             opts[:phase_reference_root] = require_value()
         elseif arg == "--phase-reference-layer"
             layer = Symbol(require_value())
-            layer in (:strict, :derived, :render) || error("unknown phase reference layer: $(layer)")
+            layer in (:accepted, :strict, :render) || error("unknown phase reference layer: $(layer)")
             opts[:phase_reference_layer] = layer
         elseif arg == "--phase-reference-mode"
             mode = Symbol(require_value())
-            mode in (:runtime, :diagnostic, :legacy) || error("unknown phase reference mode: $(mode)")
+            mode in (:runtime, :strict, :diagnostic) || error("unknown phase reference mode: $(mode)")
             opts[:phase_reference_mode] = mode
         elseif arg in ("-h", "--help")
             print_usage()

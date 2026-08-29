@@ -10,8 +10,8 @@ PNJL 相图绘制脚本
     python scripts/pnjl/plot_phase_diagram.py [options]
 
 选项：
-    --boundary PATH   相变线数据文件（默认 legacy_phase_reference_v1 snapshot）
-    --cep PATH        CEP 数据文件（默认 legacy_phase_reference_v1 snapshot）
+    --boundary PATH   相变线数据文件（显式 legacy/旧 schema 输入）
+    --cep PATH        CEP 数据文件（显式 legacy/旧 schema 输入）
     --xi VALUE        要绘制的 ξ 值，可多次指定 (默认绘制所有)
     --output-dir DIR  输出目录 (默认 data/outputs/figures/pnjl)
     --format FMT      输出格式 png/pdf/svg (默认 png)
@@ -57,6 +57,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_phase_reference
 
 
+DEFAULT_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
+DEFAULT_PHASE_REFERENCE_LAYER = "accepted"
 LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
 DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
 DEFAULT_CEP_PATH = LEGACY_PHASE_REFERENCE_ROOT / "cep.csv"
@@ -110,9 +112,9 @@ def load_candidate_phase_data(reference_root: Path, layer: str | None = None) ->
 ]:
     """Load an explicit Issue #130 layer for diagnostic plotting.
 
-    This path is opt-in and keeps the candidate's unresolved/interpolated
-    status in the returned diagnostics.  It is not a runtime promotion path.
-    The legacy CSV loaders remain the default for backwards compatibility.
+    This path keeps the candidate's unresolved/interpolated status in the
+    returned diagnostics.  The v2 ``accepted`` layer is the default for
+    downstream phase-map consumers; ``strict`` remains an explicit audit view.
     """
 
     selected_layer = layer or default_downstream_layer(reference_root)
@@ -657,7 +659,7 @@ def main() -> None:
         "--phase-reference-root",
         type=Path,
         default=None,
-        help="显式 Issue #130 candidate root；指定后使用 adapter，默认使用 retired legacy snapshot",
+        help="Issue #130 candidate root；未指定时使用仓库内 v2 accepted layer",
     )
     parser.add_argument(
         "--phase-reference-layer",
@@ -683,16 +685,28 @@ def main() -> None:
     
     args = parser.parse_args()
     
-    # 加载数据。Candidate 只能通过显式 root/layer 进入；snapshot 只作旧 schema 回放。
+    # 默认加载作者接受的 v2 phase map。旧 CSV 仍可通过显式路径回放。
     candidate_diagnostics = None
-    if args.phase_reference_root is not None:
+    use_default_candidate = (
+        args.phase_reference_root is None
+        and DEFAULT_PHASE_REFERENCE_ROOT.is_dir()
+        and args.boundary == DEFAULT_BOUNDARY_PATH
+        and args.cep == DEFAULT_CEP_PATH
+        and args.spinodal == DEFAULT_SPINODAL_PATH
+        and args.crossover == DEFAULT_CROSSOVER_PATH
+    )
+    if args.phase_reference_root is not None or use_default_candidate:
+        reference_root = args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT
         (
             boundary_points,
             cep_points,
             spinodal_points,
             crossover_points,
             candidate_diagnostics,
-        ) = load_candidate_phase_data(args.phase_reference_root, args.phase_reference_layer)
+        ) = load_candidate_phase_data(
+            reference_root,
+            args.phase_reference_layer or DEFAULT_PHASE_REFERENCE_LAYER,
+        )
         if args.no_spinodal:
             spinodal_points = []
         if args.no_crossover:

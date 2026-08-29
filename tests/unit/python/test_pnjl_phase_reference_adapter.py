@@ -9,9 +9,11 @@ import pytest
 
 from scripts.pnjl.phase_reference_adapter import (
     PhaseReferenceContractError,
+    build_accepted_primary_runtime_view,
     build_runtime_view,
     default_downstream_layer,
     load_phase_reference,
+    load_phase_reference_runtime,
     to_legacy_views,
 )
 from scripts.pnjl.plot_phase_diagram import DEFAULT_BOUNDARY_PATH, load_candidate_phase_data
@@ -118,6 +120,18 @@ def _write_v2_candidate(root: Path) -> None:
     )
 
 
+def _authorize_accepted(root: Path) -> None:
+    """Mark every v2 accepted fixture row as author-reviewed downstream data."""
+
+    for path in (root / "accepted" / "tables").glob("*.csv"):
+        path.write_text(
+            path.read_text(encoding="utf-8").replace(
+                "candidate_pending_author_review", "author_accepted_for_downstream"
+            ),
+            encoding="utf-8",
+        )
+
+
 def test_candidate_layer_maps_mu_q_and_preserves_cep_bracket(tmp_path: Path) -> None:
     root = tmp_path / "candidate"
     _write_candidate(root)
@@ -182,7 +196,7 @@ def test_v2_exposes_render_and_accepted_without_public_derived(tmp_path: Path) -
     assert render.diagnostics["row_counts"]["spinodals"] == 1
     assert accepted.diagnostics["uncertified_rows"] == 0
     assert accepted.tables["boundary"][0]["muB_MeV"] == 900.0
-    with pytest.raises(PhaseReferenceContractError, match="primary runtime source"):
+    with pytest.raises(PhaseReferenceContractError, match="ineligible"):
         load_phase_reference(root, layer="accepted", allow_runtime=True)
     cep_path = root / "accepted" / "tables" / V2_TABLES["cep"][2]
     cep_path.write_text(
@@ -247,7 +261,7 @@ def test_paper_p1_candidate_overlay_preserves_mu_scale_and_status(tmp_path: Path
     assert cep["candidate_status"] == "bracket_preserved"
 
 
-def test_runtime_view_uses_certified_candidate_then_legacy_fallback(tmp_path: Path) -> None:
+def test_runtime_view_rejects_legacy_rows(tmp_path: Path) -> None:
     root = tmp_path / "candidate"
     _write_candidate(root)
     boundary = root / "strict" / "tables" / TABLES["boundary"]
@@ -258,16 +272,14 @@ def test_runtime_view_uses_certified_candidate_then_legacy_fallback(tmp_path: Pa
     candidate = load_phase_reference(root, layer="strict")
     legacy_row = dict(candidate.tables["boundary"][0])
     legacy_row["muq_MeV"] = 301.0
-    runtime = build_runtime_view(candidate, legacy_tables={"boundary": [legacy_row]})
-    assert runtime.source == "candidate"
-    assert runtime.diagnostics["runtime_view"] == "certified_candidate_with_legacy_fallback"
-    assert runtime.diagnostics["fallback_row_counts"]["boundary"] == 1
-    assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"
+    with pytest.raises(PhaseReferenceContractError, match="legacy fallback is retired"):
+        build_runtime_view(candidate, legacy_tables={"boundary": [legacy_row]})
 
 
-def test_runtime_view_uses_author_accepted_rows_before_legacy(tmp_path: Path) -> None:
+def test_accepted_primary_runtime_view_preserves_noncertified_rows(tmp_path: Path) -> None:
     root = tmp_path / "candidate"
     _write_v2_candidate(root)
+    _authorize_accepted(root)
     strict_boundary = root / "strict" / "tables" / TABLES["boundary"]
     strict_boundary.write_text(
         strict_boundary.read_text(encoding="utf-8").replace(
@@ -285,30 +297,17 @@ def test_runtime_view_uses_author_accepted_rows_before_legacy(tmp_path: Path) ->
         encoding="utf-8",
     )
 
-    candidate = load_phase_reference(root, layer="strict")
-    accepted = load_phase_reference(root, layer="accepted")
-    legacy_row = dict(candidate.tables["boundary"][0])
-    legacy_row["T_MeV"] = 90.0
-    legacy_row["muq_MeV"] = 301.0
-    runtime = build_runtime_view(
-        candidate,
-        accepted_bundle=accepted,
-        legacy_tables={"boundary": [legacy_row]},
-    )
+    accepted = load_phase_reference_runtime(root, layer="accepted")
+    runtime = build_accepted_primary_runtime_view(accepted)
 
-    assert runtime.diagnostics["runtime_view"] == (
-        "certified_candidate_with_accepted_then_legacy_fallback"
-    )
-    assert runtime.diagnostics["accepted_fallback_row_counts"]["boundary"] == 1
-    assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 1
-    accepted_row = next(
-        row for row in runtime.tables["boundary"] if row["source_layer"] == "accepted_fallback"
-    )
+    assert runtime.diagnostics["runtime_view"] == "accepted_primary"
+    assert runtime.diagnostics["primary_layer"] == "accepted"
+    assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 0
+    accepted_row = runtime.tables["boundary"][0]
     assert accepted_row["certified"] is False
     assert accepted_row["runtime_eligible"] is True
-    assert accepted_row["accepted_source_status"] == "interpolated_noncertified"
-    assert len(runtime.diagnostics["accepted_manifest_sha256"]) == 64
-    assert len(runtime.diagnostics["accepted_layer_manifest_sha256"]) == 64
+    assert accepted_row["runtime_source_layer"] == "accepted_primary"
+    assert accepted_row["source_status"] == "interpolated_noncertified"
 
 
 def test_runtime_view_rejects_unpromoted_accepted_bundle(tmp_path: Path) -> None:
@@ -325,7 +324,7 @@ def test_runtime_view_rejects_unpromoted_accepted_bundle(tmp_path: Path) -> None
         build_runtime_view(candidate, accepted_bundle=accepted)
 
 
-def test_runtime_view_rejects_unaccepted_or_out_of_support_rows(tmp_path: Path) -> None:
+def test_accepted_primary_rejects_unaccepted_or_out_of_support_rows(tmp_path: Path) -> None:
     root = tmp_path / "candidate"
     _write_v2_candidate(root)
     strict_boundary = root / "strict" / "tables" / TABLES["boundary"]
@@ -344,41 +343,33 @@ def test_runtime_view_rejects_unaccepted_or_out_of_support_rows(tmp_path: Path) 
     )
     candidate = load_phase_reference(root, layer="strict")
     accepted = load_phase_reference(root, layer="accepted")
-    legacy_row = dict(candidate.tables["boundary"][0])
-    legacy_row["T_MeV"] = 90.0
-    legacy_row["muq_MeV"] = 301.0
-
-    runtime = build_runtime_view(
-        candidate,
-        accepted_bundle=accepted,
-        legacy_tables={"boundary": [legacy_row]},
-    )
-
-    assert runtime.diagnostics["accepted_fallback_row_counts"]["boundary"] == 0
-    assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 1
-    assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"
+    with pytest.raises(PhaseReferenceContractError, match="ineligible"):
+        load_phase_reference_runtime(root, layer="accepted")
 
 
-def test_runtime_view_excludes_crossover_rows_above_cep(tmp_path: Path) -> None:
+def test_strict_runtime_view_has_no_fallback_rows(tmp_path: Path) -> None:
     root = tmp_path / "candidate"
     _write_v2_candidate(root)
     candidate = load_phase_reference(root, layer="strict")
-    accepted = load_phase_reference(root, layer="accepted")
+    runtime = build_runtime_view(candidate)
+    assert runtime.source == "strict"
+    assert runtime.diagnostics["runtime_view"] == "strict_certified_only"
+    assert runtime.diagnostics["fallback_enabled"] is False
+    assert runtime.diagnostics["fallback_order"] == "strict_primary"
 
-    legacy_below = dict(candidate.tables["crossover"][0])
-    legacy_below.update({"muq_MeV": 250.0, "mu_MeV": 250.0})
-    legacy_above = dict(candidate.tables["crossover"][0])
-    legacy_above.update({"muq_MeV": 350.0, "mu_MeV": 350.0})
 
-    runtime = build_runtime_view(
-        candidate,
-        accepted_bundle=accepted,
-        legacy_tables={"crossover": [legacy_below, legacy_above]},
+def test_v2_default_runtime_loader_is_accepted_primary(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    _authorize_accepted(root)
+
+    runtime = load_phase_reference_runtime(root)
+    assert runtime.layer == "accepted"
+    assert runtime.diagnostics["runtime_view"] == "accepted_primary"
+    assert runtime.diagnostics["primary_layer"] == "accepted"
+    assert sum(runtime.diagnostics["accepted_primary_noncertified_row_counts"].values()) == 0
+    assert all(
+        row["runtime_eligible"]
+        for rows in runtime.tables.values()
+        for row in rows
     )
-
-    legacy_rows = [
-        row for row in runtime.tables["crossover"] if row["source_layer"] == "legacy_fallback"
-    ]
-    assert [row["muq_MeV"] for row in legacy_rows] == [250.0]
-    assert runtime.diagnostics["legacy_fallback_row_counts"]["crossover"] == 1
-    assert runtime.diagnostics["legacy_excluded_row_counts"]["crossover"] == 1

@@ -2,10 +2,11 @@
 
 The Issue #130 candidate uses versioned tables whose schema is intentionally
 different from the historical CSV files.  This module is the only boundary
-between those contracts.  Runtime selection is explicit and auditable:
-certified candidate rows are the preferred source, author-accepted
-common-support rows may be used as a marked non-certified fallback, and the
-immutable legacy source is the final fallback and explicit rollback path.  This
+between those contracts.  Runtime selection is explicit and auditable: the
+author-accepted v2 layer is the default source for downstream consumers, while
+the strict layer is an explicit certified-only opt-in.  The historical legacy
+source is retained only for the retirement audit until its separate
+physical-deletion step; it is not a runtime fallback or rollback path.  This
 module never deletes either source.
 """
 module PhaseReferenceAdapter
@@ -18,7 +19,8 @@ export PhaseReferenceAdapterError
 export PhaseReferenceSource
 export load_phase_reference
 export load_phase_reference_runtime
-export load_phase_reference_runtime_with_fallback
+export load_phase_reference_strict_runtime
+export load_phase_reference_accepted_runtime
 export load_default_phase_reference_runtime
 export load_legacy_phase_reference
 export source_kind
@@ -68,9 +70,9 @@ const _TABLE_FILES = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
 
 # v2 exposes exactly three public layers: strict, render and accepted.  The
 # former v1 ``derived`` tables remain an internal build input and are not
-# addressable through this map.  ``accepted`` is not a primary runtime source,
-# but an explicit fallback policy may admit its author-accepted common-support
-# rows while preserving their non-certified status.
+# addressable through this map.  ``accepted`` is the author-approved runtime
+# source for downstream consumers; its interpolated rows remain explicitly
+# non-certified.
 const _TABLE_FILES_V2 = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
     :strict => Dict{Symbol,Union{Nothing,String}}(
         :boundary => "maxwell_surface_strict_reference_v1.csv",
@@ -306,11 +308,52 @@ function _certified_runtime_source(source::PhaseReferenceSource)
         certified_counts[String(table)] = length(certified)
     end
     diagnostics = merge(source.diagnostics, (
-        runtime_view="certified_only",
+        runtime_view="strict_certified_only",
         certified_row_counts=certified_counts,
         fallback_enabled=false,
     ))
     return PhaseReferenceSource(source.kind, source.layer, source.root, true, tables, diagnostics)
+end
+
+function _accepted_runtime_source(source::PhaseReferenceSource)
+    source.layer === :accepted || _error("accepted runtime requires the accepted layer")
+    get(source.diagnostics, :promotion_status, "") == "accepted_for_downstream" ||
+        _error("accepted layer is not author-promoted for runtime consumption")
+
+    tables = Dict{Symbol,Vector{NamedTuple}}()
+    row_counts = Dict{String,Int}()
+    noncertified_counts = Dict{String,Int}()
+    for (table, rows) in source.tables
+        any(!_accepted_fallback_eligible(table, row) for row in rows) &&
+            _error("accepted runtime rejected an ineligible $(table) row")
+        runtime_rows = NamedTuple[]
+        for row in rows
+            original_source_layer = hasproperty(row, :source_layer) ? row.source_layer : ""
+            push!(runtime_rows, merge(row, (
+                runtime_eligible=true,
+                runtime_source_layer="accepted_primary",
+                accepted_source_layer=original_source_layer,
+            )))
+        end
+        tables[table] = runtime_rows
+        row_counts[String(table)] = length(runtime_rows)
+        noncertified_counts[String(table)] = count(row -> !Bool(row.certified), runtime_rows)
+    end
+    diagnostics = merge(source.diagnostics, (
+        runtime_consumption=true,
+        runtime_view="accepted_primary",
+        primary_layer="accepted",
+        fallback_enabled=false,
+        fallback_order="accepted_primary",
+        fallback_reason="",
+        accepted_manifest_sha256=get(source.diagnostics, :candidate_manifest_sha256, ""),
+        accepted_layer_manifest_sha256=get(source.diagnostics, :candidate_layer_manifest_sha256, ""),
+        accepted_primary_row_counts=row_counts,
+        accepted_primary_noncertified_row_counts=noncertified_counts,
+        legacy_fallback_row_counts=Dict{String,Int}(table => 0 for table in keys(row_counts)),
+        legacy_excluded_row_counts=Dict{String,Int}(table => 0 for table in keys(row_counts)),
+    ))
+    return PhaseReferenceSource(:candidate, :accepted, source.root, true, tables, diagnostics)
 end
 
 function _table_key(table::Symbol, row)
@@ -500,17 +543,19 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
     layer_root = joinpath(root_abs, String(layer))
     layer_manifest = _manifest(joinpath(layer_root, "manifest.json"))
     get(layer_manifest, "layer", "") isa String || _error("candidate layer manifest has no layer identifier")
-    if allow_runtime && layer in (:render, :accepted)
-        layer === :render && _error("render layer is visualization-only and cannot be runtime input")
-        _error("accepted layer cannot be the primary runtime source; pass it through the accepted fallback policy")
-    end
+    allow_runtime && layer === :render &&
+        _error("render layer is visualization-only and cannot be runtime input")
     paths = Dict{Symbol,String}()
     for (table, filename) in table_files[layer]
         filename === nothing && continue
         paths[table] = joinpath(layer_root, "tables", filename)
     end
-    tables, counts, uncertified = _normalize_tables(paths, layer; require_certified=allow_runtime)
-    return PhaseReferenceSource(
+    tables, counts, uncertified = _normalize_tables(
+        paths,
+        layer;
+        require_certified=allow_runtime && layer !== :accepted,
+    )
+    source = PhaseReferenceSource(
         :candidate,
         layer,
         root_abs,
@@ -525,118 +570,47 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
          candidate_manifest_sha256=_file_sha256(joinpath(root_abs, "manifest.json")),
          candidate_layer_manifest_sha256=_file_sha256(joinpath(layer_root, "manifest.json")),
          source_root=root_abs,
-         runtime_view=allow_runtime ? "strict_all_rows" : "diagnostic_all_rows",
+         runtime_view=allow_runtime ? (layer === :accepted ? "accepted_primary" : "strict_all_rows") : "diagnostic_all_rows",
          fallback_enabled=false),
     )
+    return allow_runtime && layer === :accepted ? _accepted_runtime_source(source) : source
 end
 
-function load_phase_reference_runtime(root::AbstractString; layer::Symbol=:strict)
-    return load_phase_reference(root; layer=layer, allow_runtime=true)
+function load_phase_reference_strict_runtime(root::AbstractString; layer::Symbol=:strict)
+    layer === :strict || _error("strict runtime requires the strict layer")
+    source = load_phase_reference(root; layer=:strict, allow_runtime=false)
+    return _certified_runtime_source(source)
 end
 
-function load_phase_reference_runtime_with_fallback(candidate_root::AbstractString;
-    layer::Symbol=:strict,
-    boundary_path::AbstractString,
-    cep_path::AbstractString,
-    crossover_path::AbstractString,
-    spinodals_path::AbstractString,
-    accepted_root::Union{Nothing,AbstractString}=nothing,
-)
-    layer in (:render, :accepted) &&
-        _error("$(layer) layer is downstream-only and cannot be used for runtime fallback")
-    legacy = load_legacy_phase_reference(
-        boundary_path=boundary_path,
-        cep_path=cep_path,
-        crossover_path=crossover_path,
-        spinodals_path=spinodals_path,
-    )
-    accepted = nothing
-    accepted_error = ""
-    if accepted_root !== nothing && !isempty(String(accepted_root))
-        accepted = try
-            source = load_phase_reference(String(accepted_root); layer=:accepted)
-            get(source.diagnostics, :promotion_status, "") == "accepted_for_downstream" ||
-                _error("accepted package is not author-promoted for downstream fallback")
-            source
-        catch err
-            accepted_error = sprint(showerror, err)
-            nothing
-        end
+function load_phase_reference_accepted_runtime(root::AbstractString)
+    return load_phase_reference(root; layer=:accepted, allow_runtime=true)
+end
+
+function load_phase_reference_runtime(root::AbstractString; layer::Symbol=:accepted)
+    if layer === :accepted
+        # A v1 import predates the accepted layer.  Keep its explicit
+        # compatibility path deterministic by exposing only certified strict
+        # rows; repository v2 remains accepted-primary.
+        manifest = _manifest(joinpath(normpath(abspath(root)), "manifest.json"))
+        String(get(manifest, "schema_version", "")) == _IMPORT_SCHEMA_V1 &&
+            return load_phase_reference_strict_runtime(root; layer=:strict)
+        return load_phase_reference_accepted_runtime(root)
     end
-    candidate = try
-        load_phase_reference(candidate_root; layer=layer)
-    catch err
-        if accepted !== nothing
-            empty_candidate = PhaseReferenceSource(
-                :candidate,
-                layer,
-                String(candidate_root),
-                false,
-                Dict{Symbol,Vector{NamedTuple}}(),
-                (
-                    schema_version="candidate_load_failed",
-                    candidate_schema_version="",
-                    row_counts=Dict{String,Int}(),
-                    uncertified_rows=0,
-                    manifest_reference_status="candidate",
-                    promotion_status="",
-                    downstream_default_layer="",
-                    candidate_manifest_sha256="",
-                    candidate_layer_manifest_sha256="",
-                    source_root=String(candidate_root),
-                    runtime_view="candidate_load_failed",
-                    fallback_enabled=true,
-                    candidate_load_error=sprint(showerror, err),
-                ),
-            )
-            merged = _merge_candidate_with_accepted_and_legacy(empty_candidate, accepted, legacy)
-            return PhaseReferenceSource(
-                merged.kind,
-                merged.layer,
-                merged.root,
-                merged.runtime_enabled,
-                merged.tables,
-                merge(merged.diagnostics, (accepted_load_error=accepted_error,)),
-            )
-        end
-        diagnostics = merge(legacy.diagnostics, (
-            runtime_view="legacy_fallback",
-            fallback_enabled=true,
-            fallback_reason="candidate_load_failed: " * sprint(showerror, err),
-            accepted_load_error=accepted_error,
-        ))
-        return PhaseReferenceSource(:legacy, :legacy, "", true, legacy.tables, diagnostics)
-    end
-    merged = accepted === nothing ?
-        _merge_certified_candidate_with_legacy(candidate, legacy) :
-        _merge_candidate_with_accepted_and_legacy(candidate, accepted, legacy)
-    accepted_error == "" && return merged
-    return PhaseReferenceSource(merged.kind, merged.layer, merged.root, merged.runtime_enabled, merged.tables,
-        merge(merged.diagnostics, (accepted_load_error=accepted_error,)))
+    layer === :strict && return load_phase_reference_strict_runtime(root)
+    _error("runtime layer must be :accepted (default) or :strict (explicit)")
 end
 
 function load_default_phase_reference_runtime(; project_root::AbstractString,
-    layer::Symbol=:strict,
-    source::Symbol=:candidate,
+    layer::Symbol=:accepted,
+    source::Symbol=:accepted,
 )
-    source in (:candidate, :legacy) || _error("phase-reference source must be candidate or legacy")
+    source in (:accepted, :strict) ||
+        _error("phase-reference source must be :accepted (default) or :strict (explicit)")
     reference_root = joinpath(project_root, "data", "reference", "pnjl")
-    legacy_root = joinpath(reference_root, "legacy_phase_reference_v1")
-    legacy_paths = (
-        boundary_path=joinpath(legacy_root, "boundary.csv"),
-        cep_path=joinpath(legacy_root, "cep.csv"),
-        crossover_path=joinpath(legacy_root, "crossover_dense.csv"),
-        spinodals_path=joinpath(legacy_root, "spinodals.csv"),
-    )
-    source === :legacy && return load_legacy_phase_reference(; legacy_paths...)
-    candidate_root = joinpath(reference_root, "issue130_phase_reference_v1")
-    accepted_root = joinpath(reference_root, "issue130_phase_reference_v2")
-    return load_phase_reference_runtime_with_fallback(
-        candidate_root;
-        layer=layer,
-        accepted_root=accepted_root,
-        legacy_paths...,
-    )
+    candidate_root = joinpath(reference_root, "issue130_phase_reference_v2")
+    source === :accepted && return load_phase_reference_accepted_runtime(candidate_root)
+    layer === :strict || _error("strict source requires layer=:strict")
+    return load_phase_reference_strict_runtime(candidate_root; layer=:strict)
 end
 
 function _legacy_rows(path::AbstractString, table::Symbol)
