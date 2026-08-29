@@ -6,15 +6,15 @@ updated_at = "2026-08-29"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "active"
-current_task = "issue130-phase-reference-accepted-runtime-fallback"
+current_task = "issue130-phase-reference-accepted-primary-runtime"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "accepted 已获作者批准并作为下游分析默认；按 strict→accepted→legacy 顺序完成 adapter 合同修订和 solver-free consumer audit v3，作者审核 fallback 矩阵前不做 legacy 物理删除。"
+next_action = "accepted 已获作者批准并作为所有 phase-reference 下游（含 phase-guided transport）的默认 runtime source；strict 仅显式开启。完成 accepted-primary audit v3 后迁移剩余 active legacy path contract，再单独提出物理删除 PR。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "main"
-current_sha = "638eef72cc49e95a179bc5bb256b2dd052c1b803"
+current_branch = "codex/issue130-pnjl-legacy-reference-audit"
+current_sha = "863dea0bc4dcec660a720831783df42fcb5868f8"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -324,11 +324,11 @@ classification = "required_follow_up"
 status = "promoted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md"
-reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unresolved rows，必须以 certified-only view、逐键 legacy fallback 和显式 rollback 形成独立 runtime switch，不能整体放宽 candidate gate。"
-next_action = "PR #260 与合并 SHA smoke 已接受；runtime 默认 candidate、逐键 fallback 和显式 rollback 合同保持有效。"
+reason = "PR #259 已完成 consumer migration；PR #260 的 strict candidate + legacy fallback 是已结束的 v1 历史合同，当前 accepted-primary 合同由独立任务单承接。"
+next_action = "保留 PR #260 的 provenance 作为历史记录；当前 runtime 以 accepted 为默认，strict 仅显式开启，legacy fallback/rollback 已移除。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback; promotion_smoke_solver_free_pass", "promotion:runtime_default_strict_candidate_with_certified_only_fallback"]
+evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:v1_runtime_default_strict_candidate_with_certified_only_legacy_fallback_is_historical", "promotion:historical_v1_runtime_default_strict_candidate_with_certified_only_fallback"]
 
 [[items]]
 id = "issue130-rs-phase-reference-parity"
@@ -337,8 +337,8 @@ classification = "required_follow_up"
 status = "accepted"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md"
-reason = "runtime-switch 已合并；RS transport 必须在保留 strict candidate certified-only、逐键 legacy fallback 和显式 rollback 的前提下完成 consumer parity 与限定重验，不能把 solver-free smoke 误写成 production parity。"
-next_action = "PR #274 与 PR #275 已合并：两套 mode-A/mode-B prod_v2 已登记为 approved formal raw，分析入口默认迁移，publication-clean v1 已由作者审核接受；old-reference retirement 由 item:issue130-rs-old-reference-retirement-audit 承接。数值状态仍为 diagnostic-only，legacy fallback/rollback 与 prod_v1 保留。"
+reason = "runtime-switch 与 RS consumer parity 已完成；phase-guided transport 属于 phase-reference 下游，当前按 accepted-primary、strict-explicit 合同消费，不再依赖 PNJL legacy fallback。"
+next_action = "PR #274 与 PR #275 已合并：两套 mode-A/mode-B prod_v2 已登记为 approved formal raw，分析入口默认迁移，publication-clean v1 已由作者审核接受；RS 数值仍为 diagnostic-only，PNJL accepted-primary/path-retirement 由 item:issue130-phase-reference-accepted-primary-runtime 承接。"
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2_quality_audit/", "file:docs/analysis/relaxtime/issue130_rs_sharded_production_v2_post_repair_audit_v1/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:scripts/analysis/relaxtime/import_issue130_rs_candidate_results.py", "file:tests/unit/python/test_issue130_rs_candidate_result_import.py", "run:32354095831", "run:32451053476", "run:32684074876", "run:32817419175", "run:32817421815", "run:32817424871", "run:32817427980", "run:32817431677", "run:32817434357", "run:32817437525", "run:32817439861", "run:32817442542", "run:32817445213", "run:32817529717", "run:32817532839", "run:32817535505", "run:32817538589", "run:32817541560", "run:32817544844", "run:32817549646", "run:32817552946", "run:32817555686", "run:32817559249", "run:32817562105", "run:32817566643", "run:32817570850", "run:32817573728", "run:32817577977", "run:32817580774", "run:32817583483", "run:32817586501", "run:32817589187", "run:32817592217", "pr:261", "pr:262", "pr:263", "pr:269", "pr:272", "sha:da35d4b9c88c924a90f1696454c50f65a5fa288d", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "sha:22874505877491754eed27519ad8a7b871c82571", "sha:472e3eb0047b3a9380b27f1935880b0e473ca9b5", "sha:31ab0490a68be02d2f8cde7739a79128b3d3fd23", "sha:1c15d6bbc8ec4f1a4857286d1ef1f4a50158b69f", "sha:eba889feea0d422f20cb33e92ad62d9c8cf377fa", "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96", "sha:27e9642d431ba7afd845f2b187f77c0fbbe3be4d", "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba", "note:pr272_11_of_11_successful", "review:author_accepted_numerical_pilot", "review:author_accepted_full_rs_candidate_legacy_comparison_and_figures", "note:pilot_pair_complete_with_common_quality_warnings_diagnostic_only", "note:rs_sharded_production_v2_30_unique_successful_shards_10_duplicate_dispatches_cancelled", "note:post_repair_audit_pass_diagnostic_only", "note:formal_candidate_figures_imported_without_numerical_promotion", "note:historical_sidecar_hash_mismatch_60_preserved_immutable", "note:versioned_rs_result_import_mode_a_910_scan_38220_diag_manifest_3d0a9117", "note:versioned_rs_result_import_mode_b_909_scan_38178_diag_manifest_093ff055", "note:result_import_solver_free_runtime_default_unchanged_legacy_preserved", "note:result_import_author_review_accepted", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/", "sha:3b19246fb911be4a2efa75fbe14fcb9a793ca256", "note:rs_consumer_smoke_v2_pass_diagnostic_only_solver_free"]
@@ -461,8 +461,8 @@ classification = "required_follow_up"
 status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
-reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 仍是 candidate strict 未认证/缺键行的逐键 fallback 和显式 rollback 输入，必须先完成 solver-free 覆盖与消费者审计，不能沿用 RS allowlist 直接删除。"
-next_action = "legacy_audit_v2 的 382 个 fallback 作为历史基线保留；accepted-runtime-fallback 合同先按资格规则接管可覆盖键并生成 audit v3，仍保留显式 legacy rollback，未完成 consumer 审核前不物理删除。"
+reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 已不再是 runtime fallback 或 rollback。accepted-primary audit v3 已证明运行时依赖为 0，当前只剩 active path contract 迁移和独立物理删除门禁。"
+next_action = "PR #280 合并后创建 path-retirement PR：迁移/重分类 6 个 active legacy path contract，重新运行 audit v3；通过后再创建精确 allowlist 的 physical-deletion PR。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -485,9 +485,11 @@ evidence = [
   "sha:2f62b2838d90119ba33bb6f2fb6f4b1324124ef7",
   "sha:2b477aa1b0d876bc30dd4c0aa95ec948aef84a56",
   "note:legacy_audit_v2_post_acceptance_inconclusive_fallback382_active_contract_blockers25_unknown_active0_20260829",
-  "review:accepted_downstream_default_keeps_strict_runtime_and_legacy_fallback",
-  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md",
-  "note:runtime_fallback_contract_revised_strict_then_accepted_then_legacy_pending_audit_v3",
+  "review:accepted_primary_runtime_no_legacy_fallback_or_rollback",
+  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
+  "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
+  "file:scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py",
+  "note:accepted_primary_runtime_ready_path_retirement_pending_active_path_contracts6_runtime_fallback0",
   ]
 
 [[items]]
@@ -498,7 +500,7 @@ status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md"
 reason = "作者已审核 v2 strict/render/accepted 三层覆盖、spinodal 完整表、accepted 状态和代表图，并明确批准 accepted 作为下游分析默认；derived 仅保留为内部构建证据。"
-next_action = "accepted 已通过显式 solver-free promotion 脚本标记为 author_accepted_for_downstream；默认 runtime 仍以 strict 为 primary，accepted fallback 由独立合同任务承接并写入 audit v3。"
+next_action = "accepted 已通过显式 solver-free promotion 脚本标记为 author_accepted_for_downstream；当前 runtime 已改为 accepted primary，strict 仅显式开启，legacy fallback/rollback 已移除。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -523,11 +525,11 @@ evidence = [
 id = "issue130-phase-reference-accepted-runtime-fallback"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md"
-reason = "legacy audit v2 显示 strict certificate 缺口直接落到旧 snapshot；作者已批准的 v2 accepted common-support 派生行在当前下游用途下更可信，因此修订此前禁止 accepted runtime 的合同。"
-next_action = "完成 Python/Julia adapter 与 consumer fixture；在不可变 candidate/accepted/legacy 输入上生成 solver-free audit v3，分别报告 accepted 与 legacy fallback、资格失败和显式 rollback；作者审核后再决定 legacy path/physical retirement。"
+reason = "该任务记录的 strict→accepted→legacy fallback 合同已被作者新的 accepted-primary 决策取代；保留为历史 provenance，不再指导 runtime。"
+next_action = "历史任务已完成并 superseded；当前以 accepted-primary runtime 任务和 audit v3 为准，继续 path retirement。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -538,7 +540,30 @@ evidence = [
   "file:tests/unit/python/test_pnjl_phase_reference_adapter.py",
   "file:tests/unit/relaxtime/test_phase_reference_adapter.jl",
   "sha:620845ece09749e64ea9a054df360b1035220c6a",
-  "note:strict_candidate_accepted_fallback_legacy_rollback_order",
+  "note:superseded_by_accepted_primary_runtime_no_legacy_fallback_or_rollback",
+]
+
+[[items]]
+id = "issue130-phase-reference-accepted-primary-runtime"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md"
+reason = "作者已明确 phase-guided transport 等 phase-reference consumer 默认使用 accepted；strict 只在显式模式下使用，legacy fallback/rollback 不再保留。"
+next_action = "PR #280 完成 CI 与作者审核后合并；随后在同一隔离 worktree 创建 path-retirement PR，迁移 6 个 active legacy path contract，并重跑 audit v3。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
+  "file:scripts/pnjl/phase_reference_adapter.py",
+  "file:scripts/relaxtime/phase_reference_adapter.jl",
+  "file:scripts/relaxtime/run_gap_transport_scan.jl",
+  "file:tests/unit/python/test_issue130_phase_reference_accepted_primary_audit.py",
+  "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
+  "pr:280",
+  "sha:863dea0bc4dcec660a720831783df42fcb5868f8",
+  "note:accepted_primary_runtime_ready_strict_explicit_runtime_fallback0_path_retirement_pending",
 ]
 
 [[items]]

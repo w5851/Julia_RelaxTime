@@ -1,0 +1,30 @@
+[
+  {
+    "boundary": "accepted non-certified rows remain non-certified; strict is an explicit opt-in",
+    "claim": "The author-promoted accepted v2 layer is the default downstream runtime source.",
+    "claim_id": "accepted_is_primary_runtime",
+    "evidence": "data/reference/pnjl/issue130_phase_reference_v2/manifest.json; adapter diagnostics",
+    "status": "supported"
+  },
+  {
+    "boundary": "historical snapshot readers and explicit audit tooling are not runtime consumers",
+    "claim": "No runtime legacy fallback or rollback is enabled by the current adapter contract.",
+    "claim_id": "legacy_runtime_fallback_removed",
+    "evidence": "decision.json; tables/consumer_matrix.csv",
+    "status": "supported"
+  },
+  {
+    "boundary": "nearest support is not an exact-key equivalence and must not be silently labeled exact",
+    "claim": "Legacy exact-key gaps have finite accepted same-xi support where available; the gaps are a key-grid issue, not a reason to restore legacy fallback.",
+    "claim_id": "accepted_neighborhood_support",
+    "evidence": "tables/coverage.csv; tables/neighbor_coverage.csv",
+    "status": "supported"
+  },
+  {
+    "boundary": "a separate allowlist PR and author authorization remain mandatory",
+    "claim": "The legacy snapshot is eligible for physical deletion only after path retirement is complete.",
+    "claim_id": "physical_deletion_gate",
+    "evidence": "decision.json; tables/consumer_matrix.csv; tables/legacy_snapshot_inventory.csv",
+    "status": "not_supported"
+  }
+]
