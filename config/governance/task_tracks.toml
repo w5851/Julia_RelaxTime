@@ -6,15 +6,15 @@ updated_at = "2026-08-29"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "active"
-current_task = "issue130-phase-reference-accepted-primary-runtime"
+current_task = "issue130-phase-reference-legacy-retirement"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "accepted 已获作者批准并作为所有 phase-reference 下游（含 phase-guided transport）的默认 runtime source；strict 仅显式开启。完成 accepted-primary audit v3 后迁移剩余 active legacy path contract，再单独提出物理删除 PR。"
+next_action = "accepted 已获作者批准并作为所有 phase-reference 下游（含 phase-guided transport）的默认 runtime source；strict 仅显式开启。6 个 active legacy path contract 已迁移并由 audit v4 验证为 0；下一步单独提出精确 allowlist 的物理删除 PR。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-pnjl-legacy-reference-audit"
-current_sha = "863dea0bc4dcec660a720831783df42fcb5868f8"
+current_branch = "codex/issue130-pnjl-phase-reference-path-retirement"
+current_sha = "7b02d84d3c38c60500e82b769eb0f9c22de39c9b"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -462,7 +462,7 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
 reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 已不再是 runtime fallback 或 rollback。accepted-primary audit v3 已证明运行时依赖为 0，当前只剩 active path contract 迁移和独立物理删除门禁。"
-next_action = "PR #280 合并后创建 path-retirement PR：迁移/重分类 6 个 active legacy path contract，重新运行 audit v3；通过后再创建精确 allowlist 的 physical-deletion PR。"
+next_action = "path-retirement implementation 已完成：6 个 active legacy path contract 已迁移到 accepted，solver-free audit v4 为 active_path_contract_count=0；创建独立 physical-deletion PR 前仍需作者再次授权。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -490,6 +490,9 @@ evidence = [
   "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
   "file:scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py",
   "note:accepted_primary_runtime_ready_path_retirement_pending_active_path_contracts6_runtime_fallback0",
+  "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/",
+  "sha:7b02d84d3c38c60500e82b769eb0f9c22de39c9b",
+  "note:path_retirement_migrated_six_active_defaults_audit_v4_zero_active_paths_physical_deletion_candidate_no_snapshot_delete",
   ]
 
 [[items]]
@@ -551,7 +554,7 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md"
 reason = "作者已明确 phase-guided transport 等 phase-reference consumer 默认使用 accepted；strict 只在显式模式下使用，legacy fallback/rollback 不再保留。"
-next_action = "PR #280 完成 CI 与作者审核后合并；随后在同一隔离 worktree 创建 path-retirement PR，迁移 6 个 active legacy path contract，并重跑 audit v3。"
+next_action = "path-retirement branch 已迁移 6 个 active legacy path contract，并生成 audit v4；等待本 PR CI/作者审核，之后才创建独立 physical-deletion PR。"
 blocked_by = []
 backlog_file = ""
 evidence = [

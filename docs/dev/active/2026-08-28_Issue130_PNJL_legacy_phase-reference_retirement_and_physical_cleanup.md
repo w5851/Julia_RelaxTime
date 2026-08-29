@@ -35,8 +35,8 @@ canonical 根路径退役，并不等于 snapshot 可以立即物理删除。
 ### 非目标
 
 - 不调用 PNJL equilibrium solver，不重跑 C0/C1/C2、CEP、RS numerical 或 transport；
-- 不修改 Maxwell、crossover、CEP、spinodal 数值或容差；adapter 的 fallback 语义由
-  独立的 2026-08-29 合同修订任务收束为 strict→accepted→legacy，并保留旧路径回退；
+- 不修改 Maxwell、crossover、CEP、spinodal 数值或容差；当前 adapter 合同为
+  accepted primary、strict 显式 opt-in，legacy 仅允许历史审计/恢复边界读取；
 - 不删除 `data/reference/pnjl/crossover.csv`（它是另一组历史 fixed-point 输入）；
 - 不删除 `docs/analysis/` 历史 evidence、raw rho-mu 外部归档指针或当前 candidate；
 - 不把 candidate 的 unresolved/non-certified 行强行标为 certified，也不以图像完整性
@@ -118,27 +118,24 @@ consumer 的请求键/适配层，并审计 accepted fallback 的资格与实际
 fallback 矩阵确认无 active legacy 依赖、消费者/恢复边界完整后，才可提出独立
 physical-deletion PR。旧的 strict→legacy audit 数字继续保留为历史基线。
 
-#### 阶段 A.1：accepted fallback 合同修订（2026-08-29）
+#### 阶段 A.1：accepted fallback 合同修订（2026-08-29，历史 superseded）
 
 作者指出 strict certificate 缺口直接落到 legacy 会优先使用较旧 snapshot，
-而 v2 `accepted` 中的作者审核非证书派生值在当前研究用途下更可信。独立任务
-`2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md` 已将 runtime
-顺序明确为 `strict candidate → accepted_downstream → legacy snapshot`：accepted
-只能以显式、逐键、带 provenance 的 fallback 进入，仍保留 `certified=false`，不
-能作为 primary runtime source。未接受、外推、support 外或 unresolved 行仍不能
-进入 accepted fallback；这些行才继续落到 legacy 或保持缺失。
+而 v2 `accepted` 中的作者审核非证书派生值在当前研究用途下更可信。该历史任务曾
+提出 `strict candidate → accepted_downstream → legacy snapshot` 的逐键 fallback，
+但随后被作者的 accepted-primary 决策取代：accepted 现在直接作为下游 runtime
+primary，strict 只在显式模式下启用，legacy 不再作为 fallback/rollback。原任务单、
+旧 audit 数字和 snapshot 仍保留作历史 provenance，不再指导当前实现。
 
-该修订不改变既有数值和 snapshot，只改变 adapter source selection。新的
-solver-free consumer audit v3 必须分别报告 accepted 与 legacy 的实际 fallback
-计数；在 audit v3 和作者审核完成前，不得物理删除 legacy snapshot。
+### 阶段 B：fallback/path retirement（以阶段 A 与 accepted-primary 证据为输入）
 
-### 阶段 B：fallback/path retirement（以阶段 A 与 A.1 证据为输入）
-
-- [ ] 若仍有 active consumer 依赖 legacy，先迁移其请求键/适配层，保持显式
-  rollback；优先使用已接受的 common-support accepted fallback，不改数值输入；
-  为迁移增加 Julia/Python/workflow focused tests。
-- [ ] 在独立 PR 中更新 registry、默认路径和文档；验证 candidate-only runtime 与
-  显式 legacy rollback 均可用，并证明 accepted/legacy 的来源顺序与计数可追溯。
+- [x] 将 6 个活动默认路径契约迁移到 v2 `accepted`：Julia gap/phase-equilibrium、
+  Python 相图/验证器、ξ 平滑采样和 CEP baseline exporter；旧 CSV 仅保留显式
+  fixture/历史输入能力。
+- [x] 为 accepted schema 增加必要的 production-parity 字段映射、路径参数和 focused
+  unit coverage；不改变数值 solver、Maxwell 或物理容差。
+- [x] 在独立 path-retirement 分支生成 solver-free audit v4，验证活动 legacy 路径为
+  `0`、runtime fallback/rollback 为 `0`、accepted/strict/snapshot provenance 完整。
   此阶段仍不物理删除 snapshot。
 
 ### 阶段 C：物理清理（再次单独授权）
@@ -187,14 +184,17 @@ candidate 的细网格与旧粗网格不共键、隐藏 consumer 依赖以及误
 的默认输入，`strict` 只在显式模式下使用。当前 adapter 已移除可用的
 `strict→accepted→legacy` fallback/rollback 入口；legacy 仅由历史审计和恢复边界读取。
 
-solver-free v3 审计包：
+solver-free v3 审计包（历史基线）：
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/`。
 审计固定 calculation SHA `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`，验证 accepted
 manifest promotion、strict certified-only、legacy snapshot bytes/SHA、同 ξ 邻近支持以及
 运行时 `legacy_fallback_rows=0`。legacy 与 accepted 的 exact key 仍不是同一网格，
 因此 coverage 表仅用于解释邻近支持，不能把 nearest row 伪装成 exact row。
 
-当前 verdict 为 `accepted_primary_runtime_ready_path_retirement_pending`：运行时已无
-legacy fallback/rollback，但 21 个 active path contract（默认路径、旧诊断入口和治理文本）
-仍需逐项迁移或明确标为历史工具。完成 path-retirement PR 并重新运行 v3 审计后，才生成
-独立 physical-deletion PR；删除 PR 只允许精确 allowlist，保留 Git 恢复边界和全部历史 evidence。
+当前 v3 verdict `accepted_primary_runtime_ready_path_retirement_pending` 仅为历史基线。
+路径迁移后的 solver-free v4 审计包位于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/`，其
+`active_path_contract_count=0`、`runtime_legacy_fallback_rows=0`、
+`runtime_legacy_rollback_enabled=false`，当前 verdict 为
+`legacy_physical_deletion_candidate`。这只表示可以提出独立 physical-deletion PR；删除
+PR 仍只允许精确 allowlist、恢复 manifest 和作者授权，且保留全部历史 evidence。
