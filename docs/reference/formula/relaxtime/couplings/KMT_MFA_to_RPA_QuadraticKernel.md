@@ -71,7 +71,32 @@ K_{80} & K_{83} & K_8
 
 当 `phi_u=phi_d=phi_l` 时，旧 `EffectiveCouplings.calculate_effective_couplings` 使用 `G_u=-phi_l`、`G_s=-phi_s`。在本文件约定下，它的 `K0/K123/K4567/K8/K08` 与新后端的 P/S 对应分量相等；单元测试锁定这一兼容性。这个等式是 API/符号映射的测试，不是对所有有限同位旋物理的证明。
 
-## 5. 文献证据与未决项
+## 5. Phase 3 数值桥接合同
+
+`MesonRPAAdapter` 将当前 `PolarizationAniso` 接到上述矩阵公式，但只采用
+三次同味夸克泡作为输入：
+
+```text
+Pi_u = Pi_P/S(k0, k; m_u, m_u, mu_u, mu_u, A_u, A_u)
+Pi_d = Pi_P/S(k0, k; m_d, m_d, mu_d, mu_d, A_d, A_d)
+Pi_s = Pi_P/S(k0, k; m_s, m_s, mu_s, mu_s, A_s, A_s)
+```
+
+随后调用方可以把 `(Pi_u, Pi_d, Pi_s)` 传入 `neutral_polarization_matrix`，
+或直接使用 `neutral_rpa_from_quark_params` 完成矩阵组合。这里的
+`Pi_03`、`Pi_08`、`Pi_38` 是味道对角泡在 `(0,3,8)` 基底下的投影，不代表
+adapter 已经实现了非对角夸克传播子或非对角平均场自能。
+
+所有新入口的 `k0_inv_fm`、`k_norm_inv_fm`、`m_f`、`mu_f`、`T` 和 `A_f`
+遵循项目内部自然单位；`num_s_quark` 默认逐味为零，只有显式设置为 `1`
+时才使用当前 `PolarizationAniso` 中的 `k0` 对称平均。缺少 `A` 时的自动
+补值来自 `AFieldBuilder`，不会触发 gap solver。
+
+这一步只验证数值接线和输入合同，不证明当前极化的正则化/归一化与外部
+RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。相应的诊断 API
+边界见 `docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
+
+## 6. 文献证据与未决项
 
 完整 `0/3/8` 结构可追溯到 KMT 六费米项的 Hartree 收缩和三味 RPA 组织。项目调研中使用的主要线索是 Rehberg、Klevansky、Hüfner（Phys. Rev. C 53, 410, DOI: [10.1103/PhysRevC.53.410](https://doi.org/10.1103/PhysRevC.53.410)）、Mei 等（Phys. Rev. D 107, 074018, [arXiv:2212.04778](https://arxiv.org/abs/2212.04778)）以及本轮提供的 Tian 等（Phys. Rev. D 114, 034012 (2026)）。Tian 等 Eq. (3) 明确给出了 `K_{03}`、`K_{38}` 的相对符号；当前实现已按该来源和本项目的 `phi_f=sigma_f` 约定对齐。
 

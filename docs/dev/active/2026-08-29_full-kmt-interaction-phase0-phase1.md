@@ -1,8 +1,8 @@
-# 完整 KMT 介子相互作用核 Phase 0/1
+# 完整 KMT 介子相互作用核 Phase 0-3
 
 更新日期：2026-08-29
 
-当前状态：Phase 0、Phase 1、Phase 1.5 与 Phase 2（中性 RPA 代数后端）已完成；尚未接入现有夸克泡数值工作流。本任务只建立来源对齐的公式合同和并行后端，不修改上游 PNJL 平衡求解或既有介子数密度生产链。
+当前状态：Phase 0、Phase 1、Phase 1.5、Phase 2（中性 RPA 代数后端）与 Phase 3（`PolarizationAniso` 数值桥接）已完成；尚未接入极点、相移或介子数密度生产工作流。本任务只建立来源对齐的公式合同和并行诊断后端，不修改上游 PNJL 平衡求解或既有介子数密度生产链。
 
 ## 1. 目标与边界
 
@@ -50,9 +50,26 @@
 - [x] 锁定矩阵乘法顺序、同位旋对称解耦、KMT 关闭但极化仍可非对角等边界行为。
 - [x] 补充 API 文档与 31 项纯代数单元测试。
 
+## 3.7 Phase 3：现有夸克泡数值桥接
+
+- [x] 新增独立 `MesonRPAAdapter`，按 `(u,u)`、`(d,d)`、`(s,s)` 调用当前 `PolarizationAniso`。
+- [x] 支持显式 `num_s_quark` 三味策略、可选宽度路径和缺失 `A` 时的 `AFieldBuilder` 自动补值。
+- [x] 将 adapter 输出组合到 `MesonRPA` 的中性极化矩阵、RPA 逆矩阵、传播子和行列式。
+- [x] 保留归一化后的输入、单位字段、自动补 `A` 状态和通道设置作为诊断元数据。
+- [x] 不修改旧 `MesonPropagator`、`MesonDensity`、PNJL 平衡或 `Omega_M` 反馈接口。
+- [x] 新增 36 项 adapter 单元测试，覆盖直接泡值对照、`num_s_quark`/宽度转发、RPA 组合、自动补 `A` 和非法输入。
+
+Phase 3 的实际数值含义是：三味 flavor-diagonal 泡经过固定基底变换后进入
+完整中性 RPA 代数；由此得到的非对角 `Pi_03/Pi_08/Pi_38` 不等于已经实现
+了非对角夸克传播子或同位旋交叉自能。`num_s_quark=2` 仍只是兼容标签，
+当前 `PolarizationAniso` 对它没有额外运算。
+
 ## 4. 验证门禁与后续入口
 
-Phase 1.5/2 只要求来源对齐、纯代数和接口测试通过。当前 `MesonRPA` 接受调用方已计算好的三味夸克泡，不负责把 `PolarizationAniso` 的某一数值约定自动解释成论文 Eq. (26) 的 `Pi_f`。后续 Phase 3 才评估完整核对上游凝聚/质量和极化归一化的影响，Phase 4 才做带电 K/π 的 A/B 数值对照。
+Phase 1.5/2/3 只要求来源对齐、纯代数、数值接线和接口测试通过。当前
+`MesonRPAAdapter` 明确采用同味 `PolarizationAniso` 约定，但不宣称其极化
+归一化已经与外部论文逐项相同；Phase 4 才做极点/相移或带电 K/π 的 A/B
+数值对照。
 
 允许继续保留旧 `EffectiveCouplings` 与旧 `MesonPropagator` 的生产/回归语义。新后端的任何数值扫描必须使用独立 case slug，并标注 `diagnostic`。
 
@@ -60,6 +77,7 @@ Phase 1.5/2 只要求来源对齐、纯代数和接口测试通过。当前 `Mes
 
 - `julia --project=. tests/unit/relaxtime/test_meson_interaction_kernel.jl`：54/54 通过。
 - `julia --project=. tests/unit/relaxtime/test_meson_rpa.jl`：31/31 通过。
+- `julia --project=. tests/unit/relaxtime/test_meson_rpa_adapter.jl`：36/36 通过。
 - `julia --project=. -e 'include("src/relaxtime/RelaxTime.jl"); ...'`：`RelaxTime` include/re-export smoke 通过。
 - `git diff --check`：通过。
 - 单元测试覆盖：不对称 `K_{03}/K_{38}`、同位旋对称退化、KMT 关闭、P/S 互补、旧 0/8 耦合映射、equilibrium `x_state` 适配、来源对齐的 `(0,3,8)` 极化矩阵、RPA 矩阵顺序、KMT 关闭下的极化非对角项、非法输入与通道查询。
@@ -74,3 +92,5 @@ Phase 1.5/2 只要求来源对齐、纯代数和接口测试通过。当前 `Mes
 - API 合同：`docs/api/relaxtime/propagator/MesonInteractionKernel.md`。
 - 单元测试：`tests/unit/relaxtime/test_meson_interaction_kernel.jl`。
 - 中性 RPA 单元测试：`tests/unit/relaxtime/test_meson_rpa.jl`。
+- 数值桥接 API：`docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
+- 数值桥接单元测试：`tests/unit/relaxtime/test_meson_rpa_adapter.jl`。

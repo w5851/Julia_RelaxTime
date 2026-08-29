@@ -15,6 +15,9 @@ Pi = neutral_polarization_matrix((Pi_u, Pi_d, Pi_s))
 D = neutral_rpa_propagator(kernel, Pi; channel=:P)
 ```
 
+如果需要从当前 `PolarizationAniso` 实际计算三味同味泡，可使用诊断层
+[`MesonRPAAdapter.md`](MesonRPAAdapter.md)；它不会改变本模块的纯代数入口。
+
 `neutral_polarization_matrix` 按 Tian 等 Phys. Rev. D 114, 034012 (2026), Eq. (26) 组装 `(lambda_0, lambda_3, lambda_8)` 基底的 3×3 极化矩阵。`neutral_rpa_propagator` 严格使用
 
 ```text
