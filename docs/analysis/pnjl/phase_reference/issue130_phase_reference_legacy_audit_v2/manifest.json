@@ -1,0 +1,92 @@
+{
+  "accepted_interpolated_rows_noncertified": true,
+  "accepted_manifest_sha256": "e053824282c556f252e952163a534c35ddad554452ade6130c2411e11566f60d",
+  "accepted_promotion_status": "accepted_for_downstream",
+  "accepted_reference_write": false,
+  "accepted_root": "data/reference/pnjl/issue130_phase_reference_v2",
+  "accepted_runtime_consumption": false,
+  "active_consumer_blocker_count": 25,
+  "audit_version": "v2",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_auto_selected": false,
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "candidate_reference_write": true,
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "candidate_runtime_consumption": false,
+  "candidate_strict_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+  "candidate_strict_reference_write": false,
+  "candidate_tree_sha256": "25239b872577977128669252878a92ce234de6e293a10413767da87f3e7c8b8e",
+  "decision": "decision.json",
+  "downstream_default_layer": "accepted",
+  "files": [
+    {
+      "bytes": 1161,
+      "path": "AUDIT.md",
+      "sha256": "633ea61cc324716fc6e1191e6d990f76e6f25370297d12d518ad5ac5f740d8f8"
+    },
+    {
+      "bytes": 1675,
+      "path": "decision.json",
+      "sha256": "3c4bfe30563f2c282016bec1e5b93b39bb4ba1c8ae1b09912e44f6b79d39e592"
+    },
+    {
+      "bytes": 2285,
+      "path": "README.md",
+      "sha256": "5f134a6e13f243064af3228495a2e58d21a85dad63392a537a50deb0afeeebc3"
+    },
+    {
+      "bytes": 1633,
+      "path": "tables/claim_ledger.csv",
+      "sha256": "0156095f2bc0471e3ace11d8c83eeaa22a7db0c517d87e60c262404eda3afdf6"
+    },
+    {
+      "bytes": 2184,
+      "path": "tables/claim_ledger.json",
+      "sha256": "67a72da8c871a4881fa37ef8dc40b73bfecbf0b8b6176896fb248cd12bdd910e"
+    },
+    {
+      "bytes": 20473,
+      "path": "tables/consumer_matrix.csv",
+      "sha256": "5f8302202ca68b3e06b094ed6458db2ca0a0cda51ec700facdc2c47c64f7269e"
+    },
+    {
+      "bytes": 521,
+      "path": "tables/coverage_matrix.csv",
+      "sha256": "0591fa71f53250b01f78d662a6c9b14973dfca6eada44af67908ed2392e72f6f"
+    },
+    {
+      "bytes": 40867,
+      "path": "tables/fallback_matrix.csv",
+      "sha256": "8605b7059971be09a0a2ed365fbc9d6853e138c1ccf9420201984750f88e99b2"
+    },
+    {
+      "bytes": 1384,
+      "path": "tables/legacy_snapshot_inventory.csv",
+      "sha256": "b41c9a415115e2fd9bf3a48c535b924aa424fff61fe2434df1cc4aa8b348ad21"
+    },
+    {
+      "bytes": 149463,
+      "path": "tables/reference_occurrences.csv",
+      "sha256": "5276b61dac2b2a52c95399f89dd74779491493cf21e633c5235878521abbdf69"
+    }
+  ],
+  "generated_at_utc": "2026-08-29T06:43:17.196506+00:00",
+  "input_manifests": {
+    "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "candidate_strict": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
+    "legacy_retirement": "data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json"
+  },
+  "legacy_fallback_key_count": 382,
+  "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "legacy_tree_sha256": "c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6",
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "repo_head": "3a8fea69e33208b797073b012428c268ddc3e502",
+  "runtime_consumption": false,
+  "runtime_reference_layer": "strict",
+  "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_audit_v2",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "verdict": "retirement_inconclusive"
+}

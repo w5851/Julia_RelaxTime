@@ -94,6 +94,26 @@ rollback 的 active contract，未知 active 引用为 `0`。因此 snapshot 继
 不得创建物理删除 PR。candidate-only 迁移不能把这些 unresolved 行自动提升为
 certified；阶段 B 必须先定义请求键/适配层合同并验证显式 legacy rollback。
 
+#### 阶段 A post-acceptance 重审（2026-08-29）
+
+作者已确认 v2 package 的 `accepted` 层作为 phase-map/分析下游默认，但这不改变
+strict runtime 的 certified-key 合同。基于同一 candidate calculation SHA
+`3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`、source run `32354095831` 和
+solver-free replay `32451053476`，重新生成的审计包位于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`。
+
+v2 结果为 `retirement_inconclusive`：legacy fallback key `382`
+（boundary `35`、crossover `315`、CEP `1`、spinodals `31`），candidate
+uncertified row `4074`，active consumer/rollback blocker `25`，unknown active
+reference `0`。新增的旧审计契约测试已明确归类为 snapshot contract test；它仍需在
+物理删除前迁移或随删除 allowlist 一并处置，但不再构成未登记引用。`accepted`
+插值行仍为 non-certified，故不能用来宣称 strict fallback 已消失。
+
+v2 审计保持 `solver_called=false`、`reference_write=false`、`runtime_consumption=false`，
+不修改 candidate/legacy tree，也不创建物理删除 PR。下一步仍是迁移 strict runtime
+consumer 的请求键/适配层并验证显式 legacy rollback，只有 fallback=0 且消费者/恢复
+边界完整后才可提出独立 physical-deletion PR。
+
 ### 阶段 B：fallback/path retirement（以阶段 A 证据为输入）
 
 - [ ] 若仍有 active consumer 依赖 legacy，先迁移其请求键/适配层，保持显式

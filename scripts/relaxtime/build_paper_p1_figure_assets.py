@@ -32,7 +32,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.pnjl.phase_reference_adapter import load_phase_reference
+from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_phase_reference
 
 CHANNELS = {
     "pi": {
@@ -87,9 +87,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--phase-reference-candidate-layer",
-        choices=["strict", "derived", "render"],
-        default="strict",
-        help="Candidate layer for --phase-reference-candidate-root.",
+        choices=["strict", "derived", "render", "accepted"],
+        default=None,
+        help="Candidate layer; omitted selects accepted for v2 and strict for v1.",
     )
     parser.add_argument(
         "--phase-mu-scale",
@@ -1039,12 +1039,15 @@ def main() -> int:
     trajectories, isentropic_crossings = build_isentropic_assets(args.isentropic_csv)
     if args.phase_reference_root is not None and args.phase_reference_candidate_root is not None:
         raise ValueError("choose either --phase-reference-root or --phase-reference-candidate-root")
+    candidate_layer = args.phase_reference_candidate_layer
+    if args.phase_reference_candidate_root is not None and candidate_layer is None:
+        candidate_layer = default_downstream_layer(args.phase_reference_candidate_root)
     candidate_diagnostics = None
     if args.phase_reference_candidate_root is not None:
         candidate_diagnostics = dict(
             load_phase_reference(
                 args.phase_reference_candidate_root,
-                layer=args.phase_reference_candidate_layer,
+                layer=candidate_layer,
             ).diagnostics
         )
     phase_overlay = dedupe_phase_rows(
@@ -1052,7 +1055,7 @@ def main() -> int:
         + load_phase_reference_overlay(args.phase_reference_root, args.phase_reference_tag, args.phase_mu_scale)
         + load_phase_candidate_overlay(
             args.phase_reference_candidate_root,
-            args.phase_reference_candidate_layer,
+            candidate_layer,
             args.phase_mu_scale,
         )
     )
@@ -1143,7 +1146,7 @@ def main() -> int:
             "phase_reference_root": _manifest_path(args.phase_reference_root) if args.phase_reference_root is not None else None,
             "phase_reference_tag": args.phase_reference_tag,
             "phase_reference_candidate_root": _manifest_path(args.phase_reference_candidate_root) if args.phase_reference_candidate_root is not None else None,
-            "phase_reference_candidate_layer": args.phase_reference_candidate_layer,
+            "phase_reference_candidate_layer": candidate_layer,
             "phase_reference_candidate_diagnostics": candidate_diagnostics,
             "phase_mu_scale": args.phase_mu_scale,
         },

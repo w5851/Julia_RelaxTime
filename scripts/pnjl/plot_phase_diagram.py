@@ -54,7 +54,7 @@ PROJECT_ROOT = _find_project_root()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.pnjl.phase_reference_adapter import load_phase_reference
+from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_phase_reference
 
 
 LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
@@ -105,7 +105,7 @@ class CrossoverPoint:
     rho_deconf: Optional[float]    # 退禁闭 crossover 密度
 
 
-def load_candidate_phase_data(reference_root: Path, layer: str = "strict") -> tuple[
+def load_candidate_phase_data(reference_root: Path, layer: str | None = None) -> tuple[
     List[BoundaryPoint], List[CEPPoint], List[SpinodalPoint], List[CrossoverPoint], dict
 ]:
     """Load an explicit Issue #130 layer for diagnostic plotting.
@@ -115,7 +115,8 @@ def load_candidate_phase_data(reference_root: Path, layer: str = "strict") -> tu
     The legacy CSV loaders remain the default for backwards compatibility.
     """
 
-    bundle = load_phase_reference(reference_root, layer=layer)
+    selected_layer = layer or default_downstream_layer(reference_root)
+    bundle = load_phase_reference(reference_root, layer=selected_layer)
     boundary_points = [
         BoundaryPoint(
             xi=row["xi"],
@@ -660,9 +661,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--phase-reference-layer",
-        choices=["strict", "derived", "render"],
-        default="strict",
-        help="candidate layer for --phase-reference-root (diagnostic plotting only)",
+        choices=["strict", "derived", "render", "accepted"],
+        default=None,
+        help="candidate layer; omitted selects accepted for v2 and strict for v1",
     )
     parser.add_argument("--xi", type=float, action="append", default=None,
                        help="ξ values to plot (can specify multiple times)")

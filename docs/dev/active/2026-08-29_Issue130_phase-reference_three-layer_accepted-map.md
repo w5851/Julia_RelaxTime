@@ -1,6 +1,7 @@
 # Issue #130：phase reference 三层语义与 accepted 下游数据层
 
-状态：active；本任务承接作者已确认的三层方案：`strict → render → accepted`。
+状态：active；作者已确认 `accepted` 作为下游分析默认层，当前转入
+PNJL legacy fallback coverage audit。三层方案仍为 `strict → render → accepted`。
 现有 v1 package 和历史 evidence 保持不可变；`derived` 降为 render 的内部构建
 输入与 provenance，不再作为下游公共语义层。
 
@@ -106,10 +107,21 @@ accepted 可以满足完整相结构下游查询，但不得被表述为 strict 
 
 ### 阶段 E：作者审核与后续 retirement
 
-- [ ] 审核完整 spinodal、accepted 覆盖、插值状态和代表图。
-- [ ] 审核通过后将 accepted 标为 `accepted_for_downstream`，并决定是否作为下游分析默认。
-- [ ] 重新运行 legacy fallback coverage audit；只有 fallback=0 且恢复证据完整时，才另立
+- [x] 审核完整 spinodal、accepted 覆盖、插值状态和代表图。
+- [x] 将 accepted 标为 `accepted_for_downstream`，并设为下游分析/派生相图默认层。
+- [x] 重新运行 legacy fallback coverage audit；只有 fallback=0 且恢复证据完整时，才另立
   PNJL legacy physical-deletion PR。
+
+`accepted` 的默认范围仅为 phase-map、Paper P1 和其他明确允许派生/插值的分析消费者。
+Julia transport/runtime 仍固定使用 strict certified-only view、逐键 legacy fallback 和
+显式 legacy rollback；本次 promotion 不改变 solver runtime。
+
+审计 v2 已生成于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`，
+verdict 为 `retirement_inconclusive`：legacy fallback `382`、active
+consumer/rollback blocker `25`、unknown active reference `0`。因此 accepted
+默认已经完成下游语义切换，但 strict runtime 的 consumer migration 和 legacy
+fallback coverage 仍未完成，不能进入物理删除。
 
 ## 5. 测试与验收标准
 
@@ -153,5 +165,20 @@ ledger、adapter contract 和 solver-free consumer smoke 均有可追溯证据�
 - 兼容性修正：import candidate 的 legacy byte snapshot 已改为读取
   `data/reference/pnjl/legacy_phase_reference_v1/`，与已合并的物理 retirement
   路径一致；原顶层 dense 路径继续保持不存在。
-- 当前仍待作者审核 accepted 覆盖与语义；在此之前不切换 runtime 默认、不删除
-  legacy、不启动新的数值重验。
+- accepted 已完成作者审核并记录为 `accepted_for_downstream`；行级插值状态仍为
+  `interpolated_noncertified`，strict certificate 未被升级。runtime 默认、legacy
+  fallback/rollback 和数值输入保持不变。
+
+## 9. accepted promotion 与 legacy audit v2（2026-08-29）
+
+- promotion 脚本：`scripts/analysis/pnjl/promote_issue130_phase_reference_accepted.py`；
+  只更新 accepted 行级决策字段、layer/root manifest、claim ledger 和说明文字。
+- v2 accepted package：`data/reference/pnjl/issue130_phase_reference_v2/`；
+  `promotion_status=accepted_for_downstream`、`downstream_default_layer=accepted`、
+  `runtime_consumption=false`、`reference_write=false`、`solver_called=false`。
+- strict 四表、render 四表、源 manifest 和 legacy snapshot 均未由 promotion 脚本写入；
+  accepted 的 12,537/3,135/161/11,989 行分别保留原 source status 和非外推约束。
+- solver-free legacy coverage audit v2 已生成于
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2/`；
+  其 `retirement_inconclusive` 结果只进入 consumer/path retirement，不把 accepted
+  默认误写成 legacy 已可删除。

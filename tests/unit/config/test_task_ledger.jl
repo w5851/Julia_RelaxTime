@@ -67,7 +67,7 @@ end
     tracks = Dict(String(t["id"]) => t for t in parsed["tracks"])
     @test parsed["primary_track"] == "issue130-phase"
     @test tracks["issue130-phase"]["status"] == "active"
-    @test tracks["issue130-phase"]["current_task"] == "issue130-phase-reference-three-layer-accepted-map"
+    @test tracks["issue130-phase"]["current_task"] == "issue130-phase-reference-legacy-retirement"
     @test tracks["rs-transport"]["status"] == "active"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "triaged"

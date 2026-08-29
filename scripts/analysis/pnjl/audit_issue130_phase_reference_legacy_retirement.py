@@ -176,6 +176,11 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
         "role": "snapshot_integrity_contract",
         "retirement_blocker": True,
     },
+    "tests/unit/python/test_issue130_phase_reference_legacy_retirement.py": {
+        "kind": "snapshot_contract_test",
+        "role": "snapshot_integrity_contract",
+        "retirement_blocker": True,
+    },
     "tests/unit/python/test_issue130_rs_numerical_pilot.py": {
         "kind": "historical_contract_test",
         "role": "historical_snapshot_input",

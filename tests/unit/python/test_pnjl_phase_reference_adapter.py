@@ -10,6 +10,7 @@ import pytest
 from scripts.pnjl.phase_reference_adapter import (
     PhaseReferenceContractError,
     build_runtime_view,
+    default_downstream_layer,
     load_phase_reference,
     to_legacy_views,
 )
@@ -84,6 +85,8 @@ def _write_v2_candidate(root: Path) -> None:
     manifest_path = root / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["schema_version"] = "pnjl_issue130_phase_reference_v2"
+    manifest["promotion_status"] = "accepted_for_downstream"
+    manifest["downstream_default_layer"] = "accepted"
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     for layer in ("render", "accepted"):
         (root / layer / "tables").mkdir(parents=True)
@@ -193,6 +196,31 @@ def test_v2_exposes_render_and_accepted_without_public_derived(tmp_path: Path) -
     assert all(Path(row["source_csv"]).is_file() for row in overlay)
     with pytest.raises(PhaseReferenceContractError, match="not available"):
         load_phase_reference(root, layer="derived")
+
+
+def test_v2_defaults_downstream_consumers_to_accepted(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    assert default_downstream_layer(root) == "accepted"
+    _, _, _, _, diagnostics = load_candidate_phase_data(root)
+    assert diagnostics["layer"] == "accepted"
+
+
+def test_v2_before_author_promotion_keeps_strict_default(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest.pop("promotion_status")
+    manifest.pop("downstream_default_layer")
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert default_downstream_layer(root) == "strict"
+
+
+def test_v1_keeps_strict_downstream_compatibility_default(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_candidate(root)
+    assert default_downstream_layer(root) == "strict"
 
 
 def test_plot_consumer_requires_explicit_candidate_root(tmp_path: Path) -> None:

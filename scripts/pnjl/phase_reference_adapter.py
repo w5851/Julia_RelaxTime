@@ -134,6 +134,34 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def default_downstream_layer(reference_root: str | Path) -> str:
+    """Select the default layer for downstream display/analysis consumers.
+
+    The v2 package has an author-accepted ``accepted`` view for downstream
+    phase maps.  The v1 import remains compatible with ``strict``.  Runtime
+    callers must continue to select strict explicitly through the runtime
+    adapter; this helper is intentionally not used by solver paths.
+    """
+
+    manifest = _read_json(Path(reference_root).resolve() / "manifest.json")
+    schema_version = manifest.get("schema_version")
+    if schema_version == IMPORT_SCHEMA_V2:
+        if (
+            manifest.get("promotion_status") == "accepted_for_downstream"
+            and manifest.get("downstream_default_layer") == "accepted"
+        ):
+            return "accepted"
+        # A v2 package can exist before the author promotion step.  Keep the
+        # safe strict view as the implicit analysis default until that step is
+        # recorded in the root manifest.
+        return "strict"
+    if schema_version == IMPORT_SCHEMA:
+        return "strict"
+    raise PhaseReferenceContractError(
+        f"unsupported candidate schema for downstream default: {schema_version!r}"
+    )
+
+
 def _float(value: str | None, *, path: Path, row_number: int, field: str) -> float:
     try:
         parsed = float(value if value is not None else "")
@@ -559,6 +587,7 @@ __all__ = [
     "PhaseReferenceContractError",
     "PhaseReferenceRuntimeView",
     "SCHEMA_VERSION",
+    "default_downstream_layer",
     "build_runtime_view",
     "load_phase_reference",
     "sha256",
