@@ -482,6 +482,8 @@ evidence = [
   "file:scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement_v2.py",
   "pr:280",
   "sha:9e09dd17ee48350c6d50d4bae8847786bf7e1f1d",
+  "sha:2f62b2838d90119ba33bb6f2fb6f4b1324124ef7",
+  "sha:2b477aa1b0d876bc30dd4c0aa95ec948aef84a56",
   "note:legacy_audit_v2_post_acceptance_inconclusive_fallback382_active_contract_blockers25_unknown_active0_20260829",
   "review:accepted_downstream_default_keeps_strict_runtime_and_legacy_fallback",
   ]
