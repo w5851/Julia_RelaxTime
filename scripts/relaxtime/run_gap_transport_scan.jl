@@ -43,37 +43,33 @@ const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
 
-function preferred_phase_reference_path(dense_name::String, legacy_name::String)
-    dense_path = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", dense_name)
-    legacy_root = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
-    retired_dense_path = joinpath(legacy_root, dense_name)
-    legacy_path = joinpath(legacy_root, legacy_name)
-    isfile(dense_path) && return dense_path
-    return isfile(retired_dense_path) ? retired_dense_path : legacy_path
-end
+const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2")
+const DEFAULT_PHASE_REFERENCE_LAYER = :accepted
+const DEFAULT_STRICT_PHASE_REFERENCE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT
 
-const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_dense.csv", "boundary.csv")
-const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
-const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
-const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v1")
+# These paths are retained only for explicit diagnostic CSV compatibility.  A
+# normal runtime invocation resolves through the versioned v2 adapter above;
+# it never discovers or merges the historical snapshot implicitly.
 const LEGACY_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
+const DEFAULT_PHASE_BOUNDARY_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "boundary.csv")
+const DEFAULT_PHASE_CEP_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "cep.csv")
+const DEFAULT_PHASE_CROSSOVER_PATH = joinpath(LEGACY_PHASE_REFERENCE_ROOT, "crossover_dense.csv")
 
 function _load_runtime_phase_reference(opts)
     mode = opts.phase_reference_mode
     mode === :diagnostic && opts.phase_reference_root === nothing &&
         error("--phase-reference-mode diagnostic requires --phase-reference-root")
-    legacy = (
-        boundary_path=DEFAULT_PHASE_BOUNDARY_PATH,
-        cep_path=DEFAULT_PHASE_CEP_PATH,
-        crossover_path=DEFAULT_PHASE_CROSSOVER_PATH,
-        spinodals_path=joinpath(LEGACY_PHASE_REFERENCE_ROOT, "spinodals.csv"),
-    )
-    mode === :legacy && return PhaseReferenceAdapter.load_legacy_phase_reference(; legacy...)
+    mode === :legacy && error("legacy phase reference is retired from runtime; use the historical retirement audit")
     root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root
     mode === :diagnostic && return PhaseReferenceAdapter.load_phase_reference(root; layer=opts.phase_reference_layer)
-    return PhaseReferenceAdapter.load_phase_reference_runtime_with_fallback(
-        root; layer=opts.phase_reference_layer, legacy...
-    )
+    if mode === :strict
+        opts.phase_reference_layer === :strict ||
+            error("strict runtime requires --phase-reference-layer strict")
+        return PhaseReferenceAdapter.load_phase_reference_strict_runtime(root; layer=:strict)
+    end
+    opts.phase_reference_layer === :accepted ||
+        error("runtime mode uses accepted as the default primary layer; use --phase-reference-mode strict for strict")
+    return PhaseReferenceAdapter.load_phase_reference_accepted_runtime(root)
 end
 
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
@@ -385,8 +381,15 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
                 "phase_reference_source" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_kind(phase_reference)),
                 "phase_reference_runtime_view" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_summary(phase_reference).runtime_view),
+                "phase_reference_primary_layer" => phase_reference === nothing ? "none" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :primary_layer, "")),
+                "phase_reference_runtime_consumption" => phase_reference === nothing ? "false" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :runtime_consumption, false)),
                 "phase_reference_fallback_reason" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_reason, "")),
+                "phase_reference_fallback_order" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_order, "")),
                 "phase_reference_candidate_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :candidate_manifest_sha256, "")),
+                "phase_reference_accepted_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_manifest_sha256, "")),
+                "phase_reference_accepted_layer_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_layer_manifest_sha256, "")),
+                "phase_reference_accepted_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_fallback_row_counts, "")),
+                "phase_reference_legacy_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :legacy_fallback_row_counts, "")),
 
                 # labels for plotting convenience
                 "y_label.sigma_over_T" => "σ/T",
@@ -468,7 +471,7 @@ function main()
     phase_reference = _load_runtime_phase_reference(opts)
     run_scan(opts, ctx;
         phase_reference=phase_reference,
-        phase_reference_mode=opts.phase_reference_mode === :diagnostic ? :diagnostic : :runtime,
+        phase_reference_mode=opts.phase_reference_mode,
     )
 end
 

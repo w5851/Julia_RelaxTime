@@ -12,10 +12,11 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - calculation SHA：`3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`
 - candidate source run：`32354095831`
 - aggregate replay：`32451053476`
-- candidate：`data/reference/pnjl/issue130_phase_reference_v1/`
-- legacy fallback：`data/reference/pnjl/legacy_phase_reference_v1/` versioned snapshot
-- runtime view：strict candidate 的 certified-only 行，缺失/不合格键逐键 legacy fallback
-- rollback：`--phase-reference-mode legacy`
+- candidate：`data/reference/pnjl/issue130_phase_reference_v2/accepted/`
+- strict opt-in：`data/reference/pnjl/issue130_phase_reference_v2/strict/` 的 certified-only 行
+- runtime view：accepted primary；strict 仅在显式 `--phase-reference-mode strict` 时使用
+- legacy：`data/reference/pnjl/legacy_phase_reference_v1/` 仅为 retirement audit/history snapshot，
+  不再是 fallback 或 rollback
 - 本机不调用 equilibrium solver；本轮 post-repair audit 不重跑 C0/C1/C2、M4 solver 或 transport
 
 ## 阶段与验收

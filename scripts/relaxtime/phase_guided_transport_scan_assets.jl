@@ -75,8 +75,12 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "- phase reference root: `$(phase_root)`")
         println(io, "- phase reference layer: `$(opts.phase_reference_layer)`")
         println(io, "- phase reference mode: `$(opts.phase_reference_mode)`")
-        phase_reference !== nothing && println(io, "- phase reference source: `$(Main.PhaseReferenceAdapter.source_kind(phase_reference))`")
-        phase_reference !== nothing && println(io, "- phase reference runtime view: `$(Main.PhaseReferenceAdapter.source_summary(phase_reference).runtime_view)`")
+        if phase_reference !== nothing
+            phase_summary = _phase_reference_summary_dict(phase_reference)
+            println(io, "- phase reference source: `$(Main.PhaseReferenceAdapter.source_kind(phase_reference))`")
+            println(io, "- phase reference primary layer: `$(get(phase_summary, "primary_layer", String(Main.PhaseReferenceAdapter.source_layer(phase_reference))))`")
+            println(io, "- phase reference runtime view: `$(get(phase_summary, "runtime_view", ""))`")
+        end
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
            opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
             println(io, "- tau/sigma overrides:")
@@ -135,6 +139,7 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "phase_reference_layer" => String(opts.phase_reference_layer),
         "phase_reference_mode" => String(opts.phase_reference_mode),
         "phase_reference_source" => phase_reference === nothing ? "none" : String(Main.PhaseReferenceAdapter.source_kind(phase_reference)),
+        "phase_reference_primary_layer" => phase_reference === nothing ? "none" : get(_phase_reference_summary_dict(phase_reference), "primary_layer", String(Main.PhaseReferenceAdapter.source_layer(phase_reference))),
         "channel_diagnostics" => opts.channel_diagnostics,
         "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,

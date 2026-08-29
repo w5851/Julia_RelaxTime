@@ -44,13 +44,21 @@ def test_dense_legacy_files_are_retired_from_canonical_root() -> None:
     assert (REFERENCE_ROOT / "crossover.csv").is_file()
 
 
-def test_runtime_consumers_reference_versioned_snapshot() -> None:
-    expected = "legacy_phase_reference_v1"
+def test_runtime_consumers_default_to_accepted_and_do_not_fallback_to_legacy() -> None:
     consumers = [
         ROOT / "scripts" / "relaxtime" / "phase_reference_adapter.jl",
         ROOT / "scripts" / "relaxtime" / "run_gap_transport_scan.jl",
         ROOT / "scripts" / "pnjl" / "plot_phase_diagram.py",
-        ROOT / "scripts" / "pnjl" / "validate_phase_data.py",
     ]
     for path in consumers:
-        assert expected in path.read_text(encoding="utf-8"), path
+        text = path.read_text(encoding="utf-8")
+        assert "issue130_phase_reference_v2" in text, path
+    adapter = (ROOT / "scripts" / "relaxtime" / "phase_reference_adapter.jl").read_text(encoding="utf-8")
+    runtime_scan = (ROOT / "scripts" / "relaxtime" / "run_gap_transport_scan.jl").read_text(encoding="utf-8")
+    assert "load_phase_reference_runtime_with_fallback" not in adapter
+    assert "phase-reference-mode legacy" not in runtime_scan
+
+
+def test_historical_validation_tool_remains_explicitly_snapshot_bound() -> None:
+    validator = (ROOT / "scripts" / "pnjl" / "validate_phase_data.py").read_text(encoding="utf-8")
+    assert "legacy_phase_reference_v1" in validator

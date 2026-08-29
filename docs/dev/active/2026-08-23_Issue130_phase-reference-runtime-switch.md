@@ -1,15 +1,24 @@
 # Issue #130：phase-reference runtime switch 任务单
 
-状态：accepted。PR #259 已完成 Julia/Python consumer adapter migration，PR #260 已合并；本任务只处理
-独立的 runtime source switch，不改 solver、Maxwell、C0/C1/C2 artifact、物理容差或旧
-reference 文件。
+状态：accepted（历史合同已 superseded）。PR #259 已完成 Julia/Python consumer adapter
+migration，PR #260 已合并；本文件保留 v1 runtime-switch 的决策记录，不再作为当前配置说明。
+当前合同由 `2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md` 承接：
+accepted 是默认 runtime source，strict 只显式开启，legacy 不再作为 fallback/rollback。
 
 ## Runtime 合同
 
-- 默认 source：`candidate`，layer：`strict`。
+> 以下条目记录 PR #260 合并前后的 v1 历史合同，仅用于 provenance；当前 runtime 不按
+> 这些条目启用 legacy fallback。请以 accepted-primary 任务单为准。
+
+- 默认 source：`candidate`，layer：`strict`。严格 certified 行仍优先；v2 accepted
+  common-support 行可按独立合同作为标记的非证书 fallback，legacy snapshot 为最后
+  fallback 和显式 rollback。
 - candidate 只暴露 `certified=true` 的行；`unresolved`、`ambiguous`、
-  `interpolated_noncertified` 永远保留在 candidate evidence 中，但不能进入 runtime view。
-- candidate 缺失的 boundary/crossover/CEP/spinodal key 才由 legacy source 补位，补位行标记
+  `interpolated_noncertified` 永远保留在 candidate evidence 中，不能直接作为
+  candidate primary runtime 行。
+- candidate 缺失或未认证的 boundary/crossover/CEP/spinodal key 先由符合资格的
+  accepted 行补位，标记 `source_layer=accepted_fallback`、`status=accepted_fallback`、
+  `certified=false`；仍缺失的 key 才由 legacy source 补位并标记
   `source_layer=legacy_fallback`、`status=legacy_fallback`。
 - `--phase-reference-mode legacy` 是显式 rollback；`diagnostic` 只允许审计 candidate，
   `render` 不得成为 runtime 输入。
@@ -25,8 +34,18 @@ reference 文件。
   dry-run 只检查 source resolution，不调用 equilibrium solver。
 - focused unit/integration、task-ledger、docs consistency、`git diff --check` 全部通过后，
   创建独立 runtime-switch PR；PR #260 已合并，并在合并 SHA 上完成 solver-free promotion/
-  consumer smoke。runtime view 为 `certified_candidate_with_legacy_fallback`，显式
-  `--phase-reference-mode legacy` rollback 通过；这些证据不等价于 RS 数值 production parity。
+  consumer smoke。历史 runtime view 为 `certified_candidate_with_legacy_fallback`；现行
+  v2 view 允许显式 accepted fallback，且 `--phase-reference-mode legacy` rollback 仍通过。
+  这些证据不等价于 RS 数值 production parity。
+
+### 合同修订说明（2026-08-29）
+
+原“certified-only + legacy”是 v1 runtime-switch 的历史状态。由于 v2 accepted
+包含作者已审核的 non-certified/common-support 派生行，继续让 strict 缺口直接落到
+较旧 legacy 会降低当前下游的输入可信度。现行 adapter 已改为
+`accepted_primary`；strict 只在显式模式下返回 certified-only 行，legacy fallback 和
+rollback API 已移除。详细覆盖与 path-retirement 边界见 accepted-primary 任务单和
+legacy audit v3。
 
 ## Handoff
 

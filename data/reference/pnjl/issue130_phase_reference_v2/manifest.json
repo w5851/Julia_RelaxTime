@@ -2,7 +2,7 @@
   "schema_version": "pnjl_issue130_phase_reference_v2",
   "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
   "reference_status": "candidate",
-  "promotion_status": "awaiting_author_review",
+  "promotion_status": "accepted_for_downstream",
   "public_layers": [
     "strict",
     "render",
@@ -39,8 +39,8 @@
     },
     "accepted": {
       "path": "accepted/manifest.json",
-      "sha256": "6dbfa69127b92d3eb1d66949d339f6cb661bdc8f837db05665d09ae01eae9eef",
-      "bytes": 4314
+      "sha256": "e053824282c556f252e952163a534c35ddad554452ade6130c2411e11566f60d",
+      "bytes": 4420
     }
   },
   "build_input": {
@@ -74,11 +74,22 @@
     "oracle_labels_consumed": false,
     "runtime_switch": false,
     "legacy_fallback_preserved": true,
-    "extrapolation": false
+    "extrapolation": false,
+    "accepted_for_downstream": true,
+    "runtime_default_unchanged": true
   },
   "claim_ledger": {
     "path": "claim_ledger.json",
-    "sha256": "b22f5f4b2587bb9d6b0faccebcbc7e2479858fe530d720f43ba947cba0b9b76d",
-    "bytes": 1335
+    "sha256": "77a05e5e8c21cced0b2240b96976ea430c0463c78950ca30be5822679b30bb16",
+    "bytes": 1352
+  },
+  "downstream_default_layer": "accepted",
+  "downstream_default_scope": "analysis_and_derived_phase_maps",
+  "author_decision": {
+    "status": "accepted",
+    "scope": "downstream_analysis_default",
+    "recorded_at_utc": "2026-08-29T06:20:17.555046+00:00",
+    "runtime_default_unchanged": true,
+    "legacy_fallback_preserved": true
   }
 }

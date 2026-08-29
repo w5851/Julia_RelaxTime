@@ -14,8 +14,8 @@
   "oracle_labels_consumed": false,
   "schema_version": "pnjl_issue130_phase_reference_layer_v2",
   "layer": "accepted",
-  "semantics": "author-review candidate downstream phase map derived from complete structured render tables",
-  "promotion_status": "awaiting_author_review",
+  "semantics": "author-accepted downstream phase map derived from complete structured render tables",
+  "promotion_status": "accepted_for_downstream",
   "reference_write": false,
   "runtime_consumption": false,
   "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
@@ -29,8 +29,8 @@
       },
       "output": {
         "path": "accepted/tables/maxwell_surface_accepted_phase_map_v1.csv",
-        "sha256": "6005cdb6f1309b4719b71148d1b0f49a7d8e045ae24d02cb7482d96d9a681943",
-        "bytes": 4439108
+        "sha256": "947499b21cb08d6ce2af9b4d068b33f393dc403978ab1506a0cb271e5673695f",
+        "bytes": 4388959
       },
       "rows": 12537,
       "source_status_counts": {
@@ -47,8 +47,8 @@
       },
       "output": {
         "path": "accepted/tables/crossover_surface_accepted_phase_map_v1.csv",
-        "sha256": "197143c7abf314892e9ea82301bbc23bcf45f5de189a6c8c8200821db0a927bd",
-        "bytes": 1144584
+        "sha256": "a90aa4fc34011557db7f2f607ee038df97f11e298a02e03c52b80509fe8d08f4",
+        "bytes": 1132043
       },
       "rows": 3135,
       "source_status_counts": {
@@ -65,8 +65,8 @@
       },
       "output": {
         "path": "accepted/tables/cep_boundary_accepted_phase_map_v1.csv",
-        "sha256": "8eb262cc24ddcf8a9b6fa3a9c57d7bb6ffe7964a2b943bdf86189b2192e86b88",
-        "bytes": 45045
+        "sha256": "42f445c1442803addcf543722b3e8272e73a5e957889a5abb95346b7c29490ea",
+        "bytes": 44400
       },
       "rows": 161,
       "source_status_counts": {
@@ -83,8 +83,8 @@
       },
       "output": {
         "path": "accepted/tables/spinodal_surface_accepted_phase_map_v1.csv",
-        "sha256": "eb6de8926d11edc0f2f4e02d85c318cb278ceccb577cb4b87147485440f2428b",
-        "bytes": 3555200
+        "sha256": "95372a15a7d9e25c8eb833ec3f5906d68ed3d447206824d1144ea998a8137793",
+        "bytes": 3507243
       },
       "rows": 11989,
       "source_status_counts": {
@@ -109,8 +109,8 @@
     }
   },
   "source_layer": "render",
-  "acceptance_status": "candidate_pending_author_review",
-  "acceptance_scope": "downstream_phase_map_only",
+  "acceptance_status": "author_accepted_for_downstream",
+  "acceptance_scope": "downstream_phase_map_default",
   "interpolation_is_noncertified": true,
   "strict_certificate_preserved": true,
   "extrapolation": false,
@@ -119,5 +119,12 @@
     "crossover": 3135,
     "cep": 161,
     "spinodals": 11989
+  },
+  "author_decision": {
+    "status": "accepted",
+    "scope": "downstream_analysis_default",
+    "recorded_at_utc": "2026-08-29T06:20:17.555046+00:00",
+    "runtime_default_unchanged": true,
+    "legacy_fallback_preserved": true
   }
 }

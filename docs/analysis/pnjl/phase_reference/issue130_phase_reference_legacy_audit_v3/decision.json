@@ -1,0 +1,34 @@
+{
+  "accepted_manifest_sha256": "e053824282c556f252e952163a534c35ddad554452ade6130c2411e11566f60d",
+  "accepted_primary_runtime_ready": true,
+  "accepted_primary_valid": true,
+  "active_path_contract_count": 6,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "coverage_exact_key_is_informational": true,
+  "legacy_missing_physical_key_count": 255,
+  "legacy_mode_runtime_present": false,
+  "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "legacy_runtime_fallback_api_present": false,
+  "legacy_snapshot_integrity_pass": true,
+  "next_action": "migrate remaining active legacy path contracts, then rerun this audit",
+  "non_goals": [
+    "do not call Julia or the PNJL equilibrium solver",
+    "do not rewrite data/reference/pnjl trees",
+    "do not infer numerical convergence from a coverage audit"
+  ],
+  "path_retirement_ready": false,
+  "physical_deletion_eligible": false,
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "runtime_consumption": false,
+  "runtime_legacy_fallback_rows": 0,
+  "runtime_legacy_rollback_enabled": false,
+  "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_decision_v3",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "stop_reasons": [
+    "active_legacy_path_contract_requires_migration"
+  ],
+  "strict_explicit_valid": true,
+  "verdict": "accepted_primary_runtime_ready_path_retirement_pending"
+}

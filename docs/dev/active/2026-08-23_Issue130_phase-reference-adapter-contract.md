@@ -11,8 +11,9 @@ runtime switch 已完成并接受；legacy 数值现以 byte-preserving versione
 - layer：`strict`、`derived`；`render` 仅可用于绘图，不可作为 runtime 输入。
 - `mu_MeV`/`mu_CEP_proxy_MeV` 是 `mu_q`；adapter 同时派生 `muB=3*mu_q`，不得由调用方猜测。
 - Maxwell 的 `grid_unresolved`、`geometry_converged`、`finite_and_converged` 和状态字符串
-  共同决定 `certified`；unresolved 行必须保留为诊断，但默认不能进入 candidate runtime view，
-  缺失键才可由 legacy fallback 补位。
+  共同决定 `certified`；unresolved 行必须保留为诊断，但默认不能进入 strict candidate
+  runtime view。当前 runtime adapter 的逐键顺序为 strict certified、作者接受且在
+  common support 内的 accepted fallback，最后才是 legacy snapshot。
 - derived 的 `interpolated_noncertified` 只能显式允许用于派生图或诊断，不能伪装成 strict。
 - CEP 同时保留 `[T_low_MeV,T_high_MeV]`、宽度和 `T_midpoint_MeV`；使用中点必须显式选择
   `cep_mode=estimated_midpoint`，内部审计可以选择 `cep_mode=bracket`。
@@ -41,7 +42,17 @@ runtime switch 已完成并接受；legacy 数值现以 byte-preserving versione
 ## 验收与非目标
 
 本阶段验收是 adapter contract 可读、可拒绝不安全输入、消费者 parity 可追溯，并能以
-certified-only candidate + legacy fallback 运行或显式回滚；不是 phase-reference promotion，也不是
-RS transport production。验证只运行 Julia/Python fixture、candidate schema replay、CLI/dry-run、
-`git diff --check`、task-ledger/docs governance；本机不调用新的 equilibrium solver 扫描。runtime-switch
-合并并经作者审核后才能标记 candidate 为默认 runtime reference；旧 reference retirement 仍需另立 PR。
+strict candidate + 受控 accepted fallback + legacy fallback 运行或显式回滚；不是
+phase-reference promotion，也不是 RS transport production。验证只运行 Julia/Python fixture、
+candidate schema replay、CLI/dry-run、`git diff --check`、task-ledger/docs governance；本机不调用新的
+equilibrium solver 扫描。runtime-switch 合并并经作者审核后才能标记 candidate 为默认
+runtime reference；accepted fallback 的实际覆盖和旧 reference retirement 仍需独立审计。
+
+## Contract revision (2026-08-29)
+
+早期合同曾明确禁止 accepted 进入 runtime。该禁止已被新的活动任务
+`2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md` 有限地修订：
+accepted 不能 primary，但可作为作者接受、非外推、common-support 且状态有效的逐键
+fallback。进入 runtime view 的 accepted 行保持 `certified=false` 并标记
+`runtime_eligible=true`；直接 `allow_runtime=true, layer=accepted` 仍拒绝，避免把
+下游派生图层伪装成 strict 数值 reference。

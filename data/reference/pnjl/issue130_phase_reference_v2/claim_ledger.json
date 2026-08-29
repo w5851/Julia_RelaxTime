@@ -20,14 +20,14 @@
       "claim": "accepted preserves native/unresolved/interpolated source status",
       "status": "supported",
       "evidence": "accepted/manifest.json; accepted/tables/*.csv",
-      "boundary": "interpolated rows remain non-certified and author review is pending"
+      "boundary": "author accepted for downstream analysis only; interpolated rows remain non-certified"
     },
     {
       "claim_id": "runtime_promotion",
       "claim": "v2 is an automatic replacement for strict runtime or legacy fallback",
       "status": "blocked",
       "evidence": "manifest.json",
-      "boundary": "requires explicit consumer audit and author promotion"
+      "boundary": "accepted is downstream-only; strict runtime and legacy fallback/rollback are unchanged"
     }
   ]
 }

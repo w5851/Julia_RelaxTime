@@ -263,10 +263,26 @@ def _validate_source_smoke(payload: dict[str, Any], candidate_manifest_sha: str)
     legacy = sources["legacy"]
     if runtime.get("source_kind") != "candidate" or not runtime.get("runtime_enabled"):
         raise ValueError("runtime smoke did not enable candidate")
-    if runtime.get("diagnostics", {}).get("runtime_view") != "certified_candidate_with_legacy_fallback":
+    runtime_view = runtime.get("diagnostics", {}).get("runtime_view")
+    if runtime_view not in {
+        "certified_candidate_with_legacy_fallback",
+        "certified_candidate_with_accepted_then_legacy_fallback",
+    }:
         raise ValueError("runtime fallback view mismatch")
     if not runtime.get("diagnostics", {}).get("fallback_enabled"):
         raise ValueError("runtime fallback is not enabled")
+    if runtime_view == "certified_candidate_with_accepted_then_legacy_fallback":
+        runtime_diagnostics = runtime.get("diagnostics", {})
+        if runtime_diagnostics.get("fallback_order") != (
+            "strict_candidate>accepted_downstream>legacy_snapshot"
+        ):
+            raise ValueError("accepted fallback order mismatch")
+        for field in ("accepted_manifest_sha256", "accepted_layer_manifest_sha256"):
+            value = runtime_diagnostics.get(field, "")
+            if not isinstance(value, str) or len(value) != 64:
+                raise ValueError(f"accepted fallback {field} is not a SHA-256")
+        if not isinstance(runtime_diagnostics.get("accepted_fallback_row_counts"), dict):
+            raise ValueError("accepted fallback row counts are missing")
     if runtime.get("diagnostics", {}).get("candidate_manifest_sha256") != candidate_manifest_sha:
         raise ValueError("runtime candidate manifest hash mismatch")
     if diagnostic.get("source_kind") != "candidate" or diagnostic.get("runtime_enabled"):

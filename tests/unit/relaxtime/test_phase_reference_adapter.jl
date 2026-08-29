@@ -34,11 +34,18 @@ function _write_candidate_fixture(root::AbstractString; unresolved::Bool=false, 
     return root
 end
 
-function _write_v2_candidate_fixture(root::AbstractString; accepted_noncertified::Bool=false)
-    _write_candidate_fixture(root)
+function _write_v2_candidate_fixture(root::AbstractString;
+    accepted_noncertified::Bool=false,
+    accepted_authorized::Bool=false,
+    unresolved::Bool=false,
+)
+    _write_candidate_fixture(root; unresolved=unresolved)
     manifest_path = joinpath(root, "manifest.json")
     manifest = replace(read(manifest_path, String),
         "pnjl_issue130_phase_reference_import_v1" => "pnjl_issue130_phase_reference_v2")
+    manifest = replace(manifest,
+        "\"reference_status\":\"candidate\"" =>
+            "\"reference_status\":\"candidate\",\"promotion_status\":\"accepted_for_downstream\",\"downstream_default_layer\":\"accepted\"")
     write(manifest_path, manifest)
 
     render_names = Dict(
@@ -70,9 +77,11 @@ function _write_v2_candidate_fixture(root::AbstractString; accepted_noncertified
         cp(source, render; force=true)
         lines = split(chomp(read(source, String)), '\n')
         header, row = first(lines), last(lines)
+        acceptance_status = accepted_authorized ?
+            "author_accepted_for_downstream" : "candidate_pending_author_review"
         accepted_row_status = accepted_noncertified ?
-            "interpolated_noncertified,candidate_pending_author_review,False,interpolated_common_support,downstream_phase_map_candidate" :
-            "strict_certified,candidate_pending_author_review,False,native_support,downstream_phase_map_candidate"
+            "interpolated_noncertified,$acceptance_status,False,interpolated_common_support,downstream_phase_map_candidate" :
+            "strict_certified,$acceptance_status,False,native_support,downstream_phase_map_candidate"
         accepted = join((header * additions, row * "," * accepted_row_status), '\n') * "\n"
         write(joinpath(root, "accepted", "tables", accepted_names[table]), accepted)
     end
@@ -103,9 +112,12 @@ end
 
 @testset "phase-reference candidate rejects unresolved/nonfinite/duplicate rows" begin
     @test PRA.load_phase_reference(_write_candidate_fixture(mktempdir(); unresolved=true)).diagnostics.uncertified_rows == 1
-    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime(
+    strict_runtime = PRA.load_phase_reference_runtime(
         _write_candidate_fixture(mktempdir(); unresolved=true),
     )
+    @test PRA.source_layer(strict_runtime) === :strict
+    @test strict_runtime.diagnostics.runtime_view == "strict_certified_only"
+    @test isempty(strict_runtime.tables[:boundary])
     @test_throws PRA.PhaseReferenceAdapterError _write_candidate_fixture(mktempdir(); nonfinite=true) |> PRA.load_phase_reference
     @test_throws PRA.PhaseReferenceAdapterError _write_candidate_fixture(mktempdir(); duplicate=true) |> PRA.load_phase_reference
 end
@@ -123,14 +135,7 @@ end
     @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime(root; layer=:render)
     @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime(root; layer=:accepted)
     @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference(root; layer=:derived)
-    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime_with_fallback(
-        root;
-        layer=:accepted,
-        boundary_path="",
-        cep_path="",
-        crossover_path="",
-        spinodals_path="",
-    )
+    @test !isdefined(PRA, :load_phase_reference_runtime_with_fallback)
 end
 
 @testset "legacy and candidate views preserve muq to muB parity" begin
@@ -156,7 +161,7 @@ end
     @test legacy_boundary.muB_CEP == candidate_boundary.muB_CEP
 end
 
-@testset "certified candidate runtime view falls back by missing key and supports rollback" begin
+@testset "legacy fallback and rollback entrypoint are retired" begin
     candidate_root = _write_candidate_fixture(mktempdir(); unresolved=true)
     legacy_root = mktempdir()
     boundary = joinpath(legacy_root, "boundary.csv")
@@ -168,20 +173,7 @@ end
     write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,100.0,160.0,1.0\n")
     write(spinodals, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV\n0.0,100.0,320.0,280.0\n")
 
-    runtime = PRA.load_phase_reference_runtime_with_fallback(
-        candidate_root;
-        boundary_path=boundary,
-        cep_path=cep,
-        crossover_path=crossover,
-        spinodals_path=spinodals,
-    )
-    @test PRA.source_kind(runtime) === :candidate
-    @test runtime.diagnostics.runtime_view == "certified_candidate_with_legacy_fallback"
-    @test runtime.diagnostics.fallback_enabled
-    @test runtime.diagnostics.fallback_reason == "candidate_key_absent_or_uncertified"
-    @test runtime.diagnostics.fallback_row_counts["boundary"] == 1
-    @test PRA.boundary_data(runtime, 0.0).mu_values == [301.0]
-    @test PRA.boundary_data(runtime, 0.0).muB_CEP == 900.0
+    @test !isdefined(PRA, :load_phase_reference_runtime_with_fallback)
 
     rollback = PRA.load_legacy_phase_reference(
         boundary_path=boundary, cep_path=cep, crossover_path=crossover, spinodals_path=spinodals,
@@ -191,17 +183,58 @@ end
     @test PRA.boundary_data(rollback, 0.0).mu_values == [301.0]
 end
 
-@testset "repository default uses candidate plus retired legacy snapshot" begin
+@testset "accepted non-certified rows are the primary runtime source" begin
+    root = _write_v2_candidate_fixture(
+        mktempdir(); accepted_noncertified=true, accepted_authorized=true,
+    )
+    legacy_root = mktempdir()
+    boundary = joinpath(legacy_root, "boundary.csv")
+    cep = joinpath(legacy_root, "cep.csv")
+    crossover = joinpath(legacy_root, "crossover.csv")
+    spinodals = joinpath(legacy_root, "spinodals.csv")
+    write(boundary, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark\n0.0,90.0,301.0,1.0,2.0\n")
+    write(cep, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV\n0.0,121.0,299.0,897.0\n")
+    write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,250.0,160.0,1.0\n0.0,350.0,150.0,1.1\n")
+    write(spinodals, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV\n0.0,100.0,320.0,280.0\n")
+
+    runtime = PRA.load_phase_reference_runtime(root; layer=:accepted)
+    summary = PRA.source_summary(runtime)
+    @test summary.runtime_view == "accepted_primary"
+    @test summary.primary_layer == "accepted"
+    @test !summary.fallback_enabled
+    @test summary.fallback_order == "accepted_primary"
+    @test summary.legacy_fallback_row_counts["boundary"] == 0
+    @test summary.legacy_fallback_row_counts["crossover"] == 0
+    accepted_row = only(runtime.tables[:boundary])
+    @test !accepted_row.certified
+    @test accepted_row.runtime_eligible
+    @test accepted_row.runtime_source_layer == "accepted_primary"
+    @test accepted_row.source_status == "interpolated_noncertified"
+    @test length(summary.candidate_manifest_sha256) == 64
+    @test length(summary.candidate_layer_manifest_sha256) == 64
+    @test PRA.boundary_data(runtime, 0.0).mu_values == [300.0]
+end
+
+@testset "repository default uses accepted primary and strict is explicit" begin
     project_root = normpath(joinpath(@__DIR__, "..", "..", ".."))
     runtime = PRA.load_default_phase_reference_runtime(project_root=project_root)
     summary = PRA.source_summary(runtime)
     @test PRA.source_kind(runtime) === :candidate
-    @test summary.runtime_view == "certified_candidate_with_legacy_fallback"
-    @test summary.fallback_enabled
-    @test sum(values(summary.fallback_row_counts)) > 0
+    @test PRA.source_layer(runtime) === :accepted
+    @test summary.runtime_view == "accepted_primary"
+    @test !summary.fallback_enabled
+    @test summary.fallback_order == "accepted_primary"
+    @test sum(values(summary.accepted_primary_row_counts)) > 0
+    @test sum(values(summary.legacy_fallback_row_counts)) == 0
 
-    rollback = PRA.load_default_phase_reference_runtime(project_root=project_root, source=:legacy)
-    @test PRA.source_kind(rollback) === :legacy
-    @test PRA.source_summary(rollback).runtime_view == "legacy"
-    @test !PRA.source_summary(rollback).fallback_enabled
+    strict = PRA.load_default_phase_reference_runtime(
+        project_root=project_root, source=:strict, layer=:strict,
+    )
+    @test PRA.source_kind(strict) === :candidate
+    @test PRA.source_layer(strict) === :strict
+    @test PRA.source_summary(strict).runtime_view == "strict_certified_only"
+    @test !PRA.source_summary(strict).fallback_enabled
+    @test_throws PRA.PhaseReferenceAdapterError PRA.load_default_phase_reference_runtime(
+        project_root=project_root, source=:strict, layer=:accepted,
+    )
 end
