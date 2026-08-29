@@ -34,6 +34,51 @@ function _write_candidate_fixture(root::AbstractString; unresolved::Bool=false, 
     return root
 end
 
+function _write_v2_candidate_fixture(root::AbstractString; accepted_noncertified::Bool=false)
+    _write_candidate_fixture(root)
+    manifest_path = joinpath(root, "manifest.json")
+    manifest = replace(read(manifest_path, String),
+        "pnjl_issue130_phase_reference_import_v1" => "pnjl_issue130_phase_reference_v2")
+    write(manifest_path, manifest)
+
+    render_names = Dict(
+        :boundary => "maxwell_surface_render.csv",
+        :crossover => "crossover_surface_render.csv",
+        :cep => "cep_boundary_render.csv",
+        :spinodals => "spinodal_surface_render.csv",
+    )
+    strict_names = Dict(
+        :boundary => "maxwell_surface_strict_reference_v1.csv",
+        :crossover => "crossover_surface_strict_reference_v1.csv",
+        :cep => "cep_boundary_strict_reference_v1.csv",
+        :spinodals => "spinodal_surface_strict_reference_v1.csv",
+    )
+    accepted_names = Dict(
+        :boundary => "maxwell_surface_accepted_phase_map_v1.csv",
+        :crossover => "crossover_surface_accepted_phase_map_v1.csv",
+        :cep => "cep_boundary_accepted_phase_map_v1.csv",
+        :spinodals => "spinodal_surface_accepted_phase_map_v1.csv",
+    )
+    additions = ",source_status,acceptance_status,extrapolation,coverage_status,acceptance_scope"
+    for layer in ("render", "accepted")
+        mkpath(joinpath(root, layer, "tables"))
+        write(joinpath(root, layer, "manifest.json"), "{\"layer\":\"$(layer)\",\"runtime_consumption\":false}")
+    end
+    for table in keys(strict_names)
+        source = joinpath(root, "strict", "tables", strict_names[table])
+        render = joinpath(root, "render", "tables", render_names[table])
+        cp(source, render; force=true)
+        lines = split(chomp(read(source, String)), '\n')
+        header, row = first(lines), last(lines)
+        accepted_row_status = accepted_noncertified ?
+            "interpolated_noncertified,candidate_pending_author_review,False,interpolated_common_support,downstream_phase_map_candidate" :
+            "strict_certified,candidate_pending_author_review,False,native_support,downstream_phase_map_candidate"
+        accepted = join((header * additions, row * "," * accepted_row_status), '\n') * "\n"
+        write(joinpath(root, "accepted", "tables", accepted_names[table]), accepted)
+    end
+    return root
+end
+
 @testset "phase-reference candidate adapter contract" begin
     root = _write_candidate_fixture(mktempdir())
     source = PRA.load_phase_reference(root)
@@ -63,6 +108,29 @@ end
     )
     @test_throws PRA.PhaseReferenceAdapterError _write_candidate_fixture(mktempdir(); nonfinite=true) |> PRA.load_phase_reference
     @test_throws PRA.PhaseReferenceAdapterError _write_candidate_fixture(mktempdir(); duplicate=true) |> PRA.load_phase_reference
+end
+
+@testset "v2 exposes strict/render/accepted and keeps downstream layers out of runtime" begin
+    root = _write_v2_candidate_fixture(mktempdir(); accepted_noncertified=true)
+    render = PRA.load_phase_reference(root; layer=:render)
+    @test PRA.source_layer(render) === :render
+    @test render.diagnostics.candidate_schema_version == "pnjl_issue130_phase_reference_v2"
+    @test length(render.tables[:spinodals]) == 1
+
+    accepted = PRA.load_phase_reference(root; layer=:accepted)
+    @test PRA.source_layer(accepted) === :accepted
+    @test accepted.diagnostics.uncertified_rows == 4
+    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime(root; layer=:render)
+    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime(root; layer=:accepted)
+    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference(root; layer=:derived)
+    @test_throws PRA.PhaseReferenceAdapterError PRA.load_phase_reference_runtime_with_fallback(
+        root;
+        layer=:accepted,
+        boundary_path="",
+        cep_path="",
+        crossover_path="",
+        spinodals_path="",
+    )
 end
 
 @testset "legacy and candidate views preserve muq to muB parity" begin

@@ -1,0 +1,33 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_claim_ledger_v2",
+  "claims": [
+    {
+      "claim_id": "strict_byte_preserved",
+      "claim": "v2 strict tables are byte-preserving copies of v1 strict tables",
+      "status": "supported",
+      "evidence": "strict/manifest.json",
+      "boundary": "certificate semantics unchanged"
+    },
+    {
+      "claim_id": "render_spinodal_complete",
+      "claim": "render contains structured crossover, Maxwell, CEP and spinodal tables",
+      "status": "supported",
+      "evidence": "render/manifest.json; render/tables/spinodal_surface_render.csv",
+      "boundary": "spinodal values are copied from derived build input; no solver call"
+    },
+    {
+      "claim_id": "accepted_status_preserved",
+      "claim": "accepted preserves native/unresolved/interpolated source status",
+      "status": "supported",
+      "evidence": "accepted/manifest.json; accepted/tables/*.csv",
+      "boundary": "interpolated rows remain non-certified and author review is pending"
+    },
+    {
+      "claim_id": "runtime_promotion",
+      "claim": "v2 is an automatic replacement for strict runtime or legacy fallback",
+      "status": "blocked",
+      "evidence": "manifest.json",
+      "boundary": "requires explicit consumer audit and author promotion"
+    }
+  ]
+}

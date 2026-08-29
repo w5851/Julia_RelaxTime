@@ -694,11 +694,35 @@ def load_phase_candidate_overlay(
         return []
     bundle = load_phase_reference(phase_reference_root, layer=phase_reference_layer)
     layer_dir = bundle.root / phase_reference_layer / "tables"
+    table_names = {
+        "strict": {
+            "boundary": "maxwell_surface_strict_reference_v1.csv",
+            "spinodals": "spinodal_surface_strict_reference_v1.csv",
+            "crossover": "crossover_surface_strict_reference_v1.csv",
+            "cep": "cep_boundary_strict_reference_v1.csv",
+        },
+        "derived": {
+            "boundary": "maxwell_surface_derived_reference_v1.csv",
+            "spinodals": "spinodal_surface_derived_reference_v1.csv",
+            "crossover": "crossover_surface_derived_reference_v1.csv",
+            "cep": "cep_boundary_derived_reference_v1.csv",
+        },
+        "render": {
+            "boundary": "maxwell_surface_render.csv",
+            "spinodals": "spinodal_surface_render.csv",
+            "crossover": "crossover_surface_render.csv",
+            "cep": "cep_boundary_render.csv",
+        },
+        "accepted": {
+            "boundary": "maxwell_surface_accepted_phase_map_v1.csv",
+            "spinodals": "spinodal_surface_accepted_phase_map_v1.csv",
+            "crossover": "crossover_surface_accepted_phase_map_v1.csv",
+            "cep": "cep_boundary_accepted_phase_map_v1.csv",
+        },
+    }
     source_paths = {
-        "boundary": layer_dir / ("maxwell_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
-        "spinodals": layer_dir / ("spinodal_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv")),
-        "crossover": layer_dir / ("crossover_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
-        "cep": layer_dir / ("cep_boundary_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
+        table: layer_dir / filename
+        for table, filename in table_names[phase_reference_layer].items()
     }
     rows: list[dict[str, Any]] = []
     for row in bundle.tables.get("boundary", ()):

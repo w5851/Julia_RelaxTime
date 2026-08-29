@@ -24,12 +24,16 @@ SOURCE_RUN_ID = "32354095831"
 REPLAY_RUN_ID = "32451053476"
 PACKAGE_RELATIVE = Path("docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1")
 GATE_RELATIVE = Path("docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1")
+# The legacy bundle is now a canonical, immutable snapshot after retirement;
+# the former top-level dense paths are intentionally absent.  Import keeps
+# recording these bytes so a new candidate can prove it did not mutate the
+# rollback source.
 LEGACY_FILES = (
-    Path("data/reference/pnjl/boundary.csv"),
-    Path("data/reference/pnjl/cep.csv"),
-    Path("data/reference/pnjl/spinodals.csv"),
-    Path("data/reference/pnjl/crossover_dense.csv"),
-    Path("data/reference/pnjl/phase_reference_dense_manifest.json"),
+    Path("data/reference/pnjl/legacy_phase_reference_v1/boundary.csv"),
+    Path("data/reference/pnjl/legacy_phase_reference_v1/cep.csv"),
+    Path("data/reference/pnjl/legacy_phase_reference_v1/spinodals.csv"),
+    Path("data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.csv"),
+    Path("data/reference/pnjl/legacy_phase_reference_v1/phase_reference_dense_manifest.json"),
 )
 
 LAYER_SPECS = {

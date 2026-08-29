@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import csv
+import shutil
 from pathlib import Path
 
 import pytest
@@ -24,6 +26,13 @@ TABLES = {
     "crossover": "crossover_surface_strict_reference_v1.csv",
     "cep": "cep_boundary_strict_reference_v1.csv",
     "spinodals": "spinodal_surface_strict_reference_v1.csv",
+}
+
+V2_TABLES = {
+    "boundary": (TABLES["boundary"], "maxwell_surface_render.csv", "maxwell_surface_accepted_phase_map_v1.csv"),
+    "crossover": (TABLES["crossover"], "crossover_surface_render.csv", "crossover_surface_accepted_phase_map_v1.csv"),
+    "cep": (TABLES["cep"], "cep_boundary_render.csv", "cep_boundary_accepted_phase_map_v1.csv"),
+    "spinodals": (TABLES["spinodals"], "spinodal_surface_render.csv", "spinodal_surface_accepted_phase_map_v1.csv"),
 }
 
 
@@ -67,6 +76,42 @@ def _write_candidate(root: Path, *, duplicate: bool = False, nonfinite: bool = F
         "rho_spinodal_hadron,rho_spinodal_quark,layer,status\n"
         "spinodal,0.0,100.0,280.0,320.0,1.2,1.8,strict_reference_v1,native\n",
         encoding="utf-8",
+    )
+
+
+def _write_v2_candidate(root: Path) -> None:
+    _write_candidate(root)
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["schema_version"] = "pnjl_issue130_phase_reference_v2"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    for layer in ("render", "accepted"):
+        (root / layer / "tables").mkdir(parents=True)
+        (root / layer / "manifest.json").write_text(
+            json.dumps({"layer": layer, "runtime_consumption": False}), encoding="utf-8"
+        )
+    strict_tables = root / "strict" / "tables"
+    for table, (strict_name, render_name, accepted_name) in V2_TABLES.items():
+        source = strict_tables / strict_name
+        shutil.copyfile(source, root / "render" / "tables" / render_name)
+        rows = list(csv.DictReader(source.open(encoding="utf-8", newline="")))
+        fields = list(rows[0].keys()) + [
+            "source_status", "acceptance_status", "extrapolation", "coverage_status", "acceptance_scope"
+        ]
+        for row in rows:
+            row.update({
+                "source_status": "strict_certified",
+                "acceptance_status": "candidate_pending_author_review",
+                "extrapolation": "False",
+                "coverage_status": "native_support",
+                "acceptance_scope": "downstream_phase_map_candidate",
+            })
+        with (root / "accepted" / "tables" / accepted_name).open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(rows)
+    (root / "render" / "tables" / "mesh_coverage.csv").write_text(
+        "surface,xi,coverage_status\nspinodal,0.0,native_support\n", encoding="utf-8"
     )
 
 
@@ -122,6 +167,32 @@ def test_imported_candidate_is_solver_free_and_has_real_manifest() -> None:
     assert bundle.manifest["runtime_consumption"] is False
     assert bundle.diagnostics["manifest_sha256"]
     assert bundle.diagnostics["row_counts"]["boundary"] > 0
+
+
+def test_v2_exposes_render_and_accepted_without_public_derived(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+
+    render = load_phase_reference(root, layer="render")
+    accepted = load_phase_reference(root, layer="accepted")
+    assert render.diagnostics["schema_version"] == "pnjl_issue130_phase_reference_v2"
+    assert render.diagnostics["row_counts"]["spinodals"] == 1
+    assert accepted.diagnostics["uncertified_rows"] == 0
+    assert accepted.tables["boundary"][0]["muB_MeV"] == 900.0
+    with pytest.raises(PhaseReferenceContractError, match="downstream candidate"):
+        load_phase_reference(root, layer="accepted", allow_runtime=True)
+    cep_path = root / "accepted" / "tables" / V2_TABLES["cep"][2]
+    cep_path.write_text(
+        cep_path.read_text(encoding="utf-8").replace("strict_certified", "interpolated_noncertified", 1),
+        encoding="utf-8",
+    )
+    accepted_with_interpolation = load_phase_reference(root, layer="accepted")
+    assert accepted_with_interpolation.diagnostics["uncertified_rows"] == 1
+    overlay = load_phase_candidate_overlay(root, "accepted", 3.0)
+    assert {row["kind"] for row in overlay} == {"first_order", "spinodal_hadron", "spinodal_quark", "crossover", "cep"}
+    assert all(Path(row["source_csv"]).is_file() for row in overlay)
+    with pytest.raises(PhaseReferenceContractError, match="not available"):
+        load_phase_reference(root, layer="derived")
 
 
 def test_plot_consumer_requires_explicit_candidate_root(tmp_path: Path) -> None:

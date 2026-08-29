@@ -1,0 +1,89 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_manifest": {
+    "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+    "bytes": 16420
+  },
+  "source_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "schema_version": "pnjl_issue130_phase_reference_layer_v2",
+  "layer": "strict",
+  "semantics": "native C2/v6 plus reviewed Maxwell additions; strict certificate and unresolved status preserved",
+  "promotion_status": "awaiting_author_review",
+  "reference_write": false,
+  "runtime_consumption": false,
+  "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
+  "source_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "tables": {
+    "boundary": {
+      "source": {
+        "path": "strict/tables/maxwell_surface_strict_reference_v1.csv",
+        "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c",
+        "bytes": 2674236
+      },
+      "output": {
+        "path": "strict/tables/maxwell_surface_strict_reference_v1.csv",
+        "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c",
+        "bytes": 2674236
+      },
+      "byte_preserved": true,
+      "rows": 7162
+    },
+    "crossover": {
+      "source": {
+        "path": "strict/tables/crossover_surface_strict_reference_v1.csv",
+        "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23",
+        "bytes": 244934
+      },
+      "output": {
+        "path": "strict/tables/crossover_surface_strict_reference_v1.csv",
+        "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23",
+        "bytes": 244934
+      },
+      "byte_preserved": true,
+      "rows": 1343
+    },
+    "cep": {
+      "source": {
+        "path": "strict/tables/cep_boundary_strict_reference_v1.csv",
+        "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7",
+        "bytes": 11994
+      },
+      "output": {
+        "path": "strict/tables/cep_boundary_strict_reference_v1.csv",
+        "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7",
+        "bytes": 11994
+      },
+      "byte_preserved": true,
+      "rows": 93
+    },
+    "spinodals": {
+      "source": {
+        "path": "strict/tables/spinodal_surface_strict_reference_v1.csv",
+        "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182",
+        "bytes": 668050
+      },
+      "output": {
+        "path": "strict/tables/spinodal_surface_strict_reference_v1.csv",
+        "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182",
+        "bytes": 668050
+      },
+      "byte_preserved": true,
+      "rows": 6886
+    }
+  },
+  "source_layer": "strict_reference_v1",
+  "strict_unresolved_preserved": true,
+  "rows": {
+    "boundary": 7162,
+    "crossover": 1343,
+    "cep": 93,
+    "spinodals": 6886
+  }
+}

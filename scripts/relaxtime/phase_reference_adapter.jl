@@ -65,6 +65,35 @@ const _TABLE_FILES = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
     ),
 )
 
+# v2 exposes exactly three public layers: strict, render and accepted.  The
+# former v1 ``derived`` tables remain an internal build input and are not
+# addressable through this map.  ``accepted`` is intentionally downstream-only
+# until a separate promotion decision; it must never become a runtime source
+# merely because its rows happen to be finite.
+const _TABLE_FILES_V2 = Dict{Symbol, Dict{Symbol, Union{Nothing,String}}}(
+    :strict => Dict{Symbol,Union{Nothing,String}}(
+        :boundary => "maxwell_surface_strict_reference_v1.csv",
+        :crossover => "crossover_surface_strict_reference_v1.csv",
+        :cep => "cep_boundary_strict_reference_v1.csv",
+        :spinodals => "spinodal_surface_strict_reference_v1.csv",
+    ),
+    :render => Dict{Symbol,Union{Nothing,String}}(
+        :boundary => "maxwell_surface_render.csv",
+        :crossover => "crossover_surface_render.csv",
+        :cep => "cep_boundary_render.csv",
+        :spinodals => "spinodal_surface_render.csv",
+    ),
+    :accepted => Dict{Symbol,Union{Nothing,String}}(
+        :boundary => "maxwell_surface_accepted_phase_map_v1.csv",
+        :crossover => "crossover_surface_accepted_phase_map_v1.csv",
+        :cep => "cep_boundary_accepted_phase_map_v1.csv",
+        :spinodals => "spinodal_surface_accepted_phase_map_v1.csv",
+    ),
+)
+
+const _IMPORT_SCHEMA_V1 = "pnjl_issue130_phase_reference_import_v1"
+const _IMPORT_SCHEMA_V2 = "pnjl_issue130_phase_reference_v2"
+
 const _REQUIRED_COLUMNS = Dict{Symbol, Tuple}(
     :boundary => (:xi, :T_MeV, :mu_MeV, :rho_hadron, :rho_quark, :area_residual),
     :crossover => (:xi, :mu_MeV, :T_MeV, :rho, :mu_CEP_proxy_MeV),
@@ -124,7 +153,10 @@ end
 
 function _status_certified(table::Symbol, row, layer::Symbol, row_number::Int)
     status = lowercase(_string(_row_value(row, :status)))
+    source_status = lowercase(_string(_row_value(row, :source_status)))
     interpolation = occursin("interpolat", status) ||
+        occursin("interpolat", source_status) ||
+        occursin("unresolved", source_status) ||
         lowercase(_string(_row_value(row, :layer))) == "interpolated_noncertified" ||
         occursin("interpolat", lowercase(_string(_row_value(row, :interpolation_method))))
     interpolation && return false
@@ -330,22 +362,32 @@ function _file_sha256(path::AbstractString)
 end
 
 function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow_runtime::Bool=false)
-    layer in (:strict, :derived, :render) || _error("phase-reference layer must be strict, derived, or render")
     root_abs = normpath(abspath(root))
     manifest = _manifest(joinpath(root_abs, "manifest.json"))
-    get(manifest, "schema_version", "") == "pnjl_issue130_phase_reference_import_v1" ||
+    schema_version = String(get(manifest, "schema_version", ""))
+    table_files = if schema_version == _IMPORT_SCHEMA_V1
+        layer in (:strict, :derived, :render) ||
+            _error("phase-reference layer must be strict, derived, or render for v1")
+        _TABLE_FILES
+    elseif schema_version == _IMPORT_SCHEMA_V2
+        layer in (:strict, :render, :accepted) ||
+            _error("phase-reference layer must be strict, render, or accepted for v2")
+        _TABLE_FILES_V2
+    else
         _error("candidate import schema mismatch")
+    end
     get(manifest, "runtime_consumption", true) === false || _error("candidate runtime_consumption must remain false")
     get(manifest, "reference_status", "") in ("candidate", "imported_candidate") ||
         _error("candidate reference_status is not a candidate state")
     layer_root = joinpath(root_abs, String(layer))
     layer_manifest = _manifest(joinpath(layer_root, "manifest.json"))
     get(layer_manifest, "layer", "") isa String || _error("candidate layer manifest has no layer identifier")
-    if layer === :render && allow_runtime
-        _error("render layer is visualization-only and cannot be runtime input")
+    if allow_runtime && layer in (:render, :accepted)
+        layer === :render && _error("render layer is visualization-only and cannot be runtime input")
+        _error("accepted layer is a downstream candidate and cannot be runtime input")
     end
     paths = Dict{Symbol,String}()
-    for (table, filename) in _TABLE_FILES[layer]
+    for (table, filename) in table_files[layer]
         filename === nothing && continue
         paths[table] = joinpath(layer_root, "tables", filename)
     end
@@ -356,7 +398,8 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
         root_abs,
         allow_runtime,
         tables,
-        (schema_version="pnjl_issue130_phase_reference_adapter_v1", row_counts=counts,
+        (schema_version="pnjl_issue130_phase_reference_adapter_v1", candidate_schema_version=schema_version,
+         row_counts=counts,
          uncertified_rows=uncertified,
          manifest_reference_status=String(get(manifest, "reference_status", "")),
          candidate_manifest_sha256=_file_sha256(joinpath(root_abs, "manifest.json")),
@@ -378,6 +421,8 @@ function load_phase_reference_runtime_with_fallback(candidate_root::AbstractStri
     crossover_path::AbstractString,
     spinodals_path::AbstractString,
 )
+    layer in (:render, :accepted) &&
+        _error("$(layer) layer is downstream-only and cannot be used for runtime fallback")
     legacy = load_legacy_phase_reference(
         boundary_path=boundary_path,
         cep_path=cep_path,
