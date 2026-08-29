@@ -43,7 +43,7 @@ updated_at = "2026-08-24"
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "review"
+status = "active"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
@@ -482,7 +482,7 @@ evidence = [
 id = "issue130-phase-reference-three-layer-accepted-map"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md"
 reason = "作者已确认以 strict、render、accepted 作为三层公共语义；derived 仅保留为内部构建证据。v2 的 render/spinodal 完整化、accepted 状态保留和 adapter smoke 已完成，当前等待作者审核后再决定下游默认与 legacy retirement。"
@@ -499,7 +499,7 @@ evidence = [
   "file:data/reference/pnjl/issue130_phase_reference_v2/claim_ledger.json",
   "file:tests/unit/python/test_issue130_phase_reference_v2.py",
   "file:tests/unit/relaxtime/test_phase_reference_adapter.jl",
-  "commit:e1769e4a",
+  "sha:e1769e4abea196a4f75303b1dbdf4e1081efbbba",
   "note:author_authorized_three_layer_strict_render_accepted_plan",
 ]
 
