@@ -553,11 +553,12 @@ def _accepted_fallback_eligible(table: str, row: Mapping[str, Any]) -> bool:
         return False
     if row.get("coverage_status") not in {"native_support", "interpolated_common_support"}:
         return False
-    if table == "crossover" and row.get("physical_region", "").lower() not in {
-        "",
-        "crossover_below_cep",
-    }:
-        return False
+    if table == "crossover":
+        if row.get("physical_region", "").lower() not in {"", "crossover_below_cep"}:
+            return False
+        endpoint = row.get("mu_CEP_proxy_MeV")
+        if endpoint not in (None, "") and float(row["muq_MeV"]) > float(endpoint) + 1e-9:
+            return False
     status = f"{row.get('status', '')} {row.get('source_status', '')}".lower()
     return not any(token in status for token in ("unresolved", "ambiguous", "not_converged"))
 
@@ -602,6 +603,22 @@ def build_runtime_view(
     candidate_counts: dict[str, int] = {}
     accepted_counts: dict[str, int] = {}
     legacy_counts: dict[str, int] = {}
+    legacy_excluded_counts: dict[str, int] = {}
+
+    cep_limits: dict[float, float] = {}
+    for row in candidate.tables.get("cep", ()):
+        if row.get("certified", False):
+            cep_limits[float(row["xi"])] = float(row["muq_CEP_proxy_MeV"])
+    for row in accepted_tables.get("cep", ()):
+        if _accepted_fallback_eligible("cep", row):
+            cep_limits.setdefault(float(row["xi"]), float(row["muq_CEP_proxy_MeV"]))
+
+    def cep_limit(xi: float) -> float | None:
+        exact = cep_limits.get(float(xi))
+        if exact is not None:
+            return exact
+        nearby = [limit for key_xi, limit in cep_limits.items() if abs(key_xi - float(xi)) <= 1e-6]
+        return nearby[0] if nearby else None
 
     def key(table: str, row: Mapping[str, Any]) -> tuple[Any, ...]:
         spec = _TABLES[table]
@@ -636,7 +653,14 @@ def build_runtime_view(
             seen.add(row_key)
             n_accepted += 1
         n_legacy = 0
+        n_legacy_excluded = 0
         for row in legacy_tables.get(table, ()):
+            if table == "crossover":
+                raw_muq = row.get("muq_MeV", row.get("mu_MeV"))
+                limit = cep_limit(float(row.get("xi"))) if raw_muq not in (None, "") else None
+                if limit is not None and float(raw_muq) > limit + 1e-9:
+                    n_legacy_excluded += 1
+                    continue
             row_key = key(table, row)
             if row_key in seen:
                 continue
@@ -656,6 +680,7 @@ def build_runtime_view(
         candidate_counts[table] = len(certified)
         accepted_counts[table] = n_accepted
         legacy_counts[table] = n_legacy
+        legacy_excluded_counts[table] = n_legacy_excluded
 
     accepted_enabled = bool(accepted_tables)
     runtime_view = (
@@ -674,6 +699,7 @@ def build_runtime_view(
             "candidate_row_counts": candidate_counts,
             "accepted_fallback_row_counts": accepted_counts,
             "legacy_fallback_row_counts": legacy_counts,
+            "legacy_excluded_row_counts": legacy_excluded_counts,
             # Keep the historical key as an alias for callers that only
             # reported the final legacy fallback count.
             "fallback_row_counts": legacy_counts,

@@ -334,6 +334,10 @@ function _accepted_fallback_eligible(table::Symbol, row)
     if table === :crossover && hasproperty(row, :physical_region)
         region = lowercase(_string(row.physical_region))
         region in ("", "crossover_below_cep") || return false
+        if hasproperty(row, :mu_CEP_proxy_MeV) && isfinite(row.mu_CEP_proxy_MeV) &&
+            row.muq_MeV > row.mu_CEP_proxy_MeV + 1e-9
+            return false
+        end
     end
     status = lowercase(join((_string(row.status), _string(row.source_status)), " "))
     any(token -> occursin(token, status), ("unresolved", "ambiguous", "not_converged")) && return false
@@ -350,6 +354,20 @@ function _merge_candidate_with_accepted_and_legacy(
     candidate_counts = Dict{String,Int}()
     accepted_counts = Dict{String,Int}()
     legacy_counts = Dict{String,Int}()
+    legacy_excluded_counts = Dict{String,Int}()
+    cep_limits = NamedTuple[]
+    for row in get(candidate_runtime.tables, :cep, NamedTuple[])
+        _runtime_eligible(row) && push!(cep_limits, row)
+    end
+    if accepted !== nothing
+        for row in get(accepted.tables, :cep, NamedTuple[])
+            _accepted_fallback_eligible(:cep, row) && push!(cep_limits, row)
+        end
+    end
+    function cep_limit(xi)
+        exact = findfirst(row -> isapprox(row.xi, xi; atol=1e-6, rtol=0.0), cep_limits)
+        exact === nothing ? nothing : cep_limits[exact].muq_CEP_MeV
+    end
     for table in _TABLE_ORDER
         rows = NamedTuple[]
         seen = Set{Any}()
@@ -391,7 +409,30 @@ function _merge_candidate_with_accepted_and_legacy(
             push!(seen, key)
             n_legacy += 1
         end
+        n_legacy_excluded = 0
+        # The historical crossover file contains derivative peaks on both
+        # sides of the endpoint.  Only the below-CEP part has crossover
+        # semantics in a runtime phase view.
+        if table === :crossover
+            filtered_rows = NamedTuple[]
+            for row in rows
+                if row.source_layer == "legacy_fallback"
+                    limit = cep_limit(row.xi)
+                    if limit !== nothing && row.muq_MeV > limit + 1e-9
+                        n_legacy_excluded += 1
+                        continue
+                    end
+                end
+                push!(filtered_rows, row)
+            end
+            rows = filtered_rows
+        end
+        # Count only rows that remain available to this runtime view.  Rows
+        # above a known CEP are retained in the byte-preserving legacy
+        # snapshot, but are not runtime crossover fallback rows.
+        n_legacy -= n_legacy_excluded
         legacy_counts[String(table)] = n_legacy
+        legacy_excluded_counts[String(table)] = n_legacy_excluded
         tables[table] = rows
     end
     accepted_enabled = accepted !== nothing
@@ -407,6 +448,7 @@ function _merge_candidate_with_accepted_and_legacy(
         candidate_row_counts=candidate_counts,
         accepted_fallback_row_counts=accepted_counts,
         legacy_fallback_row_counts=legacy_counts,
+        legacy_excluded_row_counts=legacy_excluded_counts,
         # Preserve the historical diagnostic key for existing consumers.
         fallback_row_counts=legacy_counts,
         legacy_row_counts=legacy.diagnostics.row_counts,

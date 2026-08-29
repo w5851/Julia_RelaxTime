@@ -46,8 +46,10 @@ strict candidate 的完整 key 集一致地覆盖了 strict 的 4,071 个未认�
 - 未标记 `author_accepted_for_downstream` 的行不能进入 accepted fallback；
 - `extrapolation=true`、support 外行、`unresolved`、`ambiguous` 或
   `not_converged` 状态不能进入 accepted fallback；
-- crossover 只有 `physical_region=crossover_below_cep`（或空的历史兼容值）可
-  进入；Maxwell/CEP/spinodal 保留各自字段和 bracket 语义；
+- crossover 只有 `physical_region=crossover_below_cep` 可进入；历史空字段只在
+  同行存在有限 `mu_CEP_proxy_MeV` 且 `muq_MeV <= mu_CEP_proxy_MeV` 时兼容，
+  以确保 CEP 以上的导数峰不被赋予 crossover 物理含义。Maxwell/CEP/spinodal
+  保留各自字段和 bracket 语义；
 - accepted 行与 strict/legacy 使用同一 adapter key 去重，不能按行号配对；
 - accepted 资格失败或 key 仍缺失时才使用 legacy，并记录最终来源。
 
@@ -59,12 +61,37 @@ strict candidate 的完整 key 集一致地覆盖了 strict 的 4,071 个未认�
   legacy rollback；`run_gap_transport_scan.jl` sidecar 写入顺序、hash 和逐表计数；
 - [x] Python/Julia fixture 覆盖 accepted 非证书行优先于 legacy，以及 strict/
   render/accepted runtime 边界；
+- [x] fixture 覆盖 CEP 以上历史 crossover 导数峰：该类行保留在 legacy snapshot，
+  但从 runtime crossover fallback 中排除并单独计数；
 - [ ] 增加 solver-free consumer smoke/replay v3，确认实际 active consumers 的
   fallback 矩阵与 accepted 资格统计；
 - [ ] 作者审核 fallback 矩阵后，才决定是否可以继续 legacy path retirement；
   在此之前不创建物理删除 PR。
 
-## 5. 非目标与回退
+## 5. 当前 solver-free 默认 materialization
+
+在当前 candidate/accepted/legacy 文件树上只读加载得到的来源计数为：
+
+| 表 | strict candidate | accepted fallback | legacy retained | legacy excluded |
+|---|---:|---:|---:|---:|
+| boundary/Maxwell | 3,091 | 9,446 | 34 | 0 |
+| crossover | 1,343 | 1,792 | 190 | 125 |
+| CEP | 90 | 71 | 0 | 0 |
+| spinodals | 6,886 | 5,103 | 31 | 0 |
+
+`legacy retained` 是当前 runtime view 实际仍会读取的逐键 fallback；
+`legacy excluded=125` 是历史 crossover 表中 `muq_MeV > mu_CEP_proxy_MeV` 的
+导数峰，它们不是待补齐的物理 crossover 行。原始 snapshot 仍保持
+`boundary 48 / crossover 336 / CEP 11 / spinodals 57` 的字节级完整性。
+
+这里要区分“参数范围覆盖”和“runtime key 覆盖”：accepted package 在其声明的共同
+support 内提供派生网格，但 adapter 当前按各表的 exact key 去重（boundary/spinodals
+为 `(xi,T_MeV)`、crossover 为 `(xi,muq_MeV)`、CEP 为 `(xi)`），不会在 runtime
+入口隐式插值。因此 accepted 目前不能逐键完全替代 legacy；它已经优先接管了
+strict 的大量 non-certified gap，但剩余的 34/190/0/31 行仍需 legacy 或另一个
+明确的插值适配合同。
+
+## 6. 非目标与回退
 
 本任务不把 accepted 提升为 strict，不修改 `data/reference/**` 的数值，不删除
 legacy snapshot，也不启动新的 PNJL/RS numerical run。若 accepted manifest、

@@ -208,7 +208,7 @@ end
     spinodals = joinpath(legacy_root, "spinodals.csv")
     write(boundary, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark\n0.0,90.0,301.0,1.0,2.0\n")
     write(cep, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV\n0.0,121.0,299.0,897.0\n")
-    write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,100.0,160.0,1.0\n")
+    write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,250.0,160.0,1.0\n0.0,350.0,150.0,1.1\n")
     write(spinodals, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV\n0.0,100.0,320.0,280.0\n")
 
     runtime = PRA.load_phase_reference_runtime_with_fallback(
@@ -224,6 +224,9 @@ end
     @test summary.fallback_order == "strict_candidate>accepted_downstream>legacy_snapshot"
     @test summary.accepted_fallback_row_counts["boundary"] == 1
     @test summary.legacy_fallback_row_counts["boundary"] == 1
+    @test summary.legacy_fallback_row_counts["crossover"] == 1
+    @test summary.legacy_excluded_row_counts["crossover"] == 1
+    @test only(filter(row -> row.source_layer == "legacy_fallback", runtime.tables[:crossover])).muq_MeV == 250.0
     accepted_row = only(filter(row -> row.source_layer == "accepted_fallback", runtime.tables[:boundary]))
     @test !accepted_row.certified
     @test accepted_row.runtime_eligible

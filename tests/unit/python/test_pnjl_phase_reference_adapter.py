@@ -357,3 +357,28 @@ def test_runtime_view_rejects_unaccepted_or_out_of_support_rows(tmp_path: Path) 
     assert runtime.diagnostics["accepted_fallback_row_counts"]["boundary"] == 0
     assert runtime.diagnostics["legacy_fallback_row_counts"]["boundary"] == 1
     assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"
+
+
+def test_runtime_view_excludes_crossover_rows_above_cep(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_v2_candidate(root)
+    candidate = load_phase_reference(root, layer="strict")
+    accepted = load_phase_reference(root, layer="accepted")
+
+    legacy_below = dict(candidate.tables["crossover"][0])
+    legacy_below.update({"muq_MeV": 250.0, "mu_MeV": 250.0})
+    legacy_above = dict(candidate.tables["crossover"][0])
+    legacy_above.update({"muq_MeV": 350.0, "mu_MeV": 350.0})
+
+    runtime = build_runtime_view(
+        candidate,
+        accepted_bundle=accepted,
+        legacy_tables={"crossover": [legacy_below, legacy_above]},
+    )
+
+    legacy_rows = [
+        row for row in runtime.tables["crossover"] if row["source_layer"] == "legacy_fallback"
+    ]
+    assert [row["muq_MeV"] for row in legacy_rows] == [250.0]
+    assert runtime.diagnostics["legacy_fallback_row_counts"]["crossover"] == 1
+    assert runtime.diagnostics["legacy_excluded_row_counts"]["crossover"] == 1
