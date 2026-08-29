@@ -163,6 +163,18 @@ g(\omega)
 - `density_policy = :strict_normal_domain`
 - `noanom_policy = :none`
 
+可选的 `interaction` 仅用于显式诊断耦合 A/B：
+
+- `nothing`（默认）继续使用旧 `EffectiveCouplings` 的 `K123/K4567`；
+- `PhaseShiftInteractionSpec` 允许调用方提供一个带有 `backend`、`pair`、
+  `channel`、`coupling`、`numerator_factor` 和 `denominator_factor` 的不可变规格；
+- `FullKMTInteraction` 会把 `π^±` 映射到 `K12`，把 `K^±` 映射到 `K45`。
+
+完整 KMT A/B 诊断当前故意沿用相移密度旧的标量分母
+`D = 2K/(1-4KΠ)`，并在返回值中回显 `interaction_*` 字段。它只改变给定
+平均场背景上的带电耦合，不修改 PNJL/BQS 平衡方程，也不代表完整
+`Omega_M` 反馈或已经认证的 charged-RPA 归一化。
+
 当前支持两个正式 `scheme`：
 
 - `:current` -> `:phase_shift_current`
@@ -238,6 +250,12 @@ No-anomalous policy：
 - `unsafe_bose_count`
 - `min_E_minus_mu`
 - `bose_x_min`
+- `interaction_backend`
+- `interaction_pair`
+- `interaction_channel`
+- `interaction_coupling`
+- `interaction_numerator_factor`
+- `interaction_denominator_factor`
 - `status`
 - `message`
 - 当前积分配置回显

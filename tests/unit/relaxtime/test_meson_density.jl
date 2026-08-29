@@ -37,6 +37,8 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    stable_meson_number_density,
                                    stable_kpi_ratio,
                                    stable_kpi_scan
+using Main.RelaxTime.MesonDensity: PhaseShiftInteractionSpec
+using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction, charged_coupling
 
 const ZETA3 = 1.2020569031595942
 
@@ -272,6 +274,39 @@ end
     @test summary.k_density.scheme == :phase_shift_gbu_reference
     @test summary.n_pi > 0.0
     @test summary.n_K > 0.0
+end
+
+@testset "MesonDensity charged KMT interaction A/B diagnostic" begin
+    qp = (m=(u=0.098, d=0.104, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.095, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+    kernel = build_full_kmt_interaction((-0.30, -0.22, -0.10); G=1.0, K=0.15)
+
+    custom = PhaseShiftInteractionSpec(:test, :K12, :P, 0.7; denominator_factor=2.0)
+    @test custom.backend == :test
+    @test custom.coupling == 0.7
+    @test custom.denominator_factor == 2.0
+    @test_throws ArgumentError PhaseShiftInteractionSpec(:test, :K12, :P, 0.7; denominator_factor=0.0)
+
+    legacy = phase_shift_meson_number_density(
+        :pi_plus, qp, tp;
+        degeneracy=1, qmax=4.0, q_nodes=4, omega_min=0.05, omega_max=3.0, omega_nodes=4,
+    )
+    full = phase_shift_meson_number_density(
+        :pi_plus, qp, tp;
+        degeneracy=1, qmax=4.0, q_nodes=4, omega_min=0.05, omega_max=3.0, omega_nodes=4,
+        interaction=kernel,
+    )
+    @test legacy.interaction_backend == :legacy_effective
+    @test full.interaction_backend == :full_kmt_charged
+    @test full.interaction_pair == :K12
+    @test full.interaction_coupling ≈ charged_coupling(kernel, :K12, :P)
+    @test full.interaction_denominator_factor == 4.0
+    @test isfinite(full.density)
+    @test_throws ArgumentError phase_shift_meson_number_density(
+        :pi, qp, tp;
+        degeneracy=3, qmax=2.0, q_nodes=2, omega_min=0.05, omega_max=1.5, omega_nodes=2,
+        interaction=kernel,
+    )
 end
 
 @testset "MesonDensity real-axis mode and Bose-domain policy metadata" begin

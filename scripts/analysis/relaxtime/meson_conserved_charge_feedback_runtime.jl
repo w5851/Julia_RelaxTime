@@ -10,15 +10,17 @@ module MesonConservedChargeFeedbackRuntime
 
 using LinearAlgebra: norm
 
-using Main.Constants_PNJL: ħc_MeV_fm
+using Main.Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm
 using Main.Models
 using Main.MesonConservedChargeFeedbackUtils
+using Main.MesonInteractionKernel: build_full_kmt_interaction, charged_coupling
 using Main.MesonDensity: phase_shift_meson_number_density
 
 export FeedbackSettings
 export build_candidate_evaluator
 export solve_feedback_level
 export solve_partial_feedback_point
+export solve_quark_only_bu_ab_point
 export candidate_timing_summary
 
 Base.@kwdef struct FeedbackSettings
@@ -50,7 +52,14 @@ function _validate_settings(settings::FeedbackSettings)
     return nothing
 end
 
-@inline function _phase_density(meson::Symbol, mu_M::Float64, qp, tp, settings::FeedbackSettings)
+@inline function _phase_density(
+    meson::Symbol,
+    mu_M::Float64,
+    qp,
+    tp,
+    settings::FeedbackSettings;
+    interaction=nothing,
+)
     return phase_shift_meson_number_density(
         meson,
         qp,
@@ -66,6 +75,32 @@ end
         eta=settings.eta,
         density_policy=settings.density_policy,
         bose_x_min=settings.bose_x_min,
+        interaction=interaction,
+    )
+end
+
+function _model_kmt_couplings(model)
+    if hasproperty(model, :params)
+        params = getproperty(model, :params)
+        if hasproperty(params, :G_fm2) && hasproperty(params, :K_fm5)
+            return (G=Float64(params.G_fm2), K=Float64(params.K_fm5), source=:model_params)
+        end
+    end
+    return (G=Float64(G_fm2), K=Float64(K_fm5), source=:constants_fallback)
+end
+
+function _charged_density_set(meson_mu, qp, tp, settings::FeedbackSettings; interaction=nothing)
+    density_start = time_ns()
+    pi_plus = _phase_density(:pi_plus, meson_mu.mu_pi_plus, qp, tp, settings; interaction=interaction)
+    pi_minus = _phase_density(:pi_minus, meson_mu.mu_pi_minus, qp, tp, settings; interaction=interaction)
+    K_plus = _phase_density(:K_plus, meson_mu.mu_K_plus, qp, tp, settings; interaction=interaction)
+    K_minus = _phase_density(:K_minus, meson_mu.mu_K_minus, qp, tp, settings; interaction=interaction)
+    return (
+        pi_plus=pi_plus,
+        pi_minus=pi_minus,
+        K_plus=K_plus,
+        K_minus=K_minus,
+        elapsed_s=(time_ns() - density_start) / 1.0e9,
     )
 end
 
@@ -355,6 +390,160 @@ function solve_partial_feedback_point(
         baseline_elapsed_s=baseline_elapsed_s,
         feedback=feedback,
         total_elapsed_s=baseline_elapsed_s + feedback.outer_elapsed_s,
+    )
+end
+
+"""
+    solve_quark_only_bu_ab_point(model, T_fm, muB_fm, settings; kwargs...)
+
+Solve the existing BQS quark-only equilibrium once and evaluate the four
+charged BU densities twice on that same state: first with the legacy effective
+couplings and then with the full charged KMT couplings `K12`/`K45`.  The
+calculation is intentionally post-processing only.  In particular, the full
+kernel does not alter `Omega` or the BQS stationarity equations here.
+"""
+function solve_quark_only_bu_ab_point(
+    model,
+    T_fm::Float64,
+    muB_fm::Float64,
+    settings::FeedbackSettings;
+    baseline_seed=nothing,
+    target_ratio::Float64=0.4,
+    rho_S_target::Float64=0.0,
+    rho0::Float64=0.16,
+    p_num::Int=8,
+    t_num::Int=4,
+    quark_residual_norm_max::Float64=1e-5,
+    quark_iterations::Int=200,
+)
+    _validate_settings(settings)
+    mode = FixedMuBConservedCharges(muB_fm, target_ratio, rho_S_target)
+    baseline_kwargs = (
+        p_num=p_num,
+        t_num=t_num,
+        residual_norm_max=quark_residual_norm_max,
+        iterations=quark_iterations,
+        xi=0.0,
+    )
+    baseline_kwargs = baseline_seed === nothing ? baseline_kwargs : (; baseline_kwargs..., seed_guess=baseline_seed)
+
+    baseline_start = time_ns()
+    baseline = solve(model, mode, T_fm; baseline_kwargs...)
+    baseline_elapsed_s = (time_ns() - baseline_start) / 1.0e9
+    if !baseline.converged
+        return (
+            converged=false,
+            reason=:quark_only_not_converged,
+            message="quark-only baseline residual $(baseline.residual_norm) exceeds $(quark_residual_norm_max)",
+            baseline=baseline,
+            baseline_mu=nothing,
+            baseline_bqs=nothing,
+            meson_mu=nothing,
+            legacy=nothing,
+            full=nothing,
+            full_kernel=nothing,
+            kernel_couplings=nothing,
+            baseline_elapsed_s=baseline_elapsed_s,
+            legacy_density_elapsed_s=NaN,
+            full_density_elapsed_s=NaN,
+            total_elapsed_s=baseline_elapsed_s,
+        )
+    end
+
+    conserved_mu = conserved_mu_from_flavor(baseline.mu_vec...)
+    baseline_rho = model_rho(
+        model,
+        baseline.x_state,
+        baseline.mu_vec,
+        T_fm;
+        xi=0.0,
+        p_num=p_num,
+        t_num=t_num,
+    )
+    baseline_bqs = conserved_densities_from_flavor(baseline_rho)
+    masses = calculate_mass_vec(model, meanfield_state(baseline.x_state).phi)
+    qp = (
+        m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
+        μ=(u=Float64(baseline.mu_vec[1]), d=Float64(baseline.mu_vec[2]), s=Float64(baseline.mu_vec[3])),
+    )
+    state = meanfield_state(baseline.x_state)
+    tp = (T=T_fm, Φ=Float64(state.Phi), Φbar=Float64(state.PhiBar), ξ=0.0)
+    meson_mu = charged_meson_chemical_potentials(conserved_mu.mu_Q, conserved_mu.mu_S)
+
+    legacy = _charged_density_set(meson_mu, qp, tp, settings)
+    kmt_params = _model_kmt_couplings(model)
+    full_kernel = build_full_kmt_interaction(
+        state.phi;
+        G=kmt_params.G,
+        K=kmt_params.K,
+    )
+    full = _charged_density_set(meson_mu, qp, tp, settings; interaction=full_kernel)
+
+    statuses = (
+        legacy.pi_plus.status, legacy.pi_minus.status, legacy.K_plus.status, legacy.K_minus.status,
+        full.pi_plus.status, full.pi_minus.status, full.K_plus.status, full.K_minus.status,
+    )
+    converged = all(status === :ok for status in statuses)
+    reason = converged ? :ok : :bu_density_status_not_ok
+    message = converged ? "" : "one or more BU density channels returned a non-ok status"
+    safe_ratio(numerator, denominator) = denominator > 0.0 ? numerator / denominator : NaN
+    kernel_couplings = (
+        K12_P=charged_coupling(full_kernel, :K12, :P),
+        K45_P=charged_coupling(full_kernel, :K45, :P),
+        K67_P=charged_coupling(full_kernel, :K67, :P),
+        K03_P=full_kernel.neutral_P[1, 2],
+        K38_P=full_kernel.neutral_P[2, 3],
+        G=kmt_params.G,
+        K=kmt_params.K,
+        source=kmt_params.source,
+    )
+    legacy_payload = (
+        n_pi_plus=Float64(legacy.pi_plus.density),
+        n_pi_minus=Float64(legacy.pi_minus.density),
+        n_K_plus=Float64(legacy.K_plus.density),
+        n_K_minus=Float64(legacy.K_minus.density),
+        Kplus_over_piplus=safe_ratio(legacy.K_plus.density, legacy.pi_plus.density),
+        Kminus_over_piminus=safe_ratio(legacy.K_minus.density, legacy.pi_minus.density),
+        pi_plus=legacy.pi_plus,
+        pi_minus=legacy.pi_minus,
+        K_plus=legacy.K_plus,
+        K_minus=legacy.K_minus,
+    )
+    full_payload = (
+        n_pi_plus=Float64(full.pi_plus.density),
+        n_pi_minus=Float64(full.pi_minus.density),
+        n_K_plus=Float64(full.K_plus.density),
+        n_K_minus=Float64(full.K_minus.density),
+        Kplus_over_piplus=safe_ratio(full.K_plus.density, full.pi_plus.density),
+        Kminus_over_piminus=safe_ratio(full.K_minus.density, full.pi_minus.density),
+        pi_plus=full.pi_plus,
+        pi_minus=full.pi_minus,
+        K_plus=full.K_plus,
+        K_minus=full.K_minus,
+    )
+
+    return (
+        converged=converged,
+        reason=reason,
+        message=message,
+        baseline=baseline,
+        baseline_mu=conserved_mu,
+        baseline_bqs=baseline_bqs,
+        meson_mu=meson_mu,
+        qp=qp,
+        thermo=tp,
+        masses=(u=qp.m.u, d=qp.m.d, s=qp.m.s),
+        legacy=legacy_payload,
+        full=full_payload,
+        full_kernel=full_kernel,
+        kernel_couplings=kernel_couplings,
+        target_ratio=target_ratio,
+        rho_S_target=rho_S_target,
+        rho0=rho0,
+        baseline_elapsed_s=baseline_elapsed_s,
+        legacy_density_elapsed_s=legacy.elapsed_s,
+        full_density_elapsed_s=full.elapsed_s,
+        total_elapsed_s=baseline_elapsed_s + legacy.elapsed_s + full.elapsed_s,
     )
 end
 
