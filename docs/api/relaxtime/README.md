@@ -22,6 +22,7 @@
 - `workflow/MesonDensityWorkflow.md`
 - `meson_density/MesonDensity.md`
 - `meson_thermo/MesonThermodynamics.md`
+- `propagator/MesonInteractionKernel.md`（Phase 1 完整 KMT 相互作用核后端）
 
 如果你的目标是“从统一 workflow 直接生成 `n_pi(T)` / `n_K(T)` / `K/\pi(T)` 的扫描输出”，优先结合以下页面与脚本：
 
@@ -46,6 +47,7 @@
 - `workflow/TransportWorkflow.md`
 - `workflow/MesonDensityWorkflow.md`
 - `meson_thermo/MesonThermodynamics.md`
+- `propagator/MesonInteractionKernel.md`
 - `scattering/*`
 - `propagator/*`
 - `polarization/*`
