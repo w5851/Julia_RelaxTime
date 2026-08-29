@@ -14,7 +14,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-phase-reference-three-layer-v2"
-current_sha = "e1769e4abea196a4f75303b1dbdf4e1081efbbba"
+current_sha = "a517122c36cb28da7685443da5b7248ca9b5e0e8"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
