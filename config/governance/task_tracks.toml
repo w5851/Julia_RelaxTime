@@ -1,20 +1,20 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-29"
+updated_at = "2026-08-30"
 
 [[tracks]]
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
-status = "active"
-current_task = "issue130-phase-reference-legacy-retirement"
+status = "review"
+current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "accepted 已获作者批准并作为所有 phase-reference 下游（含 phase-guided transport）的默认 runtime source；strict 仅显式开启。6 个 active legacy path contract 已迁移并由 audit v4 验证为 0；下一步单独提出精确 allowlist 的物理删除 PR。"
+next_action = "PNJL legacy snapshot 物理删除 PR #285 已通过全部 CI 并以 main@dd943779a9ddc170491a61e69e2e41198532084d 合并；accepted 继续作为所有 phase-reference 下游默认、strict 仅显式开启，legacy 不再提供 fallback/rollback。下一步回到 Issue #130 的 full-hybrid author review。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-pnjl-legacy-reference-physical-deletion"
-current_sha = "7b02d84d3c38c60500e82b769eb0f9c22de39c9b"
+current_branch = "main"
+current_sha = "dd943779a9ddc170491a61e69e2e41198532084d"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -458,15 +458,15 @@ evidence = ["file:docs/dev/active/2026-08-24_Issue130_phase-reference-retirement
 id = "issue130-phase-reference-legacy-retirement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
-task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
-reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 已不再是 runtime fallback 或 rollback。accepted-primary audit v3 已证明运行时依赖为 0，当前只剩 active path contract 迁移和独立物理删除门禁。"
-next_action = "path-retirement implementation 已完成：6 个 active legacy path contract 已迁移到 accepted，solver-free audit v4 为 active_path_contract_count=0；physical-deletion proposal branch 已按精确 allowlist 删除 8 个 legacy snapshot 文件，validator verdict=physical_deletion_proposal_valid，待 PR/CI 与作者合并授权；合并后再归档任务。"
+task_file = "docs/dev/archived/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
+reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 已完成 accepted-primary/path retirement 与精确 allowlist 物理删除，旧 snapshot 不再是 runtime fallback 或 rollback。"
+next_action = "PR #285 已通过全部 CI 并以 main@dd943779a9ddc170491a61e69e2e41198532084d squash 合并；8 个 legacy snapshot 文件已物理移除，删除 validator、恢复边界与 evidence 已接受，本任务完成并归档。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md",
+  "file:docs/dev/archived/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md",
   "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
   "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/tables/legacy_snapshot_inventory.csv",
   "file:scripts/pnjl/phase_reference_adapter.py",
@@ -486,7 +486,7 @@ evidence = [
   "sha:2b477aa1b0d876bc30dd4c0aa95ec948aef84a56",
   "note:legacy_audit_v2_post_acceptance_inconclusive_fallback382_active_contract_blockers25_unknown_active0_20260829",
   "review:accepted_primary_runtime_no_legacy_fallback_or_rollback",
-  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
+  "file:docs/dev/archived/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
   "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
   "file:scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py",
   "note:accepted_primary_runtime_ready_path_retirement_pending_active_path_contracts6_runtime_fallback0",
@@ -498,7 +498,8 @@ evidence = [
   "file:tests/unit/python/test_issue130_phase_reference_physical_deletion.py",
   "sha:9aa4c313901ca0c91e851f58514e3df9aa124df4",
   "pr:285",
-  "note:physical_deletion_proposal_valid_allowlist8_files_50749_bytes_recovery_ref_9aa4c313_pending_merge_author_review",
+  "sha:dd943779a9ddc170491a61e69e2e41198532084d",
+  "note:physical_deletion_merged_allowlist8_files_50749_bytes_recovery_ref_9aa4c313_no_runtime_fallback_or_rollback",
 ]
 
 [[items]]
@@ -556,23 +557,25 @@ evidence = [
 id = "issue130-phase-reference-accepted-primary-runtime"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
-task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md"
-reason = "作者已明确 phase-guided transport 等 phase-reference consumer 默认使用 accepted；strict 只在显式模式下使用，legacy fallback/rollback 不再保留。"
-next_action = "path-retirement branch 已迁移 6 个 active legacy path contract，并生成 audit v4；等待本 PR CI/作者审核，之后才创建独立 physical-deletion PR。"
+task_file = "docs/dev/archived/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md"
+reason = "作者已明确 phase-guided transport 等 phase-reference consumer 默认使用 accepted；strict 只在显式模式下使用，legacy fallback/rollback 不再保留。path retirement 与物理删除已完成。"
+next_action = "PR #280 完成 accepted-primary runtime，PR #285 完成 PNJL legacy snapshot 物理删除并以 main@dd943779a9ddc170491a61e69e2e41198532084d 合并；本任务完成并归档。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
+  "file:docs/dev/archived/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md",
   "file:scripts/pnjl/phase_reference_adapter.py",
   "file:scripts/relaxtime/phase_reference_adapter.jl",
   "file:scripts/relaxtime/run_gap_transport_scan.jl",
   "file:tests/unit/python/test_issue130_phase_reference_accepted_primary_audit.py",
   "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
   "pr:280",
+  "pr:285",
   "sha:863dea0bc4dcec660a720831783df42fcb5868f8",
-  "note:accepted_primary_runtime_ready_strict_explicit_runtime_fallback0_path_retirement_pending",
+  "sha:dd943779a9ddc170491a61e69e2e41198532084d",
+  "note:accepted_primary_runtime_and_legacy_physical_deletion_complete_strict_explicit_no_runtime_fallback_or_rollback",
 ]
 
 [[items]]

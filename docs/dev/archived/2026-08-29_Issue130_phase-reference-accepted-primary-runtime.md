@@ -1,6 +1,18 @@
+---
+title: Issue #130：accepted-primary runtime 与 PNJL legacy retirement
+archived: true
+original: docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-primary-runtime.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：accepted-primary runtime 与 PNJL legacy retirement
 
-状态：active。作者已明确 phase-guided transport 属于 phase-reference 的下游消费者，
+状态：completed。作者已明确 phase-guided transport 属于 phase-reference 的下游消费者，
 `accepted` 是默认 runtime source；`strict` 仅在显式开启时作为 certified-only source。
 旧 PNJL legacy snapshot 不再作为 runtime fallback 或 rollback，先完成 path retirement，
 再以精确 allowlist 做物理删除。
@@ -78,8 +90,9 @@ legacy key。对超出 accepted support 的请求返回缺失/错误，由调用
   active legacy path contract；这不是 runtime fallback 依赖。
 - [x] path-retirement implementation：6 个 active 默认路径契约已迁移到 accepted；旧
   CSV 仅保留显式 fixture/历史输入能力，snapshot 仍保留；solver-free audit v4 已重跑。
-- [ ] physical-deletion PR：在 path-retirement CI、静态扫描、恢复 manifest 和作者授权
-  后删除 snapshot。
+- [x] physical-deletion PR：PR #285 在 path-retirement CI、静态扫描、恢复 manifest 和作者
+  授权后删除 snapshot，并 squash 合并为
+  `dd943779a9ddc170491a61e69e2e41198532084d`。
 
 ## 5. 非目标与停止条件
 
@@ -95,7 +108,8 @@ legacy key。对超出 accepted support 的请求返回缺失/错误，由调用
 `codex/issue130-pnjl-phase-reference-path-retirement` 分支，合并前不把未合并分支
 写成 main provenance。迁移后的 solver-free evidence 为
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/`，其
-`active_path_contract_count=0`、`physical_deletion_eligible=true` 仅表示可以提出
-独立删除 PR，不表示本分支已经删除 snapshot。
+`active_path_contract_count=0`、`physical_deletion_eligible=true` 曾表示可以提出
+独立删除 PR；PR #285 已完成物理删除。
 v1/v2 legacy coverage audit 保留为历史基线；v3 audit 仍作为历史基线，v4 audit 保存摘要、邻近覆盖、
-consumer matrix、manifest 和 claim ledger，不复制原始全量曲线。
+consumer matrix、manifest 和 claim ledger，不复制原始全量曲线。legacy 现在只能从 Git
+recovery ref 在临时分支恢复，不能作为 runtime fallback/rollback。
