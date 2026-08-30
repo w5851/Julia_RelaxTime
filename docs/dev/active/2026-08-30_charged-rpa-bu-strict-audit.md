@@ -183,14 +183,17 @@ coupling substitution”。
 
 - [x] 新增独立的 charged scalar-RPA kernel/spec，显式记录 `pair`、P/S、
   numerator、denominator、retarded convention 和 normalization source。
-- [ ] 用同位旋对称极限把该 backend 与旧 `MesonPropagator` 做代数/极点 parity
+- [x] 用同位旋对称极限把该 backend 与旧 `MesonPropagator` 做代数/极点 parity
   测试；不以一轮冻结线 A/B 代替该测试。
-- [ ] 为 `K^+`、`K^-` 分别保留 `Pi_{us}`、`Pi_{su}` 的输入和诊断元数据。
+- [x] 为 `K^+`、`K^-` 分别保留 `Pi_{us}`、`Pi_{su}` 的输入和诊断元数据。
 
 Phase B 的第一项已由 `src/relaxtime/ChargedRPAKernel.jl` 落地。该模块只提供
 经过校验的通道/归一化契约和纯标量代数；默认 `MesonPropagator`、极化 provider、
 相移和 BU 密度语义保持不变。其两个分母候选分别标记为
 `:legacy_scalar_diagnostic` 与 `:neutral_matrix_candidate`，尚未选择生产定义。
+同位旋对称 parity 和有序 `Pi_{us}/Pi_{su}` 输入已由
+`tests/unit/relaxtime/test_charged_rpa_kernel.jl` 锁定；这仍不代表 Phase C 的
+retarded bubble provider 已实现。
 
 ### Phase C：charged bubble provider 与极点
 

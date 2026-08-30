@@ -64,6 +64,11 @@ Goldstone 条件和极点/相移一致性决定唯一形式。
 - `charged_rpa_propagator(spec, K_a, Pi_a)`：返回
   `c_num K_a/(1-c_den K_a Pi_a)`；`D_a` 的单位是 `fm^2`。
 
+`K_plus` 与 `K_minus` 的 `pair` 字段分别固定为 `(:u,:s)` 和 `(:s,:u)`。
+调用方应把对应的 `Pi_us`、`Pi_su` 分别传入同一函数；契约不会假设两者相等。
+在 `phi_u=phi_d` 时，测试还核对了默认 `:legacy_scalar` 公式与旧
+`MesonPropagator` 的代数值和近极点位置相容。
+
 项目自然单位约定为：`K_a` 为 `fm^2`，`Pi_a` 为 `fm^-2`，所以 `K_a Pi_a` 无量纲，
 传播子 `D_a` 为 `fm^2`。输入必须有限；精确零分母会抛出 `DomainError`，不会用
 `MesonPropagator` 的历史 epsilon 静默平滑。
