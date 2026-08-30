@@ -1,3 +1,15 @@
+---
+title: Issue #130：phase-reference adapter contract 与引用迁移
+archived: true
+original: docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：phase-reference adapter contract 与引用迁移
 
 状态：accepted。PR253 的 solver-free compatibility audit、PR259 consumer migration 与 PR260

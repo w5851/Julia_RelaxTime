@@ -1,3 +1,15 @@
+---
+title: Issue #130：phase-reference runtime switch 任务单
+archived: true
+original: docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：phase-reference runtime switch 任务单
 
 状态：accepted（历史合同已 superseded）。PR #259 已完成 Julia/Python consumer adapter

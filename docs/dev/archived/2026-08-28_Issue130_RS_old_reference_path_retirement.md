@@ -1,3 +1,15 @@
+---
+title: Issue #130：RS old `prod_v1` path retirement implementation
+archived: true
+original: docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：RS old `prod_v1` path retirement implementation
 
 状态：accepted；PR #277 已通过 CI 并以 `main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5`

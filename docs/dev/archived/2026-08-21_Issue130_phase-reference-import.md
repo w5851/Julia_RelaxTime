@@ -1,3 +1,15 @@
+---
+title: Issue #130：versioned phase-reference import 任务单
+archived: true
+original: docs/dev/active/2026-08-21_Issue130_phase-reference-import.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：versioned phase-reference import 任务单
 
 状态：review；promotion gate v1 已在 PR #250 合并，新的 import candidate 已在本分支生成，

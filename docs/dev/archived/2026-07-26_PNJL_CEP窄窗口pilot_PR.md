@@ -1,3 +1,15 @@
+---
+title: PNJL CEP 窄窗口 pilot PR
+archived: true
+original: docs/dev/active/2026-07-26_PNJL_CEP窄窗口pilot_PR.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL CEP 窄窗口 pilot PR
 
 ## 范围与不变项

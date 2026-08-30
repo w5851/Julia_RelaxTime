@@ -1,3 +1,15 @@
+---
+title: Issue #130：accepted phase-reference runtime fallback 合同修订
+archived: true
+original: docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：accepted phase-reference runtime fallback 合同修订
 
 状态：superseded（2026-08-29）。该任务曾修订此前“accepted 不得进入 runtime”的明确禁止，原因是

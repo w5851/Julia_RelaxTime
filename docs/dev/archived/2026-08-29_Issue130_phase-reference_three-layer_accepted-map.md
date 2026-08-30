@@ -1,3 +1,15 @@
+---
+title: Issue #130：phase reference 三层语义与 accepted 下游数据层
+archived: true
+original: docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：phase reference 三层语义与 accepted 下游数据层
 
 状态：accepted；作者已确认 `accepted` 作为所有 phase-reference 下游（含 runtime）默认层，

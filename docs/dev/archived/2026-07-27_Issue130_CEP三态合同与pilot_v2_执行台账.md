@@ -1,3 +1,15 @@
+---
+title: Issue130 CEP三态合同与pilot v2 执行台账
+archived: true
+original: docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2_执行台账.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue130 CEP三态合同与pilot v2 执行台账
 
 更新日期：2026-08-17
