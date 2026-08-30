@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，PR #274 已完成 raw promotion 与分析默认迁移，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留；publication-clean v1 已由作者审核接受并经 PR #275 合并到 `main@ac0674e249176a3453257105bab3b2382e409581`；old-reference retirement 进入独立 solver-free audit
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，PR #274 已完成 raw promotion 与分析默认迁移，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留；publication-clean v1 已由作者审核接受并经 PR #275 合并到 `main@ac0674e249176a3453257105bab3b2382e409581`；old-reference retirement 已完成；accepted-primary p104/p128 matched convergence 已完成并由作者接受为独立收敛证据，旧 strict-era raw/figure 保持不变，不再因本证据重跑或替换
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -478,6 +478,27 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
   accepted-primary 运行；比较通过后可保留旧 raw 不变，把新 run 作为匹配收敛 evidence，
   是否更新正式 accepted raw 另由独立 promotion/import 决定。
 
+### 8.12 Accepted-primary 结果与正式产物边界（2026-08-30）
+
+- accepted-primary 证据包 `docs/analysis/relaxtime/issue130_rs_accepted_primary_convergence_v1/`
+  对应外部不可变 artifact 根目录
+  `D:/Desktop/Julia_RelaxTime_issue130_artifacts/rs_accepted_primary_convergence_20260830/`。
+  固定 calculation SHA 为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`，workflow/contract SHA
+  为 `0448a2df5574ab55dd74b93ba5e359afd696b035`。
+- p104、p128 各完成 30 个 shard（15 mode-A + 15 mode-B），每档 1819 个 scan rows；两档
+  合计 60 个 run manifest、3638 个 scan rows 和 152796 个 channel-diagnostic rows。所有
+  shard 的 `error_count`、`skipped_count` 和 `failed_points` 均为零，结果 finite/converged。
+- 作者接受 p104 -> p128 在 accepted-primary runtime 下的应用级收敛判断。局部相对漂移仍作为
+  诊断保留：三个点对应已知传播子分母敏感窗口，约 1.35% 的点位于一阶/非一阶相结构切换
+  附近；这些记录不构成 solver failure、非有限输出或 phase-reference 合同回归。
+- accepted 与 strict-era 的差异是 reference input/view 变化；mode-A 的 phase anchor 还会
+  通过 `T=alpha_T*T_phase_base` 进入输运输入。因此不把 accepted 数据重新套入旧 strict
+  workflow，也不把两套结果的差异误写成同一输入下的数值不收敛。
+- 旧 strict-era `prod_v2` raw result 和既有 figure 是已审核、保留的正式历史产物，继续不变；
+  accepted-primary p104/p128 仅作为本次收敛证明和 reference 对照，不导入正式 result tree，
+  不重绘旧 figure。未来若确需完全基于 accepted-primary 的正式 case，另立 versioned
+  promotion/import PR，并重新写入独立 provenance。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）
@@ -526,7 +547,8 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 非目标的散射、传播子和弛豫时间语义有保护证据。
 - [x] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
 - [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
-- [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
+- [x] accepted-primary p104/p128 matched convergence 已由独立 evidence package 记录并经作者接受；
+  旧 strict-era raw/figure 未被覆盖，accepted 证据不追溯改写既有 provenance。
 - [ ] bulk 导数与主 equilibrium 分支一致，受影响 `zeta/s` production 已重跑并通过审计。
 - [ ] 一阶区域主 equilibrium 由稳定性治理选取；严格共存点不输出唯一输运量，双侧近零点通过相别与收敛认证。
 - [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。

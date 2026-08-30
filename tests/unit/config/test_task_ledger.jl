@@ -68,7 +68,7 @@ end
     @test parsed["primary_track"] == "issue130-phase"
     @test tracks["issue130-phase"]["status"] == "accepted"
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
-    @test tracks["rs-transport"]["status"] == "active"
+    @test tracks["rs-transport"]["status"] == "accepted"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "triaged"
     items = Dict(String(item["id"]) => item for item in parsed["items"])

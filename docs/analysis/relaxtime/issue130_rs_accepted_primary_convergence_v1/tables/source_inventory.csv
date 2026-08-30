@@ -1,0 +1,6 @@
+resolution,mode,artifact_glob,shards,scan_rows,channel_diagnostic_rows,failed_points_rows,error_count,skipped_count,validation
+p104,mode_a,four-level external run_manifest.json under p104,15,910,38199,0,0,0,all shard summaries complete
+p104,mode_b,four-level external run_manifest.json under p104,15,909,38199,0,0,0,all shard summaries complete
+p128,mode_a,four-level external run_manifest.json under p128,15,910,38199,0,0,0,all shard summaries complete
+p128,mode_b,four-level external run_manifest.json under p128,15,909,38199,0,0,0,all shard summaries complete
+total,both,external artifact root,60,3638,152796,0,0,0,counts reconciled with manifest.json

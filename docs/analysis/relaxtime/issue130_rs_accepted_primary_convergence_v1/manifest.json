@@ -1,0 +1,49 @@
+{
+  "schema_version": "issue130_rs_accepted_primary_convergence_v1",
+  "artifact_type": "solver_numerical_convergence_evidence",
+  "status": "author_accepted_diagnostic_evidence",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "workflow_contract_sha": "0448a2df5574ab55dd74b93ba5e359afd696b035",
+  "phase_reference_layer": "accepted",
+  "phase_reference_mode": "runtime",
+  "source_artifact_root": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/rs_accepted_primary_convergence_20260830/",
+  "source_artifact_is_external": true,
+  "source_artifact_immutable": true,
+  "resolutions": {
+    "p104": {
+      "shards": 30,
+      "mode_a_shards": 15,
+      "mode_b_shards": 15,
+      "scan_rows": 1819,
+      "channel_diagnostic_rows": 76398,
+      "failed_points_rows": 0,
+      "error_count": 0,
+      "skipped_count": 0,
+      "grid": "104/18/30/20/440"
+    },
+    "p128": {
+      "shards": 30,
+      "mode_a_shards": 15,
+      "mode_b_shards": 15,
+      "scan_rows": 1819,
+      "channel_diagnostic_rows": 76398,
+      "failed_points_rows": 0,
+      "error_count": 0,
+      "skipped_count": 0,
+      "grid": "128/20/36/24/560"
+    }
+  },
+  "total_run_manifests": 60,
+  "total_scan_rows": 3638,
+  "total_channel_diagnostic_rows": 152796,
+  "solver_called_in_replay": false,
+  "formal_result_or_figure_replaced": false,
+  "old_strict_result_retained": true,
+  "package_file_sha256_excluding_manifest": {
+    "README.md": "b626303771988949e0f51183ad0d07345006fc2148b89a9c792c13ea6cac54d4",
+    "tables/source_inventory.csv": "209d60402f509f8d08a105f5b1e2fbc0f20c9662aa8346c94f1d63a7bc410e15",
+    "tables/comparison_scope.csv": "82ded060ab3e3935da8dc3bda3a95bfa149b5b9820e3b915f37d4d4e20d76c73",
+    "tables/claim_ledger.csv": "0bff133643fb4c885425a27914a08d2f6976b2b40f90ef5a4032956c3dd51d8f"
+  },
+  "next_action": "no_legacy_strict_rerun; optional_future_versioned_accepted_primary_import_only_if_explicitly_needed"
+}

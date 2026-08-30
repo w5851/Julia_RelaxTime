@@ -1,0 +1,7 @@
+claim_id,claim,claim_type,evidence,verdict
+C1,accepted-primary p104 and p128 completed with finite non-skipped scan coverage,observation,manifest.json; external artifact run_manifest.json files, supported
+C2,accepted-primary p104 to p128 is the convergence evidence for the current accepted runtime contract,interpretation,README.md; comparison_scope.csv, supported
+C3,accepted versus strict differences are reference-input differences and are not a reason to rerun accepted through strict workflow,attribution,README.md; docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md, supported_indirect
+C4,old strict-era raw results and figures remain unchanged and continue to serve as the formal retained outputs,formal_production_boundary,comparison_scope.csv; existing prod_v2 manifests, supported
+C5,accepted-primary p104 and p128 are not themselves a replacement formal result or figure,formal_production_boundary,manifest.json; comparison_scope.csv, supported
+C6,local relative drifts remain diagnostic and do not indicate solver failure,mechanism,README.md; external channel_diagnostics.csv and failed_points.csv, author_accepted
