@@ -1,0 +1,6 @@
+check_id,scope,status,evidence,reason,solver_called,action_dispatched,next_action
+p128_high_tier_artifact,strict-explicit,reusable_strict_explicit_only,"mode-A/B manifest; source workflow 22874505877491754eed27519ad8a7b871c82571",旧 workflow 的 CLI 默认 strict 且 manifest 记录旧 legacy fallback；同口径 p104 可与之配对,false,false,可在历史 strict workflow ref 上显式 dispatch p104
+p128_high_tier_artifact,accepted-primary,not_reusable,"mode-A/B manifest; accepted v2 manifest 3e37d6812c33c4dd15469391247768fe536dc3185fd54543cdaba2713c520be1",p128 source 未在 accepted v2 runtime 下生成；仅共享 calculation SHA 不足以消除 reference input 差异,false,false,先重跑 accepted-primary p128
+p104_dispatch_from_current_main,accepted-primary,deferred,"current CLI defaults accepted; current workflow has no explicit phase layer input",只改 p104 输入会产生 accepted p104，不能与 strict p128 构成 matched convergence pair,false,false,等待 accepted-primary matched p128
+p104_dispatch_from_228_strict_ref,strict-explicit,technically_possible,"workflow 22874505877491754eed27519ad8a7b871c82571; p104 input fields",现有 workflow 能表达 104/18/30/20/440，且不需要新增规则文件；但结论仅限 strict-explicit,false,false,需作者明确选择 strict-only scope
+existing_old_p104_p128_gate,historical,historical_only,"old first_canonical_v1 convergence package","旧 case/source 与当前 prod_v2 不同，只作性能和 gate 先例，不作当前证明",false,false,"保留历史对照"

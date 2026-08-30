@@ -460,6 +460,24 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
   进入作者审核；作者接受 raw 范围后由独立 promotion/default PR 登记 `approved`，但不覆盖旧
   production、不删除 fallback，且不把 diagnostic-only audit 改写为全域 numerical parity。
 
+### 8.11 Accepted-primary matched convergence（2026-08-30）
+
+- 作者已授权以当前 runtime 合同重新生成 accepted-primary p128，并补做 accepted-primary
+  p104；两档均固定 calculation SHA `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`、同一
+  `direct_coexistence` topology、`match_thermo`、`validated_anchored`、`compute_bulk=true`
+  和既有物理/数值门禁。p128 使用 `128/20/36/24/560`，p104 使用 `104/18/30/20/440`。
+- production workflow 现显式接受 `phase_reference_layer=accepted` 与
+  `phase_reference_mode=runtime`（默认），并只允许 `strict/strict` 作为明确 opt-in；其余
+  组合在 runner 端拒绝。两种 resolution 使用独立 case slug，不能覆盖已登记的 `prod_v2`
+  raw tree。
+- p128 与 p104 可以按对应 shard 成对并行 dispatch；mode-A 与 mode-B 必须分开 dispatch，
+  因为 `mode=both` 在单个 job 内顺序执行。并行度按 6--10 个总 jobs 分波控制，不能把
+  GitHub Student runner 额度视为无限容量；任一档出现硬失败或成本异常时停止未放行波次。
+- 旧 p128 是 strict-era source workflow 的 immutable diagnostic artifact。即使新的
+  accepted-primary p128 与其接近，也不能改写旧 manifest 或追溯性地声称旧结果已按
+  accepted-primary 运行；比较通过后可保留旧 raw 不变，把新 run 作为匹配收敛 evidence，
+  是否更新正式 accepted raw 另由独立 promotion/import 决定。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）

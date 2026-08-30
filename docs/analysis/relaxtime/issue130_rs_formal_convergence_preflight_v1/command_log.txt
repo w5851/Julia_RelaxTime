@@ -1,0 +1,19 @@
+2026-08-30 solver-free preflight command log
+
+Read-only checks executed from D:/Temp/julia_relaxtime_issue130_shared:
+
+1. git status --short --branch
+2. git rev-parse HEAD; git rev-parse origin/main; git show -s --format='%H %s' HEAD
+3. Get-FileHash -Algorithm SHA256 for both p128 manifests, both effective_config.json files,
+   accepted v2 manifest, historical convergence manifest/summary and current workflow
+4. Read p128 manifest provenance fields: calculation_sha, workflow_head_sha,
+   source_solver_called, aggregate_replay_solver_called, import_solver_called,
+   legacy_fallback, numerical_status
+5. git show 22874505877491754eed27519ad8a7b871c82571:scripts/relaxtime/phase_reference_adapter.jl
+   and phase_guided_transport_scan_cli.jl (read-only) to verify strict-era defaults
+6. Read current phase_reference_adapter.jl, phase_guided_transport_scan_cli.jl and
+   relaxtime-phase-guided-transport-production.yml to verify accepted defaults and p104 input fields
+7. Existing historical p104/p128 summary read-only inspection
+
+No PNJL equilibrium solver, transport numerical scan, Action dispatch, result write,
+reference write or figure generation was executed.

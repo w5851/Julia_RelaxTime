@@ -140,6 +140,13 @@ end
     @test occursin("--p-num", workflow_text)
     @test occursin("--t-num", workflow_text)
     @test occursin("--phase-anchor-policy", workflow_text)
+    @test occursin("phase_reference_layer:", workflow_text)
+    @test occursin("phase_reference_mode:", workflow_text)
+    @test occursin("phase_reference_layer=\"\${{ inputs.phase_reference_layer || 'accepted' }}\"", workflow_text)
+    @test occursin("phase_reference_mode=\"\${{ inputs.phase_reference_mode || 'runtime' }}\"", workflow_text)
+    @test occursin("--phase-reference-layer \"\$phase_reference_layer\"", workflow_text)
+    @test occursin("--phase-reference-mode \"\$phase_reference_mode\"", workflow_text)
+    @test occursin("runtime:accepted|strict:strict", workflow_text)
 end
 
 @testset "phase-guided CLI defaults to direct coexistence anchoring" begin
