@@ -75,7 +75,7 @@ Phase 1.5/2/3 只要求来源对齐、纯代数、数值接线和接口测试通
 
 ## 5. 本阶段验证记录
 
-- `julia --project=. tests/unit/relaxtime/test_meson_interaction_kernel.jl`：54/54 通过。
+- `julia --project=. tests/unit/relaxtime/test_meson_interaction_kernel.jl`：63/63 通过。
 - `julia --project=. tests/unit/relaxtime/test_meson_rpa.jl`：31/31 通过。
 - `julia --project=. tests/unit/relaxtime/test_meson_rpa_adapter.jl`：36/36 通过。
 - `julia --project=. -e 'include("src/relaxtime/RelaxTime.jl"); ...'`：`RelaxTime` include/re-export smoke 通过。

@@ -168,7 +168,16 @@ g(\omega)
 - `nothing`（默认）继续使用旧 `EffectiveCouplings` 的 `K123/K4567`；
 - `PhaseShiftInteractionSpec` 允许调用方提供一个带有 `backend`、`pair`、
   `channel`、`coupling`、`numerator_factor` 和 `denominator_factor` 的不可变规格；
-- `FullKMTInteraction` 会把 `π^±` 映射到 `K12`，把 `K^±` 映射到 `K45`。
+- `FullKMTInteraction` 会把 `π^±` 映射到 `K12`，把物理 `K^±`
+  （`u\bar s/s\bar u`）映射到 `K45`；`K^0/\bar K^0`
+  （`d\bar s/s\bar d`）对应 `K67`。旧 `EffectiveCouplings` 的
+  `K4567` 使用 `H_u=-phi_u`，在 `u\\ne d` 时因此只与 `K67` 代数对应，
+  不能直接作为 charged `K^±` 的完整核耦合。
+
+分析层若向 `quark_params` 附加已经求得的
+`phi=(u=..., d=..., s=...)`，legacy `nothing` 分支会通过
+`EffectiveCouplings.calculate_effective_couplings_from_phi` 生成兼容字段，避免
+再次从 `A_f` 构造 `H_f`。没有 `phi` 字段的历史 `m,mu,A` 输入仍使用原有回退路径。
 
 完整 KMT A/B 诊断当前故意沿用相移密度旧的标量分母
 `D = 2K/(1-4KΠ)`，并在返回值中回显 `interaction_*` 字段。它只改变给定

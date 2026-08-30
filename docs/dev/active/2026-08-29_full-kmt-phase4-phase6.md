@@ -50,7 +50,7 @@ FixedMuBConservedCharges (quark-only BQS)
   `PhaseShiftInteractionSpec` 与 FullKMT 注入测试；
 - `julia --project=. tests/integration/relaxtime/test_meson_conserved_charge_feedback_script_contract.jl`：69/69；
 - `julia --project=. tests/unit/models/test_fixed_mub_conserved_charges.jl`：36/36；
-- `julia --project=. tests/unit/relaxtime/test_meson_interaction_kernel.jl`：55/55；
+- `julia --project=. tests/unit/relaxtime/test_meson_interaction_kernel.jl`：63/63；
 - `julia --project=. tests/unit/relaxtime/test_meson_rpa.jl`：31/31；
 - `julia --project=. tests/unit/relaxtime/test_meson_rpa_adapter.jl`：36/36；
 - `git diff --check` 与三个分析脚本的 `Meta.parseall` 均通过；

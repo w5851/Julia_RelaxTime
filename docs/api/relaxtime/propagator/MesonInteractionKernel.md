@@ -51,7 +51,32 @@ kernel = build_full_kmt_interaction_from_equilibrium(equilibrium; G=G_fm2, K=K_f
 - `charged_coupling(kernel, pair, channel)`：读取 `:K12`、`:K45` 或 `:K67`。
 - `get_Kab(kernel, a, b, channel)`：读取 `a,b ∈ (0,3,8)` 的中性矩阵元。
 
-数值均采用项目内部自然单位；`phi` 为无量纲夸克凝聚输入，`G` 为 `fm^2`，`K` 为 `fm^5`，输出耦合为 `fm^2`。调用方必须显式传入与 PNJL 配置一致的符号和单位。
+数值均采用项目内部自然单位；`phi=(phi_u,phi_d,phi_s)` 是物理夸克凝聚
+`<bar q_f q_f>`，单位为 `fm^-3`（不是无量纲量）；`G` 为 `fm^2`，
+`K` 为 `fm^5`，输出耦合为 `fm^2`。因此 `K*phi_f` 的单位也是 `fm^2`。
+调用方必须显式传入与 PNJL 配置一致的符号和单位。
+
+## 非对称背景下的通道映射
+
+完整核直接使用平衡解中的 `phi_f`，不需要先把它转换成旧 helper `H_f`。
+若为了兼容旧 `EffectiveCouplings` 接口而定义 `H_f=-phi_f`，则有：
+
+| 旧接口/代数通道 | 完整 KMT 通道 | 物理味道组成 |
+|---|---|---|
+| `K123`（`H_s`） | `K12` | `pi^±` |
+| `K4567`（`H_u`） | `K67` | `K^0=d\bar s`、`\bar K^0=s\bar d` |
+| 无对应旧独立字段 | `K45` | `K^+=u\bar s`、`K^-=s\bar u` |
+
+在 `phi_u=phi_d` 的同位旋对称极限，`K45=K67`，所以旧的 `K4567`
+数值与 charged/neutral 两个完整通道耦合；在 `phi_u!=phi_d` 时，
+`K4567` 只能按 `K67`（u spectator）解释，不能继续作为 `K^±` 的默认耦合。
+
+## 与 RPA 分层的关系
+
+这里的 `K_ab` 由固定平均场背景上的 KMT Hartree 收缩得到；RPA 随后在同一
+背景上构造二次介子涨落并重求和夸克泡图。极化函数 `Pi` 不仅依赖质量和外部
+动量，还依赖 `T`、各味 `mu_f`、Polyakov 背景、正则化及所选外部运动学。
+因此本模块只负责核的纯代数构造，不能被解释为已经完成完整 RPA 或热力学反馈。
 
 ## 稳定性边界
 

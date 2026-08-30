@@ -63,6 +63,27 @@ using Main.RelaxTime.EffectiveCouplings: calculate_effective_couplings
         @test get_Kab(kernel, 3, 8, :S) ≈ -expected_K38
     end
 
+    @testset "旧 helper 与非对称 spectator 通道的纯代数映射" begin
+        # calculate_G_from_A 的历史返回量记为 H_f=-phi_f。
+        # 这里不调用积分或平衡求解，只验证旧字段与完整核的代数关系。
+        phi_u, phi_d, phi_s = -0.30, -0.20, -0.10
+        H_u, H_s = -phi_u, -phi_s
+        kernel = build_full_kmt_interaction((phi_u, phi_d, phi_s); G=G, K=K)
+        old = calculate_effective_couplings(G, K, H_u, H_s)
+
+        # π 通道的旧 K123 与完整 K12 在任意 u/d 非对称下仍相同。
+        @test old.K123_plus ≈ charged_coupling(kernel, :K12, :P)
+        @test old.K123_minus ≈ charged_coupling(kernel, :K12, :S)
+
+        # 旧 K4567 使用 H_u，因此对应 u-s spectator 的 K67，而不是 K45。
+        @test old.K4567_plus ≈ charged_coupling(kernel, :K67, :P)
+        @test old.K4567_minus ≈ charged_coupling(kernel, :K67, :S)
+        @test old.K4567_plus - charged_coupling(kernel, :K45, :P) ≈ K * (phi_d - phi_u) / 2
+        @test old.K4567_minus - charged_coupling(kernel, :K45, :S) ≈ K * (phi_u - phi_d) / 2
+        @test old.K4567_plus != charged_coupling(kernel, :K45, :P)
+        @test old.K4567_minus != charged_coupling(kernel, :K45, :S)
+    end
+
     @testset "同位旋对称极限与旧 0/8 API 兼容" begin
         phi_l, phi_s = -0.30, -0.12
         kernel = build_full_kmt_interaction((phi_l, phi_l, phi_s); G=G, K=K)

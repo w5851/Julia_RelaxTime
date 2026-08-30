@@ -71,6 +71,27 @@ K_{80} & K_{83} & K_8
 
 当 `phi_u=phi_d=phi_l` 时，旧 `EffectiveCouplings.calculate_effective_couplings` 使用 `G_u=-phi_l`、`G_s=-phi_s`。在本文件约定下，它的 `K0/K123/K4567/K8/K08` 与新后端的 P/S 对应分量相等；单元测试锁定这一兼容性。这个等式是 API/符号映射的测试，不是对所有有限同位旋物理的证明。
 
+### 4.1 非对称背景下的旧接口映射
+
+旧接口只有一个 `K4567` 字段，且其修正项使用 `H_u=-phi_u`。因此在
+`phi_u != phi_d` 时，纯代数对应关系是
+
+```math
+\begin{aligned}
+K_{123}^{\mathrm{legacy},\pm} &= K_{12}^{P/S},\\
+K_{4567}^{\mathrm{legacy},\pm} &= K_{67}^{P/S},\\
+K^\pm &= K_{45}^{P/S}.
+\end{aligned}
+```
+
+这里 `K_{45}` 是 `u\bar s/s\bar u` 的物理 charged-kaon 通道（`K^+`、`K^-`），
+而 `K_{67}` 是 `d\bar s/s\bar d` 的中性通道（`K^0`、`\bar K^0`）。只有在
+`phi_u=phi_d` 时才有 `K_{45}=K_{67}=K_{4567}^{\mathrm{legacy}}`；旧函数签名
+保持不变，但非对称 charged-kaon 计算不得把 `K4567` 直接当成 `K45`。
+
+所有凝聚在这里均为 `phi_f=<bar q_f q_f>`，单位 `fm^-3`；旧 helper `H_f`
+仅是 `-phi_f` 的兼容命名，`K H_f` 与完整核中的 `K phi_f` 修正项均为 `fm^2`。
+
 ## 5. Phase 3 数值桥接合同
 
 `MesonRPAAdapter` 将当前 `PolarizationAniso` 接到上述矩阵公式，但只采用
@@ -120,6 +141,9 @@ RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。�
 ```
 
 其中矩阵乘法顺序必须保留；它不能在一般同位旋不对称背景下被替换成逐元素标量公式。
+这里的 RPA 不是“只取作用量二阶项”的一次微扰修正，而是在固定平均场背景
+上保留二次介子涨落并对夸克泡链作无限重求和。相应的 `Pi` 还依赖
+`T,mu_f,Phi,\bar Phi`、正则化和外部运动学；不能简化成只依赖 `m_f` 与 `q^2`。
 
 接入极化矩阵前仍需逐项核对：
 
