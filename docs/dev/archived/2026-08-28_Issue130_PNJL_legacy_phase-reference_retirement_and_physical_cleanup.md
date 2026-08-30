@@ -1,10 +1,21 @@
+---
+title: Issue #130：PNJL legacy phase-reference retirement 与物理清理
+archived: true
+original: docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：PNJL legacy phase-reference retirement 与物理清理
 
-状态：active；这是 RS `prod_v1` 物理删除（PR #278）之后的独立 PNJL
+状态：completed；这是 RS `prod_v1` 物理删除（PR #278）之后的独立 PNJL
 phase-reference follow-up。作者已确认 v2 `accepted` 是 phase-reference 下游的默认
 runtime source，strict 只在显式模式下使用；legacy 不再作为 runtime fallback/rollback。
-当前已完成 path retirement，并已创建独立 PNJL legacy snapshot 物理删除 PR #285；
-该 PR 尚待 CI 与作者合并授权。
+path retirement 与独立 PNJL legacy snapshot 物理删除 PR #285 均已完成。
 
 ## 1. 背景与目标
 
@@ -150,7 +161,7 @@ primary，strict 只在显式模式下启用，legacy 不再作为 fallback/roll
 - [x] 创建独立 physical-deletion PR；未经作者再次授权不合并、不删除本地或远端
   其他分支/文件。
 
-#### 阶段 C 实际结果（2026-08-30，待合并）
+#### 阶段 C 实际结果（2026-08-30，已合并）
 
 物理删除提案（PR #285）位于
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_physical_deletion_v1/`，
@@ -159,8 +170,16 @@ allowlist 精确包含 8 个 legacy snapshot 文件，共 50,749 bytes。删除�
 `9aa4c313901ca0c91e851f58514e3df9aa124df4`。分支中的 validator 报告
 `physical_deletion_proposal_valid`，`solver_called=false`、`production_write=false`，
 candidate/accepted/strict、历史 evidence 和独立 `crossover.csv` 均保持存在。
-合并后 legacy 不再作为 runtime fallback/rollback；如需复原只能从 Git 恢复引用在
+PR #285 已通过全部 CI 并 squash 合并为 `dd943779a9ddc170491a61e69e2e41198532084d`；
+对应本地/远端分支已清理。合并后 legacy 不再作为 runtime fallback/rollback；如需复原只能从 Git 恢复引用在
 临时分支恢复，不承诺运行时回退。
+
+### 完成记录
+
+- [x] PR #285 已合并，删除 allowlist、恢复边界和 solver-free validator 证据保留；
+- [x] legacy snapshot 已从 `origin/main` 物理移除，candidate/accepted/strict、历史 evidence
+  和独立 `crossover.csv` 保持不变；
+- [x] 本任务归档；后续 phase-reference 工作由 Issue #130 主线的下一个 review 任务承接。
 
 ## 5. 测试与验收标准
 
