@@ -25,6 +25,7 @@
 - `propagator/MesonInteractionKernel.md`（Phase 1.5/2 完整 KMT 相互作用核与中性 RPA 代数后端）
 - `propagator/MesonRPA.md`（中性 `(0,3,8)` RPA 矩阵代数）
 - `propagator/MesonRPAAdapter.md`（Phase 3：`PolarizationAniso` 到中性 RPA 的诊断桥接）
+- `propagator/ChargedRPAKernel.md`（Phase B：charged RPA 归一化/味道顺序契约，diagnostic）
 
 如果你的目标是“从统一 workflow 直接生成 `n_pi(T)` / `n_K(T)` / `K/\pi(T)` 的扫描输出”，优先结合以下页面与脚本：
 
@@ -52,6 +53,7 @@
 - `propagator/MesonInteractionKernel.md`
 - `propagator/MesonRPA.md`
 - `propagator/MesonRPAAdapter.md`
+- `propagator/ChargedRPAKernel.md`
 - `scattering/*`
 - `propagator/*`
 - `polarization/*`
