@@ -112,19 +112,36 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "plot-sop"
 title = "Paper-grade plotting SOP and migration"
-status = "triaged"
+status = "promoted"
 current_task = "plot-sop-independent-land"
 blocked_by = []
 unlocks = []
-next_action = "将当前 plotting 文档、脚本、配置和产物放入独立 branch/PR 后，再把该 item 转为 active 并绑定 task_file。"
+next_action = "绘图 SOP 合同已由作者审核并完成 promotion；后续逐图族迁移、legacy 图清理和 strict layout gate 作为独立任务推进，不改变已审核历史产物。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = true
-current_branch = ""
-current_sha = ""
+current_branch = "main"
+current_sha = "acc610ee03dff0e7dd53f8e8e048764420f2f11c"
 run_ids = []
-evidence = []
-updated_at = "2026-08-15"
+evidence = [
+  "file:docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md",
+  "file:docs/guides/sop/workflows/figure_production.md",
+  "file:config/plotting/audit_v1.toml",
+  "file:config/plotting/candidate_origin_like_v1.toml",
+  "file:config/plotting/strict_origin_like_v1.toml",
+  "file:scripts/plotting/validate_plot_artifact.py",
+  "file:tests/unit/python/test_plotting_contract.py",
+  "pr:218",
+  "pr:220",
+  "pr:222",
+  "sha:bf249323641fd9976b303f8651fa43771e1c52e9",
+  "sha:49d87b2c11d2184d0a09cf45cb60124795927c66",
+  "sha:e74bf00184ee34531f23435fdb9a1ea90df2781c",
+  "review:author_accepted_line_first_plotting_pilot",
+  "promotion:figure_production_sop_contract_v1",
+  "note:formal_sop_promoted_future_figure_family_migrations_separate",
+]
+updated_at = "2026-08-30"
 
 [[tracks]]
 id = "diagnostic-workflow-lifecycle"
@@ -591,14 +608,31 @@ evidence = [
 id = "plot-sop-independent-land"
 track_id = "plot-sop"
 classification = "independent"
-status = "triaged"
+status = "promoted"
 parent = "track:plot-sop"
-task_file = ""
-reason = "当前 plotting 文档、脚本、配置和输出是 dirty main 中的未跟踪本地工作，本 ledger 不吸收或提交它们。"
-next_action = "先在独立 branch/PR 落盘 plotting 工作，再绑定稳定 task_file 和 evidence。"
+task_file = "docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md"
+reason = "正式绘图 SOP、三份 style profile、validator、绘图 helper 和合同单测已落地；PR #218、#220、#222 已合并，line-first pilot 已获作者视觉审核。"
+next_action = "以已 promotion 的 SOP 为公共合同；逐图族迁移和 strict layout gate 另立独立 task/PR，不追溯覆盖历史图像。"
 blocked_by = []
 backlog_file = ""
-evidence = []
+evidence = [
+  "file:docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md",
+  "file:docs/guides/sop/workflows/figure_production.md",
+  "file:config/plotting/audit_v1.toml",
+  "file:config/plotting/candidate_origin_like_v1.toml",
+  "file:config/plotting/strict_origin_like_v1.toml",
+  "file:scripts/plotting/validate_plot_artifact.py",
+  "file:tests/unit/python/test_plotting_contract.py",
+  "pr:218",
+  "pr:220",
+  "pr:222",
+  "sha:bf249323641fd9976b303f8651fa43771e1c52e9",
+  "sha:49d87b2c11d2184d0a09cf45cb60124795927c66",
+  "sha:e74bf00184ee34531f23435fdb9a1ea90df2781c",
+  "review:author_accepted_line_first_plotting_pilot",
+  "promotion:figure_production_sop_contract_v1",
+  "note:formal_sop_promoted_future_figure_family_migrations_separate",
+]
 
 [[items]]
 id = "retire-stale-one-shot-actions"
