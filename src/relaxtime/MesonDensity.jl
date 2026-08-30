@@ -15,7 +15,8 @@ module MesonDensity
 using ForwardDiff
 using ..GaussLegendre: gauleg
 using ..AFieldBuilder: ensure_quark_params_has_A
-using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings,
+                            calculate_effective_couplings_from_phi
 using ..MesonMass: solve_meson_mass
 using ..PolarizationAniso: polarization_aniso, polarization_with_width
 using ..MesonInteractionKernel: FullKMTInteraction, charged_coupling
@@ -1214,6 +1215,23 @@ function _simple_meson_pol_params(meson::Symbol, qp)
 end
 
 function _build_k_coeffs(qp)
+    # Analysis callers may carry the already-solved condensates alongside the
+    # quark masses/chemical potentials.  Prefer that phi-native view so the
+    # legacy compatibility tuple does not reconstruct H_f from a second A_f
+    # quadrature.  Plain historical callers without :phi retain the old path.
+    if hasproperty(qp, :phi)
+        phi = qp.phi
+        all(flavor -> hasproperty(phi, flavor), (:u, :d, :s)) || throw(ArgumentError(
+            "quark_params.phi must provide fields :u, :d, and :s",
+        ))
+        return calculate_effective_couplings_from_phi(
+            G_fm2,
+            K_fm5,
+            Float64(phi.u),
+            Float64(phi.s),
+        )
+    end
+
     G_u = calculate_G_from_A(qp.A.u, qp.m.u)
     G_s = calculate_G_from_A(qp.A.s, qp.m.s)
     return calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)

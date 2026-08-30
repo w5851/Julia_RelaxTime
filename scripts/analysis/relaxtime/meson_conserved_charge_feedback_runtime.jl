@@ -155,6 +155,9 @@ function build_candidate_evaluator(
             qp = (
                 m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
                 μ=(u=mu_vec[1], d=mu_vec[2], s=mu_vec[3]),
+                # Preserve the solved condensates for the phi-native legacy
+                # coupling adapter; A is still built for the polarization.
+                phi=(u=Float64(x_state[1]), d=Float64(x_state[2]), s=Float64(x_state[3])),
             )
             tp = (
                 T=T_fm,
@@ -465,6 +468,9 @@ function solve_quark_only_bu_ab_point(
     qp = (
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
         μ=(u=Float64(baseline.mu_vec[1]), d=Float64(baseline.mu_vec[2]), s=Float64(baseline.mu_vec[3])),
+        # Keep the equilibrium condensates beside the derived masses so the
+        # legacy A/B post-processing can use the phi-native adapter.
+        phi=(u=Float64(baseline.x_state[1]), d=Float64(baseline.x_state[2]), s=Float64(baseline.x_state[3])),
     )
     state = meanfield_state(baseline.x_state)
     tp = (T=T_fm, Φ=Float64(state.Phi), Φbar=Float64(state.PhiBar), ξ=0.0)

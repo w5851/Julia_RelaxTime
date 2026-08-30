@@ -25,6 +25,7 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    _noanom_policy_symbol,
                                    _apply_noanom_policy,
                                    _unwrap_phases,
+                                   _build_k_coeffs,
                                    bose_distribution,
                                    meson_degeneracy,
                                    phase_shift_point_diagnostic,
@@ -39,6 +40,8 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    stable_kpi_scan
 using Main.RelaxTime.MesonDensity: PhaseShiftInteractionSpec
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction, charged_coupling
+using Main.RelaxTime.EffectiveCouplings: calculate_effective_couplings_from_phi
+using Main.Constants_PNJL: G_fm2, K_fm5
 
 const ZETA3 = 1.2020569031595942
 
@@ -307,6 +310,21 @@ end
         degeneracy=3, qmax=2.0, q_nodes=2, omega_min=0.05, omega_max=1.5, omega_nodes=2,
         interaction=kernel,
     )
+end
+
+@testset "MesonDensity phi-native legacy coupling adapter" begin
+    phi = (u=-0.30, d=-0.22, s=-0.10)
+    qp = (
+        m=(u=0.098, d=0.104, s=0.42),
+        μ=(u=0.0, d=0.0, s=0.0),
+        A=(u=0.1, d=0.095, s=0.08),
+        phi=phi,
+    )
+    via_qp = _build_k_coeffs(qp)
+    direct = calculate_effective_couplings_from_phi(G_fm2, K_fm5, phi.u, phi.s)
+    @test via_qp.K123_plus ≈ direct.K123_plus
+    @test via_qp.K4567_plus ≈ direct.K4567_plus
+    @test via_qp.det_K_plus ≈ direct.det_K_plus
 end
 
 @testset "MesonDensity real-axis mode and Bose-domain policy metadata" begin
