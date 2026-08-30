@@ -54,6 +54,15 @@ provider 不会把共轭通道的输入折叠成同一个数组：
 所有输入必须有限，`q`、`gamma` 非负且 `T>0`。provider 不自动计算或重积分
 `A_f`；调用方需显式传入同一背景下的 `A_u/A_d/A_s`。
 
+## 极点与 Mott 诊断记录
+
+`charged_pole_residual(spec, K_a, Pi_a)` 返回
+`Delta_a=1-c_den*K_a*Pi_a` 的复残差、实部、虚部和范数；它只记录候选点，
+不搜索根，也不添加极点 epsilon。`charged_mott_diagnostic(spec, pole_mass, masses)`
+按 `spec.pair` 计算 `m1+m2` 阈值并返回 `:bound`、`:at_threshold` 或 `:continuum`
+分支。这两个 helper 为后续严格极点 provider 统一输出格式，但当前不代表已经
+完成极点求解或 Mott 连续性验证。
+
 ## 后续门禁
 
 本模块已锁定当前 A/B0 计算链的有序参数传递，并用直接调用 parity 测试验证数值

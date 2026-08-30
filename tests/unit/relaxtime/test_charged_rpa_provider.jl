@@ -11,7 +11,8 @@ if !isdefined(Main, :RelaxTime)
 end
 
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec
-using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAProvider: charged_polarization, charged_pole_residual,
+    charged_mott_diagnostic
 using Main.RelaxTime.PolarizationAniso: polarization_aniso, polarization_with_width
 
 @testset "ChargedRPAProvider Phase C contract" verbose=true begin
@@ -130,5 +131,33 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso, polarization_with_wi
         @test_throws ArgumentError charged_polarization(spec, k0, q, (u=1.5, d=1.5), chemical_potentials, thermo, A_values)
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; num_s_quark=2)
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; gamma_inv_fm=-0.1, mode=:finite_width)
+    end
+
+    @testset "pole residual and Mott branch records" begin
+        spec = charged_rpa_spec(:K_plus)
+        K_a = 0.35
+        Pi_a = 0.20 + 0.03im
+        residual = charged_pole_residual(spec, K_a, Pi_a)
+        expected = 1 - 4 * K_a * Pi_a
+        @test residual.residual_complex ≈ expected
+        @test residual.residual_real ≈ real(expected)
+        @test residual.residual_imag ≈ imag(expected)
+        @test residual.residual_norm ≈ abs(expected)
+        @test residual.root_search == false
+        @test residual.polarization_units == :fm_minus2
+
+        bound = charged_mott_diagnostic(spec, 3.9, masses)
+        at_threshold = charged_mott_diagnostic(spec, 4.0, masses; pole_gamma_inv_fm=0.05)
+        continuum = charged_mott_diagnostic(spec, 4.1, masses)
+        @test bound.threshold_inv_fm == masses.u + masses.s
+        @test bound.status == :bound
+        @test bound.is_mott == false
+        @test at_threshold.status == :at_threshold
+        @test at_threshold.is_mott == true
+        @test at_threshold.pole_gamma_inv_fm == 0.05
+        @test continuum.status == :continuum
+        @test continuum.threshold_gap_inv_fm > 0.0
+        @test_throws ArgumentError charged_mott_diagnostic(spec, -0.1, masses)
+        @test_throws ArgumentError charged_mott_diagnostic(spec, 4.0, masses; atol=-1e-6)
     end
 end

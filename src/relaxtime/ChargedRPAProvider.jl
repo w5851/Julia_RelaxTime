@@ -12,10 +12,11 @@ Beth-Uhlenbeck density.
 """
 module ChargedRPAProvider
 
-using ..ChargedRPAKernel: ChargedRPAKernelSpec
+using ..ChargedRPAKernel: ChargedRPAKernelSpec, charged_rpa_inverse
 using ..PolarizationAniso: polarization_aniso, polarization_with_width
 
 export charged_polarization
+export charged_pole_residual, charged_mott_diagnostic
 
 const _FLAVORS = (:u, :d, :s)
 const _MODES = (:real_axis, :finite_width)
@@ -174,6 +175,92 @@ function charged_polarization(
         Φbar=thermo_values.Φbar,
         ξ=thermo_values.ξ,
         num_s_quark=num_s,
+    )
+end
+
+"""
+    charged_pole_residual(spec, K_a, Pi_a) -> NamedTuple
+
+Record the complex inverse-propagator residual
+`Delta_a = 1 - c_den*K_a*Pi_a` at a candidate pole.  This helper does not
+search for a root and does not add the legacy propagator epsilon; it is a
+solver-independent diagnostic record for later pole providers.
+"""
+function charged_pole_residual(
+    spec::ChargedRPAKernelSpec,
+    K_a::Real,
+    Pi_a::Number,
+)
+    inverse = charged_rpa_inverse(spec, K_a, Pi_a)
+    return (
+        meson=spec.meson,
+        pair=spec.pair,
+        channel=spec.channel,
+        kernel_pair=spec.kernel_pair,
+        coupling_fm2=Float64(K_a),
+        polarization=Pi_a,
+        polarization_units=:fm_minus2,
+        inverse= inverse,
+        residual_complex=inverse,
+        residual_real=Float64(real(inverse)),
+        residual_imag=Float64(imag(inverse)),
+        residual_norm=Float64(abs(inverse)),
+        normalization_source=spec.normalization_source,
+        retarded_convention=spec.retarded_convention,
+        root_search=false,
+    )
+end
+
+"""
+    charged_mott_diagnostic(spec, pole_mass_inv_fm, masses; kwargs...) -> NamedTuple
+
+Classify a candidate charged pole against the constituent threshold
+`m1+m2`, using the ordered pair in `spec`.  The returned `status` is
+`:bound` below threshold, `:at_threshold` within `atol`, or `:continuum` above
+threshold.  This is a kinematic record only; it does not assert that a pole
+was found or that the current finite-width proxy is retarded.
+"""
+function charged_mott_diagnostic(
+    spec::ChargedRPAKernelSpec,
+    pole_mass_inv_fm::Real,
+    masses;
+    pole_gamma_inv_fm::Real=0.0,
+    atol::Real=1e-6,
+)
+    pole_mass = _finite_real(pole_mass_inv_fm, "pole_mass_inv_fm")
+    pole_mass >= 0.0 || throw(ArgumentError("pole_mass_inv_fm must be non-negative"))
+    pole_gamma = _finite_real(pole_gamma_inv_fm, "pole_gamma_inv_fm")
+    pole_gamma >= 0.0 || throw(ArgumentError("pole_gamma_inv_fm must be non-negative"))
+    threshold_atol = _finite_real(atol, "atol")
+    threshold_atol >= 0.0 || throw(ArgumentError("atol must be non-negative"))
+
+    mass_values = _normalize_triplet(masses, "masses")
+    flavor1, flavor2 = spec.pair
+    m1 = mass_values[flavor1]
+    m2 = mass_values[flavor2]
+    threshold = m1 + m2
+    gap = pole_mass - threshold
+    status = if abs(gap) <= threshold_atol
+        :at_threshold
+    elseif gap < 0.0
+        :bound
+    else
+        :continuum
+    end
+
+    return (
+        meson=spec.meson,
+        pair=spec.pair,
+        pole_mass_inv_fm=pole_mass,
+        pole_gamma_inv_fm=pole_gamma,
+        threshold_inv_fm=threshold,
+        threshold_gap_inv_fm=gap,
+        threshold_source=:constituent_mass_sum,
+        status=status,
+        is_mott=(status === :at_threshold),
+        atol=threshold_atol,
+        retarded_convention=spec.retarded_convention,
+        root_search=false,
     )
 end
 

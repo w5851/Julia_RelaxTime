@@ -201,7 +201,11 @@ retarded bubble provider 已实现。
   相同 `A/B0` 正则化；实现位于 `src/relaxtime/ChargedRPAProvider.jl`。
 - [ ] 完成有限宽度严格 retarded 解析延拓验证；当前 `:finite_width` 仍只是实轴
   兼容 proxy，不能作为该门禁的通过证据。
-- [ ] 实现极点残差/阈值/Mott 分支记录，覆盖 `mu=0` 共轭关系和有限同位旋点。
+- [x] 实现 solver-independent 的极点残差/阈值/Mott 分支记录；
+  `charged_pole_residual` 与 `charged_mott_diagnostic` 已保留有序味道和
+  retarded provenance。
+- [ ] 用严格 retarded 极点 provider 覆盖 `mu=0` 共轭关系和有限同位旋点；当前
+  记录 helper 不等于根求解或共轭关系验证。
 
 ### Phase D：strict BU density
 
