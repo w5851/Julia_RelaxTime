@@ -3,7 +3,7 @@
 状态：active；这是 RS `prod_v1` 物理删除（PR #278）之后的独立 PNJL
 phase-reference follow-up。作者已确认 v2 `accepted` 是 phase-reference 下游的默认
 runtime source，strict 只在显式模式下使用；legacy 不再作为 runtime fallback/rollback。
-当前已完成 path retirement，并在独立分支准备 PNJL legacy snapshot 物理删除 PR；
+当前已完成 path retirement，并已创建独立 PNJL legacy snapshot 物理删除 PR #285；
 该 PR 尚待 CI 与作者合并授权。
 
 ## 1. 背景与目标
@@ -152,7 +152,7 @@ primary，strict 只在显式模式下启用，legacy 不再作为 fallback/roll
 
 #### 阶段 C 实际结果（2026-08-30，待合并）
 
-物理删除提案位于
+物理删除提案（PR #285）位于
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_physical_deletion_v1/`，
 allowlist 精确包含 8 个 legacy snapshot 文件，共 50,749 bytes。删除前 tree hash 为
 `c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6`，恢复引用固定为

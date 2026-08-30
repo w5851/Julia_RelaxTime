@@ -497,6 +497,7 @@ evidence = [
   "file:scripts/analysis/pnjl/audit_issue130_phase_reference_physical_deletion.py",
   "file:tests/unit/python/test_issue130_phase_reference_physical_deletion.py",
   "sha:9aa4c313901ca0c91e851f58514e3df9aa124df4",
+  "pr:285",
   "note:physical_deletion_proposal_valid_allowlist8_files_50749_bytes_recovery_ref_9aa4c313_pending_merge_author_review",
 ]
 
