@@ -47,12 +47,15 @@ end
         "--adaptive-xi",
         "--xi-refine-levels", "1",
         "--T-refine-levels", "1",
+        "--rho-hybrid-endpoint-policy", "three_crossing_endpoint_local_v2",
     ])
     @test cfg.adaptive_xi
     @test cfg.xi_max_refine_level == 1
     @test cfg.temperature_max_refine_level == 1
     @test resolved_crossover_T_max_MeV(cfg) == 235.0
     @test cfg.crossover_mu_only_zero
+    @test cfg.rho_hybrid_endpoint_policy == :three_crossing_endpoint_local_v2
+    @test manifest_config_payload(cfg)["rho_hybrid_endpoint_policy"] == "three_crossing_endpoint_local_v2"
 
     inherited = DensePhaseReferenceConfig(T_min=10.0, T_max=240.0)
     @test resolved_crossover_T_max_MeV(inherited) == 240.0

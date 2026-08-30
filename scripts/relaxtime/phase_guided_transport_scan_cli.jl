@@ -23,6 +23,9 @@ struct PhaseGuidedScanOptions
     p_num::Int
     t_num::Int
     phase_anchor_policy::Symbol
+    phase_reference_root::Union{Nothing,String}
+    phase_reference_layer::Symbol
+    phase_reference_mode::Symbol
 end
 
 function PhaseGuidedScanOptions(
@@ -69,6 +72,9 @@ function PhaseGuidedScanOptions(
         12,
         6,
         :reference_interpolation,
+        nothing,
+        :accepted,
+        :runtime,
     )
 end
 
@@ -92,6 +98,9 @@ function print_usage(io::IO=stdout)
     println(io, "  --p-num <int>                主平衡态与 bulk 的热力学动量节点 (default 12)")
     println(io, "  --t-num <int>                主平衡态与 bulk 的热力学角节点 (default 6)")
     println(io, "  --phase-anchor-policy <direct_coexistence|reference_interpolation>  mode a 一阶相变温度锚点 (default direct_coexistence)")
+    println(io, "  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
+    println(io, "  --phase-reference-layer <accepted|strict|render>  candidate layer (default accepted)")
+    println(io, "  --phase-reference-mode <runtime|strict|diagnostic>  accepted runtime (default), explicit strict, or diagnostic view")
     println(io, "  --channel-diagnostics        输出每点每通道的 τ^-1 贡献明细 CSV")
     println(io, "  --compute-bulk               显式开启体粘滞 ζ 计算（默认开启）")
     println(io, "  --no-compute-bulk            显式关闭体粘滞 ζ 计算")
@@ -130,6 +139,9 @@ function parse_args(args::Vector{String})
         :p_num => 12,
         :t_num => 6,
         :phase_anchor_policy => :direct_coexistence,
+        :phase_reference_root => nothing,
+        :phase_reference_layer => :accepted,
+        :phase_reference_mode => :runtime,
         :channel_diagnostics => false,
         :compute_bulk => true,
         :dry_run => false,
@@ -194,6 +206,16 @@ function parse_args(args::Vector{String})
             policy in (:direct_coexistence, :reference_interpolation) ||
                 error("unknown phase anchor policy: $(policy) (expected: direct_coexistence|reference_interpolation)")
             opts[:phase_anchor_policy] = policy
+        elseif arg == "--phase-reference-root"
+            opts[:phase_reference_root] = require_value()
+        elseif arg == "--phase-reference-layer"
+            layer = Symbol(strip(require_value()))
+            layer in (:accepted, :strict, :render) || error("unknown phase reference layer: $(layer)")
+            opts[:phase_reference_layer] = layer
+        elseif arg == "--phase-reference-mode"
+            mode = Symbol(strip(require_value()))
+            mode in (:runtime, :strict, :diagnostic) || error("unknown phase reference mode: $(mode)")
+            opts[:phase_reference_mode] = mode
         elseif arg == "--channel-diagnostics"
             opts[:channel_diagnostics] = true
         elseif arg == "--compute-bulk"
@@ -257,6 +279,9 @@ function parse_args(args::Vector{String})
         Int(opts[:p_num]),
         Int(opts[:t_num]),
         Symbol(opts[:phase_anchor_policy]),
+        isnothing(opts[:phase_reference_root]) ? nothing : String(opts[:phase_reference_root]),
+        Symbol(opts[:phase_reference_layer]),
+        Symbol(opts[:phase_reference_mode]),
     )
 end
 

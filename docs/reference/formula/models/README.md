@@ -30,6 +30,6 @@
 ## 文献对齐记录
 
 - `rotation/Rotation_PNJL_CoreEquations.md` 已按 arXiv:2307.14402v1 做了一轮公式口径对齐（含 `\epsilon_n`、Bessel 权重、Polyakov 势参数化与驻点方程）。
-- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已按 `thesis.pdf` 第 2.2 节做逐式对照（Eq. 2.40-2.70）与符号映射；对提取不确定项已显式标注“待复核”。
-- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已补“基于当前实现反推的不确定项”，用于指导后续参数配置收敛（区分占位实现与论文定式）。
-- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已吸收 `tmp/公式文档temp.md` 的可验证信息，并把耦合比口径统一为原文符号 `f_sigma/f_omega/f_rho`。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已按 `thesis.pdf` 第 2.2 节做逐式对照（Eq. 2.40-2.70）与符号映射，并显式记录 Eq.2.69 熵项和 Eq.2.70 delta 项 errata。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已固定 `f_i=g_i^2/m_i^2`、`b/c` 吸收约定、tau3 归一化、NLrho/NLrho-delta profile 分离和 Fortran 价值矩阵。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 的源码/测试证据表区分 diagnostic 实现与尚未满足的 formal gate。

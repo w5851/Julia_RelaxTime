@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+paired_completion,candidate and legacy each completed the 19-point numerical plan,supported,tables/anchor_drift_summary.csv; source manifest,this pilot scope only
+common_quality_warning,the five tau_u/tau_ubar quality warnings are common to candidate and legacy,supported,tables/quality_warning_summary.csv,"shared scan_quality warning, not solver failure"
+continuous_anchor_propagation,reference anchor differences can propagate through T-scaled transport inputs,supported,tables/anchor_drift_summary.csv; source sampling_plan.csv,no new solver-free causal decomposition beyond input path
+reference_transport_regression,this scope shows no material candidate-specific transport regression,candidate,tables/quality_warning_summary.csv; tables/anchor_drift_summary.csv,"limited 19-point pilot, not full production parity"
+legacy_retirement,old reference may be removed,not_claimed,README.md,requires consumer audit and accepted numerical revalidation

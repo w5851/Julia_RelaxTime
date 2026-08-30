@@ -1,0 +1,8 @@
+# Issue130 RS sharded production v2 claim ledger; diagnostic-only
+claim_id,claim,status,evidence,boundary
+C1,30 个唯一 numerical shard 均完成并上传完整结果 artifact。,supported,action_run_summary.csv; per_shard_summary.csv,仅针对选定 30 个成功 run；重复 cancelled run 不纳入。
+C2,所有 scan 点 converged=true、failed_points 数据行数为 0、scan/diagnostics 无重复键且数值有限。,supported,per_shard_summary.csv; mode_a_scan.csv; mode_b_scan.csv; mode_a_diag.csv; mode_b_diag.csv,mode-B alpha_T=NaN 为不适用字段，已单独允许。
+C3,candidate runtime 使用固定 calculation SHA 和 workflow head，保留 legacy fallback。,supported,per_shard_summary.csv; each shard DIAGNOSTIC_AUDIT.md/effective_config.json,本次只运行 candidate runtime；不是 legacy-vs-candidate 同 job 的新成对 numerical scan。
+C4,"direct_coexistence 的 muB=900, alpha_T=1.0 路由保留 xi=-0.003/+0.003 两侧点且不含 xi=0。",supported,aggregate_summary.json; mode_a_scan.csv,这是 transport 输入点集合同，不代表相变 reference 证书本身。
+C5,candidate 与历史 v1 legacy 结果存在局部 phase/transport 差异。,supported,candidate_legacy_comparison.csv; candidate_legacy_comparison_summary.json,reference 输入改变会改变 T_phase_base/连续 equilibrium 路径；差异不是单独的 solver convergence failure。
+C6,本次证据可晋升为正式 reference 或删除 legacy fallback。,not_supported,aggregate_summary.json; per_shard_summary.csv,每 shard 的 effective_config.json、failed_points.csv manifest hash 均不匹配；仍需 provenance repair/复核和独立作者审核。

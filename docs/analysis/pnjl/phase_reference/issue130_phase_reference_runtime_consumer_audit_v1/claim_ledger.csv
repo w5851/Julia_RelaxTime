@@ -1,0 +1,5 @@
+claim_id,claim,status,evidence,boundary
+candidate_integrity,Candidate strict/derived/render tables are finite and key-unique under the imported package contract.,supported,tables/candidate_table_checks.csv; data/reference/pnjl/issue130_phase_reference_v1/manifest.json,integrity does not authorize runtime use
+runtime_isolation,Existing phase/transport entrypoints do not implicitly select the Issue #130 candidate sibling.,supported,tables/consumer_inventory.csv; tables/source_contract_checks.csv,static source audit; no runtime execution
+schema_adapter_required,The candidate cannot be passed directly to legacy consumers without a schema/semantic adapter.,supported,tables/schema_compatibility.csv,adapter design is a separate task and must preserve unresolved/non-certified semantics
+promotion,This audit promotes or switches the runtime phase reference.,not_supported,decision.json; data/reference/pnjl/issue130_phase_reference_v1/manifest.json,runtime_consumption=false; RS transport remains blocked

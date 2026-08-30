@@ -1,0 +1,4 @@
+claim_id,claim,status,evidence,boundary
+package_integrity,The reviewed three-layer package is hash-bound and replay-complete,supported,tables/gate_summary.csv; manifest.json,solver-free gate only
+unresolved_semantics,Strict unresolved geometry rows remain explicit and are not certified by derived interpolation,supported,tables/unresolved_summary.csv; strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv,downstream policy must choose strict versus derived explicitly
+versioned_promotion,A separate versioned promotion PR may be prepared,candidate,decision.json; reference_target.json,no data/reference write or runtime switch in this gate

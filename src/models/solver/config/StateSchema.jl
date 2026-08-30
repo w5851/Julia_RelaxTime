@@ -37,8 +37,10 @@ end
 按模型类型构造状态 schema。
 """
 function schema_for_model(model_kind::Symbol)
-    model = create_model(model_kind)
-    dim = gap_state_dim(model)
+    # The magnetic route requires a caller-supplied positive eB, so schema
+    # construction must not instantiate its model with an invalid zero-field
+    # default merely to discover the already-defined five-dimensional shape.
+    dim = model_kind === :PNJLMagnetic ? 5 : gap_state_dim(create_model(model_kind))
     fields = _default_state_fields(model_kind, dim)
     length(fields) == dim || throw(ArgumentError("schema fields length mismatch for $model_kind: expected $dim, got $(length(fields))"))
     return ModelStateSchema(model_kind, fields)

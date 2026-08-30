@@ -1,0 +1,87 @@
+{
+  "aggregate_replay_run_id": "31352083775",
+  "calculation_sha": "4c9703c3be45b76608ab57d375082e29418bfd05",
+  "deep_oracle_run_id": "31350127588",
+  "evidence_state": "final",
+  "generated_at_utc": "2026-08-10T03:21:02.457732Z",
+  "oracle_overlay": {
+    "applied": [
+      {
+        "T_MeV": 20.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": -0.5
+      },
+      {
+        "T_MeV": 5.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": 0.0
+      }
+    ],
+    "approved_points": [
+      [
+        -0.5,
+        5.0
+      ],
+      [
+        -0.5,
+        20.0
+      ],
+      [
+        0.0,
+        5.0
+      ]
+    ],
+    "deep_manifest_schema": "cep_deep_oracle_v1",
+    "deep_run_id": "31350127588",
+    "errors": [],
+    "expected_calculation_sha": "4c9703c3be45b76608ab57d375082e29418bfd05",
+    "oracle_labels_used_for_route": false,
+    "schema_version": "cep_maxwell_endpoint_local_overlay_v1"
+  },
+  "plot_policy": {
+    "full_panel": "rho_0_to_4_with_shared_method_styles",
+    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+    "local_x_padding_rule": "max(4% of phase/support envelope, 0.01 rho)",
+    "local_y_axis_is_independent": true,
+    "local_y_padding_rule": "max(8% of local mu span, 0.0002 MeV)",
+    "no_support_panel": "smooth_window_rho_mu_zoom_v1"
+  },
+  "plot_source_manifest_sha256": "800f64ec7ee09bd467d57c9833386c0bf94595f8674706b3c923b2b378a661fe",
+  "plotter_script_sha256": "a46cd59cf08e8a50c239584edc52a4a98f3e275091bae63e96a5abd3e74a0517",
+  "postprocess_sha": "52620dffc5493375f74e26f9a7b1b22af6099ca2",
+  "raw_curve_points": {
+    "file": "Actions/local artifact curve_points.csv",
+    "raw_curve_copy_in_repository": false,
+    "rows": 54659,
+    "sha256": "bec96fd7c9a1887a63729355db47b55632126c1a85a3c8ec8a8297a8e34d8c63"
+  },
+  "repository_files_sha256": {
+    "AUDIT.md": "716a1c740fd6d4bbe37acd0c62668b66f4caa854d9e5b622e3aa092ba56b3538",
+    "README.md": "0dfc077ddcc13b8f3210d7580f8a2314a573f1cd3b6492ebb86386b6a4625d63",
+    "figures/plot_manifest.json": "597034448a26e1f0be3ad013716ffe7db456d100032d6def7f784fc557cd81a0",
+    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "1c70fcd80da397cc4ba1d97319204983d89c5bb7ba29af9f0ca3c671bfbfc3a8",
+    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "99a2c776d4c7a3396ca70d125edf77ad8be323ee256e19fae0768bc56f6fd738",
+    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "34b0f741a4f96c7e6465778d1784c30b18bad8259e62299f4ff4bd822b6a9892",
+    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "f8ee2b9c0d44f3b006c7137e790a57d03999b1c70c110299407a4384fc4547e7",
+    "figures/rho_mu_xi_0p5_T_107.085_first_monotone.png": "0953cc118f64c631fc28258069a73aab54add95ee721a16fbce3c1a07aa0e05c",
+    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "f1bc1b9ee9c04d556229d3289b2088fd905a2b709e9e7b733d0fbebd0a8826df",
+    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "8611def6dd15ada2040e1e6f9b3091de3c0558b7e64c837da57e51528e1675b7",
+    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "5d254183c0442810490ceaa7c6847473178728b78f51c1154bfe9986fc0ee8fc",
+    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "7fdb87bef653c5abbe71392bdb5f4239f6cd875ce022283f6e75a5372e56b601",
+    "source_manifest.json": "93fa283d5dc617796927834106c96ab8a4f531a1eaafeb600a1b025d35800fcf",
+    "tables/actions_costs.csv": "964e41d57c58341ac7df6a948582d49525ce7fdd4d13146bf9c6755e7db6506c",
+    "tables/cep_accuracy.csv": "bbee783e4664563ab2dfcb8c077402bfc01b44b5dab76adfad0fd6e3c6541404",
+    "tables/claim_ledger.csv": "4dd79408b97d4662c69e75be95600173c65bcebe4623a4708ada4a4819159622",
+    "tables/curve_index.csv": "7b96b0c8eb6daf7bed34a24ed721cf72bad7e0a54f2437027143341483c905a4",
+    "tables/geometry_accuracy.csv": "4a2b0cff0b6ecf307047c404838eca2540539d696f29e271ae3009e82da9c05e",
+    "tables/method_costs.csv": "4a0178a737fe3b01a4e900d117af9216774b9d30431c5de498293f285f633a71",
+    "tables/slice_metrics.csv": "20694ba257f99fccc80c683917d70344c2414ae04dc8e5255e8939f48df6c520"
+  },
+  "schema_version": "pnjl_cep_endpoint_local_production_shadow_v4_evidence_v1",
+  "scope": "full",
+  "source_run_id": "31351527152",
+  "source_schema_version": "cep_maxwell_endpoint_local_production_shadow_v4",
+  "verdict": "full_hybrid_candidate"
+}

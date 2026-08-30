@@ -41,6 +41,7 @@ Base.@kwdef mutable struct PhaseCliConfig
     cep_strategy::Symbol = :interpolate
     cep_interpolate_use_direct_eval::Bool = false
     cep_tol::Float64 = 0.01
+    temperature_resolution_target_MeV::Float64 = NaN
     cep_max_bisect_iter::Int = 20
     cep_area_tol_good::Float64 = 1e-4
     cep_area_tol_bad::Float64 = 5e-4
@@ -61,6 +62,12 @@ Base.@kwdef mutable struct PhaseCliConfig
     rho_position_tol_MeV::Float64 = 0.05
     rho_density_tol::Float64 = 0.005
     rho_maxwell_area_tol::Float64 = 1e-4
+    rho_refinement_policy::Symbol = :uniform_nested
+    rho_refine_levels::Int = 2
+    rho_support_fine_step::Float64 = 0.025
+    rho_support_target_point_count::Int = 9
+    rho_support_targeted_cap::Int = 12
+    rho_hybrid_endpoint_policy::Symbol = :bounded_zero_density_v1
     adaptive_temperature::Bool = false
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10
@@ -186,6 +193,8 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "cep_strategy") && (cfg.cep_strategy = Symbol(lowercase(String(table["cep_strategy"]))))
     haskey(table, "cep_interpolate_use_direct_eval") && (cfg.cep_interpolate_use_direct_eval = _as_bool(table["cep_interpolate_use_direct_eval"], "phase_pipeline.cep_interpolate_use_direct_eval"))
     haskey(table, "cep_tol") && (cfg.cep_tol = Float64(table["cep_tol"]))
+    haskey(table, "temperature_resolution_target_MeV") &&
+        (cfg.temperature_resolution_target_MeV = Float64(table["temperature_resolution_target_MeV"]))
     haskey(table, "cep_max_bisect_iter") && (cfg.cep_max_bisect_iter = Int(table["cep_max_bisect_iter"]))
     haskey(table, "cep_area_tol_good") && (cfg.cep_area_tol_good = Float64(table["cep_area_tol_good"]))
     haskey(table, "cep_area_tol_bad") && (cfg.cep_area_tol_bad = Float64(table["cep_area_tol_bad"]))
@@ -206,6 +215,12 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "rho_position_tol_MeV") && (cfg.rho_position_tol_MeV = Float64(table["rho_position_tol_MeV"]))
     haskey(table, "rho_density_tol") && (cfg.rho_density_tol = Float64(table["rho_density_tol"]))
     haskey(table, "rho_maxwell_area_tol") && (cfg.rho_maxwell_area_tol = Float64(table["rho_maxwell_area_tol"]))
+    haskey(table, "rho_refinement_policy") && (cfg.rho_refinement_policy = Symbol(lowercase(String(table["rho_refinement_policy"]))))
+    haskey(table, "rho_refine_levels") && (cfg.rho_refine_levels = Int(table["rho_refine_levels"]))
+    haskey(table, "rho_support_fine_step") && (cfg.rho_support_fine_step = Float64(table["rho_support_fine_step"]))
+    haskey(table, "rho_support_target_point_count") && (cfg.rho_support_target_point_count = Int(table["rho_support_target_point_count"]))
+    haskey(table, "rho_support_targeted_cap") && (cfg.rho_support_targeted_cap = Int(table["rho_support_targeted_cap"]))
+    haskey(table, "rho_hybrid_endpoint_policy") && (cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(String(table["rho_hybrid_endpoint_policy"]))))
     haskey(table, "adaptive_temperature") && (cfg.adaptive_temperature = _as_bool(table["adaptive_temperature"], "phase_pipeline.adaptive_temperature"))
     haskey(table, "temperature_max_refine_level") && (cfg.temperature_max_refine_level = Int(table["temperature_max_refine_level"]))
     haskey(table, "temperature_position_tol_MeV") && (cfg.temperature_position_tol_MeV = Float64(table["temperature_position_tol_MeV"]))
@@ -287,12 +302,19 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
             "crossover_T_max_MeV",
             isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_max,
         ),
+        "temperature_resolution_target_MeV" => (isfinite(cfg.temperature_resolution_target_MeV) ? cfg.temperature_resolution_target_MeV : cfg.cep_tol),
         "cep_tol" => cfg.cep_tol,
         "unknown_budget" => cfg.unknown_budget,
         "rho_geometry_convergence" => cfg.rho_geometry_convergence,
         "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
         "rho_density_tol" => cfg.rho_density_tol,
         "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "rho_refinement_policy" => String(cfg.rho_refinement_policy),
+        "rho_refine_levels" => cfg.rho_refine_levels,
+        "rho_support_fine_step" => cfg.rho_support_fine_step,
+        "rho_support_target_point_count" => cfg.rho_support_target_point_count,
+        "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
+        "rho_hybrid_endpoint_policy" => String(cfg.rho_hybrid_endpoint_policy),
         "adaptive_temperature" => cfg.adaptive_temperature,
         "temperature_max_refine_level" => cfg.temperature_max_refine_level,
         "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
@@ -362,6 +384,7 @@ function _usage()
     println("  --cep_strategy=...     CEP定位策略（interpolate|direct）")
     println("  --cep_interpolate_use_direct_eval=true|false interpolate策略下对临界二分点做direct重算")
     println("  --cep_tol=0.01         CEP二分温度容差 (MeV)")
+    println("  --temperature_resolution_target_MeV=0.01  cep_tol 的明确别名；仅控制端点搜索分辨率")
     println("  --cep_max_bisect_iter=20 CEP二分迭代上限")
     println("  --cep_area_tol_good=1e-4 CEP判定valid阈值")
     println("  --cep_area_tol_bad=5e-4  CEP判定invalid阈值")
@@ -382,6 +405,12 @@ function _usage()
     println("  --rho_position_tol_MeV=0.05 rho网格位置量误差门限(MeV)")
     println("  --rho_density_tol=0.005 rho网格密度量误差门限")
     println("  --rho_maxwell_area_tol=1e-4 rho网格Maxwell面积残差门限")
+    println("  --rho_refinement_policy=uniform_nested|rho_support_cascade|rho_support_hybrid 可选rho支持级联/三级hybrid（默认保持uniform）")
+    println("  --rho_refine_levels=2 rho细化层数；cascade要求为1")
+    println("  --rho_support_fine_step=0.025 cascade细网格步长")
+    println("  --rho_support_target_point_count=9 cascade目标补点数")
+    println("  --rho_support_targeted_cap=12 cascade每温度补点上限")
+    println("  --rho_hybrid_endpoint_policy=bounded_zero_density_v1|three_crossing_endpoint_local_v2 hybrid端点证书策略")
     println("  --adaptive_temperature=false 启用相线中点温度自适应")
     println("  --temperature_max_refine_level=2 温度中点最大加密层数")
     println("  --temperature_position_tol_MeV=0.10 温度中点位置误差门限(MeV)")
@@ -490,6 +519,8 @@ function parse_args(args, project_root::AbstractString)
             cfg.cep_interpolate_use_direct_eval = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
         elseif startswith(arg, "--cep_tol=")
             cfg.cep_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--temperature_resolution_target_MeV=")
+            cfg.temperature_resolution_target_MeV = parse(Float64, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_max_bisect_iter=")
             cfg.cep_max_bisect_iter = parse(Int, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_area_tol_good=")
@@ -530,6 +561,18 @@ function parse_args(args, project_root::AbstractString)
             cfg.rho_density_tol = parse(Float64, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--rho_maxwell_area_tol=")
             cfg.rho_maxwell_area_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_refinement_policy=")
+            cfg.rho_refinement_policy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--rho_refine_levels=")
+            cfg.rho_refine_levels = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_support_fine_step=")
+            cfg.rho_support_fine_step = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_support_target_point_count=")
+            cfg.rho_support_target_point_count = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_support_targeted_cap=")
+            cfg.rho_support_targeted_cap = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_hybrid_endpoint_policy=")
+            cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         elseif startswith(arg, "--adaptive_temperature=")
             cfg.adaptive_temperature = _as_bool(split(arg, "="; limit=2)[2], "--adaptive_temperature")
         elseif startswith(arg, "--temperature_max_refine_level=")
@@ -562,9 +605,30 @@ function parse_args(args, project_root::AbstractString)
     cfg.p_num > 0 || throw(ArgumentError("p_num must be positive"))
     cfg.t_num > 0 || throw(ArgumentError("t_num must be positive"))
     cfg.iterations > 0 || throw(ArgumentError("iterations must be positive"))
-    cfg.cep_tol > 0 && isfinite(cfg.cep_tol) || throw(ArgumentError("cep_tol must be finite and positive"))
+    effective_resolution_target = isfinite(cfg.temperature_resolution_target_MeV) ?
+        cfg.temperature_resolution_target_MeV : cfg.cep_tol
+    effective_resolution_target > 0 && isfinite(effective_resolution_target) ||
+        throw(ArgumentError("temperature_resolution_target_MeV must be finite and positive"))
     cfg.unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative"))
     cfg.cep_max_refine_level >= 0 || throw(ArgumentError("cep_max_refine_level must be nonnegative"))
+    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) ||
+        throw(ArgumentError("invalid --rho_refinement_policy=$(cfg.rho_refinement_policy)"))
+    cfg.rho_refine_levels >= 0 || throw(ArgumentError("rho_refine_levels must be nonnegative"))
+    cfg.rho_support_fine_step > 0 || throw(ArgumentError("rho_support_fine_step must be positive"))
+    cfg.rho_support_target_point_count >= 5 && isodd(cfg.rho_support_target_point_count) ||
+        throw(ArgumentError("rho_support_target_point_count must be an odd integer >= 5"))
+    cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
+        throw(ArgumentError("rho_support_targeted_cap must cover rho_support_target_point_count"))
+    cfg.rho_hybrid_endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
+        throw(ArgumentError("rho_hybrid_endpoint_policy must be bounded_zero_density_v1 or three_crossing_endpoint_local_v2"))
+    if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
+        cfg.model_kind === :PNJL || throw(ArgumentError("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL"))
+        cfg.rho_geometry_convergence || throw(ArgumentError("$(cfg.rho_refinement_policy) requires rho_geometry_convergence=true"))
+        required_levels = cfg.rho_refinement_policy === :rho_support_hybrid ? 4 : 1
+        cfg.rho_refine_levels == required_levels || throw(ArgumentError("$(cfg.rho_refinement_policy) requires rho_refine_levels=$(required_levels)"))
+        cfg.rho_refinement_policy !== :rho_support_hybrid || cfg.rho_support_targeted_cap <= 12 ||
+            throw(ArgumentError("rho_support_hybrid Stage-A targeted cap must be <= 12"))
+    end
     if cfg.rho_geometry_convergence && cfg.cep_max_refine_level < 1 && cfg.mode === :production
         throw(ArgumentError("rho geometry convergence requires cep_max_refine_level >= 1 in production mode"))
     end
@@ -603,6 +667,7 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
     println("T-grid: $(first(T_grid)) -> $(last(T_grid)) (n=$(length(T_grid)))")
     println("rho-grid: $(first(rho_grid)) -> $(last(rho_grid)) (n=$(length(rho_grid)))")
 
+    effective_rho_levels = cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? cfg.rho_refine_levels : cfg.cep_max_refine_level
     result = models_module.run_phase_pipeline(
         cfg.model_kind;
         mode=cfg.mode,
@@ -630,10 +695,11 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         cep_strategy=cfg.cep_strategy,
         cep_interpolate_use_direct_eval=cfg.cep_interpolate_use_direct_eval,
         cep_tol=cfg.cep_tol,
+        temperature_resolution_target_MeV=cfg.temperature_resolution_target_MeV,
         cep_max_bisect_iter=cfg.cep_max_bisect_iter,
         cep_area_tol_good=cfg.cep_area_tol_good,
         cep_area_tol_bad=cfg.cep_area_tol_bad,
-        cep_max_refine_level=cfg.cep_max_refine_level,
+        cep_max_refine_level=effective_rho_levels,
         cep_adaptive_rho=cfg.cep_adaptive_rho,
         cep_adaptive_slope_tol=cfg.cep_adaptive_slope_tol,
         cep_adaptive_min_gap=cfg.cep_adaptive_min_gap,
@@ -650,6 +716,15 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         rho_position_tol_MeV=cfg.rho_position_tol_MeV,
         rho_density_tol=cfg.rho_density_tol,
         rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+        rho_refinement_policy=cfg.rho_refinement_policy,
+        rho_support_fine_step=cfg.rho_support_fine_step,
+        rho_support_targeted_cap=cfg.rho_support_targeted_cap,
+        rho_support_config=models_module.RhoSupportConfig(target_point_count=cfg.rho_support_target_point_count,
+            max_extra_points=max(cfg.rho_support_targeted_cap, cfg.rho_support_target_point_count)),
+        rho_hybrid_verification=models_module.RhoHybridVerificationConfig(
+            endpoint_policy=cfg.rho_hybrid_endpoint_policy,
+            targeted_cap=cfg.rho_support_targeted_cap,
+        ),
         adaptive_temperature=cfg.adaptive_temperature,
         temperature_max_refine_level=cfg.temperature_max_refine_level,
         temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,

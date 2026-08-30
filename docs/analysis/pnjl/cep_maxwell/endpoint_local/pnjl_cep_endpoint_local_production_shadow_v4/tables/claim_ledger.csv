@@ -1,0 +1,6 @@
+claim_id,status,claim_zh,evidence,fields_or_points,boundary
+full_hybrid_gate,pass,full 24-anchor shadow 的 hybrid 三态分类、数值几何和 workflow gate 全部通过,tables/slice_metrics.csv; tables/geometry_accuracy.csv; manifest.json,"result_status, geometry_converged, gate.*",diagnostic candidate; requires author physical review
+endpoint_support_contract,pass,三个 endpoint-local 证书的 support envelope 覆盖初始左 bracket 与 anchor，最终收缩界限单独记录,tables/slice_metrics.csv; tables/geometry_accuracy.csv,"support_low/high, endpoint_lower/upper_bound, endpoint_*_bracket",does not add a fourth physical state
+solver_cost,pass,hybrid unique solves、fixed-rho requests、residual/Jacobian 和 runner cost 不高于 dense,tables/method_costs.csv; tables/actions_costs.csv,"method_costs, performance gate",runner noise allowance and author audit still apply
+deep_overlay,pass,approved required-three deep overlay 与 calculation SHA、artifact provenance 一致，且未用于 route 选择,manifest.json; source_manifest.json,"oracle_overlay, expected_calculation_sha",approved points only
+promotion,author_check,full_hybrid_candidate 尚未自动晋升 production/reference，也未启动 C0/C1/C2 或 transport,README.md; AUDIT.md,automatic_gate_is_not_promotion,"requires author review of representative curves, endpoint certificates, and costs"

@@ -1,0 +1,76 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_layers_v1",
+  "generated_at_utc": "2026-08-21T05:39:58.108769+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "maxwell_source_run_id": "32354095831",
+  "v7_manifest_hash": "027a4263a05ee7f951156a2519551a48696488ebbb6c4235d4e5319b2270543c",
+  "freeze_manifest_hash": "abb3d166ac0deeed6803c9c0e5d81fdd63fd20658a504641290319bc5785ee40",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "reference_write": false,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "generator": {
+    "script": "D:\\Temp\\julia_relaxtime_issue130_phase_reference_derived_v1\\scripts\\analysis\\pnjl\\build_issue130_phase_reference_layers.py",
+    "script_sha256": "f46e38fa8dffd0bf394ab4423e13aa1780458de10064aaa23af1b39bf09185d6",
+    "command": [
+      "scripts/analysis/pnjl/build_issue130_phase_reference_layers.py",
+      "--v7-root",
+      "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v7_crossover_derived",
+      "--frozen-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\maxwell_cep_local_expansion_32354095831_frozen_v1_final",
+      "--replay-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\maxwell_cep_local_expansion_32451053476_replay_v1",
+      "--output-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\phase_reference_layers_v1_rebuild_32451053476",
+      "--run-id",
+      "32354095831",
+      "--replay-run-id",
+      "32451053476",
+      "--calculation-sha",
+      "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+    ]
+  },
+  "replay": {
+    "run_id": "32451053476",
+    "source_run_id": "32354095831",
+    "manifest_sha256": "b6fdf71ec0cb0da103100e06901685ea5f6e26d06a7201cf2d2f552e27a82614",
+    "postprocess_sha": "d9a52e6232d09695a83997cda2c11f6b00204587",
+    "verdict": "expansion_candidate"
+  },
+  "layer": "issue130_phase_reference_layers_v1",
+  "promotion_status": "awaiting_author_review",
+  "children": {
+    "strict_reference_v1": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+    "derived_reference_v1": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
+    "phase_surface_render_v1": "4b091f9d97a1edf5046b872799928c8e742fe780f401e87e7ba17edd6220c605"
+  },
+  "render_lineage": {
+    "v8": {
+      "semantic_role": "pre_refinement_public_snapshot",
+      "manifest": "phase_surface_render_v8/manifest.json",
+      "manifest_sha256": "f7575d9df747c02aad5d28b392cf0aa339e4bb9750f760a6e0bf04b989f0234a",
+      "png_sha256": "5b8152b2ccef4107c51393370b82ff77f48287132e8206a37ee6cfb2ab793b14"
+    },
+    "v9": {
+      "semantic_role": "current_public_display_candidate",
+      "manifest": "phase_surface_render_v9/manifest.json",
+      "manifest_sha256": "49201a7fb9c71fd6143a6f55c68e56aa3db8c02686c3e5e42b0ad1b2eab4db18",
+      "png_sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65"
+    }
+  },
+  "package_files": {
+    "README.md": "2fefce4f8d2af81358df73c6e5c81408b55470a8bfe7e24502f9bc2c2f47f85d",
+    "AUDIT.md": "dcd6d50bfa240941c16887cdad3919be743b4034beccee8350d47d7434f608d3",
+    "decision.json": "11ea87f30e31e9096cc1e38ac170faacb4d02cb5c11b9205b1754f4ed71f15d3",
+    "claim_ledger.csv": "caeebabaa498a90ec30fef969d3a9a211ba8592be2b4bd1f27293cd8abc0e4d0",
+    "replay_provenance.json": "e33178e443133e3f8c6a38f4590f4d1fbd253a4db96899600d49f0ca27a90cfa"
+  },
+  "metadata_hash_normalization": {
+    "schema_version": "pnjl_issue130_phase_reference_metadata_normalization_v1",
+    "normalized_at_utc": "2026-08-21T06:27:52.693303+00:00",
+    "reason": "Git checkout normalized text files to LF after the reviewed package was generated on Windows",
+    "numeric_tables_unchanged": true,
+    "solver_called": false
+  }
+}

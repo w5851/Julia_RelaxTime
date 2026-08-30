@@ -1,0 +1,22 @@
+{
+  "schema_version": "pnjl_issue130_maxwell_cep_local_replay_provenance_v1",
+  "replay_run_id": "32451053476",
+  "replay_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32451053476",
+  "source_run_id": "32354095831",
+  "source_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32354095831",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_workflow_sha": "85ceccad19fb361fd2ba5f69afd8f509fd3ab9f3",
+  "replay_postprocess_sha": "d9a52e6232d09695a83997cda2c11f6b00204587",
+  "verdict": "expansion_candidate",
+  "run_mode": "aggregate_replay",
+  "solver_called": false,
+  "materialized_target_count": 276,
+  "expected_target_count": 276,
+  "manifest": {
+    "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\maxwell_cep_local_expansion_32451053476_replay_v1\\issue130-maxwell-cep-local-expansion-issue130_maxwell_cep_local_expansion_v1-aggregate-replay\\manifest.json",
+    "sha256": "b6fdf71ec0cb0da103100e06901685ea5f6e26d06a7201cf2d2f552e27a82614",
+    "bytes": 222231
+  },
+  "identity_fallback_count": 276,
+  "boundary": "solver-free replay provenance; no reference promotion"
+}

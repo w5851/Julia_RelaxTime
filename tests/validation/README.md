@@ -48,6 +48,48 @@ Matching target/provenance directories should preserve the same semantic split:
 - `targets/relaxtime/legacy/transport/`: lightweight acceptance targets for legacy transport quantities such as `tau`, `eta_over_s`, `sigma_t`, `kappa_*`, `lambda`, and stable ratio diagnostics.
 - `provenance/.../evidence/`: source file paths, column semantics, and comparison notes that justify how targets were extracted.
 
+The current Mott integral external replay is evidence-only:
+`data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`.
+It records source hashes and error statistics but is not read by the default
+acceptance suite. The magnetic external-source ledger is kept under
+`docs/analysis/historical/legacy/legacy_extraction_v1/` until model, unit,
+cutoff, and branch gates are closed.
+
+The magnetic external plan is now source-gated rather than dual-source. The
+legacy Fortran route remains diagnostic evidence only because it follows the
+disputed smooth-Landau kernel. The selected external MFIR source is
+`pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db`; its existing replay rows
+remain evidence until the remaining numerical gates are closed and lightweight
+targets are extracted. The Fortran entropy/density postprocessing
+rows with the documented flavor-charge bug and NaN exports are excluded from
+acceptance. The short v2 replay is recorded in
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_external_fixedmu_replay_v2.csv`;
+the same-route Julia/Fortran state deltas are in
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`.
+The paper-route audit and `pnjl_mag` source-gate are in
+`docs/analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md`.
+The repository and commit are fixed; the static formula and parameter source-gate
+is recorded in
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/pnjl_mag_source_gate_v1.csv`.
+The external locked environment has also been replayed locally through the author's
+descending one-seed temperature continuation. Nine representative equilibrium rows,
+source hashes, residuals, and exact comparison with the committed external CSV are in
+`docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_equilibrium_replay_v1/`.
+The follow-up cross-solver diagnostic is in
+`docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_cross_solver_replay_v1/`:
+all nine points were screened with Julia multi-seed solving, and three `T=240 MeV`
+points were replayed with matched quadrature nodes. The matched run remains diagnostic
+only; its branch and convergence gates are not acceptance targets.
+Until the remaining numerical
+convergence, ensemble adapter, branch policy, and output schema gates are closed,
+all equilibrium rows remain evidence/diagnostic rather than targets. One explicitly
+labelled fixed-state kernel-only Omega target is admitted under
+`tests/validation/data/targets/pnjl/reference/`; it does not validate root solving
+or branch completeness. Its source hashes and observed comparison delta are recorded
+under `tests/validation/data/provenance/pnjl/evidence/`. The point-list file is maintained with the historical
+extraction package at
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.
+
 Practical rule:
 
 - tests read `targets/`

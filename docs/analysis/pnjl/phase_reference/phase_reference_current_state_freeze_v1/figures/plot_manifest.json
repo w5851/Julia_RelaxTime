@@ -1,0 +1,36 @@
+{
+  "schema_version": "pnjl_phase_reference_current_state_freeze_plot_manifest_v1",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "copied_figures": false,
+  "entries": [
+    {
+      "path": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png",
+      "role": "C2 global native-support diagnostic",
+      "source_manifest": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
+      "exists": true,
+      "sha256": "39a34c99862d47b4581fc1867260b8db7752f1919043e937b49bf7ea2d27da66"
+    },
+    {
+      "path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png",
+      "role": "full-shadow representative first-order curve",
+      "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
+      "exists": true,
+      "sha256": "e85079857bd0d064622b2e4a0420585a15202d06709e3235028ed4fbb0c9c9d5"
+    },
+    {
+      "path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png",
+      "role": "full-shadow representative monotone curve",
+      "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
+      "exists": true,
+      "sha256": "c0e756c45536cfd943c33ab61f7c8e4cd7f0626053e3f7384b28b2de367a245a"
+    },
+    {
+      "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/figures/rho_mu_xi_0p5_T_107_raw_audit.png",
+      "role": "unresolved raw-curve diagnostic",
+      "source_manifest": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
+      "exists": true,
+      "sha256": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c"
+    }
+  ],
+  "note": "冻结包只登记现有图的路径和 hash，不复制或改写正式/诊断图。"
+}

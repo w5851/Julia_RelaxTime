@@ -6,6 +6,7 @@
 # 3. PhasePipelineResult 结构
 
 using Test
+using JSON3
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -55,6 +56,44 @@ end
         @test haskey(paths, "phase_grid_convergence")
         @test isfile(paths["phase_grid_convergence"])
         @test startswith(read(paths["phase_grid_convergence"], String), "axis,xi,T_MeV")
+    end
+
+    @testset "ambiguous CEP is visible in the phase conclusion" begin
+        tmp = mktempdir()
+        result = Models.PhasePipelineResult(
+            cep=Models.CEPResult(
+                result_status=:ambiguous,
+                T_last_first_order_MeV=130.0,
+                T_first_monotone_MeV=131.0,
+            ),
+        )
+        paths = Models.build_phase_artifacts(result; output_dir=tmp)
+        summary = read(paths["phase_summary"], String)
+        report = read(paths["phase_report"], String)
+        @test occursin("\"phase_structure\":\"ambiguous_near_critical\"", summary)
+        @test occursin("- result_status: ambiguous", report)
+    end
+
+    @testset "nested non-finite diagnostics are emitted as JSON null" begin
+        tmp = mktempdir()
+        result = Models.PhasePipelineResult(
+            diagnostics=Dict{String, Any}(
+                "nested" => (
+                    finite=1.5,
+                    nan=NaN,
+                    inf=Inf,
+                    values=[-Inf, nothing],
+                    status=:ambiguous,
+                ),
+            ),
+        )
+        paths = Models.build_phase_artifacts(result; output_dir=tmp)
+        summary = JSON3.read(read(paths["phase_summary"], String))
+        @test summary.stats.nested.finite == 1.5
+        @test summary.stats.nested.nan === nothing
+        @test summary.stats.nested.inf === nothing
+        @test summary.stats.nested.values[1] === nothing
+        @test String(summary.stats.nested.status) == "ambiguous"
     end
 
     @testset "grid convergence reasons are valid quoted CSV fields" begin

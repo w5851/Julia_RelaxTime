@@ -57,7 +57,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_IO_DIR / "t200_m08_re_zero_cross_summary.csv",
     )
-    parser.add_argument("--out-dir", type=Path, default=Path("docs/analysis/relaxtime"))
+    parser.add_argument("--out-dir", type=Path, default=Path("docs/analysis/relaxtime/transport/t200_tauu_spikes"))
     parser.add_argument("--x-scale", choices=("log", "linear"), default="log")
     parser.add_argument("--focus-ds-min", type=float, default=10.0)
     parser.add_argument("--focus-ds-max", type=float, default=15.0)

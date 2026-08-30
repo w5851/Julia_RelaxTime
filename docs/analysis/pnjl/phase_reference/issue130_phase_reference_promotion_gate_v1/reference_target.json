@@ -1,0 +1,18 @@
+{
+  "legacy_files_untouched": [
+    "boundary.csv",
+    "cep.csv",
+    "spinodals.csv",
+    "crossover_dense.csv",
+    "phase_reference_dense_manifest.json"
+  ],
+  "planned_figure_root": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1",
+  "planned_layers": {
+    "derived": "derived",
+    "render_data": "render",
+    "strict": "strict"
+  },
+  "planned_reference_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "runtime_consumption_in_this_gate": false,
+  "write_in_this_gate": false
+}

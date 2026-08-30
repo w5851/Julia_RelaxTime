@@ -1,0 +1,510 @@
+name: PNJL Issue130 Maxwell CEP-local Expansion
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Numerical input-incomplete matrix or authenticated aggregate replay"
+        required: false
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      calculation_ref:
+        description: "Immutable calculation SHA"
+        required: true
+        type: string
+      tag:
+        description: "Versioned diagnostic artifact tag"
+        required: false
+        default: issue130_maxwell_cep_local_expansion_v1
+        type: string
+      source_run_id:
+        description: "Completed numerical source run for aggregate replay or failed-only restore"
+        required: false
+        default: ""
+        type: string
+      rerun_failed_only:
+        description: "Run only target IDs listed in failed_target_ids"
+        required: false
+        default: false
+        type: boolean
+      failed_target_ids:
+        description: "Comma-separated input_incomplete target IDs for failed-only rerun"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  TARGET_LIST: docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/tables/target_list.csv
+  TARGET_SELECTION: input_incomplete
+  SCHEMA_VERSION: pnjl_issue130_maxwell_cep_local_expansion_v1
+  EXPECTED_TARGET_COUNT: "276"
+  BASE_RHO_KEYS_PER_TARGET: "641"
+
+jobs:
+  prepare:
+    if: ${{ inputs.mode == 'numerical' }}
+    name: prepare immutable Maxwell expansion matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix_left: ${{ steps.matrix.outputs.matrix_left }}
+      matrix_right: ${{ steps.matrix.outputs.matrix_right }}
+      target_ids: ${{ steps.matrix.outputs.target_ids }}
+      target_count: ${{ steps.matrix.outputs.target_count }}
+      target_count_left: ${{ steps.matrix.outputs.target_count_left }}
+      target_count_right: ${{ steps.matrix.outputs.target_count_right }}
+      target_list_sha256: ${{ steps.matrix.outputs.target_list_sha256 }}
+      expected_base_rho_keys: ${{ steps.matrix.outputs.expected_base_rho_keys }}
+    steps:
+      - name: Checkout workflow and postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify target matrix and cost envelope
+        id: matrix
+        shell: bash
+        env:
+          TARGET_LIST: ${{ env.TARGET_LIST }}
+          TARGET_SELECTION: ${{ env.TARGET_SELECTION }}
+          EXPECTED_TARGET_COUNT: ${{ env.EXPECTED_TARGET_COUNT }}
+          BASE_RHO_KEYS_PER_TARGET: ${{ env.BASE_RHO_KEYS_PER_TARGET }}
+        run: |
+          set -euo pipefail
+          [[ -f "$TARGET_LIST" ]] || { echo "missing target list: $TARGET_LIST" >&2; exit 1; }
+          python - "$TARGET_LIST" "$TARGET_SELECTION" "$EXPECTED_TARGET_COUNT" "$BASE_RHO_KEYS_PER_TARGET" <<'PY'
+          import csv, hashlib, json, sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          selection = sys.argv[2]
+          expected = int(sys.argv[3])
+          base_keys = int(sys.argv[4])
+          with path.open(newline="", encoding="utf-8") as handle:
+              rows = list(csv.DictReader(handle))
+          selected = [row for row in rows if row.get("pilot_selection") == selection]
+          ids = [row.get("target_id", "") for row in selected]
+          if len(selected) != expected or len(set(ids)) != expected or any(not item for item in ids):
+              raise SystemExit(f"target contract mismatch: selection={selection} count={len(selected)} expected={expected}")
+          if any(row.get("target_kind") != "maxwell_fixed_xi_T" for row in selected):
+              raise SystemExit("target matrix contains a non-fixed-(xi,T) target")
+          print(json.dumps({"target_count": len(ids), "expected_base_rho_keys": len(ids) * base_keys}))
+          print("TARGET_IDS_JSON=" + json.dumps(ids, separators=(",", ":")))
+          print("TARGET_LIST_SHA256=" + hashlib.sha256(path.read_bytes()).hexdigest())
+          PY
+          values="$(python - "$TARGET_LIST" "$TARGET_SELECTION" <<'PY'
+          import csv, json, sys
+          with open(sys.argv[1], newline="", encoding="utf-8") as handle:
+              ids=[row["target_id"] for row in csv.DictReader(handle) if row.get("pilot_selection")==sys.argv[2]]
+          print(json.dumps(ids, separators=(",", ":")))
+          PY
+          )"
+          count="$(python -c 'import json,sys; print(len(json.loads(sys.argv[1])))' "$values")"
+          sha="$(sha256sum "$TARGET_LIST" | awk '{print $1}')"
+          expected_keys=$((count * BASE_RHO_KEYS_PER_TARGET))
+          [[ "$count" = "$EXPECTED_TARGET_COUNT" ]] || exit 1
+          [[ "$expected_keys" -le 176916 ]] || {
+            echo "base rho cost envelope exceeded: $expected_keys" >&2
+            exit 1
+          }
+          read -r left_values right_values left_count right_count < <(python - "$values" <<'PY'
+          import json, sys
+
+          ids = json.loads(sys.argv[1])
+          midpoint = (len(ids) + 1) // 2
+          left = ids[:midpoint]
+          right = ids[midpoint:]
+          print(
+              json.dumps(left, separators=(",", ":")),
+              json.dumps(right, separators=(",", ":")),
+              len(left),
+              len(right),
+          )
+          PY
+          )
+          [[ "$left_count" -gt 0 && "$right_count" -gt 0 ]] || {
+            echo "target matrix partition must contain two non-empty shards" >&2
+            exit 1
+          }
+          [[ "$left_count" -le 256 && "$right_count" -le 256 ]] || {
+            echo "target matrix partition exceeds GitHub Actions combination limit" >&2
+            exit 1
+          }
+          {
+            echo "matrix_left={\"target_id\":$left_values}"
+            echo "matrix_right={\"target_id\":$right_values}"
+            echo "target_ids=$values"
+            echo "target_count=$count"
+            echo "target_count_left=$left_count"
+            echo "target_count_right=$right_count"
+            echo "target_list_sha256=$sha"
+            echo "expected_base_rho_keys=$expected_keys"
+          } >> "$GITHUB_OUTPUT"
+
+  numerical_left:
+    if: ${{ inputs.mode == 'numerical' }}
+    name: "Maxwell CEP-local expansion ${{ matrix.target_id }}"
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix_left) }}
+    steps:
+      - name: Select target for failed-only rerun
+        id: select_target
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          FAILED_TARGET_IDS: ${{ inputs.failed_target_ids }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_TARGET_IDS," != *",$TARGET_ID,"* ]]; then
+            echo "run_target=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_target=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation ref
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+
+      - name: Checkout workflow and postprocess head
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Materialize immutable calculation worktree
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          mkdir -p calculation/scripts/analysis calculation/endpoint_inputs
+          cp scripts/analysis/pnjl_issue130_maxwell_cep_local_pilot.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_maxwell_endpoint_candidate_feasibility.jl calculation/scripts/analysis/
+          cp "$TARGET_LIST" calculation/endpoint_inputs/target_list.csv
+
+      - name: Setup Julia
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-issue130-maxwell-cep-local-expansion-v1
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        run: julia --project=calculation -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run one input-incomplete Maxwell target
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+          TAG: ${{ inputs.tag }}
+          SCHEMA_VERSION: ${{ env.SCHEMA_VERSION }}
+          TARGET_SELECTION: ${{ env.TARGET_SELECTION }}
+        run: |
+          set -euo pipefail
+          mkdir -p "artifacts/${TARGET_ID}"
+          julia --project=calculation calculation/scripts/analysis/pnjl_issue130_maxwell_cep_local_pilot.jl \
+            --calculation-sha "$CALCULATION_REF" \
+            --workflow-head-sha "$WORKFLOW_HEAD_SHA" \
+            --target-id "$TARGET_ID" \
+            --target-list calculation/endpoint_inputs/target_list.csv \
+            --tag "$TAG" \
+            --selection "$TARGET_SELECTION" \
+            --schema-version "$SCHEMA_VERSION" \
+            --output-dir "artifacts/${TARGET_ID}"
+
+      - name: Upload expansion target artifact
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue130-maxwell-cep-local-expansion-${{ matrix.target_id }}-${{ inputs.tag }}
+          path: artifacts/${{ matrix.target_id }}
+          if-no-files-found: error
+          retention-days: 90
+
+  numerical_right:
+    if: ${{ inputs.mode == 'numerical' }}
+    name: "Maxwell CEP-local expansion ${{ matrix.target_id }}"
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix_right) }}
+    steps:
+      - name: Select target for failed-only rerun
+        id: select_target
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          FAILED_TARGET_IDS: ${{ inputs.failed_target_ids }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_TARGET_IDS," != *",$TARGET_ID,"* ]]; then
+            echo "run_target=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_target=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation ref
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+
+      - name: Checkout workflow and postprocess head
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Materialize immutable calculation worktree
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          mkdir -p calculation/scripts/analysis calculation/endpoint_inputs
+          cp scripts/analysis/pnjl_issue130_maxwell_cep_local_pilot.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_maxwell_endpoint_candidate_feasibility.jl calculation/scripts/analysis/
+          cp "$TARGET_LIST" calculation/endpoint_inputs/target_list.csv
+
+      - name: Setup Julia
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-issue130-maxwell-cep-local-expansion-v1
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        run: julia --project=calculation -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run one input-incomplete Maxwell target
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+          TAG: ${{ inputs.tag }}
+          SCHEMA_VERSION: ${{ env.SCHEMA_VERSION }}
+          TARGET_SELECTION: ${{ env.TARGET_SELECTION }}
+        run: |
+          set -euo pipefail
+          mkdir -p "artifacts/${TARGET_ID}"
+          julia --project=calculation calculation/scripts/analysis/pnjl_issue130_maxwell_cep_local_pilot.jl \
+            --calculation-sha "$CALCULATION_REF" \
+            --workflow-head-sha "$WORKFLOW_HEAD_SHA" \
+            --target-id "$TARGET_ID" \
+            --target-list calculation/endpoint_inputs/target_list.csv \
+            --tag "$TAG" \
+            --selection "$TARGET_SELECTION" \
+            --schema-version "$SCHEMA_VERSION" \
+            --output-dir "artifacts/${TARGET_ID}"
+
+      - name: Upload expansion target artifact
+        if: ${{ steps.select_target.outputs.run_target == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue130-maxwell-cep-local-expansion-${{ matrix.target_id }}-${{ inputs.tag }}
+          path: artifacts/${{ matrix.target_id }}
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    if: ${{ always() && inputs.mode == 'numerical' }}
+    name: aggregate Maxwell CEP-local expansion
+    needs: [prepare, numerical_left, numerical_right]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workflow and postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Restore skipped target artifacts for failed-only rerun
+        if: ${{ inputs.rerun_failed_only == true }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          CURRENT_WORKFLOW_SHA: ${{ github.sha }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha)"
+          test "$(echo "$source_json" | jq -r .status)" = completed
+          test "$(echo "$source_json" | jq -r .conclusion)" = success
+          source_workflow_sha="$(echo "$source_json" | jq -r .headSha)"
+          test "$source_workflow_sha" = "$CURRENT_WORKFLOW_SHA"
+          echo "SOURCE_WORKFLOW_SHA=$source_workflow_sha" >> "$GITHUB_ENV"
+          mkdir -p job-artifacts source-artifacts
+          gh run download "$SOURCE_RUN_ID" --pattern "issue130-maxwell-cep-local-expansion-*-$TAG" --dir source-artifacts
+          cp -a source-artifacts/. job-artifacts/
+
+      - name: Download numerical expansion artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: issue130-maxwell-cep-local-expansion-*-${{ inputs.tag }}
+          path: job-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate and aggregate expansion evidence
+        shell: bash
+        env:
+          CALCULATION_SHA: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          TARGET_SELECTION: ${{ env.TARGET_SELECTION }}
+          SCHEMA_VERSION: ${{ env.SCHEMA_VERSION }}
+          EXPECTED_TARGET_COUNT: ${{ env.EXPECTED_TARGET_COUNT }}
+        run: |
+          set +e
+          python scripts/analysis/collect_pnjl_issue130_maxwell_cep_local_pilot.py \
+            --input-dir job-artifacts --output-dir aggregate \
+            --target-list "$TARGET_LIST" \
+            --calculation-sha "$CALCULATION_SHA" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --source-workflow-sha "${SOURCE_WORKFLOW_SHA:-$POSTPROCESS_SHA}" \
+            --selection "$TARGET_SELECTION" \
+            --schema-version "$SCHEMA_VERSION" \
+            --expected-count "$EXPECTED_TARGET_COUNT" \
+            --candidate-verdict expansion_candidate \
+            --run-mode numerical
+          status=$?
+          cat aggregate/verdict.json >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+
+      - name: Upload aggregate expansion evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue130-maxwell-cep-local-expansion-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate_replay:
+    if: ${{ inputs.mode == 'aggregate_replay' }}
+    name: replay Maxwell CEP-local expansion aggregate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+
+      - name: Checkout workflow and postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify source run and download expansion artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha)"
+          test "$(echo "$source_json" | jq -r .status)" = completed
+          test "$(echo "$source_json" | jq -r .conclusion)" = success
+          source_workflow_sha="$(echo "$source_json" | jq -r .headSha)"
+          [[ "$source_workflow_sha" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          echo "SOURCE_RUN_ID=$SOURCE_RUN_ID" >> "$GITHUB_ENV"
+          echo "SOURCE_WORKFLOW_SHA=$source_workflow_sha" >> "$GITHUB_ENV"
+          mkdir -p job-artifacts
+          gh run download "$SOURCE_RUN_ID" --pattern "issue130-maxwell-cep-local-expansion-*-$TAG" --dir job-artifacts
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Replay and validate expansion evidence
+        shell: bash
+        env:
+          CALCULATION_SHA: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          TARGET_SELECTION: ${{ env.TARGET_SELECTION }}
+          SCHEMA_VERSION: ${{ env.SCHEMA_VERSION }}
+          EXPECTED_TARGET_COUNT: ${{ env.EXPECTED_TARGET_COUNT }}
+        run: |
+          set +e
+          python scripts/analysis/collect_pnjl_issue130_maxwell_cep_local_pilot.py \
+            --input-dir job-artifacts --output-dir aggregate \
+            --target-list "$TARGET_LIST" \
+            --calculation-sha "$CALCULATION_SHA" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --source-workflow-sha "$SOURCE_WORKFLOW_SHA" \
+            --selection "$TARGET_SELECTION" \
+            --schema-version "$SCHEMA_VERSION" \
+            --expected-count "$EXPECTED_TARGET_COUNT" \
+            --candidate-verdict expansion_candidate \
+            --run-mode aggregate_replay \
+            --source-run-id "$SOURCE_RUN_ID"
+          status=$?
+          cat aggregate/verdict.json >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+
+      - name: Upload replay aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue130-maxwell-cep-local-expansion-${{ inputs.tag }}-aggregate-replay
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90

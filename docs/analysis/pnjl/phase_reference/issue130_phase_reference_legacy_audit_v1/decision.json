@@ -1,0 +1,32 @@
+{
+  "active_consumer_blocker_count": 24,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_auto_selected": false,
+  "candidate_duplicate_or_legacy_duplicate_keys": 0,
+  "candidate_provenance_ok": true,
+  "candidate_uncertified_rows": 4074,
+  "consumers_migrated": false,
+  "coverage_complete": false,
+  "legacy_fallback_key_count": 382,
+  "legacy_snapshot_integrity_pass": true,
+  "next_action": "retain snapshot; migrate consumers and/or close candidate certified-key gaps before path retirement",
+  "non_goals": [
+    "do not call Julia or the PNJL equilibrium solver",
+    "do not rewrite candidate or legacy reference files",
+    "do not delete the PNJL legacy snapshot",
+    "do not treat a solver-free audit as numerical convergence"
+  ],
+  "physical_deletion_eligible": false,
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_audit_v1",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "stop_reasons": [
+    "candidate_or_legacy_key_coverage_incomplete",
+    "active_consumer_or_rollback_dependency_present"
+  ],
+  "unknown_active_reference_count": 0,
+  "verdict": "retirement_inconclusive"
+}

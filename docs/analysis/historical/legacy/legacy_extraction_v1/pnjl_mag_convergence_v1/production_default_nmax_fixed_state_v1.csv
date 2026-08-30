@@ -1,0 +1,4 @@
+profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,p_num,zeta_num,pz_max_fm_inv,configured_n_max,resolved_n_max,fixed_residual_norm,fixed_omega_fm4,status
+production,50.0,0.0,0.2,5.136378925382266,96,64,25.0,,4,9.345630779359615e-5,-21.505720803452174,ok
+production,240.0,0.0,0.2,5.136378925382266,96,64,25.0,,3,1.283795117024708,-25.247625198974564,ok
+production,240.0,0.0,0.8,20.545515701529062,96,64,25.0,,3,0.14955944505742377,-23.96099135314408,ok

@@ -70,7 +70,10 @@ function _point_meta(point)
     )
 end
 
-function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
+function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
     paths = _default_output_paths(opts)
     figure_dir = _default_figure_dir(opts)
     mkpath(opts.outdir)
@@ -81,16 +84,20 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
         end
     end
 
-    plan = PhaseGuidedPlan.build_plan(opts)
+    plan = PhaseGuidedPlan.build_plan(
+        opts;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     PhaseGuidedAssets.write_plan_csv(paths.plan_csv, plan)
-    PhaseGuidedAssets.write_readme(paths.readme, opts, plan; result_csv_name=basename(paths.result_csv), figure_dir=replace(figure_dir, '\\' => '/'))
-    PhaseGuidedAssets.write_effective_config(paths.effective_config, PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')))
+    PhaseGuidedAssets.write_readme(paths.readme, opts, plan; result_csv_name=basename(paths.result_csv), figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference)
+    PhaseGuidedAssets.write_effective_config(paths.effective_config, PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference))
 
     if opts.dry_run
         Main.ProvenanceMetadata.write_run_sidecars(
             opts.outdir;
             ctx=ctx,
-            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
+            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference),
             artifacts=[paths.plan_csv, paths.readme, paths.effective_config],
             summary=Dict{String,Any}("points_total" => plan.total, "dry_run" => true),
         )
@@ -111,6 +118,9 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     io = open(paths.result_csv, "a")
     failed_io = open(paths.failed_points, "a")
     channel_io = opts.channel_diagnostics ? open(paths.channel_diagnostics, "a") : nothing
+    # Bind the result before the try/finally block; the provenance summary is
+    # written after streams are closed and must remain a function-local value.
+    stats = nothing
     try
         if filesize(paths.result_csv) == 0
             Main.ScanCSV.write_metadata(io, Dict(
@@ -151,6 +161,8 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
                     runtime;
                     previous_solution=previous_solution,
                     previous_phase=previous_phase,
+                    phase_reference=phase_reference,
+                    phase_reference_mode=phase_reference_mode,
                     point_meta=_point_meta(point),
                 ),
             opts,
@@ -158,25 +170,29 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
             existing,
         )
 
-        Main.ProvenanceMetadata.write_run_sidecars(
-            opts.outdir;
-            ctx=ctx,
-            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
-            artifacts=opts.channel_diagnostics ?
-                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
-                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
-            summary=Dict{String,Any}(
-                "points_total" => stats.total,
-                "success_count" => stats.success,
-                "error_count" => stats.error,
-                "skipped_count" => stats.skipped,
-            ),
-        )
     finally
         close(io)
         close(failed_io)
         channel_io !== nothing && close(channel_io)
     end
+
+    # Hashes must be taken only after all producer streams have been flushed and
+    # closed.  In particular, a header-only failed_points.csv is a valid zero-row
+    # artifact and must not be hashed as an empty file.
+    Main.ProvenanceMetadata.write_run_sidecars(
+        opts.outdir;
+        ctx=ctx,
+        effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference),
+        artifacts=opts.channel_diagnostics ?
+            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
+            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
+        summary=Dict{String,Any}(
+            "points_total" => stats.total,
+            "success_count" => stats.success,
+            "error_count" => stats.error,
+            "skipped_count" => stats.skipped,
+        ),
+    )
 
     println("Phase-guided transport scan finished. Output: $(paths.result_csv)")
     return plan
@@ -185,7 +201,11 @@ end
 function main()
     opts = PhaseGuidedCLI.parse_args(copy(ARGS))
     ctx = Main.ProvenanceMetadata.new_run_context("scripts/relaxtime/run_phase_guided_transport_scan.jl", copy(ARGS))
-    run_phase_guided_scan(opts, ctx)
+    phase_reference = Main._load_runtime_phase_reference(opts)
+    run_phase_guided_scan(opts, ctx;
+        phase_reference=phase_reference,
+        phase_reference_mode=opts.phase_reference_mode,
+    )
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

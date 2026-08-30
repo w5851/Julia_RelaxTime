@@ -1,0 +1,20 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "files": {
+    "AUDIT.md": "8ca503d07597154894d02604c9e2fd2e9fcbf185d059b523bd014a44a914412d",
+    "author_review_record_v1.json": "7afd2f37030a937b33cfed6774e9bab860afc28dc2e5e99297819bedef3044cf",
+    "claim_ledger.csv": "53f369135ef05848549882617cfdf2585ece36309d2dc9942b1fc34d50429e97",
+    "decision.json": "c4de5e97f2e26df45bfd6113d03a08508a4621df48403efe8223a4cbf1defe51",
+    "reference_target.json": "fdc19ba29e13b0995c709bc1b8d9d9581941cc30795e3926baeb8f9d6bdc1692",
+    "tables/gate_summary.csv": "8f88b803e494ce283fe50cb4a5f64619cc40e1435f29ab5b1061bd372934a535",
+    "tables/unresolved_summary.csv": "2c423ae861bedc2a7011cc4718f1e2ff709cf3192382ea2a2cd12cfd0bd0f871"
+  },
+  "generated_at_utc": "2026-08-21T06:29:04.187938+00:00",
+  "package_manifest_sha256": "ebbd580728caaf87839487442318fee90f137ff22568742e0553eba1b630d97c",
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_promotion_gate_v1",
+  "source_run_id": "32354095831",
+  "verdict": "promotion_candidate"
+}

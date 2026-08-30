@@ -46,4 +46,10 @@ end
     dens = Models.number_densities(m, st, T, mu)
     @test all(isfinite, dens.quark)
     @test all(isfinite, dens.antiquark)
+
+    # The unified model thermo facade differentiates pressure with ForwardDiff;
+    # RMF kernels must preserve dual numbers instead of forcing Float64(T).
+    generic_thermo = Models.model_thermo(m, st, mu, T; p_num=16)
+    @test all(isfinite, generic_thermo)
+    @test generic_thermo[2] >= 0.0
 end

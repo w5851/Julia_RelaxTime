@@ -9,6 +9,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 TARGETS = [
     ROOT / "scripts" / "plot_scan_csv.py",
+    ROOT / "scripts" / "analysis" / "collect_pnjl_cep_narrow_pilot.py",
+    ROOT / "scripts" / "analysis" / "plot_pnjl_cep_narrow_pilot.py",
+    ROOT / "scripts" / "analysis" / "freeze_pnjl_cep_narrow_pilot_v2_windows.py",
+    ROOT / "scripts" / "analysis" / "collect_pnjl_cep_narrow_pilot_v2.py",
+    ROOT / "scripts" / "analysis" / "plot_pnjl_cep_narrow_pilot_v2.py",
+    ROOT / "scripts" / "analysis" / "collect_pnjl_cep_deep_oracle.py",
     ROOT / "scripts" / "pnjl",
     ROOT / "scripts" / "relaxtime",
 ]

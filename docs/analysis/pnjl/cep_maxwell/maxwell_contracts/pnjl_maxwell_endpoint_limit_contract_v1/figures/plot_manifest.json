@@ -1,0 +1,14 @@
+{
+  "schema_version": "pnjl_maxwell_endpoint_limit_contract_v1",
+  "figures": [
+    {
+      "path": "figures/endpoint_limit_convergence.png",
+      "sha256": "a7876aafea3eda85b5378e8b613e0249cc70ac5df7b5be32b49711aff888272c",
+      "inputs": [
+        "tables/refinement_trace.csv"
+      ],
+      "claim_boundary": "single-anchor numerical convergence only"
+    }
+  ],
+  "command": "python scripts/analysis/build_pnjl_maxwell_endpoint_limit_contract.py --input-dir <job-artifact> --aggregate-dir <aggregate-artifact> --output-dir docs/analysis/pnjl_maxwell_endpoint_limit_contract_v1"
+}

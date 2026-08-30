@@ -1,0 +1,35 @@
+{
+  "calculation_sha": "9d325b62ef366f1de70cd3b2a3555e71bd12664a",
+  "generated_at_utc": "2026-07-28T07:47:11.367441Z",
+  "label_policy": "bounds_and_common_anchors_only; discovery labels are diagnostics",
+  "schema_version": "cep_narrow_pilot_v2_validation_windows",
+  "windows": [
+    {
+      "T_max_MeV": 155.0947265625,
+      "T_min_MeV": 139.0947265625,
+      "discovery_T_first_monotone_MeV": 147.2197265625,
+      "discovery_T_last_first_order_MeV": 139.9697265625,
+      "discovery_result_status": "ambiguous",
+      "required_T_anchors": [],
+      "xi": -0.5
+    },
+    {
+      "T_max_MeV": 138.3369140625,
+      "T_min_MeV": 122.3369140625,
+      "discovery_T_first_monotone_MeV": 131.0869140625,
+      "discovery_T_last_first_order_MeV": 130.5869140625,
+      "discovery_result_status": "ambiguous",
+      "required_T_anchors": [],
+      "xi": 0.0
+    },
+    {
+      "T_max_MeV": 129.0849609375,
+      "T_min_MeV": 89.0849609375,
+      "discovery_T_first_monotone_MeV": 107.0849609375,
+      "discovery_T_last_first_order_MeV": 101.4599609375,
+      "discovery_result_status": "ambiguous",
+      "required_T_anchors": [],
+      "xi": 0.5
+    }
+  ]
+}

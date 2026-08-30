@@ -1,0 +1,12 @@
+table,status,details
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/maxwell_surface_strict_reference_v1.csv,pass,rows=7162; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/crossover_surface_strict_reference_v1.csv,pass,rows=1343; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/spinodal_surface_strict_reference_v1.csv,pass,rows=6886; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv,pass,rows=93; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/maxwell_surface_derived_reference_v1.csv,pass,rows=12537; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/crossover_surface_derived_reference_v1.csv,pass,rows=3135; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/spinodal_surface_derived_reference_v1.csv,pass,rows=11989; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/cep_boundary_derived_reference_v1.csv,pass,rows=161; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/maxwell_surface_render.csv,pass,rows=12537; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/crossover_surface_render.csv,pass,rows=3135; missing=; nonfinite=0; duplicates=0
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/cep_boundary_render.csv,pass,rows=161; missing=; nonfinite=0; duplicates=0

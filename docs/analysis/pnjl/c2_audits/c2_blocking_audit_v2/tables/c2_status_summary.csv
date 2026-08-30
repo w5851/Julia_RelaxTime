@@ -1,0 +1,18 @@
+metric,value,gate,status,evidence
+workflow_conclusion,success,all required jobs complete,pass,validation_report.json
+boundary_rows,6886,reference artifact present,pass,boundary CSV
+boundary_not_converged,0,0,pass,boundary CSV
+boundary_nonfinite,0,0,pass,boundary CSV
+max_boundary_area_residual,4.99985959315e-06,<=5e-5,pass,boundary CSV
+crossover_rows,1488,all retained rows finite/converged,pass,crossover CSV
+grid_rows,22791,diagnostic inventory,info,grid convergence CSV
+grid_unconverged_rows,5424,0 for full convergence candidate,fail,c2_grid_failure_by_axis.csv
+failed_points,0,0,pass,phase_diagnostics JSON
+scan_failure,0,0,pass,phase_diagnostics JSON
+unique_solves,5413794,telemetry present,pass,phase_diagnostics JSON
+cache_hits,4397841,telemetry present,pass,phase_diagnostics JSON
+point_requests,9811635,telemetry present,pass,phase_diagnostics JSON
+targeted_additions,36939,telemetry present,pass,phase_diagnostics JSON
+diagnostics_records,93,available_record_count == shard count,pass,phase_diagnostics JSON
+c2_primary_comparator_verdict,classification_regression,convergence_candidate,fail,comparator summary JSON
+c2_audit_verdict,diagnostic-only convergence candidate,author review before promotion,candidate,README.md; claim_ledger.csv

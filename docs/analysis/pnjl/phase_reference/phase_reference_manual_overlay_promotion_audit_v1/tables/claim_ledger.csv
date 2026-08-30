@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+automatic_passes,"C2 boundary, crossover and solver-finiteness checks pass",supported,tables/auto_gate_summary.csv,C2 candidate only
+manual_cep_overlay,All three CEP brackets are author-accepted at width 0.0625 MeV,supported,tables/manual_cep_decisions.csv,diagnostic overlay; no CSV rewrite
+manual_nine_curves,Nine oracle rho-mu curves are author-accepted as first-order observations,supported,tables/manual_nine_curve_decisions.csv,hybrid labels remain ambiguous
+grid_residuals,C2 unresolved grid rows are entirely geometry/interpolation-only diagnostics,not_supported,tables/grid_unresolved_by_reason.csv,promotion blocker when false
+promotion,Combined evidence is ready for a phase-reference promotion PR,blocked,tables/promotion_decision.csv,no reference write performed

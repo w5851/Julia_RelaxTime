@@ -6,7 +6,8 @@ m_omega_MeV = 783.0
 m_rho_MeV = 770.0
 m_delta_MeV = 983.0
 
-# Original symbol convention in docs: f_i = g_i / m_i
+# Legacy/diagnostic profile. The RMF core interprets f_i as g_i^2/m_i^2;
+# this file keeps the historical zero-delta key for compatibility only.
 f_sigma = 10.329
 f_omega = 5.423
 f_rho = 3.15

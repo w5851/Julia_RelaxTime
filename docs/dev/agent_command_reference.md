@@ -127,7 +127,14 @@ julia --project=. scripts/dev/check_precompile_profile_coverage.jl
 julia --project=. scripts/dev/check_precompile_trace_budget.jl
 julia --project=. scripts/dev/check_skill_governance.jl
 julia --project=. scripts/dev/sync_claude_skills.jl --check
+julia --project=. scripts/dev/check_task_ledger.jl
+julia --project=. scripts/dev/check_task_ledger.jl --preflight
+julia --project=. scripts/dev/check_task_ledger.jl --preflight --track rs-transport
 ```
+
+Task ledger preflight is read-only. It reports the selected primary track, current task,
+branch, HEAD and dirty paths; it never changes the ledger or worktree. `--track ID` selects
+an existing track and is also checked during the default validation.
 
 Build and use a persistent sysimage:
 

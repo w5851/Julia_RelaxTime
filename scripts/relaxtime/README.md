@@ -128,6 +128,11 @@ julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl \
 - 可选 `figures/p1_mott_phase_diagram.*` 与 `figures/p1_isentropic_mott_paths.*`
 - 可选 per-`xi` 子图 `figures/p1_mott_phase_diagram_xi_*.*`
 
+P1 图像按 Mott 图族 namespace 组织在
+`data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/<case>/`；对应的计算结果和 `figure_assets` 仍保留在
+`data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/<case>/`。现有 `production_20260531` case 的 canonical 图像目录是
+`data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/`。
+
 `mott_lines.csv` 会保留 bracket 诊断字段；其中 `bracket_kind=branch_jump` 表示 gap 过零 bracket 同时跨过明显质量分支跳变，不应直接当作普通连续 Mott root 解释。P1 生产入口默认把 Mott 平衡态设为 `stable` 模式，即每个点用 FixedMu 多初值压力选优选择稳定分支；如需复现旧的温度连续亚稳分支扫描，可显式传 `--mott-equilibrium-branch-mode continuation`。
 
 示例：
@@ -137,7 +142,7 @@ python scripts/relaxtime/build_paper_p1_figure_assets.py \
   --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
   --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
   --phase-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/phase_xi0 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic \
+  --out-dir data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic \
   --asset-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/figure_assets
 ```
 
@@ -148,7 +153,7 @@ python scripts/relaxtime/build_paper_p1_figure_assets.py \
   --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
   --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
   --phase-reference-tag paper_p1_mott_phase_isentropic_xi3 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic \
+  --out-dir data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic \
   --asset-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/figure_assets
 ```
 
@@ -161,7 +166,7 @@ julia --project=. scripts/relaxtime/run_paper_p1_pipeline.jl \
   --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
   --phase-tag paper_p1_mott_phase_isentropic_xi3 \
   --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
-  --figure-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+  --figure-dir data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic
 ```
 
 当 Mott 主网格在不同 `muB` 区间需要不同温度覆盖时，使用 slice plan CSV，而不是手工拆多批命令。CSV 必须包含 `muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV`：

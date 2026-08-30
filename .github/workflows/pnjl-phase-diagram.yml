@@ -97,13 +97,21 @@ jobs:
             --verbose
 
       - name: Validate phase data
-        run: python scripts/pnjl/validate_phase_data.py
+        run: >-
+          python scripts/pnjl/validate_phase_data.py
+          --boundary data/reference/pnjl/boundary.csv
+          --spinodal data/reference/pnjl/spinodals.csv
+          --crossover data/reference/pnjl/crossover.csv
 
       - name: Generate phase diagrams
         run: |
           python scripts/pnjl/plot_phase_diagram.py \
             --type all \
             --xi ${{ matrix.xi }} \
+            --boundary data/reference/pnjl/boundary.csv \
+            --cep data/reference/pnjl/cep.csv \
+            --spinodal data/reference/pnjl/spinodals.csv \
+            --crossover data/reference/pnjl/crossover.csv \
             --output-dir data/outputs/figures/pnjl/phase_diagrams \
             --no-show
 

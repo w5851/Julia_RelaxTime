@@ -10,6 +10,7 @@
 - `calculate_magnetic_pressure`
 - `calculate_magnetic_rho`
 - `calculate_magnetic_number_densities`
+- `resolve_magnetic_nmax`
 - `magnetic_nmax_convergence_report`
 
 ## `coupling_GB`
@@ -40,6 +41,9 @@
 
 若你只需要最终热力学量，优先使用它们，而不是直接调用 Landau 低层函数。
 
+`calculate_magnetic_pressure=-Omega` 只表示固定外部磁场背景下的标量物质压力；当前
+没有 Maxwell 自能、磁化强度或横向/纵向压力张量输出。
+
 ## `calculate_magnetic_rho`
 
 通过数值导数路径计算 flavor 相关密度。它更偏进阶入口，使用时应注意步长与数值敏感区的影响。
@@ -49,9 +53,20 @@
 返回：
 
 - `quark`
+- `net`
+- `antiquark = nothing`（磁场路线不单独输出夸克/反夸克两支）
 - `baryon`
 
-适合固定点、扫描脚本或回归基线中直接消费。
+其中 `quark` 是为兼容历史脚本保留的字段名，正式语义与 `net` 相同，表示
+`q - qbar` 净密度；`baryon` 由三味净密度求和得到。该返回值不满足普通 PNJL
+`(quark, antiquark)` 的独立分量合同，不应直接传入需要独立反夸克占据数的输运路径。
+这是受支持正 `eB` 的 magnetic core 语义；输入低于
+`MAGNETIC_EB_MIN_FM2` 会明确拒绝，不会转回普通 PNJL。
+
+因此 `PNJLMagneticModel` 会将通用
+`supports_number_densities` capability 标为 `false`，避免该结果被普通输运路径误接；
+这不撤销专用 `calculate_magnetic_number_densities` API。
+适合磁场固定点、扫描脚本或回归基线中直接消费。
 
 ## `magnetic_nmax_convergence_report`
 
@@ -70,3 +85,9 @@
 - 新参数区首次跑点
 - 调整 `eB_fm2`、`p_num` 或 `pz_max` 后
 - 更新实现后做 baseline 或 regression 检查前
+
+自动截断的直接诊断入口是 `resolve_magnetic_nmax`。默认 thermal-tail profile 使用
+`thermal_tail_factor`、`n_max_floor` 和 `n_max_cap`，并在同一点的所有 solver seed/
+fallback attempt 之间共享解析结果；显式 `n_max` 会覆盖自动策略。source-parity
+跨求解器复核可使用 `config/models/pnjl/magnetic_source_parity.toml` 的固定
+`n_max=79` 和 `p_num=128`/`pz_max=40`/`zeta_num=256` 设置。

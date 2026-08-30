@@ -1,0 +1,14 @@
+{
+  "figures": {
+    "cep_comparison.png": "1e31a3e5b334d2b3f3fc5c310e02f46e428ac3458aa609ccb3dfedf24c17becf",
+    "cost_frontier.png": "0dfa60995efa19b9738dfb7e3a3ce1663f4247d0b101fac5e5874437feecb5bf",
+    "slice_costs.png": "e1d3a58e542c2f0b7d1664ef9f1d9fb10f4f82735e954aa6932fee2a01fa1aaa"
+  },
+  "generated_at_utc": "2026-07-26T11:16:54.172085Z",
+  "input_sha256": {
+    "cep_accuracy.csv": "71950e4f7dc2d467141db16bef4d0e63b4be4e48d9d068fa30d681d341db9e76",
+    "method_costs.csv": "29f1ec4b45f23497fea3b2d2f3ff92ab487aa572802ecff3357d94a3824fd07b",
+    "slice_metrics.csv": "cfee9961b8bed82e9ecea5a62cfb9e42df93c6698d089331b2bde940b4bcebc1"
+  },
+  "schema_version": "cep_narrow_pilot_v1"
+}

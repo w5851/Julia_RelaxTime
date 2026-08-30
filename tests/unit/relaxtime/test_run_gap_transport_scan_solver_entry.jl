@@ -207,3 +207,19 @@ end
     @test runtime.tau_kwargs.propagator_xi_policy == :isotropic
     @test runtime.tau_kwargs.sigma_cache_policy == :validated_anchored
 end
+
+@testset "phase-reference runtime switch defaults to accepted with explicit strict" begin
+    default_opts = Main.parse_args(String[])
+    @test default_opts.phase_reference_mode === :runtime
+    @test default_opts.phase_reference_layer === :accepted
+    strict_opts = Main.parse_args([
+        "--phase-reference-mode", "strict", "--phase-reference-layer", "strict",
+    ])
+    @test strict_opts.phase_reference_mode === :strict
+    @test strict_opts.phase_reference_layer === :strict
+    @test_throws ErrorException Main.parse_args(["--phase-reference-mode", "legacy"])
+    diagnostic_opts = Main.parse_args([
+        "--phase-reference-root", "candidate", "--phase-reference-mode", "diagnostic",
+    ])
+    @test diagnostic_opts.phase_reference_mode === :diagnostic
+end

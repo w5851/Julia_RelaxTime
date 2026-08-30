@@ -1,0 +1,6 @@
+path,check,needle,verdict,old_case_occurrences,solver_called
+scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py,current_case_default,first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2,pass,0,False
+scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl,current_case_default,first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2,pass,0,False
+scripts/relaxtime/phase_reference_adapter.jl,legacy_snapshot_and_source_switch,legacy_phase_reference_v1,pass,0,False
+scripts/relaxtime/phase_reference_adapter.jl,explicit_source_switch,"source in (:candidate, :legacy)",pass,0,False
+scripts/relaxtime/run_phase_guided_transport_scan.jl,phase_reference_mode_parameter,phase_reference_mode,pass,0,False

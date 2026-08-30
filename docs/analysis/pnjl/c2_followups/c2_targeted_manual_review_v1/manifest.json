@@ -1,0 +1,268 @@
+{
+  "schema_version": "pnjl_c2_targeted_manual_review_v1",
+  "verdict": "author_review_required",
+  "scope": "nine_targeted_regression_curves_plus_three_cep_midpoint_plan",
+  "source_run_id": "31941614867",
+  "source_calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_postprocess_sha": "aa9f3a70a821df863dd9f4fbbc8a89b053cdbf8c",
+  "solver_called": false,
+  "oracle_labels_used_for_routing": false,
+  "reference_write": false,
+  "target_count": 9,
+  "cep_failure_count": 3,
+  "source_files": [
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\production_hybrid\\curve_points.csv",
+      "sha256": "d66ba215cbcb7a775f462e622aa90a075b820843a00368923a7d27e9c482c9fd"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\production_hybrid\\manifest.json",
+      "sha256": "fde978a9e0d6518e8a75fdd1b66171e90aeb545b25204167c4733eebc7219c10"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "0ed76f63b2d8cf7b829681feaaf3f666b6590150b857f680e69b7c847cf034f4"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\independent_oracle\\curve_points.csv",
+      "sha256": "29db61e801b9c635c0118cb07623ae66c5e23f0e278d40f5226eeb83ea2b3c66"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\independent_oracle\\manifest.json",
+      "sha256": "87d1993e5a486a6558046a2349c8a35d08d69eceea99286854673331b2987b8d"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p00_T51\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "0d8d30031e38a7b837513bcb99bafb541af45176d120da0aad48a6a3390af359"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\production_hybrid\\curve_points.csv",
+      "sha256": "6023bd9eb36600fdd5f3b9290821de1c29d4d8682f91988cda20229bb687ee75"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\production_hybrid\\manifest.json",
+      "sha256": "d49e988a2e2bcfac91c517dc2a6079aea30e564d4bc15d07ed2e05de01c166b5"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "2e897241878b11b01dedd0ba9d7e8c46b3530b866863da60b2455636607f02f2"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\independent_oracle\\curve_points.csv",
+      "sha256": "a50fc8009ae24919c31e59de1b61f7076cc63f8b85c7cf2a8a0c9ee91f99d06a"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\independent_oracle\\manifest.json",
+      "sha256": "dde102293ae37fd50e28830507db2803524dccc72a55e3e08265cf1b5010c922"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p30_T21\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "726be2c02ccaa2a6a149327d4fd98cbb9cbffeac2677760c02df60fd604f9a5b"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\production_hybrid\\curve_points.csv",
+      "sha256": "e98bf0e68c45601ee237a83a03ad32e7aba7ac336ab71a611b72156942041917"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\production_hybrid\\manifest.json",
+      "sha256": "2efd372c7ef901e0ced7acea0bba7889a3509f278ee9e9c5c97c40a1b6ad382a"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "8d4efe3acbc933a30bcffc065cbcf1b55acc3aea4ceaef8e9ecdbb918cb75850"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\independent_oracle\\curve_points.csv",
+      "sha256": "22371a2dfbb35292b18623d2794018fc694e9185f9af4aef20eace6da16aebe6"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\independent_oracle\\manifest.json",
+      "sha256": "feb9f31e86c6dd2c88d646b517ab44372d87ac5c08197249fa01d2ef6286315a"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T101\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "962efe49ad3e611bbf32f4ca3e77171e117204c1ad4e4ec7f9b43ff0715872c2"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\production_hybrid\\curve_points.csv",
+      "sha256": "b0c9c1fa1cacac532fd17620a367a313f7fb57204a6d0976b59e36cad815bd59"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\production_hybrid\\manifest.json",
+      "sha256": "c034fdc69c76c8fe65dd8684eb3d5c1c3e8ad27a1daa97edeb854fe2b91b1cbf"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "3c581939f43b95b982a25c7f6c39b49cdf0e09a4652d6f32a4aa8e9c77c20c95"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\independent_oracle\\curve_points.csv",
+      "sha256": "303ae5d96ed89a4d9e144e844961ca10d7c5fab5d070ff1856fbfad3adcb20ac"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\independent_oracle\\manifest.json",
+      "sha256": "b4a39be4bc36c2889692eaa5a4d780f0372de921a4c463189bb3df47d3985d1e"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_0p35_T51\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "48931a4ad94496272c4c6ed1f6800ded8c9827c102fb99224553255d3905ac05"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\production_hybrid\\curve_points.csv",
+      "sha256": "54d2d5f4e36f17e9d330c38da6490cb4b57da31d2773cebb798974dd16cebe18"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\production_hybrid\\manifest.json",
+      "sha256": "e9233c368e02d32da78e84e1ae472940f4f1ebdf93c5b382ea59e3d95c864618"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "cb421d29aaa7731eceafc08143efd157ee0d5a43449f4115aeec4d1b50d03034"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\independent_oracle\\curve_points.csv",
+      "sha256": "22dd08875c1ab01100104f190b75bf6bf520a4624c1da63742980c5d9cd8757d"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\independent_oracle\\manifest.json",
+      "sha256": "b53f268156a5ba4c42b095d19a50b3131f6d2eb000176ed56bde044eb2ebd574"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p10_T41\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "64b730bfd6fd4c8adf3ab5349d862356fabbec15b96ca6522f021c8d5942d3c3"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\production_hybrid\\curve_points.csv",
+      "sha256": "079a47c424e5f31395b79314a8df93793e68f38813d8e5781f78ba4704a0072b"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\production_hybrid\\manifest.json",
+      "sha256": "3352cc1929c7d51a582b551bf113786fddf70c27e7f86cd426a7026231aa4db3"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "830a0f7f55e929746a8fed02654c0f63930089e0996d940ab7892e1d30fad23e"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\independent_oracle\\curve_points.csv",
+      "sha256": "48a10b566b7ba8396044d11a1339225c71a6d6a19b383c085902bc5436c84600"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\independent_oracle\\manifest.json",
+      "sha256": "a84d71bbdce98136e04c068a35f00e99fa0c5bc1e65b357a222711cae5d593c0"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p15_T41\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "aeaa0e9af9c074238f5c6b2ca35d370535ff0044ab75ba3af6bfae6deb5a74fc"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\production_hybrid\\curve_points.csv",
+      "sha256": "df1fb22a828d97dccb6c89246d258a56e58db824ea4ee61f49f8d2379dee3f6f"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\production_hybrid\\manifest.json",
+      "sha256": "9a4508853797ef63157be3872d06d61bb37668c17e81c57efcbbf66b76a453ec"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "0e8a94095f6420ce6728bee1192bbd1a84273e40df6120929fb064e528c9e7b6"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\independent_oracle\\curve_points.csv",
+      "sha256": "16eff22553821899f0deb566c1b6e20e0b84230edc6a4c36dbbe4fdb529465b6"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\independent_oracle\\manifest.json",
+      "sha256": "cfabff5eb7a9bf2bbe46ba90007a769edcdf0ef8f672640a83b106503d90ec42"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p20_T41\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "bae0ea978ce8c72ddb39b73d7604386227c7fa5ff9211450eca42182fc5010cf"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\production_hybrid\\curve_points.csv",
+      "sha256": "ef6565d08e1ac706193c515a451bc23639cb1943910ccf4cddf84a01fc51d9d0"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\production_hybrid\\manifest.json",
+      "sha256": "df857d7daf9b1d29ecd8e5e626b54dc936e48475190f909071db5b6b6998b610"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "d71d363b17eacfd28c68fc3d87a749df446a2545d9411150e49bb7f63406111f"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\independent_oracle\\curve_points.csv",
+      "sha256": "e7edebea5bc2fe485d499055d03ea6ae6b750168e114c48f2cd7207a22d9a2ce"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\independent_oracle\\manifest.json",
+      "sha256": "d864d0fd802412baa5f4f79cefc04387c3eee2de8d6140394e610f8aa41a0ed7"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p25_T41\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "78b587273ff15bc779d002afc85ae1275353573d1016f200b4a4275ba3de38b0"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\production_hybrid\\curve_points.csv",
+      "sha256": "8e776b8039474a1b34520c20d7cf3c2a83d65827cc0ac6b907cf7f134167ec4b"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\production_hybrid\\manifest.json",
+      "sha256": "d8bbe5cd55563942c9f96e2e2c366bcf7304ee5459f98a19a378f4b3c5a1847d"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\production_hybrid\\slice_diagnostics.csv",
+      "sha256": "794dcbfc97ef03a7fbbd2661b02b693fd72163017c0d57be1ef34b6662ff6270"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\independent_oracle\\curve_points.csv",
+      "sha256": "33d67083513935d3aa71e2ee4ac190e796c8c0b9375b6e656862c6f52b486291"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\independent_oracle\\manifest.json",
+      "sha256": "815ed59967e325cbac33be3ac2defaa7a834fbf0102374557f9d6ae2cee19d19"
+    },
+    {
+      "path": "D:\\Temp\\c2_targeted_download_smoke2\\c2-targeted-regression-xi_m0p35_T51\\independent_oracle\\slice_diagnostics.csv",
+      "sha256": "6bba40ec4a349de280b9376654032c5196df43ce67dafe95e0069cedfc8f9584"
+    }
+  ],
+  "files": {
+    "curves/xi_0p00_T51__independent_oracle__curve_points.csv": "29db61e801b9c635c0118cb07623ae66c5e23f0e278d40f5226eeb83ea2b3c66",
+    "curves/xi_0p00_T51__production_hybrid__curve_points.csv": "d66ba215cbcb7a775f462e622aa90a075b820843a00368923a7d27e9c482c9fd",
+    "curves/xi_0p30_T21__independent_oracle__curve_points.csv": "a50fc8009ae24919c31e59de1b61f7076cc63f8b85c7cf2a8a0c9ee91f99d06a",
+    "curves/xi_0p30_T21__production_hybrid__curve_points.csv": "6023bd9eb36600fdd5f3b9290821de1c29d4d8682f91988cda20229bb687ee75",
+    "curves/xi_0p35_T101__independent_oracle__curve_points.csv": "22371a2dfbb35292b18623d2794018fc694e9185f9af4aef20eace6da16aebe6",
+    "curves/xi_0p35_T101__production_hybrid__curve_points.csv": "e98bf0e68c45601ee237a83a03ad32e7aba7ac336ab71a611b72156942041917",
+    "curves/xi_0p35_T51__independent_oracle__curve_points.csv": "303ae5d96ed89a4d9e144e844961ca10d7c5fab5d070ff1856fbfad3adcb20ac",
+    "curves/xi_0p35_T51__production_hybrid__curve_points.csv": "b0c9c1fa1cacac532fd17620a367a313f7fb57204a6d0976b59e36cad815bd59",
+    "curves/xi_m0p10_T41__independent_oracle__curve_points.csv": "22dd08875c1ab01100104f190b75bf6bf520a4624c1da63742980c5d9cd8757d",
+    "curves/xi_m0p10_T41__production_hybrid__curve_points.csv": "54d2d5f4e36f17e9d330c38da6490cb4b57da31d2773cebb798974dd16cebe18",
+    "curves/xi_m0p15_T41__independent_oracle__curve_points.csv": "48a10b566b7ba8396044d11a1339225c71a6d6a19b383c085902bc5436c84600",
+    "curves/xi_m0p15_T41__production_hybrid__curve_points.csv": "079a47c424e5f31395b79314a8df93793e68f38813d8e5781f78ba4704a0072b",
+    "curves/xi_m0p20_T41__independent_oracle__curve_points.csv": "16eff22553821899f0deb566c1b6e20e0b84230edc6a4c36dbbe4fdb529465b6",
+    "curves/xi_m0p20_T41__production_hybrid__curve_points.csv": "df1fb22a828d97dccb6c89246d258a56e58db824ea4ee61f49f8d2379dee3f6f",
+    "curves/xi_m0p25_T41__independent_oracle__curve_points.csv": "e7edebea5bc2fe485d499055d03ea6ae6b750168e114c48f2cd7207a22d9a2ce",
+    "curves/xi_m0p25_T41__production_hybrid__curve_points.csv": "ef6565d08e1ac706193c515a451bc23639cb1943910ccf4cddf84a01fc51d9d0",
+    "curves/xi_m0p35_T51__independent_oracle__curve_points.csv": "33d67083513935d3aa71e2ee4ac190e796c8c0b9375b6e656862c6f52b486291",
+    "curves/xi_m0p35_T51__production_hybrid__curve_points.csv": "8e776b8039474a1b34520c20d7cf3c2a83d65827cc0ac6b907cf7f134167ec4b",
+    "figures/nine_point_local_overview.png": "20b0835021665cd762f7226d3a465f049cdf15025487ce39a65133f8713d4583",
+    "figures/plot_manifest.json": "3faba2b4fe2dc809827b269cdae777123c95e45fab3ba0d42844337880027ca2",
+    "figures/rho_mu_xi_0p00_T51_local_audit.png": "c3c5f8b0b969c993a5fb2e6ef5b6a375c2ae6600c1276e9fdb793a3f5fec4c50",
+    "figures/rho_mu_xi_0p30_T21_local_audit.png": "547d238761a7c434998c3ed4102b1f46e86bd064dab92dd707cbb8c096fefed0",
+    "figures/rho_mu_xi_0p35_T101_local_audit.png": "ce9b2f2222d11fd4c13e1001ebeeb412f0709f7cf39c8721f3f508872a674a8a",
+    "figures/rho_mu_xi_0p35_T51_local_audit.png": "03346c1d269cb37c1681199e380c48a8f0df9ea4bc9517a25a8054c94e682c17",
+    "figures/rho_mu_xi_m0p10_T41_local_audit.png": "7a2925cc0a71e258db202057f70c3af62462ac53a21c3ffe0df96d70a61b4672",
+    "figures/rho_mu_xi_m0p15_T41_local_audit.png": "d0bd7d6f1cc4c61426c98a544e5f71297960ed4bba285730bc2e5aff7fdf519d",
+    "figures/rho_mu_xi_m0p20_T41_local_audit.png": "f7cb3c76af04414f22f4a3085f42115b1370d3fe9e7c9c00649bdff3cfc84c35",
+    "figures/rho_mu_xi_m0p25_T41_local_audit.png": "494beeb4d637f223774ef1a6200b3f36b478ac3b22844f93c1a8d0d4a8faba45",
+    "figures/rho_mu_xi_m0p35_T51_local_audit.png": "ce5f5da41a32dfc425e11198a4e69942620f721e2d1d1d138ce5d509e55df47f",
+    "README.md": "2704194688cdf2e30aeaaa22479972481fe75256ae904011e8cbe289a3f1bd4e",
+    "tables/cep_current_failures.csv": "bcbc08d907b763361ece8a6589425f2a3a6cc3ebbd99b7de79b6128461729ca7",
+    "tables/cep_refinement_plan.csv": "8df2a6bcdcd7f6346116f45db9cd42c80c2728a0e45708d260b6d2b616499ff3",
+    "tables/claim_ledger.csv": "52c664fdd57b3324a2021060eb6ce399a83cbb0c35909bb8e745737b32169105",
+    "tables/curve_points.csv": "751656fa95003204601d1ff710eb4864ddc7e8ba255604bdab4d8f921f40dac6",
+    "tables/point_summary.csv": "21b1119e0a5ef2328639a6b8339afece8ef04052e94cf1408aab6971a11edca7"
+  }
+}

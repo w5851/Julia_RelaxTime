@@ -3,7 +3,21 @@
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
+
+
+TELEMETRY_SCHEMA = "pnjl_phase_telemetry_aggregate_v1"
+TELEMETRY_COUNTERS = (
+    "scan_total",
+    "scan_success",
+    "scan_failure",
+    "point_requests",
+    "cache_hits",
+    "unique_solves",
+    "targeted_additions",
+    "failed_points",
+)
 
 
 def parse_args():
@@ -17,6 +31,10 @@ def parse_args():
     parser.add_argument("--expect-full-reference", action="store_true", help="Assert that boundary, CEP, spinodal, and crossover artifacts are present")
     parser.add_argument("--expect-mu0-only", action="store_true", help="Assert that all mu_MeV values are zero")
     parser.add_argument("--report-path", help="Optional JSON report output path")
+    parser.add_argument(
+        "--diagnostics-path",
+        help="Optional aggregate phase_diagnostics_<tag>.json path; if omitted, validate it when present",
+    )
     return parser.parse_args()
 
 
@@ -56,6 +74,83 @@ def require_columns(fieldnames, required, artifact_name: str):
         fail(f"{artifact_name} missing required columns: {missing}; found {fieldnames}")
 
 
+def validate_cep_rows(fieldnames, rows, path: Path):
+    modern_columns = {
+        "result_status",
+        "T_last_first_order_MeV",
+        "muq_last_first_order_MeV",
+        "muB_last_first_order_MeV",
+        "T_first_monotone_MeV",
+        "ambiguity_width_T_MeV",
+        "temperature_resolution_target_MeV",
+    }
+    present_modern = modern_columns.intersection(fieldnames)
+    if not present_modern:
+        # The eight-column historical contract remains readable.
+        return
+    if present_modern != modern_columns:
+        fail(
+            f"partial modern CEP schema at {path}: present={sorted(present_modern)}, "
+            f"required={sorted(modern_columns)}"
+        )
+    allowed = {"resolved", "ambiguous", "not_found"}
+    def finite_value(value: str, label: str, index: int, *, positive: bool = False) -> float | None:
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            parsed = float(text)
+        except ValueError:
+            fail(f"non-numeric CEP {label} at {path}:{index}: {value!r}")
+        if not math.isfinite(parsed):
+            fail(f"non-finite CEP {label} at {path}:{index}: {value!r}")
+        if positive and parsed <= 0:
+            fail(f"non-positive CEP {label} at {path}:{index}: {value!r}")
+        return parsed
+
+    seen_xi: set[float] = set()
+    for index, row in enumerate(rows, start=2):
+        xi_text = row.get("xi", "").strip()
+        try:
+            xi_value = float(xi_text)
+        except ValueError:
+            fail(f"non-numeric CEP xi at {path}:{index}: {xi_text!r}")
+        if not math.isfinite(xi_value):
+            fail(f"non-finite CEP xi at {path}:{index}: {xi_text!r}")
+        if xi_value in seen_xi:
+            fail(f"duplicate CEP xi row at {path}:{index}: {xi_value}")
+        seen_xi.add(xi_value)
+        status = row.get("result_status", "").strip()
+        if status not in allowed:
+            fail(f"invalid CEP result_status at {path}:{index}: {status!r}")
+        if status != "resolved" and (row.get("T_CEP_MeV", "").strip() or row.get("muq_CEP_MeV", "").strip()):
+            fail(f"non-resolved CEP row publishes a single point at {path}:{index}")
+        if status == "resolved" and not (
+            row.get("T_CEP_MeV", "").strip() and row.get("muq_CEP_MeV", "").strip()
+        ):
+            fail(f"resolved CEP row lacks a finite single point at {path}:{index}")
+        finite_value(row.get("T_CEP_MeV", ""), "T_CEP_MeV", index)
+        finite_value(row.get("muq_CEP_MeV", ""), "muq_CEP_MeV", index)
+        finite_value(
+            row.get("temperature_resolution_target_MeV", ""),
+            "temperature_resolution_target_MeV",
+            index,
+            positive=True,
+        )
+        if status == "ambiguous":
+            low = row.get("T_last_first_order_MeV", "").strip()
+            high = row.get("T_first_monotone_MeV", "").strip()
+            if not low and not high:
+                fail(f"ambiguous CEP row lacks phase evidence at {path}:{index}")
+            low_value = finite_value(low, "T_last_first_order_MeV", index)
+            high_value = finite_value(high, "T_first_monotone_MeV", index)
+            if low_value is not None and high_value is not None and high_value < low_value:
+                fail(f"ambiguous CEP evidence interval is reversed at {path}:{index}")
+            width = finite_value(row.get("ambiguity_width_T_MeV", ""), "ambiguity_width_T_MeV", index)
+            if width is not None and width < 0:
+                fail(f"ambiguous CEP ambiguity width is negative at {path}:{index}")
+
+
 def validate_manifest_artifact(artifacts, artifact_name: str, csv_path: Path, row_count: int, repo_root: Path):
     info = artifacts.get(artifact_name, {})
     if not info:
@@ -74,6 +169,70 @@ def normalize_relpath(path: Path, root: Path) -> str:
         return path.as_posix()
 
 
+def validate_telemetry(path: Path, manifest: dict, repo_root: Path) -> dict:
+    try:
+        payload = load_json(path)
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(f"invalid phase diagnostics JSON: {path}: {exc}")
+    if payload.get("schema_version") != TELEMETRY_SCHEMA:
+        fail(f"unsupported phase diagnostics schema: {path}")
+    if payload.get("telemetry_status") not in {"available", "partial", "telemetry_unavailable"}:
+        fail(f"invalid phase diagnostics telemetry_status: {path}")
+    for name in (
+        "shard_count",
+        "diagnostics_record_count",
+        "available_record_count",
+        "unavailable_record_count",
+        "missing_shard_diagnostics",
+    ):
+        value = payload.get(name)
+        if not isinstance(value, int) or value < 0:
+            fail(f"invalid phase diagnostics count {name}: {path}")
+    counters = payload.get("counter_totals")
+    if not isinstance(counters, dict):
+        fail(f"phase diagnostics counter_totals must be an object: {path}")
+    for name in TELEMETRY_COUNTERS:
+        value = counters.get(name)
+        if value is not None and (
+            isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)) or value < 0
+        ):
+            fail(f"invalid phase diagnostics counter {name}: {path}")
+    missing = payload.get("missing_counter_fields")
+    if not isinstance(missing, list) or any(not isinstance(item, str) for item in missing):
+        fail(f"invalid phase diagnostics missing_counter_fields: {path}")
+    provenance = payload.get("provenance")
+    if not isinstance(provenance, dict):
+        fail(f"phase diagnostics provenance is missing: {path}")
+    manifest_provenance = manifest.get("provenance") or {}
+    if manifest_provenance and provenance.get("calculation_git_commit") != manifest_provenance.get("calculation_git_commit"):
+        fail("phase diagnostics calculation provenance does not match manifest")
+    artifact = (manifest.get("artifacts") or {}).get("phase_diagnostics")
+    if artifact:
+        expected = normalize_relpath(path, repo_root)
+        if artifact.get("path") != expected:
+            fail(f"manifest phase_diagnostics.path mismatch: expected {expected}, got {artifact.get('path')}")
+        if artifact.get("sha256"):
+            import hashlib
+
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            if artifact["sha256"] != digest:
+                fail("manifest phase_diagnostics.sha256 does not match file")
+        if artifact.get("record_count") != payload.get("diagnostics_record_count"):
+            fail("manifest phase_diagnostics.record_count does not match payload")
+    return {
+        "path": normalize_relpath(path, repo_root),
+        "schema_version": payload.get("schema_version"),
+        "status": payload.get("telemetry_status"),
+        "shard_count": payload.get("shard_count"),
+        "diagnostics_record_count": payload.get("diagnostics_record_count"),
+        "available_record_count": payload.get("available_record_count"),
+        "unavailable_record_count": payload.get("unavailable_record_count"),
+        "missing_shard_diagnostics": payload.get("missing_shard_diagnostics"),
+        "counter_totals": counters,
+        "missing_counter_fields": missing,
+    }
+
+
 def main():
     args = parse_args()
     repo_root = Path(__file__).resolve().parents[2]
@@ -86,6 +245,11 @@ def main():
     cep_csv = reference_root / f"cep_{args.tag}.csv"
     spinodal_csv = reference_root / f"spinodals_{args.tag}.csv"
     grid_convergence_csv = reference_root / f"phase_grid_convergence_{args.tag}.csv"
+    diagnostics_path = (
+        Path(args.diagnostics_path).resolve()
+        if args.diagnostics_path
+        else reference_root / f"phase_diagnostics_{args.tag}.json"
+    )
 
     required_paths = [crossover_csv, crossover_meta, grid_convergence_csv, manifest_path]
     if args.expect_full_reference:
@@ -112,6 +276,12 @@ def main():
 
     meta = load_json(crossover_meta)
     manifest = load_json(manifest_path)
+
+    telemetry_report = None
+    if args.diagnostics_path or diagnostics_path.is_file():
+        if not diagnostics_path.is_file():
+            fail(f"missing requested phase diagnostics artifact: {diagnostics_path}")
+        telemetry_report = validate_telemetry(diagnostics_path, manifest, repo_root)
 
     artifact_info = meta.get("artifact", {})
     if artifact_info.get("row_count") != len(rows):
@@ -206,6 +376,8 @@ def main():
         for artifact_name, (csv_path, required_columns) in expected_non_crossover.items():
             artifact_fields, artifact_rows = load_csv_rows(csv_path)
             require_columns(artifact_fields, required_columns, artifact_name)
+            if artifact_name == "cep":
+                validate_cep_rows(artifact_fields, artifact_rows, csv_path)
             validate_manifest_artifact(artifacts, artifact_name, csv_path, len(artifact_rows), repo_root)
             full_artifact_reports[artifact_name] = {
                 "rows": len(artifact_rows),
@@ -257,6 +429,9 @@ def main():
         },
         "full_reference_artifacts": full_artifact_reports,
     }
+    if telemetry_report is not None:
+        report["telemetry"] = telemetry_report
+        report["files"]["phase_diagnostics"] = normalize_relpath(diagnostics_path, repo_root)
 
     if args.expect_full_reference:
         report["files"].update({

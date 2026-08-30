@@ -1,0 +1,77 @@
+{
+  "accepted_layer_manifest_sha256": "e053824282c556f252e952163a534c35ddad554452ade6130c2411e11566f60d",
+  "accepted_manifest_sha256": "3e37d6812c33c4dd15469391247768fe536dc3185fd54543cdaba2713c520be1",
+  "accepted_root": "data/reference/pnjl/issue130_phase_reference_v2",
+  "accepted_tree_sha256": "a0a76331e4a1409f7b89deeffd76bb0eb77097068c846b39af125678912e0c30",
+  "active_path_contract_count": 0,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "decision": "decision.json",
+  "files": [
+    {
+      "bytes": 362,
+      "path": "AUDIT.md",
+      "sha256": "85f4a2a5f18c82d0b34af094219c271b4746827230f2f6fe4922f90182e28de6"
+    },
+    {
+      "bytes": 1382,
+      "path": "decision.json",
+      "sha256": "2bfdb752c387c01134a0e6289896f3b240fa9585fb24f24cc8f259b3ceaa3662"
+    },
+    {
+      "bytes": 2678,
+      "path": "README.md",
+      "sha256": "07855e6da59318d7b9cddb790bdc12753823a6df1960902d13840faffd0f98b4"
+    },
+    {
+      "bytes": 1168,
+      "path": "tables/claim_ledger.csv",
+      "sha256": "0da21e78254fe4c95d9606f998942e37c3ee4e4fea34ac3dd242e8f1d99862b7"
+    },
+    {
+      "bytes": 1521,
+      "path": "tables/claim_ledger.json",
+      "sha256": "9972e98d10c06e2427d1ab07f56870644199c4724b464c5ebc819d9364ca1d9a"
+    },
+    {
+      "bytes": 6422,
+      "path": "tables/consumer_matrix.csv",
+      "sha256": "3f2e19fdbecb09a05c66e892f16b8986c58b25cd8c2edcb4afe84bf1b34389c4"
+    },
+    {
+      "bytes": 26792,
+      "path": "tables/consumer_occurrences.csv",
+      "sha256": "234d807102c36851e21886b846b8b5ea7c18a534085664f447bfe535ad25933e"
+    },
+    {
+      "bytes": 765,
+      "path": "tables/coverage.csv",
+      "sha256": "af5c151f0b6d65507fdc44b6fa138b0fe0373888bf571111d3a7a59dfb06a547"
+    },
+    {
+      "bytes": 1384,
+      "path": "tables/legacy_snapshot_inventory.csv",
+      "sha256": "b41c9a415115e2fd9bf3a48c535b924aa424fff61fe2434df1cc4aa8b348ad21"
+    },
+    {
+      "bytes": 58231,
+      "path": "tables/neighbor_coverage.csv",
+      "sha256": "83206d7266cff615665912e8645a48259b3410eea192493dab03bb43656947ef"
+    }
+  ],
+  "generated_at_utc": "2026-08-29T13:38:39.327137+00:00",
+  "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "legacy_tree_sha256": "c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6",
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "repo_head": "7b02d84d3c38c60500e82b769eb0f9c22de39c9b",
+  "runtime_consumption": false,
+  "runtime_legacy_fallback_rows": 0,
+  "runtime_legacy_rollback_enabled": false,
+  "schema_version": "pnjl_issue130_phase_reference_legacy_audit_v4",
+  "script": "scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py",
+  "script_sha256": "95469dd3ec4a643187e3ee386930f72e8c77d91e014b0998193cc8735d45e48e",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "verdict": "legacy_physical_deletion_candidate"
+}

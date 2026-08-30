@@ -29,6 +29,18 @@ julia --project=. scripts/dev/check_sop_governance.jl
 
 该门禁以 `config/governance/docs_authority_map.toml` 为机读单一来源，检查 active SOP 的路径、唯一权威范围、稳定入口白名单、必需章节、旧入口模式和复核周期。首期只约束 `docs/guides/sop/`，不一次性阻断全部历史文档。
 
+跨主线 task ledger 检查：
+
+```powershell
+julia --project=. scripts/dev/check_task_ledger.jl
+julia --project=. scripts/dev/check_task_ledger.jl --preflight
+julia --project=. scripts/dev/check_task_ledger.jl --preflight --track rs-transport
+```
+
+该检查只读校验 `config/governance/task_tracks.toml` 的状态、依赖、任务文件、evidence
+和分支/SHA/run 格式；`--preflight` 额外报告当前 worktree 的 dirty paths，`--track ID`
+选择并校验已有主线。
+
 导出 API 全集索引生成：
 
 ```powershell
@@ -97,13 +109,20 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol PNJLMagneticModel \
+	--include-symbol magnetic_gap_residual \
+	--include-symbol magnetic_gap_residual_autodiff \
+	--include-symbol solve_magnetic_gap \
 	--include-symbol alpha_n \
 	--include-symbol energy_landau \
 	--include-symbol smooth_cutoff \
 	--include-symbol resolve_nmax_from_cutoff \
+	--include-symbol resolve_magnetic_nmax \
 	--include-symbol omega0_flavor_landau \
 	--include-symbol omegat_flavor_landau \
 	--include-symbol density_flavor_landau \
+	--include-symbol MAGNETIC_EB_MIN_MEV2 \
+	--include-symbol MAGNETIC_EB_MIN_FM2 \
+	--include-symbol validate_magnetic_eB \
 	--include-symbol MagneticIMCParams \
 	--include-symbol default_imc_params \
 	--include-symbol coupling_GB \

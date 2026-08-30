@@ -1,0 +1,5 @@
+xi,T_MeV,expected_status,label_source
+-0.5,147.0947265625,confirmed_first_order,author_adjudication
+0.5,106.9599609375,confirmed_first_order,author_adjudication
+-0.5,147.2197265625,confirmed_monotone,three_method_consensus
+0.5,107.0849609375,confirmed_monotone,three_method_consensus

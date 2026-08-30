@@ -1,0 +1,29 @@
+{
+  "schema_version": "pnjl_c1_cep_bracket_plot_v1",
+  "generated_at_utc": "2026-08-15T09:07:11.669376+00:00",
+  "figure": {
+    "path": "docs\\analysis\\pnjl\\c1_surface_views\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.png",
+    "sha256": "f830948aaac4348c14477c4a7450da6755b19683e7c69e7b28f0917d0d33f94c",
+    "input": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\cep_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+    "input_sha256": "75de4c75652ebb11b72dbb32b2b93e60a58755425abfbd85d5672d86971aa74d",
+    "row_count": 57,
+    "xi_min": -0.5,
+    "xi_max": 0.5,
+    "T_min_MeV": 107.0,
+    "T_max_MeV": 147.125,
+    "bracket_widths_MeV": [
+      0.0625,
+      0.125
+    ],
+    "status_counts": {
+      "ambiguous": 57
+    },
+    "midpoint_is_physical_CEP": false
+  },
+  "plot_contract": {
+    "x": "xi",
+    "y": "T_bracket_low_MeV..T_bracket_high_MeV",
+    "midpoint": "diagnostic_only",
+    "solver_called": false
+  }
+}

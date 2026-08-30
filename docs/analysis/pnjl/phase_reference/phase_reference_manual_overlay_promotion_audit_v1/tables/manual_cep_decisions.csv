@@ -1,0 +1,4 @@
+xi,bracket_low_MeV,bracket_high_MeV,width_MeV,status,production_override
+0.125,126.25,126.3125,0.0625,closed_by_author_review,false
+0.39375,113.5,113.5625,0.0625,closed_by_author_review,false
+0.5,107.0625,107.125,0.0625,closed_by_author_review,false

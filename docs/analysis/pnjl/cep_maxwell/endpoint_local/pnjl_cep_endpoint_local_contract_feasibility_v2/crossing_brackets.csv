@@ -1,0 +1,7 @@
+xi,T_MeV,bracket_kind,rho_low,rho_high,width,source
+-0.5,5.0,left_maxwell,0.0,0.0125,0.0125,stage_b_candidate
+-0.5,5.0,right_maxwell,2.8,2.80625,0.006250000000000089,stage_b_outer_branch
+-0.5,20.0,left_maxwell,0.0,0.00625,0.00625,stage_b_candidate
+-0.5,20.0,right_maxwell,2.79375,2.8,0.006249999999999645,stage_b_outer_branch
+0.0,5.0,left_maxwell,0.0,0.00625,0.00625,stage_b_candidate
+0.0,5.0,right_maxwell,2.5,2.50625,0.006250000000000089,stage_b_outer_branch

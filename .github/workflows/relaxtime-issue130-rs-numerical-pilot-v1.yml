@@ -1,0 +1,269 @@
+name: Issue130 RS numerical pilot v1
+run-name: Issue130 RS numerical pilot v1 / ${{ inputs.tag || 'issue130_rs_numerical_pilot_v1_20260824' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      calculation_ref:
+        description: "Immutable numerical calculation SHA"
+        required: true
+        default: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+        type: string
+      tag:
+        description: "Immutable diagnostic artifact tag"
+        required: true
+        default: issue130_rs_numerical_pilot_v1_20260824
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CALCULATION_SHA: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+  WORKFLOW_SCHEMA: pnjl_issue130_rs_numerical_pilot_v1
+  NOMINAL_REQUESTED_POINTS: "18"
+  EXPECTED_POINTS: "19"
+  ARTIFACT_RETENTION_DAYS: "90"
+
+jobs:
+  numerical_pilot:
+    name: Candidate/legacy paired numerical pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 720
+    steps:
+      - name: Validate immutable calculation SHA
+        env:
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "calculation_ref must be lowercase 40-hex" >&2; exit 1; }
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || { echo "calculation_ref differs from frozen calculation SHA" >&2; exit 1; }
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow head and fixed contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          [[ "${{ inputs.tag }}" =~ ^[A-Za-z0-9_.=-]+$ ]] || { echo "tag contains unsupported characters" >&2; exit 1; }
+          test -f scripts/analysis/relaxtime/collect_issue130_rs_numerical_pilot.py
+          test -f scripts/relaxtime/run_phase_guided_transport_scan.jl
+          test "${NOMINAL_REQUESTED_POINTS}" = "18"
+          test "${EXPECTED_POINTS}" = "19"
+
+      - name: Materialize calculation checkout and phase-reference adapter overlay
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+
+          # Keep the numerical/model base at CALCULATION_SHA.  The overlay is
+          # limited to the already-reviewed phase-reference adapter boundary;
+          # it is recorded separately as workflow/postprocess provenance.
+          overlay=(
+            scripts/relaxtime/gap_transport_scan_cli.jl
+            scripts/relaxtime/gap_transport_scan_orchestration.jl
+            scripts/relaxtime/gap_transport_scan_phase_equilibrium.jl
+            scripts/relaxtime/gap_transport_scan_provenance.jl
+            scripts/relaxtime/phase_guided_transport_scan_assets.jl
+            scripts/relaxtime/phase_guided_transport_scan_cli.jl
+            scripts/relaxtime/phase_guided_transport_scan_plan.jl
+            scripts/relaxtime/phase_reference_adapter.jl
+            scripts/relaxtime/run_gap_transport_scan.jl
+            scripts/relaxtime/run_phase_guided_transport_scan.jl
+          )
+          for path in "${overlay[@]}"; do
+            mkdir -p "calculation/$(dirname "$path")"
+            cp "$path" "calculation/$path"
+          done
+          mkdir -p calculation/data/reference/pnjl
+          cp -R data/reference/pnjl/issue130_phase_reference_v1 calculation/data/reference/pnjl/
+          cp -R data/reference/pnjl/legacy_phase_reference_v1 calculation/data/reference/pnjl/
+          test -f calculation/data/reference/pnjl/issue130_phase_reference_v1/manifest.json
+          test -f calculation/data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json
+          test -f calculation/scripts/relaxtime/phase_reference_adapter.jl
+
+      - name: Write immutable input provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${GITHUB_WORKSPACE}/pilot-artifacts"
+          mkdir -p "$root/provenance"
+          sha256sum \
+            data/reference/pnjl/issue130_phase_reference_v1/manifest.json \
+            data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json \
+            data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json \
+            data/reference/pnjl/legacy_phase_reference_v1/boundary.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/cep.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/spinodals.csv > "$root/provenance/input_hashes.sha256"
+          cat > "$root/provenance/pilot_inputs.json" <<EOF
+          {
+            "schema_version": "${WORKFLOW_SCHEMA}",
+            "workflow_sha": "${GITHUB_SHA}",
+            "calculation_sha": "${CALCULATION_SHA}",
+            "source_run_id": "${GITHUB_RUN_ID}",
+            "tag": "${{ inputs.tag }}",
+            "nominal_requested_points": 18,
+            "effective_expected_points": 19,
+            "point_identity": ["muB_MeV", "xi", "mode", "alpha_T"],
+            "xi_list": [-0.5, 0.0, 0.5],
+            "muB_list": [150.0, 450.0, 900.0],
+            "alpha_T_list": [1.0, 1.2],
+            "phase_anchor_policy": "direct_coexistence",
+            "propagator_xi_policy": "match_thermo",
+            "sigma_cache_policy": "validated_anchored",
+            "p_num": 24,
+            "t_num": 8,
+            "tau_p_nodes": 64,
+            "tau_angle_nodes": 12,
+            "tau_phi_nodes": 24,
+            "tau_n_sigma": 16,
+            "sigma_grid_n": 280,
+            "compute_bulk": true,
+            "plots": false,
+            "production_write": false,
+            "reference_write": false
+          }
+          EOF
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-issue130-rs-numerical-pilot-v1
+
+      - name: Install calculation dependencies
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run paired numerical references in one job
+        shell: bash
+        run: |
+          set -euo pipefail
+          pilot_root="${GITHUB_WORKSPACE}/pilot-artifacts"
+          calc_root="${GITHUB_WORKSPACE}/calculation"
+          candidate_root="${calc_root}/data/reference/pnjl/issue130_phase_reference_v1"
+          mkdir -p "$pilot_root/results" "$pilot_root/status" "$pilot_root/logs"
+
+          run_reference() {
+            local reference="$1"
+            local phase_mode="$2"
+            local result_dir="$pilot_root/results/$reference"
+            local log_file="$pilot_root/logs/${reference}.log"
+            local status_file="$pilot_root/status/${reference}.txt"
+            local start end elapsed status
+            mkdir -p "$result_dir"
+            local args=(
+              --mode fixed-muB-phase-scaled
+              --outdir "$result_dir"
+              --case-name issue130_rs_numerical_pilot_v1
+              --xi-list -0.5,0.0,0.5
+              --muB-list 150,450,900
+              --alphaT-list 1.0,1.2
+              --phase-reference-root "$candidate_root"
+              --phase-reference-layer strict
+              --phase-reference-mode "$phase_mode"
+              --phase-anchor-policy direct_coexistence
+              --p-num 24
+              --t-num 8
+              --tau-p-nodes 64
+              --tau-angle-nodes 12
+              --tau-phi-nodes 24
+              --tau-n-sigma 16
+              --sigma-grid-n 280
+              --propagator-xi-policy match_thermo
+              --sigma-cache-policy validated_anchored
+              --channel-diagnostics
+              --compute-bulk
+              --overwrite
+            )
+            printf '%q ' julia --project=calculation calculation/scripts/relaxtime/run_phase_guided_transport_scan.jl "${args[@]}" > "$result_dir/command.txt"
+            printf '\n' >> "$result_dir/command.txt"
+            start="$(date +%s)"
+            set +e
+            julia --project=calculation calculation/scripts/relaxtime/run_phase_guided_transport_scan.jl "${args[@]}" 2>&1 | tee "$log_file"
+            status="${PIPESTATUS[0]}"
+            set -e
+            end="$(date +%s)"
+            elapsed=$((end - start))
+            printf '%s\n' "$status" > "$status_file"
+            printf '%s\n' "$elapsed" > "$result_dir/elapsed_seconds.txt"
+            cat > "$result_dir/pilot_metadata.json" <<EOF
+          {
+            "schema_version": "${WORKFLOW_SCHEMA}",
+            "reference_mode": "${reference}",
+            "phase_reference_mode": "${phase_mode}",
+            "workflow_sha": "${GITHUB_SHA}",
+            "calculation_sha": "${CALCULATION_SHA}",
+            "source_run_id": "${GITHUB_RUN_ID}",
+            "tag": "${{ inputs.tag }}",
+            "runner_exit_code": ${status},
+            "elapsed_seconds": ${elapsed},
+            "solver_called": true,
+            "production_write": false,
+            "reference_write": false,
+            "plots": false
+          }
+          EOF
+            return 0
+          }
+
+          run_reference candidate_runtime runtime
+          run_reference legacy legacy
+
+      - name: Collect paired diagnostic evidence
+        id: collect
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          python scripts/analysis/relaxtime/collect_issue130_rs_numerical_pilot.py \
+            --pilot-root pilot-artifacts \
+            --output pilot-artifacts/aggregate \
+            --repo-sha "$GITHUB_SHA" \
+            --calculation-sha "$CALCULATION_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --expected-points "$EXPECTED_POINTS" \
+            --fail-on-hard-failure
+          status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [[ -f pilot-artifacts/aggregate/manifest.json ]]; then
+            cat pilot-artifacts/aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit 0
+
+      - name: Upload numerical pilot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue130-rs-numerical-pilot-${{ inputs.tag }}
+          path: pilot-artifacts
+          if-no-files-found: warn
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+
+      - name: Enforce pilot hard-failure verdict
+        if: always()
+        shell: bash
+        run: |
+          test "${{ steps.collect.outputs.status }}" = "0"

@@ -23,8 +23,8 @@ function _print_usage()
     println("  --tmax <float>         T upper bound in MeV (default: 270)")
     println("  --muqmin <float>       mu_q lower bound in MeV (default: 0)")
     println("  --muqmax <float>       mu_q upper bound in MeV (default: 360)")
-    println("  --boundary-csv <path>  boundary csv path")
-    println("  --crossover-csv <path> crossover csv path")
+    println("  --boundary-csv <path>  boundary csv path (default: v2 accepted table)")
+    println("  --crossover-csv <path> crossover csv path (default: v2 accepted table)")
 end
 
 function _parse_args(args::Vector{String})
@@ -37,8 +37,14 @@ function _parse_args(args::Vector{String})
         :tmax => 270.0,
         :muqmin => 0.0,
         :muqmax => 360.0,
-        :boundary_csv => joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "boundary.csv"),
-        :crossover_csv => joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "crossover.csv"),
+        :boundary_csv => joinpath(
+            PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2",
+            "accepted", "tables", "maxwell_surface_accepted_phase_map_v1.csv",
+        ),
+        :crossover_csv => joinpath(
+            PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2",
+            "accepted", "tables", "crossover_surface_accepted_phase_map_v1.csv",
+        ),
     )
 
     i = 1

@@ -7,9 +7,10 @@ export NJLModel
 export NJL2Model
 export PNJLModel
 export PNJLMagneticModel
+export MagneticGapCandidate, MagneticGapResult
+export magnetic_gap_residual, magnetic_gap_residual_autodiff, solve_magnetic_gap
 export RPNJLModel
 export RotationModel
-export GasLiquidModel
 export create_model
 export get_cached_model, clear_model_cache!
 export register_model!, unregister_model!, registered_model_kinds
@@ -64,6 +65,9 @@ export SOLVER_DIAGNOSTIC_VERSION_V1, SOLVER_DIAGNOSTIC_PUBLIC_FIELDS, SOLVER_DIA
 export solver_diagnostic_version, solver_diagnostic_public_fields, solver_diagnostic_internal_fields
 export to_public_namedtuple
 export coerce_solver_diagnostic_summary, coerce_solver_diagnostic_public_view
+export SolverWorkTelemetry, solver_work_snapshot, reset_solver_work!
+export record_solver_request!, record_governed_attempt!, record_nlsolve_work!
+export record_postprocess_residual!, record_attempt_outcome!, record_solver_exception!, record_scan_retry!
 export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view
@@ -81,9 +85,11 @@ export solve_root_with_policy, solve_root_continuation
 export ρ0
 export QUARK_CHARGE_ABS
 export alpha_n, energy_landau, smooth_cutoff, resolve_nmax_from_cutoff
+export DEFAULT_ZETA_COUNT, zeta_nodes, zeta_prime_minus_one, omega_magnetic_mfir
 export omega0_flavor_landau, omegat_flavor_landau, density_flavor_landau
 export MagneticIMCParams, default_imc_params, coupling_GB
 export MagneticConfig, default_magnetic_config
+export resolve_magnetic_nmax
 export calculate_magnetic_omega_components, calculate_magnetic_omega
 export calculate_magnetic_pressure, calculate_magnetic_rho
 export calculate_magnetic_number_densities
@@ -93,7 +99,8 @@ export TransportProvider
 export prepare_transport_provider
 export default_momentum_count, default_theta_count
 export default_momentum_nodes, default_momentum_weights
-export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export CEPResult, CEP_RESULT_STATUSES, FirstOrderSweepResult, RhoHybridVerificationConfig, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export RhoSupportConfig, RhoSupportPrior, RhoSupportAssessment, analyze_rho_support_cascade
 export AbstractPipelineIOContract, PipelineIOContract
 export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, PipelineArtifact, StageResult
 export persisted_symbol_to_string, persisted_string_to_symbol

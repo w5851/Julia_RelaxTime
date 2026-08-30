@@ -1,0 +1,50 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_layers_v1",
+  "generated_at_utc": "2026-08-21T05:39:58.108769+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "maxwell_source_run_id": "32354095831",
+  "v7_manifest_hash": "027a4263a05ee7f951156a2519551a48696488ebbb6c4235d4e5319b2270543c",
+  "freeze_manifest_hash": "abb3d166ac0deeed6803c9c0e5d81fdd63fd20658a504641290319bc5785ee40",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "reference_write": false,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "generator": {
+    "script": "D:\\Temp\\julia_relaxtime_issue130_phase_reference_derived_v1\\scripts\\analysis\\pnjl\\build_issue130_phase_reference_layers.py",
+    "script_sha256": "f46e38fa8dffd0bf394ab4423e13aa1780458de10064aaa23af1b39bf09185d6",
+    "command": [
+      "scripts/analysis/pnjl/build_issue130_phase_reference_layers.py",
+      "--v7-root",
+      "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v7_crossover_derived",
+      "--frozen-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\maxwell_cep_local_expansion_32354095831_frozen_v1_final",
+      "--replay-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\maxwell_cep_local_expansion_32451053476_replay_v1",
+      "--output-root",
+      "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\phase_reference_layers_v1_rebuild_32451053476",
+      "--run-id",
+      "32354095831",
+      "--replay-run-id",
+      "32451053476",
+      "--calculation-sha",
+      "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+    ]
+  },
+  "replay": {
+    "run_id": "32451053476",
+    "source_run_id": "32354095831",
+    "manifest_sha256": "b6fdf71ec0cb0da103100e06901685ea5f6e26d06a7201cf2d2f552e27a82614",
+    "postprocess_sha": "d9a52e6232d09695a83997cda2c11f6b00204587",
+    "verdict": "expansion_candidate"
+  },
+  "layer": "strict_reference_v1",
+  "promotion_status": "awaiting_author_review",
+  "semantics": "native C2/v6 plus real Maxwell expansion; old unresolved rows retained",
+  "rows": {
+    "maxwell": 7162,
+    "crossover": 1343,
+    "spinodal": 6886,
+    "cep": 93
+  }
+}

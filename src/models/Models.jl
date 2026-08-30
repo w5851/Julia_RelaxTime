@@ -18,7 +18,7 @@ module Models
 include(joinpath(@__DIR__, "exports_public.jl"))
 
 # Keep key entrypoint exports explicitly in this file for governance checks.
-export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
 export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan
@@ -39,6 +39,9 @@ export solve_strict_bw_meson_thermo_from_meson_point, solve_gap_and_strict_bw_me
 export solve_phase_shift_meson_thermo_from_meson_point, solve_gap_and_phase_shift_meson_thermo_point
 export build_meson_thermo_contract_row
 export solve_gas_liquid_point, solve_rotation_point
+export GasLiquidModel
+export solve_gas_liquid_rmf_point, run_gas_liquid_tmu_scan, run_gas_liquid_trho_scan
+export build_gas_liquid_result_row, build_gas_liquid_manifest
 export transport_workflow_module, meson_workflow_module, meson_density_workflow_module, meson_thermo_workflow_module
 export rotation_workflow_module, gas_liquid_workflow_module
 export workflow_param_adapters_module, workflow_module_for
@@ -59,6 +62,10 @@ include(joinpath(@__DIR__, "njl", "NJL2Model.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLDistributions.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLCore.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLModel.jl"))
+# Magnetic core must be defined inside Models before its adapter is loaded;
+# this avoids injecting a second copy into Main during module initialization.
+include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
+include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLMagneticModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))
 include(joinpath(@__DIR__, "variants", "gas_liquid", "GasLiquidModel.jl"))
@@ -139,8 +146,6 @@ include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
 include(joinpath(@__DIR__, "derivatives", "HigherOrderDerivatives.jl"))
 include(joinpath(@__DIR__, "derivatives", "AbstractSusceptibilityProvider.jl"))
 include(joinpath(@__DIR__, "derivatives", "ConservedChargeSusceptibilities.jl"))
-include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
-include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
 include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
@@ -152,6 +157,7 @@ include(joinpath(@__DIR__, "scans", "MesonChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
+include(joinpath(@__DIR__, "scans", "MagneticScan.jl"))
 
 using .SeedStrategies
 using .Conditions
@@ -170,6 +176,7 @@ using .MesonChemicalProfiles
 using .TmuScan
 using .FreezeoutPathScan
 using .TrhoScan
+using .MagneticScan
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
 include(joinpath(@__DIR__, "transport_provider.jl"))
@@ -177,6 +184,8 @@ include(joinpath(@__DIR__, "transport_provider.jl"))
 const ρ0 = Main.Constants_PNJL.ρ0_inv_fm3
 
 # Unified scan/workflow entrypoints (Stage C compatibility layer)
+include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
+include(joinpath(@__DIR__, "phase", "RhoSupportRefinement.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseTypes.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseGridConvergence.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseTypes.jl"))
@@ -184,7 +193,6 @@ include(joinpath(@__DIR__, "phase", "PMPhaseSeeds.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseDiagnostic.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "AdaptiveRhoRefinement.jl"))
-include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseIO.jl"))
 include(joinpath(@__DIR__, "phase", "CEPDetector.jl"))
 include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
@@ -224,6 +232,10 @@ const Constants_PNJL = Main.Constants_PNJL
 const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
 const FreezeoutScanConfig = ScanConfig.FreezeoutScanConfig
+const RhoSupportConfig = RhoSupportRefinement.RhoSupportConfig
+const RhoSupportPrior = RhoSupportRefinement.RhoSupportPrior
+const RhoSupportAssessment = RhoSupportRefinement.RhoSupportAssessment
+const analyze_rho_support_cascade = RhoSupportRefinement.analyze_rho_support_cascade
 const MesonChemicalProfile = MesonChemicalProfiles.MesonChemicalProfile
 const update! = SeedStrategies.update!
 

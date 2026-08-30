@@ -1,0 +1,5 @@
+claim_id,claim,status,evidence,boundary
+raw_coverage,All 761 target coordinates have complete finite/converged 1281-point raw curves,supported,tables/raw_curve_audit.csv,raw input validity only
+s_shape_observation,Some target raw curves exhibit a discrete +→−→+ topology,supported,tables/shape_summary.csv and figures/,not a Maxwell certificate
+stage_c_attribution,S-shaped raw curves make Stage-C/certificate insufficiency a plausible explanation for selected unresolved rows,candidate,tables/reason_shape_summary.csv,does not prove the exact failing component
+promotion,The raw archive authorizes phase-reference promotion,blocked,decision.json,raw oracle cannot silently override hybrid/C2

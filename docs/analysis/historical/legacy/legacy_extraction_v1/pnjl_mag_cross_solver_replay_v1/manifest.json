@@ -1,0 +1,22 @@
+{
+  "schema_version": "pnjl_mag_cross_solver_replay_manifest_v1",
+  "acceptance_scope": "diagnostic_only",
+  "producer": "scripts/analysis/pnjl/compare_pnjl_mag_julia_equilibrium.jl",
+  "input_artifact": "../pnjl_mag_equilibrium_replay_v1/",
+  "tables": {
+    "full_screening_point_summary": "julia_point_summary_full_screening_v1.csv",
+    "full_screening_candidates": "julia_candidates_full_screening_v1.csv",
+    "high_matched_point_summary": "julia_point_summary_high_matched_v1.csv",
+    "high_matched_candidates": "julia_candidates_high_matched_v1.csv"
+  },
+  "sha256": {
+    "julia_point_summary_full_screening_v1.csv": "648393FCF2298ADDE0DA48F110FD12C3BE49231015EB60F0F4DEF0348D7625F8",
+    "julia_candidates_full_screening_v1.csv": "6B9AB3F73D76F433EAA54F36DA63897A83867F4EEE15719C0F071BA723723100",
+    "julia_point_summary_high_matched_v1.csv": "C9C2F315A61DDB6B967F4DDAF550A07E1C5ADA9EA03E88BAEE2787ACD8EC2BA9",
+    "julia_candidates_high_matched_v1.csv": "AAFD92E27823781C396137CBFEBDAC0E0C5DB66FB11DD349AA964EB508D692D9"
+  },
+  "source_commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+  "julia_repo_input_head": "927d466446606f222c0d6a332d75c5b783ddf96f",
+  "external_acceptance": "not_admitted",
+  "boundary": "Small multi-seed cross-solver diagnostic; no all-branch completeness, no production baseline, no C0/C1/C2 rerun."
+}

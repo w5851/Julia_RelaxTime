@@ -1,0 +1,23 @@
+{
+  "area_gate": 5e-05,
+  "calculation_sha": "ceec2295c5c9250a3fcd45c0eceae9a6c35f4335",
+  "candidate_policy": "unique_three_crossing_topology_v1",
+  "certificate_kinds": [
+    "endpoint_limited_first_order",
+    "endpoint_local_geometry_first_order"
+  ],
+  "coverage_scope": "targeted_18_plus_approved_required_three_deep",
+  "deep_labels_used_for_route": false,
+  "deep_run_id": "31002704845",
+  "density_tol": 0.0025,
+  "endpoint_policy": "three_crossing_endpoint_local_v2",
+  "full_24_anchor_shadow_still_required": true,
+  "left_refinement_rule": "active_left_crossing_midpoint_only",
+  "local_step": 0.0015625,
+  "position_tol_MeV": 0.025,
+  "route_rule": "right_maxwell_crossing_bracketed_by_actual_stage_b_outer_points",
+  "schema_version": "cep_maxwell_endpoint_local_contract_feasibility_v2",
+  "source_run_id": "30999377195",
+  "targeted_cap": 12,
+  "verdict": "feasible_candidate"
+}

@@ -1,0 +1,11 @@
+category,label,count
+status,ambiguous_near_critical,359
+status,confirmed_first_order,6886
+status,confirmed_monotone,2636
+certificate,endpoint_limited_first_order,62
+certificate,endpoint_local_geometry_first_order,568
+certificate,none,9251
+stage,stage_a,2636
+stage,stage_b,4915
+stage,stage_c,1645
+stage,stage_c_endpoint_local_v2,685

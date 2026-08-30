@@ -20,6 +20,39 @@ ARTIFACTS: dict[str, tuple[str, ...]] = {
     "grid_convergence": ("axis", "xi", "T_MeV", "level", "left", "right", "midpoint"),
 }
 
+CEP_LEGACY_COLUMNS = (
+    "xi",
+    "T_CEP_MeV",
+    "muq_CEP_MeV",
+    "muB_CEP_MeV",
+    "uncertainty_T_MeV",
+    "T_bracket_low_MeV",
+    "T_bracket_high_MeV",
+    "bracket_width_T_MeV",
+)
+CEP_COLUMNS = CEP_LEGACY_COLUMNS + (
+    "result_status",
+    "T_last_first_order_MeV",
+    "muq_last_first_order_MeV",
+    "muB_last_first_order_MeV",
+    "T_first_monotone_MeV",
+    "ambiguity_width_T_MeV",
+    "temperature_resolution_target_MeV",
+)
+
+DIAGNOSTICS_SCHEMA = "pnjl_phase_shard_diagnostics_v1"
+TELEMETRY_SCHEMA = "pnjl_phase_telemetry_aggregate_v1"
+TELEMETRY_COUNTERS = (
+    "scan_total",
+    "scan_success",
+    "scan_failure",
+    "point_requests",
+    "cache_hits",
+    "unique_solves",
+    "targeted_additions",
+    "failed_points",
+)
+
 
 def fail(message: str) -> None:
     raise SystemExit(f"[dense-reference-merge] {message}")
@@ -47,6 +80,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source-workflow-run-id",
         help="workflow run that produced the shard artifacts",
+    )
+    parser.add_argument(
+        "--diagnostics-root",
+        type=Path,
+        help="root containing per-shard phase_diagnostics_<tag>_*.json files; defaults to --shards-root",
     )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -135,6 +173,25 @@ def merge_csv_artifact(
     merged: dict[tuple[tuple[int, float | str], ...], dict[str, str]] = {}
     for path in sorted(paths, key=lambda item: item.as_posix()):
         current_header, rows = load_csv(path)
+        if name == "cep":
+            if tuple(current_header) == CEP_LEGACY_COLUMNS:
+                converted: list[dict[str, str]] = []
+                for row in rows:
+                    has_point = bool(row.get("T_CEP_MeV", "").strip() and row.get("muq_CEP_MeV", "").strip())
+                    converted.append({
+                        **row,
+                        "result_status": "resolved" if has_point else "not_found",
+                        "T_last_first_order_MeV": row.get("T_bracket_low_MeV", ""),
+                        "muq_last_first_order_MeV": row.get("muq_CEP_MeV", ""),
+                        "muB_last_first_order_MeV": row.get("muB_CEP_MeV", ""),
+                        "T_first_monotone_MeV": row.get("T_bracket_high_MeV", ""),
+                        "ambiguity_width_T_MeV": row.get("bracket_width_T_MeV", ""),
+                        "temperature_resolution_target_MeV": "",
+                    })
+                current_header = list(CEP_COLUMNS)
+                rows = converted
+            elif tuple(current_header) != CEP_COLUMNS:
+                fail(f"unsupported CEP CSV schema in {path}: {current_header}")
         if header is None:
             header = current_header
         elif current_header != header:
@@ -175,6 +232,146 @@ def update_dense_meaning(dense_meaning: dict[str, Any], xi_values: list[float]) 
     return updated
 
 
+def _diagnostics_key(payload: dict[str, Any]) -> tuple[float, str, str]:
+    try:
+        xi = float(payload["xi"])
+    except (KeyError, TypeError, ValueError):
+        fail("phase diagnostics record is missing a numeric xi")
+    if not math.isfinite(xi):
+        fail("phase diagnostics record has a non-finite xi")
+    return xi, str(payload.get("stage", "")), str(payload.get("shard_id", ""))
+
+
+def _validate_diagnostics_payload(payload: dict[str, Any], path: Path, expected_calculation: str | None) -> None:
+    if payload.get("schema_version") != DIAGNOSTICS_SCHEMA:
+        fail(f"unsupported phase diagnostics schema in {path}")
+    if payload.get("availability") not in {"available", "telemetry_unavailable"}:
+        fail(f"invalid phase diagnostics availability in {path}")
+    calculation = payload.get("calculation_sha")
+    if expected_calculation and calculation not in (None, expected_calculation):
+        fail(f"phase diagnostics calculation SHA mismatch in {path}: expected {expected_calculation}, got {calculation}")
+    if payload.get("availability") == "available":
+        if not str(payload.get("config_hash", "")).strip():
+            fail(f"available phase diagnostics lacks config_hash: {path}")
+        diagnostics = payload.get("diagnostics")
+        if not isinstance(diagnostics, dict):
+            fail(f"available phase diagnostics lacks diagnostics object: {path}")
+        counters = diagnostics.get("counters")
+        if not isinstance(counters, dict):
+            fail(f"available phase diagnostics lacks counters: {path}")
+        for field in TELEMETRY_COUNTERS:
+            value = counters.get(field)
+            if value is not None and (
+                isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)) or value < 0
+            ):
+                fail(f"invalid phase diagnostics counter {field} in {path}")
+
+
+def aggregate_phase_diagnostics(
+    diagnostics_root: Path,
+    destination: Path,
+    manifests: list[Path],
+    calculation_git_commit: str,
+    postprocess_git_commit: str,
+    tag: str,
+    source_workflow_run_id: str | None,
+) -> dict[str, Any]:
+    paths = sorted(diagnostics_root.rglob(f"phase_diagnostics_{tag}_*.json")) if diagnostics_root.is_dir() else []
+    by_key: dict[tuple[float, str, str], dict[str, Any]] = {}
+    source_files: list[dict[str, str]] = []
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            fail(f"invalid phase diagnostics JSON {path}: {exc}")
+        if not isinstance(payload, dict):
+            fail(f"phase diagnostics must be an object: {path}")
+        _validate_diagnostics_payload(payload, path, calculation_git_commit)
+        key = _diagnostics_key(payload)
+        previous = by_key.get(key)
+        if previous is not None and previous != payload:
+            fail(f"conflicting duplicate phase diagnostics record for key={key}: {path}")
+        by_key[key] = payload
+        source_files.append({"path": normalized_path(path), "sha256": sha256(path)})
+
+    records = [by_key[key] for key in sorted(by_key)]
+    if len(records) > len(manifests):
+        fail(
+            "phase diagnostics record count exceeds shard manifest count: "
+            f"{len(records)} > {len(manifests)}"
+        )
+    available = [record for record in records if record.get("availability") == "available"]
+    unavailable = [record for record in records if record.get("availability") != "available"]
+    counter_totals: dict[str, int | float | None] = {}
+    missing_counter_fields: set[str] = set()
+    for field in TELEMETRY_COUNTERS:
+        values: list[int | float] = []
+        for record in available:
+            diagnostics = record.get("diagnostics") or {}
+            counters = diagnostics.get("counters") or {}
+            value = counters.get(field)
+            if value is None:
+                missing_counter_fields.add(field)
+            else:
+                values.append(value)
+        counter_totals[field] = None if not available or len(values) != len(available) else sum(values)
+    if not available and records:
+        missing_counter_fields.update(TELEMETRY_COUNTERS)
+
+    def aggregate_counts(field: str) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        for record in available:
+            values = ((record.get("diagnostics") or {}).get(field) or {})
+            if not isinstance(values, dict):
+                continue
+            for key, value in values.items():
+                if isinstance(value, bool) or not isinstance(value, (int, float)):
+                    continue
+                counts[str(key)] = counts.get(str(key), 0) + int(value)
+        return dict(sorted(counts.items()))
+
+    if not records:
+        telemetry_status = "telemetry_unavailable"
+    elif len(available) == len(records):
+        telemetry_status = "available"
+    else:
+        telemetry_status = "partial"
+
+    payload = {
+        "schema_version": TELEMETRY_SCHEMA,
+        "normalization_version": "phase_summary_projection_v1",
+        "tag": tag,
+        "provenance": {
+            "calculation_git_commit": calculation_git_commit,
+            "postprocess_git_commit": postprocess_git_commit,
+            "source_workflow_run_id": source_workflow_run_id,
+        },
+        "telemetry_status": telemetry_status,
+        "shard_count": len(manifests),
+        "diagnostics_record_count": len(records),
+        "available_record_count": len(available),
+        "unavailable_record_count": len(unavailable),
+        "missing_shard_diagnostics": len(manifests) - len(records),
+        "counter_totals": counter_totals,
+        "missing_counter_fields": sorted(missing_counter_fields),
+        "status_counts": aggregate_counts("status_counts"),
+        "stage_counts": aggregate_counts("stage_counts"),
+        "certificate_counts": aggregate_counts("certificate_counts"),
+        "geometry_missing_record_count": sum(
+            int(((record.get("diagnostics") or {}).get("geometry_missing_record_count") or 0))
+            for record in available
+        ),
+        "config_hashes": {
+            f"{record.get('xi')}|{record.get('stage')}|{record.get('shard_id')}": record.get("config_hash")
+            for record in records
+        },
+        "source_files": sorted(source_files, key=lambda item: item["path"]),
+        "records": records,
+    }
+    destination.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return payload
+
+
 def main() -> None:
     args = parse_args()
     tag = args.tag
@@ -209,9 +406,10 @@ def main() -> None:
         "crossover": args.reference_root / f"crossover_{tag}.csv",
         "grid_convergence": args.reference_root / f"phase_grid_convergence_{tag}.csv",
     }
+    diagnostics_path = args.reference_root / f"phase_diagnostics_{tag}.json"
     meta_path = args.reference_root / f"crossover_{tag}.meta.json"
     manifest_path = args.reference_root / f"phase_reference_{tag}_manifest.json"
-    for path in [*outputs.values(), meta_path, manifest_path]:
+    for path in [*outputs.values(), meta_path, manifest_path, diagnostics_path]:
         if path.exists() and not args.overwrite:
             fail(f"output exists: {path}; rerun with --overwrite")
 
@@ -342,13 +540,39 @@ def main() -> None:
             "unconverged_count": unconverged,
         },
     }
+    diagnostics_root = args.diagnostics_root or args.shards_root
+    telemetry = aggregate_phase_diagnostics(
+        diagnostics_root,
+        diagnostics_path,
+        manifests,
+        calculation_git_commit,
+        postprocess_git_commit,
+        tag,
+        args.source_workflow_run_id,
+    )
+    final_manifest["telemetry"] = {
+        "schema_version": telemetry["schema_version"],
+        "status": telemetry["telemetry_status"],
+        "diagnostics_record_count": telemetry["diagnostics_record_count"],
+        "available_record_count": telemetry["available_record_count"],
+        "unavailable_record_count": telemetry["unavailable_record_count"],
+        "missing_shard_diagnostics": telemetry["missing_shard_diagnostics"],
+        "counter_totals": telemetry["counter_totals"],
+        "missing_counter_fields": telemetry["missing_counter_fields"],
+    }
     final_manifest["artifacts"]["crossover_meta"] = {"path": normalized_path(meta_path)}
+    final_manifest["artifacts"]["phase_diagnostics"] = {
+        "path": normalized_path(diagnostics_path),
+        "sha256": sha256(diagnostics_path),
+        "record_count": telemetry["diagnostics_record_count"],
+    }
     final_manifest["artifacts"]["manifest"] = {"path": normalized_path(manifest_path)}
     manifest_path.write_text(json.dumps(final_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     print(f"merged {len(manifests)} shards calculated at commit {calculation_git_commit}")
     print(f"postprocessed at commit {postprocess_git_commit}")
     print(f"resolved xi values: {xis}")
+    print(f"telemetry: {telemetry['telemetry_status']} ({telemetry['diagnostics_record_count']} records)")
     print(f"manifest: {manifest_path}")
 
 

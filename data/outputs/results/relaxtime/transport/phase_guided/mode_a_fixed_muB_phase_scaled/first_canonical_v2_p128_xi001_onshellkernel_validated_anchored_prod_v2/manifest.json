@@ -1,0 +1,229 @@
+{
+  "aggregate_manifest_sha256": "42e88e028832311a95e45816eaf8ab1bb2dbbe8bb094ed6b59681c51d1cad754",
+  "aggregate_replay_solver_called": false,
+  "aggregate_root": "aggregate_replay_20260826_v4",
+  "aggregate_source_file_hashes": {
+    "action_run_summary.csv": "c9db93004186d5bd346cbcad998eaff7345b69ff938d8f0e2db6908fe49268c9",
+    "aggregate_summary.json": "4385f1c06b25dc8eb43f35327f9b029b856eb7e3158494267568749e110e7c71",
+    "candidate_legacy_comparison.csv": "e1511a6c1e8dcd0e4bc572764120f6075ad78c04d01da59be6a5968fcaa01edd",
+    "candidate_legacy_comparison_summary.json": "a6f4a4492a356b763aa1ae12427795ed54422bfbd3d036cf567dcbd99104f7e9",
+    "claim_ledger.csv": "ebe459d5f2f30a0420325e40352e88d4ee6461bf21c2805a87eaa852a75fd1dd",
+    "cost_summary.csv": "b9f0eab99bc86dea52a5ea7cc84ce67010c6a06479f1233cb798e4c8a7971575",
+    "mode_a_diag.csv": "6eaf02101e330762569d028fe1398c94184e243ea6d7e39a8db69718a6e4e246",
+    "mode_a_scan.csv": "144f59dd6d74b1d13b24b793328e620e796fb645b7af9418174ba5a55e360587",
+    "mode_b_diag.csv": "ada5d7c204a02e705cfbb5744bedbcc68158d54cce55faa0c8b92d0ba50d0d0f",
+    "mode_b_scan.csv": "3b73b937f1f09cf7112b3a42219088f98b852e5ef0354174b66f71823f7bb29c",
+    "per_shard_summary.csv": "eb4c9212988d3d629b3d57d6d7482a44a9ef2493ca873f2261c8dc1921a66ec8"
+  },
+  "aggregate_summary_sha256": "4385f1c06b25dc8eb43f35327f9b029b856eb7e3158494267568749e110e7c71",
+  "artifact_status": "imported_candidate",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+  "diagnostic_summary": {
+    "duplicate_keys": 0,
+    "negative": 0,
+    "nonfinite": 0,
+    "rows": 38220
+  },
+  "direct_coexistence_gate": {
+    "has_minus_0003": true,
+    "has_plus_0003": true,
+    "has_zero": false,
+    "rows": 102,
+    "xi_max": 0.5,
+    "xi_min": -0.5
+  },
+  "explicit_rollback": "--phase-reference-mode legacy",
+  "figure_files": [
+    "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/plot_manifest.json",
+    "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/**/*.png"
+  ],
+  "figure_reference": {
+    "figure_count": 36,
+    "figure_status": "author_accepted_formal_layout",
+    "numerical_status": "diagnostic_only",
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+    "plot_manifest_sha256": "eed426abfc592a7842d6124b1dbe86fb3394c6cd58a7e29b2be69335790180c7"
+  },
+  "hashes": {
+    "PRODUCTION_AUDIT.md": "a868b8212366e7c5032a4a2a62458c12f12cf639b35a35ff37f04b4b31656b67",
+    "README.md": "2473d73f4d0c354e5d324c104c2bf21e489f8684a86866fc797b9672d6900d4c",
+    "channel_diagnostics.csv": "6eaf02101e330762569d028fe1398c94184e243ea6d7e39a8db69718a6e4e246",
+    "convergence/action_run_summary.csv": "c9db93004186d5bd346cbcad998eaff7345b69ff938d8f0e2db6908fe49268c9",
+    "convergence/aggregate_summary.json": "4385f1c06b25dc8eb43f35327f9b029b856eb7e3158494267568749e110e7c71",
+    "convergence/candidate_legacy_comparison.csv": "e1511a6c1e8dcd0e4bc572764120f6075ad78c04d01da59be6a5968fcaa01edd",
+    "convergence/candidate_legacy_comparison_summary.json": "a6f4a4492a356b763aa1ae12427795ed54422bfbd3d036cf567dcbd99104f7e9",
+    "convergence/claim_ledger.csv": "ebe459d5f2f30a0420325e40352e88d4ee6461bf21c2805a87eaa852a75fd1dd",
+    "convergence/cost_summary.csv": "b9f0eab99bc86dea52a5ea7cc84ce67010c6a06479f1233cb798e4c8a7971575",
+    "convergence/per_shard_summary.csv": "eb4c9212988d3d629b3d57d6d7482a44a9ef2493ca873f2261c8dc1921a66ec8",
+    "convergence/post_repair_audit_pointer.json": "5651d609f4ffeb396b0651fbdbd51d4459acb254561216752e1ff487fef59eec",
+    "convergence/source_run_manifest_index.json": "4adb59aa7bdba6187af141e852b5c1c1b06ba35f379af241fa2084b1658fcba2",
+    "effective_config.json": "426f5fd061fe217c4a2f277fb155713a0fe9599494ee54b750278e50bee75cd6",
+    "failed_points.csv": "f95962de51e1300bec4e4cc44d09c43a38facc2c3445f9343de29fa13ebba123",
+    "phase_guided_transport_scan.csv": "144f59dd6d74b1d13b24b793328e620e796fb645b7af9418174ba5a55e360587",
+    "sampling_plan.csv": "60991912484bd05f0984eb1037c42db25283f3f9d5825ccf401a6d7ab27ac3b4"
+  },
+  "import_solver_called": false,
+  "known_metadata_defects": {
+    "effective_config.json": 30,
+    "failed_points.csv": 30
+  },
+  "legacy_fallback": true,
+  "mode": "mode_a_fixed_muB_phase_scaled",
+  "non_goals": [
+    "no solver rerun",
+    "no runtime default switch",
+    "no old prod_v1 rewrite",
+    "no legacy deletion",
+    "no claim of numerical parity or convergence promotion"
+  ],
+  "numerical_status": "diagnostic_only",
+  "post_repair_audit": {
+    "manifest_sha256": "587f79db64476f777b25ca5ee234a43b5a31e17bea375864d9e13f0226d1d6f0",
+    "root": "post_repair_audit_20260826_v1",
+    "summary_sha256": "dc7d5605c5b40e0903659d0ef3c092ec098f41ac9ac98379b59333adf31d2e15",
+    "verdict": "post_repair_audit_pass_diagnostic_only"
+  },
+  "production_write": false,
+  "legacy_prod_v1_tree_hash": "f44b61fe07afd1eac4c40d6ba8c043007182aa653655ba511a41cc1d034af0dd",
+  "quality_reason_counts": {
+    "ok": 680,
+    "tau_u_ubar_ratio_high": 230
+  },
+  "registry_status": "versioned_candidate_not_default",
+  "result_files": [
+    "PRODUCTION_AUDIT.md",
+    "README.md",
+    "channel_diagnostics.csv",
+    "convergence/action_run_summary.csv",
+    "convergence/aggregate_summary.json",
+    "convergence/candidate_legacy_comparison.csv",
+    "convergence/candidate_legacy_comparison_summary.json",
+    "convergence/claim_ledger.csv",
+    "convergence/cost_summary.csv",
+    "convergence/per_shard_summary.csv",
+    "convergence/post_repair_audit_pointer.json",
+    "convergence/source_run_manifest_index.json",
+    "effective_config.json",
+    "failed_points.csv",
+    "phase_guided_transport_scan.csv",
+    "sampling_plan.csv"
+  ],
+  "runtime_default_switch": false,
+  "scan_summary": {
+    "converged_counts": {
+      "true": 910
+    },
+    "duplicate_keys": 0,
+    "key_fields": [
+      "muB_MeV",
+      "xi",
+      "alpha_T"
+    ],
+    "quality_flag_counts": {
+      "false": 680,
+      "true": 230
+    },
+    "quality_reason_counts": {
+      "ok": 680,
+      "tau_u_ubar_ratio_high": 230
+    },
+    "rows": 910
+  },
+  "schema_version": "issue130_rs_candidate_runtime_result_import_v1",
+  "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826",
+  "source_runs": [
+    {
+      "label": "A_mu0_a10_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817419175",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817419175"
+    },
+    {
+      "label": "A_mu0_a11_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817421815",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817421815"
+    },
+    {
+      "label": "A_mu0_a12_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817424871",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817424871"
+    },
+    {
+      "label": "A_mu450_a10_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817427980",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817427980"
+    },
+    {
+      "label": "A_mu450_a10_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817431677",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817431677"
+    },
+    {
+      "label": "A_mu450_a11_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817529717",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817529717"
+    },
+    {
+      "label": "A_mu450_a11_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817532839",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817532839"
+    },
+    {
+      "label": "A_mu450_a12_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817535505",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817535505"
+    },
+    {
+      "label": "A_mu450_a12_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817538589",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817538589"
+    },
+    {
+      "label": "A_mu900_a10_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817541560",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817541560"
+    },
+    {
+      "label": "A_mu900_a10_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817544844",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817544844"
+    },
+    {
+      "label": "A_mu900_a11_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817549646",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817549646"
+    },
+    {
+      "label": "A_mu900_a11_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817552946",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817552946"
+    },
+    {
+      "label": "A_mu900_a12_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817555686",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817555686"
+    },
+    {
+      "label": "A_mu900_a12_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817559249",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817559249"
+    }
+  ],
+  "source_solver_called": true,
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571"
+}

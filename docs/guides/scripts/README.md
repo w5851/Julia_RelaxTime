@@ -82,12 +82,23 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 | 输运扫描 | `scripts/relaxtime/run_gap_transport_scan.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
 | 服务器入口 | `scripts/server/server_full.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
 
+### 论文级绘图合同工具
+
+- [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
+  - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位字段、support/mask、strict gate、DPI 和 SVG vector 标志
+- `scripts/plotting/inventory_figure_assets.py`
+  - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
+- `scripts/plotting/render_plotting_pilot.py`
+  - 代表性 pilot 生成器，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case
+- 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
+
 ### PNJL
 
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
   - 守恒荷广义磁化率、累积量、`Ssigma`、`kappa_sigma2` 的统一单点/小范围扫描入口
 - [scripts/models/run_unified_scan.jl](../../../scripts/models/run_unified_scan.jl)
-  - 统一扫描入口（`scan tmu|trho`），覆盖 T-μ / T-ρ 网格扫描与 `Models` 主链扫描治理
+  - 统一扫描入口（`scan tmu|trho|magnetic`）；其中 `scan magnetic` 是完整五维 FixedMu 的 `(T,mu,eB)` equilibrium 产线，`run_magnetic_*` 旧脚本仍是固定 `x_state` 诊断
+  - 磁场最小调用：`scan magnetic --model_kind=PNJLMagnetic --solver_mode=fixed_mu --T_values=150 --mu_values=0 --eB_values=20000 --xi_values=0 --output_path=data/outputs/results/pnjl/scan/magnetic/selected.csv`
 - [scripts/pnjl/calculate_phase_structure.jl](../../../scripts/pnjl/calculate_phase_structure.jl)
   - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
 
@@ -106,6 +117,33 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - 可以使用 `--preset=smoke` 快速切换到轻量可复现实验参数（随后仍可用 CLI 显式参数覆盖）。
 - CLI 显式参数优先级高于模板（同名键会覆盖）。
 - production 可显式设置 `crossover_T_max_MeV`、rho 粗细网格几何量门限和温度中点自适应门限；解析后的 `p_num/t_num/iterations` 与这些门限写入 manifest。
+- production 默认保持 `rho_refinement_policy=uniform_nested`。`rho_support_cascade` 仅用于显式
+  shadow/诊断请求：必须启用 `rho_geometry_convergence`、使用均匀嵌套 coarse rho 网格、
+  `rho_refine_levels=1`，并通过 `rho_support_fine_step` 与
+  `rho_support_targeted_cap` 记录两层 support/补点合同；它不会自动覆盖旧 reference。
+- `rho_support_hybrid` 是更高成本的显式 shadow/候选策略，要求 `rho_refine_levels=4`。
+  它按 cascade → 完整 memoized dense → 离散极值 guard 内局部验证的顺序升级；
+  guard 取两个 μ 极值外侧首个严格 Stage-B 采样点，不插值、不二分、不使用固定
+  padding。Stage-A targeted 总上限仍为 `12`，Stage-C 始终保留完整 Stage-B 曲线；
+  没有可靠 guard 时保持 ambiguous，不启动全域 oracle。
+  v2 shadow 显式使用
+  `RhoHybridVerificationConfig(endpoint_policy=:three_crossing_endpoint_local_v2)`：完整
+  Stage-B 曲线保留不截断，右 Maxwell crossing 只需被两个实际外支采样点 bracket，Stage-C
+  只在左 crossing active bracket 内补 midpoint。下界为零并达到预算时记录
+  `endpoint_limited_first_order`；下界为正且末两级 geometry 通过时记录
+  `endpoint_local_geometry_first_order`。这两种内部证书仍映射到既有三态，anchor 与最多
+  12 个 refinement 点分别计费；失败保持 `ambiguous_near_critical`。旧的
+  `bounded_zero_density_v1` 继续用于历史复现。
+  Dense Reference 的 Actions planner 在选择 `rho_support_hybrid` 时会显式传入
+  `--rho-hybrid-endpoint-policy=three_crossing_endpoint_local_v2`；直接 CLI 若未指定仍保持
+  `bounded_zero_density_v1`，以免改写历史命令语义。
+
+- endpoint-local geometry contract v2 的离线 feasibility 使用
+  `scripts/analysis/pnjl_endpoint_local_feasibility_v2.py`。它读取 targeted
+  aggregate 与已批准的 required-three deep artifact，只用完整 Stage-B 曲线决定
+  左侧 active bracket 的 midpoint；deep 曲线只在点位选定后用于 solver-free gate。
+  右侧只要求两个实际 Stage-B 外支点 bracket Maxwell crossing，不再要求采样点越过
+  最大 spinodal 化学势。该脚本不调用 PNJL solver，也不产生 production/reference 工件。
 
 最小产物结构（输出目录）：
 
@@ -142,6 +180,12 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `fixed-T-sparse-muB`（兼容短别名 `b`）
   - `fixed-muB-phase-scaled`：固定 `mu_B`，沿 `T/T_phase` 倍率带扫描 `xi`
   - `fixed-T-sparse-muB`：固定 `T`、离散 `mu_B`、连续扫描 `xi`
+  - 默认使用仓库内 Issue #130 `strict` candidate 的 certified-only runtime view；candidate 缺失键
+    使用 legacy fallback。可用 `--phase-reference-root <dir>` 指定 candidate、
+    `--phase-reference-layer strict|derived|render` 选择层，或用
+    `--phase-reference-mode legacy` 显式回滚 legacy。`diagnostic` 仍只用于显式 candidate 的
+    solver-free/审计路径，`render` 不可作为 runtime 输入；source、fallback 原因和 manifest hash
+    写入 effective config/run manifest。
   - 当前 canonical 口径：
     - mode a 固定 `mu_B = 0, 450, 900 MeV`
     - mode b 固定 `T = 120, 160, 200 MeV`
@@ -155,16 +199,20 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；也可传 `--sigma-cache-policy validated_anchored` 诊断 threshold-subtraction 与 σ-cache 插值放大效应。默认 `match_thermo` / `default` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
   - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
   - 高精度长任务应优先通过 action shard 触发：mode a 可用 `muB_list` + `alpha_t_list` 分片，mode b 可用 `t_list` + `muB_list` 分片，二者都可用 `xi_list` 缩小窗口，并用 `shard_label` 区分 artifact。workflow 会把扫描/绘图日志写入 result artifact；失败或取消时仍尽量上传 partial CSV、`failed_points.csv`、`channel_diagnostics.csv` 和日志，供本地合并与 convergence gate 使用。
-  - 当前 phase-guided transport production-grade case：
-    - 高 xi 分辨率、同 p128 validated-anchored 积分精度：`first_canonical_v1_p128_xi001_validated_anchored_prod_v1`
-      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/`
-      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/`
-      - shared import gate evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi001_validated_anchored_prod_v1_convergence/`
-    - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_validated_anchored_prod_v1`
-      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
-      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
-      - shared convergence evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/`
-  - 旧 `first_canonical_v1` 已从仓库数据树移除。它缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；历史对照请通过 git history / PR #122 查看，局部 `xi` 结构的 production-grade 解读应优先使用高 xi p128 production-grade case。
+  - 当前 phase-guided transport formal raw case：
+    - 高 xi 分辨率、onshell-kernel、p128 validated-anchored 积分精度：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
+      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`
+      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`
+      - shared import/audit evidence: `docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/` and each case's `convergence/`
+      - registry status: `approved` for raw result; publication-clean filtering remains a separate derived layer
+    - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
+      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+      - shared convergence evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/`
+  - 旧 `first_canonical_v1` 已从仓库数据树移除。它缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；历史对照请通过 git history / PR #122 查看，局部 `xi` 结构的 production-grade 解读应优先使用当前 `prod_v2` raw case。旧高密度 `prod_v1` 不再占用 mode 的 canonical 根路径，而是保留在版本化 snapshot：
+    - result/figure snapshot 已在 path-retirement 后由独立 deletion proposal 处理，当前不提供 RS `prod_v1` fallback/rollback。
+    - 删除 allowlist、删除前 tree/manifest hash 与 Git 恢复引用见 `docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/`。
+    - path-retirement merge `74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 保留删除前 snapshot 的 Git 历史恢复边界；这不是外部数值备份。当前 approved `prod_v2` 仍位于各 mode canonical 目录；PNJL phase-reference 的 `legacy_phase_reference_v1` fallback 不受此 RS 删除影响。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`

@@ -72,14 +72,31 @@ function _execute_governed_attempt_plan(
             local_kwargs[:nlsolve_method] = attempt_cfg.method
             local_kwargs[:trust_region_fallback] = attempt_cfg.use_fallback
             local_kwargs[:fallback_method] = attempt_cfg.fallback_method
+            record_governed_attempt!(get(local_kwargs, :work_telemetry, nothing); origin=attempt_cfg.attempt_origin)
 
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
+            # A governed attempt may deliberately return a structured
+            # incomplete-output candidate (for example when a backend
+            # produces `nothing` for one thermodynamic field).  Preserve
+            # that diagnostic reason alongside the ordinary hard-rule
+            # failures instead of allowing it to be overwritten here.
+            raw_failed_value = hasproperty(raw, :failed_constraints) ?
+                getproperty(raw, :failed_constraints) : Symbol[]
+            raw_failed = raw_failed_value === nothing ? Symbol[] : Symbol.(raw_failed_value)
+            failed = unique(vcat(raw_failed, failed))
+            ok = ok && isempty(raw_failed)
+            raw_error_kind_value = hasproperty(raw, :error_kind) ? getproperty(raw, :error_kind) : :none
+            raw_error_kind = raw_error_kind_value === nothing ? :none : Symbol(raw_error_kind_value)
+            raw_error_msg_value = hasproperty(raw, :error_msg) ? getproperty(raw, :error_msg) : ""
+            raw_error_msg = raw_error_msg_value === nothing ? "" : String(raw_error_msg_value)
             merged = build_governance_candidate(raw;
                 hard_constraint_ok=ok,
                 failed_constraints=failed,
                 seed_index=Int(attempt_index),
                 residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
+                error_kind=raw_error_kind,
+                error_msg=raw_error_msg,
             )
             success = evaluate_candidate_success(merged;
                 residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
@@ -87,6 +104,7 @@ function _execute_governed_attempt_plan(
             return merged, success
         end,
         on_error=(attempt_cfg, attempt_index, err) -> begin
+            record_solver_exception!(get(kwargs, :work_telemetry, nothing))
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
             err_kind = classify_attempt_error(err)
             err_msg = normalize_error_message(err)
@@ -112,6 +130,90 @@ function _execute_governed_attempt_plan(
         require_converged=true,
     )
     return selected, selected.normalized_candidates
+end
+
+const _FIXEDRHO_JOINT_REQUIRED_SCALARS = (
+    :omega,
+    :pressure,
+    :rho_norm,
+    :entropy,
+    :energy,
+    :residual_norm,
+)
+const _FIXEDRHO_JOINT_REQUIRED_VECTORS = (
+    (:solution, 8),
+    (:x_state, 5),
+    (:mu_vec, 3),
+    (:masses, 3),
+)
+
+"""Return explicit reasons for a malformed FixedRho joint-solve payload.
+
+The solver callback is allowed to report a failed attempt, but it must not
+leak a partial payload into the outer orchestration layer.  In particular,
+`Float64(nothing)` is an orchestration error, not a physical solver result.
+"""
+function _fixedrho_joint_output_issues(solved)
+    solved === nothing && return Symbol[:solver_returned_nothing]
+    issues = Symbol[]
+    if !hasproperty(solved, :converged) || !(getproperty(solved, :converged) isa Bool)
+        push!(issues, :invalid_converged)
+    end
+    if !hasproperty(solved, :iterations) || !(getproperty(solved, :iterations) isa Integer)
+        push!(issues, :invalid_iterations)
+    end
+    for field in _FIXEDRHO_JOINT_REQUIRED_SCALARS
+        if !hasproperty(solved, field)
+            push!(issues, Symbol("missing_$(field)"))
+        elseif getproperty(solved, field) === nothing || !(getproperty(solved, field) isa Real)
+            push!(issues, Symbol("invalid_$(field)"))
+        end
+    end
+    for (field, expected_length) in _FIXEDRHO_JOINT_REQUIRED_VECTORS
+        if !hasproperty(solved, field)
+            push!(issues, Symbol("missing_$(field)"))
+            continue
+        end
+        value = getproperty(solved, field)
+        if value === nothing || !(value isa AbstractVector) || length(value) != expected_length ||
+                any(entry -> !(entry isa Real), value)
+            push!(issues, Symbol("invalid_$(field)"))
+        end
+    end
+    return issues
+end
+
+function _fixedrho_incomplete_output_candidate(
+    attempt_cfg,
+    residual_norm_max::Real,
+    issues::AbstractVector{<:Symbol},
+)
+    issue_text = isempty(issues) ? "unknown incomplete solver output" : join(string.(issues), ", ")
+    return (
+        converged=false,
+        solution=Float64[],
+        x_state=zeros(5),
+        mu_vec=zeros(3),
+        omega=NaN,
+        pressure=NaN,
+        rho_norm=NaN,
+        entropy=NaN,
+        energy=NaN,
+        masses=zeros(3),
+        iterations=0,
+        residual_norm=Inf,
+        residual_norm_max=Float64(residual_norm_max),
+        fixedrho_joint_solve_requested=true,
+        fixedrho_joint_solve_active=false,
+        fixedrho_joint_fallback=false,
+        fixedrho_joint_selected_method=:none,
+        fixedrho_joint_selected_quality=:bad,
+        fixedrho_joint_fallback_used=false,
+        fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
+        failed_constraints=vcat(Symbol[:solver_incomplete_output], collect(issues)),
+        error_kind=:solver_incomplete_output,
+        error_msg="FixedRho joint solver returned incomplete output ($(issue_text))",
+    )
 end
 
 @inline function _resolve_candidate_selector(kwargs::Dict{Symbol,Any})::Function
@@ -158,6 +260,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
 
     local_kwargs = Dict{Symbol,Any}(kwargs)
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+    delete!(local_kwargs, :work_telemetry)
 
     solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
     result = solved
@@ -212,6 +315,7 @@ end
         :thermo_quadrature_rtol,
         :thermo_quadrature_atol,
         :thermo_quadrature_maxevals,
+        :work_telemetry,
     )
         delete!(kwargs, key)
     end
@@ -236,6 +340,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     trust_region_fallback = Bool(get(kwargs, :trust_region_fallback, true))
     fallback_method = get(kwargs, :fallback_method, :trust_region)
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
+    work_telemetry = get(kwargs, :work_telemetry, nothing)
 
     x0 = if length(seed_guess) >= 8
         Float64.(seed_guess[1:8])
@@ -290,6 +395,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
             thermo_quadrature_atol=thermo_quadrature_atol,
             thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
+        record_postprocess_residual!(work_telemetry)
         phys = physicality_check(thermo.x_state, thermo.masses) && _thermo_quantities_finite(thermo)
 
         return (
@@ -308,19 +414,27 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
 
     cache = Dict{Symbol,NamedTuple}()
     solve_once = function (method::Symbol, seed::Vector{Float64})
-        res = nlsolve(
-            residual_fn!,
-            seed;
-            autodiff=:forward,
-            method=method,
-            xtol=1e-9,
-            ftol=1e-9,
-            pairs(local_nls_kwargs)...,
-        )
+        local res
+        try
+            res = nlsolve(
+                residual_fn!,
+                seed;
+                autodiff=:forward,
+                method=method,
+                xtol=1e-9,
+                ftol=1e-9,
+                pairs(local_nls_kwargs)...,
+            )
+        catch
+            record_solver_exception!(work_telemetry)
+            rethrow()
+        end
+        record_nlsolve_work!(work_telemetry, res, method)
 
         solution = Float64.(res.zero)
         pp = postprocess_solution(solution)
         converged = Bool(res.f_converged) && pp.phys && isfinite(pp.residual_norm) && pp.residual_norm <= residual_norm_max
+        record_attempt_outcome!(work_telemetry; converged=converged)
 
         cache[method] = (
             res=res,
@@ -385,6 +499,7 @@ end
 
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    record_solver_request!(get(kwargs, :work_telemetry, nothing); fixedrho=true)
     cfg = _fixedrho_runtime_config_from_kwargs(mode, kwargs)
     diagnostic_level = _resolve_diagnostic_level(kwargs)
     extra_constraints = _resolve_extra_constraints(kwargs)
@@ -435,6 +550,14 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
             solved = _fixedrho_joint_problem_spec_forward_solve(model, mode, T_fm; pairs(local_kwargs)...)
+            output_issues = _fixedrho_joint_output_issues(solved)
+            if !isempty(output_issues)
+                return _fixedrho_incomplete_output_candidate(
+                    attempt_cfg,
+                    get(local_kwargs, :residual_norm_max, 1e-6),
+                    output_issues,
+                )
+            end
             return (
                 converged=Bool(solved.converged),
                 solution=Float64.(solved.solution),
@@ -579,6 +702,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         selector_fn,
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+            delete!(local_kwargs, :work_telemetry)
             delete!(local_kwargs, :trust_region_fallback)
             delete!(local_kwargs, :fallback_method)
 

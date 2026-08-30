@@ -1,0 +1,25 @@
+{
+    "outer_area_gate": 5.0e-5,
+    "endpoint_cell": 0.003125,
+    "verdict": "feasible_candidate",
+    "endpoint_policy": "diagnostic_only_until_positive_rho_bracket",
+    "targeted_cap_candidates": [
+        4,
+        6,
+        8,
+        10,
+        12
+    ],
+    "density_tol": 0.0025,
+    "local_step_candidates": [
+        0.0015625,
+        0.00078125,
+        0.000390625,
+        0.0001953125
+    ],
+    "position_tol_MeV": 0.025,
+    "selection_status": "awaiting_actions_endpoint_refinement",
+    "area_solver_tol": 5.0e-6,
+    "candidate_policy": "unique_three_crossing_topology_v1",
+    "schema_version": "pnjl_maxwell_endpoint_candidate_feasibility_v1"
+}

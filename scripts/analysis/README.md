@@ -14,7 +14,7 @@
 - `relaxtime/meson_conserved_charge_feedback_runtime.jl`：partial-feedback analysis runtime；集中候选 evaluator、缓存与 gap/BU/outer 分项计时，不是稳定公共入口
 - `relaxtime/meson_conserved_charge_outer_feedback_spike.jl`：固定 `(T,mu_B)` 的 quark-only→partial-feedback 单点诊断；每个 `(mu_Q,mu_S)` 候选重求五平均场，并同时计算 `pi+/-`、`K+/-` current-BU 密度
 - `relaxtime/scan_meson_conserved_charge_feedback_freezeout.jl`：读取 hot-start benchmark 中位耗时，沿 `default/baseline_freezeout` 选择 7/5/3 点稀疏扫描 `K+/pi+`、`K-/pi-`；输出仅为 diagnostic
-- `relaxtime/build_phase_guided_transport_xi001_jump_analysis.py`：基于 xi=0.01 p128 phase-guided transport 正式产物生成 tau-first 突变分析包，并把 `eta_over_s` / `zeta_over_s` 作为 tau 下游响应处理
+- `relaxtime/build_phase_guided_transport_xi001_jump_analysis.py`：基于当前 `prod_v2` xi=0.01 p128 phase-guided transport 正式 raw 产物生成 tau-first 突变分析包，并把 `eta_over_s` / `zeta_over_s` 作为 tau 下游响应处理
 - `relaxtime/phase_guided_p128_mechanism_scan.jl`：消费 xi001 分析包生成的 mechanism window candidates，对 phase-guided transport 局部窗口执行 denominator-chain / rate-band 机制深拆并写回分析包表格
 - `relaxtime/build_phase_guided_pole_sensitive_rendering.py`：验证 v1→v2 tau/rate 机制迁移门槛，生成不改写正式产物的内部极点敏感审计，以及隐藏数值修正痕迹、用星号标示一阶相变点的多曲线论文候选图
 
@@ -26,8 +26,9 @@
 - charged 同点消融默认使用显式 `density_policy=:x_min_cut` 诊断延拓，并同时输出 `strict_requested_window_status`、`m_M-μ_M` 与 effective lower bound；不得把该诊断直接视为守恒荷平衡解或 production 结果。
 - 外层守恒荷 spike 同样固定为显式 `density_policy=:x_min_cut`，且介子尚未进入 mean-field stationarity；即使 verdict 为 `full-feedback-candidate`，也只表示值得拉起完整热力学反馈研究，不是自洽平衡解认证。
 - 可用 `BU_AUDIT_RUN_NEUTRAL=false` 只运行 charged 消融；`BU_AUDIT_Q_NODES`、`BU_AUDIT_OMEGA_NODES`、`BU_AUDIT_QMAX`、`BU_AUDIT_OMEGA_MIN/MAX` 和 `BU_AUDIT_BOSE_X_MIN` 可控制低成本诊断网格。
-- xi001 tau-first 突变分析只消费已入库正式产物，不重跑 production。
-- xi001 transport 分析包的完整生成顺序是：先运行 Python 生成候选窗口，再运行 Julia 机制深拆，最后重新运行 Python 刷新主报告和 manifest。
+- xi001 tau-first 突变分析只消费已入库 `prod_v2` 正式 raw 产物，不重跑 production。
+- 当前默认输出为版本化目录 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/`；不覆盖旧的 v1 分析包。
+- xi001 transport 分析包的完整生成顺序是：先运行 Python 生成 v2 候选窗口，再运行 Julia 机制深拆，最后重新运行 Python 刷新主报告和 manifest。
 
 ```bash
 julia --project=. scripts/analysis/scan_mott_meson_vs_xi_mu0.jl
@@ -37,7 +38,7 @@ julia --project=. scripts/analysis/relaxtime/audit_bu_meson_density_literature_a
 julia --project=. scripts/analysis/relaxtime/meson_conserved_charge_outer_feedback_spike.jl
 julia --project=. scripts/analysis/relaxtime/scan_meson_conserved_charge_feedback_freezeout.jl
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py
-julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl --case-name first_canonical_v1_p128_xi001_validated_anchored_prod_v1 --candidate-csv docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv --out-dir docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables --integration-mode semi_infinite
+julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl --case-name first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2 --candidate-csv docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/mechanism_window_candidates.csv --out-dir docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables --integration-mode semi_infinite
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py
 python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 ```

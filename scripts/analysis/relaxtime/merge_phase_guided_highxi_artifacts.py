@@ -26,10 +26,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 RESULT_ROOT = PROJECT_ROOT / "data" / "outputs" / "results" / "relaxtime" / "transport" / "phase_guided"
 FIGURE_ROOT = PROJECT_ROOT / "data" / "outputs" / "figures" / "relaxtime" / "transport" / "phase_guided"
 
-OLD_CASE = "first_canonical_v1_p128_validated_anchored_prod_v1"
+OLD_CASE = "first_canonical_v1_p128_xi005_validated_anchored_prod_v1"
 NEW_CASE = "first_canonical_v1_p128_xi001_validated_anchored_prod_v1"
 SOURCE_CANDIDATE_CASE = "p128_xi001_localdispatch_20260618_223856"
-CONVERGENCE_SOURCE = "first_canonical_v1_p128_validated_anchored_prod_v1_convergence"
+CONVERGENCE_SOURCE = "first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence"
 MODE_A = "mode_a_fixed_muB_phase_scaled"
 MODE_B = "mode_b_fixed_T_sparse_muB"
 

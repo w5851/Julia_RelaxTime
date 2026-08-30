@@ -1,0 +1,11 @@
+T,linear_coefficient,expected_status,observed_status,matches_expected,prior_used,support_origin,targeted_function_evaluations,polynomial_fits,spinodal_rho_center,spinodal_rho_gap,analytic_spinodal_rho_gap,reason
+0.0,-0.12,resolved_s_shape,resolved_s_shape,true,false,coarse_topology,0,0,1.0000000000000002,0.3511111111111115,0.4,coarse sampled curve resolves persistent + -> - -> + topology
+0.25,-0.09,resolved_s_shape,resolved_s_shape,true,true,coarse_topology,0,0,0.9999999999999998,0.2911111111111109,0.34641016151377546,coarse sampled curve resolves persistent + -> - -> + topology
+0.5,-0.06,resolved_s_shape,resolved_s_shape,true,true,coarse_topology,0,0,1.0000000000000002,0.23111111111111116,0.282842712474619,coarse sampled curve resolves persistent + -> - -> + topology
+0.7,-0.036000000000000004,resolved_s_shape,resolved_s_shape,true,true,coarse_and_prior,8,1,0.9999999999999998,0.21182779846885513,0.21908902300206645,targeted rho samples and local cubic agree on persistent + -> - -> + topology
+0.82,-0.021600000000000005,resolved_s_shape,resolved_s_shape,true,true,coarse_and_prior,8,1,0.999999999999998,0.16282925588605923,0.16970562748477142,targeted rho samples and local cubic agree on persistent + -> - -> + topology
+0.9,-0.011999999999999997,resolved_s_shape,resolved_s_shape,true,true,coarse_and_prior,8,1,0.9999999999999996,0.12406850500388078,0.12649110640673517,targeted rho samples and local cubic agree on persistent + -> - -> + topology
+0.96,-0.004800000000000004,resolved_s_shape,resolved_s_shape,true,true,coarse_and_prior,8,1,1.0000000000000004,0.06825425199333146,0.08000000000000003,targeted rho samples and local cubic agree on persistent + -> - -> + topology
+1.0,0.0,near_critical,near_critical,true,true,coarse_and_prior,8,1,,,,targeted local cubic has a near-zero minimum slope
+1.04,0.004800000000000004,resolved_monotone,resolved_monotone,true,true,coarse_and_prior,8,1,,,,previous-temperature density window is positively sloped after targeted validation
+1.15,0.017999999999999988,resolved_monotone,resolved_monotone,true,true,temperature_prior,8,1,,,,previous-temperature density window is positively sloped after targeted validation

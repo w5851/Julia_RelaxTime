@@ -10,7 +10,8 @@ end
     kinds = (:NJL, :NJL2, :PNJL, :PNJLMagnetic, :RPNJL, :Rotation, :GasLiquid)
 
     for kind in kinds
-        model = Models.create_model(kind)
+        model = kind === :PNJLMagnetic ?
+            Models.create_model(kind; eB_fm2=0.1) : Models.create_model(kind)
         dim = Models.gap_state_dim(model)
         @test dim >= 2
 
@@ -24,6 +25,23 @@ end
             else
                 @test isdefined(Models, :solve_gas_liquid_point)
             end
+            continue
+        end
+
+        if kind === :PNJLMagnetic
+            # Magnetic equilibrium is a dedicated FixedMu route; the shared
+            # scan/constraint regression must not launch a full magnetic solve.
+            @test isdefined(Models, :run_magnetic_scan)
+            @test_throws ArgumentError Models.run_tmu_scan(
+                T_values=[150.0], mu_values=[0.0], xi_values=[0.0],
+                output_path=joinpath(mktempdir(), "magnetic_tmu.csv"),
+                model_kind=:PNJLMagnetic,
+            )
+            @test_throws ArgumentError Models.run_trho_scan(
+                T_values=[150.0], rho_values=[0.2], xi_values=[0.0],
+                output_path=joinpath(mktempdir(), "magnetic_trho.csv"),
+                model_kind=:PNJLMagnetic,
+            )
             continue
         end
 

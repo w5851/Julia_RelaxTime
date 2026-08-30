@@ -1,0 +1,45 @@
+{
+  "schema_version": "issue130_rs_old_reference_physical_deletion_v1",
+  "proposal_status": "pending_author_review",
+  "proposal_pr": 278,
+  "proposal_commit": "f973d113600c80bdaa2c1367cf709fa5489df214",
+  "physical_deletion_applied_in_branch": true,
+  "merge_authorization_required": true,
+  "author_authorized_pr_creation": true,
+  "path_retirement_merge_sha": "74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "legacy_snapshot_version": "legacy_prod_v1_snapshot_v1",
+  "legacy_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+  "scope": [
+    "data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1",
+    "data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1"
+  ],
+  "excluded": [
+    "current prod_v2 result and figure trees",
+    "first_canonical_v1 and xi005 historical evidence",
+    "data/reference/pnjl/legacy_phase_reference_v1",
+    "numerical solver and Actions artifacts"
+  ],
+  "deleted_tree_count": 4,
+  "deleted_file_count": 112,
+  "deleted_bytes": 41673063,
+  "fallback_available_after_merge": false,
+  "rollback_available_after_merge": false,
+  "solver_called": false,
+  "production_write": false,
+  "external_archive": {
+    "status": "none",
+    "note": "Recovery relies on the reachable path-retirement merge commit and this manifest; no RS-specific Zenodo archive is registered."
+  },
+  "allowlist": "deletion_allowlist.csv",
+  "recovery": {
+    "ref": "74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+    "instructions": "restore_commands.md",
+    "verification": "The validator checks the allowlisted files and directory inventories at the recovery ref."
+  },
+  "pre_delete_root_metadata": {
+    "result_readme_sha256": "9ef5b17fea20d2f00549497646622572f34b8f733b2ca3b23941c56f8b55e983",
+    "result_retirement_manifest_sha256": "ba065ed3bc4efaa23d8685239b7787a26675879fb5ef1bed0313eef34e0e50b9",
+    "figure_retirement_manifest_sha256": "c8a297b679be303c46de741f5f323d5736d38da9df9976872a3b2f58247f0dc"
+  }
+}

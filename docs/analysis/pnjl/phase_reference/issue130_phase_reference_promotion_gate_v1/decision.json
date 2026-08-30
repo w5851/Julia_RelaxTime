@@ -1,0 +1,43 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "next_action": "prepare a separate versioned reference import PR",
+  "package_root": "D:\\Temp\\julia_relaxtime_issue130_phase_reference_promotion_gate\\docs\\analysis\\pnjl\\phase_reference\\issue130_phase_reference_layers_v1",
+  "promotion_status": "eligible_for_versioned_promotion",
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_promotion_gate_v1",
+  "source_run_id": "32354095831",
+  "summary": {
+    "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "cep_rows": 93,
+    "coverage_rows": 483,
+    "crossover_rows": 1343,
+    "figure_bytes": 999505,
+    "figure_sha256": "50d09fefca853d532059c6133d70ca040b33b5c125ade18d7227ef71a1a0ea39",
+    "maxwell_expansion_rows": 276,
+    "maxwell_rows": 7162,
+    "maxwell_unresolved_rows": 4071,
+    "maxwell_unresolved_statuses": {
+      "native_c2_unresolved_geometry": 4071
+    },
+    "render_input_hashes": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "replay_run_id": "32451053476",
+    "source_run_id": "32354095831",
+    "spinodal_rows": 6886,
+    "surface_rows": {
+      "cep": 161,
+      "coverage": 483,
+      "crossover": 3135,
+      "maxwell": 12537,
+      "spinodal": 11989
+    }
+  },
+  "verdict": "promotion_candidate"
+}

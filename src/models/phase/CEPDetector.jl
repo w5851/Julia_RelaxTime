@@ -27,6 +27,7 @@ function _classify_s_curve(mu_vals, rho_vals;
         status=:invalid,
         mu_transition=nothing,
         sres=sres,
+        maxwell=MaxwellResult(),
         area_residual=nothing,
         reason="no_s_shape",
     )
@@ -34,6 +35,33 @@ function _classify_s_curve(mu_vals, rho_vals;
     mres = maxwell_construction(mu_vals, rho_vals; spinodal_hint=sres, maxwell_options...)
     if !(mres.converged && mres.mu_transition !== nothing)
         reason = get(mres.details, :reason, "maxwell_failed")
+        # An observed S-shape with an unresolved crossing topology or strict
+        # bisection failure is numerical ambiguity, never a monotone result.
+        # Keep the historical `no_sign_change` reason for legacy weak-S
+        # discrimination, while exposing the newer failure class explicitly.
+        if reason in ("multiple_maxwell_candidates", "bisection_failed",
+                      "crossing_count_not_three", "topology_changed_inside_bisection",
+                      "solver_tolerance_not_met")
+            return (
+                status=:unknown,
+                mu_transition=nothing,
+                sres=sres,
+                maxwell=mres,
+                area_residual=nothing,
+                reason="maxwell_numerical_ambiguous:$(reason)",
+            )
+        end
+        if reason == "no_sign_change" &&
+           Int(get(mres.details, :near_zero_grid_probe_count, 0)) > 0
+            return (
+                status=:unknown,
+                mu_transition=nothing,
+                sres=sres,
+                maxwell=mres,
+                area_residual=nothing,
+                reason="maxwell_numerical_ambiguous:near_zero_grid_hit",
+            )
+        end
         if reason == "no_sign_change"
             weak = _weak_s_shape_metrics(mu_vals, rho_vals, sres)
             if _is_weak_s_shape(weak)
@@ -46,6 +74,7 @@ function _classify_s_curve(mu_vals, rho_vals;
                     status=:weak_s_shape,
                     mu_transition=weak_mu,
                     sres=sres,
+                    maxwell=mres,
                     area_residual=nothing,
                     reason="weak_s_shape_no_sign_change",
                 )
@@ -55,6 +84,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:invalid,
             mu_transition=nothing,
             sres=sres,
+            maxwell=mres,
             area_residual=nothing,
             reason=String(reason),
         )
@@ -66,6 +96,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:valid,
             mu_transition=Float64(mres.mu_transition),
             sres=sres,
+            maxwell=mres,
             area_residual=Float64(area),
             reason="ok",
         )
@@ -74,6 +105,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:invalid,
             mu_transition=Float64(mres.mu_transition),
             sres=sres,
+            maxwell=mres,
             area_residual=Float64(area),
             reason="area_residual_too_large",
         )
@@ -83,6 +115,7 @@ function _classify_s_curve(mu_vals, rho_vals;
         status=:unknown,
         mu_transition=Float64(mres.mu_transition),
         sres=sres,
+        maxwell=mres,
         area_residual=Float64(area),
         reason="area_residual_gray_zone",
     )
@@ -174,7 +207,13 @@ function _interpolate_or_reevaluate_curve(
         curve = evaluate_at_T(T_target, 0)
         curve !== nothing && return curve
     end
-    return _interpolate_curve(curves, T_target)
+    interpolated = _interpolate_curve(curves, T_target)
+    # `_interpolate_curve` historically returns `(nothing, nothing)` when
+    # the target is outside the supplied temperature span. Normalize that
+    # sentinel here so the three-state classifier records a genuine unknown
+    # rather than attempting `detect_s_shape(nothing, nothing)`.
+    interpolated[1] === nothing && return nothing
+    return interpolated
 end
 
 function _uniform_rho_grid(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}; atol::Float64=1e-10)
@@ -351,7 +390,7 @@ function _directional_bracket(temperatures::Vector{Float64}, eval_fn::Function;
     return nothing
 end
 
-function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}};
+function _find_cep_direct_legacy(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}};
         evaluate_at_T::Union{Nothing, Function}=nothing,
         maxwell_options::NamedTuple=(;),
         tol::Float64=0.01,
@@ -489,7 +528,13 @@ function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Fl
     )
 end
 
-function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}};
+# Keep the historical private helper name available to downstream diagnostic
+# scripts while the public `find_cep` entrypoint uses the three-state path.
+function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}; kwargs...)
+    return _find_cep_direct_legacy(curves; kwargs...)
+end
+
+function _find_cep_legacy(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}};
         maxwell_options::NamedTuple=(;),
         tol::Float64=0.01,
         max_bisect_iter::Int=20,
@@ -507,7 +552,7 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
     isempty(curves) && return CEPResult()
 
     if strategy == :direct
-        return _find_cep_direct(curves;
+        return _find_cep_direct_legacy(curves;
             evaluate_at_T=evaluate_at_T,
             maxwell_options=maxwell_options,
             tol=tol,
@@ -584,4 +629,213 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
         bracket_width_T_MeV=T_high - T_low,
         method=method,
     )
+end
+
+# ---------------------------------------------------------------------------
+# Three-state CEP contract
+# ---------------------------------------------------------------------------
+
+@inline function _research_slice_status(cres, T::Float64, monotone_certificate)
+    if cres.status == :valid
+        return :confirmed_first_order
+    elseif cres.status == :invalid && cres.reason == "no_s_shape" && monotone_certificate !== nothing
+        return monotone_certificate(T, cres) ? :confirmed_monotone : :ambiguous_near_critical
+    end
+    return :ambiguous_near_critical
+end
+
+function _three_state_cep_result(low, high;
+        eval_count::Int=0,
+        unknown_count::Int=0,
+        resolution_target::Float64=NaN,
+        reason::Union{Nothing, String}=nothing,
+        method::Symbol=:three_state_frontier)
+    if low === nothing
+        return CEPResult(
+            result_status=:not_found,
+            eval_count=eval_count,
+            unknown_count=unknown_count,
+            reason=isnothing(reason) ? "no_confirmed_first_order" : reason,
+            method=method,
+            temperature_resolution_target_MeV=resolution_target,
+        )
+    end
+
+    T_low = Float64(low.T)
+    mu_low = Float64(something(low.mu, NaN))
+    T_high = high === nothing ? NaN : Float64(high.T)
+    width = isfinite(T_high) ? T_high - T_low : NaN
+    return CEPResult(
+        result_status=:ambiguous,
+        T_bracket_low_MeV=T_low,
+        T_bracket_high_MeV=T_high,
+        bracket_width_T_MeV=width,
+        T_last_first_order_MeV=T_low,
+        mu_last_first_order_MeV=mu_low,
+        T_first_monotone_MeV=T_high,
+        ambiguity_width_T_MeV=width,
+        temperature_resolution_target_MeV=resolution_target,
+        eval_count=eval_count,
+        unknown_count=unknown_count,
+        reason=isnothing(reason) ? "ambiguous_interval_between_phase_evidence" : reason,
+        method=method,
+    )
+end
+
+function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}};
+        maxwell_options::NamedTuple=(;),
+        tol::Float64=0.01,
+        max_bisect_iter::Int=20,
+        strategy::Symbol=:interpolate,
+        evaluate_at_T::Union{Nothing, Function}=nothing,
+        area_tol_good::Float64=1e-4,
+        area_tol_bad::Float64=5e-4,
+        max_refine_level::Int=2,
+        direct_bracket_mode::Symbol=:directional,
+        direct_start::Symbol=:low,
+        direct_initial_step::Float64=NaN,
+        direct_expand_factor::Float64=2.0,
+        direct_max_expand_steps::Int=8,
+        direct_fallback_scan::Bool=true,
+        monotone_certificate::Union{Nothing, Function}=nothing,
+        unknown_budget::Int=typemax(Int))
+    isfinite(tol) && tol > 0 || throw(ArgumentError(
+        "temperature resolution target must be finite and positive, got $(tol)",
+    ))
+    unknown_budget >= 0 || throw(ArgumentError(
+        "unknown_budget must be nonnegative, got $(unknown_budget)",
+    ))
+    max_bisect_iter >= 0 || throw(ArgumentError(
+        "max_bisect_iter must be nonnegative, got $(max_bisect_iter)",
+    ))
+    isempty(curves) && return _three_state_cep_result(nothing, nothing;
+        resolution_target=tol,
+        method=Symbol("three_state_", strategy),
+        reason="empty_curve_set")
+
+    area_tol_good > area_tol_bad && ((area_tol_good, area_tol_bad) = (area_tol_bad, area_tol_good))
+    temperatures = sort(collect(keys(curves)))
+    eval_count = 0
+    unknown_count = 0
+    evaluations = Dict{Float64, NamedTuple}()
+    statuses = Dict{Float64, Symbol}()
+
+    evaluate_at = function (T::Float64)
+        key = Float64(T)
+        haskey(evaluations, key) && return evaluations[key]
+        er = if strategy == :direct
+            _evaluate_direct_at_T(curves, key;
+                evaluate_at_T=evaluate_at_T,
+                max_refine_level=max_refine_level,
+                maxwell_options=maxwell_options,
+                area_tol_good=area_tol_good,
+                area_tol_bad=area_tol_bad)
+        else
+            curve = _interpolate_or_reevaluate_curve(curves, key; evaluate_at_T=evaluate_at_T)
+            if curve === nothing
+                (status=:unknown, mu_transition=nothing, area_residual=nothing, level=0, reason="curve_unavailable")
+            else
+                mu_vals, rho_vals = curve
+                cres = _classify_s_curve(mu_vals, rho_vals;
+                    maxwell_options=maxwell_options,
+                    area_tol_good=area_tol_good,
+                    area_tol_bad=area_tol_bad)
+                curves[key] = curve
+                merge(cres, (level=0,))
+            end
+        end
+        eval_count += er.level + 1
+        semantic = _research_slice_status(er, key, monotone_certificate)
+        # `unknown_budget` applies only to solver/classification unknowns. A
+        # weak-S or Maxwell-gray slice remains ambiguous and is never counted
+        # as a budget event or relabelled as monotone.
+        er.status == :unknown && (unknown_count += 1)
+        statuses[key] = semantic
+        evaluations[key] = er
+        return er
+    end
+
+    for T in temperatures
+        evaluate_at(Float64(T))
+    end
+
+    low = nothing
+    high = nothing
+    for T in sort(collect(keys(evaluations)))
+        semantic = statuses[T]
+        if semantic == :confirmed_first_order
+            low = (T=T, mu=evaluations[T].mu_transition)
+        elseif semantic == :confirmed_monotone && low !== nothing && high === nothing
+            high = (T=T,)
+        end
+    end
+
+    if low === nothing
+        return _three_state_cep_result(nothing, nothing;
+            eval_count=eval_count,
+            unknown_count=unknown_count,
+            resolution_target=tol,
+            method=Symbol("three_state_", strategy),
+            reason=unknown_count > unknown_budget ?
+                "unknown_budget_exceeded:no_confirmed_first_order" : "no_confirmed_first_order")
+    end
+
+    if high !== nothing
+        low_anchor = low
+        high_anchor = high
+        low_search_hi = high
+        high_search_lo = low
+        for _ in 1:max_bisect_iter
+            # The initial supplied curves are always classified, but once the
+            # budget is exceeded no further expensive re-evaluation is
+            # requested. The current evidence interval is retained verbatim.
+            unknown_count > unknown_budget && break
+            changed = false
+            if low_search_hi.T - low_anchor.T > tol
+                T_mid = 0.5 * (low_anchor.T + low_search_hi.T)
+                er = evaluate_at(T_mid)
+                semantic = statuses[T_mid]
+                if semantic == :confirmed_first_order
+                    low_anchor = (T=T_mid, mu=er.mu_transition)
+                else
+                    low_search_hi = (T=T_mid,)
+                    semantic == :confirmed_monotone && (high_anchor = (T=T_mid,))
+                end
+                changed = true
+            end
+            unknown_count > unknown_budget && break
+            if high_anchor.T - high_search_lo.T > tol
+                T_mid = 0.5 * (high_search_lo.T + high_anchor.T)
+                er = evaluate_at(T_mid)
+                semantic = statuses[T_mid]
+                if semantic == :confirmed_monotone
+                    high_anchor = (T=T_mid,)
+                else
+                    high_search_lo = (T=T_mid,)
+                    semantic == :confirmed_first_order && (low_anchor = (T=T_mid, mu=er.mu_transition))
+                end
+                changed = true
+            end
+            changed || break
+            low = low_anchor
+            high = high_anchor
+            low_search_hi.T - low_anchor.T <= tol && high_anchor.T - high_search_lo.T <= tol && break
+        end
+        low, high = low_anchor, high_anchor
+    end
+
+    budget_exhausted = unknown_count > unknown_budget
+    result_reason = if budget_exhausted
+        "unknown_budget_exceeded"
+    elseif high === nothing
+        "confirmed_first_order_without_monotone_anchor"
+    else
+        nothing
+    end
+    return _three_state_cep_result(low, high;
+        eval_count=eval_count,
+        unknown_count=unknown_count,
+        resolution_target=tol,
+        method=Symbol("three_state_", strategy),
+        reason=result_reason)
 end

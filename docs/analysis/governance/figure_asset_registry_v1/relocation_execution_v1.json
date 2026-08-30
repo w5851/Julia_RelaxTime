@@ -1,0 +1,100 @@
+{
+  "schema_version": "figure_namespace_relocation_v1",
+  "generated_at_utc": "2026-08-16T10:12:19.435Z",
+  "execution_status": "completed",
+  "reason": "Place the P1 Mott/isentropic production case under the Mott figure-family namespace without changing numerical or image content.",
+  "source_case": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531",
+  "destination_case": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531",
+  "scope": {
+    "figure_tree_only": true,
+    "file_count": 6,
+    "png_count": 5,
+    "manifest_count": 1,
+    "manifest_figure_path_fields_updated": 5,
+    "results_tree_moved": false,
+    "reference_tree_moved": false,
+    "numeric_generation_executed": false
+  },
+  "content_policy": "byte_preserve",
+  "assets": [
+    {
+      "kind": "png",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_isentropic_mott_paths.png",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_isentropic_mott_paths.png",
+      "size_bytes": 245759,
+      "before_sha256": "E3799286D1253D6D57B70D5DFD45D90A900A5001CDF1B03C0DFD122E8931D919",
+      "after_sha256": "E3799286D1253D6D57B70D5DFD45D90A900A5001CDF1B03C0DFD122E8931D919",
+      "verification": "byte_hash_equal"
+    },
+    {
+      "kind": "png",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram.png",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram.png",
+      "size_bytes": 298059,
+      "before_sha256": "080F95445B013ED2F4F3FD33BFA8AFB978F7C48513C591A6041B040FD5B95091",
+      "after_sha256": "080F95445B013ED2F4F3FD33BFA8AFB978F7C48513C591A6041B040FD5B95091",
+      "verification": "byte_hash_equal"
+    },
+    {
+      "kind": "png",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_0.png",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_0.png",
+      "size_bytes": 119485,
+      "before_sha256": "FD4CF3A51C2C0B4B91DB7662F49DE0C8D00688028CDC7B256A84913CE73E2583",
+      "after_sha256": "FD4CF3A51C2C0B4B91DB7662F49DE0C8D00688028CDC7B256A84913CE73E2583",
+      "verification": "byte_hash_equal"
+    },
+    {
+      "kind": "png",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_0p3.png",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_0p3.png",
+      "size_bytes": 116704,
+      "before_sha256": "5DA3345FE79A6A9865A2F1C331D9A0FBBC4A5631F99D32F60F1A94D2955A498A",
+      "after_sha256": "5DA3345FE79A6A9865A2F1C331D9A0FBBC4A5631F99D32F60F1A94D2955A498A",
+      "verification": "byte_hash_equal"
+    },
+    {
+      "kind": "png",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_m0p3.png",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/figures/p1_mott_phase_diagram_xi_m0p3.png",
+      "size_bytes": 125386,
+      "before_sha256": "6F820C2F2E190ACF4F0D05B688603580CC97DA8D31377B1EA12E2CD49319E340",
+      "after_sha256": "6F820C2F2E190ACF4F0D05B688603580CC97DA8D31377B1EA12E2CD49319E340",
+      "verification": "byte_hash_equal"
+    },
+    {
+      "kind": "plot_manifest",
+      "before_path": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/plot_manifest.json",
+      "after_path": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/plot_manifest.json",
+      "before_size_bytes": 2719,
+      "after_size_bytes": 2779,
+      "before_sha256": "BB2B61C7BFED82E1021427DA7385F5585E4C818ED31AFCD251A8B15BDBEC3E8A",
+      "after_sha256": "190E684CDA3A399B5880F47256CB9FCA010AF6B3559899D561986C9FB3ECEE9F",
+      "changed_fields": [
+        "figures[0]",
+        "figures[1]",
+        "figures[2]",
+        "figures[3]",
+        "figures[4]"
+      ],
+      "verification": "path_fields_only"
+    }
+  ],
+  "unchanged_roots": [
+    "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531",
+    "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531"
+  ],
+  "generator_defaults": {
+    "entrypoint": "scripts/relaxtime/run_paper_p1_pipeline.jl",
+    "figure_dir_before": "data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/orchestrated",
+    "figure_dir_after": "data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/orchestrated",
+    "result_dir_unchanged": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/orchestrated"
+  },
+  "historical_snapshots_kept_immutable": [
+    "docs/analysis/figure_asset_registry_v1/asset_registry.json",
+    "docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv",
+    "docs/analysis/figure_asset_registry_v1/cleanup_preflight_v1.json",
+    "docs/analysis/figure_asset_registry_v1/author_review_decisions.md",
+    "docs/analysis/figure_asset_registry_v1/retirement_execution_v1.json"
+  ]
+}

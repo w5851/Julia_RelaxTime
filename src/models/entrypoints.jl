@@ -1,7 +1,7 @@
 """entrypoints.jl
 
 Models 统一流程入口（阶段 C）：
-- 扫描：run_tmu_scan / run_trho_scan
+- 扫描：run_tmu_scan / run_trho_scan / run_magnetic_scan
 - 工作流：solve_gap_and_transport / solve_gap_and_meson_point
 
 当前采用统一入口策略：
@@ -9,7 +9,7 @@ Models 统一流程入口（阶段 C）：
 - 调用方应通过 `Models` 模块显式访问工作流能力。
 """
 
-export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
 export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan
@@ -32,6 +32,8 @@ export build_meson_thermo_contract_row
 export solve_phase_shift_point_diagnostic_from_meson_point
 export solve_phase_shift_derivative_reference_from_meson_point
 export solve_gas_liquid_point
+export solve_gas_liquid_rmf_point, run_gas_liquid_tmu_scan, run_gas_liquid_trho_scan
+export build_gas_liquid_result_row, build_gas_liquid_manifest
 export solve_rotation_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
@@ -100,6 +102,10 @@ end
 
 function run_trho_scan(args...; kwargs...)
     return TrhoScan.run_trho_scan(args...; kwargs...)
+end
+
+function run_magnetic_scan(args...; kwargs...)
+    return MagneticScan.run_magnetic_scan(args...; kwargs...)
 end
 
 function run_freezeout_fixedmu_scan(args...; kwargs...)
@@ -339,6 +345,26 @@ end
 
 function solve_gas_liquid_point(args...; kwargs...)
     return gas_liquid_workflow_module().solve_gas_liquid_point(args...; kwargs...)
+end
+
+function solve_gas_liquid_rmf_point(args...; kwargs...)
+    return gas_liquid_workflow_module().solve_gas_liquid_rmf_point(args...; kwargs...)
+end
+
+function run_gas_liquid_tmu_scan(args...; kwargs...)
+    return gas_liquid_workflow_module().run_gas_liquid_tmu_scan(args...; kwargs...)
+end
+
+function run_gas_liquid_trho_scan(args...; kwargs...)
+    return gas_liquid_workflow_module().run_gas_liquid_trho_scan(args...; kwargs...)
+end
+
+function build_gas_liquid_result_row(args...; kwargs...)
+    return gas_liquid_workflow_module().build_gas_liquid_result_row(args...; kwargs...)
+end
+
+function build_gas_liquid_manifest(args...; kwargs...)
+    return gas_liquid_workflow_module().build_gas_liquid_manifest(args...; kwargs...)
 end
 
 function solve_rotation_point(args...; kwargs...)

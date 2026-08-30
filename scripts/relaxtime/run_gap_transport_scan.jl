@@ -43,14 +43,26 @@ const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
 
-function preferred_phase_reference_path(dense_name::String, legacy_name::String)
-    dense_path = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", dense_name)
-    return isfile(dense_path) ? dense_path : joinpath(PROJECT_ROOT, "data", "reference", "pnjl", legacy_name)
-end
+const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2")
+const DEFAULT_PHASE_REFERENCE_LAYER = :accepted
+const DEFAULT_STRICT_PHASE_REFERENCE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT
 
-const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_dense.csv", "boundary.csv")
-const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
-const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
+function _load_runtime_phase_reference(opts)
+    mode = opts.phase_reference_mode
+    mode === :diagnostic && opts.phase_reference_root === nothing &&
+        error("--phase-reference-mode diagnostic requires --phase-reference-root")
+    mode === :legacy && error("legacy phase reference is retired from runtime; use the historical retirement audit")
+    root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root
+    mode === :diagnostic && return PhaseReferenceAdapter.load_phase_reference(root; layer=opts.phase_reference_layer)
+    if mode === :strict
+        opts.phase_reference_layer === :strict ||
+            error("strict runtime requires --phase-reference-layer strict")
+        return PhaseReferenceAdapter.load_phase_reference_strict_runtime(root; layer=:strict)
+    end
+    opts.phase_reference_layer === :accepted ||
+        error("runtime mode uses accepted as the default primary layer; use --phase-reference-mode strict for strict")
+    return PhaseReferenceAdapter.load_phase_reference_accepted_runtime(root)
+end
 
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
 const MODULE_DEFAULT_ANGLE_NODES = RT_ASR.DEFAULT_ANGLE_NODES   # 4
@@ -62,6 +74,7 @@ include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_cli.j
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_io.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_orchestration.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_plan.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "phase_reference_adapter.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_phase_equilibrium.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_provenance.jl"))
 
@@ -292,7 +305,10 @@ function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_p
     return caches
 end
 
-function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
+function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=opts.phase_reference_mode,
+)
     ensure_parent_dir(opts.output)
     if opts.channel_diagnostics_output !== nothing
         ensure_parent_dir(opts.channel_diagnostics_output)
@@ -355,6 +371,17 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
                 "note.tau_threshold_hint" => "for near-threshold sharp channels, linear+threshold_subtraction often more robust than pchip",
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
+                "phase_reference_source" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_kind(phase_reference)),
+                "phase_reference_runtime_view" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_summary(phase_reference).runtime_view),
+                "phase_reference_primary_layer" => phase_reference === nothing ? "none" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :primary_layer, "")),
+                "phase_reference_runtime_consumption" => phase_reference === nothing ? "false" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :runtime_consumption, false)),
+                "phase_reference_fallback_reason" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_reason, "")),
+                "phase_reference_fallback_order" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_order, "")),
+                "phase_reference_candidate_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :candidate_manifest_sha256, "")),
+                "phase_reference_accepted_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_manifest_sha256, "")),
+                "phase_reference_accepted_layer_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_layer_manifest_sha256, "")),
+                "phase_reference_accepted_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :accepted_fallback_row_counts, "")),
+                "phase_reference_legacy_fallback_counts" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :legacy_fallback_row_counts, "")),
 
                 # labels for plotting convenience
                 "y_label.sigma_over_T" => "σ/T",
@@ -405,6 +432,8 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
                     runtime;
                     previous_solution=previous_solution,
                     previous_phase=previous_phase,
+                    phase_reference=phase_reference,
+                    phase_reference_mode=phase_reference_mode,
                 ),
             opts,
             plan,
@@ -423,7 +452,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
         end
     end
 
-    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped)
+    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped; phase_reference=phase_reference)
 
     println("Scan finished. Output: $(opts.output)")
 end
@@ -431,7 +460,11 @@ end
 function main()
     opts = parse_args(copy(ARGS))
     ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/run_gap_transport_scan.jl", copy(ARGS))
-    run_scan(opts, ctx)
+    phase_reference = _load_runtime_phase_reference(opts)
+    run_scan(opts, ctx;
+        phase_reference=phase_reference,
+        phase_reference_mode=opts.phase_reference_mode,
+    )
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

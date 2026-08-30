@@ -33,6 +33,32 @@ def test_resolves_whitelisted_controls_in_deterministic_order():
     ]
 
 
+def test_accepts_hybrid_rho_policy_controls():
+    module = load_module()
+    resolved = module.resolve_action_config(
+        '{"rho_refinement_policy":"rho_support_hybrid","rho_refine_levels":4,"rho_support_targeted_cap":12}'
+    )
+    assert resolved == [
+        "--rho-refinement-policy",
+        "rho_support_hybrid",
+        "--rho-refine-levels",
+        "4",
+        "--rho-support-targeted-cap",
+        "12",
+    ]
+
+
+def test_accepts_endpoint_policy_control():
+    module = load_module()
+    resolved = module.resolve_action_config(
+        '{"rho_hybrid_endpoint_policy":"three_crossing_endpoint_local_v2"}'
+    )
+    assert resolved == [
+        "--rho-hybrid-endpoint-policy",
+        "three_crossing_endpoint_local_v2",
+    ]
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -41,6 +67,7 @@ def test_resolves_whitelisted_controls_in_deterministic_order():
         '{"T_refine_levels":1.5}',
         '{"thermo_quadrature_rtol":0}',
         '{"thermo_quadrature_maxevals":true}',
+        '{"rho_hybrid_endpoint_policy":"unknown"}',
     ],
 )
 def test_rejects_invalid_or_unsupported_controls(payload):

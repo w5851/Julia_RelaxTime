@@ -1,0 +1,15 @@
+job_name,job_id,status,conclusion,elapsed_seconds,runner_minutes_rounded
+v2 discovery xi=0.0,90210399758,completed,success,198.0,4
+v2 discovery xi=0.5,90210399829,completed,success,578.0,10
+v2 discovery xi=-0.5,90210399832,completed,success,171.0,3
+cep-pilot xi=${{ matrix.xi }} method=${{ matrix.method }},90210400218,completed,skipped,0.0,0
+replay CEP pilot v2 aggregate diagnostics,90210400469,completed,skipped,0.0,0
+aggregate CEP pilot diagnostics,90210400669,completed,skipped,0.0,0
+freeze v2 validation windows,90212314432,completed,success,14.0,1
+v2 validation xi=0.0 method=c2_dense_baseline,90212392452,completed,success,406.0,7
+v2 validation xi=0.0 method=high_resolution_oracle,90212392458,completed,success,824.0,14
+v2 validation xi=-0.5 method=c2_dense_baseline,90212392472,completed,success,320.0,6
+v2 validation xi=-0.5 method=high_resolution_oracle,90212392480,completed,success,505.0,9
+v2 validation xi=0.5 method=c2_dense_baseline,90212392499,completed,success,874.0,15
+v2 validation xi=0.5 method=high_resolution_oracle,90212392540,completed,success,1247.0,21
+aggregate CEP pilot v2 diagnostics,90216771980,completed,success,36.0,1

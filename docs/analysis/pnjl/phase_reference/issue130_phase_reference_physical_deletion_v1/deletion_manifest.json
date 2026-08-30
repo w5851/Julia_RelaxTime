@@ -1,0 +1,65 @@
+{
+  "schema_version": "issue130_pnjl_phase_reference_physical_deletion_v1",
+  "proposal_status": "pending_author_review",
+  "proposal_branch": "codex/issue130-pnjl-legacy-reference-physical-deletion",
+  "proposal_pr": 285,
+  "physical_deletion_applied_in_branch": true,
+  "merge_authorization_required": true,
+  "recovery_ref": "9aa4c313901ca0c91e851f58514e3df9aa124df4",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "legacy_snapshot_version": "legacy_phase_reference_v1",
+  "scope": [
+    "data/reference/pnjl/legacy_phase_reference_v1"
+  ],
+  "pre_delete_tree_sha256": "c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6",
+  "pre_delete_file_count": 8,
+  "pre_delete_bytes": 50749,
+  "deleted_file_count": 8,
+  "deleted_bytes": 50749,
+  "fallback_available_after_merge": false,
+  "rollback_available_after_merge": false,
+  "solver_called": false,
+  "production_write": false,
+  "runtime_default_layer": "accepted",
+  "strict_mode": "explicit_only",
+  "excluded": [
+    "data/reference/pnjl/issue130_phase_reference_v1",
+    "data/reference/pnjl/issue130_phase_reference_v2",
+    "data/reference/pnjl/crossover.csv",
+    "docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v1",
+    "docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v2",
+    "docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3",
+    "docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4",
+    "numerical solver and Actions artifacts"
+  ],
+  "allowlist": "deletion_allowlist.csv",
+  "recovery": {
+    "ref": "9aa4c313901ca0c91e851f58514e3df9aa124df4",
+    "instructions": "restore_commands.md",
+    "verification": "audit_issue130_phase_reference_physical_deletion.py"
+  },
+  "pre_delete_snapshot_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "claims": [
+    {
+      "claim_id": "accepted_runtime_independent",
+      "status": "supported",
+      "claim": "The accepted-primary runtime and explicit strict route do not require the legacy snapshot.",
+      "evidence": "phase_reference_legacy_audit_v4/decision.json; consumer_matrix.csv",
+      "boundary": "solver-free path contract only"
+    },
+    {
+      "claim_id": "exact_allowlist",
+      "status": "supported",
+      "claim": "Only the eight files listed in deletion_allowlist.csv are removed.",
+      "evidence": "deletion_allowlist.csv; validator report",
+      "boundary": "does not delete candidate, accepted, strict, render, or historical evidence"
+    },
+    {
+      "claim_id": "recoverable_history",
+      "status": "supported",
+      "claim": "The pre-delete snapshot remains recoverable from the reachable path-retirement merge ref.",
+      "evidence": "restore_commands.md; recovery_ref tree/hash checks",
+      "boundary": "Git history recovery, not a runtime fallback or external archive"
+    }
+  ]
+}

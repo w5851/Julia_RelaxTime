@@ -1,0 +1,21 @@
+{
+  "command": "python scripts/analysis/pnjl_endpoint_local_feasibility_v2.py --standard-dir <aggregate> --deep-dir <deep-aggregate> --output-dir docs/analysis/pnjl_cep_endpoint_local_contract_feasibility_v2",
+  "figures": [
+    {
+      "inputs": [
+        "route_traces.csv"
+      ],
+      "path": "figures/endpoint_local_brackets.png",
+      "sha256": "2419719e0b9cc624fda8b98fa06bd3325aeab8129b836add1ed1fa0ea92bb2d3"
+    },
+    {
+      "inputs": [
+        "curve_index.csv"
+      ],
+      "path": "figures/representative_stage_b_curves.png",
+      "sha256": "72836d92f70e6ecc3df088525115dd8f347ee739238e999b4cc1c494defc3fb4"
+    }
+  ],
+  "raw_curves_external": true,
+  "schema_version": "cep_maxwell_endpoint_local_contract_feasibility_v2"
+}

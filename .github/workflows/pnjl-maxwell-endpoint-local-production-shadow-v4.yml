@@ -1,0 +1,350 @@
+name: PNJL Maxwell endpoint-local production shadow v4
+
+on:
+  workflow_dispatch:
+    inputs:
+      calculation_ref:
+        description: "Immutable 40-character production calculation SHA"
+        required: true
+        type: string
+      scope:
+        description: "Focused, targeted, or full anchor matrix"
+        required: false
+        default: focused
+        type: choice
+        options: [focused, targeted, full]
+      mode:
+        description: "Numerical run or authenticated aggregate replay"
+        required: false
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      source_run_id:
+        description: "Completed numerical source run for replay or failed-only rerun"
+        required: false
+        default: ""
+        type: string
+      deep_oracle_run_id:
+        description: "Approved deep-oracle run for the required-three overlay"
+        required: false
+        default: ""
+        type: string
+      rerun_failed_only:
+        description: "Run only the job keys listed in failed_job_keys"
+        required: false
+        default: false
+        type: boolean
+      failed_job_keys:
+        description: "Comma-separated method/xi keys, for example production_hybrid/-0.5"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Versioned endpoint-local artifact tag"
+        required: false
+        default: cep_maxwell_endpoint_local_production_shadow_v4
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  SCHEMA_VERSION: cep_maxwell_endpoint_local_production_shadow_v4
+  ENDPOINT_POLICY: three_crossing_endpoint_local_v2
+  CANDIDATE_POLICY: unique_three_crossing_sign_change_v2
+
+jobs:
+  shadow:
+    if: ${{ inputs.mode == 'numerical' }}
+    name: "endpoint-local v4 xi=${{ matrix.xi }} method=${{ matrix.method }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        xi: ["-0.5", "0.0", "0.5"]
+        method: [production_hybrid, memoized_dense, independent_oracle]
+    steps:
+      - name: Select matrix job for failed-only rerun
+        id: select_job
+        shell: bash
+        env:
+          JOB_KEY: ${{ matrix.method }}/${{ matrix.xi }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$JOB_KEY,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping $JOB_KEY; its artifact will be restored from source_run_id."
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation ref
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "calculation_ref must be a 40-character immutable SHA" >&2
+            exit 1
+          }
+
+      - name: Checkout calculation SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Verify checkout SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
+
+      - name: Setup Julia
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-maxwell-endpoint-local-production-shadow-v4
+
+      - name: Install Julia dependencies
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run endpoint-local shadow job
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          METHOD: ${{ matrix.method }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SCOPE: ${{ inputs.scope }}
+          ENDPOINT_POLICY: ${{ env.ENDPOINT_POLICY }}
+          CANDIDATE_POLICY: ${{ env.CANDIDATE_POLICY }}
+        run: |
+          mkdir -p "artifacts/${METHOD}/xi_${XI}"
+          julia --project=. scripts/analysis/pnjl_cep_hybrid_production_shadow.jl \
+            --xi "$XI" --method "$METHOD" --tag "$TAG" \
+            --calculation-sha "$CALCULATION_REF" --scope "$SCOPE" \
+            --endpoint-policy "$ENDPOINT_POLICY" \
+            --candidate-policy "$CANDIDATE_POLICY" \
+            --output-dir "artifacts/${METHOD}/xi_${XI}"
+
+      - name: Upload endpoint-local job artifact
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-maxwell-endpoint-local-production-shadow-${{ matrix.method }}-xi-${{ matrix.xi }}
+          path: artifacts/${{ matrix.method }}/xi_${{ matrix.xi }}
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    name: aggregate endpoint-local shadow evidence
+    if: ${{ always() && inputs.mode == 'numerical' }}
+    needs: [shadow]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Restore skipped job artifacts for failed-only rerun
+        if: ${{ inputs.rerun_failed_only == true }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "source_run_id is required for failed-only rerun"; exit 1; }
+          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha)"
+          test "$(echo "$source_json" | jq -r .status)" = completed
+          test "$(echo "$source_json" | jq -r .conclusion)" = success
+          test "$(echo "$source_json" | jq -r .headSha)" = "$CALCULATION_REF"
+          mkdir -p job-artifacts source-artifacts
+          gh run download "$SOURCE_RUN_ID" \
+            --pattern 'cep-maxwell-endpoint-local-production-shadow-*-xi-*' \
+            --dir source-artifacts
+          cp -a source-artifacts/. job-artifacts/
+
+      - name: Download endpoint-local job artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-maxwell-endpoint-local-production-shadow-*
+          path: job-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Collect and gate endpoint-local evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SCOPE: ${{ inputs.scope }}
+          TAG: ${{ inputs.tag }}
+          ENDPOINT_POLICY: ${{ env.ENDPOINT_POLICY }}
+        run: |
+          set +e
+          python scripts/analysis/collect_pnjl_cep_hybrid_production_shadow.py \
+            --input-dir job-artifacts --output-dir aggregate \
+            --run-id "$RUN_ID" --source-run-id "$RUN_ID" \
+            --expected-calculation-sha "$CALCULATION_REF" \
+            --scope "$SCOPE" --schema-version "${SCHEMA_VERSION}" \
+            --endpoint-mode --endpoint-policy "$ENDPOINT_POLICY" \
+            --candidate-policy "$CANDIDATE_POLICY" \
+            --postprocess-sha "${GITHUB_SHA}" --run-mode numerical
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+          python scripts/analysis/plot_pnjl_cep_hybrid_production_shadow.py \
+            --input-dir aggregate --output-dir aggregate/figures
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo "collector_verdict_status=$status" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload endpoint-local aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-maxwell-endpoint-local-production-shadow-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate_replay:
+    name: replay endpoint-local shadow evidence
+    if: ${{ inputs.mode == 'aggregate_replay' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "source_run_id is required"; exit 1; }
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+
+      - name: Checkout postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify source run and download numeric artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          DEEP_RUN_ID: ${{ inputs.deep_oracle_run_id }}
+        run: |
+          set -euo pipefail
+          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha,jobs)"
+          test "$(echo "$source_json" | jq -r .status)" = completed
+          # The source run's head is the workflow/postprocess checkout.  It
+          # may differ from the immutable calculation SHA when collector or
+          # plotting code is repaired after a numeric run.  The downloaded
+          # job summaries remain the authoritative calculation-SHA check.
+          source_head_sha="$(echo "$source_json" | jq -r .headSha)"
+          [[ "$source_head_sha" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          echo "source_workflow_head_sha=$source_head_sha"
+          numeric_jobs="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi="))] | length')"
+          numeric_failures="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi=")) | select(.conclusion != "success")] | length')"
+          test "$numeric_jobs" = 9
+          test "$numeric_failures" = 0
+          mkdir -p job-artifacts
+          artifact_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/artifacts?per_page=100")"
+          job_prefix='cep-maxwell-endpoint-local-production-shadow-'
+          for xi in '-0.5' '0.0' '0.5'; do
+            for method in 'production_hybrid' 'memoized_dense' 'independent_oracle'; do
+              artifact_name="${job_prefix}${method}-xi-${xi}"
+              artifact_exists="$(echo "$artifact_json" | jq -r --arg name "$artifact_name" '[.artifacts[] | select(.name == $name and .expired == false)] | length')"
+              test "$artifact_exists" = 1 || {
+                echo "missing or expired source artifact: $artifact_name" >&2
+                exit 1
+              }
+              artifact_dir="job-artifacts/${method}-xi-${xi}"
+              mkdir -p "$artifact_dir"
+              gh run download "$SOURCE_RUN_ID" --name "$artifact_name" --dir "$artifact_dir"
+            done
+          done
+          if [[ -n "$DEEP_RUN_ID" ]]; then
+            mkdir -p deep-artifacts
+            deep_artifacts="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEEP_RUN_ID}/artifacts?per_page=100")"
+            deep_name="$(echo "$deep_artifacts" | jq -r '[.artifacts[] | select(.name | startswith("cep-deep-oracle-")) | select(.name | endswith("-aggregate")) | select(.expired == false) | .name] | if length == 1 then .[0] else empty end')"
+            test -n "$deep_name" || {
+              echo "expected exactly one non-expired deep-oracle aggregate artifact" >&2
+              exit 1
+            }
+            gh run download "$DEEP_RUN_ID" --name "$deep_name" --dir deep-artifacts
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Replay and gate endpoint-local evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          DEEP_RUN_ID: ${{ inputs.deep_oracle_run_id }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SCOPE: ${{ inputs.scope }}
+          ENDPOINT_POLICY: ${{ env.ENDPOINT_POLICY }}
+        run: |
+          set +e
+          deep_args=()
+          if [[ -n "$DEEP_RUN_ID" ]]; then
+            deep_args+=(--deep-input-dir deep-artifacts --deep-run-id "$DEEP_RUN_ID")
+          fi
+          python scripts/analysis/collect_pnjl_cep_hybrid_production_shadow.py \
+            --input-dir job-artifacts --output-dir aggregate \
+            --run-id "$SOURCE_RUN_ID" --source-run-id "$SOURCE_RUN_ID" \
+            --expected-calculation-sha "$CALCULATION_REF" \
+            --scope "$SCOPE" --schema-version "${SCHEMA_VERSION}" \
+            --endpoint-mode --endpoint-policy "$ENDPOINT_POLICY" \
+            --candidate-policy "$CANDIDATE_POLICY" \
+            --postprocess-sha "${GITHUB_SHA}" --run-mode aggregate_replay \
+            "${deep_args[@]}"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+          python scripts/analysis/plot_pnjl_cep_hybrid_production_shadow.py \
+            --input-dir aggregate --output-dir aggregate/figures
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo "collector_verdict_status=$status" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload replay aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-maxwell-endpoint-local-production-shadow-${{ inputs.tag }}-aggregate-replay
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90

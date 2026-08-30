@@ -1,10 +1,4 @@
-"""GasLiquidModel
-
-Gas-Liquid (RMF/Walecka) 最小可运行模型壳。
-
-说明：
-- 当前版本先打通 Models 统一接口与 workflow 组装，数值细节在后续 PR 增强。
-"""
+"""Models adapter for the finite-temperature RMF gas-liquid core."""
 
 using StaticArrays
 
@@ -19,7 +13,9 @@ if !isdefined(@__MODULE__, :GasLiquidThermodynamics)
 end
 
 using .GasLiquidEquationSet: GasLiquidCoreParams, GasLiquidState, solve_equilibrium, mu_baryon
+using .GasLiquidEquationSet: density_bundle, physical_mu_pair
 using .GasLiquidThermodynamics: pressure_density_entropy_energy, omega_components as gasliquid_omega_components
+using .GasLiquidThermodynamics: scalar_field_contribution
 
 export GasLiquidModel
 
@@ -59,12 +55,8 @@ end
 
 @inline function calculate_chiral(model::GasLiquidModel, φ; kwargs...)
     _ = kwargs
-    sigma = float(φ[1])
-    delta = float(φ[2])
-    p = model.params
-    x = p.g_sigma * sigma
-    us = (1 / 3) * p.b * p.m_nucleon_inv_fm * x^3 + (1 / 4) * p.c * x^4
-    return us + 0.5 * p.m_delta_inv_fm^2 * delta^2
+    gl = GasLiquidState(float(φ[1]), float(φ[2]), 0.0, 0.0)
+    return scalar_field_contribution(gl, model.params)
 end
 
 @inline function polyakov_potential(::GasLiquidModel, Φ, Φbar, T; kwargs...)
@@ -85,11 +77,12 @@ end
     mn = float(masses[2])
     muB = mu_baryon(mu_vec)
 
-    sigma = (p.m_nucleon_inv_fm - 0.5 * (mp + mn)) / (p.g_sigma + eps(Float64))
-    delta = if abs(p.g_delta) <= eps(Float64)
+    # phi stores the field contributions S and D, not the bare meson fields.
+    sigma = p.m_nucleon_inv_fm - 0.5 * (mp + mn)
+    delta = if p.f_delta <= eps(Float64)
         0.0
     else
-        (mn - mp) / (2 * p.g_delta)
+        (mn - mp) / 2
     end
 
     Tprom = promote_type(typeof(sigma), typeof(delta), typeof(muB))
@@ -97,10 +90,7 @@ end
 end
 
 @inline function _chi_from_state(model::GasLiquidModel, st::GasLiquidState)
-    p = model.params
-    x = p.g_sigma * st.sigma
-    us = (1 / 3) * p.b * p.m_nucleon_inv_fm * x^3 + (1 / 4) * p.c * x^4
-    return us + 0.5 * p.m_delta_inv_fm^2 * st.delta^2
+    return scalar_field_contribution(st, model.params)
 end
 
 @inline function thermal_contribution(model::GasLiquidModel, masses, Φ, Φbar, mu_vec, T; kwargs...)

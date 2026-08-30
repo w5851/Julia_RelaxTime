@@ -111,6 +111,27 @@ def common_cli_args(config: dict[str, Any]) -> list[str]:
         "--crossover-n-mu", _text(_integer(config, "crossover_n_mu")),
         "--crossover-mu-max", _text(_number(config, "crossover_mu_max_MeV")),
     ]
+    # Preserve rho-policy provenance when a staged resume is reconstructed
+    # from a source manifest.  Older manifests predate these fields, so they
+    # intentionally retain the historical uniform defaults.
+    if "rho_refinement_policy" in config:
+        rho_policy = str(config["rho_refinement_policy"])
+        if rho_policy not in {"uniform_nested", "rho_support_cascade", "rho_support_hybrid"}:
+            fail(f"unsupported source rho_refinement_policy: {rho_policy}")
+        args.extend(["--rho-refinement-policy", rho_policy])
+        if "rho_refine_levels" in config:
+            args.extend(["--rho-refine-levels", _text(_integer(config, "rho_refine_levels"))])
+        if "rho_support_fine_step" in config:
+            args.extend(["--rho-support-fine-step", _text(_number(config, "rho_support_fine_step"))])
+        if "rho_support_target_point_count" in config:
+            args.extend(["--rho-support-target-point-count", _text(_integer(config, "rho_support_target_point_count"))])
+        if "rho_support_targeted_cap" in config:
+            args.extend(["--rho-support-targeted-cap", _text(_integer(config, "rho_support_targeted_cap"))])
+        endpoint_policy = config.get("rho_hybrid_endpoint_policy")
+        if endpoint_policy is not None:
+            if endpoint_policy not in {"bounded_zero_density_v1", "three_crossing_endpoint_local_v2"}:
+                fail(f"unsupported source rho_hybrid_endpoint_policy: {endpoint_policy}")
+            args.extend(["--rho-hybrid-endpoint-policy", str(endpoint_policy)])
     if _boolean(config, "adaptive_xi"):
         args.extend([
             "--adaptive-xi",

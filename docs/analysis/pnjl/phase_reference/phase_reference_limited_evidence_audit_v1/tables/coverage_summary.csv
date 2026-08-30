@@ -1,0 +1,8 @@
+metric,value,interpretation
+target_unresolved_rows,763,C2 rows in the limited audit scope
+target_unique_coordinates,761,"deduplicated (xi,T) coordinates"
+duplicate_unresolved_rows_collapsed,2,"multiple unresolved levels for the same (xi,T) coordinate"
+raw_curve_valid_finite_converged,761,raw oracle input validity only
+range_fetch_or_parse_failures,0,must remain zero for a usable diagnostic package
+raw_archive_curve_rows,1281,expected per-curve rho coverage
+solver_called,False,solver-free audit

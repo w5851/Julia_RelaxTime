@@ -45,10 +45,20 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     crossover_only::Bool = false
     crossover_mu_only_zero::Bool = false
     cep_tol_MeV::Float64 = 0.1
+    temperature_resolution_target_MeV::Float64 = NaN
     rho_geometry_convergence::Bool = true
     rho_position_tol_MeV::Float64 = 0.05
     rho_density_tol::Float64 = 0.005
     rho_maxwell_area_tol::Float64 = 1e-4
+    rho_refinement_policy::Symbol = :uniform_nested
+    rho_refine_levels::Int = 2
+    rho_support_fine_step::Float64 = 0.025
+    rho_support_target_point_count::Int = 9
+    rho_support_targeted_cap::Int = 12
+    # The legacy bounded-zero-density route remains the CLI default for
+    # reproducibility.  Dense-reference hybrid runs select the endpoint-local
+    # v2 contract explicitly through the workflow planner.
+    rho_hybrid_endpoint_policy::Symbol = :bounded_zero_density_v1
     adaptive_temperature::Bool = true
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10
@@ -91,11 +101,18 @@ function usage()
     println("  --crossover-n-mu <int>   crossover mu sampling count (default 16)")
     println("  --crossover-mu-max <MeV> crossover mu_q upper bound (default 450)")
     println("  --crossover-T-max <MeV>  explicit crossover search ceiling (default T-max)")
-    println("  --cep-tol <MeV>          CEP temperature bracket width gate (default 0.1)")
+    println("  --cep-tol <MeV>          compatibility alias for endpoint resolution target (default 0.1)")
+    println("  --temperature-resolution-target <MeV>  endpoint search resolution target")
     println("  --no-rho-geometry-convergence  disable coarse/fine Maxwell and spinodal gates")
     println("  --rho-position-tol <MeV> coarse/fine phase-position tolerance (default 0.05)")
     println("  --rho-density-tol <value> coarse/fine density tolerance (default 0.005)")
     println("  --rho-maxwell-area-tol <value> Maxwell diagnostic gate (default 1e-4)")
+    println("  --rho-refinement-policy <name> uniform_nested, rho_support_cascade, or rho_support_hybrid (default uniform_nested)")
+    println("  --rho-refine-levels <int> rho refinement levels; cascade requires 1, hybrid requires 4")
+    println("  --rho-support-fine-step <value> cascade/hybrid Stage-A fine rho step (default 0.025)")
+    println("  --rho-support-target-point-count <int> cascade/hybrid target count (default 9)")
+    println("  --rho-support-targeted-cap <int> cascade/hybrid Stage-A per-temperature cap (default 12)")
+    println("  --rho-hybrid-endpoint-policy <name> bounded_zero_density_v1 or three_crossing_endpoint_local_v2")
     println("  --no-adaptive-T          disable midpoint temperature refinement")
     println("  --T-refine-levels <int>  maximum adaptive temperature levels (default 2)")
     println("  --T-position-tol <MeV>   temperature interpolation position gate (default 0.10)")
@@ -216,6 +233,8 @@ function parse_args(args::Vector{String})
             cfg.crossover_T_max_MeV = parse(Float64, require_value())
         elseif arg == "--cep-tol"
             cfg.cep_tol_MeV = parse(Float64, require_value())
+        elseif arg == "--temperature-resolution-target"
+            cfg.temperature_resolution_target_MeV = parse(Float64, require_value())
         elseif arg == "--no-rho-geometry-convergence"
             cfg.rho_geometry_convergence = false
         elseif arg == "--rho-position-tol"
@@ -224,6 +243,18 @@ function parse_args(args::Vector{String})
             cfg.rho_density_tol = parse(Float64, require_value())
         elseif arg == "--rho-maxwell-area-tol"
             cfg.rho_maxwell_area_tol = parse(Float64, require_value())
+        elseif arg == "--rho-refinement-policy"
+            cfg.rho_refinement_policy = Symbol(lowercase(require_value()))
+        elseif arg == "--rho-refine-levels"
+            cfg.rho_refine_levels = parse(Int, require_value())
+        elseif arg == "--rho-support-fine-step"
+            cfg.rho_support_fine_step = parse(Float64, require_value())
+        elseif arg == "--rho-support-target-point-count"
+            cfg.rho_support_target_point_count = parse(Int, require_value())
+        elseif arg == "--rho-support-targeted-cap"
+            cfg.rho_support_targeted_cap = parse(Int, require_value())
+        elseif arg == "--rho-hybrid-endpoint-policy"
+            cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(require_value()))
         elseif arg == "--no-adaptive-T"
             cfg.adaptive_temperature = false
         elseif arg == "--T-refine-levels"
@@ -280,12 +311,32 @@ function parse_args(args::Vector{String})
     cfg.iterations > 0 || error("iterations must be positive")
     cfg.crossover_n_mu > 0 || error("crossover-n-mu must be positive")
     cfg.crossover_mu_max_MeV > 0 || error("crossover-mu-max must be positive")
-    cfg.cep_tol_MeV > 0 || error("cep-tol must be positive")
+    resolution_target = isfinite(cfg.temperature_resolution_target_MeV) ?
+        cfg.temperature_resolution_target_MeV : cfg.cep_tol_MeV
+    resolution_target > 0 || error("temperature-resolution-target must be positive")
     cfg.temperature_max_refine_level >= 0 || error("T-refine-levels must be nonnegative")
     cfg.xi_max_refine_level >= 0 || error("xi-refine-levels must be nonnegative")
     cfg.rho_position_tol_MeV > 0 || error("rho-position-tol must be positive")
     cfg.rho_density_tol > 0 || error("rho-density-tol must be positive")
     cfg.rho_maxwell_area_tol > 0 || error("rho-maxwell-area-tol must be positive")
+    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) ||
+        error("rho-refinement-policy must be uniform_nested, rho_support_cascade, or rho_support_hybrid")
+    cfg.rho_refine_levels >= 0 || error("rho-refine-levels must be nonnegative")
+    cfg.rho_support_fine_step > 0 || error("rho-support-fine-step must be positive")
+    cfg.rho_support_target_point_count >= 5 && isodd(cfg.rho_support_target_point_count) ||
+        error("rho-support-target-point-count must be an odd integer >= 5")
+    cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
+        error("rho-support-targeted-cap must cover rho-support-target-point-count")
+    cfg.rho_hybrid_endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
+        error("rho-hybrid-endpoint-policy must be bounded_zero_density_v1 or three_crossing_endpoint_local_v2")
+    if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
+        cfg.model_kind === :PNJL || error("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL")
+        cfg.rho_geometry_convergence || error("$(cfg.rho_refinement_policy) requires rho geometry convergence")
+        required_levels = cfg.rho_refinement_policy === :rho_support_hybrid ? 4 : 1
+        cfg.rho_refine_levels == required_levels || error("$(cfg.rho_refinement_policy) requires rho-refine-levels=$(required_levels)")
+        cfg.rho_refinement_policy !== :rho_support_hybrid || cfg.rho_support_targeted_cap <= 12 ||
+            error("rho_support_hybrid Stage-A targeted cap must be <= 12")
+    end
     cfg.temperature_position_tol_MeV > 0 || error("T-position-tol must be positive")
     cfg.temperature_density_tol > 0 || error("T-density-tol must be positive")
     cfg.temperature_maxwell_area_tol > 0 || error("T-maxwell-area-tol must be positive")
@@ -341,6 +392,10 @@ end
 @inline resolved_crossover_T_max_MeV(cfg::DensePhaseReferenceConfig) =
     isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_max
 
+@inline resolved_temperature_resolution_target_MeV(cfg::DensePhaseReferenceConfig) =
+    isfinite(cfg.temperature_resolution_target_MeV) ?
+        cfg.temperature_resolution_target_MeV : cfg.cep_tol_MeV
+
 function ensure_writable(path::String, overwrite::Bool)
     if isfile(path) && !overwrite
         error("output exists: $path; rerun with --overwrite")
@@ -358,9 +413,26 @@ end
 
 function write_cep_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV,uncertainty_T_MeV,T_bracket_low_MeV,T_bracket_high_MeV,bracket_width_T_MeV")
+        println(io, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV,uncertainty_T_MeV,T_bracket_low_MeV,T_bracket_high_MeV,bracket_width_T_MeV,result_status,T_last_first_order_MeV,muq_last_first_order_MeV,muB_last_first_order_MeV,T_first_monotone_MeV,ambiguity_width_T_MeV,temperature_resolution_target_MeV")
         for row in rows
-            println(io, "$(row.xi),$(row.T_CEP_MeV),$(row.muq_CEP_MeV),$(row.muB_CEP_MeV),$(row.uncertainty_T_MeV),$(row.T_bracket_low_MeV),$(row.T_bracket_high_MeV),$(row.bracket_width_T_MeV)")
+            values = (
+                row.xi,
+                _dense_record_value(row, :T_CEP_MeV),
+                _dense_record_value(row, :muq_CEP_MeV),
+                _dense_record_value(row, :muB_CEP_MeV),
+                _dense_record_value(row, :uncertainty_T_MeV),
+                _dense_record_value(row, :T_bracket_low_MeV),
+                _dense_record_value(row, :T_bracket_high_MeV),
+                _dense_record_value(row, :bracket_width_T_MeV),
+                _dense_record_value(row, :result_status, "not_found"),
+                _dense_record_value(row, :T_last_first_order_MeV),
+                _dense_record_value(row, :muq_last_first_order_MeV),
+                _dense_record_value(row, :muB_last_first_order_MeV),
+                _dense_record_value(row, :T_first_monotone_MeV),
+                _dense_record_value(row, :ambiguity_width_T_MeV),
+                _dense_record_value(row, :temperature_resolution_target_MeV),
+            )
+            println(io, join(_dense_csv_value.(values), ','))
         end
     end
 end
@@ -547,11 +619,18 @@ function manifest_config_payload(cfg::DensePhaseReferenceConfig)
         "crossover_T_max_MeV" => resolved_crossover_T_max_MeV(cfg),
         "crossover_only" => cfg.crossover_only,
         "crossover_mu0_only" => cfg.crossover_mu_only_zero,
+        "temperature_resolution_target_MeV" => resolved_temperature_resolution_target_MeV(cfg),
         "cep_tol_MeV" => cfg.cep_tol_MeV,
         "rho_geometry_convergence" => cfg.rho_geometry_convergence,
         "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
         "rho_density_tol" => cfg.rho_density_tol,
         "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "rho_refinement_policy" => String(cfg.rho_refinement_policy),
+        "rho_refine_levels" => cfg.rho_refine_levels,
+        "rho_support_fine_step" => cfg.rho_support_fine_step,
+        "rho_support_target_point_count" => cfg.rho_support_target_point_count,
+        "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
+        "rho_hybrid_endpoint_policy" => String(cfg.rho_hybrid_endpoint_policy),
         "adaptive_temperature" => cfg.adaptive_temperature,
         "temperature_max_refine_level" => cfg.temperature_max_refine_level,
         "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
@@ -767,11 +846,23 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 crossover_n_mu=cfg.crossover_n_mu,
                 crossover_mu0_only=cfg.crossover_mu_only_zero,
                 crossover_T_max_MeV=resolved_crossover_T_max_MeV(cfg),
-                cep_tol=cfg.cep_tol_MeV,
+                cep_tol=resolved_temperature_resolution_target_MeV(cfg),
                 rho_geometry_convergence=cfg.rho_geometry_convergence,
                 rho_position_tol_MeV=cfg.rho_position_tol_MeV,
                 rho_density_tol=cfg.rho_density_tol,
                 rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+                rho_refinement_policy=cfg.rho_refinement_policy,
+                rho_support_fine_step=cfg.rho_support_fine_step,
+                rho_support_targeted_cap=cfg.rho_support_targeted_cap,
+                rho_support_config=Models.RhoSupportConfig(
+                    target_point_count=cfg.rho_support_target_point_count,
+                    max_extra_points=max(cfg.rho_support_targeted_cap, cfg.rho_support_target_point_count),
+                ),
+                rho_hybrid_verification=Models.RhoHybridVerificationConfig(
+                    endpoint_policy=cfg.rho_hybrid_endpoint_policy,
+                    targeted_cap=cfg.rho_support_targeted_cap,
+                ),
+                cep_max_refine_level=(cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? cfg.rho_refine_levels : 2),
                 adaptive_temperature=cfg.adaptive_temperature,
                 temperature_max_refine_level=cfg.temperature_max_refine_level,
                 temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,
@@ -800,19 +891,26 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
             for row in result.first_order_boundary
                 push!(boundary_rows, merge((xi=key,), row))
             end
-            if result.cep.found && isfinite(result.cep.T_cep_MeV) && isfinite(result.cep.mu_cep_MeV)
-                muq_CEP_MeV = result.cep.mu_cep_MeV
-                push!(cep_rows, (
-                    xi=key,
-                    T_CEP_MeV=result.cep.T_cep_MeV,
-                    muq_CEP_MeV=muq_CEP_MeV,
-                    muB_CEP_MeV=3.0 * muq_CEP_MeV,
-                    uncertainty_T_MeV=result.cep.uncertainty_T_MeV,
-                    T_bracket_low_MeV=result.cep.T_bracket_low_MeV,
-                    T_bracket_high_MeV=result.cep.T_bracket_high_MeV,
-                    bracket_width_T_MeV=result.cep.bracket_width_T_MeV,
-                ))
-            end
+            cep = result.cep
+            muq_CEP_MeV = isfinite(cep.mu_cep_MeV) ? cep.mu_cep_MeV : nothing
+            muq_last_first_order_MeV = isfinite(cep.mu_last_first_order_MeV) ? cep.mu_last_first_order_MeV : nothing
+            push!(cep_rows, (
+                xi=key,
+                T_CEP_MeV=isfinite(cep.T_cep_MeV) ? cep.T_cep_MeV : nothing,
+                muq_CEP_MeV=muq_CEP_MeV,
+                muB_CEP_MeV=isnothing(muq_CEP_MeV) ? nothing : 3.0 * muq_CEP_MeV,
+                uncertainty_T_MeV=isfinite(cep.uncertainty_T_MeV) ? cep.uncertainty_T_MeV : nothing,
+                T_bracket_low_MeV=isfinite(cep.T_bracket_low_MeV) ? cep.T_bracket_low_MeV : nothing,
+                T_bracket_high_MeV=isfinite(cep.T_bracket_high_MeV) ? cep.T_bracket_high_MeV : nothing,
+                bracket_width_T_MeV=isfinite(cep.bracket_width_T_MeV) ? cep.bracket_width_T_MeV : nothing,
+                result_status=String(cep.result_status),
+                T_last_first_order_MeV=isfinite(cep.T_last_first_order_MeV) ? cep.T_last_first_order_MeV : nothing,
+                muq_last_first_order_MeV=muq_last_first_order_MeV,
+                muB_last_first_order_MeV=isnothing(muq_last_first_order_MeV) ? nothing : 3.0 * muq_last_first_order_MeV,
+                T_first_monotone_MeV=isfinite(cep.T_first_monotone_MeV) ? cep.T_first_monotone_MeV : nothing,
+                ambiguity_width_T_MeV=isfinite(cep.ambiguity_width_T_MeV) ? cep.ambiguity_width_T_MeV : nothing,
+                temperature_resolution_target_MeV=isfinite(cep.temperature_resolution_target_MeV) ? cep.temperature_resolution_target_MeV : nothing,
+            ))
             for row in result.spinodal
                 push!(spinodal_rows, merge((xi=key,), row))
             end
@@ -834,6 +932,9 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 "spinodal_count" => length(result.spinodal),
                 "crossover_count" => length(result.crossover_line),
                 "cep_found" => result.cep.found,
+                "cep_result_status" => String(result.cep.result_status),
+                "cep_T_last_first_order_MeV" => (isfinite(result.cep.T_last_first_order_MeV) ? result.cep.T_last_first_order_MeV : nothing),
+                "cep_T_first_monotone_MeV" => (isfinite(result.cep.T_first_monotone_MeV) ? result.cep.T_first_monotone_MeV : nothing),
                 "cep_uncertainty_T_MeV" => (isfinite(result.cep.uncertainty_T_MeV) ? result.cep.uncertainty_T_MeV : nothing),
                 "grid_convergence_count" => length(get(result.diagnostics, "grid_convergence_records", NamedTuple[])),
             ))

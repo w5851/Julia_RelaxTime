@@ -1,0 +1,12 @@
+path,surface,layer,rows,columns,sha256,keys,missing_numeric_fields,nonfinite_numeric_values,duplicate_keys,legacy_contract
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/maxwell_surface_strict_reference_v1.csv,maxwell,strict,7162,22,510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c,"xi,T_MeV",,0,0,boundary.csv
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/crossover_surface_strict_reference_v1.csv,crossover,strict,1343,12,4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23,"xi,mu_MeV",,0,0,crossover_dense.csv
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/spinodal_surface_strict_reference_v1.csv,spinodal,strict,6886,9,103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182,"xi,T_MeV",,0,0,spinodals.csv
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv,cep_boundary,strict,93,10,3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7,xi,,0,0,cep.csv
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/maxwell_surface_derived_reference_v1.csv,maxwell,derived,12537,17,f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c,"xi,T_MeV",,0,0,boundary.csv
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/crossover_surface_derived_reference_v1.csv,crossover,derived,3135,16,fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e,"xi,mu_MeV",,0,0,crossover_dense.csv
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/spinodal_surface_derived_reference_v1.csv,spinodal,derived,11989,15,2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f,"xi,T_MeV",,0,0,spinodals.csv
+data/reference/pnjl/issue130_phase_reference_v1/derived/tables/cep_boundary_derived_reference_v1.csv,cep_boundary,derived,161,13,252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853,xi,,0,0,cep.csv
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/maxwell_surface_render.csv,maxwell,render,12537,17,f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c,"xi,T_MeV",,0,0,boundary.csv
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/crossover_surface_render.csv,crossover,render,3135,16,fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e,"xi,mu_MeV",,0,0,crossover_dense.csv
+data/reference/pnjl/issue130_phase_reference_v1/render/tables/cep_boundary_render.csv,cep_boundary,render,161,13,252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853,xi,,0,0,cep.csv

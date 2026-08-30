@@ -1,0 +1,58 @@
+{
+  "schema_version": "pnjl_phase_reference_limited_evidence_audit_v1",
+  "generated_at_utc": "2026-08-18T02:48:10.263191+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "production_override": false,
+  "verdict": "raw_curve_coverage_complete_diagnostic_only",
+  "source": {
+    "zenodo_record": "21980679",
+    "archive_url": "https://zenodo.org/api/records/21980679/files/pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip/content",
+    "declared_zip_sha256": "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc",
+    "curve_index_path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\phase_reference_limited_evidence_audit_v1\\external_archive\\curve_index.csv",
+    "curve_index_sha256": "9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590",
+    "central_directory_path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\phase_reference_limited_evidence_audit_v1\\external_archive\\central_directory.bin",
+    "central_directory_sha256": "3f5bf45723da9678385e53771051067715240fffc31f96d56096403ba0c5dab1",
+    "c2_grid_path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+    "c2_grid_sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673",
+    "c2_manifest_path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json",
+    "c2_manifest_sha256": "51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67",
+    "c2_validation_path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\validation_report.json",
+    "c2_validation_sha256": "741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a"
+  },
+  "counts": {
+    "c2_unresolved_rows": 763,
+    "unique_coordinates": 761,
+    "raw_curve_rows_per_coordinate": 1281,
+    "reason_classes": [
+      "classification_transition",
+      "hybrid_stage_c_unresolved",
+      "mixed_reasons",
+      "unresolved_unclassified"
+    ],
+    "valid_curves": 761,
+    "figure_count": 4
+  },
+  "output_files": {
+    "decision.json": "9c426108c361306d454e4a885f9001d024d0f709bd3a028676f0d24a7d74eed3",
+    "execution_log.md": "ba41fdc881b282edfc008f5246296b7d44bb6952348cde471cda20dcfc29fab3",
+    "figures/plot_manifest.json": "b95816a68a090b4392cb05c2d895def49b5ddd10811214bd12dae25a93770e40",
+    "figures/rho_mu_xi_0p5_T_107_raw_audit.png": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c",
+    "figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png": "52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87",
+    "figures/rho_mu_xi_m0p4875_T_55_raw_audit.png": "c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2",
+    "figures/rho_mu_xi_m0p5_T_5_raw_audit.png": "89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7",
+    "README.md": "831f3d168d5f220d7c747453d5142b84b40ff8992bacd400dbff4af46d1d6665",
+    "tables/claim_ledger.csv": "899ce29df457a06f346beb4b83e0f79da8c32955cd57892f9272269574589f1d",
+    "tables/coverage_summary.csv": "481e8c99575d939d1df36fb850593527b23db3d43eddb57601939e7f44c0769a",
+    "tables/raw_curve_audit.csv": "ceae80b058c791fd266b16b3a939f27622013c282fd3fb552bf6039fcc596eb0",
+    "tables/reason_shape_summary.csv": "6d52795dfd7b6336ee908aac1c54c842cef66b02e91b2c7f43ec8e8816ae6259",
+    "tables/shape_summary.csv": "0af5f53764a974fea1a8afd32c024f1fe5404146769941f4d9b41a86e8a87f5a",
+    "tables/shape_threshold_sensitivity.csv": "de56463e47f31c0dd7afc5261536c4e1935c42d246f344cef0e9bb18b2d9cbd6",
+    "tables/target_coordinates.csv": "b5254bcaffcccc3d23b4eb2cc81ccc48d943b7430afee2f410d1ce1ea74c2009"
+  },
+  "generator": {
+    "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\scripts\\analysis\\pnjl\\build_phase_reference_limited_evidence_audit.py",
+    "sha256": "a12c786d4651f40a8dd7f1d3c71e346ce4df9d1fff61674a9a830ffe90efc281"
+  }
+}

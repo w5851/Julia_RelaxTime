@@ -1,0 +1,9 @@
+field,runtime,diagnostic,legacy,runtime_minus_legacy,verdict
+mode_a_phase_kind,crossover,crossover,crossover,,same_contract_value
+boundary_rows,49,75,5,,mode_sensitive
+boundary_xi_used,0,0,0,,same_contract_value
+crossover_xi_used,0,0,0,,same_contract_value
+first_order_xi_used,0,0,0,,same_contract_value
+mode_a_phase_T_MeV,198.2066818967471,198.17900998431992,198.12550509377107,0.08117680297604579,mode_sensitive
+crossover_T_MeV,198.2066818967471,198.17900998431992,198.12550509377107,0.08117680297604579,mode_sensitive
+first_order_T_MeV,131,131,130,1.0,same_candidate_source

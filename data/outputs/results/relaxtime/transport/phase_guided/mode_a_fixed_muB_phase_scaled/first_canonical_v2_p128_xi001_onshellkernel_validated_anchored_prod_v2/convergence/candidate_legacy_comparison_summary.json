@@ -1,0 +1,47 @@
+{
+  "mode_a_fixed_muB_phase_scaled": {
+    "candidate_rows": 910,
+    "legacy_rows": 909,
+    "common_keys": 908,
+    "candidate_only_keys": 2,
+    "legacy_only_keys": 1,
+    "candidate_only_examples": [
+      "900.0|-0.003|1.0",
+      "900.0|0.003|1.0"
+    ],
+    "legacy_only_examples": [
+      "900.0|0.0|1.0"
+    ],
+    "numeric_comparisons": 12712,
+    "phase_field_mismatch_common_keys": 15,
+    "max_abs_delta": 2.1012719067069128,
+    "max_rel_delta": 4.863355089016844,
+    "key_columns": [
+      "muB_MeV",
+      "xi",
+      "alpha_T"
+    ],
+    "legacy_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1\\phase_guided_transport_scan.csv",
+    "legacy_exists": true
+  },
+  "mode_b_fixed_T_sparse_muB": {
+    "candidate_rows": 909,
+    "legacy_rows": 909,
+    "common_keys": 909,
+    "candidate_only_keys": 0,
+    "legacy_only_keys": 0,
+    "candidate_only_examples": [],
+    "legacy_only_examples": [],
+    "numeric_comparisons": 12726,
+    "phase_field_mismatch_common_keys": 47,
+    "max_abs_delta": 13.128644294872513,
+    "max_rel_delta": 8.497595326788558,
+    "key_columns": [
+      "T_MeV",
+      "muB_MeV",
+      "xi"
+    ],
+    "legacy_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1\\phase_guided_transport_scan.csv",
+    "legacy_exists": true
+  }
+}

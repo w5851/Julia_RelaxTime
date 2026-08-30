@@ -1,0 +1,175 @@
+{
+  "actions": {
+    "conclusion": "success",
+    "cost_snapshot_is_final": true,
+    "critical_path_seconds": 568.0,
+    "headSha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "job_count": 11,
+    "raw_total_seconds": 3060.0,
+    "run_id": "31713534102",
+    "run_mode": "aggregate_replay",
+    "runner_minutes": 57,
+    "snapshot_phase": "final",
+    "source": "gh run view",
+    "source_run_completed_success": true,
+    "source_run_id": "31713534102",
+    "source_run_numeric_jobs": 9,
+    "source_run_overall_success": true,
+    "status": "completed",
+    "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/31713534102"
+  },
+  "aggregation_corrections": [],
+  "candidate_policy": "unique_three_crossing_sign_change_v2",
+  "compatibility_warnings": [],
+  "endpoint_mode": true,
+  "endpoint_policy": "three_crossing_endpoint_local_v2",
+  "evidence_state": "final",
+  "expected_calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "file_sha256": {
+    "AUDIT.md": "d534ba70e6cc48c8134a498abdc87cafb8c39d37c2d619bce0ea1e2d04df67b9",
+    "README.md": "e1b02010af0da2c6edc3c3c987d6a5345ecad259b889a44dc4d409b6f33f2220",
+    "actions_costs.csv": "77cb8a9bade5ed910b08098331eaf39fb5ca6a14c500e3ea69ded6ccc193dda6",
+    "cep_accuracy.csv": "e7f830c25ba71f4725e51d6809078487cc1cca2c71c8b3e50bb8bba1b05fd4a4",
+    "claim_ledger.csv": "075f0aece6a51fc68de88c96c8439e1940d628f1b8e8d7b0ecba2f5fb18918b5",
+    "curve_index.csv": "e2ee939eb4b067406c21b9cf29996ac31b838cc8685afdca6ef1b71c45ff822d",
+    "curve_points.csv": "326974ee24932a3ecccce6d3d961c67835f1477250236e01286529a3384e2038",
+    "geometry_accuracy.csv": "caad71e30240f9d6286f50e8c0c800545baab167828346a16ac1a90dbd9b1d32",
+    "method_costs.csv": "ebca59f1f1bff50375d93580b9ed1663db4381e83f821a644b01e2c1c91b8d3f",
+    "oracle_overlay.json": "9dbd1f3a5b7de6302c87bcbe64b02cd54716596fb6766882baee33fa99d57708",
+    "plot_manifest.json": "32cf8b034c3ac4ddc74027faeec491ad5fb7e0e652ff4ff530aa443ecfd40f63",
+    "slice_metrics.csv": "0d37438a077b7f325a61c456a15ae870dfc990bc5c01aec29f7eab84b407d0a9"
+  },
+  "gate": {
+    "automatic_gate_is_not_promotion": true,
+    "classification_errors": [],
+    "compatibility_warnings": [],
+    "coverage_errors": [],
+    "endpoint_errors": [],
+    "expected_anchor_count": 24,
+    "oracle_errors": [],
+    "performance": {
+      "dense_fallback_retry_rate": 0.0,
+      "grouped": {
+        "independent_oracle": {
+          "equilibrium_requests": 30744.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 30744.0,
+          "jacobian_calls": 189358.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 250988.0,
+          "retry_count": 0.0,
+          "runner_seconds": 450.919591311,
+          "unique_solves": 30744.0
+        },
+        "memoized_dense": {
+          "equilibrium_requests": 15384.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 15384.0,
+          "jacobian_calls": 99796.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 130660.0,
+          "retry_count": 0.0,
+          "runner_seconds": 269.499445139,
+          "unique_solves": 15384.0
+        },
+        "production_hybrid": {
+          "equilibrium_requests": 12846.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 12846.0,
+          "jacobian_calls": 87484.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 113332.0,
+          "retry_count": 0.0,
+          "runner_seconds": 289.73531274,
+          "unique_solves": 12845.0
+        }
+      },
+      "hybrid_fallback_retry_rate": 0.0
+    },
+    "performance_errors": [],
+    "scope": "full",
+    "verdict": "full_hybrid_candidate",
+    "workflow_contract_errors": []
+  },
+  "generated_at_utc": "2026-08-13T15:17:27.404820Z",
+  "job_keys": [
+    [
+      -0.5,
+      "independent_oracle"
+    ],
+    [
+      -0.5,
+      "memoized_dense"
+    ],
+    [
+      -0.5,
+      "production_hybrid"
+    ],
+    [
+      0.0,
+      "independent_oracle"
+    ],
+    [
+      0.0,
+      "memoized_dense"
+    ],
+    [
+      0.0,
+      "production_hybrid"
+    ],
+    [
+      0.5,
+      "independent_oracle"
+    ],
+    [
+      0.5,
+      "memoized_dense"
+    ],
+    [
+      0.5,
+      "production_hybrid"
+    ]
+  ],
+  "oracle_overlay": {
+    "applied": [
+      {
+        "T_MeV": 20.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": -0.5
+      },
+      {
+        "T_MeV": 5.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": 0.0
+      }
+    ],
+    "approved_points": [
+      [
+        -0.5,
+        5.0
+      ],
+      [
+        -0.5,
+        20.0
+      ],
+      [
+        0.0,
+        5.0
+      ]
+    ],
+    "deep_manifest_schema": "cep_deep_oracle_v1",
+    "deep_run_id": "31710995191",
+    "errors": [],
+    "expected_calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "oracle_labels_used_for_route": false,
+    "schema_version": "cep_maxwell_endpoint_local_overlay_v1"
+  },
+  "postprocess_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "run_id": "31713534102",
+  "run_mode": "aggregate_replay",
+  "schema_version": "cep_maxwell_endpoint_local_production_shadow_v4",
+  "scope": "full",
+  "source_run_id": "31713534102"
+}

@@ -1,0 +1,5 @@
+claim_id,claim,status,boundary
+solver_free_replay,No equilibrium/Newton solver was called,pass,postprocess-only
+strict_three_cross_candidate,Unique Maxwell candidate requires three-crossing topology,pass,fixed source artifacts
+endpoint_semantics,"rho=0 is recorded as an endpoint observation, not duplicated or hard-coded",pass,finite-T endpoint remains diagnostic
+production_promotion,Candidate is ready for production integration,not_claimed,requires endpoint-local Actions and public-core regression

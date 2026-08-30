@@ -42,17 +42,39 @@ end
         common...,
     )
 
-    @test production.cep.found == research.cep.found
-    @test isapprox(production.cep.T_cep_MeV, research.cep.T_cep_MeV; atol=0.3)
-    @test isapprox(production.cep.mu_cep_MeV, research.cep.mu_cep_MeV; atol=0.3)
+    # Production deliberately uses the stricter request-scoped Maxwell stopping
+    # tolerance derived from its active acceptance gates, while research keeps
+    # the public Maxwell default for compatibility.  The two independent
+    # bisections therefore need not return bit-identical coordinates.  Use a
+    # narrow, contract-derived envelope (twice the largest active stopping
+    # tolerance) for coordinate drift; status, boundary cardinality and the
+    # CEP evidence remain exact semantic checks below.
+    production_solver_tol = Models._production_maxwell_solver_tol(
+        Models.ProductionPipelineConfig(
+            area_tol_good=1e-4,
+            rho_geometry_convergence=false,
+        ),
+    )
+    research_solver_tol = Models.DEFAULT_AREA_TOL
+    mode_coordinate_envelope = 2 * max(production_solver_tol, research_solver_tol)
+    @test production_solver_tol == 1e-5
+    @test research_solver_tol == 1e-4
+    @test mode_coordinate_envelope == 2e-4
+
+    @test production.cep.result_status == research.cep.result_status
+    @test production.cep.result_status == :ambiguous
+    @test isapprox(production.cep.T_last_first_order_MeV, research.cep.T_last_first_order_MeV; atol=0.3)
 
     @test length(production.first_order_boundary) == length(research.first_order_boundary)
     for (prod_row, ref_row) in zip(production.first_order_boundary, research.first_order_boundary)
         @test prod_row.converged == ref_row.converged
         @test isapprox(prod_row.T_MeV, ref_row.T_MeV; atol=1e-10)
-        @test isapprox(prod_row.mu_transition_MeV, ref_row.mu_transition_MeV; atol=1e-10)
-        @test isapprox(prod_row.rho_hadron, ref_row.rho_hadron; atol=1e-10)
-        @test isapprox(prod_row.rho_quark, ref_row.rho_quark; atol=1e-10)
+        @test isapprox(prod_row.mu_transition_MeV, ref_row.mu_transition_MeV;
+            atol=mode_coordinate_envelope)
+        @test isapprox(prod_row.rho_hadron, ref_row.rho_hadron;
+            atol=mode_coordinate_envelope)
+        @test isapprox(prod_row.rho_quark, ref_row.rho_quark;
+            atol=mode_coordinate_envelope)
     end
 
     @test length(production.crossover_line) == length(research.crossover_line)

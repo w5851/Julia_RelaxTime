@@ -1,0 +1,254 @@
+{
+  "schema_version": "pnjl_phase_reference_current_state_freeze_v1",
+  "generated_at_utc": "2026-08-18T06:19:13Z",
+  "solver_called_by_freeze": false,
+  "reference_write": false,
+  "transport_started": false,
+  "calculation": {
+    "current_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "historical_c0_c1_c2_sha": "ffa816df0a145f73d7490db1ed9ff10c92e017a4",
+    "current_c2_source_run": "31862752226",
+    "current_c2_postprocess_sha": "fd359e792a89beb5ab12349bba761dc58ee16761",
+    "full_shadow_aggregate_run": "31714535418",
+    "cep_manual_overlay_run": "31999149922",
+    "targeted_regression_replay_run": "31944988128"
+  },
+  "repo": {
+    "worktree": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit",
+    "branch": "codex/issue130-phase-reference-limited-evidence-audit",
+    "head": "e25047e871cca730e14a9783aee63fbff42a76dc",
+    "dirty": true,
+    "status_lines": [
+      "M config/governance/task_tracks.toml",
+      " M docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
+      " M docs/dev/active/2026-08-15_论文级绘图SOP与分层迁移任务单.md",
+      " M docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md",
+      " M docs/guides/sop/workflows/figure_production.md",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v1/",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v2/",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v3/",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v4_visual_closed/",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v4_visual_closed_display16/",
+      "?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/",
+      "?? docs/analysis/pnjl/phase_reference_current_state_freeze_v1/",
+      "?? docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md",
+      "?? scripts/analysis/pnjl/build_phase_reference_current_state_freeze.py",
+      "?? scripts/analysis/pnjl/plot_c2_phase_surfaces_diagnostic.py"
+    ]
+  },
+  "source_validation": {
+    "c2_artifact_summary": {
+      "artifacts": {
+        "boundary": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+          "row_count": 6886
+        },
+        "cep": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+          "row_count": 93
+        },
+        "crossover": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+          "row_count": 1488
+        },
+        "crossover_meta": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.meta.json"
+        },
+        "grid_convergence": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+          "row_count": 22791
+        },
+        "manifest": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json"
+        },
+        "phase_diagnostics": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json",
+          "record_count": 93,
+          "sha256": "adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe"
+        },
+        "spinodals": {
+          "path": "data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+          "row_count": 6886
+        }
+      },
+      "config": {
+        "tag": "issue130_stagec_density_v2_c2_grid_tight_20260813",
+        "rho_refinement_policy": "rho_support_hybrid",
+        "rho_hybrid_endpoint_policy": "three_crossing_endpoint_local_v2",
+        "rho_support_targeted_cap": 12,
+        "rho_support_fine_step": 0.025,
+        "rho_position_tol_MeV": 0.025,
+        "rho_density_tol": 0.0025,
+        "rho_maxwell_area_tol": 5e-05,
+        "temperature_max_refine_level": 3,
+        "xi_max_refine_level": 3,
+        "temperature_resolution_target_MeV": 0.1,
+        "cep_tol_MeV": 0.1
+      },
+      "provenance": {
+        "calculation_git_commit": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+        "postprocess_git_commit": "fd359e792a89beb5ab12349bba761dc58ee16761",
+        "source_workflow_run_id": "31862752226"
+      },
+      "grid_convergence": {
+        "record_count": 22791,
+        "unconverged_count": 5424
+      },
+      "status_counts": {
+        "ambiguous_near_critical": 359,
+        "confirmed_first_order": 6886,
+        "confirmed_monotone": 2636
+      },
+      "stage_counts": {
+        "stage_a": 2636,
+        "stage_b": 4915,
+        "stage_c": 1645,
+        "stage_c_endpoint_local_v2": 685
+      },
+      "telemetry_status": "available",
+      "unavailable_record_count": 0
+    },
+    "c2_validation_summary": {
+      "tag": "issue130_stagec_density_v2_c2_grid_tight_20260813",
+      "git_commit": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "calculation_git_commit": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "postprocess_git_commit": "fd359e792a89beb5ab12349bba761dc58ee16761",
+      "source_workflow_run_id": "31862752226",
+      "generated_at_utc": "2026-08-15T03:49:24Z",
+      "crossover_rows": 1488,
+      "converged_rows": 1488,
+      "grid_convergence_rows": 22791,
+      "grid_unconverged_rows": 5424
+    },
+    "phase_diagnostics_status_counts": {
+      "ambiguous_near_critical": 359,
+      "confirmed_first_order": 6886,
+      "confirmed_monotone": 2636
+    },
+    "phase_diagnostics_stage_counts": {
+      "stage_a": 2636,
+      "stage_b": 4915,
+      "stage_c": 1645,
+      "stage_c_endpoint_local_v2": 685
+    },
+    "cep_overlay_complete": true,
+    "targeted_classification_match": false,
+    "targeted_finite_and_converged": true
+  },
+  "sources": [
+    {
+      "id": "boundary",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748",
+      "bytes": 727970
+    },
+    {
+      "id": "crossover",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c",
+      "bytes": 194321
+    },
+    {
+      "id": "cep",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef",
+      "bytes": 10364
+    },
+    {
+      "id": "grid_convergence",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673",
+      "bytes": 2539751
+    },
+    {
+      "id": "spinodals",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8",
+      "bytes": 670175
+    },
+    {
+      "id": "phase_diagnostics",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json",
+      "sha256": "adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe",
+      "bytes": 231945
+    },
+    {
+      "id": "c2_manifest",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json",
+      "sha256": "51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67",
+      "bytes": 91093
+    },
+    {
+      "id": "c2_validation",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\validation_report.json",
+      "sha256": "741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a",
+      "bytes": 42143
+    },
+    {
+      "id": "cep_overlay",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_manual_bisection_audit_v2_31999149922\\author_decision_overlay_v2.json",
+      "sha256": "f2a58c9c2db63c21b40f4e0bbc1f8858ab861149ce24942ae2b4046e17ab508d",
+      "bytes": 2381
+    },
+    {
+      "id": "cep_acceptance",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_manual_bisection_audit_v2_31999149922\\cep_bracket_acceptance_v2.csv",
+      "sha256": "4343c323b85fc6f165ec53766c873451503507fd00c3720e542bbde24652ab50",
+      "bytes": 1036
+    },
+    {
+      "id": "targeted_manifest",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c2_targeted_closure_replay_31944988128\\c2-targeted-closure-issue130_c2_targeted_closure_v1_20260816_r2_replay4-regression_curves\\manifest.json",
+      "sha256": "2d67a435391b68f362fab647e9ed6689c428a68602ce6203def7fe40bd171f4a",
+      "bytes": 20026
+    },
+    {
+      "id": "targeted_overlay",
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c2_targeted_closure_replay_31944988128\\c2-targeted-closure-issue130_c2_targeted_closure_v1_20260816_r2_replay4-regression_curves\\classification_overlay.csv",
+      "sha256": "9331ad665984d3770b53a04422c850391b479d599442b09605baef9badfa80b2",
+      "bytes": 2438
+    },
+    {
+      "id": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
+      "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\docs\\analysis\\pnjl_cep_endpoint_local_production_shadow_v4_20260813\\manifest.json",
+      "sha256": "9ca83fadd56d8cccbe95716b84353b1552811fbb1d8562016a8a770a9017c090",
+      "bytes": 4399
+    },
+    {
+      "id": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
+      "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\docs\\analysis\\pnjl\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\manifest.json",
+      "sha256": "d37ba8dea91c4387bb8d7eeacf4b1ed6f092d995f35b1f119c6fe46d9c266fed",
+      "bytes": 5946
+    },
+    {
+      "id": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
+      "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\docs\\analysis\\pnjl\\phase_reference_limited_evidence_audit_v1\\manifest.json",
+      "sha256": "5bb2de14f132fbc8926eb2b9ec326f1709967a94f55a01a5401ab8f4e4fe2b54",
+      "bytes": 4217
+    },
+    {
+      "id": "docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json",
+      "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\docs\\analysis\\pnjl\\c2_convergence_audit_v1\\manifest.json",
+      "sha256": "a1b8ae705a0810453bdf42f8f328e7b4dd4bf36da4449930f79cac84d3b5b051",
+      "bytes": 6203
+    },
+    {
+      "id": "config/governance/task_tracks.toml",
+      "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\config\\governance\\task_tracks.toml",
+      "sha256": "15224ab94f87b5c9c859486c44cc7a474496547a38c8f5c158012d1f8555b47a",
+      "bytes": 6833
+    }
+  ],
+  "output_files": {
+    "figures/plot_manifest.json": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619",
+    "README.md": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6",
+    "tables/c2_summary.csv": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f",
+    "tables/cep_manual_overlay.csv": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f",
+    "tables/claim_ledger.csv": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff",
+    "tables/gate_status_matrix.csv": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818",
+    "tables/input_validation.csv": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6",
+    "tables/targeted_regression_status.csv": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3"
+  },
+  "verdict": "diagnostic_state_frozen_promotion_blocked",
+  "next_action": "solver-free CEP mu-direction target-list/cost preflight"
+}

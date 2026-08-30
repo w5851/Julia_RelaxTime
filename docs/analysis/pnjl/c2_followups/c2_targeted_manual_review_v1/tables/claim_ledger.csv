@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,notes
+curve_finiteness,Nine source targets have finite/converged hybrid and oracle rho-mu curves.,supported,tables/curve_points.csv; tables/point_summary.csv,Validated from source manifests and every curve row.
+oracle_first_order,The independent full-fine oracle reports confirmed_first_order for all nine targets.,supported,tables/point_summary.csv,Candidate count and crossing count are retained for author inspection.
+hybrid_certificate,The production hybrid is not a closed geometry certificate at all nine targets.,supported,tables/point_summary.csv,Hybrid remains ambiguous; no label is overwritten.
+cep_three_failures,Three C2 CEP brackets exceed the 0.1 MeV gate.,supported,tables/cep_current_failures.csv,The package identifies the midpoint requests but does not claim them solved.
+manual_decision,Author review is required before any oracle-backed overlay or promotion decision.,author_check,README.md; figures/nine_point_local_overview.png,This package is diagnostic-only and does not write reference data.

@@ -1,0 +1,5 @@
+claim_id,claim,status,boundary
+tolerance_certificate,five revalidated anchors have first-order Maxwell/geometry certificates,pass,fixed anchors only
+classification,Stage-C replay satisfies all 24-anchor classification gates,inconclusive,solver-free replay
+cost,simulated Stage-A/B/C union is below memoized dense,pass,runner telemetry requires Actions
+promotion,replay authorizes production/reference promotion,not_claimed,targeted/full shadow and author review required

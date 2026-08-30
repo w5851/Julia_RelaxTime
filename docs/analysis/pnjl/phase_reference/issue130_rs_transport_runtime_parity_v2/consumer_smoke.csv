@@ -1,0 +1,4 @@
+mode,source_kind,boundary_rows,boundary_xi_used,boundary_first_T_MeV,boundary_first_muq_MeV,boundary_muB_CEP_MeV,crossover_T_MeV,mode_a_phase_kind,mode_a_phase_T_MeV,first_order_T_MeV,solver_called
+runtime,candidate,49,0,41,357.9124998225613,873.5862261137158,198.2066818967471,crossover,198.2066818967471,131,False
+diagnostic,candidate,75,0,5,361.0392798318283,873.5862261137158,198.17900998431992,crossover,198.17900998431992,131,False
+legacy,legacy,5,0,50,356.4183284099421,877.1423865705507,198.12550509377107,crossover,198.12550509377107,130,False

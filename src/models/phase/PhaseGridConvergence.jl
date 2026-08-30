@@ -244,16 +244,32 @@ function _phase_result_midpoint_error(
         comparable_count += 1
     end
 
-    if left.cep.found && midpoint.cep.found && right.cep.found
+    cep_statuses = (left.cep.result_status, midpoint.cep.result_status, right.cep.result_status)
+    if all(status -> status == :resolved, cep_statuses)
         position_error = max(position_error,
             _linear_midpoint_error(midpoint.cep.T_cep_MeV, left.cep.T_cep_MeV, right.cep.T_cep_MeV),
             _linear_midpoint_error(midpoint.cep.mu_cep_MeV, left.cep.mu_cep_MeV, right.cep.mu_cep_MeV))
         comparable_count += 1
+    elseif all(status -> status == :ambiguous, cep_statuses)
+        T_last = (left.cep.T_last_first_order_MeV, midpoint.cep.T_last_first_order_MeV, right.cep.T_last_first_order_MeV)
+        T_first = (left.cep.T_first_monotone_MeV, midpoint.cep.T_first_monotone_MeV, right.cep.T_first_monotone_MeV)
+        if all(isfinite, T_last)
+            position_error = max(position_error, _linear_midpoint_error(T_last[2], T_last[1], T_last[3]))
+            comparable_count += 1
+        end
+        if all(isfinite, T_first)
+            position_error = max(position_error, _linear_midpoint_error(T_first[2], T_first[1], T_first[3]))
+            comparable_count += 1
+        end
+    elseif all(status -> status == :not_found, cep_statuses)
+        comparable_count += 1
+    else
+        return PhaseGeometryError(reason="cep_result_status_changed:$(join(string.(cep_statuses), ","))")
     end
 
     if comparable_count == 0
         all_empty = all(result -> isempty(result.first_order_boundary) && isempty(result.spinodal) &&
-                                  isempty(result.crossover_line) && !result.cep.found,
+                                  isempty(result.crossover_line) && result.cep.result_status == :not_found,
                         (left, midpoint, right))
         return PhaseGeometryError(
             comparable=all_empty,

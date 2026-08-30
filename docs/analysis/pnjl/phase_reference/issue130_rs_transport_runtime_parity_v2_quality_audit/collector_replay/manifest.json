@@ -1,0 +1,287 @@
+{
+  "schema_version": "pnjl_issue130_rs_numerical_pilot_v1",
+  "verdict": "pilot_pair_complete_with_common_quality_warnings_diagnostic_only",
+  "diagnostic_only": true,
+  "repo_sha": "27e9642d431ba7afd845f2b187f77c0fbbe3be4d",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "run_id": "32684074876",
+  "solver_called": true,
+  "nominal_requested_points": 18,
+  "effective_planned_points": 19,
+  "plan_expansion_reason": "direct_coexistence replaces xi=0 with certified +/- coexistence-side points for one first-order anchor",
+  "reference_modes": {
+    "candidate_runtime": {
+      "reference_mode": "candidate_runtime",
+      "result_path": "results/candidate_runtime/phase_guided_transport_scan.csv",
+      "result_sha256": "0e853253af2b471cab3243562fbf9d3c3940fcfcc7c1ea61e0e935bef6fc4e48",
+      "effective_config_sha256": "7dc846908028bd7a1566db90f301178b28ebb671cb14a82a9869f50a2017bd08",
+      "run_manifest_sha256": "0ffbcb40f4ddac889e79e232cd23f1505a124898c6832744d0b37a954053be38",
+      "pilot_metadata_sha256": "49d567a54d246e2ffff3e87b2c8870eb8ad4aee211ac84433dd485bc8d746586",
+      "status": "0",
+      "exit_success": true,
+      "row_count": 19,
+      "expected_points": 19,
+      "point_count_matches": true,
+      "plan_row_count": 19,
+      "plan_point_count_matches": true,
+      "failed_point_count": 0,
+      "missing_fields": [],
+      "duplicate_key_count": 0,
+      "duplicate_keys": [],
+      "plan_duplicate_key_count": 0,
+      "plan_duplicate_keys": [],
+      "nonfinite_count": 0,
+      "nonfinite_keys": [],
+      "negative_transport_count": 0,
+      "negative_transport_keys": [],
+      "nonconverged_count": 0,
+      "nonconverged_keys": [],
+      "invalid_quality_count": 5,
+      "invalid_quality_keys": [
+        [
+          "900.0",
+          "-0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.0"
+        ],
+        [
+          "900.0",
+          "-0.003",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.0"
+        ],
+        [
+          "900.0",
+          "-0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ],
+        [
+          "900.0",
+          "0.0",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ],
+        [
+          "900.0",
+          "0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ]
+      ],
+      "quality_warning_reasons": {
+        "900.0|-0.5|mode_a_fixed_muB_phase_scaled|1.0": "tau_u_ubar_ratio_high",
+        "900.0|-0.003|mode_a_fixed_muB_phase_scaled|1.0": "tau_u_ubar_ratio_high",
+        "900.0|-0.5|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high",
+        "900.0|0.0|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high",
+        "900.0|0.5|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high"
+      },
+      "solver_called": true,
+      "pilot_metadata": {
+        "schema_version": "pnjl_issue130_rs_numerical_pilot_v1",
+        "reference_mode": "candidate_runtime",
+        "phase_reference_mode": "runtime",
+        "workflow_sha": "27e9642d431ba7afd845f2b187f77c0fbbe3be4d",
+        "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+        "source_run_id": "32684074876",
+        "tag": "issue130_rs_numerical_pilot_v1_20260824",
+        "runner_exit_code": 0,
+        "elapsed_seconds": 315,
+        "solver_called": true,
+        "production_write": false,
+        "reference_write": false,
+        "plots": false
+      },
+      "phase_reference_mode": "runtime",
+      "phase_reference_source": "candidate",
+      "phase_reference_summary": {
+        "candidate_layer_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+        "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+        "candidate_row_counts": {
+          "boundary": 3091,
+          "cep": 90,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "certified_row_counts": {
+          "boundary": 3091,
+          "cep": 90,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "fallback_enabled": true,
+        "fallback_reason": "candidate_key_absent_or_uncertified",
+        "fallback_row_counts": {
+          "boundary": 35,
+          "cep": 1,
+          "crossover": 315,
+          "spinodals": 31
+        },
+        "legacy_manifest_reference_status": "legacy",
+        "legacy_row_counts": {
+          "boundary": 48,
+          "cep": 11,
+          "crossover": 336,
+          "spinodals": 57
+        },
+        "manifest_reference_status": "candidate",
+        "row_counts": {
+          "boundary": 7162,
+          "cep": 93,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "runtime_view": "certified_candidate_with_legacy_fallback",
+        "schema_version": "pnjl_issue130_phase_reference_adapter_v1",
+        "source_root": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/calculation/data/reference/pnjl/issue130_phase_reference_v1",
+        "uncertified_rows": 4074
+      },
+      "run_id": "20260824T025259_c650f99e"
+    },
+    "legacy": {
+      "reference_mode": "legacy",
+      "result_path": "results/legacy/phase_guided_transport_scan.csv",
+      "result_sha256": "0966d3497d91d881538e08727218591a44cf22c4a3849f94b84980a86aaf868f",
+      "effective_config_sha256": "d25a7eb114972dd8cb9ed7e2a571f45eacec746ec3a505f642ba4db16f36c993",
+      "run_manifest_sha256": "8fc858be4d3ea7351a6a14a6b20bfbeea76898d3259fb94a503af386686d6c38",
+      "pilot_metadata_sha256": "03caa4d91f7d09e98113c9b58fd04c3ccf45b8613037e2334bcc0dc3006c038f",
+      "status": "0",
+      "exit_success": true,
+      "row_count": 19,
+      "expected_points": 19,
+      "point_count_matches": true,
+      "plan_row_count": 19,
+      "plan_point_count_matches": true,
+      "failed_point_count": 0,
+      "missing_fields": [],
+      "duplicate_key_count": 0,
+      "duplicate_keys": [],
+      "plan_duplicate_key_count": 0,
+      "plan_duplicate_keys": [],
+      "nonfinite_count": 0,
+      "nonfinite_keys": [],
+      "negative_transport_count": 0,
+      "negative_transport_keys": [],
+      "nonconverged_count": 0,
+      "nonconverged_keys": [],
+      "invalid_quality_count": 5,
+      "invalid_quality_keys": [
+        [
+          "900.0",
+          "-0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.0"
+        ],
+        [
+          "900.0",
+          "-0.003",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.0"
+        ],
+        [
+          "900.0",
+          "-0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ],
+        [
+          "900.0",
+          "0.0",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ],
+        [
+          "900.0",
+          "0.5",
+          "mode_a_fixed_muB_phase_scaled",
+          "1.2"
+        ]
+      ],
+      "quality_warning_reasons": {
+        "900.0|-0.5|mode_a_fixed_muB_phase_scaled|1.0": "tau_u_ubar_ratio_high",
+        "900.0|-0.003|mode_a_fixed_muB_phase_scaled|1.0": "tau_u_ubar_ratio_high",
+        "900.0|-0.5|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high",
+        "900.0|0.0|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high",
+        "900.0|0.5|mode_a_fixed_muB_phase_scaled|1.2": "tau_u_ubar_ratio_high"
+      },
+      "solver_called": true,
+      "pilot_metadata": {
+        "schema_version": "pnjl_issue130_rs_numerical_pilot_v1",
+        "reference_mode": "legacy",
+        "phase_reference_mode": "legacy",
+        "workflow_sha": "27e9642d431ba7afd845f2b187f77c0fbbe3be4d",
+        "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+        "source_run_id": "32684074876",
+        "tag": "issue130_rs_numerical_pilot_v1_20260824",
+        "runner_exit_code": 0,
+        "elapsed_seconds": 314,
+        "solver_called": true,
+        "production_write": false,
+        "reference_write": false,
+        "plots": false
+      },
+      "phase_reference_mode": "legacy",
+      "phase_reference_source": "legacy",
+      "phase_reference_summary": {
+        "candidate_layer_manifest_sha256": "",
+        "candidate_manifest_sha256": "",
+        "fallback_enabled": false,
+        "manifest_reference_status": "legacy",
+        "row_counts": {
+          "boundary": 48,
+          "cep": 11,
+          "crossover": 336,
+          "spinodals": 57
+        },
+        "runtime_view": "legacy",
+        "schema_version": "legacy",
+        "source_root": "",
+        "uncertified_rows": 0
+      },
+      "run_id": "20260824T025815_ddc3bdeb"
+    }
+  },
+  "common_row_count": 19,
+  "common_quality_warning_count": 5,
+  "common_quality_warning_keys": [
+    [
+      "900.0",
+      "-0.003",
+      "mode_a_fixed_muB_phase_scaled",
+      "1.0"
+    ],
+    [
+      "900.0",
+      "-0.5",
+      "mode_a_fixed_muB_phase_scaled",
+      "1.0"
+    ],
+    [
+      "900.0",
+      "-0.5",
+      "mode_a_fixed_muB_phase_scaled",
+      "1.2"
+    ],
+    [
+      "900.0",
+      "0.0",
+      "mode_a_fixed_muB_phase_scaled",
+      "1.2"
+    ],
+    [
+      "900.0",
+      "0.5",
+      "mode_a_fixed_muB_phase_scaled",
+      "1.2"
+    ]
+  ],
+  "nonblocking_quality_reasons": [
+    "tau_u_ubar_ratio_high"
+  ],
+  "hard_failures": [],
+  "non_goals": [
+    "no production/reference write",
+    "no legacy deletion",
+    "no automatic numerical drift acceptance"
+  ]
+}

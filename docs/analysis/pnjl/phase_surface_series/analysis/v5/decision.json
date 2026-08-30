@@ -1,0 +1,40 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v5",
+  "generated_at_utc": "2026-08-18T04:41:29.012930+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "verdict": "diagnostic_no_triangulation_ready",
+  "promotion_effect": "none",
+  "counts": {
+    "boundary_rows_plotted": 6886,
+    "crossover_rows_plotted": 1157,
+    "crossover_rows_excluded": 331,
+    "cep_brackets_projected": 93,
+    "unresolved_grid_rows": 5424,
+    "maxwell_grid_status_counts": {
+      "rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged": 289,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged": 356,
+      "rho:geometry_tolerance_exceeded": 742,
+      "automatic_grid_pass": 2815,
+      "temperature:interpolation_tolerance_exceeded": 427,
+      "rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded": 23,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 137,
+      "rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 123,
+      "rho:geometry_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 344,
+      "xi:interpolation_tolerance_exceeded": 1198,
+      "temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 179,
+      "rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 71,
+      "rho:rho_geometry_not_converged": 146,
+      "rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 14,
+      "rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded": 14,
+      "rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 4,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 2,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded": 2
+    },
+    "unresolved_diagnostic_summary_counts": {
+      "partial_candidate_diagnostics": 87,
+      "complete_candidate_diagnostics": 5337
+    }
+  }
+}

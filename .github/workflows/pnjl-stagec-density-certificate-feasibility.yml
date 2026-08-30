@@ -1,0 +1,294 @@
+name: PNJL Stage-C Density Certificate Feasibility
+run-name: Stage-C density feasibility / ${{ inputs.mode || 'numerical' }} / ${{ inputs.tag || 'v1' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run numerical matrix or replay a completed numerical source run"
+        required: false
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      calculation_ref:
+        description: "Immutable 40-character calculation SHA"
+        required: true
+        type: string
+      source_run_id:
+        description: "Completed numerical run id for aggregate replay"
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        description: "Calculation SHA recorded by the source run; must match calculation_ref"
+        required: false
+        default: ""
+        type: string
+      rerun_failed_only:
+        description: "Run only the job keys listed in failed_job_keys"
+        required: false
+        default: false
+        type: boolean
+      failed_job_keys:
+        description: "Comma-separated method/xi keys, for example production_hybrid/-0.5"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Versioned diagnostic artifact tag"
+        required: false
+        default: "cep_hybrid_stagec_density_certificate_v1"
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  numerical:
+    if: ${{ inputs.mode != 'aggregate_replay' }}
+    name: "density certificate xi=${{ matrix.xi }} method=${{ matrix.method }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        xi: ["-0.5", "-0.35", "-0.25", "-0.2", "-0.15", "-0.1", "0.0", "0.3", "0.35", "0.5"]
+        method: [production_hybrid, memoized_dense, independent_oracle]
+    steps:
+      - name: Select matrix job for failed-only rerun
+        id: select_job
+        shell: bash
+        env:
+          JOB_KEY: ${{ matrix.method }}/${{ matrix.xi }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$JOB_KEY,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping $JOB_KEY for failed-only rerun."
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation ref
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "calculation_ref must be a 40-character immutable SHA" >&2
+            exit 1
+          }
+
+      - name: Checkout workflow and postprocess SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow checkout SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$WORKFLOW_HEAD_SHA"
+
+      - name: Materialize calculation SHA worktree and inject runner
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_stagec_density_certificate_job.jl calculation/scripts/analysis/
+
+      - name: Setup Julia
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-stagec-density-certificate-v1
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run one density-certificate numerical job
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          METHOD: ${{ matrix.method }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "artifacts/${METHOD}/xi_${XI}"
+          cd calculation
+          julia --project=. scripts/analysis/pnjl_stagec_density_certificate_job.jl \
+            --xi "$XI" \
+            --method "$METHOD" \
+            --tag "$TAG" \
+            --calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --output-dir "../artifacts/${METHOD}/xi_${XI}"
+
+      - name: Upload density-certificate numerical artifact
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: stagec-density-certificate-${{ matrix.method }}-xi-${{ matrix.xi }}
+          path: artifacts/${{ matrix.method }}/xi_${{ matrix.xi }}
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    if: ${{ always() && inputs.mode != 'aggregate_replay' && inputs.rerun_failed_only != true }}
+    name: aggregate Stage-C density feasibility
+    needs: [numerical]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Download numerical artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stagec-density-certificate-*
+          path: job-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Replay and gate Stage-C feasibility
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+        run: |
+          set +e
+          python scripts/analysis/pnjl_stagec_density_certificate_feasibility.py \
+            --input-dir job-artifacts \
+            --output-dir aggregate \
+            --expected-calculation-sha "$CALCULATION_REF" \
+            --expected-source-postprocess-sha "$POSTPROCESS_SHA" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --audit-dir docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
+          echo "feasibility_exit_status=$status" >> "$GITHUB_STEP_SUMMARY"
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Stage-C feasibility evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stagec-density-certificate-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate_replay:
+    if: ${{ inputs.mode == 'aggregate_replay' }}
+    name: replay Stage-C density feasibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs and source run
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: w5851/Julia_RelaxTime
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ -n "$SOURCE_RUN_ID" ]] || { echo "source_run_id is required" >&2; exit 1; }
+          if [[ -n "$SOURCE_CALCULATION_SHA" && "$SOURCE_CALCULATION_SHA" != "$CALCULATION_REF" ]]; then
+            echo "source_calculation_sha must match calculation_ref" >&2
+            exit 1
+          fi
+          payload="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,jobs,headSha)"
+          test "$(echo "$payload" | jq -r .status)" = completed
+          source_conclusion="$(echo "$payload" | jq -r .conclusion)"
+          numeric_jobs="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("density certificate xi="))] | length')"
+          test "$numeric_jobs" = 30
+          numeric_failures="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("density certificate xi=")) | select(.conclusion != "success")] | length')"
+          test "$numeric_failures" = 0
+          echo "SOURCE_POSTPROCESS_SHA=$(echo "$payload" | jq -r .headSha)" >> "$GITHUB_ENV"
+          echo "SOURCE_RUN_CONCLUSION=$source_conclusion" >> "$GITHUB_ENV"
+          echo "Source run conclusion: $source_conclusion (numeric matrix complete; aggregate replay allowed)."
+
+      - name: Checkout postprocess head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Download source numerical artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: gh run download "$SOURCE_RUN_ID" --pattern 'stagec-density-certificate-*' --dir source-artifacts
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Replay source evidence with dual provenance
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+        run: |
+          set +e
+          python scripts/analysis/pnjl_stagec_density_certificate_feasibility.py \
+            --input-dir source-artifacts \
+            --output-dir aggregate \
+            --expected-calculation-sha "$CALCULATION_REF" \
+            --expected-source-postprocess-sha "$SOURCE_POSTPROCESS_SHA" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --audit-dir docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
+          echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "source_run_conclusion=$SOURCE_RUN_CONCLUSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "feasibility_exit_status=$status" >> "$GITHUB_STEP_SUMMARY"
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload replayed Stage-C feasibility evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stagec-density-certificate-${{ inputs.tag }}-aggregate-replay
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90

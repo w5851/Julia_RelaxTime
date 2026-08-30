@@ -1,6 +1,6 @@
 {
   "format": "phase_guided_transport_convergence_manifest_v1",
-  "case_slug": "first_canonical_v1_p128_validated_anchored_prod_v1",
+  "case_slug": "first_canonical_v1_p128_xi005_validated_anchored_prod_v1",
   "date": "2026-06-10",
   "verdict": "production-grade",
   "source_commit": "c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f",

@@ -10,8 +10,8 @@ PNJL 相图绘制脚本
     python scripts/pnjl/plot_phase_diagram.py [options]
 
 选项：
-    --boundary PATH   相变线数据文件 (默认 data/reference/pnjl/boundary.csv)
-    --cep PATH        CEP 数据文件 (默认 data/reference/pnjl/cep.csv)
+    --boundary PATH   相变线数据文件（显式旧 schema 输入）
+    --cep PATH        CEP 数据文件（显式旧 schema 输入）
     --xi VALUE        要绘制的 ξ 值，可多次指定 (默认绘制所有)
     --output-dir DIR  输出目录 (默认 data/outputs/figures/pnjl)
     --format FMT      输出格式 png/pdf/svg (默认 png)
@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -50,10 +51,19 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
-DEFAULT_BOUNDARY_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
-DEFAULT_CEP_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "cep.csv"
-DEFAULT_SPINODAL_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "spinodals.csv"
-DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_phase_reference
+
+
+DEFAULT_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
+DEFAULT_PHASE_REFERENCE_LAYER = "accepted"
+DEFAULT_ACCEPTED_TABLE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT / "accepted" / "tables"
+DEFAULT_BOUNDARY_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "maxwell_surface_accepted_phase_map_v1.csv"
+DEFAULT_CEP_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "cep_boundary_accepted_phase_map_v1.csv"
+DEFAULT_SPINODAL_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "spinodal_surface_accepted_phase_map_v1.csv"
+DEFAULT_CROSSOVER_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "crossover_surface_accepted_phase_map_v1.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl"
 
 
@@ -95,6 +105,65 @@ class CrossoverPoint:
     T_deconf_MeV: Optional[float]  # 退禁闭 crossover 温度
     rho_chiral: Optional[float]    # 手征 crossover 密度
     rho_deconf: Optional[float]    # 退禁闭 crossover 密度
+
+
+def load_candidate_phase_data(reference_root: Path, layer: str | None = None) -> tuple[
+    List[BoundaryPoint], List[CEPPoint], List[SpinodalPoint], List[CrossoverPoint], dict
+]:
+    """Load an explicit Issue #130 layer for diagnostic plotting.
+
+    This path keeps the candidate's unresolved/interpolated status in the
+    returned diagnostics.  The v2 ``accepted`` layer is the default for
+    downstream phase-map consumers; ``strict`` remains an explicit audit view.
+    """
+
+    selected_layer = layer or default_downstream_layer(reference_root)
+    bundle = load_phase_reference(reference_root, layer=selected_layer)
+    boundary_points = [
+        BoundaryPoint(
+            xi=row["xi"],
+            T_MeV=row["T_MeV"],
+            mu_coex_MeV=row["muq_MeV"],
+            rho_hadron=row["rho_hadron"],
+            rho_quark=row["rho_quark"],
+        )
+        for row in bundle.tables.get("boundary", ())
+    ]
+    cep_points = [
+        CEPPoint(
+            xi=row["xi"],
+            T_CEP_MeV=row["T_midpoint_MeV"],
+            mu_CEP_MeV=row["muq_CEP_proxy_MeV"],
+        )
+        for row in bundle.tables.get("cep", ())
+    ]
+    spinodal_points = [
+        SpinodalPoint(
+            xi=row["xi"],
+            T_MeV=row["T_MeV"],
+            mu_spinodal_low_MeV=row["muq_spinodal_hadron_MeV"],
+            mu_spinodal_high_MeV=row["muq_spinodal_quark_MeV"],
+            rho_spinodal_hadron=row["rho_spinodal_hadron"] or 0.0,
+            rho_spinodal_quark=row["rho_spinodal_quark"] or 0.0,
+        )
+        for row in bundle.tables.get("spinodals", ())
+    ]
+    # The candidate contains one physical crossover family.  Map it to the
+    # historical chiral slot and leave the separate deconfinement slot empty;
+    # no second physical surface is invented by the adapter.
+    crossover_points = [
+        CrossoverPoint(
+            xi=row["xi"],
+            mu_MeV=row["muq_MeV"],
+            T_chiral_MeV=row["T_MeV"],
+            T_deconf_MeV=None,
+            rho_chiral=row["rho"],
+            rho_deconf=None,
+        )
+        for row in bundle.tables.get("crossover", ())
+        if row.get("physical_region", "") in ("", "crossover_below_CEP")
+    ]
+    return boundary_points, cep_points, spinodal_points, crossover_points, dict(bundle.diagnostics)
 
 
 def load_boundary_data(path: Path) -> List[BoundaryPoint]:
@@ -586,6 +655,18 @@ def main() -> None:
                        help="Spinodal data file")
     parser.add_argument("--crossover", type=Path, default=DEFAULT_CROSSOVER_PATH,
                        help="Crossover data file")
+    parser.add_argument(
+        "--phase-reference-root",
+        type=Path,
+        default=None,
+        help="Issue #130 candidate root；未指定时使用仓库内 v2 accepted layer",
+    )
+    parser.add_argument(
+        "--phase-reference-layer",
+        choices=["strict", "derived", "render", "accepted"],
+        default=None,
+        help="candidate layer; omitted selects accepted for v2 and strict for v1",
+    )
     parser.add_argument("--xi", type=float, action="append", default=None,
                        help="ξ values to plot (can specify multiple times)")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
@@ -604,11 +685,37 @@ def main() -> None:
     
     args = parser.parse_args()
     
-    # 加载数据
-    boundary_points = load_boundary_data(args.boundary)
-    cep_points = load_cep_data(args.cep)
-    spinodal_points = [] if args.no_spinodal else load_spinodal_data(args.spinodal)
-    crossover_points = [] if args.no_crossover else load_crossover_data(args.crossover)
+    # 默认加载作者接受的 v2 phase map。旧 CSV 仍可通过显式路径回放。
+    candidate_diagnostics = None
+    use_default_candidate = (
+        args.phase_reference_root is None
+        and DEFAULT_PHASE_REFERENCE_ROOT.is_dir()
+        and args.boundary == DEFAULT_BOUNDARY_PATH
+        and args.cep == DEFAULT_CEP_PATH
+        and args.spinodal == DEFAULT_SPINODAL_PATH
+        and args.crossover == DEFAULT_CROSSOVER_PATH
+    )
+    if args.phase_reference_root is not None or use_default_candidate:
+        reference_root = args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT
+        (
+            boundary_points,
+            cep_points,
+            spinodal_points,
+            crossover_points,
+            candidate_diagnostics,
+        ) = load_candidate_phase_data(
+            reference_root,
+            args.phase_reference_layer or DEFAULT_PHASE_REFERENCE_LAYER,
+        )
+        if args.no_spinodal:
+            spinodal_points = []
+        if args.no_crossover:
+            crossover_points = []
+    else:
+        boundary_points = load_boundary_data(args.boundary)
+        cep_points = load_cep_data(args.cep)
+        spinodal_points = [] if args.no_spinodal else load_spinodal_data(args.spinodal)
+        crossover_points = [] if args.no_crossover else load_crossover_data(args.crossover)
     
     if not boundary_points:
         print(f"No boundary data found in {args.boundary}")
@@ -622,6 +729,13 @@ def main() -> None:
     print(f"CEP points: {len(cep_points)}")
     print(f"Spinodal points: {len(spinodal_points)}")
     print(f"Crossover points: {len(crossover_points)}")
+    if candidate_diagnostics is not None:
+        print(
+            "Candidate adapter: "
+            f"layer={candidate_diagnostics['layer']}, "
+            f"uncertified_rows={candidate_diagnostics['uncertified_rows']}, "
+            "runtime_consumption=false"
+        )
     
     show = not args.no_show
     output_dir = args.output_dir

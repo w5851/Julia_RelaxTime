@@ -1,0 +1,5 @@
+table,accepted_rows,accepted_strict_certified_rows,accepted_noncertified_rows,accepted_duplicate_keys,strict_rows,legacy_rows,legacy_exact_accepted,legacy_missing_physical,legacy_excluded_nonphysical,nearest_support_count,nearest_distance_min,nearest_distance_median,nearest_distance_max,key_fields,key_normalization
+boundary,12537,7162,5375,0,3091,48,14,34,0,34,1.0,1.0,1.0,"xi,T_MeV",Float64 rounded to 12 decimal places
+crossover,3135,1343,1792,0,1343,336,21,190,125,190,0.2870298222489964,5.6169031903105004,12.620837553113006,"xi,muq_MeV",Float64 rounded to 12 decimal places
+cep,161,90,71,0,90,11,11,0,0,0,,,,xi,Float64 rounded to 12 decimal places
+spinodals,11989,6886,5103,0,6886,57,26,31,0,31,0.3125,1.0,2.0,"xi,T_MeV",Float64 rounded to 12 decimal places

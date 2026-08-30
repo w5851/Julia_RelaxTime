@@ -1,0 +1,95 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_v2",
+  "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
+  "reference_status": "candidate",
+  "promotion_status": "accepted_for_downstream",
+  "public_layers": [
+    "strict",
+    "render",
+    "accepted"
+  ],
+  "internal_build_inputs": [
+    "data/reference/pnjl/issue130_phase_reference_v1/derived"
+  ],
+  "reference_write": false,
+  "runtime_consumption": false,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_manifest": {
+    "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+    "bytes": 16420
+  },
+  "source_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "layers": {
+    "strict": {
+      "path": "strict/manifest.json",
+      "sha256": "bd1e33ec03cfaf423489fc9704df51b14886e5901c3e169060507d0087817b5d",
+      "bytes": 3245
+    },
+    "render": {
+      "path": "render/manifest.json",
+      "sha256": "203323ee6030c86310a0671d2498619cf66a353604acf4cc3684a791f09b0fc6",
+      "bytes": 4154
+    },
+    "accepted": {
+      "path": "accepted/manifest.json",
+      "sha256": "e053824282c556f252e952163a534c35ddad554452ade6130c2411e11566f60d",
+      "bytes": 4420
+    }
+  },
+  "build_input": {
+    "derived_layer": {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived",
+      "manifest": {
+        "path": "derived/manifest.json",
+        "sha256": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
+        "bytes": 2234
+      },
+      "role": "internal_build_input_only"
+    },
+    "source_v1_manifest": {
+      "path": "manifest.json",
+      "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+      "bytes": 16420
+    }
+  },
+  "figure": {
+    "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
+    "sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65",
+    "bytes": 5287855
+  },
+  "constraints": {
+    "v1_unchanged": true,
+    "derived_public_layer": false,
+    "strict_certificate_preserved": true,
+    "interpolated_rows_noncertified": true,
+    "render_has_spinodal_table": true,
+    "solver_called": false,
+    "oracle_labels_consumed": false,
+    "runtime_switch": false,
+    "legacy_fallback_preserved": true,
+    "extrapolation": false,
+    "accepted_for_downstream": true,
+    "runtime_default_unchanged": true
+  },
+  "claim_ledger": {
+    "path": "claim_ledger.json",
+    "sha256": "77a05e5e8c21cced0b2240b96976ea430c0463c78950ca30be5822679b30bb16",
+    "bytes": 1352
+  },
+  "downstream_default_layer": "accepted",
+  "downstream_default_scope": "analysis_and_derived_phase_maps",
+  "author_decision": {
+    "status": "accepted",
+    "scope": "downstream_analysis_default",
+    "recorded_at_utc": "2026-08-29T06:20:17.555046+00:00",
+    "runtime_default_unchanged": true,
+    "legacy_fallback_preserved": true
+  }
+}

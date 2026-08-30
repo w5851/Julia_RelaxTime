@@ -1,0 +1,174 @@
+{
+  "actions": {
+    "conclusion": "success",
+    "cost_snapshot_is_final": true,
+    "critical_path_seconds": 610.0,
+    "headSha": "6ceaa1ea73ca684f7333556c5d9e0492bc567899",
+    "job_count": 11,
+    "raw_total_seconds": 2648.0,
+    "run_id": "31067984700",
+    "run_mode": "aggregate_replay",
+    "runner_minutes": 52,
+    "snapshot_phase": "final",
+    "source": "gh run view",
+    "source_run_completed_success": true,
+    "source_run_id": "31067984700",
+    "source_run_numeric_jobs": 9,
+    "source_run_overall_success": true,
+    "status": "completed",
+    "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/31067984700"
+  },
+  "aggregation_corrections": [],
+  "compatibility_warnings": [],
+  "endpoint_mode": true,
+  "endpoint_policy": "three_crossing_endpoint_local_v2",
+  "evidence_state": "final",
+  "expected_calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
+  "file_sha256": {
+    "AUDIT.md": "d534ba70e6cc48c8134a498abdc87cafb8c39d37c2d619bce0ea1e2d04df67b9",
+    "README.md": "f55f38931f27f28e011db9181ac2af897566891901b962f113eae7aa1d711e77",
+    "actions_costs.csv": "6cdb8a512b2b808284dbd8daf67f8dd6531205d1646c5312183c7d540d6f22c8",
+    "cep_accuracy.csv": "91c9c1b5d0e02de4417f4e0465431d102a78141e73e44cf68ae568e5fb78637e",
+    "claim_ledger.csv": "075f0aece6a51fc68de88c96c8439e1940d628f1b8e8d7b0ecba2f5fb18918b5",
+    "curve_index.csv": "82dc73edd884b66cf23d35e9bcc323af1e62ecb958cd5fa013005173b69103d6",
+    "curve_points.csv": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8",
+    "geometry_accuracy.csv": "3f2229121cb31ac0b70d8b96f1846afc0afb05c409db3b29687a182d87421398",
+    "method_costs.csv": "5c0e7c2093ee9f8ed94d0543394b864fcdd5dd2ec2147799afbc7dd47756261b",
+    "oracle_overlay.json": "8724f0891c41087b8be9f48d4aece5cd6a357c9991514ca3e4f723000faedb29",
+    "plot_manifest.json": "32cf8b034c3ac4ddc74027faeec491ad5fb7e0e652ff4ff530aa443ecfd40f63",
+    "slice_metrics.csv": "7bf8f53f984f25b4906926c2e655744f69b851770dc499e9480684ae2c519d1a"
+  },
+  "gate": {
+    "automatic_gate_is_not_promotion": true,
+    "classification_errors": [],
+    "compatibility_warnings": [],
+    "coverage_errors": [],
+    "endpoint_errors": [],
+    "expected_anchor_count": 24,
+    "oracle_errors": [],
+    "performance": {
+      "dense_fallback_retry_rate": 0.0,
+      "grouped": {
+        "independent_oracle": {
+          "equilibrium_requests": 30744.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 30744.0,
+          "jacobian_calls": 189358.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 250988.0,
+          "retry_count": 0.0,
+          "runner_seconds": 476.21528455,
+          "unique_solves": 30744.0
+        },
+        "memoized_dense": {
+          "equilibrium_requests": 15384.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 15384.0,
+          "jacobian_calls": 99796.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 130660.0,
+          "retry_count": 0.0,
+          "runner_seconds": 284.397597425,
+          "unique_solves": 15384.0
+        },
+        "production_hybrid": {
+          "equilibrium_requests": 12846.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 12846.0,
+          "jacobian_calls": 87484.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 113332.0,
+          "retry_count": 0.0,
+          "runner_seconds": 274.794164782,
+          "unique_solves": 12845.0
+        }
+      },
+      "hybrid_fallback_retry_rate": 0.0
+    },
+    "performance_errors": [],
+    "scope": "full",
+    "verdict": "full_hybrid_candidate",
+    "workflow_contract_errors": []
+  },
+  "generated_at_utc": "2026-08-06T03:31:27.380319Z",
+  "job_keys": [
+    [
+      -0.5,
+      "independent_oracle"
+    ],
+    [
+      -0.5,
+      "memoized_dense"
+    ],
+    [
+      -0.5,
+      "production_hybrid"
+    ],
+    [
+      0.0,
+      "independent_oracle"
+    ],
+    [
+      0.0,
+      "memoized_dense"
+    ],
+    [
+      0.0,
+      "production_hybrid"
+    ],
+    [
+      0.5,
+      "independent_oracle"
+    ],
+    [
+      0.5,
+      "memoized_dense"
+    ],
+    [
+      0.5,
+      "production_hybrid"
+    ]
+  ],
+  "oracle_overlay": {
+    "applied": [
+      {
+        "T_MeV": 20.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": -0.5
+      },
+      {
+        "T_MeV": 5.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": 0.0
+      }
+    ],
+    "approved_points": [
+      [
+        -0.5,
+        5.0
+      ],
+      [
+        -0.5,
+        20.0
+      ],
+      [
+        0.0,
+        5.0
+      ]
+    ],
+    "deep_manifest_schema": "cep_deep_oracle_v1",
+    "deep_run_id": "31065343978",
+    "errors": [],
+    "expected_calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
+    "oracle_labels_used_for_route": false,
+    "schema_version": "cep_maxwell_endpoint_local_overlay_v1"
+  },
+  "postprocess_sha": "6ceaa1ea73ca684f7333556c5d9e0492bc567899",
+  "run_id": "31067984700",
+  "run_mode": "aggregate_replay",
+  "schema_version": "cep_maxwell_endpoint_local_production_shadow_v4",
+  "scope": "full",
+  "source_run_id": "31067984700"
+}

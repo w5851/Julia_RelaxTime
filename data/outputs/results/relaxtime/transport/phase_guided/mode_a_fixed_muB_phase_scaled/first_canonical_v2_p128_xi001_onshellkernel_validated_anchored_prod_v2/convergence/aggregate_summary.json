@@ -1,0 +1,130 @@
+{
+  "schema_version": "issue130_rs_sharded_production_v2_aggregate_replay_v4",
+  "generated_utc": "2026-08-26T01:11:20.202084+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "case_name": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+  "source_dispatch_manifest_sha256": "fbf6bceefd678dd8d1864f4bba173a79bd7c3569c2e0509c80ab0d52704177e3",
+  "selected_unique_run_count": 30,
+  "duplicate_cancelled_run_ids": [
+    32817608059,
+    32817612099,
+    32817614679,
+    32817617122,
+    32817623140,
+    32817626448,
+    32817629180,
+    32817632016,
+    32817634309,
+    32817636849
+  ],
+  "per_shard_hard_gate_all_ok": true,
+  "actions_timing_all_ok": true,
+  "all_hard_gates_including_timing": true,
+  "manifest_hash_mismatch_total": 60,
+  "scan_rows": {
+    "mode_a_fixed_muB_phase_scaled": 910,
+    "mode_b_fixed_T_sparse_muB": 909
+  },
+  "diagnostic_rows": {
+    "mode_a_fixed_muB_phase_scaled": 38220,
+    "mode_b_fixed_T_sparse_muB": 38178
+  },
+  "quality_reason_counts": {
+    "mode_a_fixed_muB_phase_scaled": {
+      "ok": 680,
+      "tau_u_ubar_ratio_high": 230
+    },
+    "mode_b_fixed_T_sparse_muB": {
+      "ok": 669,
+      "tau_u_ubar_ratio_high": 240
+    }
+  },
+  "phase_structure_counts": {
+    "mode_a_fixed_muB_phase_scaled": {
+      "no_transition": 662,
+      "crossover_possible": 153,
+      "first_order_possible": 95
+    },
+    "mode_b_fixed_T_sparse_muB": {
+      "first_order_possible": 231,
+      "crossover_possible": 325,
+      "no_transition": 353
+    }
+  },
+  "direct_coexistence_gate": {
+    "rows": 102,
+    "has_minus_0003": true,
+    "has_plus_0003": true,
+    "has_zero": false,
+    "xi_min": -0.5,
+    "xi_max": 0.5
+  },
+  "candidate_legacy_summary": {
+    "mode_a_fixed_muB_phase_scaled": {
+      "candidate_rows": 910,
+      "legacy_rows": 909,
+      "common_keys": 908,
+      "candidate_only_keys": 2,
+      "legacy_only_keys": 1,
+      "candidate_only_examples": [
+        "900.0|-0.003|1.0",
+        "900.0|0.003|1.0"
+      ],
+      "legacy_only_examples": [
+        "900.0|0.0|1.0"
+      ],
+      "numeric_comparisons": 12712,
+      "phase_field_mismatch_common_keys": 15,
+      "max_abs_delta": 2.1012719067069128,
+      "max_rel_delta": 4.863355089016844,
+      "key_columns": [
+        "muB_MeV",
+        "xi",
+        "alpha_T"
+      ],
+      "legacy_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1\\phase_guided_transport_scan.csv",
+      "legacy_exists": true
+    },
+    "mode_b_fixed_T_sparse_muB": {
+      "candidate_rows": 909,
+      "legacy_rows": 909,
+      "common_keys": 909,
+      "candidate_only_keys": 0,
+      "legacy_only_keys": 0,
+      "candidate_only_examples": [],
+      "legacy_only_examples": [],
+      "numeric_comparisons": 12726,
+      "phase_field_mismatch_common_keys": 47,
+      "max_abs_delta": 13.128644294872513,
+      "max_rel_delta": 8.497595326788558,
+      "key_columns": [
+        "T_MeV",
+        "muB_MeV",
+        "xi"
+      ],
+      "legacy_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1\\phase_guided_transport_scan.csv",
+      "legacy_exists": true
+    }
+  },
+  "interpretation": "30/30 unique shards completed with complete finite converged scans and zero failed data rows. The aggregate is diagnostic-only: per-run failed_points manifest hashes were captured before stream flush, and historical v1 comparisons measure reference-input drift rather than numerical convergence.",
+  "known_metadata_defects": [
+    {
+      "file": "effective_config.json",
+      "scope": "30/30 shards",
+      "reason": "run_manifest hashes artifacts before write_run_sidecars rewrites the initial options-only snapshot into the wrapped effective_config JSON; actual file hash equals config_hash, manifest artifact hash is stale."
+    },
+    {
+      "file": "failed_points.csv",
+      "scope": "30/30 shards",
+      "reason": "failed_points header is buffered when write_run_sidecars hashes the file; stream is closed only in the finally block afterward. Actual file has header only and zero data rows."
+    },
+    {
+      "file": "git_dirty",
+      "scope": "30/30 shards",
+      "reason": "producer writes outputs before git status is captured; this is expected in-run metadata and not a numerical failure."
+    }
+  ],
+  "acceptance_verdict": "numerical_execution_passed_diagnostic_only",
+  "stop_reason": "provenance_hash_contract_defect_requires_repair_before_formal_promotion_or_legacy_retirement"
+}

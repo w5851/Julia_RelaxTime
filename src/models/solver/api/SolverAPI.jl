@@ -41,6 +41,15 @@ const SOLVER_RESULT_REQUIRED_FIELDS = (
     :xi,
 )
 
+@inline function _reject_magnetic_constraint_route(::PNJLMagneticModel, mode::ConstraintMode)
+    throw(ArgumentError(
+        "PNJLMagneticModel constrained mode $(typeof(mode)) is not implemented by the shared " *
+        "PNJL ProblemSpec chain; use solve_magnetic_gap for the complete five-field magnetic equilibrium",
+    ))
+end
+
+@inline _reject_magnetic_constraint_route(::AbstractQCDModel, ::ConstraintMode) = nothing
+
 @inline function _normalize_solver_contract_version(version)::Symbol
     if version isa Symbol
         version == SOLVER_CONTRACT_VERSION_V1 || throw(ArgumentError("unsupported solver contract_version: $(version), expected $(SOLVER_CONTRACT_VERSION_V1)"))
@@ -424,6 +433,7 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     μ_fm::Real,
     kwargs...)
+    _reject_magnetic_constraint_route(model, mode)
     # FixedMu 与其他 mode 一致，统一走 ProblemSpec 主链。
     merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
     return _solve_with_problem_spec_default(model, mode, T_fm, merged)
@@ -432,19 +442,23 @@ end
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     kwargs...)
+    _reject_magnetic_constraint_route(model, mode)
     merged = (; kwargs..., problem_spec=problem_spec)
     return _solve_with_problem_spec_default(model, mode, T_fm, merged)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; kwargs...)
+    _reject_magnetic_constraint_route(model, mode)
     return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; kwargs...)
+    _reject_magnetic_constraint_route(model, mode)
     return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
+    _reject_magnetic_constraint_route(model, mode)
     return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 

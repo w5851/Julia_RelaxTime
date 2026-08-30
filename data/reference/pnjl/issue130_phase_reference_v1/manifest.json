@@ -1,0 +1,360 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_import_v1",
+  "generated_at_utc": "2026-08-21T07:23:39.506278+00:00",
+  "reference_status": "candidate",
+  "promotion_status": "imported_candidate",
+  "reference_write": true,
+  "runtime_consumption": false,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "source_package": {
+    "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1",
+    "manifest": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/manifest.json",
+      "sha256": "8c0a083c147e8dfa9e4f6132fb49f1832d80cf766f97acb8c560ed7c4f35cef9",
+      "bytes": 3099
+    },
+    "gate_manifest": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/manifest.json",
+      "sha256": "eddf1f40ecaa36270e86ba150ac294addbf82e2681be8f4535f8aebb8a671f81",
+      "bytes": 1145
+    },
+    "decision": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/decision.json",
+      "sha256": "c3edfb48856a8d2bac01a750540b4fe0b5dba558781438e5cf3b206428614b63",
+      "bytes": 1392
+    },
+    "author_review": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/author_review_record_v1.json",
+      "sha256": "3ea8e11cb8874817b4939fcac777658316fb1ba4e4ebd9faa58fe3bb7a0ed91c",
+      "bytes": 501
+    }
+  },
+  "layers": {
+    "strict": {
+      "source_layer": "strict_reference_v1",
+      "files": [
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/README.md",
+            "sha256": "359cd437c90da41f79f807c29d577f7ecb299423cdcbd08589c624f195589902",
+            "bytes": 306
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/README.md",
+            "sha256": "359cd437c90da41f79f807c29d577f7ecb299423cdcbd08589c624f195589902",
+            "bytes": 306
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/manifest.json",
+            "sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+            "bytes": 2130
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
+            "sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+            "bytes": 2130
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/tables/cep_boundary_strict_reference_v1.csv",
+            "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7",
+            "bytes": 11994
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv",
+            "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7",
+            "bytes": 11994
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/tables/crossover_surface_strict_reference_v1.csv",
+            "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23",
+            "bytes": 244934
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/crossover_surface_strict_reference_v1.csv",
+            "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23",
+            "bytes": 244934
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv",
+            "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c",
+            "bytes": 2674236
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/maxwell_surface_strict_reference_v1.csv",
+            "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c",
+            "bytes": 2674236
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/strict_reference_v1/tables/spinodal_surface_strict_reference_v1.csv",
+            "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182",
+            "bytes": 668050
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/spinodal_surface_strict_reference_v1.csv",
+            "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182",
+            "bytes": 668050
+          }
+        }
+      ]
+    },
+    "derived": {
+      "source_layer": "derived_reference_v1",
+      "files": [
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/README.md",
+            "sha256": "231d9c50af37ff3bbcdabe07c23b23eef5ed3077c6d9113fcbb8a883df0751b2",
+            "bytes": 341
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/README.md",
+            "sha256": "231d9c50af37ff3bbcdabe07c23b23eef5ed3077c6d9113fcbb8a883df0751b2",
+            "bytes": 341
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/manifest.json",
+            "sha256": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
+            "bytes": 2234
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/manifest.json",
+            "sha256": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
+            "bytes": 2234
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/tables/cep_boundary_derived_reference_v1.csv",
+            "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+            "bytes": 27047
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/cep_boundary_derived_reference_v1.csv",
+            "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+            "bytes": 27047
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/tables/crossover_surface_derived_reference_v1.csv",
+            "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+            "bytes": 785310
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/crossover_surface_derived_reference_v1.csv",
+            "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+            "bytes": 785310
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/tables/maxwell_surface_derived_reference_v1.csv",
+            "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+            "bytes": 3042004
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/maxwell_surface_derived_reference_v1.csv",
+            "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+            "bytes": 3042004
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/tables/spinodal_surface_derived_reference_v1.csv",
+            "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+            "bytes": 2219976
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/spinodal_surface_derived_reference_v1.csv",
+            "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+            "bytes": 2219976
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/derived_reference_v1/tables/surface_coverage_mask.csv",
+            "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+            "bytes": 40523
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/surface_coverage_mask.csv",
+            "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+            "bytes": 40523
+          }
+        }
+      ]
+    },
+    "render": {
+      "source_layer": "phase_surface_render_v1",
+      "files": [
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/README.md",
+            "sha256": "7f8d909ade6b4ad9a371f4d978642605cb1da572d779b18d2635e78274b7ccc6",
+            "bytes": 286
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/README.md",
+            "sha256": "7f8d909ade6b4ad9a371f4d978642605cb1da572d779b18d2635e78274b7ccc6",
+            "bytes": 286
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/manifest.json",
+            "sha256": "4b091f9d97a1edf5046b872799928c8e742fe780f401e87e7ba17edd6220c605",
+            "bytes": 2458
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/manifest.json",
+            "sha256": "4b091f9d97a1edf5046b872799928c8e742fe780f401e87e7ba17edd6220c605",
+            "bytes": 2458
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/tables/cep_boundary_render.csv",
+            "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+            "bytes": 27047
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/tables/cep_boundary_render.csv",
+            "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+            "bytes": 27047
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/tables/crossover_surface_render.csv",
+            "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+            "bytes": 785310
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/tables/crossover_surface_render.csv",
+            "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+            "bytes": 785310
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/tables/maxwell_surface_render.csv",
+            "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+            "bytes": 3042004
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/tables/maxwell_surface_render.csv",
+            "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+            "bytes": 3042004
+          }
+        },
+        {
+          "source": {
+            "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/tables/mesh_coverage.csv",
+            "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+            "bytes": 40523
+          },
+          "imported": {
+            "path": "data/reference/pnjl/issue130_phase_reference_v1/render/tables/mesh_coverage.csv",
+            "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+            "bytes": 40523
+          }
+        }
+      ]
+    }
+  },
+  "figure_root": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1",
+  "figure": {
+    "png": {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
+      "path_kind": "repository_relative",
+      "bytes": 5287855,
+      "sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65"
+    },
+    "plot_manifest": {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/plot_manifest.json",
+      "path_kind": "repository_relative",
+      "bytes": 5952,
+      "sha256": "3061354ea31701698fd7275a533ce3898377726c91c2cf8e2db50e9ed7234eae"
+    },
+    "source_png": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/figures/phase_surface_render_mu_xi_T.png",
+      "sha256": "50d09fefca853d532059c6133d70ca040b33b5c125ade18d7227ef71a1a0ea39",
+      "bytes": 999505
+    },
+    "source_plot_manifest": {
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/figures/plot_manifest.json",
+      "sha256": "d395d5201e1a5502545871fcb6e3b1711fea240bec55a987d5fb59fe73bf05d9",
+      "bytes": 3122
+    }
+  },
+  "legacy_reference_snapshot": [
+    {
+      "path": "data/reference/pnjl/boundary.csv",
+      "sha256": "5480a3048177be5ff4a2e7314c56d228dacaa5899ff7fe07f3417e1139cf5890",
+      "bytes": 3221
+    },
+    {
+      "path": "data/reference/pnjl/cep.csv",
+      "sha256": "8bdda456f2495ff322f80a802ee1efab56567bbfce18f26617544d505be4d65c",
+      "bytes": 651
+    },
+    {
+      "path": "data/reference/pnjl/spinodals.csv",
+      "sha256": "96accaa2a1d863406e8d9bb961c3c39532e0372d8e0550a463749f220b1de33f",
+      "bytes": 4916
+    },
+    {
+      "path": "data/reference/pnjl/crossover_dense.csv",
+      "sha256": "0f811c3648a18a26d7a1a6383e08466638d7484a0c7b984c7ceb9c84661aa4df",
+      "bytes": 27507
+    },
+    {
+      "path": "data/reference/pnjl/phase_reference_dense_manifest.json",
+      "sha256": "07b58593efc8a6729c6db2247ad03d6b5564003fe06eb96eb38897501cd7af39",
+      "bytes": 8059
+    }
+  ],
+  "constraints": {
+    "legacy_files_unchanged": true,
+    "canonical_consumer_switch": false,
+    "rs_transport_started": false,
+    "solver_called_during_import": false,
+    "strict_unresolved_preserved": true,
+    "derived_rows_are_noncertified": true,
+    "render_triangulation": false
+  },
+  "audit": {
+    "path": "data/reference/pnjl/issue130_phase_reference_v1/IMPORT_AUDIT.md",
+    "path_kind": "repository_relative",
+    "bytes": 1312,
+    "sha256": "c21fb516766f55c19e6a3aa43c7c2328231e64b8b0267f01777bff5293e2e5fd"
+  },
+  "public_render": {
+    "version": "v9",
+    "mode": "visualization_only_closed_candidate",
+    "source_render_layer": "derived_reference_v1",
+    "previous_public_version": "v8",
+    "previous_public_source_path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/figures/phase_surface_render_mu_xi_T.png",
+    "previous_public_png_sha256": "5b8152b2ccef4107c51393370b82ff77f48287132e8206a37ee6cfb2ab793b14",
+    "public_png_sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65",
+    "strict_and_derived_tables_unchanged": true,
+    "render_manifest_sha256": "49201a7fb9c71fd6143a6f55c68e56aa3db8c02686c3e5e42b0ad1b2eab4db18",
+    "manifest": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v9/manifest.json"
+  }
+}

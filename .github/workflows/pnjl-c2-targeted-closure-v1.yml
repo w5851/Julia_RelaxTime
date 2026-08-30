@@ -1,0 +1,423 @@
+name: PNJL C2 Targeted Closure Diagnostic
+
+run-name: C2 targeted closure / ${{ inputs.scope || 'regression_curves' }} / ${{ inputs.run_mode || 'numerical' }} / ${{ inputs.tag || '20260816' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Diagnostic scope; numerical first uses regression_curves"
+        required: true
+        default: regression_curves
+        type: choice
+        options: [regression_curves, cep_brackets, cross_axis_audit]
+      run_mode:
+        description: "Numerical targeted run or solver-free aggregate replay"
+        required: true
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      calculation_ref:
+        description: "Immutable calculation SHA"
+        required: true
+        default: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+        type: string
+      source_run_id:
+        description: "Completed numerical source run for replay"
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        description: "Source calculation SHA; must match calculation_ref"
+        required: false
+        default: ""
+        type: string
+      source_postprocess_sha:
+        description: "Source numerical runner/postprocess SHA"
+        required: false
+        default: ""
+        type: string
+      source_artifact_name:
+        description: "Exact C2 aggregate artifact for cross-axis audit"
+        required: false
+        default: ""
+        type: string
+      rerun_failed_only:
+        description: "Run only failed target ids"
+        required: false
+        default: false
+        type: boolean
+      failed_job_keys:
+        description: "Comma-separated target ids for failed-only rerun"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Immutable diagnostic tag"
+        required: true
+        default: issue130_c2_targeted_closure_v1_20260816
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CALCULATION_SHA: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+  WORKFLOW_SCHEMA: pnjl_c2_targeted_closure_v1
+  COST_STOP_MINUTES: 180
+
+jobs:
+  regression_numerical:
+    if: ${{ inputs.scope == 'regression_curves' && inputs.run_mode == 'numerical' }}
+    name: "C2 targeted regression ${{ matrix.target_id }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - target_id: xi_m0p35_T51
+            xi: "-0.35"
+            temperature: "51.0"
+          - target_id: xi_m0p25_T41
+            xi: "-0.25"
+            temperature: "41.0"
+          - target_id: xi_m0p20_T41
+            xi: "-0.20"
+            temperature: "41.0"
+          - target_id: xi_m0p15_T41
+            xi: "-0.15"
+            temperature: "41.0"
+          - target_id: xi_m0p10_T41
+            xi: "-0.10"
+            temperature: "41.0"
+          - target_id: xi_0p00_T51
+            xi: "0.0"
+            temperature: "51.0"
+          - target_id: xi_0p30_T21
+            xi: "0.30"
+            temperature: "21.0"
+          - target_id: xi_0p35_T51
+            xi: "0.35"
+            temperature: "51.0"
+          - target_id: xi_0p35_T101
+            xi: "0.35"
+            temperature: "101.0"
+    steps:
+      - name: Select failed-only target
+        id: select
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$TARGET_ID,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation SHA
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
+
+      - name: Checkout workflow head
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow head
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Materialize calculation checkout and targeted runner
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_cep_hybrid_production_shadow.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_c2_targeted_closure_job.jl calculation/scripts/analysis/
+
+      - name: Setup Julia
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run targeted regression curve job
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          mkdir -p "artifacts/${TARGET_ID}"
+          julia --project=calculation calculation/scripts/analysis/pnjl_c2_targeted_closure_job.jl \
+            --scope regression_curves --target-id "$TARGET_ID" \
+            --methods production_hybrid,independent_oracle \
+            --tag "$TAG" --calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "$POSTPROCESS_SHA" --source-run-id "$SOURCE_RUN_ID" \
+            --output-dir "artifacts/${TARGET_ID}"
+
+      - name: Upload targeted regression artifact
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-targeted-regression-${{ matrix.target_id }}
+          path: artifacts/${{ matrix.target_id }}
+          if-no-files-found: error
+          retention-days: 30
+
+  cep_numerical:
+    if: ${{ inputs.scope == 'cep_brackets' && inputs.run_mode == 'numerical' }}
+    name: "C2 targeted CEP ${{ matrix.target_id }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - target_id: xi_0p125_CEP_midpoint
+          - target_id: xi_0p39375_CEP_midpoint
+          - target_id: xi_0p50_CEP_midpoint
+    steps:
+      - name: Select failed-only target
+        id: select
+        shell: bash
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$TARGET_ID,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation SHA
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
+
+      - name: Checkout workflow head
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Materialize calculation checkout and targeted runner
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_cep_hybrid_production_shadow.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_c2_targeted_closure_job.jl calculation/scripts/analysis/
+
+      - name: Setup Julia
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run targeted CEP midpoint job
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          TARGET_ID: ${{ matrix.target_id }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          mkdir -p "artifacts/${TARGET_ID}"
+          julia --project=calculation calculation/scripts/analysis/pnjl_c2_targeted_closure_job.jl \
+            --scope cep_brackets --target-id "$TARGET_ID" \
+            --methods production_hybrid,independent_oracle \
+            --tag "$TAG" --calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "$POSTPROCESS_SHA" --source-run-id "$SOURCE_RUN_ID" \
+            --output-dir "artifacts/${TARGET_ID}"
+
+      - name: Upload targeted CEP artifact
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-targeted-cep-${{ matrix.target_id }}
+          path: artifacts/${{ matrix.target_id }}
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate_replay:
+    if: ${{ inputs.run_mode == 'aggregate_replay' && (inputs.scope == 'regression_curves' || inputs.scope == 'cep_brackets') }}
+    name: "C2 targeted closure aggregate / ${{ inputs.scope }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source run and immutable inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+          SOURCE_SHA: ${{ inputs.source_calculation_sha }}
+          SCOPE: ${{ inputs.scope }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          [[ -z "$SOURCE_SHA" || "$SOURCE_SHA" == "$INPUT_SHA" ]] || exit 1
+          payload="$(gh run view "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --json status,conclusion,jobs,headSha)"
+          test "$(jq -r .status <<<"$payload")" = completed
+          test "$(jq -r .conclusion <<<"$payload")" = success
+          if [[ "$SCOPE" == regression_curves ]]; then prefix='C2 targeted regression'; expected=9; else prefix='C2 targeted CEP'; expected=3; fi
+          jobs="$(jq --arg prefix "$prefix" '[.jobs[] | select(.name | startswith($prefix))]' <<<"$payload")"
+          test "$(jq length <<<"$jobs")" = "$expected"
+          test "$(jq '[.[] | select(.conclusion != "success")] | length' <<<"$jobs")" = 0
+          source_head="$(jq -r .headSha <<<"$payload")"
+          [[ -z "${{ inputs.source_postprocess_sha }}" || "${{ inputs.source_postprocess_sha }}" == "$source_head" ]] || exit 1
+          echo "SOURCE_HEAD_SHA=$source_head" >> "$GITHUB_ENV"
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Download exact source artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCOPE: ${{ inputs.scope }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        shell: bash
+        run: |
+          python -m venv .venv-targeted
+          . .venv-targeted/bin/activate
+          python scripts/analysis/pnjl_c2_targeted_closure.py \
+            --scope "$SCOPE" --mode download --run-id "$SOURCE_RUN_ID" \
+            --output-dir source-artifacts --repo "$GITHUB_REPOSITORY"
+
+      - name: Setup Python plotting environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Validate numerical artifacts
+        env:
+          SCOPE: ${{ inputs.scope }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          python scripts/analysis/pnjl_c2_targeted_closure.py \
+            --scope "$SCOPE" --mode source_validate --input-dir source-artifacts \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
+            --source-run-id "$SOURCE_RUN_ID"
+
+      - name: Run solver-free targeted aggregate
+        id: aggregate
+        env:
+          SCOPE: ${{ inputs.scope }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        shell: bash
+        run: |
+          set +e
+          python scripts/analysis/pnjl_c2_targeted_closure.py \
+            --scope "$SCOPE" --mode aggregate_validate --input-dir source-artifacts \
+            --output-dir aggregate --expected-calculation-sha "$CALCULATION_SHA" \
+            --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
+            --source-run-id "$SOURCE_RUN_ID"
+          status=$?
+          if [[ "$status" != 0 && "$status" != 2 ]]; then exit "$status"; fi
+          echo "aggregate_exit_status=$status" >> "$GITHUB_STEP_SUMMARY"
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload targeted closure evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-targeted-closure-${{ inputs.tag }}-${{ inputs.scope }}
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  cross_axis_audit:
+    if: ${{ inputs.scope == 'cross_axis_audit' && inputs.run_mode == 'aggregate_replay' }}
+    name: C2 targeted cross-axis solver-free audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate cross-axis inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          ARTIFACT_NAME: ${{ inputs.source_artifact_name }}
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          [[ -n "$ARTIFACT_NAME" ]] || { echo 'source_artifact_name is required' >&2; exit 1; }
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir source-artifact
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Run solver-free cross-axis audit
+        shell: bash
+        run: |
+          set +e
+          python scripts/analysis/pnjl_c2_targeted_closure.py \
+            --scope cross_axis_audit --mode cross_axis_audit \
+            --input-dir source-artifact --output-dir aggregate \
+            --expected-calculation-sha "$CALCULATION_SHA"
+          status=$?
+          if [[ "$status" != 0 && "$status" != 2 ]]; then exit "$status"; fi
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload cross-axis audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-targeted-closure-${{ inputs.tag }}-cross-axis
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90

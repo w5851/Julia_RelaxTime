@@ -1,0 +1,5 @@
+table,candidate_rows,candidate_certified_rows,candidate_uncertified_rows,candidate_duplicate_keys,legacy_rows,legacy_duplicate_keys,legacy_certified_overlap,legacy_fallback_required,key_fields,key_normalization
+boundary,7162,3091,4071,0,48,0,13,35,"xi,T_MeV",float rounded to 12 decimal places
+crossover,1343,1343,0,0,336,0,21,315,"xi,mu_MeV",float rounded to 12 decimal places
+cep,93,90,3,0,11,0,10,1,xi,float rounded to 12 decimal places
+spinodals,6886,6886,0,0,57,0,26,31,"xi,T_MeV",float rounded to 12 decimal places

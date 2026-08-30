@@ -1,0 +1,23 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "legacy_snapshot": "data/reference/pnjl/legacy_phase_reference_v1",
+  "merge_sha": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "next_action": "author review of post-merge consumer smoke, then separately decide RS runtime/default promotion and old-reference retirement",
+  "production_write": false,
+  "replay_run_id": "32451053476",
+  "repo_head": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "result_import_verified": true,
+  "runtime_default_switch": false,
+  "schema_version": "pnjl_issue130_rs_transport_runtime_parity_v2",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "stop_conditions": [
+    "do not claim RS numerical parity from this solver-free package",
+    "do not delete prod_v1 result trees or legacy fallback snapshot",
+    "do not remove explicit legacy rollback",
+    "do not start full RS production without a separate authorization"
+  ],
+  "transport_coefficients_computed": false,
+  "verdict": "rs_consumer_smoke_pass_diagnostic_only"
+}

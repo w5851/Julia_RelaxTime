@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+candidate_strict_integrity,Candidate strict tables are finite and key-unique under the production-parity adapter.,supported,tables/coverage_matrix.csv; candidate manifest hashes,does not authorize runtime-only or physical deletion
+legacy_snapshot_integrity,The versioned PNJL legacy snapshot matches its byte/hash manifest and canonical paths are absent.,supported,tables/legacy_snapshot_inventory.csv; data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json,integrity preserves the fallback; it is not evidence that fallback is unused
+candidate_replaces_all_legacy_keys,Certified candidate keys fully replace all legacy keys.,not_supported,tables/coverage_matrix.csv; tables/fallback_matrix.csv,candidate uncertified rows remain excluded from runtime view
+active_consumers_migrated,All active repository consumers and explicit rollback paths are independent of the legacy snapshot.,not_supported,tables/consumer_matrix.csv; tables/reference_occurrences.csv,static tracked-source scan; external/generated consumers are not proven absent
+physical_deletion_ready,The PNJL legacy snapshot is ready for physical deletion.,not_supported,decision.json; tables/coverage_matrix.csv; tables/consumer_matrix.csv,even a candidate verdict still requires a separate allowlist PR and author authorization

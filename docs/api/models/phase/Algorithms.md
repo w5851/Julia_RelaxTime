@@ -57,9 +57,27 @@
 
 在 pipeline 中，这一步直接决定 `first_order_boundary` 与 `spinodal` 两类工件的内容质量。
 
+#### Production 容差合同
+
+`run_production_phase_pipeline` 不把 Maxwell 二分的停止条件与跨层几何证书分开硬编码。
+它从当前生效的 acceptance tolerances 派生内部 solver tolerance：
+
+`tol_solver = 0.1 × minimum(active acceptance tolerances)`。
+
+`area_tol_good` 始终生效；启用 rho geometry 或 temperature geometry 时，分别加入
+`rho_maxwell_area_tol` 或 `temperature_maxwell_area_tol`。派生值写入
+`config_snapshot`、`config_hash` 和 diagnostics，便于复现。`maxwell_construction` 的公共
+默认值仍保持兼容；production 调用显式传递派生值，并复用同一次 Maxwell 结果填充分类和
+共存密度，避免同一曲线的二次求根。外层 `PhaseGeometryTolerances.maxwell_area` 仍然保留，
+它负责 coarse/fine 网格之间的离散收敛证书，而不是重复替代内部求根停止条件。
+
+公共核心还要求等面积候选具有唯一的三交点拓扑。endpoint-limit hybrid 只在该候选唯一、
+右外支已采样且左外交点落在首个正密度单元时补 `rho=0.003125` anchor 和最多 12 个
+局部二分点；失败时保留 `ambiguous_near_critical`，不会把 endpoint 诊断降级成 monotone。
+
 ## CEP 搜索
 
-`find_cep` 基于温度切片上的 Maxwell 有效性变化来估计 CEP，并输出 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。
+`find_cep` 基于温度切片上的 Maxwell 有效性变化来定位 CEP 证据边界，并输出 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。它不再把 ambiguous midpoint 当作 CEP 单点。
 
 当前应重点理解的不是函数签名，而是两类策略边界：
 
@@ -73,10 +91,18 @@
 
 `CEPResult` 的关键诊断字段包括：
 
+公开常量 `Models.CEP_RESULT_STATUSES` 列出允许的结果状态：
+`:resolved`、`:ambiguous`、`:not_found`。
+
+- `result_status`：`:resolved`、`:ambiguous` 或 `:not_found`
 - `T_cep_MeV`
 - `mu_cep_MeV`：历史兼容字段，表示夸克化学势 `mu_q`，不是重子化学势 `mu_B`
 - `T_bracket_low_MeV` / `T_bracket_high_MeV`
 - `bracket_width_T_MeV`
+- `T_last_first_order_MeV` / `mu_last_first_order_MeV`
+- `T_first_monotone_MeV`
+- `ambiguity_width_T_MeV`
+- `temperature_resolution_target_MeV`
 - `eval_count`
 - `unknown_count`
 - `uncertainty_T_MeV`
@@ -90,13 +116,29 @@
 `run_production_phase_pipeline` 不把 CEP 搜索抽象成单次“对已有曲线集合调用 `find_cep`”，而是显式执行温度扫掠与 bracket 收缩：
 
 1. 根据 `ProductionPipelineConfig` 生成温度网格
-2. 对每个温度切片执行 Maxwell 有效性分类，状态为 `valid`、`unknown` 或 `invalid`
+2. 对每个温度切片执行 Maxwell 与 rho-geometry 分类，状态为 `confirmed_first_order`、`confirmed_monotone` 或 `ambiguous_near_critical`
 3. 将扫掠结果收集到 `FirstOrderSweepResult`
-4. 从最后一个 `valid` 与随后的 `invalid` 温度切片构造 production bracket
-5. 在 bracket 内继续二分，得到 production CEP
+4. 从最后一个 `confirmed_first_order` 与随后的 `confirmed_monotone` 温度切片构造证据区间
+5. 独立收缩低、高两端；ambiguous 温度不被强制归入任一侧
 
-`uncertainty_T_MeV` 表示最终 CEP 温度 bracket 的半宽，完整宽度由
-`bracket_width_T_MeV` 单独记录，不能把两者混作同一误差量。
+只有独立的同点临界估计产生 `(T, μ)` 时，`result_status=:resolved` 且旧单点字段才有限。
+普通 bracket 路径返回 `result_status=:ambiguous`，单点字段为空，
+`[T_last_first_order_MeV, T_first_monotone_MeV]` 是实际 ambiguity interval。
+`temperature_resolution_target_MeV` 只是端点数值搜索目标，不是物理误差上限。
+CLI 与 dense-reference builder 仍接受旧的 `cep_tol`/`--cep-tol`，同时提供
+`temperature_resolution_target_MeV`（或 `--temperature-resolution-target`）明确别名；
+两者同时给出时以后者为准。
+
+`confirmed_monotone` 至少需要两层 rho 网格都稳定报告 `no_s_shape`；单层无 S 形、Maxwell 失败、面积灰区、geometry 未收敛和 solver/no-curve 失败均保持 ambiguous。`unknown_budget` 只影响停止和诊断，不改变切片物理标签。
+其中 `unknown_count` 只统计原始 solver/classification `:unknown`，不把
+`weak-S`、Maxwell 灰区或其他 `ambiguous_near_critical` 计入预算。预算超限后
+停止继续的温度/端点 refinement，并在 `reason` 与 diagnostics 中记录
+`unknown_budget_exceeded`；已取得的证据区间原样保留。
+
+显式设置 `rho_geometry_convergence=false` 时表示调用方选择旧的单层诊断/兼容口径：
+通过 Maxwell 的一阶切片仍可作为边界候选输出，以保持既有边界消费者可用；但单层
+`no_s_shape` 永远不会被提升为 `confirmed_monotone`，因此该配置不会伪造高侧 CEP
+证据。默认 production 配置保持严格的两层 rho-geometry gate。
 
 这条路径的重点不是更“通用”，而是更适合 production/baseline 口径的可解释性与稳定收口。
 
@@ -166,6 +208,50 @@ crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继�
 
 更详细的使用背景见 [AdaptiveRhoRefinement.md](docs/api/models/phase/AdaptiveRhoRefinement.md)。
 
+### rho-support cascade（显式 opt-in）
+
+`Models.RhoSupportConfig`、`Models.RhoSupportPrior`、`Models.RhoSupportAssessment` 和
+`Models.analyze_rho_support_cascade` 是补点路由层；
+local cubic 只用于定位 support window，最终 S-shape 仍必须由真实采样点形成
+稳定的 `+ -> - -> +` topology。production cascade 使用两个嵌套 rho 层：
+`rho_support_cascade` 默认 `0.05 -> 0.025`，每个温度累计 targeted 点上限为 `12`。
+两层均通过 Maxwell 与 C2 geometry gate 才输出 `confirmed_first_order`，两层均
+稳定 `no_s_shape` 才输出 `confirmed_monotone`，solver failure、Maxwell/area/geometry
+不收敛统一保留 `ambiguous_near_critical`。
+
+补点 session 是请求作用域的 exact `(T,xi,rho)` Float64 cache。已有成功点按同一
+`(T,xi)` 下最近 rho 作为首选 seed；等距时遵循扫描方向。失败点也缓存，后续层级
+不会静默重复求解。`SolverWorkTelemetry` 只在调用方显式提供时累加，不改变
+`SolverResult v1` 或默认 uniform path。
+
+### rho-support hybrid（五级验证链）
+
+`rho_support_hybrid` 在 Stage A 的 cascade 结果之外复用同一请求作用域 cache，执行
+完整 Stage B `0.0125 -> 0.00625` dense 层。若 Stage A/B 的状态或 geometry 未闭合，
+则从 Stage-B 曲线的两个 μ 极值向外扫描，取首个满足 `mu < mu_low` 与 `mu > mu_high`
+的已有采样点作为离散 guard；相等点跳过，不插值、不二分、不使用固定 padding。
+Stage C 的分类曲线是完整 Stage-B 全域曲线与 guard 内按 Stage-B 曲率、面积贡献和
+Maxwell 特征排序选出的 `0.003125` 点的并集。缺少任一 guard、多 S topology 或
+局部点不足时保留 `ambiguous_near_critical`；Stage C 不产生新的 monotone 证书。
+`RhoHybridVerificationConfig`、manifest 和 diagnostics 会记录 guard rule、比较 epsilon、
+local step、target cap、support μ 极值、采用阶段和 verification 点数。它默认记录
+`candidate_policy=:unique_three_crossing_sign_change_v2` 与
+`endpoint_policy=:bounded_zero_density_v1`；后者只在唯一 endpoint-dependent 候选且右外点
+存在时启用历史零密度端点证书。新的显式
+`endpoint_policy=:three_crossing_endpoint_local_v2` 不再要求右支越过两个 μ 极值：它要求
+右 Maxwell 交点被两个实际 Stage-B 外支采样点 bracket，并始终保留完整 Stage-B 曲线；
+Stage-C 只在左 Maxwell 交点的 active bracket 内加入 midpoint。左 bracket 下界保持为零并
+收缩到端点预算时，内部诊断证书为 `endpoint_limited_first_order`；下界变为正值且最后两级
+geometry 均通过时为 `endpoint_local_geometry_first_order`。这两个名称只描述内部证书，
+对外仍映射到既有三态 `confirmed_first_order` / `confirmed_monotone` /
+`ambiguous_near_critical`，不新增用户可调容差。
+
+Maxwell v2 的 candidate 合同与 Stage-C 路由分开版本化：只有面积函数在两个不同化学势
+采样点上形成严格变号 bracket，才可进入候选列表。弱 S 形中常见的单点 `abs(area) <= tol`
+只作为 `near_zero_grid_hits` 记录，不会制造第二个 candidate；因此它不会因为总面积较小
+而被误判成多根。历史 v1 artifact 可显式指定旧 policy 重放，但不作为新的 production
+证书策略。
+
 ## 工件治理层
 
 相图主题不止是算法判据，还包括工件与基线治理：
@@ -182,7 +268,7 @@ production 入口同样复用这套工件治理，但会在 `diagnostics` 和 `c
 - `dT_initial`
 - `unknown_budget`
 - `first_point_fallback`
-- `forced_invalid_count`
+- `forced_invalid_count`（兼容字段；三态路径不再把 unknown 强制改写为 invalid，正式产物中应为 `0`）
 - `sweep_temperatures_MeV`
 - `sweep_statuses`
 - `rho_geometry_convergence` 及其位置量、密度量、面积残差门限

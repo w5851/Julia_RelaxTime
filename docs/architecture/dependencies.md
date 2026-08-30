@@ -1,4 +1,4 @@
-# Dependency graph generated: 2026-07-18T17:51:22.111
+# Dependency graph generated: 2026-08-24T12:59:35.086
 
 Run: julia --project=. scripts/dev/gen_deps.jl
 
@@ -191,11 +191,10 @@ flowchart LR
     src_models_njl_NJLModel_jl[models/njl/NJLModel.jl]
     src_models_njl_core_NJLCore_jl[models/njl/core/NJLCore.jl]
     src_models_njl2_core_NJL2Core_jl[models/njl2/core/NJL2Core.jl]
+    src_models_phase_RhoSupportRefinement_jl[models/phase/RhoSupportRefinement.jl]
     src_models_pnjl_workflows_MesonMassWorkflow_jl[models/pnjl/workflows/MesonMassWorkflow.jl]
     src_models_pnjl_workflows_TransportWorkflow_jl[models/pnjl/workflows/TransportWorkflow.jl]
-    src_models_pnjl_magnetic_core_MagneticThermodynamics_jl[models/pnjl_magnetic/core/MagneticThermodynamics.jl]
     src_models_pnjl_physics_PNJLMagneticModel_jl[models/pnjl_physics/PNJLMagneticModel.jl]
-    src_models_pnjl_physics_core_Integrals_jl[models/pnjl_physics/core/Integrals.jl]
     src_models_pnjl_physics_core_MagneticIntegrals_jl[models/pnjl_physics/core/MagneticIntegrals.jl]
     src_models_pnjl_physics_core_MagneticThermodynamics_jl[models/pnjl_physics/core/MagneticThermodynamics.jl]
     src_models_pnjl_physics_core_ModelThermodynamics_jl[models/pnjl_physics/core/ModelThermodynamics.jl]
@@ -208,6 +207,7 @@ flowchart LR
     src_models_scans_FreezeoutPathProfiles_jl[models/scans/FreezeoutPathProfiles.jl]
     src_models_scans_FreezeoutPathScan_jl[models/scans/FreezeoutPathScan.jl]
     src_models_scans_FreezeoutProfiles_jl[models/scans/FreezeoutProfiles.jl]
+    src_models_scans_MagneticScan_jl[models/scans/MagneticScan.jl]
     src_models_scans_MesonChemicalProfiles_jl[models/scans/MesonChemicalProfiles.jl]
     src_models_scans_MesonMassPathScan_jl[models/scans/MesonMassPathScan.jl]
     src_models_scans_ScanCommon_jl[models/scans/ScanCommon.jl]
@@ -274,12 +274,10 @@ flowchart LR
     GasLiquidThermodynamics[GasLiquidThermodynamics]
     GaussLegendre[GaussLegendre]
     HigherOrderDerivatives[HigherOrderDerivatives]
-    Integrals[Integrals]
-    Integrals_jl[Integrals.jl]
     IsentropicPathProfiles[IsentropicPathProfiles]
     KinematicChecks[KinematicChecks]
     MagneticIntegrals[MagneticIntegrals]
-    MagneticIntegrals_jl[MagneticIntegrals.jl]
+    MagneticScan[MagneticScan]
     MagneticThermodynamics[MagneticThermodynamics]
     MesonChemicalProfiles[MesonChemicalProfiles]
     MesonDensity[MesonDensity]
@@ -341,6 +339,7 @@ flowchart LR
   src_models_Models_jl --> HigherOrderDerivatives
   src_models_Models_jl --> IsentropicPathProfiles
   src_models_Models_jl --> MagneticIntegrals
+  src_models_Models_jl --> MagneticScan
   src_models_Models_jl --> MagneticThermodynamics
   src_models_Models_jl --> MesonChemicalProfiles
   src_models_Models_jl --> PrecompileRegistry
@@ -367,19 +366,14 @@ flowchart LR
   src_models_njl_NJLModel_jl --> GaussLegendre
   src_models_njl_core_NJLCore_jl --> ConfigLoader
   src_models_njl2_core_NJL2Core_jl --> ConfigLoader
+  src_models_phase_RhoSupportRefinement_jl --> Models
   src_models_pnjl_workflows_MesonMassWorkflow_jl --> Models
   src_models_pnjl_workflows_MesonMassWorkflow_jl --> WorkflowParamAdapters
   src_models_pnjl_workflows_TransportWorkflow_jl --> Models
   src_models_pnjl_workflows_TransportWorkflow_jl --> TransportCoefficients
   src_models_pnjl_workflows_TransportWorkflow_jl --> WorkflowParamAdapters
-  src_models_pnjl_magnetic_core_MagneticThermodynamics_jl --> Integrals
-  src_models_pnjl_magnetic_core_MagneticThermodynamics_jl --> Integrals_jl
-  src_models_pnjl_magnetic_core_MagneticThermodynamics_jl --> MagneticIntegrals
-  src_models_pnjl_magnetic_core_MagneticThermodynamics_jl --> MagneticIntegrals_jl
   src_models_pnjl_physics_PNJLMagneticModel_jl --> Models
-  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> Integrals
   src_models_pnjl_physics_core_MagneticThermodynamics_jl --> MagneticIntegrals
-  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> src_models_pnjl_physics_core_Integrals_jl
   src_models_pnjl_physics_core_MagneticThermodynamics_jl --> src_models_pnjl_physics_core_MagneticIntegrals_jl
   src_models_pnjl_physics_core_ModelThermodynamics_jl --> Models
   src_models_precompile_registry_jl --> Models
@@ -410,6 +404,7 @@ flowchart LR
   src_models_scans_FreezeoutPathScan_jl --> SeedStrategies
   src_models_scans_FreezeoutPathScan_jl --> TmuScan
   src_models_scans_FreezeoutProfiles_jl --> ConfigLoader
+  src_models_scans_MagneticScan_jl --> Models
   src_models_scans_MesonChemicalProfiles_jl --> ConfigLoader
   src_models_scans_MesonMassPathScan_jl --> FreezeoutPathProfiles
   src_models_scans_MesonMassPathScan_jl --> FreezeoutProfiles
@@ -435,7 +430,10 @@ flowchart LR
   src_models_variants_gas_liquid_GasLiquidModel_jl --> GasLiquidEquationSet
   src_models_variants_gas_liquid_GasLiquidModel_jl --> GasLiquidThermodynamics
   src_models_variants_gas_liquid_core_EquationSet_jl --> ConfigLoader
+  src_models_variants_gas_liquid_core_EquationSet_jl --> GaussLegendre
   src_models_variants_gas_liquid_core_Thermodynamics_jl --> GasLiquidEquationSet
+  src_models_variants_gas_liquid_workflows_GasLiquidWorkflow_jl --> GasLiquidEquationSet
+  src_models_variants_gas_liquid_workflows_GasLiquidWorkflow_jl --> GasLiquidThermodynamics
   src_models_variants_gas_liquid_workflows_GasLiquidWorkflow_jl --> Models
   src_models_variants_rotation_RotationModel_jl --> RotationThermo
   src_models_variants_rotation_core_RotationThermo_jl --> ConfigLoader

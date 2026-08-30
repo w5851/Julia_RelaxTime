@@ -17,6 +17,12 @@ TAG = "test"
 HEADERS = {
     "boundary": ["xi", "T_MeV", "mu_transition_MeV", "rho_hadron", "rho_quark", "area_residual", "converged", "curve_parameter", "plot_order_key"],
     "cep": ["xi", "T_CEP_MeV", "muq_CEP_MeV", "muB_CEP_MeV", "uncertainty_T_MeV", "T_bracket_low_MeV", "T_bracket_high_MeV", "bracket_width_T_MeV"],
+    "cep_modern": [
+        "xi", "T_CEP_MeV", "muq_CEP_MeV", "muB_CEP_MeV", "uncertainty_T_MeV",
+        "T_bracket_low_MeV", "T_bracket_high_MeV", "bracket_width_T_MeV", "result_status",
+        "T_last_first_order_MeV", "muq_last_first_order_MeV", "muB_last_first_order_MeV",
+        "T_first_monotone_MeV", "ambiguity_width_T_MeV", "temperature_resolution_target_MeV",
+    ],
     "spinodals": ["xi", "T_MeV", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "curve_parameter", "plot_order_key"],
     "crossover": ["xi", "mu_MeV", "T_crossover_MeV", "rho", "method", "converged", "derivative", "variable", "curve_parameter", "plot_order_key"],
     "phase_grid_convergence": ["axis", "xi", "T_MeV", "level", "left", "right", "midpoint", "position_error_MeV", "density_error", "maxwell_area", "response_rtol", "converged", "reason"],
@@ -36,6 +42,7 @@ def write_shard(
     xis: list[float],
     conflict_at_zero: bool = False,
     grid_reason: str = "converged",
+    modern_cep: bool = False,
 ) -> None:
     shard = root / name
     shard.mkdir(parents=True)
@@ -48,7 +55,13 @@ def write_shard(
     for xi in xis:
         offset = 99.0 if conflict_at_zero and xi == 0.0 else 2.0 * xi
         boundary_rows.append([str(xi), "100", str(300 + offset), "1", "2", "0.00005", "true", "100", "100"])
-        cep_rows.append([str(xi), str(130 + offset), str(295 + offset), str(3 * (295 + offset)), "0.05", "129.95", "130.05", "0.1"])
+        if modern_cep:
+            cep_rows.append([
+                str(xi), "", "", "", "", "130", "131", "1", "ambiguous",
+                "130", "295", "885", "131", "1", "0.125",
+            ])
+        else:
+            cep_rows.append([str(xi), str(130 + offset), str(295 + offset), str(3 * (295 + offset)), "0.05", "129.95", "130.05", "0.1"])
         spinodal_rows.append([str(xi), "100", str(310 + offset), str(290 + offset), "0.8", "2.2", "100", "100"])
         crossover_rows.append([str(xi), "0", str(180 + offset), "0.3", "peak", "true", "4", "phi_u", "0", "0"])
         grid_rows.append(["rho", str(xi), "100", "1", "0", "1", "1", "0.01", "0.001", "0.00005", "0", "true", grid_reason])
@@ -63,7 +76,7 @@ def write_shard(
         })
 
     write_csv(shard / f"boundary_{TAG}.csv", HEADERS["boundary"], boundary_rows)
-    write_csv(shard / f"cep_{TAG}.csv", HEADERS["cep"], cep_rows)
+    write_csv(shard / f"cep_{TAG}.csv", HEADERS["cep_modern"] if modern_cep else HEADERS["cep"], cep_rows)
     write_csv(shard / f"spinodals_{TAG}.csv", HEADERS["spinodals"], spinodal_rows)
     write_csv(shard / f"crossover_{TAG}.csv", HEADERS["crossover"], crossover_rows)
     write_csv(shard / f"phase_grid_convergence_{TAG}.csv", HEADERS["phase_grid_convergence"], grid_rows)
@@ -138,6 +151,10 @@ def test_merge_is_deterministic_and_deduplicates_interval_endpoints(tmp_path: Pa
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["config"]["xi_values"] == [-0.1, 0.0, 0.1]
     assert len(manifest["shards"]) == 2
+    with (output / f"cep_{TAG}.csv").open(newline="", encoding="utf-8") as handle:
+        cep_rows = list(csv.DictReader(handle))
+    assert cep_rows[0]["result_status"] == "resolved"
+    assert cep_rows[0]["T_last_first_order_MeV"] == cep_rows[0]["T_bracket_low_MeV"]
     assert manifest["provenance"] == {
         "calculation_git_commit": "abc123",
         "postprocess_git_commit": "abc123",
@@ -159,6 +176,56 @@ def test_merge_is_deterministic_and_deduplicates_interval_endpoints(tmp_path: Pa
         check=False,
     )
     assert validation.returncode == 0, validation.stderr
+
+
+def test_merge_and_validator_accept_modern_ambiguous_cep_rows(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "modern", [-0.1, 0.0, 0.1], modern_cep=True)
+    output = tmp_path / "merged"
+
+    result = run_merge(shards, output)
+    assert result.returncode == 0, result.stderr
+    validation = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--reference-root",
+            str(output),
+            "--tag",
+            TAG,
+            "--expect-full-reference",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert validation.returncode == 0, validation.stderr
+
+    cep_path = output / f"cep_{TAG}.csv"
+    rows = list(csv.DictReader(cep_path.open(newline="", encoding="utf-8")))
+    rows[0]["T_CEP_MeV"] = "999"
+    with cep_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=HEADERS["cep_modern"], lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    invalid = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--reference-root",
+            str(output),
+            "--tag",
+            TAG,
+            "--expect-full-reference",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert invalid.returncode != 0
+    assert "non-resolved CEP row publishes a single point" in invalid.stderr + invalid.stdout
 
 
 def test_merge_round_trips_quoted_grid_reason_and_records_dual_provenance(tmp_path: Path) -> None:
@@ -289,3 +356,90 @@ def test_merge_includes_staged_xi_convergence_records(tmp_path: Path) -> None:
     assert any(row["axis"] == "xi" and row["level"] == "1" for row in rows)
     manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
     assert len(manifest["xi_refinement_records"]) == 1
+
+
+def test_merge_aggregates_available_phase_telemetry_and_costs(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "left", [-0.1, 0.0])
+    write_shard(shards, "right", [0.1])
+    diagnostic = {
+        "schema_version": "pnjl_phase_shard_diagnostics_v1",
+        "normalization_version": "phase_summary_projection_v1",
+        "tag": TAG,
+        "stage": "initial",
+        "shard_id": "left",
+        "xi": -0.1,
+        "calculation_sha": "abc123",
+        "postprocess_sha": "def456",
+        "availability": "available",
+        "missing_fields": [],
+        "config_hash": "cfg-left",
+        "diagnostics": {
+            "counters": {
+                "scan_total": 10,
+                "scan_success": 9,
+                "scan_failure": 1,
+                "point_requests": 20,
+                "cache_hits": 5,
+                "unique_solves": 15,
+                "targeted_additions": 2,
+                "failed_points": 1,
+            },
+            "status_counts": {"confirmed_first_order": 1},
+            "stage_counts": {"stage_b_dense": 1},
+            "certificate_counts": {"endpoint_limited_first_order": 1},
+            "geometry_missing_record_count": 0,
+        },
+    }
+    (shards / "left" / f"phase_diagnostics_{TAG}_initial_left.json").write_text(
+        json.dumps(diagnostic), encoding="utf-8"
+    )
+    diagnostic["xi"] = 0.1
+    diagnostic["shard_id"] = "right"
+    (shards / "right" / f"phase_diagnostics_{TAG}_initial_right.json").write_text(
+        json.dumps(diagnostic), encoding="utf-8"
+    )
+    output = tmp_path / "merged"
+    result = run_merge(
+        shards,
+        output,
+        extra_args=["--expected-calculation-git-commit", "abc123", "--postprocess-git-commit", "def456"],
+    )
+    assert result.returncode == 0, result.stderr
+    telemetry = json.loads((output / f"phase_diagnostics_{TAG}.json").read_text(encoding="utf-8"))
+    assert telemetry["telemetry_status"] == "available"
+    assert telemetry["counter_totals"]["unique_solves"] == 30
+    assert telemetry["status_counts"] == {"confirmed_first_order": 2}
+    manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["telemetry"]["status"] == "available"
+    assert manifest["artifacts"]["phase_diagnostics"]["record_count"] == 2
+    validation = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--reference-root",
+            str(output),
+            "--tag",
+            TAG,
+            "--expect-full-reference",
+            "--diagnostics-path",
+            str(output / f"phase_diagnostics_{TAG}.json"),
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert validation.returncode == 0, validation.stderr
+
+
+def test_merge_marks_legacy_shards_telemetry_unavailable(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "only", [-0.1, 0.0, 0.1])
+    output = tmp_path / "merged"
+    result = run_merge(shards, output)
+    assert result.returncode == 0, result.stderr
+    telemetry = json.loads((output / f"phase_diagnostics_{TAG}.json").read_text(encoding="utf-8"))
+    assert telemetry["telemetry_status"] == "telemetry_unavailable"
+    assert telemetry["counter_totals"]["unique_solves"] is None
+    assert telemetry["missing_shard_diagnostics"] == 1

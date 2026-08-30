@@ -1,0 +1,13 @@
+{
+    "tolerance_calculation_sha": "467be1fce847a9c991ec362c3335be07fccbe604",
+    "producer_head_sha": "3acde4815f034b7955697fe95ae219c507f71be6",
+    "merged_curve_count": 65354,
+    "reference_write": false,
+    "base_calculation_sha": "fde2b929b60575f1daacb84a1b9b8ff6e3b0a0cc",
+    "tolerance_run_id": "30730990835",
+    "base_run_id": "30601857594",
+    "solver_called": false,
+    "tolerance_manifest_sha256": "577cce55607efdf8f05b8e4afb43bd65470188b72a3fd25ee2273d742ee7dc35",
+    "schema_version": "cep_hybrid_stagec_tolerance_replay_v1",
+    "base_manifest_sha256": "58cb0c3ba32e924505d1e74afac60df58938a04b4a0f59870bdec93478228e27"
+}

@@ -1,0 +1,117 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_manifest": {
+    "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+    "bytes": 16420
+  },
+  "source_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "uniform_xi_step": 0.00625,
+  "uniform_xi_count": 161,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "schema_version": "pnjl_issue130_phase_reference_layer_v2",
+  "layer": "render",
+  "semantics": "complete structured display tables and author-reviewed figure provenance; no triangulation",
+  "promotion_status": "awaiting_author_review",
+  "reference_write": false,
+  "runtime_consumption": false,
+  "generated_at_utc": "2026-08-29T04:10:01.098784+00:00",
+  "source_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "tables": {
+    "boundary": {
+      "source": {
+        "path": "render/tables/maxwell_surface_render.csv",
+        "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+        "bytes": 3042004
+      },
+      "output": {
+        "path": "render/tables/maxwell_surface_render.csv",
+        "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+        "bytes": 3042004
+      },
+      "byte_preserved": true,
+      "rows": 12537
+    },
+    "crossover": {
+      "source": {
+        "path": "render/tables/crossover_surface_render.csv",
+        "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+        "bytes": 785310
+      },
+      "output": {
+        "path": "render/tables/crossover_surface_render.csv",
+        "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+        "bytes": 785310
+      },
+      "byte_preserved": true,
+      "rows": 3135
+    },
+    "cep": {
+      "source": {
+        "path": "render/tables/cep_boundary_render.csv",
+        "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+        "bytes": 27047
+      },
+      "output": {
+        "path": "render/tables/cep_boundary_render.csv",
+        "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+        "bytes": 27047
+      },
+      "byte_preserved": true,
+      "rows": 161
+    },
+    "spinodals": {
+      "source": {
+        "path": "derived/tables/spinodal_surface_derived_reference_v1.csv",
+        "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+        "bytes": 2219976
+      },
+      "output": {
+        "path": "render/tables/spinodal_surface_render.csv",
+        "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+        "bytes": 2219976
+      },
+      "byte_preserved": true,
+      "rows": 11989,
+      "source_layer": "derived_reference_v1"
+    },
+    "coverage": {
+      "source": {
+        "path": "render/tables/mesh_coverage.csv",
+        "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+        "bytes": 40523
+      },
+      "output": {
+        "path": "render/tables/mesh_coverage.csv",
+        "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+        "bytes": 40523
+      },
+      "byte_preserved": true,
+      "rows": 483
+    }
+  },
+  "source_layer": "phase_surface_render_v1_plus_derived_spinodal",
+  "surfaces": [
+    "boundary",
+    "crossover",
+    "cep",
+    "spinodals"
+  ],
+  "complete_structured_tables": true,
+  "figure_review_status": "existing_public_figure_reviewed; spinodal_table_completion_pending_review",
+  "runtime_input": false,
+  "figure": {
+    "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
+    "sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65",
+    "bytes": 5287855
+  },
+  "rows": {
+    "boundary": 12537,
+    "crossover": 3135,
+    "cep": 161,
+    "spinodals": 11989
+  }
+}

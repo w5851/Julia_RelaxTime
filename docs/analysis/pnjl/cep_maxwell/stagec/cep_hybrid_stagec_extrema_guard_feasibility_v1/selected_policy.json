@@ -1,0 +1,18 @@
+{
+    "schema_version": "cep_hybrid_stagec_extrema_guard_feasibility_v1",
+    "verdict": "feasible_candidate",
+    "selected_cap": 12,
+    "guard_rule": "extrema_outer_samples_v1",
+    "comparison_epsilon": 7.105427357601002e-15,
+    "stage_b_grid_step": 0.00625,
+    "stage_c_local_step": 0.003125,
+    "caps": [
+        12,
+        24,
+        48,
+        96,
+        160
+    ],
+    "dense_unique_solves": 15384,
+    "reason": "minimum feasible cap"
+}

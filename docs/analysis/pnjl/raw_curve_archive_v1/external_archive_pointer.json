@@ -1,0 +1,69 @@
+{
+  "schema": "raw_curve_archive_v1.external_archive_pointer_v1",
+  "status": "canonical_external_archive",
+  "scope": "c2_full_grid_raw_rho_mu",
+  "provider": "Zenodo",
+  "record": {
+    "record_id": "21980679",
+    "doi": "10.5281/zenodo.21980679",
+    "doi_url": "https://doi.org/10.5281/zenodo.21980679",
+    "record_url": "https://zenodo.org/records/21980679",
+    "all_versions_doi": "10.5281/zenodo.21980678",
+    "published_date": "2026-08-17",
+    "version": "raw_curve_archive_v1",
+    "license": "CC BY 4.0"
+  },
+  "archive": {
+    "filename": "pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip",
+    "download_url": "https://zenodo.org/records/21980679/files/pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip?download=1",
+    "size_bytes": 1879467478,
+    "sha256": "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc",
+    "sha256_sidecar": {
+      "filename": "pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip.sha256",
+      "download_url": "https://zenodo.org/records/21980679/files/pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip.sha256?download=1",
+      "size_bytes": 119,
+      "content": "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc  pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip\n"
+    },
+    "inner_manifest": {
+      "archive_manifest_sha256": "514d9a7dd4cf537e8b209ed7df1cb996f52da48ab0b3672f27c3437d0cba4e52",
+      "representative_count": 279,
+      "required_files": [
+        "archive_manifest.json",
+        "archive_manifest.sha256",
+        "curve_index.csv",
+        "representative_index.csv"
+      ],
+      "verification": "validate-archive rechecks the archive manifest sidecar and every indexed curve/source-manifest hash"
+    }
+  },
+  "provenance": {
+    "method": "independent_oracle",
+    "validation_status": "full_domain_verified",
+    "curve_count": 10458,
+    "xi_count": 93,
+    "rho_points_per_curve": 1281,
+    "source_run_id": "32013771445",
+    "source_artifact_id": "9288198084",
+    "source_artifact_name": "pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1",
+    "source_workflow_sha": "1aeda93fa86c39eb0734954d04f80679a9c50c33",
+    "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "postprocess_workflow_sha": "67d73f871578e35759c08b3c75200c51646cf6cd",
+    "audit_run_id": "31941614867",
+    "source_grid_run_id": "31862752226",
+    "zenodo_upload_run_id": "32037327151",
+    "zenodo_upload_workflow_sha": "8a27cf0f6461483d0205e9eff230f622413e08ca"
+  },
+  "retention": {
+    "full_curves": "All 10,458 exact resolved (xi,T_MeV) curves are retained as byte-preserved CSV data.",
+    "representative_curves": "representative_index.csv contains references into the full curve_index.csv; no representative-only data copy exists.",
+    "repository_policy": "The multi-gigabyte raw archive is external to the Git repository; this pointer and the contract remain in Git."
+  },
+  "restore": {
+    "download": "Download archive.filename and archive.sha256_sidecar.filename from their recorded URLs.",
+    "outer_archive_check": "Verify the downloaded archive size and run sha256sum --check against the sidecar.",
+    "extract": "Extract the exact ZIP without modifying its contents, then locate archive_manifest.json and expected_coverage.json.",
+    "full_validation": "python scripts/analysis/pnjl_raw_curve_archive.py validate-archive --archive-dir <archive-dir> --expected-coverage <expected-coverage.json> --require-full-domain --calculation-sha 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48 --source-postprocess-sha 67d73f871578e35759c08b3c75200c51646cf6cd --audit-workflow-sha 1aeda93fa86c39eb0734954d04f80679a9c50c33",
+    "sample_restore": "python scripts/analysis/pnjl_raw_curve_archive.py restore-curve --archive-dir <archive-dir> --xi <xi> --temperature-MeV <T_MeV> --method independent_oracle --output <restored.csv>",
+    "automated_verification": ".github/workflows/pnjl-raw-curve-archive-zenodo-restore.yml is manual-only and performs the download, outer SHA check, full archive validation, and one sample restore."
+  }
+}

@@ -1,0 +1,4 @@
+surface,rows,xi_count,grid_unresolved_rows
+maxwell_coexistence,6886,93,4071
+crossover_pseudocritical,1488,93,"not_directly_joined_to_(xi,T)_rho_grid"
+cep_bracket_projection,93,93,bracket_status_preserved

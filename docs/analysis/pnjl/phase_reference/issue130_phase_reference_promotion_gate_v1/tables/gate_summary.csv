@@ -1,0 +1,15 @@
+gate,status,evidence,details
+package_and_replay_provenance,pass,manifest.json; decision.json; replay_provenance.json,
+package_manifest_hash_inventory,pass,manifest.json; child manifests,
+strict_maxwell_finite_unique,pass,strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv,
+strict_maxwell_expansion_provenance,pass,strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv,expansion_rows=276
+strict_unresolved_preserved,pass,strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv,unresolved_rows=4071
+strict_crossover_finite_unique,pass,strict_reference_v1/tables/crossover_surface_strict_reference_v1.csv,
+strict_spinodal_finite_unique,pass,strict_reference_v1/tables/spinodal_surface_strict_reference_v1.csv,
+strict_cep_brackets_preserved,pass,strict_reference_v1/tables/cep_boundary_strict_reference_v1.csv,
+derived_uniform_xi_grid,pass,derived_reference_v1/tables/*.csv,xi_count=161
+derived_common_support_only,pass,derived_reference_v1/tables/surface_coverage_mask.csv,
+derived_noncertified_rows_explicit,pass,derived_reference_v1/tables/*.csv,
+render_no_triangulation,pass,phase_surface_render_v1/manifest.json; figures/plot_manifest.json,
+render_inputs_hash_bound,pass,phase_surface_render_v1/figures/plot_manifest.json,
+author_review_recorded,pass,promotion gate invocation,status=accepted; pr=248

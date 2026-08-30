@@ -1,0 +1,22 @@
+{
+  "schema_version": "pnjl_maxwell_endpoint_limit_contract_v1",
+  "verdict": "endpoint_limited_first_order_candidate",
+  "certificate_policy": "endpoint_limited_first_order_v1",
+  "final_physical_classification": "confirmed_first_order",
+  "rho_hadron_scalar_semantics": "endpoint_limit_representative_zero",
+  "rho_hadron_representative": 0.0,
+  "rho_hadron_interval": [
+    0.0,
+    7.62939453125e-07
+  ],
+  "base_rho_step": 0.003125,
+  "targeted_cap": 12,
+  "candidate_policy": "unique_three_crossing_topology_v1",
+  "endpoint_policy": "bounded_zero_density_v1",
+  "require_deterministic_bracket_halving": true,
+  "require_cross_level_geometry": true,
+  "require_solver_failures_zero": true,
+  "strict_positive_rho_claimed": false,
+  "author_decision_status": "accepted",
+  "author_decision_date": "2026-08-05"
+}

@@ -52,6 +52,7 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "types", "test_parameter_types.jl"),
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
+    joinpath(UNIT_DIR, "models", "test_magnetic_scan.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
 ]
 
@@ -71,6 +72,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "config", "test_sop_governance.jl"),
     joinpath(UNIT_DIR, "config", "test_dependency_policy.jl"),
     joinpath(UNIT_DIR, "config", "test_agent_instruction_governance.jl"),
+    joinpath(UNIT_DIR, "config", "test_task_ledger.jl"),
 
     # [NJL Core] NJL 模型核心
     joinpath(UNIT_DIR, "njl", "test_njl_core.jl"),
@@ -78,13 +80,21 @@ const CORE_SMOKE_FILES = [
 
     # [Models] 模型子系统（工厂/配置/工具）
     joinpath(UNIT_DIR, "models", "test_njl_model_factory.jl"),
+    joinpath(UNIT_DIR, "models", "test_gas_liquid_rmf_core.jl"),
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
     joinpath(UNIT_DIR, "models", "test_adaptive_rho_refinement.jl"),
+    joinpath(UNIT_DIR, "models", "test_rho_support_refinement.jl"),
     joinpath(UNIT_DIR, "models", "test_phase_grid_convergence.jl"),
     joinpath(UNIT_DIR, "models", "test_workflow_param_adapters.jl"),
     joinpath(UNIT_DIR, "models", "test_model_structure_homomorphism.jl"),
     joinpath(UNIT_DIR, "models", "test_model_api_homomorphism.jl"),
     joinpath(UNIT_DIR, "models", "test_meson_density_workflow.jl"),
+    joinpath(UNIT_DIR, "models", "test_solver_work_telemetry.jl"),
+    joinpath(UNIT_DIR, "models", "test_cep_narrow_pilot_contract.jl"),
+    joinpath(UNIT_DIR, "models", "test_cep_narrow_pilot_v2_contract.jl"),
+    joinpath(UNIT_DIR, "models", "test_pnjl_cep_hybrid_extrema_guard_feasibility.jl"),
+    joinpath(UNIT_DIR, "models", "test_pnjl_c2_cep_limited_feasibility.jl"),
+    joinpath(UNIT_DIR, "models", "test_pnjl_c2_cep_manual_bisection_contract.jl"),
 
     # [PNJL Solver] 求解器核心
     joinpath(UNIT_DIR, "pnjl", "test_solver_conditions.jl"),

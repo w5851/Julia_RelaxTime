@@ -1,0 +1,3 @@
+source,path,sha256,raw_curve_copy_in_repository
+standard_aggregate,curve_points.csv,c1a6f4f061b865b718ad725ad78b832fd8124fb7285d3ba6166e3e06889e8cce,False
+deep_aggregate,curve_points.csv,ccc0991018571979cab9cc62c890d587caa756fad9df3e0228cc2c2082cb4e81,False

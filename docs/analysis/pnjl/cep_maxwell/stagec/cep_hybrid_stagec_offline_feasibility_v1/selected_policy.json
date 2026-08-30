@@ -1,0 +1,16 @@
+{
+  "caps": [
+    48,
+    96,
+    160,
+    224
+  ],
+  "dense_unique_solves": 15384.0,
+  "production_cost_base": "production_hybrid rho_level 0/1 points",
+  "reason": "no cap satisfies all gates",
+  "schema_version": "cep_hybrid_stagec_offline_feasibility_v1",
+  "selected_cap": null,
+  "selected_policy": null,
+  "stage_b_global_reference": "independent_oracle.rho_level=0 (offline semantic reference only)",
+  "verdict": "maxwell_candidate_inconclusive"
+}

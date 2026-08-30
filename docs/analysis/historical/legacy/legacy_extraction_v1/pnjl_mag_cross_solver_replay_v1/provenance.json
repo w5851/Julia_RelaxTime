@@ -1,0 +1,56 @@
+{
+  "schema_version": "pnjl_mag_cross_solver_replay_provenance_v1",
+  "generated_at_utc": "2026-08-25T05:47:01.3325511Z",
+  "producer_script": "scripts/analysis/pnjl/compare_pnjl_mag_julia_equilibrium.jl",
+  "producer_script_sha256": "5D9EA71BE6F3AAC86819A68C9FBF0566092E3FE848DE11376B40CF8A700B76E5",
+  "julia_repo_input_head": "927d466446606f222c0d6a332d75c5b783ddf96f",
+  "external_source": {
+    "remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
+    "commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+    "replay_artifact": "../pnjl_mag_equilibrium_replay_v1/",
+    "replay_table_sha256": "A0398B928E6116632CF5248F0BB41F9024425CDC64ECBB97D448D1D7FE284A8B"
+  },
+  "parameter_contract": {
+    "external_hc_MeV_fm": 197.33,
+    "T_scope_MeV": [50.0, 150.0, 240.0],
+    "muB_MeV": 0.0,
+    "eB_scope_GeV2": [0.2, 0.4, 0.8],
+    "route": "MFIR zero-field cutoff vacuum + Hurwitz-zeta magnetic correction + Landau thermal term",
+    "imc_a": 0.0108805,
+    "landau_n_range": "0..79",
+    "seed_count": 3,
+    "seeds": ["external_committed", "external_chiral_shift", "project_thermal"]
+  },
+  "runs": {
+    "full_screening": {
+      "points": 9,
+      "p_num": 64,
+      "zeta_num": 64,
+      "pz_max_fm_inv": 25.0,
+      "candidate_count_per_point": 1,
+      "max_external_state_residual_in_julia": 0.0003940727690321863,
+      "max_candidate_residual": 4.673492854601949e-12,
+      "max_candidate_state_l2_delta": 0.0023384068282196455,
+      "max_omega_delta_julia_minus_external": 0.00018409880971859138,
+      "failed_attempts_total": 14
+    },
+    "high_matched": {
+      "points": 3,
+      "temperatures_MeV": [240.0],
+      "p_num": 128,
+      "zeta_num": 256,
+      "pz_max_fm_inv": 40.0,
+      "candidate_counts": {
+        "eB_0.2": 1,
+        "eB_0.4": 1,
+        "eB_0.8": 2
+      },
+      "max_external_state_residual_in_julia": 3.0523300973514467e-12,
+      "max_omega_delta_julia_minus_external": 1.1795009413617663e-12,
+      "branch_note": "T=240 MeV, eB=0.8 GeV2 produced a second physical candidate; the external continuation branch is the lower-Omega candidate."
+    }
+  },
+  "julia_solver_called": true,
+  "acceptance_scope": "diagnostic_only",
+  "boundary": "Three-seed Julia screening and three-point matched-node replay; no all-branch completeness, no convergence matrix, no formal validation target."
+}

@@ -112,6 +112,7 @@ const INTEGRATION_CORE_FILES = [
     # Variants: representative e2e
     joinpath(INTEGRATION_DIR, "models", "test_rotation_workflow_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_gas_liquid_workflow_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_gas_liquid_rmf_workflows.jl"),
 
     # Config: contract guard
     joinpath(INTEGRATION_DIR, "config", "test_config_profile_smoke.jl"),

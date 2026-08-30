@@ -1,0 +1,4 @@
+source_layer,row_count,interpretation
+v5_baseline,1157,copied from v5 retained crossover support
+endpoint_expansion,186,new finite/converged numerical endpoint candidates
+endpoint_excluded,0,retained in audit only; not plotted

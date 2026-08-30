@@ -1,0 +1,12 @@
+{
+  "schema_version": "pnjl_c2_limited_feasibility_input_v1",
+  "scope": "c2_limited_feasibility",
+  "cep_failure_bracket_count": 17,
+  "cep_failures_file": "cep_failures.csv",
+  "source_audit": "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1",
+  "solver_called": false,
+  "production_write": false,
+  "historical_evidence_immutable": true,
+  "deferred_scopes": ["cep", "crossover"],
+  "calculation_sha": "4c9703c3be45b76608ab57d375082e29418bfd05"
+}

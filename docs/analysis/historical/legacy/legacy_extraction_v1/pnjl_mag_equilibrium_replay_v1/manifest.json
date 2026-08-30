@@ -1,0 +1,10 @@
+{
+  "schema_version": "pnjl_mag_equilibrium_replay_manifest_v1",
+  "artifact_kind": "external_equilibrium_diagnostic_replay",
+  "source_commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+  "table": "pnjl_mag_equilibrium_replay_v1.csv",
+  "provenance": "provenance.json",
+  "table_sha256": "A0398B928E6116632CF5248F0BB41F9024425CDC64ECBB97D448D1D7FE284A8B",
+  "provenance_sha256": "6A1F1AA38CF1C541641F968FD666609B70D490D7CDB2B95863E0976EDEDFD685",
+  "acceptance_scope": "diagnostic_only"
+}

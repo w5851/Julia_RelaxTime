@@ -1,0 +1,4 @@
+claim_id,claim,status,boundary
+classification,offline hybrid matches corrected oracle at all anchors,inconclusive,diagnostic only
+maxwell_candidates,cross-resolution Maxwell candidate is unique,inconclusive,author curve review required
+cost,simulated hybrid unique solves do not exceed dense,pass,offline estimate only

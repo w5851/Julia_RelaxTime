@@ -1,0 +1,163 @@
+name: PNJL CEP Deep Oracle
+
+on:
+  workflow_dispatch:
+    inputs:
+      calculation_ref:
+        description: "Immutable production calculation SHA"
+        required: true
+        type: string
+      tag:
+        description: "Diagnostic artifact tag"
+        required: false
+        default: "cep_deep_oracle_v1"
+        type: string
+      anchor_set:
+        description: "Approved deep-oracle anchor set"
+        required: false
+        default: "legacy_five"
+        type: choice
+        options: [legacy_five, required_three]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deep_oracle:
+    name: "deep oracle xi=${{ matrix.xi }} T=${{ matrix.temperature }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include: ${{ fromJSON(inputs.anchor_set == 'required_three' && '[{"xi":"-0.5","temperature":"5.0"},{"xi":"-0.5","temperature":"20.0"},{"xi":"0.0","temperature":"5.0"}]' || '[{"xi":"-0.5","temperature":"20.0"},{"xi":"0.0","temperature":"5.0"},{"xi":"0.0","temperature":"20.0"},{"xi":"0.5","temperature":"5.0"},{"xi":"0.5","temperature":"20.0"}]') }}
+    steps:
+      - name: Validate immutable calculation ref
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "calculation_ref must be a 40-character immutable SHA" >&2
+            exit 1
+          }
+
+      - name: Checkout workflow and postprocess SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow checkout SHA
+        shell: bash
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$WORKFLOW_HEAD_SHA"
+
+      - name: Materialize calculation SHA worktree
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_cep_deep_oracle.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_cep_production_shadow.jl calculation/scripts/analysis/
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-cep-deep-oracle-v1
+
+      - name: Install calculation dependencies
+        run: julia --project=calculation -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run one independent deep-oracle anchor
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          TEMPERATURE: ${{ matrix.temperature }}
+          TAG: ${{ inputs.tag }}
+          ANCHOR_SET: ${{ inputs.anchor_set }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "artifacts/xi_${XI}/T_${TEMPERATURE}"
+          julia --project=calculation calculation/scripts/analysis/pnjl_cep_deep_oracle.jl \
+            --xi "$XI" \
+            --temperature "$TEMPERATURE" \
+            --tag "$TAG" \
+            --calculation-sha "$CALCULATION_REF" \
+            --workflow-head-sha "$WORKFLOW_HEAD_SHA" \
+            --output-dir "artifacts/xi_${XI}/T_${TEMPERATURE}"
+
+      - name: Upload deep-oracle job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-deep-oracle-xi-${{ matrix.xi }}-T-${{ matrix.temperature }}
+          path: artifacts/xi_${{ matrix.xi }}/T_${{ matrix.temperature }}
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    name: aggregate deep-oracle evidence
+    if: ${{ always() }}
+    needs: [deep_oracle]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workflow and postprocess SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow checkout SHA
+        shell: bash
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$WORKFLOW_HEAD_SHA"
+
+      - name: Download deep-oracle job artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-deep-oracle-*
+          path: job-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Collect deep-oracle evidence
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+          TAG: ${{ inputs.tag }}
+          ANCHOR_SET: ${{ inputs.anchor_set }}
+        run: |
+          python scripts/analysis/collect_pnjl_cep_deep_oracle.py \
+            --input-dir job-artifacts \
+            --output-dir aggregate \
+            --calculation-sha "$CALCULATION_REF" \
+            --workflow-head-sha "$WORKFLOW_HEAD_SHA" \
+            --tag "$TAG" \
+            --anchor-set "$ANCHOR_SET"
+          cat aggregate/deep_oracle_summary.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload aggregate deep-oracle evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-deep-oracle-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90

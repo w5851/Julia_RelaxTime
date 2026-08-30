@@ -2,6 +2,11 @@ module PhaseGuidedTransportScanAssets
 
 using JSON3
 
+function _phase_reference_summary_dict(source)
+    summary = Main.PhaseReferenceAdapter.source_summary(source)
+    return Dict{String,Any}(String(key) => value for (key, value) in pairs(summary))
+end
+
 @inline function _csv_quote(text::AbstractString)
     return "\"" * replace(String(text), "\"" => "\"\"") * "\""
 end
@@ -39,7 +44,7 @@ function write_plan_csv(path::String, plan)
     end
 end
 
-function write_readme(path::String, opts, plan; result_csv_name::String="phase_guided_transport_scan.csv", figure_dir::Union{Nothing,String}=nothing)
+function write_readme(path::String, opts, plan; result_csv_name::String="phase_guided_transport_scan.csv", figure_dir::Union{Nothing,String}=nothing, phase_reference=nothing)
     mode_dir = opts.mode == :mode_a_fixed_muB_phase_scaled ? "mode_a_fixed_muB_phase_scaled" : "mode_b_fixed_T_sparse_muB"
     mode_summary = opts.mode == :mode_a_fixed_muB_phase_scaled ?
         "固定 muB，沿相变参考温度做 T/T_phase 倍率带，并对每个倍率带连续扫描 xi。" :
@@ -65,6 +70,17 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "- sigma cache policy: `$(opts.sigma_cache_policy)`")
         println(io, "- thermodynamic nodes: `p_num=$(opts.p_num), t_num=$(opts.t_num)`")
         println(io, "- phase anchor policy: `$(opts.phase_anchor_policy)`")
+        phase_root = phase_reference === nothing ? opts.phase_reference_root :
+            get(_phase_reference_summary_dict(phase_reference), "source_root", opts.phase_reference_root)
+        println(io, "- phase reference root: `$(phase_root)`")
+        println(io, "- phase reference layer: `$(opts.phase_reference_layer)`")
+        println(io, "- phase reference mode: `$(opts.phase_reference_mode)`")
+        if phase_reference !== nothing
+            phase_summary = _phase_reference_summary_dict(phase_reference)
+            println(io, "- phase reference source: `$(Main.PhaseReferenceAdapter.source_kind(phase_reference))`")
+            println(io, "- phase reference primary layer: `$(get(phase_summary, "primary_layer", String(Main.PhaseReferenceAdapter.source_layer(phase_reference))))`")
+            println(io, "- phase reference runtime view: `$(get(phase_summary, "runtime_view", ""))`")
+        end
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
            opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
             println(io, "- tau/sigma overrides:")
@@ -95,8 +111,10 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
     end
 end
 
-function build_effective_config(opts, result_csv::String, plan_csv::String; figure_dir::Union{Nothing,String}=nothing)
-    return Dict(
+function build_effective_config(opts, result_csv::String, plan_csv::String; figure_dir::Union{Nothing,String}=nothing, phase_reference=nothing)
+    resolved_root = phase_reference === nothing ? opts.phase_reference_root :
+        get(Main.PhaseReferenceAdapter.source_summary(phase_reference), :source_root, opts.phase_reference_root)
+    cfg = Dict(
         "mode" => String(opts.mode),
         "outdir" => opts.outdir,
         "case_name" => opts.case_name,
@@ -117,12 +135,19 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "p_num" => opts.p_num,
         "t_num" => opts.t_num,
         "phase_anchor_policy" => String(opts.phase_anchor_policy),
+        "phase_reference_root" => resolved_root,
+        "phase_reference_layer" => String(opts.phase_reference_layer),
+        "phase_reference_mode" => String(opts.phase_reference_mode),
+        "phase_reference_source" => phase_reference === nothing ? "none" : String(Main.PhaseReferenceAdapter.source_kind(phase_reference)),
+        "phase_reference_primary_layer" => phase_reference === nothing ? "none" : get(_phase_reference_summary_dict(phase_reference), "primary_layer", String(Main.PhaseReferenceAdapter.source_layer(phase_reference))),
         "channel_diagnostics" => opts.channel_diagnostics,
         "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,
         "overwrite" => opts.overwrite,
         "resume" => opts.resume,
     )
+    phase_reference !== nothing && (cfg["phase_reference_summary"] = _phase_reference_summary_dict(phase_reference))
+    return cfg
 end
 
 function write_effective_config(path::String, cfg)

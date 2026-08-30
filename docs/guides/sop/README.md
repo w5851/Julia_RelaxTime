@@ -21,6 +21,7 @@ SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历�
 | [Relaxtime transport](workflows/relaxtime_transport.md) | 平衡态 → 截面/散射率 → τ → RTA 输运扫描 | `scripts/relaxtime/run_gap_transport_scan.jl` |
 | [介子热力学](workflows/meson_thermodynamics.md) | 介子 pressure、QP/LD 与 canonical EOS | `scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl`（专题入口） |
 | [介子数密度](workflows/meson_density.md) | stable/BW/BU 数密度与 path × regime production | `scripts/relaxtime/run_combined_meson_density_scan.jl`（domain-candidate） |
+| [论文级绘图资产与生产](workflows/figure_production.md) | 四层 figure mode、style profile、plot manifest、strict layout gate 与 Origin 边界 | `scripts/plotting/validate_plot_artifact.py` |
 
 ## 状态语义
 

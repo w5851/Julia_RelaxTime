@@ -15,7 +15,7 @@ $$
 
 其中：
 - $K_{3}^{\pm}, K_{4}^{\pm}$ 为有效耦合常数（参见 [EffectiveCoupling_K_FromA.md](couplings/EffectiveCoupling_K_FromA.md)）。
-- $\Pi_{ff'}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md)）。
+- $\Pi_{f f^{\prime}}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md)）。
 
 ### 1.2 η 与 η′ 介子传播子（含混合）
 赝标量介子 η、η′（以及标量 σ、σ′）存在单态/八重态混合，其传播子结构为：
@@ -75,7 +75,7 @@ $$
 $$
 M_i = m_i - 4G\phi_i + 2K\phi_j\phi_k,\quad i\neq j\neq k.
 $$
-3. 调用极化函数模块计算 $\Pi_{ff'}^{P(S)}(p_0,\mathbf{0})$。
+3. 调用极化函数模块计算 $\Pi_{f f^{\prime}}^{P(S)}(p_0,\mathbf{0})$。
 4. 求解介子质量：
    - π/K：在复平面搜索极点方程根，实部为 $M$、虚部为 $\Gamma/2$。
    - η/η′：先构造 $M_{00}, M_{08}, M_{88}$，再解极点方程。

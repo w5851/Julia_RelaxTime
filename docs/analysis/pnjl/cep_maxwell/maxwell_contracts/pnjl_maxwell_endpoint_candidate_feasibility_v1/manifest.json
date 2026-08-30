@@ -1,0 +1,27 @@
+{
+    "producer_head_sha": "50d84177f2dbf9967d3f1e0ce93e6576eb2ad61f",
+    "source_deep_run_id": "30809754119",
+    "required_anchor_gate": true,
+    "reference_write": false,
+    "files": {
+        "candidate_summary.csv": "9287daf33fef294098854ee8be4edbcef41c14378110bf59dea0c460e8d6b59a",
+        "selected_policy.json": "378cbcc94cad21c930d76a281b80b36fc7030e4e3a2fa0cad82653acf231e59a",
+        "figures/minus05_T5_full_near_zero.png": "3c8f811cac951148b79927564227abcc4cee63b97d40d1051e450341260ee514",
+        "figures/zero_T5_full_near_zero.png": "6defb9f842474b09134d3db87f98fc18d16f4f13a147f3fbd0d00bb6a8a4c69f",
+        "claim_ledger.csv": "7c81a529fa190728222b841eb6b6d5770a506abb36b59dc9dbdb90c0171c68cd",
+        "provenance.json": "0006f655dcd921c9c231ca2c4310fdedd80a91b3b81f4dad74a963e075eda3f7",
+        "figures/plot_manifest.json": "b05834f9b3c16d9ff3b05cfb2225f21576dd6c1968e5273aa35cdc547e567f18",
+        "AUDIT.md": "2714f429063d1b874ff54ef7e0e9abc3d293dd29474153338d2ffe298595f4e8",
+        "figures/minus05_T20_full_near_zero.png": "9aaf4d536381a4c969d694b56a7cf5dfa039a42d86d8cce2fed1b471c96e6fc6",
+        "README.md": "4d789dcdb944db72d690ca1ecc0cd5d1c9059342d335fdf565438cf75f8ee317",
+        "curve_index.csv": "32d24ca2498c93fecb849c45b503fa61a6c6fee4c269a2dc617537fff19513e9"
+    },
+    "verdict": "feasible_candidate",
+    "source_calculation_sha": "3217bed3635574f00c04cbee75e843b4c49451db",
+    "promotion_boundary": "diagnostic_only_until_endpoint_actions_and_public_core_regression",
+    "source_targeted_run_id": "30805637032",
+    "unique_candidate_gate": true,
+    "summary_count": 54,
+    "solver_called": false,
+    "schema_version": "pnjl_maxwell_endpoint_candidate_feasibility_v1"
+}
