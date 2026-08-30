@@ -5,16 +5,16 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
-status = "review"
+status = "accepted"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "PNJL legacy snapshot 物理删除 PR #285 已通过全部 CI 并以 main@dd943779a9ddc170491a61e69e2e41198532084d 合并；accepted 继续作为所有 phase-reference 下游默认、strict 仅显式开启，legacy 不再提供 fallback/rollback。下一步回到 Issue #130 的 full-hybrid author review。"
+next_action = "full_hybrid_candidate 的代表曲线、endpoint 区间、coverage 与成本已由作者审核接受；phase-reference 侧不再追加数值重跑。RS formal numerical convergence 作为独立的 transport follow-up 继续，不能把本项的 accepted 结论当作 RS 收敛证明。"
 required_author_review = true
 author_review_status = "accepted"
-promotion_required = true
+promotion_required = false
 current_branch = "main"
-current_sha = "dd943779a9ddc170491a61e69e2e41198532084d"
+current_sha = "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -35,24 +35,26 @@ evidence = [
   "pr:263",
   "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
+  "review:author_accepted_full_hybrid_candidate",
+  "sha:cc4f71a47f41d3eba20509af0f8409c75d7b9a6d",
   "review:author_accepted_numerical_pilot_and_authorized_retirement",
   "promotion:runtime_default_strict_candidate_with_certified_only_fallback",
 ]
-updated_at = "2026-08-24"
+updated_at = "2026-08-30"
 
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "active"
+status = "review"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
-next_action = "RS prod_v2 consumer/默认迁移与旧 prod_v1 物理清理已完成并留存 evidence；数值状态仍为 diagnostic-only，后续 PNJL legacy phase-reference audit 独立推进，不在本项自动重跑 RS。"
+next_action = "p128 reuse preflight 已完成：现有 p128 仅能在 strict-explicit 口径复用，不能与当前 accepted-primary 默认直接配对。请在 accepted-primary matched rerun 与 strict-only optional proof 之间确认口径；确认前不触发 p104 numerical Action。"
 required_author_review = true
-author_review_status = "accepted"
+author_review_status = "pending"
 promotion_required = true
-current_branch = "main"
-current_sha = "aa2086f428454bddcc087c4a1b2a9503d834c888"
+current_branch = "codex/issue130-rs-formal-convergence"
+current_sha = "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -97,8 +99,10 @@ evidence = [
   "review:author_accepted_publication_clean_v1",
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/",
   "note:retirement_audit_pass_retain_legacy_solver_free",
+  "file:docs/analysis/relaxtime/issue130_rs_formal_convergence_preflight_v1/",
+  "note:p128_reusable_strict_explicit_only_accepted_primary_pair_blocked",
 ]
-updated_at = "2026-08-28"
+updated_at = "2026-08-30"
 
 [[tracks]]
 id = "plot-sop"
@@ -204,27 +208,27 @@ updated_at = "2026-08-19"
 id = "issue130-full-hybrid-author-review"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md"
-reason = "自动 gate 只产生 full_hybrid_candidate，不能替代作者审核或 reference promotion。"
-next_action = "审核代表曲线、三个 endpoint 区间、coverage 和成本，并决定是否进入 reference promotion。"
+reason = "自动 gate 产生 full_hybrid_candidate 后，作者已审核代表曲线、三个 endpoint 区间、coverage 与成本并接受；该 accepted 状态只覆盖 phase-reference 侧，不替代 RS transport 的数值收敛 gate。"
+next_action = "phase-reference 侧保持当前 immutable evidence；RS formal numerical convergence 由 track:rs-transport 独立推进。"
 blocked_by = []
 backlog_file = ""
-evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
+evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/", "review:author_accepted_full_hybrid_candidate", "note:phase_side_accepted_does_not_prove_rs_numerical_convergence"]
 
 [[items]]
 id = "rs-production-after-phase-reference"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "active"
+status = "review"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
-reason = "RS production 依赖新的高精度 phase reference；旧 production 和 registry 历史保持不可变。"
-next_action = "将 32709280462 固化为 runner_communication_lost；不做 pilot，按历史 15+15 shard 矩阵分别 dispatch mode-A/mode-B，保留 mode-A direct-coexistence 的 xi=±0.003 两侧点并在 aggregate 前做 expected-key audit。"
+reason = "RS prod_v2 的 source numerical artifacts 已完成、raw/figure 已经作者接受，旧 prod_v1 已完成 path retirement 与物理清理；但现有 p128 的 source workflow head 仍是 strict-default 且带旧 legacy fallback，不能直接作为当前 accepted-primary runtime 的收敛高阶端。"
+next_action = "完成 p128 reuse preflight 后，等待 formal scope 对齐：accepted-primary 需要先在同一 calculation SHA、同一 topology 下重跑匹配的 p128，再补 p104；strict-only 证明可复用现有 p128，但必须显式固定历史 strict workflow ref。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel"]
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "file:docs/analysis/relaxtime/issue130_rs_formal_convergence_preflight_v1/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel", "note:p128_reusable_strict_explicit_only_accepted_primary_pair_blocked"]
 
 [[items]]
 id = "issue130-targeted-closure-diagnostic"

@@ -1,0 +1,9 @@
+claim_id,claim_type,claim,status,evidence,boundary
+P0,observation,"现有 p128 mode-A/B artifact 完整且 hash 可验证",confirmed,"input_inventory.csv; p128 manifests",不表示数值收敛或 accepted-primary provenance
+P1,observation,"p128 source workflow head 的 CLI 默认 strict，并保留旧 legacy fallback 语义",confirmed,"git show 228...; p128 manifest explicit rollback/legacy_fallback",仅适用于 strict-explicit historical pair
+P2,inference,"现有 p128 可作为 strict-explicit 收敛比较的高阶端",supported,"reuse_matrix.csv:p128_high_tier_artifact strict-explicit",需以同一旧 workflow ref 生成 p104
+P3,inference,"现有 p128 不能直接证明 accepted-primary 默认 runtime 的收敛",supported,"reuse_matrix.csv:p128_high_tier_artifact accepted-primary; accepted v2 manifest",需要 accepted-primary p128 matched rerun
+P4,observation,"现有 production workflow 可通过输入字段表达 p104=104/18/30/20/440",confirmed,"current workflow; input_inventory.csv",grid input 支持不等于 reference provenance 已匹配
+P5,observation,"本次预检未调用 solver、未 dispatch Action",confirmed,"manifest.json; command_log.txt",仅限本次 preflight
+P6,decision,"推荐 accepted-primary matched pair：先 p128 accepted，再 p104 accepted",proposed,"README.md; reuse_matrix.csv",需要作者确认后才触发 numerical Action
+P7,decision,"strict-only historical pair 是可选的低成本路线",pending_author_scope,"README.md; reuse_matrix.csv",不能升级为 accepted-primary 默认的 formal convergence

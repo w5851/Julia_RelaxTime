@@ -1,0 +1,64 @@
+{
+  "schema_version": "relaxtime_issue130_rs_formal_convergence_preflight_v1",
+  "generated_at_utc": "2026-08-30T00:00:00Z",
+  "repo": {
+    "worktree": "D:/Temp/julia_relaxtime_issue130_shared",
+    "branch": "codex/issue130-rs-formal-convergence",
+    "head": "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d",
+    "origin_main": "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d"
+  },
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_workflow_head": "22874505877491754eed27519ad8a7b871c82571",
+  "current_workflow_sha256": "dfb8598834a4060c09b42dd811bc636f24ed28fa28b41fbb175d4765aef13a99",
+  "reference_provenance": {
+    "p128_source_layer": "strict-explicit-era-with-legacy-fallback",
+    "p128_source_manifest_sha256": {
+      "mode_a": "3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72",
+      "mode_b": "093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921"
+    },
+    "accepted_v2_manifest_sha256": "3e37d6812c33c4dd15469391247768fe536dc3185fd54543cdaba2713c520be1",
+    "current_default_layer": "accepted",
+    "current_default_mode": "runtime"
+  },
+  "p128_reuse": {
+    "strict_explicit": true,
+    "accepted_primary": false,
+    "reason": "source workflow head predates accepted v2 runtime and p128 manifests record legacy_fallback=true"
+  },
+  "p104": {
+    "grid": "104/18/30/20/440",
+    "existing_workflow_input_supported": true,
+    "new_workflow_file_required_for_grid": false,
+    "dispatch_status": "not_dispatched"
+  },
+  "preflight_verdict": "accepted_primary_pair_blocked_strict_explicit_only_usable",
+  "solver_called": false,
+  "local_solver_invocation": false,
+  "action_dispatched": false,
+  "result_or_reference_written": false,
+  "package_files": [
+    "README.md",
+    "reuse_matrix.csv",
+    "input_inventory.csv",
+    "claim_ledger.csv",
+    "command_log.txt",
+    "manifest.json"
+  ],
+  "package_file_sha256_excluding_manifest": {
+    "README.md": "4f19fcaef388d80740c56d82bce09ba9307d12888203d3fc6ab8751ac445f01f",
+    "reuse_matrix.csv": "d2a8fd53886cc028c2dfddee2d66a0906919e48225390d0bb1faae64d64e6154",
+    "input_inventory.csv": "de91c745f2170def27484efab051912c9fbd50f145a5802c5f8a40b2aa443287",
+    "claim_ledger.csv": "0e4e7c3009d8adcd672822c4acecb8aba1e5abab99e7ea5baec55fc9f146f755",
+    "command_log.txt": "3d1f88b3eeac29c331acef15163260e5b665d06fa0074c2756274f7e26758892"
+  },
+  "input_files": {
+    "p128_mode_a_manifest_sha256": "3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72",
+    "p128_mode_b_manifest_sha256": "093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921",
+    "p128_mode_a_effective_config_sha256": "426f5fd061fe217c4a2f277fb155713a0fe9599494ee54b750278e50bee75cd6",
+    "p128_mode_b_effective_config_sha256": "283b7fcc1737dc5d594258d4f7ca2aaabd93f33975b9861f1fa27012e6487668",
+    "accepted_v2_manifest_sha256": "3e37d6812c33c4dd15469391247768fe536dc3185fd54543cdaba2713c520be1",
+    "historical_gate_manifest_sha256": "ae7e0a3632e84fea234a8191ebea3d083462d0d43965cdb33c5e14dbb45526d6",
+    "historical_gate_summary_sha256": "c603391dd72179ffb4f9a25813390d3b7695368ff435f3e338d752fc0fc58dc6"
+  },
+  "next_action": "author_scope_confirmation_before_numerical_dispatch"
+}
