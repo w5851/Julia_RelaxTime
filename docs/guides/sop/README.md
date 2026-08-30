@@ -12,6 +12,10 @@ SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历�
 4. 需要调用 Julia API 时转到 `docs/api/`。
 5. 需要判断某次结果支持什么结论时转到 `docs/analysis/`。
 
+如果任务属于新领域、新可观测量、新生产候选或引入外部公式，先执行
+[公式路线闭合 SOP](formula_route_closure.md)，再进入专题工作流 SOP。该门禁只
+保证模型、来源、代码和测试可追踪，不替代专题的数值收敛和 production 审核。
+
 ## 当前 active SOP
 
 | SOP | 权威范围 | 执行入口 |
@@ -22,6 +26,7 @@ SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历�
 | [介子热力学](workflows/meson_thermodynamics.md) | 介子 pressure、QP/LD 与 canonical EOS | `scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl`（专题入口） |
 | [介子数密度](workflows/meson_density.md) | stable/BW/BU 数密度与 path × regime production | `scripts/relaxtime/run_combined_meson_density_scan.jl`（domain-candidate） |
 | [论文级绘图资产与生产](workflows/figure_production.md) | 四层 figure mode、style profile、plot manifest、strict layout gate 与 Origin 边界 | `scripts/plotting/validate_plot_artifact.py` |
+| [公式路线闭合](formula_route_closure.md) | 新领域/新公式从微观模型到代码、测试和生产状态的闭合门禁 | `scripts/dev/check_formula_route_closure.jl` |
 
 ## 状态语义
 

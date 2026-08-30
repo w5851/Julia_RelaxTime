@@ -144,3 +144,24 @@ verification_commands = [
   "julia --project=. scripts/dev/check_docs_consistency.jl",
   "julia --project=. scripts/dev/check_script_entrypoints.jl",
 ]
+
+[[sop]]
+id = "formula_route_closure"
+path = "docs/guides/sop/formula_route_closure.md"
+status = "active"
+authoritative_for = ["formula_route_closure_governance"]
+entrypoints = [
+  "scripts/dev/check_formula_route_closure.jl",
+]
+stable_entrypoints = []
+configs = [
+  "config/governance/formula_route_closure.toml",
+]
+review_cycle_days = 120
+last_verified = "2026-08-30"
+verification_commands = [
+  "julia --project=. scripts/dev/check_formula_route_closure.jl",
+  "julia --project=. scripts/dev/check_sop_governance.jl",
+  "julia --project=. scripts/dev/check_docs_consistency.jl",
+  "julia --project=. -e 'ENV[\"UNIT_FILES\"]=\"config/test_formula_route_closure.jl\"; include(\"tests/unit/runtests.jl\")'",
+]

@@ -7,6 +7,11 @@ quark-only 后处理诊断，目标是重新核对 charged `π^±/K^±` 的 RPA/
 但不在本任务单完成前替换现有 `MesonDensity` 生产语义。`x_min_cut`、低节点数和
 未验证的归一化结果仍只能标记为 diagnostic。
 
+PR290 从独立的 `origin/main` 基线建立了
+[公式路线闭合包](../../reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md)
+和治理门禁；本任务单的严格数值复核依赖该 candidate 规范，但不会因文档闭合而
+自动完成或晋升为 production。
+
 ## 1. 决策目标与假设
 
 ### 1.1 要回答的问题
