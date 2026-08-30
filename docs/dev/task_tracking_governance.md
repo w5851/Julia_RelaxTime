@@ -69,9 +69,9 @@ Deferred/research items:
 
 ## 当前三条主线
 
-- `issue130-phase` 是当前 primary，停在作者审核；`full_hybrid_candidate` 不自动晋升 reference。
-- `rs-transport` 等待 phase reference promotion，保持 blocked，不启动新的 M4 production。
-- `plot-sop` 当前只登记为 `triaged/independent`。工作树中的 plotting 文档、脚本、配置和输出属于独立未跟踪工作，不由本 ledger PR 吸收。
+- `issue130-phase` 已完成 `full_hybrid_candidate` 作者审核、accepted reference promotion 和 legacy retirement；保留不可变 evidence，后续仅做治理归档。
+- `rs-transport` 已完成 accepted-primary p104/p128 的 matched numerical convergence 并归档；旧 strict-era raw/figure 保持不变，accepted evidence 不替换正式结果。
+- `plot-sop` 的公共 SOP 合同已登记为 `promoted`；后续逐图族迁移仍按独立 task/PR 推进，不由该 promotion 记录吸收历史图像或批量迁移工作。
 
 ## 验证与演进
 

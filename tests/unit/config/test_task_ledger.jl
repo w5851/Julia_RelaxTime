@@ -70,7 +70,7 @@ end
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
     @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
-    @test tracks["plot-sop"]["status"] == "triaged"
+    @test tracks["plot-sop"]["status"] == "promoted"
     items = Dict(String(item["id"]) => item for item in parsed["items"])
     @test items["rs-production-after-phase-reference"]["status"] == "archived"
     @test startswith(items["rs-production-after-phase-reference"]["task_file"], "docs/dev/archived/")
