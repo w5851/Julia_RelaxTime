@@ -3,7 +3,9 @@
 
 The importer is deliberately separate from the promotion gate.  It copies the
 reviewed strict/derived/render tables byte-for-byte, records the source hashes,
-and leaves the legacy reference files and runtime consumers untouched.
+and records the deleted legacy snapshot from its immutable audit inventory.
+The importer no longer requires the deleted snapshot to be present in the
+working tree.
 """
 
 from __future__ import annotations
@@ -34,6 +36,10 @@ LEGACY_FILES = (
     Path("data/reference/pnjl/legacy_phase_reference_v1/spinodals.csv"),
     Path("data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.csv"),
     Path("data/reference/pnjl/legacy_phase_reference_v1/phase_reference_dense_manifest.json"),
+)
+LEGACY_INVENTORY = Path(
+    "docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/"
+    "tables/legacy_snapshot_inventory.csv"
 )
 
 LAYER_SPECS = {
@@ -92,6 +98,36 @@ def _assert_csv_contract(path: Path) -> None:
     width = len(rows[0])
     if any(len(row) != width for row in rows[1:]):
         raise ValueError(f"CSV column mismatch: {path}")
+
+
+def _historical_legacy_records(repo_root: Path) -> list[dict[str, Any]]:
+    """Return pre-delete legacy hashes without reading a deleted snapshot.
+
+    The v4 solver-free audit inventory is the immutable provenance source after
+    physical deletion.  These records are metadata only; the importer never
+    restores or consumes legacy rows.
+    """
+    inventory = repo_root / LEGACY_INVENTORY
+    if not inventory.is_file():
+        raise FileNotFoundError(f"legacy audit inventory missing: {inventory}")
+    with inventory.open(newline="", encoding="utf-8-sig") as handle:
+        rows = list(csv.DictReader(handle))
+    if not rows:
+        raise ValueError(f"legacy audit inventory is empty: {inventory}")
+    records: list[dict[str, Any]] = []
+    for row in rows:
+        expected = row.get("expected_sha256", "")
+        expected_bytes = row.get("expected_bytes", "")
+        if not expected or not expected_bytes:
+            raise ValueError(f"legacy audit inventory row is incomplete: {row}")
+        records.append({
+            "path": row.get("source_path", ""),
+            "sha256": expected,
+            "bytes": int(expected_bytes),
+            "availability": "git_recovery_ref_only",
+            "recovery_ref": "9aa4c313901ca0c91e851f58514e3df9aa124df4",
+        })
+    return records
 
 
 def _validate_gate(package_root: Path, gate_root: Path) -> dict[str, Any]:
@@ -176,12 +212,7 @@ def import_package(
                 shutil.rmtree(path)
 
     gate = _validate_gate(package_root, gate_root)
-    legacy_records: list[dict[str, Any]] = []
-    for relative in LEGACY_FILES:
-        path = repo_root / relative
-        if not path.is_file():
-            raise FileNotFoundError(f"missing legacy reference file: {path}")
-        legacy_records.append(file_record(path, repo_root))
+    legacy_records = _historical_legacy_records(repo_root)
 
     source_layers = {
         "strict": package_root / LAYER_SPECS["strict"],
@@ -289,12 +320,6 @@ def import_package(
     ))
     _write_text(reference_root / "manifest.json", json.dumps(root_manifest, ensure_ascii=False, indent=2) + "\n")
 
-    # Re-read the generated files to ensure no copy or manifest write changed the
-    # byte-level identities recorded in the import manifest.
-    for record in legacy_records:
-        path = repo_root / record["path"]
-        if sha256(path) != record["sha256"]:
-            raise AssertionError(f"legacy reference changed during import: {path}")
     return root_manifest
 
 

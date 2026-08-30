@@ -116,6 +116,11 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
         "role": "current_retirement_audit",
         "retirement_blocker": False,
     },
+    "scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py": {
+        "kind": "migration_audit_tooling",
+        "role": "accepted_primary_audit",
+        "retirement_blocker": False,
+    },
     "scripts/analysis/pnjl/build_issue130_rs_runtime_consumer_smoke_v2.py": {
         "kind": "diagnostic_tooling",
         "role": "historical_snapshot_input",
@@ -180,6 +185,16 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
         "kind": "snapshot_contract_test",
         "role": "snapshot_integrity_contract",
         "retirement_blocker": True,
+    },
+    "tests/unit/python/test_issue130_phase_reference_accepted_primary_audit.py": {
+        "kind": "snapshot_contract_test",
+        "role": "audit_contract",
+        "retirement_blocker": False,
+    },
+    "tests/unit/python/test_issue130_phase_reference_legacy_retirement_v2.py": {
+        "kind": "snapshot_contract_test",
+        "role": "audit_contract",
+        "retirement_blocker": False,
     },
     "tests/unit/python/test_issue130_rs_numerical_pilot.py": {
         "kind": "historical_contract_test",
@@ -306,7 +321,14 @@ def git_value(repo_root: Path, *args: str) -> str:
 
 
 def relative(path: Path, repo_root: Path) -> str:
-    return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        # A historical snapshot may be supplied from a disposable recovery
+        # worktree outside the repository.  Keep that provenance explicit
+        # instead of fabricating a repository-relative path.
+        return resolved.as_posix()
 
 
 def tracked_files(repo_root: Path) -> list[Path]:

@@ -1,0 +1,4 @@
+claim_id,claim,status,evidence,boundary
+accepted_runtime_independent,The accepted-primary runtime and explicit strict route do not require the legacy snapshot.,supported,phase_reference_legacy_audit_v4/decision.json; consumer_matrix.csv,solver-free path contract only
+exact_allowlist,Only the eight files listed in deletion_allowlist.csv are removed.,supported,deletion_allowlist.csv; validator report,does not delete candidate accepted strict render or historical evidence
+recoverable_history,The pre-delete snapshot remains recoverable from the reachable path-retirement merge ref.,supported,restore_commands.md; recovery_ref tree/hash checks,Git history recovery not a runtime fallback or external archive

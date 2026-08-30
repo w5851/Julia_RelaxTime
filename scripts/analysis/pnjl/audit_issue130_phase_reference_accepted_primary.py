@@ -568,6 +568,7 @@ def build_audit(
     *,
     replace_existing: bool = False,
     audit_version: str = "v3",
+    legacy_root: Path | None = None,
 ) -> dict[str, Any]:
     if not re.fullmatch(r"v[0-9]+", audit_version):
         raise ValueError("audit_version must use the form vN")
@@ -585,7 +586,10 @@ def build_audit(
                 child.unlink()
     output_root.mkdir(parents=True, exist_ok=True)
     package_root = (repo_root / PACKAGE_RELATIVE).resolve()
-    legacy_root = (repo_root / LEGACY_RELATIVE).resolve()
+    # The live legacy snapshot is intentionally removed by the physical
+    # deletion PR.  Historical audits remain reproducible when callers pass a
+    # disposable recovery tree explicitly; no implicit restore is performed.
+    legacy_root = (legacy_root or repo_root / LEGACY_RELATIVE).resolve()
     package_info = _load_accepted(repo_root, package_root)
     legacy = _load_legacy(legacy_root)
     snapshot = _snapshot_inventory(repo_root, legacy_root)
@@ -729,6 +733,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, default=None)
     parser.add_argument("--replace-existing", action="store_true")
     parser.add_argument("--audit-version", default="v3", help="evidence version label (default: v3)")
+    parser.add_argument(
+        "--legacy-root",
+        type=Path,
+        default=None,
+        help="explicit disposable recovery tree for the deleted legacy snapshot",
+    )
     return parser.parse_args()
 
 
@@ -741,6 +751,7 @@ def main() -> int:
         output_root,
         replace_existing=args.replace_existing,
         audit_version=args.audit_version,
+        legacy_root=args.legacy_root,
     )
     print(json.dumps({"output_root": str(output_root), "verdict": manifest["verdict"]}, ensure_ascii=False))
     return 0

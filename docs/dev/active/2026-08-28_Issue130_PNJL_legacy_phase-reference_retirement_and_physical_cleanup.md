@@ -3,7 +3,8 @@
 状态：active；这是 RS `prod_v1` 物理删除（PR #278）之后的独立 PNJL
 phase-reference follow-up。作者已确认 v2 `accepted` 是 phase-reference 下游的默认
 runtime source，strict 只在显式模式下使用；legacy 不再作为 runtime fallback/rollback。
-当前进入 path retirement，完成后再单独执行 PNJL legacy snapshot 物理删除。
+当前已完成 path retirement，并在独立分支准备 PNJL legacy snapshot 物理删除 PR；
+该 PR 尚待 CI 与作者合并授权。
 
 ## 1. 背景与目标
 
@@ -48,8 +49,10 @@ canonical 根路径退役，并不等于 snapshot 可以立即物理删除。
 
 - candidate：`data/reference/pnjl/issue130_phase_reference_v1/`，calculation SHA
   `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`；
-- legacy：`data/reference/pnjl/legacy_phase_reference_v1/`，其
-  `RETIREMENT_MANIFEST.json` 固定六个 snapshot 文件的来源、字节数和 SHA-256；
+- legacy：物理删除前的 `data/reference/pnjl/legacy_phase_reference_v1/` snapshot，
+  其来源、字节数和 SHA-256 由
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/tables/legacy_snapshot_inventory.csv`
+  及恢复引用固定保存；合并后工作树中不再保留该目录。
 - adapter：`scripts/pnjl/phase_reference_adapter.py` 与
   `scripts/relaxtime/phase_reference_adapter.jl`。
 
@@ -140,12 +143,24 @@ primary，strict 只在显式模式下启用，legacy 不再作为 fallback/roll
 
 ### 阶段 C：物理清理（再次单独授权）
 
-- [ ] 生成精确 deletion allowlist、删除前 tree/hash/bytes manifest 和 Git restore
+- [x] 生成精确 deletion allowlist、删除前 tree/hash/bytes manifest 和 Git restore
   指令；allowlist 只包含已确认不再被任何 consumer 使用的 PNJL legacy snapshot。
-- [ ] 运行 deletion validator、data-path/active-doc/task-ledger governance 和
+- [x] 在物理删除分支应用 allowlist，运行 deletion validator、data-path/active-doc/task-ledger governance 和
   focused adapter tests；确认 candidate、历史 evidence 与 `crossover.csv` 不受影响。
-- [ ] 创建独立 physical-deletion PR；未经作者再次授权不合并、不删除本地或远端
+- [x] 创建独立 physical-deletion PR；未经作者再次授权不合并、不删除本地或远端
   其他分支/文件。
+
+#### 阶段 C 实际结果（2026-08-30，待合并）
+
+物理删除提案位于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_physical_deletion_v1/`，
+allowlist 精确包含 8 个 legacy snapshot 文件，共 50,749 bytes。删除前 tree hash 为
+`c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6`，恢复引用固定为
+`9aa4c313901ca0c91e851f58514e3df9aa124df4`。分支中的 validator 报告
+`physical_deletion_proposal_valid`，`solver_called=false`、`production_write=false`，
+candidate/accepted/strict、历史 evidence 和独立 `crossover.csv` 均保持存在。
+合并后 legacy 不再作为 runtime fallback/rollback；如需复原只能从 Git 恢复引用在
+临时分支恢复，不承诺运行时回退。
 
 ## 5. 测试与验收标准
 

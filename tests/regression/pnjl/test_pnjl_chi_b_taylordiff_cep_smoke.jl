@@ -2,7 +2,10 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const _MODELS_PATH = normpath(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv")
+const CEP_REFERENCE_PATH = joinpath(
+    PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v2",
+    "accepted", "tables", "cep_boundary_accepted_phase_map_v1.csv",
+)
 const CHI_B_FD_REFERENCE_BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_chi_b_taylordiff_fd_reference_v1.csv")
 
 if !isdefined(Main, :Models)
@@ -45,13 +48,15 @@ function _load_xi0_cep(path::String)
     header = split(strip(lines[1]), ',')
     idx_xi = findfirst(==("xi"), header)
     idx_T = findfirst(==("T_CEP_MeV"), header)
+    idx_T_mid = findfirst(==("T_midpoint_MeV"), header)
     idx_muB = findfirst(==("muB_CEP_MeV"), header)
+    idx_muq_proxy = findfirst(==("mu_CEP_proxy_MeV"), header)
     for line in lines[2:end]
         cols = split(strip(line), ',')
         parse(Float64, cols[idx_xi]) == 0.0 || continue
         return (
-            T_CEP_MeV=parse(Float64, cols[idx_T]),
-            muB_CEP_MeV=parse(Float64, cols[idx_muB]),
+            T_CEP_MeV=parse(Float64, cols[idx_T === nothing ? idx_T_mid : idx_T]),
+            muB_CEP_MeV=idx_muB === nothing ? 3.0 * parse(Float64, cols[idx_muq_proxy]) : parse(Float64, cols[idx_muB]),
         )
     end
     error("xi=0 CEP reference row not found: $path")

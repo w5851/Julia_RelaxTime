@@ -20,7 +20,8 @@ using Statistics
 const PROJECT_ROOT_V2 = normpath(joinpath(@__DIR__, "..", ".."))
 const HBARC_MEV_FM_V2 = 197.3269804
 const V2_CANONICAL_CEP_PATH = joinpath(
-    PROJECT_ROOT_V2, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv",
+    PROJECT_ROOT_V2, "data", "reference", "pnjl", "issue130_phase_reference_v2",
+    "accepted", "tables", "cep_boundary_accepted_phase_map_v1.csv",
 )
 const V2_STATUS_VALUES = (:confirmed_first_order, :confirmed_monotone, :ambiguous_near_critical)
 
@@ -135,7 +136,10 @@ function _v2_read_canonical(xi::Float64)
     candidates = [row for row in rows if hasproperty(row, :xi) && abs(Float64(row.xi) - xi) <= 1e-9]
     isempty(candidates) && throw(ArgumentError("canonical CEP has no xi=$(xi) row"))
     row = first(candidates)
-    return (T=Float64(row.T_CEP_MeV), muq=Float64(row.muq_CEP_MeV))
+    if hasproperty(row, :T_CEP_MeV)
+        return (T=Float64(row.T_CEP_MeV), muq=Float64(row.muq_CEP_MeV))
+    end
+    return (T=Float64(row.T_midpoint_MeV), muq=Float64(row.mu_CEP_proxy_MeV))
 end
 
 function _v2_json_read(path::AbstractString)

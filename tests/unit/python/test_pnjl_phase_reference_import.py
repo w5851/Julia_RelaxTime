@@ -1,11 +1,6 @@
 from pathlib import Path
 
-from scripts.analysis.pnjl.import_issue130_phase_reference import (
-    CALCULATION_SHA,
-    LEGACY_FILES,
-    import_package,
-    sha256,
-)
+from scripts.analysis.pnjl.import_issue130_phase_reference import CALCULATION_SHA, import_package
 
 
 ROOT = Path(__file__).parents[3]
@@ -13,8 +8,7 @@ PACKAGE = ROOT / "docs" / "analysis" / "pnjl" / "phase_reference" / "issue130_ph
 GATE = ROOT / "docs" / "analysis" / "pnjl" / "phase_reference" / "issue130_phase_reference_promotion_gate_v1"
 
 
-def test_import_creates_candidate_sibling_without_touching_legacy_reference(tmp_path):
-    before = {relative: sha256(ROOT / relative) for relative in LEGACY_FILES}
+def test_import_creates_candidate_sibling_without_requiring_deleted_legacy_reference(tmp_path):
     reference_root = tmp_path / "reference" / "issue130_phase_reference_v1"
     figure_root = tmp_path / "figures" / "issue130_phase_reference_v1"
 
@@ -31,7 +25,8 @@ def test_import_creates_candidate_sibling_without_touching_legacy_reference(tmp_
     assert (reference_root / "render" / "tables" / "maxwell_surface_render.csv").is_file()
     assert (figure_root / "phase_surface_render_mu_xi_T.png").is_file()
     assert (figure_root / "plot_manifest.json").is_file()
-    assert before == {relative: sha256(ROOT / relative) for relative in LEGACY_FILES}
+    assert len(manifest["legacy_reference_snapshot"]) == 6
+    assert all(item["availability"] == "git_recovery_ref_only" for item in manifest["legacy_reference_snapshot"])
 
 
 def test_import_refuses_existing_destination(tmp_path):
