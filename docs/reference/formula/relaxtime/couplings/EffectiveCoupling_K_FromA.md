@@ -7,18 +7,22 @@
 ## 2. 物理意义
 - **物理背景**: 在3味PNJL模型中，有效耦合系数描述了夸克-反夸克相互作用通过介子传播的有效强度，是随机相位近似下介子传播子的关键参数
 - **在计算链中的作用**: 作为介子传播子和散射截面的输入，直接影响驰豫时间和输运系数的计算
-- **相关物理量**: 原始耦合常数G、K，夸克凝聚 \(\phi_u,\phi_s\)，温度T，化学势μ
+- **相关物理量**: 原始耦合常数G、K，夸克凝聚 \(\phi_u,\phi_d,\phi_s\)，温度T，化学势μ
 
 ## 3. 数学表达式
 
 ### 3.1 原始公式
+
+为与当前物理凝聚口径区分，下面先记历史 helper
+`H_u=-\phi_u`、`H_s=-\phi_s`；它们对应代码参数名 `G_u`、`G_s`。
+
 ```math
 \begin{aligned}
-K_0^{\pm} &= G \mp \frac{1}{3} K(2G^\mu + G^s) \\
-K_1^{\pm} = K_2^{\pm} = K_3^{\pm} &= G \pm \frac{1}{2} KG^s \\
-K_4^{\pm} = K_5^{\pm} = K_6^{\pm} = K_7^{\pm} &= G \pm \frac{1}{2} KG^\mu \\
-K_8^{\pm} &= G \pm \frac{1}{6} K(4G^\mu - G^s) \\
-K_{08}^{\pm} &= \pm \frac{1}{6} \sqrt{2} K(G^\mu - G^s)
+K_0^{\pm} &= G \mp \frac{1}{3} K(2H_u + H_s) \\
+K_1^{\pm} = K_2^{\pm} = K_3^{\pm} &= G \pm \frac{1}{2} KH_s \\
+K_4^{\pm} = K_5^{\pm} = K_6^{\pm} = K_7^{\pm} &= G \pm \frac{1}{2} KH_u \\
+K_8^{\pm} &= G \pm \frac{1}{6} K(4H_u - H_s) \\
+K_{08}^{\pm} &= \pm \frac{1}{6} \sqrt{2} K(H_u - H_s)
 \end{aligned}
 ```
 
@@ -46,6 +50,14 @@ A_f(T,\mu)= 4\int_0^\Lambda dp\,\frac{p^2}{E}
 \left[n_q(E;\mu,\Phi,\bar\Phi)+n_{\bar q}(E;\mu,\Phi,\bar\Phi)-1\right].
 ```
 
+在项目的自然单位约定下，`p,m_f,T,mu_f` 的单位为 `fm^-1`，因此
+```math
+[A_f]=\mathrm{fm}^{-2},\qquad
+[\phi_f]=\mathrm{fm}^{-3},\qquad
+[H_f]=\mathrm{fm}^{-3},\qquad
+[K H_f]=\mathrm{fm}^{2}.
+```
+
 这两式之所以等价，是因为第二式把第一式中整体的负号吸收到括号里，改写成了 `n_q+n_{\bar q}-1`；这里的物理凝聚主口径始终是 `\phi_f`，而不是 `-\phi_f`。
 
 - 需要注意：当前实现中的辅助函数 `calculate_G_from_A(A_f, m_f)` 返回的是
@@ -56,7 +68,7 @@ G^f_{\text{helper}} = -\phi_f,
 
 ### 3.2 程序实现形式
 ```julia
-function calculate_effective_couplings(G, K, G_u, G_s, Nc=3)
+function calculate_effective_couplings(G, K, G_u, G_s)
     K0_plus = G - (1/3)*K*(2*G_u + G_s)
     K0_minus = G + (1/3)*K*(2*G_u + G_s)
     
@@ -84,8 +96,8 @@ end
 |------|------|------|------|----------|----------|
 | G | G | 输入 | fm² | 四夸克相互作用耦合常数 | 正实数 |
 | K | K | 输入 | fm⁵ | 't Hooft相互作用耦合常数 | 实数 |
-| G_u | \(G^u_{\text{helper}}=-\phi_u\) | 输入 | 无量纲 | 当前实现中进入耦合公式的中间变量 | 实数 |
-| G_s | \(G^s_{\text{helper}}=-\phi_s\) | 输入 | 无量纲 | 当前实现中进入耦合公式的中间变量 | 实数 |
+| G_u | \(G^u_{\text{helper}}=-\phi_u\) | 输入 | fm⁻³ | 当前实现中进入耦合公式的历史中间变量 | 实数 |
+| G_s | \(G^s_{\text{helper}}=-\phi_s\) | 输入 | fm⁻³ | 当前实现中进入耦合公式的历史中间变量 | 实数 |
 | Nc | N_c | 输入 | 无量纲 | 色数 | 3(固定) |
 | K0± | K₀± | 输出 | fm² | 单态道有效耦合系数 | 实数 |
 | K123± | K₁₂₃± | 输出 | fm² | π介子道有效耦合系数 | 实数 |
@@ -101,8 +113,37 @@ end
 - **\(\phi_u,\phi_s\)**: 物理上的夸克凝聚，通过 A 积分确定
 - **G_u,G_s**: 当前实现中传给 `calculate_effective_couplings` 的 helper 变量，满足 `G_u=-\phi_u, G_s=-\phi_s`
 
+`G_u/G_s` 的命名是兼容旧接口的历史遗留。后续完整 KMT 路径应直接复用
+平衡解中已得到的 `\phi_u,\phi_d,\phi_s`，避免再次从 `A_f` 重积分或把
+`H_f` 当作独立物理输入。
 
-### 5.2 可选参数
+### 5.2 非对称背景下的旧/完整通道映射
+
+由旧 helper 定义 `H_f=-\phi_f` 可直接得到：
+
+```math
+K_{123}^{\pm}=G\pm\frac12 K H_s
+                  =K_{12}^{P/S},
+\qquad
+K_{4567}^{\pm}=G\pm\frac12 K H_u
+                  =K_{67}^{P/S}.
+```
+
+第二个等式说明旧 `K4567` 在 `\phi_u\ne\phi_d` 时是 `K67`（u spectator）
+的代数形式，而不是 charged kaon 的耦合。物理通道应按
+
+```text
+pi^±                 -> K12
+K^+=u bar(s), K^-=s bar(u) -> K45  (d spectator)
+K^0=d bar(s), bar(K)^0=s bar(d)  -> K67  (u spectator)
+```
+
+在 `\phi_u=\phi_d` 时 `K45=K67=K4567`，这才恢复旧接口把四个 kaon 味道
+通道合并的极限。该映射是纯代数兼容关系，不等同于已经完成非对称背景下的
+完整 RPA 极化或介子热力学反馈。
+
+
+### 5.3 可选参数
 - **Nc**: 色数，默认值为3，对应QCD的SU(3)规范群
 
 ## 6. 输出结果说明

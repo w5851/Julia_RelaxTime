@@ -13,8 +13,9 @@ Phase E5: 对比 BU 导数形式与分部积分形式的一致性。
 
 说明：
 - 当前仍是分析脚本，不改正式 helper / workflow 契约
-- 由于 `omega_min > 0` 且 `omega_max < inf`，两种离散形式不要求点对点完全一致
-- 该脚本主要用于判断：差异是“有限窗口/离散误差”，还是“当前相位函数口径本身不稳”
+- 有限窗口比较显式包含 `[g(omega)F(omega)]_{omega_min}^{omega_max}`
+- 端点和 GL 内点在同一个序列上 unwrap；本门禁只认证 smooth/unwrapped branch
+- 旧 `density_*_byparts` / `*_diff` 列保留为 bulk-only 历史映射，closure 列才是恒等式门禁
 """
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
@@ -22,6 +23,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "WorkflowParamAdapters.jl"))
+include(joinpath(@__DIR__, "bu_kernel_gate_utils.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
 using .Models: solve_gap_and_meson_point
@@ -32,6 +34,7 @@ using Main.MesonMass: ensure_quark_params_has_A
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.PolarizationAniso: polarization_with_width
 using Main.MesonPropagator: meson_propagator_simple
+using .BUKernelGateUtils: finite_window_bu_identity, nonuniform_three_point_derivative
 
 const DEFAULT_OUTPUT = joinpath(
     PROJECT_ROOT,
@@ -138,45 +141,6 @@ end
 @inline _gbu_phase_function(δ::Float64) = δ - 0.5 * sin(2.0 * δ)
 @inline _gbu_derivative_weight(δ::Float64) = 2.0 * sin(δ)^2
 
-function _nonuniform_derivative(x::Vector{Float64}, y::Vector{Float64})
-    n = length(x)
-    n == length(y) || throw(ArgumentError("x/y length mismatch"))
-    n >= 2 || throw(ArgumentError("need at least 2 points for derivative"))
-    dy = similar(y)
-    if n == 2
-        slope = (y[2] - y[1]) / (x[2] - x[1])
-        dy[1] = slope
-        dy[2] = slope
-        return dy
-    end
-    dy[1] = (y[2] - y[1]) / (x[2] - x[1])
-    for i in 2:(n - 1)
-        dy[i] = (y[i + 1] - y[i - 1]) / (x[i + 1] - x[i - 1])
-    end
-    dy[n] = (y[n] - y[n - 1]) / (x[n] - x[n - 1])
-    return dy
-end
-
-function _omega_integral_byparts(F_values::Vector{Float64}, omega_grid, omega_w, T::Float64)
-    total = 0.0
-    @inbounds for iω in eachindex(omega_grid, omega_w, F_values)
-        gω = bose_distribution(Float64(omega_grid[iω]), 0.0, T)
-        total += omega_w[iω] * gω * (1.0 + gω) * F_values[iω]
-    end
-    total / (2.0 * π * T)
-end
-
-function _omega_integral_derivative(delta_values::Vector{Float64}, ddelta_values::Vector{Float64},
-                                    omega_grid, omega_w, T::Float64; generalized::Bool=false)
-    total = 0.0
-    @inbounds for iω in eachindex(omega_grid, omega_w, delta_values, ddelta_values)
-        gω = bose_distribution(Float64(omega_grid[iω]), 0.0, T)
-        weight = generalized ? _gbu_derivative_weight(delta_values[iω]) : 1.0
-        total += omega_w[iω] * gω * weight * ddelta_values[iω]
-    end
-    total / (2.0 * π)
-end
-
 function _channel_consistency(meson::Symbol, qp, tp, K_coeffs;
                               degeneracy::Int, qmax::Float64, q_nodes::Int,
                               omega_min::Float64, omega_max::Float64, omega_nodes::Int,
@@ -184,46 +148,118 @@ function _channel_consistency(meson::Symbol, qp, tp, K_coeffs;
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
     omega_grid, omega_w = gauleg(omega_min, omega_max, omega_nodes)
 
-    current_byparts_sum = 0.0
+    current_bulk_sum = 0.0
+    current_boundary_lower_sum = 0.0
+    current_boundary_upper_sum = 0.0
     current_derivative_sum = 0.0
-    gbu_byparts_sum = 0.0
+    current_weighted_phase_min_sum = 0.0
+    current_weighted_phase_max_sum = 0.0
+    gbu_bulk_sum = 0.0
+    gbu_boundary_lower_sum = 0.0
+    gbu_boundary_upper_sum = 0.0
     gbu_derivative_sum = 0.0
+    gbu_weighted_phase_min_sum = 0.0
+    gbu_weighted_phase_max_sum = 0.0
+    max_q_current_closure_abs = 0.0
+    max_q_gbu_closure_abs = 0.0
+    bose_omega_min = NaN
+    bose_omega_max = NaN
 
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
-        phases = [_propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta) for ω in omega_grid]
-        delta = _unwrap_phases(phases)
-        ddelta = _nonuniform_derivative(collect(Float64, omega_grid), delta)
-        F_current = delta
-        F_gbu = _gbu_phase_function.(delta)
+        omega_all = vcat(omega_min, collect(Float64, omega_grid), omega_max)
+        phases_all = [
+            _propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta)
+            for ω in omega_all
+        ]
+        delta_all = _unwrap_phases(phases_all)
+        ddelta_all = nonuniform_three_point_derivative(omega_all, delta_all)
+        F_current_all = delta_all
+        F_gbu_all = _gbu_phase_function.(delta_all)
+        dF_gbu_all = _gbu_derivative_weight.(delta_all) .* ddelta_all
 
-        omega_current_byparts = _omega_integral_byparts(F_current, omega_grid, omega_w, Float64(tp.T))
-        omega_current_derivative = _omega_integral_derivative(delta, ddelta, omega_grid, omega_w, Float64(tp.T))
-        omega_gbu_byparts = _omega_integral_byparts(F_gbu, omega_grid, omega_w, Float64(tp.T))
-        omega_gbu_derivative = _omega_integral_derivative(delta, ddelta, omega_grid, omega_w, Float64(tp.T); generalized=true)
+        interior = 2:(length(omega_all) - 1)
+        current_gate = finite_window_bu_identity(
+            omega_grid, omega_w, view(F_current_all, interior), view(ddelta_all, interior);
+            T=Float64(tp.T), mu=0.0,
+            omega_min=omega_min, omega_max=omega_max,
+            F_min=first(F_current_all), F_max=last(F_current_all),
+        )
+        gbu_gate = finite_window_bu_identity(
+            omega_grid, omega_w, view(F_gbu_all, interior), view(dF_gbu_all, interior);
+            T=Float64(tp.T), mu=0.0,
+            omega_min=omega_min, omega_max=omega_max,
+            F_min=first(F_gbu_all), F_max=last(F_gbu_all),
+        )
 
         q_pref = q^2 / (2.0 * π^2)
-        current_byparts_sum += q_w[iq] * q_pref * omega_current_byparts
-        current_derivative_sum += q_w[iq] * q_pref * omega_current_derivative
-        gbu_byparts_sum += q_w[iq] * q_pref * omega_gbu_byparts
-        gbu_derivative_sum += q_w[iq] * q_pref * omega_gbu_derivative
+        q_weight = q_w[iq] * q_pref
+        current_bulk_sum += q_weight * current_gate.byparts_bulk
+        current_boundary_lower_sum += q_weight * current_gate.boundary_lower
+        current_boundary_upper_sum += q_weight * current_gate.boundary_upper
+        current_derivative_sum += q_weight * current_gate.derivative
+        current_weighted_phase_min_sum += q_weight * current_gate.weighted_phase_min
+        current_weighted_phase_max_sum += q_weight * current_gate.weighted_phase_max
+        gbu_bulk_sum += q_weight * gbu_gate.byparts_bulk
+        gbu_boundary_lower_sum += q_weight * gbu_gate.boundary_lower
+        gbu_boundary_upper_sum += q_weight * gbu_gate.boundary_upper
+        gbu_derivative_sum += q_weight * gbu_gate.derivative
+        gbu_weighted_phase_min_sum += q_weight * gbu_gate.weighted_phase_min
+        gbu_weighted_phase_max_sum += q_weight * gbu_gate.weighted_phase_max
+        max_q_current_closure_abs = max(max_q_current_closure_abs, current_gate.closure_abs)
+        max_q_gbu_closure_abs = max(max_q_gbu_closure_abs, gbu_gate.closure_abs)
+        bose_omega_min = current_gate.bose_min
+        bose_omega_max = current_gate.bose_max
     end
 
     pref = Float64(degeneracy)
-    current_byparts = pref * current_byparts_sum
+    current_bulk = pref * current_bulk_sum
+    current_boundary_lower = pref * current_boundary_lower_sum
+    current_boundary_upper = pref * current_boundary_upper_sum
+    current_boundary = current_boundary_lower + current_boundary_upper
+    current_total = current_bulk + current_boundary
     current_derivative = pref * current_derivative_sum
-    gbu_byparts = pref * gbu_byparts_sum
+    gbu_bulk = pref * gbu_bulk_sum
+    gbu_boundary_lower = pref * gbu_boundary_lower_sum
+    gbu_boundary_upper = pref * gbu_boundary_upper_sum
+    gbu_boundary = gbu_boundary_lower + gbu_boundary_upper
+    gbu_total = gbu_bulk + gbu_boundary
     gbu_derivative = pref * gbu_derivative_sum
+    current_closure = current_derivative - current_total
+    gbu_closure = gbu_derivative - gbu_total
 
     return (
-        density_current_byparts=current_byparts,
+        # Backward-compatible aliases: these remain the old bulk-only quantity.
+        density_current_byparts=current_bulk,
         density_current_derivative=current_derivative,
-        density_gbu_byparts=gbu_byparts,
+        density_gbu_byparts=gbu_bulk,
         density_gbu_derivative=gbu_derivative,
-        current_abs_diff=abs(current_derivative - current_byparts),
-        current_rel_diff=abs(current_derivative - current_byparts) / max(abs(current_byparts), 1e-12),
-        gbu_abs_diff=abs(gbu_derivative - gbu_byparts),
-        gbu_rel_diff=abs(gbu_derivative - gbu_byparts) / max(abs(gbu_byparts), 1e-12),
+        current_abs_diff=abs(current_derivative - current_bulk),
+        current_rel_diff=abs(current_derivative - current_bulk) / max(abs(current_bulk), 1e-12),
+        gbu_abs_diff=abs(gbu_derivative - gbu_bulk),
+        gbu_rel_diff=abs(gbu_derivative - gbu_bulk) / max(abs(gbu_bulk), 1e-12),
+        density_current_byparts_bulk=current_bulk,
+        density_current_boundary_lower=current_boundary_lower,
+        density_current_boundary_upper=current_boundary_upper,
+        density_current_boundary=current_boundary,
+        density_current_byparts_total=current_total,
+        current_closure_abs=abs(current_closure),
+        current_closure_rel=abs(current_closure) / max(abs(current_derivative), abs(current_total), 1e-12),
+        density_gbu_byparts_bulk=gbu_bulk,
+        density_gbu_boundary_lower=gbu_boundary_lower,
+        density_gbu_boundary_upper=gbu_boundary_upper,
+        density_gbu_boundary=gbu_boundary,
+        density_gbu_byparts_total=gbu_total,
+        gbu_closure_abs=abs(gbu_closure),
+        gbu_closure_rel=abs(gbu_closure) / max(abs(gbu_derivative), abs(gbu_total), 1e-12),
+        current_qweighted_phase_omega_min=pref * current_weighted_phase_min_sum,
+        current_qweighted_phase_omega_max=pref * current_weighted_phase_max_sum,
+        gbu_qweighted_phase_omega_min=pref * gbu_weighted_phase_min_sum,
+        gbu_qweighted_phase_omega_max=pref * gbu_weighted_phase_max_sum,
+        bose_omega_min=bose_omega_min,
+        bose_omega_max=bose_omega_max,
+        max_q_current_closure_abs=max_q_current_closure_abs,
+        max_q_gbu_closure_abs=max_q_gbu_closure_abs,
     )
 end
 
@@ -289,6 +325,28 @@ function main()
                 current_rel_diff=cc.current_rel_diff,
                 gbu_abs_diff=cc.gbu_abs_diff,
                 gbu_rel_diff=cc.gbu_rel_diff,
+                density_current_byparts_bulk=cc.density_current_byparts_bulk,
+                density_current_boundary_lower=cc.density_current_boundary_lower,
+                density_current_boundary_upper=cc.density_current_boundary_upper,
+                density_current_boundary=cc.density_current_boundary,
+                density_current_byparts_total=cc.density_current_byparts_total,
+                current_closure_abs=cc.current_closure_abs,
+                current_closure_rel=cc.current_closure_rel,
+                density_gbu_byparts_bulk=cc.density_gbu_byparts_bulk,
+                density_gbu_boundary_lower=cc.density_gbu_boundary_lower,
+                density_gbu_boundary_upper=cc.density_gbu_boundary_upper,
+                density_gbu_boundary=cc.density_gbu_boundary,
+                density_gbu_byparts_total=cc.density_gbu_byparts_total,
+                gbu_closure_abs=cc.gbu_closure_abs,
+                gbu_closure_rel=cc.gbu_closure_rel,
+                current_qweighted_phase_omega_min=cc.current_qweighted_phase_omega_min,
+                current_qweighted_phase_omega_max=cc.current_qweighted_phase_omega_max,
+                gbu_qweighted_phase_omega_min=cc.gbu_qweighted_phase_omega_min,
+                gbu_qweighted_phase_omega_max=cc.gbu_qweighted_phase_omega_max,
+                bose_omega_min=cc.bose_omega_min,
+                bose_omega_max=cc.bose_omega_max,
+                max_q_current_closure_abs=cc.max_q_current_closure_abs,
+                max_q_gbu_closure_abs=cc.max_q_gbu_closure_abs,
                 qmax=qmax,
                 q_nodes=q_nodes,
                 omega_min=omega_min,
@@ -300,7 +358,7 @@ function main()
     end
 
     open(output, "w") do io
-        println(io, "T_MeV,meson,mass_ref,gamma_ref,threshold_ref,density_current_byparts,density_current_derivative,density_gbu_byparts,density_gbu_derivative,current_abs_diff,current_rel_diff,gbu_abs_diff,gbu_rel_diff,qmax,q_nodes,omega_min,omega_max,omega_nodes,eta")
+        println(io, "T_MeV,meson,mass_ref,gamma_ref,threshold_ref,density_current_byparts,density_current_derivative,density_gbu_byparts,density_gbu_derivative,current_abs_diff,current_rel_diff,gbu_abs_diff,gbu_rel_diff,density_current_byparts_bulk,density_current_boundary_lower,density_current_boundary_upper,density_current_boundary,density_current_byparts_total,current_closure_abs,current_closure_rel,density_gbu_byparts_bulk,density_gbu_boundary_lower,density_gbu_boundary_upper,density_gbu_boundary,density_gbu_byparts_total,gbu_closure_abs,gbu_closure_rel,current_qweighted_phase_omega_min,current_qweighted_phase_omega_max,gbu_qweighted_phase_omega_min,gbu_qweighted_phase_omega_max,bose_omega_min,bose_omega_max,max_q_current_closure_abs,max_q_gbu_closure_abs,qmax,q_nodes,omega_min,omega_max,omega_nodes,eta")
         for r in rows
             println(io, join((_fmt(getproperty(r, k)) for k in (
                 :T_MeV, :meson, :mass_ref, :gamma_ref, :threshold_ref,
@@ -308,6 +366,18 @@ function main()
                 :density_gbu_byparts, :density_gbu_derivative,
                 :current_abs_diff, :current_rel_diff,
                 :gbu_abs_diff, :gbu_rel_diff,
+                :density_current_byparts_bulk,
+                :density_current_boundary_lower, :density_current_boundary_upper,
+                :density_current_boundary, :density_current_byparts_total,
+                :current_closure_abs, :current_closure_rel,
+                :density_gbu_byparts_bulk,
+                :density_gbu_boundary_lower, :density_gbu_boundary_upper,
+                :density_gbu_boundary, :density_gbu_byparts_total,
+                :gbu_closure_abs, :gbu_closure_rel,
+                :current_qweighted_phase_omega_min, :current_qweighted_phase_omega_max,
+                :gbu_qweighted_phase_omega_min, :gbu_qweighted_phase_omega_max,
+                :bose_omega_min, :bose_omega_max,
+                :max_q_current_closure_abs, :max_q_gbu_closure_abs,
                 :qmax, :q_nodes, :omega_min, :omega_max, :omega_nodes, :eta
             )), ','))
         end

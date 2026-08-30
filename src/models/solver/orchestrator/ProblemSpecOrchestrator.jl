@@ -834,3 +834,40 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         cfg,
     )
 end
+
+function _fixedmub_conserved_problem_spec_forward_solve(
+    model::AbstractQCDModel,
+    mode::FixedMuBConservedCharges,
+    T_fm::Real;
+    fwd_kwargs...,
+)
+    kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    kwargs[:rho0] = Float64(get(kwargs, :rho0, rho0))
+    isfinite(kwargs[:rho0]) && kwargs[:rho0] > 0 || throw(ArgumentError(
+        "rho0 must be finite and positive, got $(kwargs[:rho0])",
+    ))
+    if haskey(kwargs, :nlsolve_method)
+        method = kwargs[:nlsolve_method]
+        method in (:newton, :trust_region) || throw(ArgumentError(
+            "nlsolve_method must be :newton or :trust_region, got $(method)",
+        ))
+    end
+    if !haskey(kwargs, :mu0)
+        flavor = flavor_mu_from_bqs(mode.muB_fm, 0.0, mode.muB_fm / 3)
+        kwargs[:mu0] = Float64[flavor.mu_u, flavor.mu_d, flavor.mu_s]
+    end
+    return _governed_nonrho_problem_spec_forward_solve(
+        model,
+        mode,
+        T_fm,
+        kwargs,
+        "FixedMuBConservedCharges",
+        :conserved_charge_attempt_origin,
+        local_kwargs -> _solve_constraint_fixedmub_conserved(
+            model,
+            T_fm,
+            mode;
+            pairs(local_kwargs)...,
+        ),
+    )
+end

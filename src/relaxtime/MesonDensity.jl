@@ -15,9 +15,11 @@ module MesonDensity
 using ForwardDiff
 using ..GaussLegendre: gauleg
 using ..AFieldBuilder: ensure_quark_params_has_A
-using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings,
+                            calculate_effective_couplings_from_phi
 using ..MesonMass: solve_meson_mass
 using ..PolarizationAniso: polarization_aniso, polarization_with_width
+using ..MesonInteractionKernel: FullKMTInteraction, charged_coupling
 using ..MesonPropagator: meson_propagator_simple
 using Main.Constants_PNJL: G_fm2, K_fm5
 
@@ -31,6 +33,7 @@ export strict_bw_qpole_meson_number_density, strict_bw_qpole_density_summary
 export phase_shift_meson_number_density, phase_shift_meson_density_summary
 export phase_shift_meson_number_density_derivative_reference, phase_shift_meson_density_derivative_reference_summary
 export phase_shift_point_diagnostic
+export PhaseShiftInteractionSpec
 
 const DEFAULT_MESON_DENSITY_Q_NODES = 256
 const DEFAULT_PHASE_SHIFT_Q_MAX = 12.0
@@ -46,6 +49,47 @@ const DEFAULT_PHASE_SHIFT_NOANOM_POLICY = :none
 const DEFAULT_NOANOM_COMPONENT_EPS = 1e-8
 const DEFAULT_NOANOM_LEADING_COMPONENT_PEAK_MIN = 0.02 * π
 const DEFAULT_NOANOM_LANDAU_MARGIN_STEPS = 0.5
+const _PHASE_SHIFT_PROPAGATOR_DENOM_EPS = 1e-12
+
+"""Explicit interaction factors used by the phase-shift density kernel.
+
+The legacy density path uses ``2K/(1-4K*Pi)``.  A diagnostic caller can inject
+another coupling while keeping the same denominator convention, or explicitly
+record a different RPA normalization.  This avoids changing the historical
+`EffectiveCouplings` NamedTuple contract.
+"""
+struct PhaseShiftInteractionSpec
+    backend::Symbol
+    pair::Symbol
+    channel::Symbol
+    coupling::Float64
+    numerator_factor::Float64
+    denominator_factor::Float64
+end
+
+function PhaseShiftInteractionSpec(
+    backend::Symbol,
+    pair::Symbol,
+    channel::Symbol,
+    coupling::Real;
+    numerator_factor::Real=2.0,
+    denominator_factor::Real=4.0,
+)
+    isfinite(Float64(coupling)) || throw(ArgumentError("interaction coupling must be finite"))
+    isfinite(Float64(numerator_factor)) || throw(ArgumentError("interaction numerator_factor must be finite"))
+    denominator_value = Float64(denominator_factor)
+    isfinite(denominator_value) && denominator_value > 0.0 || throw(ArgumentError(
+        "interaction denominator_factor must be finite and positive",
+    ))
+    return PhaseShiftInteractionSpec(
+        backend,
+        pair,
+        channel,
+        Float64(coupling),
+        Float64(numerator_factor),
+        denominator_value,
+    )
+end
 @inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
@@ -1171,6 +1215,23 @@ function _simple_meson_pol_params(meson::Symbol, qp)
 end
 
 function _build_k_coeffs(qp)
+    # Analysis callers may carry the already-solved condensates alongside the
+    # quark masses/chemical potentials.  Prefer that phi-native view so the
+    # legacy compatibility tuple does not reconstruct H_f from a second A_f
+    # quadrature.  Plain historical callers without :phi retain the old path.
+    if hasproperty(qp, :phi)
+        phi = qp.phi
+        all(flavor -> hasproperty(phi, flavor), (:u, :d, :s)) || throw(ArgumentError(
+            "quark_params.phi must provide fields :u, :d, and :s",
+        ))
+        return calculate_effective_couplings_from_phi(
+            G_fm2,
+            K_fm5,
+            Float64(phi.u),
+            Float64(phi.s),
+        )
+    end
+
     G_u = calculate_G_from_A(qp.A.u, qp.m.u)
     G_s = calculate_G_from_A(qp.A.s, qp.m.s)
     return calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
@@ -1187,6 +1248,93 @@ end
         return K_coeffs.K4567_minus
     end
     throw(ArgumentError("Unsupported simple meson: $(meson)"))
+end
+
+@inline function _phase_shift_pair(meson::Symbol)::Symbol
+    if meson === :pi || meson === :pi_plus || meson === :pi_minus || meson === :sigma_pi
+        return :K12
+    elseif meson === :K || meson === :K_plus || meson === :K_minus || meson === :sigma_K
+        return :K45
+    end
+    throw(ArgumentError("Unsupported phase-shift meson: $(meson)"))
+end
+
+@inline function _legacy_phase_shift_interaction(meson::Symbol, K_coeffs)
+    pair = meson === :pi || meson === :pi_plus || meson === :pi_minus ? :K123 : :K4567
+    channel = meson === :sigma_pi || meson === :sigma_K ? :S : :P
+    return PhaseShiftInteractionSpec(
+        :legacy_effective,
+        pair,
+        channel,
+        _simple_meson_coupling(meson, K_coeffs),
+        numerator_factor=2.0,
+        denominator_factor=4.0,
+    )
+end
+
+@inline function _full_kmt_phase_shift_interaction(meson::Symbol, kernel::FullKMTInteraction)
+    if meson === :pi || meson === :K
+        throw(ArgumentError("FullKMTInteraction requires charge-resolved mesons; use :pi_plus/:pi_minus/:K_plus/:K_minus"))
+    end
+    return _full_kmt_phase_shift_interaction_resolved(meson, kernel)
+end
+
+@inline function _full_kmt_phase_shift_interaction_resolved(meson::Symbol, kernel::FullKMTInteraction)
+    return PhaseShiftInteractionSpec(
+        :full_kmt_charged,
+        _phase_shift_pair(meson),
+        meson === :sigma_pi || meson === :sigma_K ? :S : :P,
+        charged_coupling(
+            kernel,
+            _phase_shift_pair(meson),
+            meson === :sigma_pi || meson === :sigma_K ? :S : :P,
+        ),
+        # Keep the current scalar BU denominator for an apples-to-apples
+        # coupling A/B.  The matrix-RPA 2K normalization remains a separate
+        # backend and is not silently mixed into this density diagnostic.
+        numerator_factor=2.0,
+        denominator_factor=4.0,
+    )
+end
+
+function _resolve_phase_shift_interaction(meson::Symbol, K_coeffs, interaction)
+    if interaction === nothing
+        return _legacy_phase_shift_interaction(meson, K_coeffs)
+    elseif interaction isa PhaseShiftInteractionSpec
+        return interaction
+    elseif interaction isa FullKMTInteraction
+        return _full_kmt_phase_shift_interaction(meson, interaction)
+    end
+    throw(ArgumentError(
+        "interaction must be nothing, PhaseShiftInteractionSpec, or FullKMTInteraction",
+    ))
+end
+
+@inline function _phase_shift_interaction_metadata(interaction)
+    interaction === nothing && return (
+        backend=:legacy_effective,
+        pair=:unknown,
+        channel=:unknown,
+        coupling=NaN,
+        numerator_factor=NaN,
+        denominator_factor=NaN,
+    )
+    interaction isa FullKMTInteraction && return (
+        backend=:full_kmt_charged,
+        pair=:unknown,
+        channel=:unknown,
+        coupling=NaN,
+        numerator_factor=2.0,
+        denominator_factor=4.0,
+    )
+    return (
+        backend=interaction.backend,
+        pair=interaction.pair,
+        channel=interaction.channel,
+        coupling=interaction.coupling,
+        numerator_factor=interaction.numerator_factor,
+        denominator_factor=interaction.denominator_factor,
+    )
 end
 
 function _polarization_components(
@@ -1228,11 +1376,27 @@ function _propagator_components(
     qp,
     tp,
     K_coeffs;
+    interaction_spec=nothing,
     eta::Float64,
     real_axis_mode::Symbol,
 ) where {T<:Real}
     Π = _polarization_components(meson, ω, q, qp, tp; eta=eta, real_axis_mode=real_axis_mode)
-    D = meson_propagator_simple(meson, K_coeffs, Π)
+    if interaction_spec === nothing
+        D = meson_propagator_simple(meson, K_coeffs, Π)
+        return real(D), imag(D)
+    end
+    interaction = interaction_spec === nothing ?
+        _legacy_phase_shift_interaction(meson, K_coeffs) : interaction_spec
+    K = interaction.coupling
+    TΠ = promote_type(typeof(real(Π)), typeof(K))
+    denom = one(Π) - TΠ(interaction.denominator_factor) * TΠ(K) * Π
+    if !(isfinite(real(denom)) && isfinite(imag(denom)))
+        return 0.0, 0.0
+    end
+    if abs(denom) < TΠ(_PHASE_SHIFT_PROPAGATOR_DENOM_EPS)
+        denom += Complex{TΠ}(zero(TΠ), TΠ(_PHASE_SHIFT_PROPAGATOR_DENOM_EPS))
+    end
+    D = (TΠ(interaction.numerator_factor) * TΠ(K)) / denom
     return real(D), imag(D)
 end
 
@@ -1243,13 +1407,22 @@ function _inverse_propagator_components(
     qp,
     tp,
     K_coeffs;
+    interaction_spec=nothing,
     eta::Float64,
     real_axis_mode::Symbol,
 ) where {T<:Real}
     Π = _polarization_components(meson, ω, q, qp, tp; eta=eta, real_axis_mode=real_axis_mode)
-    K = _simple_meson_coupling(meson, K_coeffs)
+    if interaction_spec === nothing
+        K = _simple_meson_coupling(meson, K_coeffs)
+        TΠ = promote_type(typeof(real(Π)), typeof(K))
+        denom = one(Π) - TΠ(4) * TΠ(K) * Π
+        return real(denom), imag(denom)
+    end
+    interaction = interaction_spec === nothing ?
+        _legacy_phase_shift_interaction(meson, K_coeffs) : interaction_spec
+    K = interaction.coupling
     TΠ = promote_type(typeof(real(Π)), typeof(K))
-    denom = one(Π) - TΠ(4) * TΠ(K) * Π
+    denom = one(Π) - TΠ(interaction.denominator_factor) * TΠ(K) * Π
     return real(denom), imag(denom)
 end
 
@@ -1260,16 +1433,27 @@ function _propagator_phase(
     qp,
     tp,
     K_coeffs;
+    interaction_spec=nothing,
     eta::Float64,
     real_axis_mode::Symbol,
     phase_convention::Symbol,
 ) where {T<:Real}
     convention = _phase_convention_symbol(phase_convention)
     if convention === :arg_inverse_propagator
-        reI, imI = _inverse_propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta, real_axis_mode=real_axis_mode)
+        reI, imI = _inverse_propagator_components(
+            meson, ω, q, qp, tp, K_coeffs;
+            interaction_spec=interaction_spec,
+            eta=eta,
+            real_axis_mode=real_axis_mode,
+        )
         return -atan(imI, reI)
     end
-    reD, imD = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta, real_axis_mode=real_axis_mode)
+    reD, imD = _propagator_components(
+        meson, ω, q, qp, tp, K_coeffs;
+        interaction_spec=interaction_spec,
+        eta=eta,
+        real_axis_mode=real_axis_mode,
+    )
     return atan(imD, reD)
 end
 
@@ -1562,6 +1746,7 @@ function phase_shift_meson_number_density(
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
+    interaction=nothing,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
     _require_positive_node_count("q_nodes", q_nodes)
@@ -1572,6 +1757,7 @@ function phase_shift_meson_number_density(
     convention = _phase_convention_symbol(phase_convention)
     display = _phase_display_symbol(phase_display)
     noanom_diag_empty = _empty_noanom_diag(noanom_policy)
+    interaction_meta = _phase_shift_interaction_metadata(interaction)
 
     tp = thermo_params
     T_fm = Float64(tp.T)
@@ -1608,6 +1794,12 @@ function phase_shift_meson_number_density(
             phase_display=display,
             density_policy=domain.policy,
             noanom_diag_empty...,
+            interaction_backend=interaction_meta.backend,
+            interaction_pair=interaction_meta.pair,
+            interaction_channel=interaction_meta.channel,
+            interaction_coupling=interaction_meta.coupling,
+            interaction_numerator_factor=interaction_meta.numerator_factor,
+            interaction_denominator_factor=interaction_meta.denominator_factor,
             unsafe_bose_count=0,
             min_E_minus_mu=omega_min - μ,
             bose_x_min=domain.bose_x_min,
@@ -1638,6 +1830,12 @@ function phase_shift_meson_number_density(
         phase_display=display,
         density_policy=domain.policy,
         noanom_diag_empty...,
+        interaction_backend=interaction_meta.backend,
+        interaction_pair=interaction_meta.pair,
+        interaction_channel=interaction_meta.channel,
+        interaction_coupling=interaction_meta.coupling,
+        interaction_numerator_factor=interaction_meta.numerator_factor,
+        interaction_denominator_factor=interaction_meta.denominator_factor,
         unsafe_bose_count=domain.unsafe_bose_count,
         min_E_minus_mu=domain.min_E_minus_mu,
         bose_x_min=domain.bose_x_min,
@@ -1648,6 +1846,9 @@ function phase_shift_meson_number_density(
 
     qp = ensure_quark_params_has_A(quark_params, tp)
     K_coeffs = _build_k_coeffs(qp)
+    resolved_interaction = _resolve_phase_shift_interaction(meson, K_coeffs, interaction)
+    interaction_meta = _phase_shift_interaction_metadata(resolved_interaction)
+    kernel_interaction = interaction === nothing ? nothing : resolved_interaction
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
     omega_grid, omega_w = gauleg(domain.omega_lower, omega_max, omega_nodes)
 
@@ -1664,6 +1865,7 @@ function phase_shift_meson_number_density(
         phases = [
             _propagator_phase(
                 meson, ω, q, qp, tp, K_coeffs;
+                interaction_spec=kernel_interaction,
                 eta=axis.eta,
                 real_axis_mode=axis.mode,
                 phase_convention=convention,
@@ -1728,6 +1930,12 @@ function phase_shift_meson_number_density(
         noanom_removed_omega_max=noanom_removed_component_count == 0 ? NaN : noanom_removed_omega_max,
         noanom_landau_omega_min=isfinite(noanom_landau_omega_min) ? noanom_landau_omega_min : NaN,
         noanom_landau_omega_max=isfinite(noanom_landau_omega_max) ? noanom_landau_omega_max : NaN,
+        interaction_backend=resolved_interaction.backend,
+        interaction_pair=resolved_interaction.pair,
+        interaction_channel=resolved_interaction.channel,
+        interaction_coupling=resolved_interaction.coupling,
+        interaction_numerator_factor=resolved_interaction.numerator_factor,
+        interaction_denominator_factor=resolved_interaction.denominator_factor,
         unsafe_bose_count=domain.unsafe_bose_count,
         min_E_minus_mu=domain.min_E_minus_mu,
         bose_x_min=domain.bose_x_min,

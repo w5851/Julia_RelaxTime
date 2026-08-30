@@ -20,6 +20,9 @@
 - 不把 stable/BW 的 unsafe Bose-domain 行替换为有限值。
 - 不把 targeted branch repair 等价为新 policy 下的全网格重跑。
 - 不负责介子 pressure/EOS；该链由介子热力学 SOP 管理。
+- `scripts/analysis/relaxtime/scan_full_kmt_bu_freezeout.jl` 仅是完整 charged
+  KMT 耦合在 quark-only BQS 背景上的 A/B 诊断脚本，不属于稳定 workflow，
+  不得用来替代下方的正式 production 入口。
 
 ## 3. 权威入口
 
@@ -60,6 +63,13 @@ Density regimes：
 - `strict_bw_stage2`；
 - `phase_shift_current`；
 - `phase_shift_gbu_reference`。
+
+完整 KMT A/B 诊断：
+
+- `MesonDensity.PhaseShiftInteractionSpec` 保持可审计的耦合与分母因子；
+- 传入 `FullKMTInteraction` 时，`pi^±` 使用 `K12`，`K^±` 使用 `K45`；
+- 默认仍采用 `2K/(1-4KPi)` 的旧 scalar BU 分母，只用于隔离耦合变化；
+- 该路径不把介子密度写回 `Omega`，也不修改 BQS 平衡解。
 
 关键治理边界：
 

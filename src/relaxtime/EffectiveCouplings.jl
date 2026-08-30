@@ -1,7 +1,11 @@
 """
 # EffectiveCouplings.jl
 
-有效耦合常数计算模块，基于单圈积分A函数计算介子传播子所需的有效耦合系数。
+有效耦合常数计算模块，基于单圈积分 A 函数计算介子传播子所需的有效耦合系数。
+
+物理上的夸克凝聚记为 `phi_f = <bar(q_f) q_f>`。历史接口
+`calculate_G_from_A` 保留了旧的中间变量命名，但返回的是
+`H_f = -phi_f`；完整 KMT 后端应直接使用已经求得的 `phi_f`。
 
 公式参考 `doc/formula/K_有效耦合常数byA.md`。
 """
@@ -13,29 +17,34 @@ using ..OneLoopIntegralsCorrection: A_aniso
 
 export calculate_effective_couplings, coupling_matrix_determinant
 export calculate_G_from_A
+export calculate_effective_couplings_from_phi
 export mixing_matrix_elements
 
 # ----------------------------------------------------------------------------
-# 转换函数：从A函数计算G^f
+# 转换函数：从 A 函数计算历史 helper H_f=-phi_f
 # ----------------------------------------------------------------------------
 
 """
-    calculate_G_from_A(A_f::Float64, m_f::Float64; Nc::Int=3) -> Float64
+    calculate_G_from_A(A_f::Real, m_f::Real; Nc::Int=3) -> H_f::Float64
 
-从单圈积分A_f计算夸克凝聚相关函数G^f。
+从单圈积分 A_f 计算历史 helper `H_f=-phi_f`（API 变量名仍为 `G_f`）。
 
 # 公式
 ```math
-G^f = -\\frac{N_c}{4\\pi^2} m_f A_f(T, \\mu)
+\\phi_f = \\frac{N_c}{4\\pi^2}m_fA_f(T,\\mu),\\qquad
+H_f \\equiv -\\phi_f = -\\frac{N_c}{4\\pi^2}m_fA_f(T,\\mu)
 ```
 
+`H_f` 是为兼容旧 `calculate_effective_couplings` 公式保留的 helper，
+不是另一个独立的物理凝聚定义。
+
 # 参数
-- `A_f`: 单圈积分A函数的值（单位：fm）
+- `A_f`: 单圈积分 A 函数的值（单位：fm⁻²）
 - `m_f`: 该味夸克的质量（单位：fm⁻¹）
 - `Nc`: 色数（默认3）
 
 # 返回值
-- `G_f`: 夸克凝聚相关函数（单位：无量纲）
+- `H_f`（历史 API 名称为 `G_f`）：负的夸克凝聚（单位：fm⁻³）
 
 # 示例
 ```julia
@@ -46,8 +55,8 @@ m_inv_fm = 300.0 / 197.327  # 300 MeV
 Φ = 0.5
 Φbar = 0.5
 
-A_u = A(T_inv_fm, μ_inv_fm, m_inv_fm, Φ, Φbar)
-G_u = calculate_G_from_A(A_u)
+A_u = A(m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
+H_u = calculate_G_from_A(A_u, m_inv_fm)
 ```
 """
 @inline @fastmath function calculate_G_from_A(A_f::Real, m_f::Real; Nc::Int=3)
@@ -58,6 +67,69 @@ end
 
 @inline @fastmath function calculate_G_from_A(A_f::Real; Nc::Int=3)
     throw(ArgumentError("calculate_G_from_A(A_f) is deprecated; call calculate_G_from_A(A_f, m_f)"))
+end
+
+# ----------------------------------------------------------------------------
+# phi-native compatibility adapter for the historical u/d-symmetric API
+# ----------------------------------------------------------------------------
+
+"""
+    calculate_effective_couplings_from_phi(G, K, phi_l, phi_s) -> NamedTuple
+
+Construct the historical effective-coupling tuple directly from condensates,
+without recomputing the one-loop integral `A_f` or introducing the historical
+helper `H_f`.  `phi_l` is the common light-flavor condensate used by the old
+u/d-symmetric interface; `phi_s` is the strange condensate.  The returned
+fields intentionally retain the legacy `K123`/`K4567` names.
+
+For an isospin-asymmetric state this adapter is only a compatibility view:
+`K123` is algebraically `K12`, while `K4567` is algebraically `K67` because
+its correction uses the u-flavor spectator.  The physical charged-kaon
+channel is `K45` and must be obtained from `MesonInteractionKernel`.
+
+The formulas are the old `calculate_effective_couplings` formulas after the
+identity `H_f = -phi_f` has been substituted.  Thus, for finite inputs,
+`calculate_effective_couplings_from_phi(G, K, phi_l, phi_s)` is algebraically
+equivalent to `calculate_effective_couplings(G, K, -phi_l, -phi_s)`.
+"""
+@inline @fastmath function calculate_effective_couplings_from_phi(
+    G::Real,
+    K::Real,
+    phi_l::Real,
+    phi_s::Real,
+)
+    # Keep the same field order and arithmetic structure as the legacy
+    # implementation, while expressing every correction in terms of the
+    # physical condensates directly.
+    term_0 = -(1.0 / 3.0) * K * (2.0 * phi_l + phi_s)
+    K0_plus = G - term_0
+    K0_minus = G + term_0
+
+    term_123 = -0.5 * K * phi_s
+    K123_plus = G + term_123
+    K123_minus = G - term_123
+
+    term_4567 = -0.5 * K * phi_l
+    K4567_plus = G + term_4567
+    K4567_minus = G - term_4567
+
+    term_8 = -(1.0 / 6.0) * K * (4.0 * phi_l - phi_s)
+    K8_plus = G + term_8
+    K8_minus = G - term_8
+
+    term_08 = (1.0 / 6.0) * sqrt(2.0) * K * (phi_s - phi_l)
+    K08_plus = term_08
+    K08_minus = -term_08
+
+    det_K_plus = coupling_matrix_determinant(K0_plus, K8_plus, K08_plus)
+    det_K_minus = coupling_matrix_determinant(K0_minus, K8_minus, K08_minus)
+
+    return (K0_plus=K0_plus, K0_minus=K0_minus,
+            K123_plus=K123_plus, K123_minus=K123_minus,
+            K4567_plus=K4567_plus, K4567_minus=K4567_minus,
+            K8_plus=K8_plus, K8_minus=K8_minus,
+            K08_plus=K08_plus, K08_minus=K08_minus,
+            det_K_plus=det_K_plus, det_K_minus=det_K_minus)
 end
 
 # ----------------------------------------------------------------------------
@@ -158,28 +230,34 @@ end
 计算3味PNJL模型中的10个有效耦合系数。
 
 # 物理背景
-在随机相位近似(RPA)下，介子传播子由有效耦合系数K_α^±描述，这些系数依赖于原始耦合常数G、K
-和夸克凝聚相关函数G^μ（u/d味）、G^s（s味）。
+在随机相位近似(RPA)下，介子传播子由有效耦合系数K_α^±描述。这一历史
+接口接收 `G_u`、`G_s` 两个 helper，它们实际表示
+`H_u=-φ_u`、`H_s=-φ_s`；完整 KMT 后端应直接以 `φ_u, φ_d, φ_s` 生成
+味道分辨的相互作用核。
 
 # 公式
-K_0^± = G ∓ (1/3)K(2G^μ + G^s)
-K_{123}^± = G ± (1/2)KG^s
-K_{4567}^± = G ± (1/2)KG^μ
-K_8^± = G ± (1/6)K(4G^μ - G^s)
-K_{08}^± = ±(1/6)√2 K(G^μ - G^s)
+K_0^± = G ∓ (1/3)K(2H_u + H_s)
+K_{123}^± = G ± (1/2)KH_s
+K_{4567}^± = G ± (1/2)KH_u
+K_8^± = G ± (1/6)K(4H_u - H_s)
+K_{08}^± = ±(1/6)√2 K(H_u - H_s)
 
 其中：
 - K_0: 单态通道（σ/f_0）
 - K_{123}: π介子通道（π⁰, π±）
-- K_{4567}: K介子通道（K⁰, K±）
+- K_{4567}: 旧接口合并的 K 通道；在 `u ≠ d` 时，由于它使用 `H_u`，
+  代数上对应 `K_{67}`（`d\\bar s/s\\bar d` 的中性通道）。物理
+  `K^±` 应使用完整核的 `K_{45}`（`u\\bar s/s\\bar u`）。
 - K_8: 八重态通道（η_8）
 - K_{08}: 混合通道（η-η'混合）
 
 # 参数
 - `G`: 四夸克相互作用耦合常数（单位：fm²）
 - `K`: 't Hooft六夸克相互作用耦合常数（单位：fm⁵）
-- `G_u`: u/d夸克凝聚相关函数（无量纲），通过`calculate_G_from_A(A_u)`计算
-- `G_s`: s夸克凝聚相关函数（无量纲），通过`calculate_G_from_A(A_s)`计算
+- `G_u`: 历史命名的 `H_u=-φ_u` helper（单位：fm⁻³），通过
+  `calculate_G_from_A(A_u, m_u)` 计算
+- `G_s`: 历史命名的 `H_s=-φ_s` helper（单位：fm⁻³），通过
+  `calculate_G_from_A(A_s, m_s)` 计算
 
 # 返回值
 返回一个NamedTuple，包含10个有效耦合系数和2个行列式（单位：fm²和fm⁴）：
@@ -214,12 +292,12 @@ m_s_inv_fm = m_s_MeV / ħc_MeV_fm
 Φbar = 0.5
 
 # 计算A函数
-A_u = A(T_inv_fm, μ_inv_fm, m_u_inv_fm, Φ, Φbar)
-A_s = A(T_inv_fm, μ_inv_fm, m_s_inv_fm, Φ, Φbar)
+A_u = A(m_u_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
+A_s = A(m_s_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
 
-# 计算G^f
-G_u = calculate_G_from_A(A_u)
-G_s = calculate_G_from_A(A_s)
+# 计算历史 helper H_f=-phi_f（变量名 G_u/G_s 为兼容旧 API）
+G_u = calculate_G_from_A(A_u, m_u_inv_fm)
+G_s = calculate_G_from_A(A_s, m_s_inv_fm)
 
 # 计算有效耦合系数
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
@@ -232,7 +310,8 @@ println("det(K⁻) = ", K_coeffs.det_K_minus, " fm⁴ (σ/σ'混合)")
 
 # 注意事项
 1. 输入的G和K应使用fm为单位的自然单位制
-2. G_u和G_s是无量纲量，通过A函数计算得到
+2. `G_u` 和 `G_s` 是历史 helper 名称，实际为 `H_u=-φ_u` 和
+   `H_s=-φ_s`（单位：fm⁻³）；完整核路径应直接使用 `φ_f`
 3. 在手征极限下（G^μ = G^s = 0），所有K_α^±均退化为G
 4. K_{08}^±的符号差异来自于η-η'混合的非对角项
 """

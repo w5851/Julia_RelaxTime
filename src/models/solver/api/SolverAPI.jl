@@ -462,6 +462,10 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_f
     return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
+function solve_constraint(model::AbstractQCDModel, mode::FixedMuBConservedCharges, T_fm::Real; kwargs...)
+    return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
+end
+
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
     opts = _resolve_fixedmu_runtime_options(mode, T_fm, μ_fm, kwargs)
@@ -531,7 +535,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
     end
 end
 
-function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
+function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
@@ -724,7 +728,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
     )
 end
 
-function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
+function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges}, T_fm::Real; kwargs...)
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
@@ -838,7 +842,7 @@ function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     return solve(model, mode, T_fm, μ_fm; kwargs...)
 end
 
-function solve(mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
+function solve(mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
     model = create_model(:PNJL)
     return solve(model, mode, T_fm; kwargs...)
 end
@@ -856,7 +860,7 @@ function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     return solve_multi(model, mode, T_fm, μ_fm; kwargs...)
 end
 
-function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
+function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges}, T_fm::Real; kwargs...)
     model = create_model(:PNJL)
     return solve_multi(model, mode, T_fm; kwargs...)
 end
@@ -877,7 +881,7 @@ function solve_vec(model::AbstractPNJLModel, mode::FixedMu, theta_vec::AbstractV
     return solve(model, mode, T_fm, μ_fm; kwargs...)
 end
 
-function solve_vec(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_vec::AbstractVector{<:Real}; kwargs...)
+function solve_vec(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma}, theta_vec::AbstractVector{<:Real}; kwargs...)
     T_fm = _extract_theta_nonfixedmu(theta_vec, mode)
     return solve(model, mode, T_fm; kwargs...)
 end
@@ -889,7 +893,7 @@ function solve_named(model::AbstractPNJLModel, mode::FixedMu, theta_named::Named
     return solve_vec(model, mode, theta_vec; kwargs...)
 end
 
-function solve_named(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_named::NamedTuple; kwargs...)
+function solve_named(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma}, theta_named::NamedTuple; kwargs...)
     haskey(theta_named, :T_fm) || throw(ArgumentError("$(typeof(mode)) solve_named requires :T_fm"))
     theta_vec = [theta_named[:T_fm]]
     return solve_vec(model, mode, theta_vec; kwargs...)

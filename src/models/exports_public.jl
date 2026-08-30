@@ -49,6 +49,8 @@ export coerce_solver_result, solver_result_view, solver_result_is_success
 export solve_vec, solve_named
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
+export FixedMuBConservedCharges
+export flavor_mu_from_bqs, conserved_mu_from_flavor, conserved_densities_from_flavor
 export state_var_dim, mu_var_dim, solution_dim
 export ProblemSpec, build_problem_spec, ExtraConstraints, default_extra_constraints
 export AbstractConstraintComponent
