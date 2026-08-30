@@ -197,8 +197,10 @@ retarded bubble provider 已实现。
 
 ### Phase C：charged bubble provider 与极点
 
-- [ ] 从现有 `PolarizationAniso` 提取可替换的 retarded bubble provider，先复用
-  相同 `A/B0` 正则化，再单独验证有限宽度解析延拓。
+- [x] 从现有 `PolarizationAniso` 提取可替换的 charged bubble provider 契约，复用
+  相同 `A/B0` 正则化；实现位于 `src/relaxtime/ChargedRPAProvider.jl`。
+- [ ] 完成有限宽度严格 retarded 解析延拓验证；当前 `:finite_width` 仍只是实轴
+  兼容 proxy，不能作为该门禁的通过证据。
 - [ ] 实现极点残差/阈值/Mott 分支记录，覆盖 `mu=0` 共轭关系和有限同位旋点。
 
 ### Phase D：strict BU density
@@ -240,6 +242,10 @@ retarded bubble provider 已实现。
 
 - 纯代数核：`src/relaxtime/MesonInteractionKernel.jl`、
   `tests/unit/relaxtime/test_meson_interaction_kernel.jl`。
+- charged scalar-RPA 契约与 A/B0 provider 适配：
+  `src/relaxtime/ChargedRPAKernel.jl`、`src/relaxtime/ChargedRPAProvider.jl`、
+  `tests/unit/relaxtime/test_charged_rpa_kernel.jl`、
+  `tests/unit/relaxtime/test_charged_rpa_provider.jl`。
 - 中性矩阵 RPA：`src/relaxtime/MesonRPA.jl`、
   `docs/api/relaxtime/propagator/MesonRPA.md`。
 - 当前 charged BU scalar 诊断：`src/relaxtime/MesonDensity.jl`、
