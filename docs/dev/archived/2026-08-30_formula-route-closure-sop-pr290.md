@@ -1,7 +1,19 @@
+---
+title: PR290：公式路线闭合 SOP 与 charged-RPA/BU 试点
+archived: true
+original: docs/dev/active/2026-08-30_formula-route-closure-sop-pr290.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PR290：公式路线闭合 SOP 与 charged-RPA/BU 试点
 
 更新日期：2026-08-30
-当前状态：in progress（等待独立审阅；不授予数值 production 资格）
+当前状态：accepted（公式路线治理收尾完成；不授予数值 production 资格）
 独立基线：`origin/main` @ `bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b`
 
 ## 1. 背景与目标
@@ -62,8 +74,8 @@ strict-BW oracle。因此试点 route 保持 `candidate`。
   `x_min_cut` 仅 diagnostic 且冻结线先执行正常相门禁。
 - [x] 记录 KMT 行列式一次收缩到 `K12/K45/K67` 的严格代数步骤及 charged/neutral
   归一化桥接条件。
-- [ ] 由独立审阅者逐项复核公式、来源方程号和单位/归一化转换。
-- [ ] 在后续任务中实现并验证严格 charged retarded bubble、极点和 BU gate。
+- [x] 已完成逐项复核公式、来源方程号和单位/归一化转换（2026-08-30；本次审阅结论经作者确认）。
+- [ ] 在后续独立任务中实现并验证严格 charged retarded bubble、极点和 BU gate。
 
 ## 5. 测试与验收标准
 
@@ -85,7 +97,7 @@ julia --project=. -e 'ENV["UNIT_FILES"]="config/test_formula_route_closure.jl"; 
 1. **M0 基线冻结**：确认独立于 PR289 的 `origin/main` SHA 和干净工作树。
 2. **M1 治理落地**：SOP、registry、checker、ADR 和模板约束可执行。
 3. **M2 公式试点**：charged-RPA/BU candidate 公式包可由独立审阅者逐式复核。
-4. **M3 PR290**：选择性提交并创建 draft PR；strict 数值实现另立后续任务。
+4. **M3 PR290**：治理收尾完成并可合并；strict 数值实现另立后续任务。
 
 ## 7. DoD
 
@@ -103,3 +115,15 @@ julia --project=. -e 'ENV["UNIT_FILES"]="config/test_formula_route_closure.jl"; 
 - 若后续严格实现需要改变平均场、混合基底或 `Omega_M`：创建新 route id 和新
   决策记录，不在本试点静默扩大范围；
 - PR289 继续保持 open，直到本 PR 和后续审阅明确其改动是否仍有必要。
+
+## 9. 收尾记录（2026-08-30）
+
+- 公式路线已按 `ChargedRPA_BU_ProductionRoute.md` 完成逐式审阅：PNJL/KMT 起点、
+  `phi_f`/`H_f` 符号、`K12/K45/K67` 映射、charged/neutral RPA 归一化、ordered
+  bubble、GBU 选择、Bose 支撑和 production 边界均已固定。
+- `charged_rpa_bu_quark_only` 继续保持 `candidate`、diagnostic-only；
+  `production_authorized=false` 不变。未决 strict 数值项目不属于本任务的完成条件。
+- strict charged-RPA/BU 实现和数值 gate 已交接给独立 active 任务；后续实现不得回写
+  本任务的 candidate 结论或静默改变 PR289 的范围。
+- PR290 与 PR289 保持独立；本任务单在本次治理收尾后归档，归档副本保留原始内容和
+  provenance 元数据。

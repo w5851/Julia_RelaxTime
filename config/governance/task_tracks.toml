@@ -109,23 +109,25 @@ updated_at = "2026-08-30"
 id = "formula-route-closure"
 title = "Formula route closure SOP and charged-RPA/BU pilot"
 status = "active"
-current_task = "formula-route-closure-sop-pr290"
+current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "完成 PR290 的公式包独立审阅；strict charged-RPA/BU 数值实现仍作为后续独立任务。"
+next_action = "在独立后续 PR 中实现并验证 ordered charged retarded bubble、domega/pi 测度、相位/Levinson/Mott gate 与四算法收敛；保持本 route 为 candidate。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/formula-route-closure-sop"
-current_sha = "6e24bccb0300bd9f33823be6d816acf30145e366"
+current_branch = ""
+current_sha = "fa2e4583cec08fff6d572b3573a7db96be9bf612"
 run_ids = []
 evidence = [
-  "file:docs/dev/active/2026-08-30_formula-route-closure-sop-pr290.md",
   "file:docs/guides/sop/formula_route_closure.md",
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
   "pr:290",
-  "sha:6e24bccb0300bd9f33823be6d816acf30145e366",
+  "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
   "sha:bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b",
+  "review:formula_route_audit_complete",
+  "review:author_accepted_pr290_sop_closeout",
+  "note:strict_follow_up_handoff",
   "note:pr290_independent_from_pr289",
 ]
 updated_at = "2026-08-30"
@@ -234,18 +236,41 @@ updated_at = "2026-08-19"
 id = "formula-route-closure-sop-pr290"
 track_id = "formula-route-closure"
 classification = "independent"
-status = "active"
+status = "archived"
 parent = "track:formula-route-closure"
-task_file = "docs/dev/active/2026-08-30_formula-route-closure-sop-pr290.md"
-reason = "PR290 从 origin/main 的固定基线建立公式路线闭合 SOP，并以 charged-RPA/BU candidate 作为首个试点；PR289 保持独立 open。"
-next_action = "等待独立审阅者逐项复核公式、来源、单位/归一化和代码映射；未完成前保持 candidate。"
+task_file = "docs/dev/archived/2026-08-30_formula-route-closure-sop-pr290.md"
+reason = "PR290 已完成公式路线逐式审阅和纯治理收尾；SOP、registry、checker 与 candidate 边界已固定，strict 数值实现转交独立后续任务；PR289 保持独立 open。"
+next_action = "PR290 合并后保留归档副本；后续只通过新的 strict charged-RPA/BU 任务推进实现与数值 gate。"
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "file:docs/dev/archived/2026-08-30_formula-route-closure-sop-pr290.md",
   "file:docs/guides/sop/formula_route_closure.md",
   "file:config/governance/formula_route_closure.toml",
   "file:scripts/dev/check_formula_route_closure.jl",
+  "pr:290",
+  "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
+  "review:formula_route_audit_complete",
+  "review:author_accepted_pr290_sop_closeout",
   "sha:bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b",
+]
+
+[[items]]
+id = "charged-rpa-bu-strict-implementation"
+track_id = "formula-route-closure"
+classification = "required_follow_up"
+status = "active"
+parent = "track:formula-route-closure"
+task_file = "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
+reason = "PR290 已固定 candidate 公式路线；ordered charged retarded bubble、严格 BU 测度、相位/Levinson/Mott gate、Bose 支撑和四算法收敛仍需在独立后续 PR 实现与验收。"
+next_action = "建立独立后续分支，先实现 ordered charged retarded bubble 与 charged kernel backend，再按任务单逐层通过 dω/pi、phase、Levinson/Mott 和 convergence gates。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md",
+  "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
+  "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
+  "note:implementation_follow_up_after_pr290",
 ]
 
 [[items]]
