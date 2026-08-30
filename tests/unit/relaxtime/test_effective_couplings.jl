@@ -26,9 +26,17 @@ const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "
 if !isdefined(Main, :PNJLQuarkDistributions)
     Base.include(Main, _QUARK_DISTRIBUTION_PATH)
 end
+const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution_Aniso.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions_Aniso)
+    Base.include(Main, _QUARK_DISTRIBUTION_ANISO_PATH)
+end
 const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+const _ONE_LOOP_INTEGRALS_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegralsAniso.jl"))
+if !isdefined(Main, :OneLoopIntegralsCorrection)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_ANISO_PATH)
 end
 const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
 if !isdefined(Main, :EffectiveCouplings)
@@ -38,7 +46,10 @@ end
 using Main.Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm, N_color
 using Main.GaussLegendre: gauleg
 using Main.OneLoopIntegrals: A
-using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, coupling_matrix_determinant
+using Main.EffectiveCouplings: calculate_G_from_A,
+                               calculate_effective_couplings,
+                               calculate_effective_couplings_from_phi,
+                               coupling_matrix_determinant
 
 # 标准测试参数
 const T_TEST_MeV = 150.0
@@ -69,6 +80,30 @@ const Φbar_TEST = 0.5
             @test abs(G_result - expected_G) < 1e-10
             
             @info "calculate_G_from_A 基本测试" A=A_typical m=m_typical G=G_result expected=expected_G
+        end
+
+        @testset "A-phi-H 关系（纯代数）" begin
+            A_sample = -2.0
+            m_sample = 0.75
+            phi_sample = N_color * m_sample * A_sample / (4.0 * π^2)
+            H_sample = calculate_G_from_A(A_sample, m_sample)
+
+            @test H_sample ≈ -phi_sample
+            @test isfinite(phi_sample)
+        end
+
+        @testset "phi-native 旧耦合适配（纯代数）" begin
+            phi_l, phi_s = -0.30, -0.10
+            from_phi = calculate_effective_couplings_from_phi(G_fm2, K_fm5, phi_l, phi_s)
+            from_legacy = calculate_effective_couplings(G_fm2, K_fm5, -phi_l, -phi_s)
+
+            # The adapter is the exact H_f=-phi_f substitution, including the
+            # determinant fields; no A_f quadrature is involved here.
+            for key in keys(from_phi)
+                @test getproperty(from_phi, key) ≈ getproperty(from_legacy, key)
+            end
+            @test from_phi.K123_plus ≈ G_fm2 - 0.5 * K_fm5 * phi_s
+            @test from_phi.K4567_plus ≈ G_fm2 - 0.5 * K_fm5 * phi_l
         end
         
         @testset "calculate_effective_couplings 基本功能" begin
@@ -404,6 +439,3 @@ const Φbar_TEST = 0.5
 end
 
 println("\n所有测试完成！")
-
-
-

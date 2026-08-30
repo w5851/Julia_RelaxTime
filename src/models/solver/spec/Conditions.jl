@@ -18,7 +18,8 @@ using ForwardDiff
 import ..Models
 
 # 从 Models 域导入
-using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
+using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma
+using ..Models: conserved_densities_from_flavor
 using ..Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model, state_view, mu_view
 const cached_nodes = Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
@@ -426,6 +427,38 @@ function build_conditions(mode::FixedAsymmetricRho, params::GapParams, schema::M
 end
 
 """
+    build_conditions(mode::FixedMuBConservedCharges, params::GapParams) -> Function
+
+构建固定 `(T,mu_B)` 的守恒荷联合条件。未知量仍为五个平均场与三个 flavor
+chemical potentials；后三个条件分别固定 `mu_B`、`rho_Q/rho_B` 与 `rho_S`。
+"""
+function build_conditions(mode::FixedMuBConservedCharges, params::GapParams)
+    schema = schema_for_model(params.model_kind)
+    return build_conditions(mode, params, schema; mu_dim=mu_var_dim(mode))
+end
+
+function build_conditions(mode::FixedMuBConservedCharges, params::GapParams, schema::ModelStateSchema; mu_dim::Int=3)
+    return (theta, x) -> begin
+        T_fm = theta[1]
+        x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
+        local_params = GapParams(T_fm, params)
+        gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
+
+        rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
+        conserved = conserved_densities_from_flavor(rho_vec)
+        muB_constraint = mu_vec[1] + 2 * mu_vec[2] - mode.muB_fm
+        charge_constraint = (
+            conserved.rho_Q - mode.charge_to_baryon_ratio * conserved.rho_B
+        ) / ρ0
+        strangeness_constraint = (
+            conserved.rho_S - mode.strangeness_density_target
+        ) / ρ0
+
+        return [gap..., muB_constraint, charge_constraint, strangeness_constraint]
+    end
+end
+
+"""
     build_conditions(mode::FixedEntropy, params::GapParams) -> Function
 
 构建固定熵密度模式的条件函数。
@@ -550,6 +583,24 @@ function build_residual!(mode::FixedAsymmetricRho, params::GapParams)
     end
 end
 
+"""构建固定 `mu_B` 守恒荷模式的 8 维 unified joint residual。"""
+function build_residual!(mode::FixedMuBConservedCharges, params::GapParams)
+    return (F, x) -> begin
+        eltp = typeof(x[1])
+        x_state = SVector{5, eltp}(Tuple(x[1:5]))
+        mu_state = SVector{3, eltp}(x[6], x[7], x[8])
+
+        gap_core_residual!(@view(F[1:5]), x_state, mu_state, params)
+        rho_vec = _rho_vec(x_state, mu_state, params.T_fm, params)
+        conserved = conserved_densities_from_flavor(rho_vec)
+
+        F[6] = mu_state[1] + 2 * mu_state[2] - mode.muB_fm
+        F[7] = (conserved.rho_Q - mode.charge_to_baryon_ratio * conserved.rho_B) / ρ0
+        F[8] = (conserved.rho_S - mode.strangeness_density_target) / ρ0
+        return nothing
+    end
+end
+
 """
     build_residual!(mode::FixedEntropy, params::GapParams) -> Function
 
@@ -617,7 +668,7 @@ function build_residual!(model::AbstractQCDModel, mode::FixedMu, T_fm::Real, μ_
     return build_residual!(mode, mu_vec, params)
 end
 
-function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real;
+function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma}, T_fm::Real;
     xi::Real=0.0,
     p_num::Int=24,
     t_num::Int=8,
@@ -650,6 +701,12 @@ end
 @inline function explicit_residual(mode::FixedAsymmetricRho, x::AbstractVector, θ::AbstractVector, params::GapParams)
     out = zeros(promote_type(eltype(x), eltype(θ)), state_dim(mode))
     explicit_residual!(out, x, θ, params, mode)
+    return out
+end
+
+@inline function explicit_residual(mode::FixedMuBConservedCharges, x::AbstractVector, theta::AbstractVector, params::GapParams)
+    out = zeros(promote_type(eltype(x), eltype(theta)), state_dim(mode))
+    explicit_residual!(out, x, theta, params, mode)
     return out
 end
 
@@ -712,6 +769,23 @@ end
     F[6] = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
     F[7] = _safe_density_ratio(rho_u, rho_d) - mode.ud_ratio_target
     F[8] = rho_s - mode.s_target
+    return nothing
+end
+
+@inline function explicit_residual!(F::AbstractVector, x::AbstractVector, theta::AbstractVector, params::GapParams, mode::FixedMuBConservedCharges)
+    T_fm = theta[1]
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
+    mu_vec = SVector{3}(x[6], x[7], x[8])
+    local_params = _local_gap_params(T_fm, params)
+
+    gap = gap_conditions(x_state, mu_vec, local_params)
+    @inbounds for i in 1:5
+        F[i] = gap[i]
+    end
+    conserved = conserved_densities_from_flavor(_rho_vec(x_state, mu_vec, T_fm, local_params))
+    F[6] = mu_vec[1] + 2 * mu_vec[2] - mode.muB_fm
+    F[7] = (conserved.rho_Q - mode.charge_to_baryon_ratio * conserved.rho_B) / ρ0
+    F[8] = (conserved.rho_S - mode.strangeness_density_target) / ρ0
     return nothing
 end
 

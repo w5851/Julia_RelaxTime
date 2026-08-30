@@ -606,6 +606,17 @@ function _build_default_seed_candidates(mode, seed_guess::AbstractVector)
         for μ0 in (0.5, 1.0)
             _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])
         end
+    elseif mode isa FixedMuBConservedCharges
+        flavor0 = flavor_mu_from_bqs(mode.muB_fm, 0.0, mode.muB_fm / 3)
+        for muQ_fraction in (-0.05, 0.0, 0.05)
+            flavor = flavor_mu_from_bqs(
+                mode.muB_fm,
+                muQ_fraction * mode.muB_fm,
+                mode.muB_fm / 3,
+            )
+            _push_unique_seed!(seeds, seen, Float64[base5..., flavor.mu_u, flavor.mu_d, flavor.mu_s])
+        end
+        _push_unique_seed!(seeds, seen, Float64[base5..., flavor0.mu_u, flavor0.mu_d, flavor0.mu_s])
     elseif mode isa FixedRho
         for μ0 in (0.2, 1.0)
             _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])

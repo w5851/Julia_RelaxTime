@@ -35,6 +35,8 @@
 - `Models.build_pnjl_fixedmu_problem` / `Models.build_pnjl_flavor_mu_problem` / `Models.build_njl_problem`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
+- `Models.FixedMuBConservedCharges`
+- `Models.flavor_mu_from_bqs` / `Models.conserved_mu_from_flavor` / `Models.conserved_densities_from_flavor`
 - `Models.SeedStrategy` 家族
 - `Models.solve_with_derivatives`
 - `Models.solve_pnjl_with_derivatives` / `Models.solve_pnjl_with_flavor_mu_derivatives`
