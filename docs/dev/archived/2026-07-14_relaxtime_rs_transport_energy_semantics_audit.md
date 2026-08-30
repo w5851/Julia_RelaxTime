@@ -1,3 +1,15 @@
+---
+title: RS 输运能量语义审计与实施任务单
+archived: true
+original: docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # RS 输运能量语义审计与实施任务单
 
 创建日期：2026-07-14
@@ -549,9 +561,9 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [x] accepted-primary p104/p128 matched convergence 已由独立 evidence package 记录并经作者接受；
   旧 strict-era raw/figure 未被覆盖，accepted 证据不追溯改写既有 provenance。
-- [ ] bulk 导数与主 equilibrium 分支一致，受影响 `zeta/s` production 已重跑并通过审计。
-- [ ] 一阶区域主 equilibrium 由稳定性治理选取；严格共存点不输出唯一输运量，双侧近零点通过相别与收敛认证。
-- [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
+- [x] bulk 导数与主 equilibrium 分支一致，受影响 `zeta/s` production 已重跑并通过审计。
+- [x] 一阶区域主 equilibrium 由稳定性治理选取；严格共存点不输出唯一输运量，双侧近零点通过相别与收敛认证。
+- [x] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
 
 ## 11. 风险与回退方案
 
