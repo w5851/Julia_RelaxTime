@@ -1,30 +1,25 @@
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 
+from scripts.analysis.pnjl import audit_issue130_phase_reference_physical_deletion as deletion
 
 ROOT = Path(__file__).parents[3]
 REFERENCE_ROOT = ROOT / "data" / "reference" / "pnjl"
-SNAPSHOT_ROOT = REFERENCE_ROOT / "legacy_phase_reference_v1"
 
 
-def test_retirement_snapshot_manifest_matches_bytes() -> None:
-    manifest = json.loads((SNAPSHOT_ROOT / "RETIREMENT_MANIFEST.json").read_text(encoding="utf-8"))
-    assert manifest["schema_version"] == "pnjl_legacy_phase_reference_retirement_v1"
-    assert manifest["status"] == "retired_canonical_snapshot"
-    assert manifest["runtime_canonical_source"].endswith("issue130_phase_reference_v1/strict")
-    assert manifest["fallback_and_rollback"] == "explicit_snapshot_only"
-    assert manifest["canonical_root_status"] == "dense_legacy_paths_absent"
-    assert manifest["solver_called"] is False
-
-    for record in manifest["files"]:
-        assert record["source_path"] == f"data/reference/pnjl/{record['path']}"
-        path = SNAPSHOT_ROOT / record["path"]
-        payload = path.read_bytes()
-        assert len(payload) == record["bytes"]
-        assert hashlib.sha256(payload).hexdigest() == record["sha256"]
+def test_retirement_snapshot_is_deleted_but_recoverable() -> None:
+    package = ROOT / deletion.PACKAGE_ROOT
+    manifest = json.loads((package / deletion.MANIFEST_NAME).read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == deletion.SCHEMA_VERSION
+    assert manifest["physical_deletion_applied_in_branch"] is True
+    assert manifest["fallback_available_after_merge"] is False
+    assert manifest["rollback_available_after_merge"] is False
+    rows = deletion._read_allowlist(package / deletion.ALLOWLIST_NAME)
+    assert len(rows) == 8
+    assert all(not deletion._repo_path(ROOT, row["path"]).exists() for row in rows)
+    assert all(deletion._git_tree_files(ROOT, deletion.RECOVERY_REF, row["path"]) for row in rows)
 
 
 def test_dense_legacy_files_are_retired_from_canonical_root() -> None:
@@ -37,7 +32,7 @@ def test_dense_legacy_files_are_retired_from_canonical_root() -> None:
         "spinodals.csv",
     }
     assert all(not (REFERENCE_ROOT / name).exists() for name in retired)
-    assert all((SNAPSHOT_ROOT / name).is_file() for name in retired)
+    assert not (REFERENCE_ROOT / "legacy_phase_reference_v1").exists()
 
     # This fixed-point table is a separate historical input, not the dense
     # Issue #130 legacy bundle retired by this change.

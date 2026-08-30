@@ -24,7 +24,7 @@ def test_physical_deletion_proposal_is_solver_free_and_allowlisted() -> None:
     }
 
 
-def test_current_prod_v2_and_pnjl_legacy_reference_remain() -> None:
+def test_current_prod_v2_and_pnjl_candidate_reference_remain() -> None:
     for mode in MODULE.MODES:
         assert (
             ROOT / MODULE.RESULT_ROOT / mode / MODULE.CURRENT_CASE / "manifest.json"
@@ -32,7 +32,7 @@ def test_current_prod_v2_and_pnjl_legacy_reference_remain() -> None:
         assert (
             ROOT / MODULE.FIGURE_ROOT / mode / MODULE.CURRENT_CASE / "plot_manifest.json"
         ).is_file()
-    assert (ROOT / "data/reference/pnjl/legacy_phase_reference_v1").is_dir()
+    assert (ROOT / "data/reference/pnjl/issue130_phase_reference_v2").is_dir()
 
 
 def test_deleted_snapshot_paths_are_absent_but_recoverable_from_merge() -> None:

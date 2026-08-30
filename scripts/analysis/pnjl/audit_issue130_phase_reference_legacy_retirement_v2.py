@@ -114,6 +114,7 @@ def build_audit(
     output_root: Path,
     *,
     replace_existing: bool = False,
+    legacy_root: Path | None = None,
 ) -> dict[str, Any]:
     output_root = output_root.resolve()
     if output_root.exists() and any(output_root.iterdir()):
@@ -123,7 +124,7 @@ def build_audit(
 
     # Reuse the reviewed v1 implementation for semantic key coverage and
     # consumer scanning, but write to a new immutable v2 evidence directory.
-    audit_v1.build_audit(repo_root.resolve(), output_root)
+    audit_v1.build_audit(repo_root.resolve(), output_root, legacy_root=legacy_root)
     repo_head = _refresh_repo_head(output_root, repo_root.resolve())
     package_root = (repo_root / PACKAGE_RELATIVE).resolve()
     package_manifest = read_json(package_root / "manifest.json")
@@ -208,6 +209,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="explicitly rebuild the local uncommitted v2 evidence directory",
     )
+    parser.add_argument(
+        "--legacy-root",
+        type=Path,
+        default=None,
+        help="explicit disposable recovery tree for the deleted legacy snapshot",
+    )
     return parser.parse_args()
 
 
@@ -215,7 +222,12 @@ def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve()
     output_root = (args.output_root or repo_root / OUTPUT_RELATIVE).resolve()
-    manifest = build_audit(repo_root, output_root, replace_existing=args.replace_existing)
+    manifest = build_audit(
+        repo_root,
+        output_root,
+        replace_existing=args.replace_existing,
+        legacy_root=args.legacy_root,
+    )
     print(json.dumps({"output_root": str(output_root), "verdict": manifest["verdict"]}, ensure_ascii=False))
     return 0
 
