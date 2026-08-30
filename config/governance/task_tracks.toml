@@ -45,13 +45,13 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "review"
+status = "active"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
-next_action = "p128 reuse preflight 已完成：现有 p128 仅能在 strict-explicit 口径复用，不能与当前 accepted-primary 默认直接配对。请在 accepted-primary matched rerun 与 strict-only optional proof 之间确认口径；确认前不触发 p104 numerical Action。"
+next_action = "作者已授权 accepted-primary matched convergence：workflow contract 合并后，以同一 calculation SHA 与 topology 成对触发 accepted/runtime 的 p128 和 p104（mode-A、mode-B 分开，受控并行）；先核验 p128 与既有 strict-era p128 的差异，再决定是否更新正式 accepted raw。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-rs-formal-convergence"
 current_sha = "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d"
@@ -101,6 +101,7 @@ evidence = [
   "note:retirement_audit_pass_retain_legacy_solver_free",
   "file:docs/analysis/relaxtime/issue130_rs_formal_convergence_preflight_v1/",
   "note:p128_reusable_strict_explicit_only_accepted_primary_pair_blocked",
+  "review:author_authorized_accepted_primary_p128_p104_matched_convergence",
 ]
 updated_at = "2026-08-30"
 
@@ -221,14 +222,14 @@ evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_loc
 id = "rs-production-after-phase-reference"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "review"
+status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
-reason = "RS prod_v2 的 source numerical artifacts 已完成、raw/figure 已经作者接受，旧 prod_v1 已完成 path retirement 与物理清理；但现有 p128 的 source workflow head 仍是 strict-default 且带旧 legacy fallback，不能直接作为当前 accepted-primary runtime 的收敛高阶端。"
-next_action = "完成 p128 reuse preflight 后，等待 formal scope 对齐：accepted-primary 需要先在同一 calculation SHA、同一 topology 下重跑匹配的 p128，再补 p104；strict-only 证明可复用现有 p128，但必须显式固定历史 strict workflow ref。"
+reason = "RS prod_v2 的 source numerical artifacts 已完成、raw/figure 已经作者接受，旧 prod_v1 已完成 path retirement 与物理清理；现有 p128 的 source workflow head 曾是 strict-default，不能直接作为当前 accepted-primary runtime 的收敛高阶端，因此按作者授权执行匹配重验。"
+next_action = "workflow contract 合并后，以同一 calculation SHA 与 topology 成对触发 accepted/runtime 的 p128 和 p104（mode-A、mode-B 分开，受控并行）；比较 p128 与既有 strict-era p128 后，再决定是否更新正式 accepted raw。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "file:docs/analysis/relaxtime/issue130_rs_formal_convergence_preflight_v1/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel", "note:p128_reusable_strict_explicit_only_accepted_primary_pair_blocked"]
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "file:docs/analysis/relaxtime/issue130_rs_formal_convergence_preflight_v1/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel", "note:p128_reusable_strict_explicit_only_accepted_primary_pair_blocked", "review:author_authorized_accepted_primary_p128_p104_matched_convergence"]
 
 [[items]]
 id = "issue130-targeted-closure-diagnostic"

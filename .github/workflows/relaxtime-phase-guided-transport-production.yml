@@ -116,6 +116,22 @@ on:
         options:
           - direct_coexistence
           - reference_interpolation
+      phase_reference_layer:
+        description: "Phase-reference layer for this run (accepted primary or strict opt-in)"
+        required: false
+        default: "accepted"
+        type: choice
+        options:
+          - accepted
+          - strict
+      phase_reference_mode:
+        description: "Phase-reference resolution mode; pair accepted with runtime or strict with strict"
+        required: false
+        default: "runtime"
+        type: choice
+        options:
+          - runtime
+          - strict
       compute_bulk:
         description: "Compute zeta-related outputs"
         required: false
@@ -176,6 +192,8 @@ jobs:
           run_tier="${{ inputs.run_tier || 'dry-run' }}"
           policy="${{ inputs.propagator_xi_policy || 'match_thermo' }}"
           sigma_cache_policy="${{ inputs.sigma_cache_policy || 'validated_anchored' }}"
+          phase_reference_layer="${{ inputs.phase_reference_layer || 'accepted' }}"
+          phase_reference_mode="${{ inputs.phase_reference_mode || 'runtime' }}"
           render_plots="${{ inputs.render_plots }}"
           mode_input="${{ inputs.mode || 'both' }}"
           xi_list="${{ inputs.xi_list || '-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5' }}"
@@ -203,6 +221,14 @@ jobs:
             echo "::error::shard_label contains unsupported characters: $shard_label"
             exit 2
           fi
+          case "$phase_reference_mode:$phase_reference_layer" in
+            runtime:accepted|strict:strict)
+              ;;
+            *)
+              echo "::error::unsupported phase-reference pair: mode=$phase_reference_mode layer=$phase_reference_layer (use accepted/runtime or strict/strict)"
+              exit 2
+              ;;
+          esac
 
           modes=()
           if [ "$mode_input" = "both" ]; then
@@ -218,6 +244,8 @@ jobs:
             --p-num "${{ inputs.thermo_p_num || '12' }}"
             --t-num "${{ inputs.thermo_t_num || '6' }}"
             --phase-anchor-policy "${{ inputs.phase_anchor_policy || 'direct_coexistence' }}"
+            --phase-reference-layer "$phase_reference_layer"
+            --phase-reference-mode "$phase_reference_mode"
             --channel-diagnostics
           )
 
@@ -317,6 +345,8 @@ jobs:
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
           calculation_sha="${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}"
           shard_label="${{ inputs.shard_label || 'full' }}"
+          phase_reference_layer="${{ inputs.phase_reference_layer || 'accepted' }}"
+          phase_reference_mode="${{ inputs.phase_reference_mode || 'runtime' }}"
           audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
           mkdir -p "$audit_root"
           {
@@ -357,6 +387,8 @@ jobs:
             printf -- '- thermo_p_num: `%s`\n' "${{ inputs.thermo_p_num || '12' }}"
             printf -- '- thermo_t_num: `%s`\n' "${{ inputs.thermo_t_num || '6' }}"
             printf -- '- phase_anchor_policy: `%s`\n' "${{ inputs.phase_anchor_policy || 'direct_coexistence' }}"
+            printf -- '- phase_reference_layer: `%s`\n' "$phase_reference_layer"
+            printf -- '- phase_reference_mode: `%s`\n' "$phase_reference_mode"
             echo ""
             echo "## Verdict"
             echo ""
