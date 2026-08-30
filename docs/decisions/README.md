@@ -132,6 +132,7 @@ NNNN-title-in-kebab-case.md
 | 0004 | [Solver 三层契约与向量内核统一](0004-solver-three-layer-contract-and-vector-kernel.md) | 提议 | 2026-04-06 |
 | 0005 | [科学计算 SOP 与文档权威治理](0005-scientific-sop-and-document-authority.md) | 已接受 | 2026-07-10 |
 | 0006 | [隔离可选数值 oracle 与精简 agent 指令](0006-isolate-optional-numerical-oracles.md) | 已接受 | 2026-07-18 |
+| 0007 | [公式路线闭合门禁与 charged-RPA/BU 试点](0007-formula-route-closure-governance.md) | 已接受 | 2026-08-30 |
 
 ## 创建新ADR的流程
 

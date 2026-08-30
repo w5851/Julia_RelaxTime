@@ -87,4 +87,4 @@ quark-only baseline 的 BQS 残差为 `O(1e-15)`，但若把后处理介子荷�
 
 ## 6. Phase 6 gate verdict
 
-本次实现完成了“候选路线可运行”和“full charged KMT 与旧耦合的同背景 A/B”两项工程门槛，但没有完成 production 认证。阻断项仍是：`x_min_cut` 非严格支撑域、低节点未收敛、full charged-RPA 归一化尚未有独立外部固定点，以及没有 `Omega_M`/`Sigma_M` 热力学反馈。因此 `production_candidate_status=not_authorized`；本地 CSV 仅作 diagnostic 保留。
+本次实现完成了“候选路线可运行”和“full charged KMT 与旧耦合的同背景 A/B”两项工程门槛，但没有完成 production 认证。charged scalar/matrix 的公式归一化已经由显式 ladder trace 与 Goldstone 条件闭合；尚缺的是 strict ordered-retarded 后端的独立外部数值固定点，以及单电荷 phase-shift 从 `domega/(2pi)` 到 `domega/pi` 的实现迁移和稳定极限回归。其他阻断项仍是：`x_min_cut` 非严格支撑域、低节点未收敛，以及没有 `Omega_M`/`Sigma_M` 热力学反馈。因此 `production_candidate_status=not_authorized`；本地 CSV 仅作 diagnostic 保留。

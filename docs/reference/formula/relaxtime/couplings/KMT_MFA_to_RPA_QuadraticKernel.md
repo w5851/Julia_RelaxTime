@@ -65,6 +65,55 @@ K_{80} & K_{83} & K_8
 
 在 `u=d` 时，`K_03=K_30=K_38=K_83=0`，中性矩阵退化为旧的 `0/8` 块；同时 `K_45=K_67`，恢复旧接口把所有 kaon charged/neutral 味道通道合并成一个 `K_4567` 的极限。
 
+### 3.1 从 KMT 行列式到 charged 二次核的可复核代数步骤
+
+为避免把非对称背景下的通道映射当作文献记号的直接替换，定义
+
+```math
+J_{ij}^{R/L}=\bar q_i(1\pm\gamma_5)q_j,
+\qquad
+\det J^{R/L}=\frac{1}{6}\epsilon_{ijk}\epsilon_{lmn}
+J_{il}^{R/L}J_{jm}^{R/L}J_{kn}^{R/L}.
+```
+
+在对角平均场中只收缩一个对角双线性，`J_{ff}^{R/L} -> phi_f`，并将剩余两个
+双线性投影到 `J_a^P=bar(q)i gamma_5 lambda_a q` 或
+`J_a^S=bar(q)lambda_a q`。把一次收缩后的 KMT 项按 `J_a^X J_b^X` 的系数
+定义为 `Delta K_ab^(X)`，则两种 determinant orientation 的和以及 P/S 投影给出
+
+```math
+\begin{aligned}
+S_1^2+S_2^2 &= 4(\bar u d)(\bar d u),\\
+P_1^2+P_2^2 &= 4(\bar u i\gamma_5 d)(\bar d i\gamma_5 u),\\
+\mathcal L_{KMT}^{(ud;\phi_s)}
+ &=2K\phi_s(\bar u d)(\bar d u)
+   -2K\phi_s(\bar u i\gamma_5 d)(\bar d i\gamma_5 u).
+\end{aligned}
+```
+
+这里前两式使用项目的 Gell-Mann 生成元归一化；将最后一式重新写回
+`S_1^2+S_2^2`、`P_1^2+P_2^2`，便得到 S/P 通道的 `1/2` 系数。循环交换
+`(u,d,s)` 后，
+
+```math
+\begin{aligned}
+\Delta K_{12}^{(X)}=\Delta K_3^{(X)}&=-\epsilon_X\frac{K}{2}\phi_s,\\
+\Delta K_{45}^{(X)}&=-\epsilon_X\frac{K}{2}\phi_d,\\
+\Delta K_{67}^{(X)}&=-\epsilon_X\frac{K}{2}\phi_u.
+\end{aligned}
+```
+
+因此每个 charged flavor pair 的 spectator 是未出现在该 pair 中的味道：
+`(12,s)`、`(45,d)`、`(67,u)`。对角投影则给出 `K_0`、`K_8`，而 `u-d` 的
+反对称部分只出现在 `K_03/K_38`；这两个量都正比于 `phi_u-phi_d`，故在
+`phi_u=phi_d` 时同时消失。将 `G delta_ab` 加回上述 KMT 二次系数，得到第 3 节
+列出的完整 `K_ab^(X)`。这个步骤明确说明：`K4567` 的 legacy 修正使用
+`phi_u` 时只能对应 `K67`，不能在非对称背景下重解释为 `K45`。
+
+该推导只使用 KMT 行列式、对角平均场和项目的 P/S 投影约定；它不证明
+`Pi_ff'` 的 retarded 解析延拓、极点 sheet 或 BU 热力学权重。后者仍需独立的
+泡函数和数值验证。
+
 ## 4. 与当前代码的兼容关系
 
 `src/models/pnjl_physics/PNJLCore.jl` 当前的标量平均场质量方程已经允许 `phi_u`、`phi_d`、`phi_s` 分开出现，但在实际平衡状态和旧传播子接口中，u/d 介子耦合仍被合并。本路线不改变这些上游方程，只把三味凝聚作为输入生成一个可审计的完整核。
@@ -113,9 +162,10 @@ adapter 已经实现了非对角夸克传播子或非对角平均场自能。
 时才使用当前 `PolarizationAniso` 中的 `k0` 对称平均。缺少 `A` 时的自动
 补值来自 `AFieldBuilder`，不会触发 gap solver。
 
-这一步只验证数值接线和输入合同，不证明当前极化的正则化/归一化与外部
-RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。相应的诊断 API
-边界见 `docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
+这一步只验证中性数值接线和输入合同，不证明当前极化的正则化、retarded
+延拓或外部数值固定点，也不产生极点、相移或介子热力学反馈。charged 顶角的
+纯代数归一化在第 6.1 节独立闭合。相应的诊断 API 边界见
+`docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
 
 ## 6. 文献证据与未决项
 
@@ -145,11 +195,42 @@ RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。�
 上保留二次介子涨落并对夸克泡链作无限重求和。相应的 `Pi` 还依赖
 `T,mu_f,Phi,\bar Phi`、正则化和外部运动学；不能简化成只依赖 `m_f` 与 `q^2`。
 
+### 6.1 charged scalar 与 matrix 归一化
+
+对 charged pair `(i,j)`，令 `lambda_a,lambda_b` 为对应的两个实 Gell-Mann
+生成元，并定义
+
+```math
+T_+=(\lambda_a+i\lambda_b)/\sqrt2=\sqrt2 E_{ij},\qquad
+T_-=(\lambda_a-i\lambda_b)/\sqrt2=\sqrt2 E_{ji}.
+```
+
+若 `Pi_ij` 是项目 `PolarizationAniso`/Rehberg 定义的单个 ordered flavor 泡，
+则二次作用量中的 flavor trace 直接给出
+
+```math
+\Pi^{matrix}_{+-}=2\Pi_{ij},\qquad
+\Pi^{matrix}_{-+}=2\Pi_{ji}.
+```
+
+所以在 charge basis 中
+
+```math
+2K[1-2K\Pi^{matrix}_{+-}]^{-1}
+=\frac{2K}{1-4K\Pi_{ij}}.
+```
+
+这个因子 2 来自两个 charged ladder 顶角，不依赖 isospin 对称，也不是事后
+匹配。`tests/unit/relaxtime/test_meson_rpa.jl` 以显式 3x3 生成元、任意且不相等的
+`Pi_ij/Pi_ji` 和 chiral-limit Goldstone identity 锁定该结论。它闭合的是场/泡
+归一化；ordered retarded 泡的解析和数值实现仍由 charged-RPA/BU 路线验收。
+
 接入极化矩阵前仍需逐项核对：
 
 1. `phi_f` 与文献 `sigma_f` 或 `i tr S^f` 的符号；
 2. P/S 上标与 `K^±` 的对应关系；
 3. `K` 的配置符号和单位；
-4. `lambda_0` 归一化以及 RPA 矩阵中的额外 2 因子。
+4. `lambda_0` 归一化；charged 通道必须使用第 6.1 节的 ladder 转换，不能把单个
+   ordered `Pi_ij` 直接代入矩阵 `1-2KPi`。
 
 只有完成上述核对、并在同位旋对称极限和一个外部文献固定点通过验证后，才允许把后续完整 RPA 数值结果纳入生产候选。当前符号对齐只证明代数约定，不证明有限温密度 PNJL 极化或介子数密度的物理正确性。

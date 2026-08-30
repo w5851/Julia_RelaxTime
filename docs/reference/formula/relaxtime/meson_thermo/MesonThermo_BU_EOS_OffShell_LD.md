@@ -217,9 +217,13 @@ n_M(T)
 =
 \frac{d_M}{T}
 \int \frac{dq\,q^2}{2\pi^2}
-\int_0^\infty \frac{d\omega}{2\pi}
+\int_0^\infty \frac{d\omega}{\pi}
 g_M(\omega)\bigl[1+g_M(\omega)\bigr]\delta_M(\omega,q).
 ```
+
+这里采用单电荷 `d=1`、单 Bose 因子的 strict 正能量测度；当前代码中的
+`domega/(2pi)` 只保留为同口径 `K/pi` ratio adapter，不能用于绝对密度/EOS
+一致性判断。
 
 ### 7.2 压强主线
 

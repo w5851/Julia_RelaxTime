@@ -73,7 +73,9 @@ Density regimes：
 
 关键治理边界：
 
-- `current` 是项目默认 production branch，GBU 是 stricter reference branch；
+- `current` 是兼容/对照 branch，GBU 是最终比较默认；二者当前都沿用
+  `domega/(2pi)` 文献 ratio adapter，尚未完成单电荷 `domega/pi` 迁移，因此均未
+  获得 strict 绝对密度 production 授权；
 - `finite_eta` 与 `pv_b0_eta0` 必须在 metadata 中可区分；
 - `strict_normal_domain` 遇到 Bose unsafe domain 返回 `NaN/status`，不静默 clamp；
 - `x_min_cut` 与 `excitation_only_E_gt_mu` 是显式项目延拓策略；

@@ -151,8 +151,8 @@ detK = k00*k88 - k08^2
 - -:标量通道（S通道），用于σ/σ'
 
 # 参数
-- `Π_uu`: u/d夸克的极化函数（单位：fm²）
-- `Π_ss`: s夸克的极化函数（单位：fm²）
+- `Π_uu`: u/d夸克的极化函数（单位：fm⁻²）
+- `Π_ss`: s夸克的极化函数（单位：fm⁻²）
 - `K_coeffs`: 预计算的K系数NamedTuple（通过`EffectiveCouplings.calculate_effective_couplings`获取）
 - `channel`: 通道类型（`:P`为赝标量，`:S`为标量）
 
@@ -171,8 +171,8 @@ detK = k00*k88 - k08^2
 K_coeffs = EffectiveCouplings.calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
 # 预计算极化函数
-Π_uu = 1e-5 + 0.0im  # fm²（ComplexF64）
-Π_ss = 8e-6 + 0.0im  # fm²
+Π_uu = 1e-5 + 0.0im  # fm⁻²（ComplexF64）
+Π_ss = 8e-6 + 0.0im  # fm⁻²
 
 # 计算赝标量通道（η/η'）的M矩阵
 M_P = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :P)
@@ -220,7 +220,7 @@ end
 # 参数
 - `meson_type`: 介子类型（`:pi`, `:K`, `:sigma_pi`, `:sigma_K`）
 - `K_coeffs`: 预计算的K系数NamedTuple（通过`EffectiveCouplings.calculate_effective_couplings`获取）
-- `Π`: 预计算的极化函数（ComplexF64，单位：fm²）
+- `Π`: 预计算的极化函数（ComplexF64，单位：fm⁻²）
 
 # 返回值
 返回传播子D（ComplexF64，单位：fm²）

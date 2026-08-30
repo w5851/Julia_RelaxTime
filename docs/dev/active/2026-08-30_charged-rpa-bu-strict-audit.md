@@ -4,8 +4,13 @@
 
 当前状态：in progress。本文承接完整 KMT interaction-kernel 与固定 BQS
 quark-only 后处理诊断，目标是重新核对 charged `π^±/K^±` 的 RPA/BU 数值链，
-但不在本任务单完成前替换现有 `MesonDensity` 生产语义。`x_min_cut`、低节点数和
-未验证的归一化结果仍只能标记为 diagnostic。
+但不在本任务单完成前替换现有 `MesonDensity` 生产语义。`x_min_cut`、低节点数、
+未闭合的 retarded/phase 数值 gate 仍只能标记为 diagnostic。
+
+PR290 从独立的 `origin/main` 基线建立了
+[公式路线闭合包](../../reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md)
+和治理门禁；本任务单的严格数值复核依赖该 candidate 规范，但不会因文档闭合而
+自动完成或晋升为 production。
 
 ## 1. 决策目标与假设
 
@@ -25,6 +30,11 @@ quark-only 后处理诊断，目标是重新核对 charged `π^±/K^±` 的 RPA/
 - 目标 observables 是 charge-resolved `K^+/pi^+` 与 `K^-/pi^-`；`K^0`、
   `bar K^0` 只作为通道映射的审计参照。
 - 本轮不做 strict-support 的凝聚处理，不以 `x_min_cut` 结果授予 production 资格。
+- 介子数密度保持四类解耦入口：稳定粒子极限、reduced strict-BW、`q` 依赖复极点
+  strict-BW 和 phase-shift BU；最终比较默认使用 `phase_shift_gbu_reference`，
+  但四类入口和 phase-shift 的 `current` 对照均保持可调用。
+- strict GBU 使用有序 `Pi_us/Pi_su` 的实轴 retarded 泡；`num_s_quark=1` 作为
+  Rehberg 有来源的散射正则化处方和课题组旧 Fortran/Cpp oracle 独立保留。
 
 ## 2. 当前有效链路（已核对）
 
@@ -49,6 +59,10 @@ PNJL/BQS x_state=(phi_u,phi_d,phi_s,Phi,PhiBar), mu_u/d/s
 | `pi_minus` | `(d,u)` | `K12` | `d bar(u)` |
 | `K_plus` | `(u,s)` | `K45` | `u bar(s)` |
 | `K_minus` | `(s,u)` | `K45` | `s bar(u)` |
+
+但 K 路径当前还会在每个有序通道内部设置 `num_s_quark=1`，把同序 `B0(k0)` 与
+`B0(-k0)` 平均。因此“输入顺序已区分”不等于“strict ordered-retarded backend
+已实现”。
 
 旧 `EffectiveCouplings` 的 `K123` 代数上等于 `K12`；旧 `K4567` 使用
 `H_u=-phi_u`，在 `phi_u!=phi_d` 时等于 `K67`，不是 charged `K45`。
@@ -80,23 +94,33 @@ D_a^{\rm current}=\frac{2K_a}{1-4K_a\Pi_a},
 D_{0,3,8}^{\rm matrix}=2\mathcal K\,[I-2\mathcal K\Pi]^{-1}.
 ```
 
-后一个式子是 `MesonRPA` 中 `(0,3,8)` 基底、矩阵归一化下的公式；它不能在没有
-重新定义 `Pi_a` 和场归一化的情况下直接替换前一个式子。charged 严格实现至少
-要比较两个候选标量形式
+后一个式子是 `MesonRPA` 中实生成元基底的公式。对任一 charged pair，
 
 ```math
-D_a^{(A)}=\frac{2K_a}{1-4K_a\Pi_a},\qquad
-D_a^{(B)}=\frac{2K_a}{1-2K_a\Pi_a},
+T_\pm=(\lambda_a\pm i\lambda_b)/\sqrt2=\sqrt2 E_{ij/ji}
 ```
 
-并用同位旋对称极限、真空介子质量/Goldstone 条件和已固定的旧传播子定义确定
-唯一可接受的因子。仅改变分母因子就可能移动极点、Mott 阈值和相移，不能把这种
-差异归因于 `K45-K67`。
+使矩阵二次作用量中的 charged polarization 成为单个 Rehberg/项目有序泡的两倍：
+
+```math
+\Pi^{matrix}_{+-}=2\Pi_{ij},\qquad
+\Pi^{matrix}_{-+}=2\Pi_{ji}.
+```
+
+所以 `1-2KPi_matrix` 与 `1-4KPi_ordered` 是同一分母，不是两个待数值选择的
+候选。该结果不要求 `Pi_ij=Pi_ji`；显式 ladder trace、chiral-limit Goldstone
+identity 和错误 `1-2KPi_ordered` 不产生零点的反例已加入
+`tests/unit/relaxtime/test_meson_rpa.jl`。低温真空标定区的 pion/kaon pole 继续由
+现有 literature/legacy Fortran validation 约束。
 
 ### 3.3 极化函数：`Pi_{us}` 与 `Pi_{su}` 不是可自动合并的同一个数组
 
 `PolarizationAniso` 当前通过 `B0(lambda)`、`A1+A2` 和可选的有限宽度修正构造
 泡，其中 `lambda=k0+mu1-mu2`，并对 `num_s_quark=1` 做额外的 `k0` 对称平均。
+这个开关可追溯到 Rehberg 等 NPA 608 (1996) Eq. (2.22)-(2.23)，并沿用于课题组
+旧 Fortran/Cpp；它是有来源的 legacy prescription，而不是任意修补。原文用途是
+修复三动量截断下非等质量、有限交换动量散射泡的伪对称破缺，不能据此把同序
+`p0` 平均认作反序 `Pi_su`。
 严格 charged 路线必须重新确认：
 
 - `K^+` 的 `(u,s)` 与 `K^-` 的 `(s,u)` 是否按 retarded 约定分别取值；
@@ -104,25 +128,33 @@ D_a^{(B)}=\frac{2K_a}{1-2K_a\Pi_a},
 - 有限 `mu` 时的 Landau 区、阈值和虚部符号是否与相移分支一致；
 - `A_f` 与 `B0` 是否使用相同 cutoff、热积分上限和节点。按当前公式的自然单位，
   `A_f` 与 `Pi_a` 的量纲应为 `fm^-2`；`K_a` 与传播子 `D_a` 为 `fm^2`，因此
-  `K_a Pi_a` 无量纲。现有部分旧 API 页面仍把 `Pi` 写成 `fm^2`，这与公式页和
-  `PolarizationAniso` 的实际量纲不一致，列为后续文档修复项，不在本轮静默改写。
+  `K_a Pi_a` 无量纲。旧 `MesonPropagator` 与 `PolarizationCache` API 页面已同步
+  为 `Pi=fm^-2`；这只修正文档契约，不改变当前数值实现。
 
 当前 `phi` 原生适配层只消除了“由 `A_f` 再构造 `H_f`”这一重复步骤；它不等于
 已经完成 `Pi_a` 的严格 retarded 解析延拓。`A_f` 仍可能作为夸克泡的 tadpole
 输入，这是两个不同的数值角色。
 
-### 3.4 极点与宽度：先固定定义，再谈 BU 相移
+### 3.4 legacy 宽度、retarded 极点与 GBU 实轴对象必须分开
 
-每个 charged 通道应由
+当前旧接口以 `p0=M+iGamma/2` 展开 prefactor，但 `B0` 仍在实轴求值。这个约定
+与课题组旧 Fortran/Cpp 一致，并且在 `mu_u=mu_d`、排除 `K45` 错配后可复现旧
+质量和正宽度；因此不应全局翻转 `gamma`。它应明确标为
+`legacy_real_axis_width`，不能称作完整复平面极点。
+
+若 `q_pole_strict_bw` 声称给出真正的 retarded pole，则每个 charged 通道应由
 
 ```math
-\Delta_a(z,q)=0,\qquad z=\omega+i\Gamma/2
+\Delta_a(z,q)=0,\qquad z=\omega-i\Gamma/2
 ```
 
-定义复极点（具体半平面符号必须与 retarded 传播子核对）。束缚态、连续谱和
-Mott 解离要分别记录；不能用一个负质量或仅靠有限 `eta` 的相位峰替代极点
-定义。极点求解至少需要：残差、收敛状态、分支 seed、阈值
-`m_1+m_2`、以及 `K^+`/`K^-` 的 flavor 顺序。
+这里采用 `e^{-i\omega t}` 的 Fourier 约定，retarded 共振极点位于跨过 cut 的
+second sheet 下半平面。极点求解至少需要：sheet、残差、收敛状态、分支 seed、
+阈值及 flavor 顺序。
+
+GBU 主路线只需要物理实轴上 `D^R(omega+i0^+)` 的相位，不需要先求这个复极点。
+因此 second-sheet solver 是 `q_pole_strict_bw` 的严格 oracle，不是
+`phase_shift_gbu_reference` 的 blocker。
 
 ### 3.5 相移与 BU 权重：常数相位、分支和边界都会改变密度
 
@@ -135,18 +167,35 @@ Mott 解离要分别记录；不能用一个负质量或仅靠有限 `eta` 的�
 并明确减去高能端常数、处理束缚态的 `pi` 跳变、连续谱相位和 Levinson 边界。
 当前 `MesonDensity` 支持 `arg_propagator`/`arg_inverse_propagator`、unwrap 和
 `current`/`gbu_reference` 两种权重，但这些是可切换诊断约定，不应在没有公式
-固定时混合使用。BU 原式及分部积分形式见
+固定时混合使用。本任务将两种权重都保留为可调用方案，并把
+`gbu_reference` 固定为最终比较默认；这不替代相位边界、Levinson 和收敛验证。
+BU 原式及分部积分形式见
 [MesonDensity_BU相移公式.md](../../reference/formula/relaxtime/meson_density/MesonDensity_BU相移公式.md)。
 
 特别是分部积分后的密度使用 `delta_a` 本体；若 `delta_a(omega->infty)` 或
 低能边界没有正确归一化，会产生与物理相互作用无关的伪密度。因此相位边界和
 Levinson 检查必须先于冻结线扫描。
 
+这里的 production gate 不是“已有 atan+unwrap 即通过”，而是逐 `(channel,q)`：
+从高能端向低能端连续 unwrap、验证增大 `omega_max` 后端点与积分稳定、独立计数
+阈下束缚根，并检查
+`delta(omega_thr)-delta(infinity)=pi*n_B`；穿越 Mott 点时还要验证 `n_B` 减一
+与阈值相位减少 `pi` 同步。最后对 `omega/q`、`eta`、cutoff 和两种 BU 积分形式
+做收敛。
+
+另一个与相位分支无关的常数归一化已由稳定极限固定：本项目对单个 ordered
+`K+`/`pi+` 通道使用 `d=1` 和一个 Bose 因子，因此正能量测度必须是
+`domega/pi`。束缚态的 `pi` 跳变于是返回一个稳定玻色子；当前代码的
+`domega/(2pi)` 会使绝对密度少一半。该共同因子在同口径 `K/pi` 比值中抵消，
+所以旧 ratio 诊断不因此失效，但四算法绝对密度比较尚未闭合。
+
 ### 3.6 Bose 支撑与凝聚：`x_min_cut` 不是严格解
 
-当 `omega<=mu_M` 时，玻色分布在 `omega=mu_M` 有极点。当前
-`density_policy=:x_min_cut` 把下界移动到 `mu_M+x_min*T`，这是明确的诊断截断，
-不是对零动量凝聚模的处理。严格路线需要二选一并写入公式合同：
+当 `omega<=mu_M` 时，玻色分布在 `omega=mu_M` 有极点。沿化学冻结线先逐点
+检查 `mu_M<m_M` 和积分节点的 `omega>mu_M`；若正常相门禁通过，则不引入
+介子凝聚零模。当前 `density_policy=:x_min_cut` 把下界移动到
+`mu_M+x_min*T`，这是文献复现/异常点诊断的简化截断，不是对零动量凝聚模的处理。
+严格路线需要二选一并写入公式合同：
 
 1. 证明所有生产点处于 `mu_M<m_M` 的正常相，并对 `omega>mu_M` 做支撑门禁；或
 2. 单独引入凝聚零模、守恒荷和连续激发的分解。
@@ -158,10 +207,12 @@ Levinson 检查必须先于冻结线扫描。
 | 变更 | 是否属于 `K45-K67` | 预期影响 | 当前状态 |
 |---|---:|---:|---|
 | charged 耦合 `K67 -> K45` | 是 | 当前背景下很小；强 `phi_u-phi_d` 时可放大 | 已有 diagnostic A/B |
-| charged 分母 `4KPi` vs `2KPi` | 否 | 可移动极点、相移和密度，可能显著 | 未决，必须推导 |
+| charged 分母 `4KPi_ordered` vs `2KPi_matrix` | 否 | 同一二次作用量下严格等价 | 已由 ladder trace + Goldstone 闭合 |
 | `Pi_{us}`/`Pi_{su}` 解析延拓与宽度 | 否 | 直接改变 `K^+` 与 `K^-` 的差异和阈值 | 未决，必须审计 |
+| `num_s_quark=1` vs ordered retarded | 否 | 可能改变有限 `q/mu` 的 kaon 相位 | source-backed legacy 与 strict 路线待数值对照 |
 | `A_f/B0` cutoff、热上限、节点 | 否 | 数值漂移或伪峰 | 需收敛门禁 |
 | 相位分支、常数边界、Levinson | 否 | 可造成整体密度偏置 | 需单独测试 |
+| 单电荷 BU 测度 `1/pi` vs `1/(2pi)` | 否 | 绝对密度差一倍；同口径 ratio 抵消 | 公式已由稳定极限闭合，代码待迁移 |
 | Bose 支撑/凝聚处理 | 否 | 接近 `mu_M=m_M` 时可能发散 | 当前仅诊断截断 |
 | `Omega_M`/`Sigma_M` 反馈 | 否 | 改变上游 `phi,m,mu`，属于另一条路线 | 暂不实现 |
 | 非对角夸克平均场或 charged-neutral 混合 | 否 | 可能让中性 `K03/K38` 间接进入 charged sector | 当前模型未开启 |
@@ -176,8 +227,13 @@ coupling substitution”。
 
 - [x] 固定 `K^± -> K45`、旧 `K4567 -> K67` 的味道映射。
 - [x] 固定 `K03/K38` 只属于中性 `(0,3,8)` 块的当前模型边界。
-- [x] 记录 `2/4` 归一化不能机械互换的原因。
+- [x] 从 charged ladder 顶角推出 `Pi_matrix=2Pi_ordered`，并以 Goldstone identity
+  固定 `1-4KPi_ordered`。
 - [x] 记录 `phi` 原生旧耦合适配层与 `A_f` 在泡计算中的不同角色。
+- [x] 分离 source-backed `num_s_quark=1`、legacy `+iGamma/2` 与 strict retarded
+  GBU/pole 的解析对象。
+- [x] 以 `pi` 相移跳变的稳定粒子极限固定单电荷正能量测度为 `domega/pi`；
+  `domega/(2pi)` 只保留为文献 ratio adapter。
 
 ### Phase B：charged RPA kernel backend（不改旧接口）
 
@@ -189,15 +245,21 @@ coupling substitution”。
 
 ### Phase C：charged bubble provider 与极点
 
-- [ ] 从现有 `PolarizationAniso` 提取可替换的 retarded bubble provider，先复用
-  相同 `A/B0` 正则化，再单独验证有限宽度解析延拓。
-- [ ] 实现极点残差/阈值/Mott 分支记录，覆盖 `mu=0` 共轭关系和有限同位旋点。
+- [ ] 从现有 `PolarizationAniso` 提取 ordered retarded real-axis bubble provider，
+  与 `num_s_quark=1` legacy oracle 分开记录并做固定点/冻结线对照。
+- [ ] 为 legacy `Gamma` 增加带来源和 hash 的固定点；另为 `q_pole_strict_bw`
+  实现 second-sheet pole 残差/阈值/Mott 分支记录。
 
 ### Phase D：strict BU density
 
-- [ ] 固定相移边界、Levinson 检查和 generalized-BU 权重的唯一生产定义。
-- [ ] 把正常相 Bose 支撑与凝聚零模明确分支；`x_min_cut` 只能留作 diagnostic。
-- [ ] 通过 q/omega 节点、`eta`、`omega_max` 和 cutoff 收敛门禁。
+- [x] 将 `current` 与 `gbu_reference` 保持为可调用方案，并固定 `gbu_reference`
+  为最终比较默认；相移边界和 Levinson 仍待验证后才能成为 production 定义。
+- [x] 规定冻结线先执行正常相 Bose 支撑门禁；`x_min_cut` 只能留作 diagnostic，
+  若门禁失败再另建凝聚零模分支。
+- [ ] 将 phase-shift 单电荷实现迁移到 `domega/pi`，并新增窄束缚态与 stable/BW
+  绝对密度回归；确认旧 `K/pi` ratio 只发生共同因子抵消。
+- [ ] 实现高能 phase anchor、束缚态计数和 Levinson/Mott gate，并通过 q/omega
+  节点、`eta`、`omega_max` 和 cutoff 收敛门禁。
 
 ### Phase E：production candidate review
 
@@ -217,8 +279,11 @@ coupling substitution”。
 2. 同位旋对称：`phi_u=phi_d` 时 `K45=K67`、`K03=K38=0`，charged backend
    与旧 scalar 结果在同一归一化下相容。
 3. 电荷共轭：`mu=0` 时 `K^+`/`K^-` 的极点和相移满足约定的共轭关系。
-4. 数值：所有相移/极点残差、Bose status、节点配置和 fallback 都可追溯。
-5. 物理：高能相位边界、Levinson 计数和 Mott 连续性通过后，才可讨论实验趋势。
+4. 密度：单电荷 phase-shift 的窄束缚态极限与 `stable_meson_number_density`
+   一致，文献 ratio adapter 单独命名。
+5. 宽度：legacy `Gamma` 与 second-sheet pole width 分开命名、分开回归。
+6. 数值：所有相移/极点残差、Bose status、节点配置和 fallback 都可追溯。
+7. 物理：高能相位边界、Levinson 计数和 Mott 连续性通过后，才可讨论实验趋势。
 
 ### 明确非目标
 
@@ -233,7 +298,11 @@ coupling substitution”。
 - 纯代数核：`src/relaxtime/MesonInteractionKernel.jl`、
   `tests/unit/relaxtime/test_meson_interaction_kernel.jl`。
 - 中性矩阵 RPA：`src/relaxtime/MesonRPA.jl`、
-  `docs/api/relaxtime/propagator/MesonRPA.md`。
+  `docs/api/relaxtime/propagator/MesonRPA.md`；charged ladder/Goldstone normalization
+  gate：`tests/unit/relaxtime/test_meson_rpa.jl`。
+- 旧质量固定点：`tests/regression/relaxtime/test_meson_mass_regression.jl`、
+  `tests/validation/relaxtime/test_literature_digitized_meson_mass_targets.jl`、
+  `tests/validation/relaxtime/test_legacy_fortran_meson_numeric_mu0_targets.jl`。
 - 当前 charged BU scalar 诊断：`src/relaxtime/MesonDensity.jl`、
   `docs/api/relaxtime/meson_density/MesonDensity.md`。
 - BU 公式与相位边界：[MesonDensity_BU相移公式.md](../../reference/formula/relaxtime/meson_density/MesonDensity_BU相移公式.md)。
