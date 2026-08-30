@@ -2,7 +2,7 @@
   "schema_version": "issue130_pnjl_phase_reference_physical_deletion_v1",
   "proposal_status": "pending_author_review",
   "proposal_branch": "codex/issue130-pnjl-legacy-reference-physical-deletion",
-  "proposal_pr": null,
+  "proposal_pr": 285,
   "physical_deletion_applied_in_branch": true,
   "merge_authorization_required": true,
   "recovery_ref": "9aa4c313901ca0c91e851f58514e3df9aa124df4",
