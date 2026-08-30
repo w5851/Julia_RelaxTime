@@ -1,3 +1,15 @@
+---
+title: Issue #130：CEP 三态合同与窄窗口 pilot v2
+archived: true
+original: docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：CEP 三态合同与窄窗口 pilot v2
 
 创建日期：2026-07-27

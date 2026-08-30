@@ -1,3 +1,15 @@
+---
+title: Issue #130：phase-reference promotion gate v1 任务单
+archived: true
+original: docs/dev/active/2026-08-21_Issue130_phase-reference-promotion-gate.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：phase-reference promotion gate v1 任务单
 
 状态：accepted；作者已接受 Issue #130 的 `strict_reference_v1`、

@@ -1,0 +1,31 @@
+{
+  "schema_version": "issue130_task_document_archive_v1",
+  "archive_date": "2026-08-30",
+  "source_main_sha": "bae8634f87df856eccfe333642b6a13e1abb6327",
+  "archive_tool": "scripts/dev/archive_docs.jl",
+  "entry_count": 17,
+  "entries": [
+    {"source": "docs/dev/active/2026-07-26_PNJL_CEP窄窗口pilot_PR.md", "destination": "docs/dev/archived/2026-07-26_PNJL_CEP窄窗口pilot_PR.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2_执行台账.md", "destination": "docs/dev/archived/2026-07-27_Issue130_CEP三态合同与pilot_v2_执行台账.md", "disposition": "superseded_historical"},
+    {"source": "docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "destination": "docs/dev/archived/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "disposition": "superseded_historical"},
+    {"source": "docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md", "destination": "docs/dev/archived/2026-08-16_Issue130_针对性收口诊断任务单.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "destination": "docs/dev/archived/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "destination": "docs/dev/archived/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-21_Issue130_phase-reference-promotion-gate.md", "destination": "docs/dev/archived/2026-08-21_Issue130_phase-reference-promotion-gate.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "destination": "docs/dev/archived/2026-08-21_Issue130_phase-reference-import.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "destination": "docs/dev/archived/2026-08-23_Issue130_phase-reference-adapter-contract.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md", "destination": "docs/dev/archived/2026-08-23_Issue130_phase-reference-runtime-switch.md", "disposition": "superseded_historical"},
+    {"source": "docs/dev/active/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md", "destination": "docs/dev/archived/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md", "destination": "docs/dev/archived/2026-08-24_Issue130_phase-reference-retirement.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md", "destination": "docs/dev/archived/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md", "destination": "docs/dev/archived/2026-08-28_Issue130_RS_old_reference_retirement_audit.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md", "destination": "docs/dev/archived/2026-08-28_Issue130_RS_old_reference_path_retirement.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md", "destination": "docs/dev/archived/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md", "disposition": "completed"},
+    {"source": "docs/dev/active/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md", "destination": "docs/dev/archived/2026-08-29_Issue130_phase-reference-accepted-runtime-fallback.md", "disposition": "superseded_historical"}
+  ],
+  "excluded": [
+    {"path": "docs/dev/active/2026-07-17_PNJL全温区相图热积分与参考生产.md", "reason": "broader production task remains active"},
+    {"path": "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md", "reason": "metadata repair follow-up remains independent"},
+    {"path": "docs/dev/active/2026-08-15_论文级绘图SOP与分层迁移任务单.md", "reason": "figure-family migration and strict layout gate remain active"}
+  ]
+}

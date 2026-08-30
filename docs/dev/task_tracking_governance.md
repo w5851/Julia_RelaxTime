@@ -69,9 +69,10 @@ Deferred/research items:
 
 ## 当前三条主线
 
-- `issue130-phase` 已完成 `full_hybrid_candidate` 作者审核、accepted reference promotion 和 legacy retirement；保留不可变 evidence，后续仅做治理归档。
+- `issue130-phase` 已完成 `full_hybrid_candidate` 作者审核、accepted reference promotion、legacy retirement 和历史任务文档归档；保留不可变 evidence 与 parent accepted 摘要，不再追加数值工作。
 - `rs-transport` 已完成 accepted-primary p104/p128 的 matched numerical convergence 并归档；旧 strict-era raw/figure 保持不变，accepted evidence 不替换正式结果。
 - `plot-sop` 的公共 SOP 合同已登记为 `promoted`；后续逐图族迁移仍按独立 task/PR 推进，不由该 promotion 记录吸收历史图像或批量迁移工作。
+- `diagnostic-workflow-lifecycle` 仍为 `triaged`；只有在本次历史文档归档合并后，才进入一次性 workflow inventory 和作者批准的 retirement proposal。
 
 ## 验证与演进
 

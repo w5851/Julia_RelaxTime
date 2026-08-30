@@ -1,3 +1,15 @@
+---
+title: Issue #130：legacy phase-reference canonical 路径退役
+archived: true
+original: docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：legacy phase-reference canonical 路径退役
 
 状态：accepted。runtime switch、consumer adapter、solver-free parity、限定 numerical pilot 和

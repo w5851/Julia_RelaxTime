@@ -1,3 +1,15 @@
+---
+title: Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
+archived: true
+original: docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
 状态：review；276-target numerical expansion 与同源 solver-free aggregate replay 均已完成并通过
