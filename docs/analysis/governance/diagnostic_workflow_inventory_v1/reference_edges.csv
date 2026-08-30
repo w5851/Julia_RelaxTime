@@ -1,0 +1,26 @@
+source_kind,source,edge_kind,target,confidence,notes
+workflow,pnjl-dense-reference.yml,workflow_call,pnjl-dense-reference-shard.yml,high,主 dense workflow 调用 xi shard
+workflow,pnjl-dense-reference.yml,workflow_call,pnjl-dense-reference-assess-xi.yml,high,主 dense workflow 调用 xi assessment
+workflow,pnjl-dense-reference-replay.yml,workflow_call,pnjl-dense-reference-assess-xi.yml,high,replay 只重放 assessment
+workflow,pnjl-dense-reference-resume.yml,workflow_call,pnjl-dense-reference-assess-xi.yml,high,resume 的 assessment stage
+workflow,pnjl-dense-reference-resume.yml,workflow_call,pnjl-dense-reference-shard.yml,high,resume 的 failed-shard/refinement stage
+workflow,pnjl-raw-curve-archive.yml,workflow_call,pnjl-raw-curve-archive-shard.yml,high,raw archive 的 xi shard
+workflow,pnjl-c2-cep-limited-feasibility.yml,active_test,tests/unit/python/test_pnjl_c2_cep_limited_feasibility.py,high,保留测试引用
+workflow,pnjl-c2-cep-limited-feasibility.yml,active_test,tests/unit/models/test_pnjl_c2_cep_limited_feasibility.jl,high,保留 Julia 合同测试
+workflow,pnjl-c2-cep-three-midpoint.yml,active_test,tests/unit/python/test_pnjl_c2_cep_limited_feasibility.py,high,共享三态 fixture
+workflow,pnjl-c2-cep-xi05-high-side-extension.yml,active_test,tests/unit/python/test_pnjl_c2_cep_xi05_high_side_extension.py,high,端点扩展测试
+workflow,pnjl-c2-limited-feasibility.yml,active_doc,docs/dev/active/2026-07-17_PNJL全温区相图热积分与参考生产.md,high,更广 production task 仍 active
+workflow,pnjl-c2-targeted-closure-v1.yml,active_test,tests/unit/python/test_pnjl_c2_targeted_closure.py,high,closure contract test
+workflow,pnjl-c2-targeted-closure-v1.yml,active_test,tests/unit/models/test_pnjl_c2_targeted_closure.jl,high,Julia closure test
+workflow,pnjl-issue130-crossover-mu-endpoint-pilot.yml,ledger_pointer,config/governance/task_tracks.toml,high,台账保留 evidence pointer
+workflow,pnjl-issue130-maxwell-cep-local-expansion.yml,active_test,tests/unit/python/test_pnjl_issue130_maxwell_cep_local_pilot.py,high,Maxwell expansion/pilot shared test
+workflow,pnjl-issue130-maxwell-cep-local-pilot.yml,active_test,tests/unit/python/test_pnjl_issue130_maxwell_cep_local_pilot.py,high,Maxwell pilot test
+workflow,pnjl-maxwell-endpoint-local-production-shadow-v4.yml,active_test,tests/unit/python/test_pnjl_cep_hybrid_production_shadow.py,medium,shared endpoint shadow contract
+workflow,pnjl-maxwell-endpoint-production-shadow.yml,active_test,tests/unit/python/test_pnjl_endpoint_local_contract_feasibility_v2.py,high,endpoint feasibility test
+workflow,pnjl-maxwell-endpoint-refinement.yml,active_test,tests/unit/python/test_pnjl_maxwell_endpoint_candidate.py,high,refinement candidate test
+workflow,pnjl-phase-diagram.yml,active_script,scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement.py,high,legacy audit still names workflow provenance
+workflow,pnjl-stagec-density-certificate-feasibility-v2.yml,active_test,tests/unit/python/test_pnjl_stagec_density_certificate_feasibility_v2.py,high,v2 schema/contract test
+workflow,pnjl-stagec-density-certificate-feasibility.yml,active_test,tests/unit/python/test_pnjl_stagec_density_certificate_feasibility.py,high,v1 test must migrate before retirement
+workflow,relaxtime-issue130-rs-numerical-pilot-v1.yml,archived_evidence,docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2_quality_audit/,high,历史 pilot 证据入口
+workflow,pnjl-c2-cep-manual-bisection.yml,scan_result,no_active_reference,high,排除 archived docs 后未发现活动引用
+workflow,pnjl-issue130-crossover-mu-endpoint-expansion.yml,scan_result,no_active_reference,high,排除 archived docs 后未发现活动引用

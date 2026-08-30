@@ -177,19 +177,27 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "diagnostic-workflow-lifecycle"
 title = "Diagnostic workflow lifecycle maintenance"
-status = "triaged"
+status = "review"
 current_task = "retire-stale-one-shot-actions"
 blocked_by = []
 unlocks = []
-next_action = "盘点一次性 diagnostic workflows、其已完成的 run/artifact、后续引用和复现价值；提交非破坏性 retirement proposal，待作者批准后才归档或删除。"
-required_author_review = false
-author_review_status = "not_required"
+next_action = "作者审核 diagnostic workflow inventory/proposal；批准前不归档、停用或删除任何 workflow。"
+required_author_review = true
+author_review_status = "pending"
 promotion_required = false
-current_branch = ""
-current_sha = "36a0cda12b77e68cd1a5c135466bd3547ffb9f4d"
+current_branch = "codex/diagnostic-workflow-inventory"
+current_sha = "cea8110cdc1e1bafbc9873aa79cb5b0954c3de76"
 run_ids = ["32011954899"]
-evidence = ["pr:232", "run:32011954899"]
-updated_at = "2026-08-17"
+evidence = [
+  "pr:232",
+  "run:32011954899",
+  "file:docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/",
+  "note:47_workflows_20_one_shot_runs_inventory_snapshot_20260830",
+  "note:inventory_snapshot_source_cea_base_fast_forward_6b2_no_workflow_changes",
+  "note:no_workflow_retirement_executed_author_review_required",
+]
+updated_at = "2026-08-30"
 
 [[tracks]]
 id = "phase-evidence-retention"
@@ -711,14 +719,27 @@ evidence = [
 id = "retire-stale-one-shot-actions"
 track_id = "diagnostic-workflow-lifecycle"
 classification = "independent"
-status = "triaged"
+status = "review"
 parent = "track:diagnostic-workflow-lifecycle"
-task_file = ""
+task_file = "docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md"
 reason = "Issue #130 的版本化一次性诊断 workflow 持续累积；完成后保留的 Actions 定义会增加维护面和误触发风险，但历史 run/artifact 仍需可追溯。"
-next_action = "建立 workflow inventory 和引用图，按仍在使用、保留复现、可归档、可删除分类；先提出保留期、artifact/provenance 迁移和删除清单，再请求作者批准。"
+next_action = "作者审核 inventory/proposal 中的四个候选及 artifact/provenance 保留位置；批准后才创建独立 retirement PR。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:232", "run:32011954899"]
+evidence = [
+  "pr:232",
+  "run:32011954899",
+  "file:docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/README.md",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/manifest.json",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/workflow_inventory.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/run_artifact_snapshot.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/reference_edges.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/retirement_proposal.md",
+  "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/claim_ledger.csv",
+  "note:inventory_snapshot_source_cea_base_fast_forward_6b2_no_workflow_changes",
+  "note:inventory_is_non_destructive_and_solver_free",
+]
 
 [[items]]
 id = "issue130-rho-mu-curve-retention"
