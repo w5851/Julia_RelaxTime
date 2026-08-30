@@ -20,6 +20,8 @@ PR289 保持 open。本任务从合并后的 `origin/main` 独立开始，落实
 
 - 新增跨领域公式路线闭合 SOP、registry 和可执行 checker；
 - 编写 fixed-BQS quark-only charged `pi^\pm/K^\pm` 的 candidate 公式包；
+- 登记稳定粒子、reduced strict-BW、`q` 依赖 strict-BW 和 phase-shift BU 四类
+  解耦数密度入口，并将 generalized BU 设为最终比较默认；
 - 记录外部来源、项目符号/单位转换、代码/测试映射和 production 边界；
 - 增加纯结构/代数契约测试，不改变已有数值 baseline。
 
@@ -53,6 +55,12 @@ PR289 保持 open。本任务从合并后的 `origin/main` 独立开始，落实
 - [x] 新增 `formula_route_closure.toml` 与 `check_formula_route_closure.jl`。
 - [x] 增加 route registry 纯契约测试，并接入 unit core profile。
 - [x] 将本 PR 登记到 `config/governance/task_tracks.toml`，保留独立基线和审阅状态。
+- [x] 修正文献元数据/方程号、`Pi` 单位、retarded 极点符号和 BQS 无除法残差说明。
+- [x] 扩展 checker 的 registry containment、生产状态机、四类算法字段和对应契约测试。
+- [x] 明确四类数密度均可调用、`phase_shift_gbu_reference` 为比较默认、
+  `x_min_cut` 仅 diagnostic 且冻结线先执行正常相门禁。
+- [x] 记录 KMT 行列式一次收缩到 `K12/K45/K67` 的严格代数步骤及 charged/neutral
+  归一化桥接条件。
 - [ ] 由独立审阅者逐项复核公式、来源方程号和单位/归一化转换。
 - [ ] 在后续任务中实现并验证严格 charged retarded bubble、极点和 BU gate。
 

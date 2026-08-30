@@ -61,6 +61,19 @@ using Main.RelaxTime.MesonRPA
         @test all(isfinite, imag.(propagator))
     end
 
+    @testset "single-channel scalar/matrix normalization bridge" begin
+        coupling = 0.37
+        pi_charged = 0.12 + 0.03im
+        pi_matrix = 2 * pi_charged
+
+        charged = 2 * coupling / (1 - 4 * coupling * pi_charged)
+        matrix_single_channel = 2 * coupling / (1 - 2 * coupling * pi_matrix)
+        unconverted_matrix = 2 * coupling / (1 - 2 * coupling * pi_charged)
+
+        @test charged ≈ matrix_single_channel
+        @test !isapprox(charged, unconverted_matrix; rtol=1e-12, atol=1e-14)
+    end
+
     @testset "isospin-symmetric decoupling" begin
         symmetric_kernel = build_full_kmt_interaction((-0.30, -0.30, -0.10); G=G, K=K)
         pi = neutral_polarization_matrix((0.11 + 0.01im, 0.11 + 0.01im, 0.03 + 0.04im))

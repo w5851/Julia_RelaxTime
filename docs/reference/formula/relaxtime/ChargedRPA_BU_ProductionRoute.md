@@ -32,6 +32,23 @@ quark-only PNJL 平衡；然后在该背景上构造介子传播子和 BU 数密
 因此它是“完整公式路线的 candidate 规范 + 当前 diagnostic 后端的审查边界”，
 不是新的稳定 `Models` 入口。
 
+### 1.1 四类可调用的介子数密度算法
+
+本项目把介子数密度算法保持为解耦的四类入口；本路线不把它们合并成单一
+“BU 数密度”实现：
+
+| 算法族 | 当前入口/语义 | 本路线边界 |
+|---|---|---|
+| `stable_particle_limit` | 稳定粒子极限 | 可调用；用于稳定极限基线 |
+| `reduced_strict_bw` | reduced strict-BW 单通道积分 | 可调用；用于有限宽度过渡诊断 |
+| `q_pole_strict_bw` | `q` 依赖复极点 strict-BW | 可调用；极点状态必须保留 |
+| `phase_shift_bu` | 相移双积分 BU | 可调用；`current` 与 `gbu_reference` 均保留 |
+
+四类算法共享上游参数和输出契约，但不共享未经证明的归一化。最终比较的默认
+方案固定为 `phase_shift_gbu_reference`（广义 BU）；`phase_shift_current` 仍可
+被显式调用作为对照，不能因为比较默认而删除或改写其它三类算法。这个选择只
+规定比较口径，不授予 strict charged-RPA/BU production 资格。
+
 ## 2. 公式闭合链
 
 本路线必须按下列顺序解释，不能跳过中间层：
@@ -128,6 +145,20 @@ M_s&=m_{0s}-4G\phi_s+2K\phi_u\phi_d.
 奇异度量子数，而不是数密度定义的正负任意选择。若将介子密度加入总守恒荷，
 必须另建含 `Omega_M`/hadronic charge 的路线，不能在本 candidate 中隐式加入。
 
+在当前 quark-only 约定下，`rho_S=0` 等价于 `rho_s=0`。只要
+`rho_B != 0`，无除法的 BQS 残差可以写成
+
+```math
+r_Q = \rho_Q-0.4\rho_B=0,
+\qquad
+r_S = \rho_s=0.
+```
+
+在 `rho_s=0` 的子域内，`rho_Q/rho_B=0.4` 进一步给出
+`rho_u/rho_d=7/8=0.875`。当 `rho_B=0` 时，比值语义本身未定义；项目 solver
+实际求解的是 affine residual `r_Q`，因而在零密度点具有连续代数延拓，但该点
+不得被解释为已经测得或验证了 `rho_Q/rho_B=0.4`。
+
 ## 4. KMT Hartree 收缩与完整相互作用核
 
 令 `epsilon_P=+1`、`epsilon_S=-1`，并把
@@ -193,9 +224,42 @@ K_{4567}^{\mathrm{legacy},\pm}=K_{67}^{P/S}.
 整体符号由下式的项目约定固定。`K^+` 使用 `(u,s)`，`K^-` 使用 `(s,u)`；在
 有限化学势下两者不应自动合并为同一个缓存数组。
 
+将每条夸克线写成正/负能量谱投影，`a,b in {+1,-1}`，Matsubara 求和后的
+有序 retarded 泡具有通用结构
+
+```math
+\Pi_{ff'}^{R,X}(\omega,\mathbf q)
+=\int_{|\mathbf p|<\Lambda}\frac{d^3p}{(2\pi)^3}
+\sum_{a,b=\pm1}\mathcal C_{ab}^{X}(\mathbf p,\mathbf q)
+\frac{n_F(bE_{f'}-\mu_{f'})-n_F(aE_f-\mu_f)}
+{\omega+\mu_f-\mu_{f'}-aE_f+bE_{f'}+i0^+}.
+```
+
+`C_ab^X` 包含 Dirac/color trace、P/S 顶角和本项目整体 loop 符号；PNJL 时
+`n_F` 替换为同一 `Phi,Phibar` 背景下的广义分布。这个式子直接固定了外能量
+只通过 `omega+mu_f-mu_f'` 进入。因此
+
+```text
+Pi_us:  omega + mu_u - mu_s,  masses/order=(u,s)
+Pi_su:  omega + mu_s - mu_u,  masses/order=(s,u)
+```
+
+二者在有限化学势下不是同一个函数。严格 provider 必须用相同 cutoff 和变量
+变换验证交换不变量
+
+```math
+\Pi_{ff'}^R(\omega,q;\mu_f,\mu_{f'})
+\stackrel{?}{=}
+\left[\Pi_{f'f}^R(-\omega,q;\mu_{f'},\mu_f)\right]^*,
+```
+
+并在 `mu_f=mu_f'=0` 恢复正能量 charged-conjugate 极点/相移一致性；问号表示
+这是后续实现必须通过的验证关系，而不是当前 legacy B0 已经证明的性质。
+
 ### 5.2 `A_f`/`B0` 组合
 
-对实轴上方的 retarded 能量 `z=omega+i eta`，项目目前采用的代数形式为
+本路线采用 `e^{-i omega t}` Fourier 约定；retarded 能量从上半平面
+`z=omega+i 0^+` 延拓，有限 `eta` 只是实轴数值探针。项目目前采用的代数形式为
 
 ```math
 \Pi_{ff'}^{P,S}(z,q)
@@ -237,6 +301,18 @@ Rehberg 等的 Eq. (2.22)–(2.23) 讨论了三动量截断下非等质量 kaon 
 - `legacy_symmetrized_B0`：兼容诊断，对应当前 `num_s_quark=1` 的显式平均，不能
   在没有额外证据时作为严格生产定义。
 
+当前代码的 legacy 平均具体是
+
+```math
+B_0^{legacy}(k_0;f,f')=\frac12\left[
+B_0(k_0+\mu_f-\mu_{f'};m_f,m_{f'})+
+B_0(-k_0+\mu_f-\mu_{f'};m_f,m_{f'})\right].
+```
+
+它既没有交换 `m_f,m_f'`，也没有把化学势差改成
+`mu_f'-mu_f`，所以不能等同于 `Pi_f'f`；这正是 `num_s_quark=1` 只能保留为
+legacy diagnostic 的代数边界。
+
 ## 6. Charged RPA 传播子、极点与相移
 
 ### 6.1 标量 charged 分母的项目规范
@@ -263,6 +339,20 @@ F_{ff'}^X(z,q)=1-4K_{ff'}^X\Pi_{ff'}^X(z,q).
 它用于 `(0,3,8)` 基底的矩阵核；只有在同时给出场归一化和 `Pi` 的因子转换时，
 才可与上面的 scalar 形式比较。当前 candidate 明确禁止把矩阵的 `2` 机械替换
 charged 分母的 `4`。
+
+单通道的代数桥接条件可以明确写成
+
+```math
+\Pi_{\mathrm{matrix}}=2\Pi_{\mathrm{charged}}
+\quad\Longrightarrow\quad
+2K\,[1-2K\Pi_{\mathrm{matrix}}]^{-1}
+ =\frac{2K}{1-4K\Pi_{\mathrm{charged}}}.
+```
+
+因此 `2`/`4` 的差异等价于泡或介子场归一化相差一个明确的因子 2；只有从同一
+二次作用量证明 `Pi_matrix=2 Pi_charged`，该桥接才可用于严格实现。当前项目
+先把这个等式作为 normalization gate 和单通道回归测试目标，不把它当作已经
+完成的 charged-RPA 证明。
 
 ### 6.2 极点定义
 
@@ -337,22 +427,48 @@ g_B(\omega;\mu_M,T)[1+g_B(\omega;\mu_M,T)]\,\delta_M(\omega,q).
 生产实现必须保存采用的是导数形式还是分部积分形式，并以同一 phase branch、
 阈值和边界验证两者；当前项目优先使用相移本体的分部积分诊断形式。
 
+### 7.2.1 四类算法与 BU 比较口径
+
+四类顶层数密度算法由各自入口解耦实现：稳定粒子极限、reduced strict-BW、
+`q` 依赖复极点 strict-BW，以及 phase-shift BU。它们可以在同一固定 BQS
+背景上分别调用和记录，不得用一个算法的数值替代另一个算法的验证。
+
+phase-shift BU 内部保留两种相移权重：
+
+```math
+F_{\mathrm{current}}(\delta)=\delta,
+\qquad
+F_{\mathrm{gBU}}(\delta)=\delta-\frac12\sin(2\delta).
+```
+
+两种权重都属于可调用的分析/诊断方案；本路线把 `F_gBU` 注册为最终比较的
+默认方案，因为它是当前文献比较中采用的广义 BU 形式。这个默认不改变稳定、
+两类 strict-BW 或 `F_current` 的调用能力，也不绕过相位边界、Levinson、
+支撑和数值收敛门禁。
+
 ### 7.3 Bose 支撑
 
-正常相要求积分支撑满足 `omega>mu_M`。`density_policy=:x_min_cut` 把下界改为
-`mu_M+x_min*T`，只是一种明确的诊断截断；它没有引入零动量凝聚模，也不能被
-解释为严格 Bose 凝聚处理。若任何生产点接近或越过 `mu_M=m_M`，必须另建
-“凝聚零模 + 连续谱”路线并停止当前 route 的升格。
+正常相要求积分支撑满足 `omega>mu_M`。沿当前化学冻结线，本路线首先检查
+`mu_M < m_M` 和所有积分节点的 `omega-mu_M > 0`；在该正常相门禁通过时，
+不引入介子凝聚零模。经验上的“通常不超过有效质量”只能作为待验证假设，
+不能替代逐点检查。
+
+`density_policy=:x_min_cut` 把下界改为 `mu_M+x_min*T`，保留为文献复现和
+异常点诊断的简化处理。它没有引入零动量凝聚模，也不能被解释为严格 Bose
+凝聚处理。若任何冻结线点满足 `mu_M >= m_M`、节点触及 `omega <= mu_M`，
+或正常相门禁失败，则该点标记为 `unsafe_bose_domain`，停止当前 route 的
+production 升格，并另建“凝聚零模 + 连续谱”路线；在此之前不得把
+`x_min_cut` 的有限结果解释为凝聚后的物理密度。
 
 ## 8. 公式 → 代码 → 测试映射
 
 | 公式层 | 当前代码/入口 | 当前证据与边界 |
 |---|---|---|
-| PNJL 平均场、质量、BQS | `src/models/pnjl_physics/PNJLCore.jl`、`src/models/solver/spec/ConstraintModes.jl`、`src/models/solver/spec/Conditions.jl` | `FixedMuBConservedCharges` 代数/求解测试；不含 `Omega_M` |
+| PNJL 平均场、质量、BQS | `src/models/pnjl_physics/PNJLCore.jl`、`src/models/solver/spec/ConstraintModes.jl`、`src/models/solver/spec/Conditions.jl` | `FixedMuBConservedCharges` 代数/求解测试（含 `tests/unit/models/test_fixed_mub_conserved_charges.jl`）；不含 `Omega_M` |
 | KMT `K_ab` | `src/relaxtime/MesonInteractionKernel.jl` | `tests/unit/relaxtime/test_meson_interaction_kernel.jl`；纯代数 backend |
 | 中性 `(0,3,8)` 矩阵 | `src/relaxtime/MesonRPA.jl`、`MesonRPAAdapter.jl` | `tests/unit/relaxtime/test_meson_rpa.jl`、`test_meson_rpa_adapter.jl`；不代表 charged 混合 |
 | `A_f/B0` 泡 | `src/relaxtime/OneLoopIntegrals.jl`、`OneLoopIntegralsAniso.jl`、`PolarizationAniso.jl` | `tests/unit/relaxtime/test_oneloopintegrals*.jl`、`test_polarization_aniso.jl`；`num_s_quark=1` 仍属兼容语义 |
-| charged scalar BU | `src/relaxtime/MesonDensity.jl` 的 `PhaseShiftInteractionSpec` 和 `phase_shift_meson_number_density` | `tests/unit/relaxtime/test_meson_density.jl`；当前是有限 `eta`/数值相位诊断 |
+| 四类介子数密度 | `stable_meson_number_density`、`strict_bw_meson_number_density`、`strict_bw_qpole_meson_number_density`、`phase_shift_meson_number_density` | `tests/unit/relaxtime/test_meson_density.jl` 及对应 workflow tests；四类均可调用，当前仍是有限 `eta`/数值相位诊断 |
 | route registry | `config/governance/formula_route_closure.toml`、`scripts/dev/check_formula_route_closure.jl` | `tests/unit/config/test_formula_route_closure.jl`；只检查闭合包完整性 |
 
 当前实现中 `FullKMTInteraction` 可以把 `K12/K45` 注入既有 charged BU 入口，但这
@@ -362,11 +478,11 @@ g_B(\omega;\mu_M,T)[1+g_B(\omega;\mu_M,T)]\,\delta_M(\omega,q).
 
 | 来源 | 使用内容 | 与项目规范的转换/限制 |
 |---|---|---|
-| Rehberg, Klevansky, Hüfner, *Nucl. Phys. A* 608 (1996) 356, DOI [10.1016/0375-9474(96)00247-3](https://doi.org/10.1016/0375-9474(96)00247-3) | Eq. (2.1) NJL/KMT 拉氏量；Eq. (2.2)–(2.5) 平均场耦合与 `A`；Eq. (2.7) 质量方程；Eq. (2.8)–(2.14) 传播子/极化；Eq. (2.22)–(2.23) kaon 泡对称化 | 采用项目内部 `fm` 自然单位；把其 `G_f` 记为 `H_f=-phi_f`；Eq. (2.23) 仅作 legacy 诊断，不能直接宣称是有限 `mu` 的 retarded 定义 |
-| Rehberg & Klevansky, *Ann. Phys.* 268 (1998) 1, DOI [10.1006/aphy.1996.0140](https://doi.org/10.1006/aphy.1996.0140) | Eq. (4.9) flavor-order 交换；Eq. (6.5)–(6.10) `2K/(1-4KPi)`、`A/B0` 和 kaon 极点 | 保留有序 `(f,f')`；项目 `Pi` 的 `fm^-2` 约定与 `K Pi` 无量纲检查必须同时使用 |
+| Rehberg, Klevansky, Hüfner, *Nucl. Phys. A* 608 (1996) 356–388, DOI [10.1016/0375-9474(96)00247-3](https://doi.org/10.1016/0375-9474(96)00247-3) | Eq. (2.1) NJL/KMT 拉氏量；Eq. (2.2)–(2.5) 平均场耦合与 `A`；Eq. (2.7) 质量方程；Eq. (2.8)–(2.14) 传播子/极化；Eq. (2.22)–(2.23) kaon 泡对称化 | 采用项目内部 `fm` 自然单位；把其 `G_f` 记为 `H_f=-phi_f`；Eq. (2.23) 仅作 legacy 诊断，不能直接宣称是有限 `mu` 的 retarded 定义 |
+| Rehberg & Klevansky, *Ann. Phys.* 252 (1996) 422–457, DOI [10.1006/aphy.1996.0140](https://doi.org/10.1006/aphy.1996.0140)；开放版本 [hep-ph/9510221](https://arxiv.org/abs/hep-ph/9510221) | arXiv v2 Eq. (19) 的 flavor-order 结构、Eq. (84)–(89) 的一圈积分/解析结构；出版物方程编号需按具体版本复核，不再写成不存在的 Eq. (4.9)/(6.5)–(6.10) | 保留有序 `(f,f')`；项目 `Pi` 的 `fm^-2` 约定与 `K Pi` 无量纲检查必须同时使用 |
 | Tian et al., *Phys. Rev. D* 114 (2026) 034012, DOI [10.1103/d7nm-y2vp](https://doi.org/10.1103/d7nm-y2vp) | Eq. (2)–(3) 完整 KMT 有效耦合（含 `K03/K30/K38/K83`）；Eq. (20)–(22)、(26) 中性 `(0,3,8)` RPA 矩阵组织 | 该文使用 NJL、外磁场和 Pauli–Villars；本项目只采用耦合/矩阵结构，把 PNJL/零磁场/BU 数值另行闭合 |
 | Blaschke et al., *Phys. Rev. D* 96 (2017) 094008, DOI [10.1103/PhysRevD.96.094008](https://doi.org/10.1103/PhysRevD.96.094008) | PNJL + BU 的 bound/resonant/scattering 统一、Mott 跳变、Levinson/高能相位边界 | 只采用方法结构；具体相位分支、正则化和节点仍按本项目公式包冻结 |
-| Blaschke et al., *Particles* 3 (2020) 100–114, DOI [10.3390/particles3010014](https://doi.org/10.3390/particles3010014)；arXiv [1912.13162](https://arxiv.org/abs/1912.13162) | Eq. (24)–(25) BU 密度和分部积分形式；带电 `pi/K` 化学势和实验比较的工作流 | 采用单 charged 物种 `d=1`；实验趋势只作数量级/趋势参照，不作为本路线逐点拟合目标 |
+| Blaschke et al., *Particles* 3 (2020) 169–177, DOI [10.3390/particles3010014](https://doi.org/10.3390/particles3010014)；arXiv [1912.13162](https://arxiv.org/abs/1912.13162) | 开放版本 Eq. (18) 标准 BU 部分密度、Eq. (20) `delta -> delta - sin(2delta)/2` 的广义替换；最终比较采用广义形式 | 四类数密度算法均保持可调用；最终路线比较默认 `phase_shift_gbu_reference`，单 charged 物种取 `d=1`；实验趋势只作参照 |
 
 这些来源分别支撑“微观模型/传播子”“有序泡与归一化”“BU 方法结构”和
 “`pi/K` 带电比值工作流”。来源之间若采用不同的 `Pi`、相移或 KMT 符号，必须
@@ -383,6 +499,7 @@ g_B(\omega;\mu_M,T)[1+g_B(\omega;\mu_M,T)]\,\delta_M(\omega,q).
 | bubble 顺序 | 目标为 `ordered_retarded` | `mu=0` 时 `K^+/-` 真空极点共轭/相同；有限 `mu` 保留方向 |
 | 相移 | retarded `D` 的 unwrap 相位并归一化高能常数 | 束缚态跳变、Levinson 计数和高能 `delta -> 0` |
 | BU 支撑 | 正常相 `omega>mu_M` | `x_min_cut` 只能标 diagnostic；接近凝聚必须分支 |
+| 数密度算法 | 四类入口均可调用 | 最终比较默认 `phase_shift_gbu_reference`；不得删除其它算法 |
 | 上游背景 | quark-only BQS | 不把后处理介子荷写成完整热力学平衡 |
 
 ## 11. 生产边界与升格条件
@@ -392,7 +509,8 @@ g_B(\omega;\mu_M,T)[1+g_B(\omega;\mu_M,T)]\,\delta_M(\omega,q).
 1. `K12/K45/K67` 的符号、单位和味道 spectator 由纯代数测试覆盖；
 2. charged `Pi_us/Pi_su` 的正则化、解析延拓和 `num_s_quark` 语义有可复核推导；
 3. `2/4` 归一化与至少一个真空或同位旋对称固定点相容；
-4. 极点、Mott 阈值、相位分支、Levinson 边界和 BU 两种积分形式通过验证；
+4. 四类数密度入口均可复现；phase-shift 的 `current`/`gbu_reference`、极点、
+   Mott 阈值、相位分支、Levinson 边界和 BU 两种积分形式通过验证；
 5. `q/omega` 节点、`eta`、截断和 Bose 支撑的变化低于预先登记的误差预算；
 6. 至少一个外部文献固定点按相同参数、单位、简并度和通道定义复核；
 7. 独立审阅者确认公式 → 代码 → 测试映射，并明确接受所有近似；
@@ -406,7 +524,7 @@ registry 和专题 SOP 中显式批准。当前 `production_authorized=false`。
 供后续独立审查（包括计划中的 5.6Sol 审核）的最小问题清单：
 
 1. 项目 `A_f/B0/Pi` 符号是否能从同一 Matsubara 定义逐行推到第 5 节；
-2. `Pi_us`、`Pi_su` 与 Rehberg Eq. (4.9) 的 flavor-order 交换在有限 `mu` 下如何
+2. `Pi_us`、`Pi_su` 与 Rehberg 开放版本 Eq. (19) 的 flavor-order 交换在有限 `mu` 下如何
    映射到 retarded 共轭，而不是误用同序 `p_0` 平均；
 3. charged 标量 `1-4KPi` 与中性矩阵 `I-2KPi` 的场归一化转换是否完整；
 4. `z_p=M-iGamma/2` 的半平面、虚部符号和有限 `eta` 相位是否一致；

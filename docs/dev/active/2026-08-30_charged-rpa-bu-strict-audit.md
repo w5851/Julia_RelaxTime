@@ -30,6 +30,9 @@ PR290 从独立的 `origin/main` 基线建立了
 - 目标 observables 是 charge-resolved `K^+/pi^+` 与 `K^-/pi^-`；`K^0`、
   `bar K^0` 只作为通道映射的审计参照。
 - 本轮不做 strict-support 的凝聚处理，不以 `x_min_cut` 结果授予 production 资格。
+- 介子数密度保持四类解耦入口：稳定粒子极限、reduced strict-BW、`q` 依赖复极点
+  strict-BW 和 phase-shift BU；最终比较默认使用 `phase_shift_gbu_reference`，
+  但四类入口和 phase-shift 的 `current` 对照均保持可调用。
 
 ## 2. 当前有效链路（已核对）
 
@@ -109,8 +112,8 @@ D_a^{(B)}=\frac{2K_a}{1-2K_a\Pi_a},
 - 有限 `mu` 时的 Landau 区、阈值和虚部符号是否与相移分支一致；
 - `A_f` 与 `B0` 是否使用相同 cutoff、热积分上限和节点。按当前公式的自然单位，
   `A_f` 与 `Pi_a` 的量纲应为 `fm^-2`；`K_a` 与传播子 `D_a` 为 `fm^2`，因此
-  `K_a Pi_a` 无量纲。现有部分旧 API 页面仍把 `Pi` 写成 `fm^2`，这与公式页和
-  `PolarizationAniso` 的实际量纲不一致，列为后续文档修复项，不在本轮静默改写。
+  `K_a Pi_a` 无量纲。旧 `MesonPropagator` 与 `PolarizationCache` API 页面已同步
+  为 `Pi=fm^-2`；这只修正文档契约，不改变当前数值实现。
 
 当前 `phi` 原生适配层只消除了“由 `A_f` 再构造 `H_f`”这一重复步骤；它不等于
 已经完成 `Pi_a` 的严格 retarded 解析延拓。`A_f` 仍可能作为夸克泡的 tadpole
@@ -121,10 +124,11 @@ D_a^{(B)}=\frac{2K_a}{1-2K_a\Pi_a},
 每个 charged 通道应由
 
 ```math
-\Delta_a(z,q)=0,\qquad z=\omega+i\Gamma/2
+\Delta_a(z,q)=0,\qquad z=\omega-i\Gamma/2
 ```
 
-定义复极点（具体半平面符号必须与 retarded 传播子核对）。束缚态、连续谱和
+这里采用 `e^{-i\omega t}` 的 Fourier 约定，retarded 极点位于下半平面，故
+`Im(z_p)<0`。束缚态、连续谱和
 Mott 解离要分别记录；不能用一个负质量或仅靠有限 `eta` 的相位峰替代极点
 定义。极点求解至少需要：残差、收敛状态、分支 seed、阈值
 `m_1+m_2`、以及 `K^+`/`K^-` 的 flavor 顺序。
@@ -140,7 +144,9 @@ Mott 解离要分别记录；不能用一个负质量或仅靠有限 `eta` 的�
 并明确减去高能端常数、处理束缚态的 `pi` 跳变、连续谱相位和 Levinson 边界。
 当前 `MesonDensity` 支持 `arg_propagator`/`arg_inverse_propagator`、unwrap 和
 `current`/`gbu_reference` 两种权重，但这些是可切换诊断约定，不应在没有公式
-固定时混合使用。BU 原式及分部积分形式见
+固定时混合使用。本任务将两种权重都保留为可调用方案，并把
+`gbu_reference` 固定为最终比较默认；这不替代相位边界、Levinson 和收敛验证。
+BU 原式及分部积分形式见
 [MesonDensity_BU相移公式.md](../../reference/formula/relaxtime/meson_density/MesonDensity_BU相移公式.md)。
 
 特别是分部积分后的密度使用 `delta_a` 本体；若 `delta_a(omega->infty)` 或
@@ -149,9 +155,11 @@ Levinson 检查必须先于冻结线扫描。
 
 ### 3.6 Bose 支撑与凝聚：`x_min_cut` 不是严格解
 
-当 `omega<=mu_M` 时，玻色分布在 `omega=mu_M` 有极点。当前
-`density_policy=:x_min_cut` 把下界移动到 `mu_M+x_min*T`，这是明确的诊断截断，
-不是对零动量凝聚模的处理。严格路线需要二选一并写入公式合同：
+当 `omega<=mu_M` 时，玻色分布在 `omega=mu_M` 有极点。沿化学冻结线先逐点
+检查 `mu_M<m_M` 和积分节点的 `omega>mu_M`；若正常相门禁通过，则不引入
+介子凝聚零模。当前 `density_policy=:x_min_cut` 把下界移动到
+`mu_M+x_min*T`，这是文献复现/异常点诊断的简化截断，不是对零动量凝聚模的处理。
+严格路线需要二选一并写入公式合同：
 
 1. 证明所有生产点处于 `mu_M<m_M` 的正常相，并对 `omega>mu_M` 做支撑门禁；或
 2. 单独引入凝聚零模、守恒荷和连续激发的分解。
@@ -200,8 +208,10 @@ coupling substitution”。
 
 ### Phase D：strict BU density
 
-- [ ] 固定相移边界、Levinson 检查和 generalized-BU 权重的唯一生产定义。
-- [ ] 把正常相 Bose 支撑与凝聚零模明确分支；`x_min_cut` 只能留作 diagnostic。
+- [x] 将 `current` 与 `gbu_reference` 保持为可调用方案，并固定 `gbu_reference`
+  为最终比较默认；相移边界和 Levinson 仍待验证后才能成为 production 定义。
+- [x] 规定冻结线先执行正常相 Bose 支撑门禁；`x_min_cut` 只能留作 diagnostic，
+  若门禁失败再另建凝聚零模分支。
 - [ ] 通过 q/omega 节点、`eta`、`omega_max` 和 cutoff 收敛门禁。
 
 ### Phase E：production candidate review

@@ -18,8 +18,18 @@ export validate_registry, main
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const DEFAULT_REGISTRY_REL = joinpath("config", "governance", "formula_route_closure.toml")
 const FORMULA_ROOT = "docs/reference/formula/"
+const DOI_PATTERN = r"^10\.\d{4,9}/\S+$"i
+const ARXIV_PATTERN = r"^(?:arxiv:)?(?:\d{4}\.\d{4,5}|[a-z][a-z.\-]+/\d{7})(?:v\d+)?$"i
 
 normalize_rel(path::AbstractString) = replace(normpath(String(path)), '\\' => '/')
+
+function _valid_source_identifier(source::AbstractString)
+    value = strip(String(source))
+    doi_value = replace(value, r"^https?://(?:dx\.)?doi\.org/"i => "")
+    occursin(DOI_PATTERN, doi_value) && return true
+    arxiv_value = replace(value, r"^https?://arxiv\.org/(?:abs|html)/"i => "")
+    return occursin(ARXIV_PATTERN, arxiv_value)
+end
 
 function _nonempty_string(value, field::AbstractString, violations::Vector{String})
     if !(value isa AbstractString) || isempty(strip(String(value)))
@@ -53,20 +63,47 @@ end
 
 function _existing_repo_file!(violations::Vector{String}, root::AbstractString, rel::AbstractString, label::AbstractString)
     normalized = normalize_rel(rel)
-    if isabspath(normalized) || startswith(normalized, "../")
+    if isabspath(normalized) || normalized == ".." || startswith(normalized, "../")
         push!(violations, "$(label) must be a repository-relative path: $(rel)")
         return nothing
     end
     path = joinpath(root, split(normalized, '/')...)
-    isfile(path) || push!(violations, "$(label) does not exist: $(normalized)")
+    if isfile(path)
+        root_real = normpath(realpath(root))
+        path_real = normpath(realpath(path))
+        root_cmp = Sys.iswindows() ? lowercase(root_real) : root_real
+        path_cmp = Sys.iswindows() ? lowercase(path_real) : path_real
+        prefix = endswith(root_cmp, string(Base.Filesystem.path_separator)) ?
+            root_cmp : root_cmp * string(Base.Filesystem.path_separator)
+        if path_cmp != root_cmp && !startswith(path_cmp, prefix)
+            push!(violations, "$(label) resolves outside repository root: $(normalized)")
+            return nothing
+        end
+    else
+        push!(violations, "$(label) does not exist: $(normalized)")
+    end
     return path
 end
 
 function _load_registry(root::AbstractString, registry_rel::AbstractString, violations::Vector{String})
     normalized = normalize_rel(registry_rel)
+    if isabspath(normalized) || normalized == ".." || startswith(normalized, "../")
+        push!(violations, "formula-route registry must be a repository-relative path: $(registry_rel)")
+        return nothing
+    end
     path = joinpath(root, split(normalized, '/')...)
     if !isfile(path)
         push!(violations, "missing formula-route registry: $(normalized)")
+        return nothing
+    end
+    root_real = normpath(realpath(root))
+    path_real = normpath(realpath(path))
+    root_cmp = Sys.iswindows() ? lowercase(root_real) : root_real
+    path_cmp = Sys.iswindows() ? lowercase(path_real) : path_real
+    prefix = endswith(root_cmp, string(Base.Filesystem.path_separator)) ?
+        root_cmp : root_cmp * string(Base.Filesystem.path_separator)
+    if path_cmp != root_cmp && !startswith(path_cmp, prefix)
+        push!(violations, "formula-route registry resolves outside repository root: $(normalized)")
         return nothing
     end
     try
@@ -140,10 +177,58 @@ function validate_registry(
         isempty(approximations) && push!(violations, "$(route_label).approximations must not be empty")
         sources = _string_vector(raw, "external_sources", route_label, violations)
         isempty(sources) && push!(violations, "$(route_label).external_sources must not be empty")
+        for source in sources
+            _valid_source_identifier(source) || push!(violations,
+                "$(route_label).external_sources has invalid DOI/arXiv identifier: $(source)")
+        end
         tests = _string_vector(raw, "formula_tests", route_label, violations)
         isempty(tests) && push!(violations, "$(route_label).formula_tests must not be empty")
         unresolved = _string_vector(raw, "unresolved_items", route_label, violations)
-        isempty(unresolved) && push!(violations, "$(route_label).unresolved_items must not be empty")
+        if status == "production_authorized"
+            !isempty(unresolved) && push!(violations,
+                "$(route_label).unresolved_items must be empty for production_authorized")
+        else
+            isempty(unresolved) && push!(violations, "$(route_label).unresolved_items must not be empty")
+        end
+
+        markers = _string_vector(raw, "required_document_markers", route_label, violations)
+        isempty(markers) && push!(violations, "$(route_label).required_document_markers must not be empty")
+
+        if id == "charged_rpa_bu_quark_only"
+            for field in ("density_algorithms", "comparison_scheme", "bose_domain_policy")
+                haskey(raw, field) || push!(violations,
+                    "$(route_label) missing required field: $(field)")
+            end
+            density_algorithms = _string_vector(raw, "density_algorithms", route_label, violations)
+            isempty(density_algorithms) && push!(violations, "$(route_label).density_algorithms must not be empty")
+            required_density_algorithms = Set((
+                "stable_particle_limit",
+                "reduced_strict_bw",
+                "q_pole_strict_bw",
+                "phase_shift_bu",
+            ))
+            for algorithm in sort!(collect(setdiff(required_density_algorithms, Set(density_algorithms))))
+                push!(violations, "$(route_label).density_algorithms missing required algorithm: $(algorithm)")
+            end
+            comparison_scheme = _nonempty_string(
+                get(raw, "comparison_scheme", nothing),
+                "$(route_label).comparison_scheme",
+                violations,
+            )
+            if comparison_scheme !== nothing && comparison_scheme != "phase_shift_gbu_reference"
+                push!(violations,
+                    "$(route_label).comparison_scheme must be phase_shift_gbu_reference")
+            end
+            bose_policy = _nonempty_string(
+                get(raw, "bose_domain_policy", nothing),
+                "$(route_label).bose_domain_policy",
+                violations,
+            )
+            if bose_policy !== nothing && bose_policy != "normal_phase_gate_x_min_cut_diagnostic"
+                push!(violations,
+                    "$(route_label).bose_domain_policy has unsupported value: $(bose_policy)")
+            end
+        end
 
         authorized = get(raw, "production_authorized", nothing)
         authorized isa Bool || push!(violations, "$(route_label).production_authorized must be boolean")
@@ -156,7 +241,6 @@ function validate_registry(
 
         if document_path !== nothing && isfile(document_path)
             content = read(document_path, String)
-            markers = _string_vector(raw, "required_document_markers", route_label, violations)
             for marker in markers
                 occursin(marker, content) ||
                     push!(violations, "$(route_label).document missing required marker: $(marker)")

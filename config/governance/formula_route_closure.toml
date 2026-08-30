@@ -23,8 +23,18 @@ approximations = [
   "PNJL mean-field background",
   "RPA quark-bubble resummation",
   "no Omega_M or Sigma_M feedback",
-  "x_min_cut is diagnostic-only",
+  "four decoupled meson-density algorithms remain callable",
+  "generalized BU is the comparison default; current BU remains callable",
+  "x_min_cut is diagnostic-only and the freezeout route first gates the normal phase",
 ]
+density_algorithms = [
+  "stable_particle_limit",
+  "reduced_strict_bw",
+  "q_pole_strict_bw",
+  "phase_shift_bu",
+]
+comparison_scheme = "phase_shift_gbu_reference"
+bose_domain_policy = "normal_phase_gate_x_min_cut_diagnostic"
 external_sources = [
   "10.1016/0375-9474(96)00247-3",
   "10.1006/aphy.1996.0140",
@@ -39,12 +49,14 @@ formula_tests = [
   "tests/unit/relaxtime/test_meson_rpa_adapter.jl",
   "tests/unit/relaxtime/test_polarization_aniso.jl",
   "tests/unit/relaxtime/test_meson_density.jl",
+  "tests/unit/models/test_fixed_mub_conserved_charges.jl",
 ]
 production_authorized = false
 unresolved_items = [
+  "strict non-isospin KMT Hessian proof and charged/neutral normalization regression",
   "charged retarded B0 continuation and complex-pole verification",
-  "normalization map between scalar 1-4KPi and neutral matrix 1-2KPi conventions",
-  "phase-branch/Levinson and Bose-support convergence gates",
+  "phase-branch/Levinson and four-algorithm numerical convergence gates",
+  "normal-phase Bose-support gate on the freezeout scan; condensate zero-mode branch if it fails",
 ]
 required_document_markers = [
   "route_id: charged_rpa_bu_quark_only",
@@ -54,4 +66,7 @@ required_document_markers = [
   "公式 → 代码 → 测试映射",
   "生产边界与升格条件",
   "未决项与审查问题",
+  "四类可调用的介子数密度算法",
+  "phase_shift_gbu_reference",
+  "正常相",
 ]

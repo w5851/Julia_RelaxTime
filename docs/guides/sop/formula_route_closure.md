@@ -133,6 +133,15 @@ julia --project=. -e 'ENV["UNIT_FILES"]="config/test_formula_route_closure.jl"; 
 - 验证命令和结果摘要；
 - 若有数值试点，单独的 diagnostic manifest/CSV，不与 formal baseline 混放。
 
+对于解耦的介子数密度路线，registry 还必须显式记录可调用的算法族、最终比较
+方案和 Bose 支撑策略。当前 charged-RPA/BU 试点的最小集合是
+`stable_particle_limit`、`reduced_strict_bw`、`q_pole_strict_bw` 和
+`phase_shift_bu`；四者都必须保持可调用，`comparison_scheme` 可设为
+`phase_shift_gbu_reference` 作为比较默认，但这不改变其它入口的存在性。
+`bose_domain_policy=normal_phase_gate_x_min_cut_diagnostic` 表示冻结线先做
+正常相门禁，`x_min_cut` 只用于文献复现或异常点诊断；门禁失败时必须停止
+production 升格并另建凝聚零模路线。
+
 公式文档不复制整篇论文。每一条外部公式应有 DOI/arXiv、方程号或页码、访问
 版本和对项目约定的转换说明。原始文献和主 BibTeX 库仍保留在项目外部指定
 位置。
@@ -175,6 +184,12 @@ route registry 的状态含义为：
 `production_authorized` 是显式人工决策，不能由检查器自动晋升。当前
 charged-RPA/BU 试点保持 `candidate`，因为严格 charged retarded bubble、极点、
 相位/支撑和归一化映射尚未全部验收。
+
+checker 对 `production_authorized` 路线要求 `unresolved_items=[]`，对其它状态
+要求至少保留一项未决内容；同时拒绝仓库外 registry、文档或测试路径。对于
+`charged_rpa_bu_quark_only`，它还要求四类介子数密度算法和广义 BU 比较默认字段
+齐全。它仍只是 provenance/contract 检查器，不替代物理推导、极点求解或数值
+收敛验证。
 
 ## 14. 后处理与作图
 

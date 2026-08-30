@@ -40,6 +40,9 @@ formula_tests = ["$(test_rel)"]
 production_authorized = $(production_authorized)
 unresolved_items = ["fixture unresolved item"]
 required_document_markers = ["route_id: fixture_route", "公式闭合链", "外部来源与项目转换", "公式 → 代码 → 测试映射", "生产边界与升格条件", "未决项与审查问题"]
+density_algorithms = ["stable_particle_limit", "reduced_strict_bw", "q_pole_strict_bw", "phase_shift_bu"]
+comparison_scheme = "phase_shift_gbu_reference"
+bose_domain_policy = "normal_phase_gate_x_min_cut_diagnostic"
 """
     registry_path = joinpath(root, "config", "governance", "formula_route_closure.toml")
     mkpath(dirname(registry_path))
@@ -66,6 +69,45 @@ end
         )
         @test any(item -> occursin("cannot authorize production", item), invalid)
 
+        production_registry = _write_formula_route_fixture(temp_root)
+        production_text = replace(
+            read(production_registry, String),
+            "status = \"candidate\"" => "status = \"production_authorized\"",
+            "production_authorized = false" => "production_authorized = true",
+            "unresolved_items = [\"fixture unresolved item\"]" => "unresolved_items = []",
+        )
+        write(production_registry, production_text)
+        @test isempty(Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel=relpath(production_registry, temp_root),
+        ))
+
+        unresolved_production = replace(
+            production_text,
+            "unresolved_items = []" => "unresolved_items = [\"still open\"]",
+        )
+        write(production_registry, unresolved_production)
+        unresolved_production_violations = Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel=relpath(production_registry, temp_root),
+        )
+        @test any(item -> occursin("unresolved_items must be empty", item), unresolved_production_violations)
+
+        missing_algorithm_registry = _write_formula_route_fixture(temp_root)
+        missing_algorithm = replace(
+            read(missing_algorithm_registry, String),
+            "id = \"fixture_route\"" => "id = \"charged_rpa_bu_quark_only\"",
+            "route_id: fixture_route" => "route_id: charged_rpa_bu_quark_only",
+            "density_algorithms = [\"stable_particle_limit\", \"reduced_strict_bw\", \"q_pole_strict_bw\", \"phase_shift_bu\"]" =>
+                "density_algorithms = [\"stable_particle_limit\"]",
+        )
+        write(missing_algorithm_registry, missing_algorithm)
+        algorithm_violations = Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel=relpath(missing_algorithm_registry, temp_root),
+        )
+        @test any(item -> occursin("missing required algorithm", item), algorithm_violations)
+
         invalid_status_registry = _write_formula_route_fixture(temp_root)
         invalid_status = replace(
             read(invalid_status_registry, String),
@@ -89,6 +131,19 @@ end
             registry_rel=relpath(escaped_document_registry, temp_root),
         )
         @test any(item -> occursin("must stay under docs/reference/formula/", item), path_violations)
+
+        escaped_registry = _write_formula_route_fixture(temp_root)
+        escaped_registry_violations = Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel="../outside_formula_route.toml",
+        )
+        @test any(item -> occursin("registry must be a repository-relative path", item), escaped_registry_violations)
+
+        absolute_registry_violations = Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel=joinpath(temp_root, "config", "governance", "formula_route_closure.toml"),
+        )
+        @test any(item -> occursin("registry must be a repository-relative path", item), absolute_registry_violations)
 
         missing_test_registry = _write_formula_route_fixture(temp_root)
         missing_test = replace(
@@ -117,6 +172,18 @@ end
             registry_rel=relpath(missing_source_registry, temp_root),
         )
         @test any(item -> occursin("does not cite registered source", item), source_violations)
+
+        invalid_source_registry = _write_formula_route_fixture(temp_root)
+        invalid_source = replace(
+            read(invalid_source_registry, String),
+            "10.1234/example" => "not-a-source-id",
+        )
+        write(invalid_source_registry, invalid_source)
+        invalid_source_violations = Main.FormulaRouteClosure.validate_registry(
+            temp_root;
+            registry_rel=relpath(invalid_source_registry, temp_root),
+        )
+        @test any(item -> occursin("invalid DOI/arXiv identifier", item), invalid_source_violations)
 
         missing_marker_registry = _write_formula_route_fixture(temp_root; marker=false)
         missing_marker = Main.FormulaRouteClosure.validate_registry(

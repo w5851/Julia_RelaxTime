@@ -10,9 +10,21 @@ const _CONSTANTS_PNJL_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "s
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH_PA)
 end
+const _GAUSS_LEGENDRE_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH_PA)
+end
+const _QUARK_DISTRIBUTION_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "pnjl_physics", "QuarkDistribution.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, _QUARK_DISTRIBUTION_PATH_PA)
+end
 const _OLI_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _OLI_PATH_PA)
+end
+const _QUARK_DISTRIBUTION_ANISO_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution_Aniso.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions_Aniso)
+    Base.include(Main, _QUARK_DISTRIBUTION_ANISO_PATH_PA)
 end
 const _OLI_ANISO_PATH_PA = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegralsAniso.jl"))
 if !isdefined(Main, :OneLoopIntegralsCorrection)
@@ -59,5 +71,26 @@ using Main.PolarizationAniso: polarization_aniso, polarization_with_width, polar
         re, im = polarization_complex(:P, p0, 0.0, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1, A2, num_s)
         @test isfinite(re)
         @test isfinite(im)
+    end
+
+    @testset "finite-mu flavor order and legacy symmetrization stay distinct" begin
+        ordered_us = polarization_aniso(
+            :P, 0.5, 0.0, 0.30, 0.55, 0.12, -0.04,
+            T, Φ, Φbar, 0.0, 1.0, 0.8, 0,
+        )
+        ordered_su = polarization_aniso(
+            :P, 0.5, 0.0, 0.55, 0.30, -0.04, 0.12,
+            T, Φ, Φbar, 0.0, 0.8, 1.0, 0,
+        )
+        legacy_us = polarization_aniso(
+            :P, 0.5, 0.0, 0.30, 0.55, 0.12, -0.04,
+            T, Φ, Φbar, 0.0, 1.0, 0.8, 1,
+        )
+
+        @test all(isfinite, ordered_us)
+        @test all(isfinite, ordered_su)
+        @test all(isfinite, legacy_us)
+        @test any(!isapprox(a, b; rtol=1e-8, atol=1e-10) for (a, b) in zip(ordered_us, ordered_su))
+        @test any(!isapprox(a, b; rtol=1e-8, atol=1e-10) for (a, b) in zip(ordered_us, legacy_us))
     end
 end
