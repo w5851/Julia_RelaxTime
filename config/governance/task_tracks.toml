@@ -117,12 +117,14 @@ required_author_review = true
 author_review_status = "pending"
 promotion_required = false
 current_branch = "codex/formula-route-closure-sop"
-current_sha = ""
+current_sha = "eb3f6c352ce91ee9355a09fcc257961d6bcaa1b5"
 run_ids = []
 evidence = [
   "file:docs/dev/active/2026-08-30_formula-route-closure-sop-pr290.md",
   "file:docs/guides/sop/formula_route_closure.md",
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
+  "pr:290",
+  "sha:eb3f6c352ce91ee9355a09fcc257961d6bcaa1b5",
   "sha:bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b",
   "note:pr290_independent_from_pr289",
 ]
