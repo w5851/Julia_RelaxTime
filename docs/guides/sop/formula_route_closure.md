@@ -182,8 +182,10 @@ route registry 的状态含义为：
 - `deprecated`：保留历史 provenance，并指向替代路线。
 
 `production_authorized` 是显式人工决策，不能由检查器自动晋升。当前
-charged-RPA/BU 试点保持 `candidate`，因为严格 charged retarded bubble、极点、
-相位/支撑和归一化映射尚未全部验收。
+charged-RPA/BU 试点保持 `candidate`：charged ladder/ordered-bubble 的 `2/4`
+归一化已经在公式层闭合，但严格 charged retarded bubble、phase/Levinson、
+Bose 支撑、单电荷 `domega/pi` 测度迁移和各算法数值收敛尚未实现或验收；second-sheet 极点只作为
+`q_pole_strict_bw` 的后续 oracle，不阻塞实轴 GBU。
 
 checker 对 `production_authorized` 路线要求 `unresolved_items=[]`，对其它状态
 要求至少保留一项未决内容；同时拒绝仓库外 registry、文档或测试路径。对于
@@ -222,5 +224,5 @@ checker 对 `production_authorized` 路线要求 `unresolved_items=[]`，对其�
   本文件不自引用自身 commit hash
 - 执行命令：见第 7 节及 route registry
 - 结果：治理 SOP 可执行；charged-RPA/BU 路线 `candidate`、diagnostic-only
-- 备注：本 SOP 试点不实现 strict-support、凝聚零模、复杂极点求解、
+- 备注：本 SOP 试点不实现 strict-support、凝聚零模、second-sheet 极点求解、
   `Omega_M` 反馈或显式 `mu_I` 路线；这些若要引入，必须创建新的闭合任务。

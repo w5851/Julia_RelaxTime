@@ -42,9 +42,10 @@ PR289 保持 open。本任务从合并后的 `origin/main` 独立开始，落实
 - `MesonDensity` 已能在固定背景注入 charged coupling，沿用 `2K/(1-4KPi)`；
 - 现有文档/测试已锁定 `K^\pm -> K45`、旧 `K4567 -> K67` 的基本映射。
 
-仍需严格复核：charged `Pi_us/Pi_su` 的 retarded 延拓、scalar/matrix 归一化
-转换、极点/相位边界、Levinson、Bose 支撑和节点收敛。因此试点 route 保持
-`candidate`。
+charged scalar/matrix 归一化已经由显式 ladder trace 与 Goldstone 条件闭合。
+仍需实现或验收：ordered `Pi_us/Pi_su` 的 retarded 延拓、相位边界、Levinson、
+单电荷 `domega/pi` 测度、Bose 支撑和节点收敛；second-sheet 极点只作为
+strict-BW oracle。因此试点 route 保持 `candidate`。
 
 ## 4. 可勾选任务分解
 

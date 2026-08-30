@@ -38,21 +38,29 @@
 - **BU 热力学结构**：`Maslov:2023wul`
 - **当前 `pi/K` 最小实现的直接参考写法**：`Blaschke:2020bzh`、`Blaschke:2021yml`
 
-## 2. BU 主公式
+## 2. BU 主公式与 charge counting
 
-广义 Beth-Uhlenbeck 形式写为：
+Blaschke 2020 的 partial-density 比值口径写为 `dM/(2pi)`；该共同因子在
+`K/pi` 比值中抵消。项目的 strict charge-resolved API 则把 `pi+`、`pi-`、
+`K+`、`K-` 分别作为 `d=1`、单 Bose 因子、正能量有序通道。稳定粒子极限要求
+后一个口径写为：
 
 ```math
 n_M(T)
 = d_M \int \frac{d^3q}{(2\pi)^3}
-\int \frac{d\omega}{2\pi}
+\int_0^\infty \frac{d\omega}{\pi}
 g_M(\omega)\frac{d\delta_M(\omega,q)}{d\omega}.
 ```
 
+因为单束缚态有 `d delta/domega = pi delta_D(omega-E_M)`，上式严格返回
+`d_M g_M(E_M)`；在 `d=1`、单 Bose 因子下沿用 `domega/(2pi)` 会少一半。当前
+`MesonDensity` 的 phase-shift 入口仍使用后一个文献比值口径，因此只可用于同
+口径 ratio diagnostic，不能用于绝对密度或四算法 production 对比。
+
 ### 来源
 
-- `Blaschke:2020bzh` Eq. (24)
-- `Blaschke:2021yml` Eq. (8)
+- `Blaschke:2020bzh` 出版版 Eq. (18)：`dM/(2pi)` partial-density 比值口径
+- 单电荷 `domega/pi` 转换：由 `pi` 相移跳变的稳定粒子极限固定
 
 ## 3. 分部积分后的等价形式
 
@@ -62,23 +70,25 @@ g_M(\omega)\frac{d\delta_M(\omega,q)}{d\omega}.
 n_M(T)
 = \frac{d_M}{T}
 \int \frac{dq\,q^2}{2\pi^2}
-\int_0^\infty \frac{d\omega}{2\pi}
+\int_0^\infty \frac{d\omega}{\pi}
 g_M(\omega)\bigl[1+g_M(\omega)\bigr]\delta_M(\omega).
 ```
 
 ### 来源
 
-- `Blaschke:2020bzh` Eq. (25)
+- `Blaschke:2020bzh` 出版版 Eq. (18) 的分部积分结构，并应用上述单电荷转换
 
 ## 4. 当前优先实现口径
 
-当前主线优先采用**分部积分后的 `\delta_M` 本体形式**，原因是：
+strict 主线优先采用**分部积分后的 `\delta_M` 本体形式**，原因是：
 
 1. 当前项目后续相移将由传播子数值相位提取；
 2. 直接对 `\delta_M` 求 `\omega` 导数更容易放大数值噪声；
 3. 相移本体形式更利于先检查 Levinson 约束和相位分支选择。
 
-导数形式保留为理论原式和交叉验证口径。
+导数形式保留为理论原式和交叉验证口径。两种形式都必须以相同边界项和
+`domega/pi` 测度通过窄束缚态到 `stable_meson_number_density` 的回归；现有
+`domega/(2pi)` 实现保持 diagnostic，待后续代码迁移。
 
 ## 5. 当前项目中的相移定义
 

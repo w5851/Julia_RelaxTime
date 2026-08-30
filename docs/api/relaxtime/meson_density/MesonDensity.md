@@ -147,6 +147,10 @@ g(\omega)
 - 仅支持 `xi = 0`
 - 支持 `:pi` / `:K` 聚合通道以及 `:pi_plus` / `:pi_minus` / `:K_plus` / `:K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
+- 当前正能量积分使用 `domega/(2pi)`；对 `d=1`、单 Bose 因子的电荷分辨绝对
+  密度，它比由 `pi` 相移跳变固定的 strict `domega/pi` 少一半。共同因子在同
+  口径 `K/pi` 比值中抵消，因此当前入口是 ratio diagnostic，不是绝对密度
+  production 定义
 
 当前默认参数：
 

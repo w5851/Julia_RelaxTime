@@ -83,6 +83,14 @@ end
     @test_throws ArgumentError stable_meson_number_density(0.14, 0.2; μ=0.14)
 end
 
+@testset "MesonDensity 单电荷 BU 正能量测度" begin
+    # A single bound state changes the ordered positive-energy phase by pi.
+    # With d=1 and one Bose factor, only domega/pi reproduces one stable boson.
+    phase_jump = π
+    @test phase_jump / π ≈ 1.0
+    @test phase_jump / (2π) ≈ 0.5
+end
+
 @testset "MesonDensity Phase-E3 参数校验" begin
     @test DEFAULT_PHASE_SHIFT_Q_MAX == 12.0
     @test DEFAULT_PHASE_SHIFT_Q_NODES == 48

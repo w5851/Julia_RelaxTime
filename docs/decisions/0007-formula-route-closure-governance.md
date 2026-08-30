@@ -26,8 +26,10 @@
    `draft -> candidate -> production_authorized`；检查器只阻止缺失/矛盾，不自动
    进行人工升格。
 4. 以 `ChargedRPA_BU_ProductionRoute.md` 作为首个试点：固定 BQS quark-only
-   背景，明确 `pi^\pm -> K12`、`K^\pm -> K45`，并把严格 retarded bubble、极点、
-   相位/支撑和归一化验证保留为 candidate 未决项。
+   背景，明确 `pi^\pm -> K12`、`K^\pm -> K45`，并用显式 charged ladder trace
+   与 Goldstone 条件闭合 scalar/matrix 分母归一化；严格 ordered retarded bubble、
+   相位/Levinson、单电荷 BU 测度实现、Bose 支撑和数值收敛仍保留为 candidate
+   未决项，second-sheet 极点只作为 strict-BW 路线的 oracle。
 5. 本决策只增加治理和公式审查层，不修改 `PNJLCore`、稳定 `MesonDensity` 默认
    语义、transport 路线或正式数值 baseline。
 

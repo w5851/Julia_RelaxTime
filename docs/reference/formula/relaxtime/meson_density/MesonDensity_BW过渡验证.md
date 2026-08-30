@@ -324,7 +324,7 @@ Z_M(q)=\frac{2K_M}{\mathcal{G}_M'(z_p(q),q)}.
 ```math
 n_M^{BW}(T)
 = d_M \int \frac{d^3q}{(2\pi)^3}
-\int \frac{d\omega}{2\pi}
+\int \frac{d\omega}{\pi}
 g_M(\omega)
 \frac{\Gamma_M(q)/2}
 {\left[\omega-E_M(q)\right]^2+\Gamma_M^2(q)/4}.
@@ -335,11 +335,16 @@ g_M(\omega)
 ```math
 n_M^{BW}(T)
 = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
-\int_0^\infty \frac{d\omega}{2\pi}
+\int_0^\infty \frac{d\omega}{\pi}
 g_M(\omega)
 \frac{\Gamma_M(q)/2}
 {\left[\omega-E_M(q)\right]^2+\Gamma_M^2(q)/4}.
 ```
+
+这里 `d delta/domega` 的 Lorentzian 分子是 `Gamma/2`，其全峰面积为 `pi`，
+所以单电荷 `d=1` 正能量测度必须是 `domega/pi`。第 5 节引用的文献写法把分子
+改写成 `Gamma` 并配 `domega/(2pi)`，二者代数等价；不能同时取 `Gamma/2` 和
+`1/(2pi)`。
 
 ### 8.6 对应到当前项目实现层级
 
@@ -390,7 +395,7 @@ E_M(q)\approx \sqrt{q^2+M_M^2},
 ```math
 n_M^{BW,red}(T)
 = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
-\int_0^\infty \frac{d\omega}{2\pi}
+\int_0^\infty \frac{d\omega}{\pi}
 g_M(\omega)
 \frac{\Gamma_M/2}
 {\left[\omega-\sqrt{q^2+M_M^2}\right]^2+\Gamma_M^2/4}.
@@ -402,7 +407,7 @@ g_M(\omega)
 
 当前仓库脚本级 `BW` 实现位于：
 
-- [validate_meson_density_bw_minimal.jl](/C:/Users/Wmzx/.codex/worktrees/346c/Julia_RelaxTime/scripts/analysis/relaxtime/validate_meson_density_bw_minimal.jl)
+- [validate_meson_density_bw_minimal.jl](../../../../../scripts/analysis/relaxtime/validate_meson_density_bw_minimal.jl)
 
 它目前并没有直接实现：
 

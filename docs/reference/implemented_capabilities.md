@@ -472,7 +472,7 @@ $$
 
 ### 10.4 Phase-shift / BU
 
-BU 原式为
+当前已实现的文献 ratio adapter 为
 
 $$
 n_M=d_M\int\frac{d^3q}{(2\pi)^3}
@@ -488,8 +488,14 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 g_M(\omega)[1+g_M(\omega)]F(\delta_M).
 $$
 
-- `scheme=:current`：`F(delta)=delta`，当前项目默认 production branch。
-- `scheme=:gbu_reference`：`F(delta)=delta-sin(2delta)/2`，stricter reference branch。
+- `scheme=:current`：`F(delta)=delta`，兼容/对照 branch。
+- `scheme=:gbu_reference`：`F(delta)=delta-sin(2delta)/2`，当前最终比较默认，但尚未获得 production 授权。
+
+上述实现对 charge-resolved `d=1` 通道使用一个 Bose 因子和正能量积分，却仍保留
+`domega/(2pi)`。由于单束缚态相移只跳变 `pi`，它的绝对密度是稳定粒子极限的
+一半；共同因子在同口径 `K/pi` 比值中抵消。strict 单电荷实现已经在公式层固定为
+`domega/pi`，但代码迁移和 stable/BW 绝对密度回归尚未完成，因此这里的
+phase-shift 能力只能标为 diagnostic candidate。
 
 相移可取 `arg(propagator)` 或审计用 `arg(inverse propagator)`；实轴后端区分 finite-eta 与 `pv_b0_eta0`。`strict_normal_domain` 遇到 `omega<=mu_M` 返回 `NaN/status=:unsafe_bose_domain`；`x_min_cut`、`excitation_only_E_gt_mu` 和 no-anomalous subtraction 都是显式诊断/延拓策略，不能写成唯一文献处方。公式与治理见 [`MesonDensity_BU相移公式.md`](formula/relaxtime/meson_density/MesonDensity_BU相移公式.md) 和 [`MesonDensity.md`](../api/relaxtime/meson_density/MesonDensity.md)。
 

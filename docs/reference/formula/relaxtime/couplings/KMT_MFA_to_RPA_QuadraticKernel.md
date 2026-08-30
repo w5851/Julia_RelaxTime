@@ -162,9 +162,10 @@ adapter 已经实现了非对角夸克传播子或非对角平均场自能。
 时才使用当前 `PolarizationAniso` 中的 `k0` 对称平均。缺少 `A` 时的自动
 补值来自 `AFieldBuilder`，不会触发 gap solver。
 
-这一步只验证数值接线和输入合同，不证明当前极化的正则化/归一化与外部
-RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。相应的诊断 API
-边界见 `docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
+这一步只验证中性数值接线和输入合同，不证明当前极化的正则化、retarded
+延拓或外部数值固定点，也不产生极点、相移或介子热力学反馈。charged 顶角的
+纯代数归一化在第 6.1 节独立闭合。相应的诊断 API 边界见
+`docs/api/relaxtime/propagator/MesonRPAAdapter.md`。
 
 ## 6. 文献证据与未决项
 
@@ -194,11 +195,42 @@ RPA 文献逐项等价，也不产生极点、相移或介子热力学反馈。�
 上保留二次介子涨落并对夸克泡链作无限重求和。相应的 `Pi` 还依赖
 `T,mu_f,Phi,\bar Phi`、正则化和外部运动学；不能简化成只依赖 `m_f` 与 `q^2`。
 
+### 6.1 charged scalar 与 matrix 归一化
+
+对 charged pair `(i,j)`，令 `lambda_a,lambda_b` 为对应的两个实 Gell-Mann
+生成元，并定义
+
+```math
+T_+=(\lambda_a+i\lambda_b)/\sqrt2=\sqrt2 E_{ij},\qquad
+T_-=(\lambda_a-i\lambda_b)/\sqrt2=\sqrt2 E_{ji}.
+```
+
+若 `Pi_ij` 是项目 `PolarizationAniso`/Rehberg 定义的单个 ordered flavor 泡，
+则二次作用量中的 flavor trace 直接给出
+
+```math
+\Pi^{matrix}_{+-}=2\Pi_{ij},\qquad
+\Pi^{matrix}_{-+}=2\Pi_{ji}.
+```
+
+所以在 charge basis 中
+
+```math
+2K[1-2K\Pi^{matrix}_{+-}]^{-1}
+=\frac{2K}{1-4K\Pi_{ij}}.
+```
+
+这个因子 2 来自两个 charged ladder 顶角，不依赖 isospin 对称，也不是事后
+匹配。`tests/unit/relaxtime/test_meson_rpa.jl` 以显式 3x3 生成元、任意且不相等的
+`Pi_ij/Pi_ji` 和 chiral-limit Goldstone identity 锁定该结论。它闭合的是场/泡
+归一化；ordered retarded 泡的解析和数值实现仍由 charged-RPA/BU 路线验收。
+
 接入极化矩阵前仍需逐项核对：
 
 1. `phi_f` 与文献 `sigma_f` 或 `i tr S^f` 的符号；
 2. P/S 上标与 `K^±` 的对应关系；
 3. `K` 的配置符号和单位；
-4. `lambda_0` 归一化以及 RPA 矩阵中的额外 2 因子。
+4. `lambda_0` 归一化；charged 通道必须使用第 6.1 节的 ladder 转换，不能把单个
+   ordered `Pi_ij` 直接代入矩阵 `1-2KPi`。
 
 只有完成上述核对、并在同位旋对称极限和一个外部文献固定点通过验证后，才允许把后续完整 RPA 数值结果纳入生产候选。当前符号对齐只证明代数约定，不证明有限温密度 PNJL 极化或介子数密度的物理正确性。

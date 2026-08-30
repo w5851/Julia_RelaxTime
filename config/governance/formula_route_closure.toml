@@ -25,6 +25,9 @@ approximations = [
   "no Omega_M or Sigma_M feedback",
   "four decoupled meson-density algorithms remain callable",
   "generalized BU is the comparison default; current BU remains callable",
+  "strict GBU uses ordered retarded charged bubbles; source-backed num_s_quark=1 remains a legacy oracle",
+  "second-sheet complex poles are required only for the q-pole strict-BW route",
+  "strict charge-resolved positive-energy BU uses domega/pi; the current domega/(2pi) ratio convention remains diagnostic",
   "x_min_cut is diagnostic-only and the freezeout route first gates the normal phase",
 ]
 density_algorithms = [
@@ -50,12 +53,16 @@ formula_tests = [
   "tests/unit/relaxtime/test_polarization_aniso.jl",
   "tests/unit/relaxtime/test_meson_density.jl",
   "tests/unit/models/test_fixed_mub_conserved_charges.jl",
+  "tests/regression/relaxtime/test_meson_mass_regression.jl",
+  "tests/validation/relaxtime/test_literature_digitized_meson_mass_targets.jl",
+  "tests/validation/relaxtime/test_legacy_fortran_meson_numeric_mu0_targets.jl",
 ]
 production_authorized = false
 unresolved_items = [
-  "strict non-isospin KMT Hessian proof and charged/neutral normalization regression",
-  "charged retarded B0 continuation and complex-pole verification",
-  "phase-branch/Levinson and four-algorithm numerical convergence gates",
+  "implement ordered charged retarded B0 and separate it from the source-backed num_s_quark=1 legacy oracle",
+  "add a provenance-bound legacy Gamma fixed point and a second-sheet pole oracle for q-pole strict-BW",
+  "implement the charge-resolved domega/pi phase-shift measure and stable-particle-limit regression",
+  "implement the high-energy phase anchor, bound-state count, Levinson/Mott and four-algorithm numerical convergence gates",
   "normal-phase Bose-support gate on the freezeout scan; condensate zero-mode branch if it fails",
 ]
 required_document_markers = [
