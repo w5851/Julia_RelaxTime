@@ -70,14 +70,14 @@ legacy key。对超出 accepted support 的请求返回缺失/错误，由调用
 - [x] solver-free v2 accepted loader 与实际 package smoke；
 - [x] Python adapter tests：16 passed；Julia adapter：全部通过；run-gap/phase-guided
   focused tests：通过；
-- [x] accepted-primary legacy coverage audit v3 已生成：
+- [x] accepted-primary legacy coverage audit v3 已生成（历史基线）：
   `docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/`；
   accepted/strict 输入、legacy snapshot bytes/hash、exact-key 与同 ξ 邻近支持、
-  runtime fallback=0 均已验证。当前 verdict 为
-  `accepted_primary_runtime_ready_path_retirement_pending`，仍有 21 个 active
-  legacy path contract 需要迁移；这不是 runtime fallback 依赖。
-- [ ] path-retirement PR：移除 active 默认路径、旧 fallback helper 和不再需要的 active
-  legacy 依赖，但保留 snapshot；
+  runtime fallback=0 均已验证。其 verdict
+  `accepted_primary_runtime_ready_path_retirement_pending` 仅表示当时仍有 21 个
+  active legacy path contract；这不是 runtime fallback 依赖。
+- [x] path-retirement implementation：6 个 active 默认路径契约已迁移到 accepted；旧
+  CSV 仅保留显式 fixture/历史输入能力，snapshot 仍保留；solver-free audit v4 已重跑。
 - [ ] physical-deletion PR：在 path-retirement CI、静态扫描、恢复 manifest 和作者授权
   后删除 snapshot。
 
@@ -91,6 +91,11 @@ legacy key。对超出 accepted support 的请求返回缺失/错误，由调用
 
 ## 6. 可追溯证据
 
-本任务的实现变更位于 PR #280 分支；合并前不把未合并分支写成 main provenance。
-v1/v2 legacy coverage audit 保留为历史基线；新 v3 audit 只保存摘要、邻近覆盖、
+本任务的 accepted-primary 实现已在 PR #280 合并；本次路径迁移位于独立
+`codex/issue130-pnjl-phase-reference-path-retirement` 分支，合并前不把未合并分支
+写成 main provenance。迁移后的 solver-free evidence 为
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v4/`，其
+`active_path_contract_count=0`、`physical_deletion_eligible=true` 仅表示可以提出
+独立删除 PR，不表示本分支已经删除 snapshot。
+v1/v2 legacy coverage audit 保留为历史基线；v3 audit 仍作为历史基线，v4 audit 保存摘要、邻近覆盖、
 consumer matrix、manifest 和 claim ledger，不复制原始全量曲线。

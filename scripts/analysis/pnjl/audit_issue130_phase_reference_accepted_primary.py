@@ -562,7 +562,16 @@ def _claims(decision: Mapping[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
-def build_audit(repo_root: Path, output_root: Path, *, replace_existing: bool = False) -> dict[str, Any]:
+def build_audit(
+    repo_root: Path,
+    output_root: Path,
+    *,
+    replace_existing: bool = False,
+    audit_version: str = "v3",
+) -> dict[str, Any]:
+    if not re.fullmatch(r"v[0-9]+", audit_version):
+        raise ValueError("audit_version must use the form vN")
+    schema_version = f"pnjl_issue130_phase_reference_legacy_audit_{audit_version}"
     output_root = output_root.resolve()
     if output_root.exists() and any(output_root.iterdir()):
         if not replace_existing:
@@ -595,6 +604,7 @@ def build_audit(repo_root: Path, output_root: Path, *, replace_existing: bool = 
     decision = _decision(
         package_info, snapshot, coverage, consumers, runtime_api_present, legacy_mode_present
     )
+    decision["schema_version"] = f"pnjl_issue130_phase_reference_legacy_retirement_decision_{audit_version}"
 
     tables_root = output_root / "tables"
     write_csv(tables_root / "coverage.csv", list(coverage[0].keys()), coverage)
@@ -612,7 +622,7 @@ def build_audit(repo_root: Path, output_root: Path, *, replace_existing: bool = 
     write_json(output_root / "decision.json", decision)
 
     summary_lines = [
-        "# Issue #130 PNJL accepted-primary / legacy retirement audit v3",
+        f"# Issue #130 PNJL accepted-primary / legacy retirement audit {audit_version}",
         "",
         "这是 solver-free 的合同审计：通过 production-parity Python adapter 读取 v2 `accepted` 与显式 `strict`，",
         "再按真实 semantic key 对照 byte-preserving legacy snapshot。它不调用 PNJL solver、不写 reference、不删除文件。",
@@ -667,7 +677,7 @@ def build_audit(repo_root: Path, output_root: Path, *, replace_existing: bool = 
     )
     (output_root / "README.md").write_text("\n".join(summary_lines) + "\n", encoding="utf-8", newline="\n")
     (output_root / "AUDIT.md").write_text(
-        "# PNJL accepted-primary legacy retirement audit v3\n\n"
+        f"# PNJL accepted-primary legacy retirement audit {audit_version}\n\n"
         f"当前 verdict：`{decision['verdict']}`。运行时已固定为 accepted primary，strict 只能显式开启；"
         "legacy 不再是 fallback/rollback。物理删除仍受 path-retirement blocker 和独立 allowlist PR 约束。\n\n"
         "本文件只解释合同和证据边界；完整表格见 `tables/`。\n",
@@ -677,7 +687,7 @@ def build_audit(repo_root: Path, output_root: Path, *, replace_existing: bool = 
 
     generated = sorted(path for path in output_root.rglob("*") if path.is_file() and path.name != "manifest.json")
     manifest = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "repo_head": git_value(repo_root, "rev-parse", "HEAD"),
         "script": "scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py",
@@ -718,6 +728,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", type=Path, default=PROJECT_ROOT)
     parser.add_argument("--output-root", type=Path, default=None)
     parser.add_argument("--replace-existing", action="store_true")
+    parser.add_argument("--audit-version", default="v3", help="evidence version label (default: v3)")
     return parser.parse_args()
 
 
@@ -725,7 +736,12 @@ def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve()
     output_root = (args.output_root or repo_root / OUTPUT_RELATIVE).resolve()
-    manifest = build_audit(repo_root, output_root, replace_existing=args.replace_existing)
+    manifest = build_audit(
+        repo_root,
+        output_root,
+        replace_existing=args.replace_existing,
+        audit_version=args.audit_version,
+    )
     print(json.dumps({"output_root": str(output_root), "verdict": manifest["verdict"]}, ensure_ascii=False))
     return 0
 

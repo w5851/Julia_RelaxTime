@@ -10,8 +10,8 @@ PNJL 相图绘制脚本
     python scripts/pnjl/plot_phase_diagram.py [options]
 
 选项：
-    --boundary PATH   相变线数据文件（显式 legacy/旧 schema 输入）
-    --cep PATH        CEP 数据文件（显式 legacy/旧 schema 输入）
+    --boundary PATH   相变线数据文件（显式旧 schema 输入）
+    --cep PATH        CEP 数据文件（显式旧 schema 输入）
     --xi VALUE        要绘制的 ξ 值，可多次指定 (默认绘制所有)
     --output-dir DIR  输出目录 (默认 data/outputs/figures/pnjl)
     --format FMT      输出格式 png/pdf/svg (默认 png)
@@ -59,11 +59,11 @@ from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_
 
 DEFAULT_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
 DEFAULT_PHASE_REFERENCE_LAYER = "accepted"
-LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
-DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
-DEFAULT_CEP_PATH = LEGACY_PHASE_REFERENCE_ROOT / "cep.csv"
-DEFAULT_SPINODAL_PATH = LEGACY_PHASE_REFERENCE_ROOT / "spinodals.csv"
-DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
+DEFAULT_ACCEPTED_TABLE_ROOT = DEFAULT_PHASE_REFERENCE_ROOT / "accepted" / "tables"
+DEFAULT_BOUNDARY_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "maxwell_surface_accepted_phase_map_v1.csv"
+DEFAULT_CEP_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "cep_boundary_accepted_phase_map_v1.csv"
+DEFAULT_SPINODAL_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "spinodal_surface_accepted_phase_map_v1.csv"
+DEFAULT_CROSSOVER_PATH = DEFAULT_ACCEPTED_TABLE_ROOT / "crossover_surface_accepted_phase_map_v1.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl"
 
 

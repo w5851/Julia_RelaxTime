@@ -31,10 +31,10 @@ def test_accepted_primary_audit_separates_runtime_and_path_gates(tmp_path: Path)
     assert decision["runtime_legacy_fallback_rows"] == 0
     assert decision["runtime_legacy_rollback_enabled"] is False
     assert decision["accepted_primary_runtime_ready"] is True
-    assert decision["path_retirement_ready"] is False
-    assert decision["physical_deletion_eligible"] is False
-    assert decision["active_path_contract_count"] > 0
-    assert decision["verdict"] == "accepted_primary_runtime_ready_path_retirement_pending"
+    assert decision["path_retirement_ready"] is True
+    assert decision["physical_deletion_eligible"] is True
+    assert decision["active_path_contract_count"] == 0
+    assert decision["verdict"] == "legacy_physical_deletion_candidate"
 
 
 def test_accepted_primary_audit_records_neighborhood_not_exact_substitution(tmp_path: Path) -> None:
