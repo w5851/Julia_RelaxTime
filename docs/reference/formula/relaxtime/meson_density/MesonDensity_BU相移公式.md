@@ -53,9 +53,11 @@ g_M(\omega)\frac{d\delta_M(\omega,q)}{d\omega}.
 ```
 
 因为单束缚态有 `d delta/domega = pi delta_D(omega-E_M)`，上式严格返回
-`d_M g_M(E_M)`；在 `d=1`、单 Bose 因子下沿用 `domega/(2pi)` 会少一半。当前
-`MesonDensity` 的 phase-shift 入口仍使用后一个文献比值口径，因此只可用于同
-口径 ratio diagnostic，不能用于绝对密度或四算法 production 对比。
+`d_M g_M(E_M)`；在 `d=1`、单 Bose 因子下沿用 `domega/(2pi)` 会少一半。
+`MesonDensity` 现在把两种口径改为显式 `omega_measure`：历史默认
+`:legacy_domega_over_2pi` 保持不变，strict 候选必须显式取
+`:single_charge_domega_over_pi`。这完成了代码层迁移，但在节点、边界和 Bose
+支撑门禁通过前仍不授权绝对密度 production。
 
 ### 来源
 
@@ -86,9 +88,10 @@ strict 主线优先采用**分部积分后的 `\delta_M` 本体形式**，原因
 2. 直接对 `\delta_M` 求 `\omega` 导数更容易放大数值噪声；
 3. 相移本体形式更利于先检查 Levinson 约束和相位分支选择。
 
-导数形式保留为理论原式和交叉验证口径。两种形式都必须以相同边界项和
-`domega/pi` 测度通过窄束缚态到 `stable_meson_number_density` 的回归；现有
-`domega/(2pi)` 实现保持 diagnostic，待后续代码迁移。
+导数形式保留为理论原式和交叉验证口径。两种形式现在共用显式
+`omega_measure` contract；strict `domega/pi` 的 `pi` 跳变归一化与 reduced BW
+稳定极限由 unit regression 锁定，`domega/(2pi)` 继续作为 ratio diagnostic。
+全传播子相位的窄峰、边界项和节点收敛仍属于后续门禁。
 
 ## 5. 当前项目中的相移定义
 
@@ -156,6 +159,17 @@ S_M \sim \frac{1}{1-2P_M\Pi_M}
 3. Mott 解离后，原束缚态跳变应转为连续谱/共振结构。
 
 这些检查先于数值积分结果本身，是相移实现是否可信的基本门禁。
+
+项目实现把这些条件拆成可失败的纯门禁：
+
+1. `anchor_phase_high_energy` 从高能端向低能端 unwrap，并把高能端锚定为 0；
+2. `count_subthreshold_roots` 对阈下 inverse propagator 做简单符号变号计数，并
+   在阈下虚部不可忽略时拒绝认证；
+3. `levinson_phase_gate` 检查阈值相位、高能 tail 和 `pi*n_B`；
+4. `mott_phase_gate` 检查束缚态数减少与阈值相位减少 `pi` 是否同步。
+
+这些函数位于 `BUPhaseGates.jl`。高能锚定不会替代更大 `omega_max` 的收敛测试，
+sign-change 根计数也不会替代需要复质量/宽度时的 second-sheet pole solver。
 
 ## 7. 当前边界
 

@@ -190,9 +190,10 @@ Levinson 检查必须先于冻结线扫描。
 
 另一个与相位分支无关的常数归一化已由稳定极限固定：本项目对单个 ordered
 `K+`/`pi+` 通道使用 `d=1` 和一个 Bose 因子，因此正能量测度必须是
-`domega/pi`。束缚态的 `pi` 跳变于是返回一个稳定玻色子；当前代码的
-`domega/(2pi)` 会使绝对密度少一半。该共同因子在同口径 `K/pi` 比值中抵消，
-所以旧 ratio 诊断不因此失效，但四算法绝对密度比较尚未闭合。
+`domega/pi`。束缚态的 `pi` 跳变于是返回一个稳定玻色子；历史
+`domega/(2pi)` 会使绝对密度少一半。代码现已提供显式 strict/legacy measure，
+且不静默切换旧默认。该共同因子在同口径 `K/pi` 比值中抵消，所以旧 ratio
+诊断不因此失效，但四算法绝对密度比较尚未闭合。
 
 ### 3.6 Bose 支撑与凝聚：`x_min_cut` 不是严格解
 
@@ -298,10 +299,13 @@ legacy 在同一门禁下达到机器精度。该小残差不阻塞 ordered 实�
   为最终比较默认；相移边界和 Levinson 仍待验证后才能成为 production 定义。
 - [x] 规定冻结线先执行正常相 Bose 支撑门禁；`x_min_cut` 只能留作 diagnostic，
   若门禁失败再另建凝聚零模分支。
-- [ ] 将 phase-shift 单电荷实现迁移到 `domega/pi`，并新增窄束缚态与 stable/BW
-  绝对密度回归；确认旧 `K/pi` ratio 只发生共同因子抵消。
-- [ ] 实现高能 phase anchor、束缚态计数和 Levinson/Mott gate，并通过 q/omega
-  节点、`eta`、`omega_max` 和 cutoff 收敛门禁。
+- [x] 将 phase-shift 单电荷实现迁移为显式 strict `domega/pi` 与 legacy
+  `domega/(2pi)` measure；旧默认不切换，strict/BW 稳定极限和共同因子由 unit
+  regression 锁定。
+- [x] 实现从高能端反向 unwrap 的 phase anchor、阈下简单根计数以及可失败的
+  Levinson/Mott gate。
+- [ ] 将 ordered charged profile 接入上述 gate，并通过 q/omega 节点、`eta`、
+  `omega_max` 和 cutoff 收敛门禁。
 
 ### Phase E：production candidate review
 

@@ -18,6 +18,11 @@ using ..AFieldBuilder: ensure_quark_params_has_A
 using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings,
                             calculate_effective_couplings_from_phi
 using ..MesonMass: solve_meson_mass
+using ..BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
+                      LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE,
+                      bu_omega_measure,
+                      bu_omega_measure_factor,
+                      anchor_phase_high_energy
 using ..PolarizationAniso: polarization_aniso, polarization_with_width
 using ..MesonInteractionKernel: FullKMTInteraction, charged_coupling
 using ..MesonPropagator: meson_propagator_simple
@@ -34,6 +39,7 @@ export phase_shift_meson_number_density, phase_shift_meson_density_summary
 export phase_shift_meson_number_density_derivative_reference, phase_shift_meson_density_derivative_reference_summary
 export phase_shift_point_diagnostic
 export PhaseShiftInteractionSpec
+export DEFAULT_PHASE_SHIFT_OMEGA_MEASURE, DEFAULT_PHASE_SHIFT_PHASE_ANCHOR
 
 const DEFAULT_MESON_DENSITY_Q_NODES = 256
 const DEFAULT_PHASE_SHIFT_Q_MAX = 12.0
@@ -46,6 +52,8 @@ const DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE = :finite_eta
 const DEFAULT_PHASE_SHIFT_PHASE_CONVENTION = :arg_propagator
 const DEFAULT_PHASE_SHIFT_DENSITY_POLICY = :strict_normal_domain
 const DEFAULT_PHASE_SHIFT_NOANOM_POLICY = :none
+const DEFAULT_PHASE_SHIFT_OMEGA_MEASURE = LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
+const DEFAULT_PHASE_SHIFT_PHASE_ANCHOR = :none
 const DEFAULT_NOANOM_COMPONENT_EPS = 1e-8
 const DEFAULT_NOANOM_LEADING_COMPONENT_PEAK_MIN = 0.02 * π
 const DEFAULT_NOANOM_LANDAU_MARGIN_STEPS = 0.5
@@ -327,6 +335,8 @@ function strict_bw_meson_number_density(
         gamma=gamma,
         mass=mass,
         mode=:strict_bw_reduced_spectral_window,
+        omega_measure=STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
+        omega_measure_factor=bu_omega_measure_factor(STRICT_SINGLE_CHARGE_OMEGA_MEASURE),
     )
 
     if gamma <= gamma_zero_tol
@@ -351,6 +361,8 @@ function strict_bw_meson_number_density(
             gamma=gamma,
             mass=mass,
             mode=:stable_limit,
+            omega_measure=STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
+            omega_measure_factor=bu_omega_measure_factor(STRICT_SINGLE_CHARGE_OMEGA_MEASURE),
         )
     end
 
@@ -381,6 +393,8 @@ function strict_bw_meson_number_density(
         gamma=gamma,
         mass=mass,
         mode=:strict_bw_reduced_spectral_window,
+        omega_measure=STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
+        omega_measure_factor=bu_omega_measure_factor(STRICT_SINGLE_CHARGE_OMEGA_MEASURE),
     )
 end
 
@@ -816,6 +830,17 @@ end
         return :fold_0_pi
     end
     throw(ArgumentError("phase_display must be :unwrapped or :fold_0_pi, got $(phase_display)"))
+end
+
+@inline function _phase_anchor_symbol(phase_anchor::Symbol)::Symbol
+    if phase_anchor === :none || phase_anchor === :legacy_unanchored
+        return :none
+    elseif phase_anchor === :high_energy_zero ||
+           phase_anchor === :anchor_high_energy_zero ||
+           phase_anchor === :strict_high_energy_zero
+        return :high_energy_zero
+    end
+    throw(ArgumentError("phase_anchor must be :none or :high_energy_zero, got $(phase_anchor)"))
 end
 
 @inline function _density_policy_symbol(density_policy::Symbol)::Symbol
@@ -1555,6 +1580,7 @@ function phase_shift_meson_number_density_derivative_reference(
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+    omega_measure::Symbol=DEFAULT_PHASE_SHIFT_OMEGA_MEASURE,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
     _require_positive_node_count("q_nodes", q_nodes)
@@ -1564,6 +1590,8 @@ function phase_shift_meson_number_density_derivative_reference(
     omega_max > omega_lower || throw(ArgumentError("omega_max must exceed effective omega_min=$(omega_lower)"))
     scheme_sym = _phase_shift_scheme_symbol(scheme)
     axis = _resolve_real_axis_config(real_axis_mode, eta)
+    measure = bu_omega_measure(omega_measure)
+    measure_factor = bu_omega_measure_factor(measure)
 
     tp = thermo_params
     _require_nonnegative("temperature T", Float64(tp.T))
@@ -1583,6 +1611,8 @@ function phase_shift_meson_number_density_derivative_reference(
         eta=axis.eta,
         real_axis_mode=axis.mode,
         polarization_backend=axis.polarization_backend,
+        omega_measure=measure,
+        omega_measure_factor=measure_factor,
         derivative_backend=:forwarddiff,
         max_formula_abs_diff=0.0,
     )
@@ -1622,7 +1652,7 @@ function phase_shift_meson_number_density_derivative_reference(
 
             omega_val += omega_w[iω] * gω * dweighted_ad
         end
-        omega_val /= (2.0 * π)
+        omega_val *= measure_factor
         return (q^2 / (2.0 * π^2)) * omega_val
     end
 
@@ -1650,6 +1680,8 @@ function phase_shift_meson_number_density_derivative_reference(
         eta=axis.eta,
         real_axis_mode=axis.mode,
         polarization_backend=axis.polarization_backend,
+        omega_measure=measure,
+        omega_measure_factor=measure_factor,
         degeneracy=Int(degeneracy),
         scheme=scheme_sym,
         derivative_backend=:forwarddiff,
@@ -1674,20 +1706,21 @@ function phase_shift_meson_density_derivative_reference_summary(
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+    omega_measure::Symbol=DEFAULT_PHASE_SHIFT_OMEGA_MEASURE,
 )
     pi_density = phase_shift_meson_number_density_derivative_reference(
         pi_channel, quark_params, thermo_params;
         μ=μ_pi,
         degeneracy=Int(d_pi), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
         omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes,
-        eta=eta, real_axis_mode=real_axis_mode,
+        eta=eta, real_axis_mode=real_axis_mode, omega_measure=omega_measure,
     )
     k_density = phase_shift_meson_number_density_derivative_reference(
         k_channel, quark_params, thermo_params;
         μ=μ_K,
         degeneracy=Int(d_K), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
         omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes,
-        eta=eta, real_axis_mode=real_axis_mode,
+        eta=eta, real_axis_mode=real_axis_mode, omega_measure=omega_measure,
     )
     n_pi = Float64(pi_density.density)
     n_K = Float64(k_density.density)
@@ -1709,6 +1742,8 @@ function phase_shift_meson_density_derivative_reference_summary(
         eta=pi_density.eta,
         real_axis_mode=pi_density.real_axis_mode,
         polarization_backend=pi_density.polarization_backend,
+        omega_measure=pi_density.omega_measure,
+        omega_measure_factor=pi_density.omega_measure_factor,
         scheme=_phase_shift_scheme_symbol(scheme),
         derivative_backend=:forwarddiff,
         max_formula_abs_diff=max(pi_density.max_formula_abs_diff, k_density.max_formula_abs_diff),
@@ -1743,6 +1778,8 @@ function phase_shift_meson_number_density(
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     phase_display::Symbol=:unwrapped,
+    phase_anchor::Symbol=DEFAULT_PHASE_SHIFT_PHASE_ANCHOR,
+    omega_measure::Symbol=DEFAULT_PHASE_SHIFT_OMEGA_MEASURE,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
@@ -1756,6 +1793,9 @@ function phase_shift_meson_number_density(
     axis = _resolve_real_axis_config(real_axis_mode, eta)
     convention = _phase_convention_symbol(phase_convention)
     display = _phase_display_symbol(phase_display)
+    anchor = _phase_anchor_symbol(phase_anchor)
+    measure = bu_omega_measure(omega_measure)
+    measure_factor = bu_omega_measure_factor(measure)
     noanom_diag_empty = _empty_noanom_diag(noanom_policy)
     interaction_meta = _phase_shift_interaction_metadata(interaction)
 
@@ -1792,6 +1832,12 @@ function phase_shift_meson_number_density(
             polarization_backend=axis.polarization_backend,
             phase_convention=convention,
             phase_display=display,
+            phase_anchor=anchor,
+            omega_measure=measure,
+            omega_measure_factor=measure_factor,
+            max_abs_high_energy_phase_before_anchor=NaN,
+            max_abs_phase_anchor_shift=NaN,
+            max_high_energy_tail_span=NaN,
             density_policy=domain.policy,
             noanom_diag_empty...,
             interaction_backend=interaction_meta.backend,
@@ -1828,6 +1874,12 @@ function phase_shift_meson_number_density(
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
         phase_display=display,
+        phase_anchor=anchor,
+        omega_measure=measure,
+        omega_measure_factor=measure_factor,
+        max_abs_high_energy_phase_before_anchor=NaN,
+        max_abs_phase_anchor_shift=NaN,
+        max_high_energy_tail_span=NaN,
         density_policy=domain.policy,
         noanom_diag_empty...,
         interaction_backend=interaction_meta.backend,
@@ -1860,6 +1912,9 @@ function phase_shift_meson_number_density(
     noanom_landau_omega_min = Inf
     noanom_landau_omega_max = -Inf
     noanom_applied = false
+    max_abs_high_energy_phase_before_anchor = 0.0
+    max_abs_phase_anchor_shift = 0.0
+    max_high_energy_tail_span = 0.0
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
         phases = [
@@ -1871,7 +1926,32 @@ function phase_shift_meson_number_density(
                 phase_convention=convention,
             ) for ω in omega_grid
         ]
-        phase_unwrapped = _unwrap_phases(phases)
+        phase_unwrapped = if anchor === :high_energy_zero
+            endpoint_phase = _propagator_phase(
+                meson, omega_max, q, qp, tp, K_coeffs;
+                interaction_spec=kernel_interaction,
+                eta=axis.eta,
+                real_axis_mode=axis.mode,
+                phase_convention=convention,
+            )
+            profile = anchor_phase_high_energy(
+                vcat(Float64.(omega_grid), omega_max),
+                vcat(Float64.(phases), Float64(endpoint_phase));
+                target=0.0,
+            )
+            max_abs_high_energy_phase_before_anchor = max(
+                max_abs_high_energy_phase_before_anchor,
+                abs(profile.high_energy_phase_before_anchor),
+            )
+            max_abs_phase_anchor_shift = max(
+                max_abs_phase_anchor_shift,
+                abs(profile.applied_shift),
+            )
+            max_high_energy_tail_span = max(max_high_energy_tail_span, profile.tail_span)
+            profile.anchored_phase[1:end-1]
+        else
+            _unwrap_phases(phases)
+        end
         effective_phases, noanom_diag = _apply_noanom_policy(
             meson,
             omega_grid,
@@ -1895,7 +1975,7 @@ function phase_shift_meson_number_density(
             gω = bose_distribution(Float64(omega_grid[iω]), μ, T_fm)
             omega_val += omega_w[iω] * gω * (1.0 + gω) * _phase_shift_weighted_phase(effective_phases[iω], scheme_sym)
         end
-        omega_val /= (2.0 * π)
+        omega_val *= measure_factor
         q_shell = (q^2 / (2.0 * π^2)) * omega_val
         q_shell_weighted_sum += q_w[iq] * q_shell
         if iq == length(q_grid)
@@ -1922,6 +2002,12 @@ function phase_shift_meson_number_density(
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
         phase_display=_noanom_policy_symbol(noanom_policy) === :none ? display : :fold_0_pi,
+        phase_anchor=anchor,
+        omega_measure=measure,
+        omega_measure_factor=measure_factor,
+        max_abs_high_energy_phase_before_anchor=anchor === :none ? NaN : max_abs_high_energy_phase_before_anchor,
+        max_abs_phase_anchor_shift=anchor === :none ? NaN : max_abs_phase_anchor_shift,
+        max_high_energy_tail_span=anchor === :none ? NaN : max_high_energy_tail_span,
         density_policy=domain.policy,
         noanom_policy=_noanom_policy_symbol(noanom_policy),
         noanom_applied=noanom_applied,
@@ -1968,6 +2054,8 @@ function phase_shift_meson_density_summary(
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     phase_display::Symbol=:unwrapped,
+    phase_anchor::Symbol=DEFAULT_PHASE_SHIFT_PHASE_ANCHOR,
+    omega_measure::Symbol=DEFAULT_PHASE_SHIFT_OMEGA_MEASURE,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
@@ -1986,6 +2074,8 @@ function phase_shift_meson_density_summary(
         real_axis_mode=real_axis_mode,
         phase_convention=phase_convention,
         phase_display=phase_display,
+        phase_anchor=phase_anchor,
+        omega_measure=omega_measure,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
         noanom_policy=noanom_policy,
@@ -2004,6 +2094,8 @@ function phase_shift_meson_density_summary(
         real_axis_mode=real_axis_mode,
         phase_convention=phase_convention,
         phase_display=phase_display,
+        phase_anchor=phase_anchor,
+        omega_measure=omega_measure,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
         noanom_policy=noanom_policy,
@@ -2045,6 +2137,21 @@ function phase_shift_meson_density_summary(
         polarization_backend=pi_density.polarization_backend,
         phase_convention=pi_density.phase_convention,
         phase_display=pi_density.phase_display,
+        phase_anchor=pi_density.phase_anchor,
+        omega_measure=pi_density.omega_measure,
+        omega_measure_factor=pi_density.omega_measure_factor,
+        max_abs_high_energy_phase_before_anchor=max(
+            pi_density.max_abs_high_energy_phase_before_anchor,
+            k_density.max_abs_high_energy_phase_before_anchor,
+        ),
+        max_abs_phase_anchor_shift=max(
+            pi_density.max_abs_phase_anchor_shift,
+            k_density.max_abs_phase_anchor_shift,
+        ),
+        max_high_energy_tail_span=max(
+            pi_density.max_high_energy_tail_span,
+            k_density.max_high_energy_tail_span,
+        ),
         density_policy=pi_density.density_policy,
         noanom_policy=pi_density.noanom_policy,
         noanom_applied=pi_density.noanom_applied || k_density.noanom_applied,
