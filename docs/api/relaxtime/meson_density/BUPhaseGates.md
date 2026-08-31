@@ -61,6 +61,24 @@ transition = mott_phase_gate(before_gate, after_gate)
 Levinson 门禁。它是 fail-able acceptance contract，不替代介子质量阈值或
 second-sheet pole 求解。
 
+## Bose 支撑与数值收敛
+
+```julia
+bose_support_gate(mass, chemical_potential; omega_min, omega_max)
+convergence_gate(reference, candidate; rtol=..., atol=...)
+```
+
+`bose_support_gate` 只检查正常相积分域：`m_M > μ_M` 且积分下界满足
+`omega_min > μ_M`。它不会添加零动量凝聚模；返回的 `:unsafe_bose_domain` 必须在
+扫描输出中保留，不能静默改用 `x_min_cut`。
+
+`convergence_gate` 对一个标量观测量执行显式绝对/相对误差判断。节点或截断扫描应
+分别记录低/高配置、参考值、候选值和门禁状态，而不能只保留最终比值。
+
+四类可比较的密度算法由 `four_density_algorithm_labels()` 固定为：
+`stable_particle_limit`、`reduced_strict_bw`、`q_pole_strict_bw` 和
+`phase_shift_bu`。它们是诊断比较标签，不表示当前已有任何 production 授权。
+
 ## 当前边界
 
 - 只提供 real-axis profile 的纯校验；

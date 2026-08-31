@@ -16,7 +16,10 @@ using Main.RelaxTime.BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
                                         anchor_phase_high_energy,
                                         count_subthreshold_roots,
                                         levinson_phase_gate,
-                                        mott_phase_gate
+                                        mott_phase_gate,
+                                        bose_support_gate,
+                                        convergence_gate,
+                                        four_density_algorithm_labels
 
 @testset "BU omega measure contract" begin
     @test bu_omega_measure(:strict) === STRICT_SINGLE_CHARGE_OMEGA_MEASURE
@@ -89,4 +92,25 @@ end
 
     wrong_after = merge(after, (bound_state_count=1,))
     @test !mott_phase_gate(before, wrong_after).passed
+end
+
+@testset "Bose support and convergence gates" begin
+    safe = bose_support_gate(0.7, 0.2; omega_min=0.3, omega_max=3.0)
+    @test safe.passed
+    @test safe.status === :safe_normal_domain
+    unsafe = bose_support_gate(0.7, 0.8; omega_min=0.3, omega_max=3.0)
+    @test !unsafe.passed
+    @test unsafe.status === :unsafe_bose_domain
+    @test_throws ArgumentError bose_support_gate(0.7, 0.2; omega_min=3.0, omega_max=0.3)
+
+    close = convergence_gate(1.0, 1.0005; rtol=1e-3)
+    @test close.passed
+    far = convergence_gate(1.0, 1.01; rtol=1e-3)
+    @test !far.passed
+    @test four_density_algorithm_labels() == (
+        :stable_particle_limit,
+        :reduced_strict_bw,
+        :q_pole_strict_bw,
+        :phase_shift_bu,
+    )
 end

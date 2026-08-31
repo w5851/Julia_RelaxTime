@@ -149,6 +149,8 @@ solve_phase_shift_meson_density_from_meson_point(
     real_axis_mode=:finite_eta,
     phase_convention=:arg_propagator,
     phase_display=:unwrapped,
+    phase_anchor=:none,
+    omega_measure=:legacy_domega_over_2pi,
     density_policy=:strict_normal_domain,
     bose_x_min=0.0,
     noanom_policy=:none,
@@ -193,6 +195,11 @@ solve_phase_shift_meson_density_from_meson_point(
   - 默认保留 unwrap 后相移；不强制限制到 `0..pi`
 - `phase_display=:fold_0_pi`
   - 显式 FIG3-like / temp7 display 诊断口径；先 fold 到 `0..pi` 再进入密度权重
+- `phase_anchor=:none` 或 `:high_energy_zero`
+  - 后者从高能端反向 unwrap 并把 `delta(omega_max)` 平移为零；不替代
+    `omega_max` 收敛与 Levinson 门禁
+- `omega_measure=:legacy_domega_over_2pi` 或 `:single_charge_domega_over_pi`
+  - 分别保留历史 ratio adapter 与单电荷绝对密度的显式测度；返回 metadata 会回显
 - `density_policy=:strict_normal_domain`
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
@@ -201,6 +208,12 @@ solve_phase_shift_meson_density_from_meson_point(
 - `noanom_policy=:low_energy_branch_subtraction`
   - 按 temp7 reconstructed diagnostic 口径删除 `K_plus` low-energy anomalous branch
   - 不改变上游 FixedMu 默认分支选择，也不作为 full phase-shift 默认值
+
+冻结线入口 `Models.run_freezeout_meson_density_scan` 同样透传
+`phase_shift_phase_anchor` 和 `phase_shift_omega_measure`。第三阶段的节点/截断、Bose
+支撑和四算法诊断由独立脚本
+`scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl` 承担，不改变默认
+生产口径。
 
 ### `solve_gap_and_phase_shift_meson_density_point`
 

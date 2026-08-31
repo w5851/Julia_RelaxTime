@@ -12,6 +12,7 @@ export STRICT_SINGLE_CHARGE_OMEGA_MEASURE, LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
 export bu_omega_measure, bu_omega_measure_factor
 export anchor_phase_high_energy, count_subthreshold_roots
 export levinson_phase_gate, mott_phase_gate
+export bose_support_gate, convergence_gate, four_density_algorithm_labels
 
 const STRICT_SINGLE_CHARGE_OMEGA_MEASURE = :single_charge_domega_over_pi
 const LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE = :legacy_domega_over_2pi
@@ -273,5 +274,80 @@ function mott_phase_gate(
         phase_passed=phase_passed,
     )
 end
+
+"""
+    bose_support_gate(mass, chemical_potential; omega_min, omega_max)
+
+Check the normal-phase Bose support needed by a positive-energy integral. The
+minimum physical excitation is `mass` at `q=0`; both it and the requested
+integration lower bound must lie above the chemical potential.
+"""
+function bose_support_gate(
+    mass::Real,
+    chemical_potential::Real;
+    omega_min::Real,
+    omega_max::Real,
+)
+    m = Float64(mass)
+    μ = Float64(chemical_potential)
+    lo = Float64(omega_min)
+    hi = Float64(omega_max)
+    all(isfinite, (m, μ, lo, hi)) || throw(ArgumentError("mass, chemical potential, and omega bounds must be finite"))
+    m >= 0.0 || throw(ArgumentError("mass must be nonnegative"))
+    hi > lo || throw(ArgumentError("omega_max must exceed omega_min"))
+    safe_excitation = m > μ
+    safe_window = lo > μ
+    passed = safe_excitation && safe_window
+    status = passed ? :safe_normal_domain : :unsafe_bose_domain
+    return (
+        passed=passed,
+        status=status,
+        mass=m,
+        chemical_potential=μ,
+        omega_min=lo,
+        omega_max=hi,
+        min_E_minus_mu=m - μ,
+        support_lower_bound=max(lo, μ),
+        excitation_safe=safe_excitation,
+        integration_window_safe=safe_window,
+    )
+end
+
+"""Compare one numerical value with a reference under an explicit tolerance."""
+function convergence_gate(
+    reference::Real,
+    candidate::Real;
+    rtol::Real=1.0e-3,
+    atol::Real=1.0e-10,
+)
+    ref = Float64(reference)
+    cand = Float64(candidate)
+    rel_tol = Float64(rtol)
+    abs_tol = Float64(atol)
+    all(isfinite, (ref, cand, rel_tol, abs_tol)) || throw(ArgumentError("convergence inputs must be finite"))
+    rel_tol >= 0.0 || throw(ArgumentError("rtol must be nonnegative"))
+    abs_tol >= 0.0 || throw(ArgumentError("atol must be nonnegative"))
+    difference = cand - ref
+    scale = max(abs(ref), abs(cand), abs_tol)
+    relative_difference = abs(difference) / scale
+    passed = abs(difference) <= abs_tol + rel_tol * abs(ref)
+    return (
+        passed=passed,
+        reference=ref,
+        candidate=cand,
+        absolute_difference=abs(difference),
+        relative_difference=relative_difference,
+        rtol=rel_tol,
+        atol=abs_tol,
+    )
+end
+
+"""Canonical four density algorithms used by the comparison and scan layer."""
+@inline four_density_algorithm_labels() = (
+    :stable_particle_limit,
+    :reduced_strict_bw,
+    :q_pole_strict_bw,
+    :phase_shift_bu,
+)
 
 end # module BUPhaseGates

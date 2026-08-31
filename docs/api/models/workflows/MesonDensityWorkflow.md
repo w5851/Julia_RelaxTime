@@ -87,6 +87,19 @@ FixedMu source 时，应先用 `Models.solve_meson_point_from_equilibrium` 构�
 - `density_policy = :strict_normal_domain`
 - `noanom_policy = :none`
 
+相移入口还接受两个显式数值审计参数：
+
+- `phase_anchor = :none`（默认）或 `:high_energy_zero`，用于高能端相位常数锚定；
+- `omega_measure = :legacy_domega_over_2pi`（默认）或
+  `:single_charge_domega_over_pi`，分别对应历史 ratio adapter 与单电荷绝对密度
+  口径。两者不会静默改变旧默认，且在返回 metadata 中回显。
+
+`Models.run_freezeout_meson_density_scan` 将上述参数透传为
+`phase_shift_phase_anchor` 与 `phase_shift_omega_measure`。节点、截断、Bose 支撑和
+四算法对照的第三阶段诊断脚本位于
+`scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl`；脚本固定复用
+`default` freeze-out profile 与 `baseline_freezeout` path，并保留失败点。
+
 当前同一 workflow 入口支持两套 `scheme`：
 
 - `scheme = :current`

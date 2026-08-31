@@ -307,6 +307,8 @@ function solve_phase_shift_meson_density_from_meson_point(
     real_axis_mode::Symbol=:finite_eta,
     phase_convention::Symbol=:arg_propagator,
     phase_display::Symbol=:unwrapped,
+    phase_anchor::Symbol=:none,
+    omega_measure::Symbol=:legacy_domega_over_2pi,
     density_policy::Symbol=:strict_normal_domain,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=:none,
@@ -339,6 +341,8 @@ function solve_phase_shift_meson_density_from_meson_point(
         real_axis_mode=real_axis_mode,
         phase_convention=phase_convention,
         phase_display=phase_display,
+        phase_anchor=phase_anchor,
+        omega_measure=omega_measure,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
         noanom_policy=noanom_policy,
@@ -377,6 +381,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=1e-6,
     real_axis_mode::Symbol=:finite_eta,
+    omega_measure::Symbol=:legacy_domega_over_2pi,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -404,6 +409,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
         omega_nodes=omega_nodes,
         eta=eta,
         real_axis_mode=real_axis_mode,
+        omega_measure=omega_measure,
     )
 
     return merge(density, (

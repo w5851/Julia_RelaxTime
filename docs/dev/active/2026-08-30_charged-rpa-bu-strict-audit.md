@@ -395,5 +395,44 @@ legacy 在同一门禁下达到机器精度。该小残差不阻塞 ordered 实�
 - 本轮 full/legacy 冻结线诊断和 `0.0233%` 差异：
   `docs/dev/active/2026-08-29_full-kmt-phase4-phase6.md`，原始 CSV 仅本地保留。
 
+## 8. Phase F：节点/截断、Bose 支撑与冻结线诊断（本 PR）
+
+本阶段新增分析脚本
+`scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl`，只复用
+`Models` workflow 和 `default` + `baseline_freezeout` 参数化，不修改任何默认
+production 入口。脚本按高 `sqrt(s_NN)` 到低能方向续算，并在续算失败时显式记录
+`fallback_no_continuation` 或 `failed`，不会静默替换平衡解。
+
+- [x] 复用四类现有密度入口：稳定粒子极限、reduced strict BW、`q` 依赖复极点
+  strict BW、`phase_shift_bu`；每条记录同时保留 `K^+/pi^+` 与 `K^-/pi^-`。
+- [x] 每个通道执行 `bose_support_gate`，将正常相支撑状态和
+  `min(E-μ)` 写入诊断结果；该门禁不等价于凝聚处理。
+- [x] 提供代表点 low/refined 节点/截断比较和 `convergence_gate`；四算法失败点
+  保留错误文本、数值配置及 `production_candidate_status=not_authorized`。
+- [x] 输出路径、`(T,mu_B)`、三味 `mu`、介子质量、夸克/守恒荷密度、算法元数据和
+  平衡 residual，供后续复核使用。CSV/README 仅作为本地 diagnostic 产物，不入库。
+- [x] 已完成单点 smoke（`sqrt(s_NN)=7.7 GeV`，`p_num=4,t_num=2`，
+  `q_nodes=3,omega_nodes=4,stable_q_nodes=8`）。稳定粒子极限的
+  `K^+/pi^+` 与 `K^-/pi^-` 均为约 `0.190`，reduced strict-BW 均为约 `0.234`；
+  q-pole 与 phase-shift BU 均因 `n_pi<=0` 或非有限而标记
+  `status=invalid_density`，不是成功的 ratio 证据。所有通道 Bose 支撑门禁为
+  `safe_normal_domain`，平衡 residual 约 `1.3e-15`。带 low/refined 对照的同点运行
+  中，稳定和 reduced-BW ratio 分别约由 `0.190 -> 0.219`、`0.234 -> 0.264`，
+  在本低节点设置下均未通过默认 `5%` convergence gate；这只说明需要更高节点/截断
+  审计，不能作为生产收敛结论。
+- [x] 原始 CSV/README 已写入本地
+  `data/outputs/results/relaxtime/analysis/charged_rpa_bu_convergence/`，未纳入版本库；
+  在本任务单中只保留上述可复现状态，不把低节点结果晋升为 production baseline。
+
+推荐最小运行示例：
+
+```powershell
+$env:MESON_CONVERGENCE_SQRTS = "7.7"
+julia --project=. scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl
+```
+
+若需要三点定性扫描，可将环境变量设为 `3,7.7,200`；这仍属于昂贵的诊断 smoke，
+不替代后续全域 `q/omega/eta/omega_max` 收敛和 production candidate review。
+
 本任务单只记录可验证的实现边界和后续 gate，不把任何尚未完成的 charged-RPA/BU
 公式或冻结线结果标记为 production。

@@ -93,6 +93,8 @@
 - `stable_num_q_nodes`
 - strict BW 的 `qmax / q_nodes / omega_max / omega_nodes`
 - phase-shift 的 `qmax / q_nodes / omega_min / omega_max / omega_nodes / eta`
+- phase-shift 的 `phase_shift_phase_anchor` 与 `phase_shift_omega_measure`
+  - 分别控制高能相位锚定和 `domega/pi` / `domega/(2pi)` 显式测度
 - phase-shift 的 `phase_shift_density_policy`
   - 默认 `:strict_normal_domain`，用于新策略下显式标记 `omega <= mu_M` 的 unsafe Bose domain
   - 历史 freeze-out 数值基线或兼容性检查可显式使用 `:excitation_only_E_gt_mu`
