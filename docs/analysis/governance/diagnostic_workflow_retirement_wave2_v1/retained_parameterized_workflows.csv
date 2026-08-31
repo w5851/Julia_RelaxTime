@@ -1,0 +1,2 @@
+workflow_file,family,role,retained_reason,parameterization_contract,non_goals
+pnjl-issue130-maxwell-cep-local-expansion.yml,maxwell_local,sole_target_list_entry,"作者允许保留一个可复用入口，覆盖未来有限 Maxwell-local 补点","target-list、left/right shard、failed-target-only、prepare/aggregate、显式 source/calculation SHA","不改变 backend、不把历史 pilot 当 production、不恢复其他已退役 YAML"

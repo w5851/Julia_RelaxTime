@@ -7,8 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_hybrid_production_shadow.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-hybrid-production-shadow.yml"
-ENDPOINT_LOCAL_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-maxwell-endpoint-local-production-shadow-v4.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-hybrid-production-shadow.yml"
+ENDPOINT_LOCAL_WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-maxwell-endpoint-local-production-shadow-v4.yml"
 
 
 def load_module(path: Path, name: str):

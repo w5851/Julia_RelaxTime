@@ -1,0 +1,7 @@
+claim_id,claim,status,evidence,scope_boundary
+W2-001,16 个一次性/历史专用 workflow 已从 Actions 入口移出,observed,retired_workflows.csv;definitions/,不删除 run/artifact，不改变数值结果
+W2-002,原始 workflow 定义按字节保留并有 SHA-256/bytes 记录,verified,retired_workflows.csv;manifest.json,只证明文件保存完整，不证明历史数值正确
+W2-003,Maxwell-local expansion 是唯一保留的 target-list 参数化入口,accepted,retained_parameterized_workflows.csv,不修改 workflow 内容或 backend 合同
+W2-004,workflow-specific tests 已迁移到 versioned definitions,verified,reference_migrations.csv,只验证历史 schema/contract
+W2-005,legacy phase audit 不再把已退役 pnjl-phase-diagram 路径视为 active blocker,verified,reference_migrations.csv;scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement.py,历史 evidence 中的旧字符串仍保留
+W2-006,本轮未调用 solver、未删除 run/artifact、未修改 numerical/reference outputs,verified,manifest.json,静态 Git/文档变更范围

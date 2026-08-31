@@ -3,7 +3,7 @@ using Test
 const ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_limited_feasibility.jl")
 const JOB_SCRIPT = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_limited_feasibility_job.jl")
-const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-limited-feasibility.yml")
+const WORKFLOW = joinpath(ROOT, "docs", "analysis", "governance", "diagnostic_workflow_retirement_wave2_v1", "definitions", "pnjl-c2-limited-feasibility.yml")
 
 @testset "C2 limited feasibility contracts" begin
     script = read(SCRIPT, String)

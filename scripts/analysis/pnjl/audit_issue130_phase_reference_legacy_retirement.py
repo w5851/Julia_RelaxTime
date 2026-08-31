@@ -61,10 +61,10 @@ TABLES: dict[str, dict[str, Any]] = {
 # These are repository consumers, not a claim that external/generated callers
 # have been exhaustively discovered.  Unknown active occurrences are blockers.
 KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
-    ".github/workflows/pnjl-phase-diagram.yml": {
-        "kind": "workflow_consumer",
-        "role": "legacy_input",
-        "retirement_blocker": True,
+    "docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/definitions/pnjl-phase-diagram.yml": {
+        "kind": "historical_workflow_definition",
+        "role": "historical_path_contract",
+        "retirement_blocker": False,
     },
     "scripts/relaxtime/phase_reference_adapter.jl": {
         "kind": "runtime_adapter",

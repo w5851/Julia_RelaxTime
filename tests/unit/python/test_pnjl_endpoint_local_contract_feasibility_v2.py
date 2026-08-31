@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_endpoint_local_feasibility_v2.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-maxwell-endpoint-production-shadow.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-maxwell-endpoint-production-shadow.yml"
 
 
 def load_module():

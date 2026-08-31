@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_deep_oracle.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-deep-oracle.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-deep-oracle.yml"
 SHA = "a" * 40
 WORKFLOW_SHA = "b" * 40
 POINTS = [(-0.5, 20.0), (0.0, 5.0), (0.0, 20.0), (0.5, 5.0), (0.5, 20.0)]

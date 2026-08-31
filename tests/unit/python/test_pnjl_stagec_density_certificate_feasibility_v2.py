@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 EVALUATOR = ROOT / "scripts" / "analysis" / "pnjl_stagec_density_certificate_feasibility_v2.jl"
 PLOTTER = ROOT / "scripts" / "analysis" / "plot_pnjl_stagec_density_certificate_feasibility_v2.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-stagec-density-certificate-feasibility-v2.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-stagec-density-certificate-feasibility-v2.yml"
 
 
 def test_v2_evaluator_is_solver_free_and_versioned():

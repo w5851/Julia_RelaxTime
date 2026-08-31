@@ -9,7 +9,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_limited_feasibility.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-c2-limited-feasibility.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-c2-limited-feasibility.yml"
 
 
 def load_module():
