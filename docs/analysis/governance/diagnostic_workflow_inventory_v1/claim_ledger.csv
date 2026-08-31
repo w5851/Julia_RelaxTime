@@ -1,0 +1,9 @@
+claim_id,claim,status,evidence,allowed_use,limitation,owner_review
+INV-001,source tree contains 47 local workflow YAML files,observed,"manifest.json;git ls-files .github/workflows",inventory scope only,does not include dynamic GitHub agent workflows,not_required
+INV-002,20 one-shot diagnostic workflows have a fixed latest-run snapshot,observed,run_artifact_snapshot.csv,retention and provenance planning,API snapshot may change after 2026-08-30,not_required
+INV-003,artifact retention is heterogeneous and some shard artifacts are already expired,observed,run_artifact_snapshot.csv,decide evidence migration priority,expired artifact content was not reconstructed,author_review
+INV-004,dense and raw archive workflow_call edges are still live,observed,reference_edges.csv,protect reusable internals from deletion,standalone run absence is not evidence of staleness,not_required
+INV-005,four workflows are deletion/archive candidates after dependency migration,candidate,retirement_proposal.md;reference_edges.csv,author review and exact allowlist preparation only,not an authorization to delete,author_review
+INV-006,pnjl-phase-diagram remains referenced by a legacy audit script,observed,reference_edges.csv;workflow_inventory.csv,retain historical audit compatibility,reference is historical rather than proof of current production use,author_review
+INV-007,no workflow definition or numerical artifact was changed by this inventory,observed,manifest.json;git diff,governance review,does not guarantee future retention,not_required
+INV-008,inventory did not call a solver,observed,manifest.json;task document,solver-free governance checks only,not a numerical validity result,not_required
