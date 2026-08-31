@@ -47,9 +47,9 @@
     "workflow_inventory.csv": "cf0ccd1b10c41400270ed8e0edbfabceb2e968dbea2d236c32fba590f4b6a4f9",
     "run_artifact_snapshot.csv": "6279f5bee70dfdd830a28328ff3e87aadf6439157347db200c1656d6a84425c1",
     "reference_edges.csv": "ae6df815e257af64c2b056559df5bd230da142360dca670e06b9029e8329dd9a",
-    "retirement_proposal.md": "5ae31c4c2ea2ac71c0c2fdf9fe52acd954895ea1690714ad6155cd2b8b9c373e",
+    "retirement_proposal.md": "b4471c50a6f4de288646a67d77e1766aa11aecf65e524f10699099602068f68e",
     "claim_ledger.csv": "103a717b1012cc8996aa592b2f154cad0a0680c0c88e95016a8dc61ca6263ef4",
-    "active_task_document": "8cb5b19816f8a7bbd27a27b2a64e24fa154eb56db16f7c2299cf3155bf5c5683"
+    "active_task_document": "11b07d5b4f15f7ed16126234c5f1e289f71b4522efca5fc2f7be676e0c23a88a"
   },
   "disposition_contract": {
     "retain": "core, scheduled, production, reusable, archive/recovery or legacy-audit workflow; no retirement proposed",

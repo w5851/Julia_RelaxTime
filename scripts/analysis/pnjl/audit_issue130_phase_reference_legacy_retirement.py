@@ -66,11 +66,6 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
         "role": "legacy_input",
         "retirement_blocker": True,
     },
-    ".github/workflows/relaxtime-issue130-rs-numerical-pilot-v1.yml": {
-        "kind": "diagnostic_workflow",
-        "role": "historical_snapshot_input",
-        "retirement_blocker": True,
-    },
     "scripts/relaxtime/phase_reference_adapter.jl": {
         "kind": "runtime_adapter",
         "role": "fallback_or_rollback",
@@ -114,6 +109,11 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
     "scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement.py": {
         "kind": "migration_audit_tooling",
         "role": "current_retirement_audit",
+        "retirement_blocker": False,
+    },
+    "scripts/analysis/pnjl/audit_issue130_phase_reference_physical_deletion.py": {
+        "kind": "migration_audit_tooling",
+        "role": "physical_deletion_audit",
         "retirement_blocker": False,
     },
     "scripts/analysis/pnjl/audit_issue130_phase_reference_accepted_primary.py": {

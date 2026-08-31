@@ -1,0 +1,7 @@
+claim_id,claim,evidence,allowed_use,limitation
+RET-001,Four author-approved workflows no longer have active Actions definitions,retired_workflows.csv;definitions/,workflow lifecycle audit,Git history and archived definitions remain available
+RET-002,No numerical solver or Actions production run is invoked by this change,git diff;manifest.json,governance claim,Does not validate historical numerical results
+RET-003,The active workflow count changes from 47 to 43,git ls-files .github/workflows,repository maintenance,Count is source-tree specific
+RET-004,Twenty-five pure manual workflows remain after wave 1,manual_dispatch_inventory_v2.csv,second-wave planning,Excludes CI schedule and release workflows that also allow manual rerun
+RET-005,Three workflow families have strong structural duplication,consolidation_groups.csv,consolidation planning,Structural similarity is not physical-contract equivalence
+RET-006,Eight remaining pure manual workflows have durable production or recovery roles,manual_dispatch_inventory_v2.csv,retention decision,Future consumers still require normal governance checks

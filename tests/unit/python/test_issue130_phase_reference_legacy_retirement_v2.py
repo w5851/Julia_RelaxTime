@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 import subprocess
 from pathlib import Path
@@ -49,12 +50,29 @@ def test_post_acceptance_audit_keeps_runtime_and_downstream_boundaries(tmp_path:
     assert decision["schema_version"] == "pnjl_issue130_phase_reference_legacy_retirement_decision_v2"
     assert decision["accepted_downstream_default"] is True
     assert decision["legacy_fallback_key_count"] > 0
-    # The deletion package itself contains historical legacy locators; these
-    # are classified as metadata rather than runtime blockers.  The exact
-    # count may therefore grow as additional immutable evidence is retained.
-    assert decision["active_consumer_blocker_count"] >= 25
+    # The retired RS pilot definition used to contribute one active blocker.
+    # Other historical legacy locators may still grow, so only the semantic
+    # lower bound changes from 25 to 24.
+    assert decision["active_consumer_blocker_count"] >= 24
     assert decision["unknown_active_reference_count"] == 0
     assert decision["physical_deletion_eligible"] is False
+
+    with (output / "tables" / "consumer_matrix.csv").open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        consumers = list(csv.DictReader(handle))
+    retired_path = (
+        "docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/"
+        "definitions/relaxtime-issue130-rs-numerical-pilot-v1.yml"
+    )
+    retired = next(row for row in consumers if row["path"] == retired_path)
+    assert retired["active"] == "False"
+    assert retired["retirement_blocker"] == "False"
+    assert retired["decision"] == "not_an_active_runtime_consumer"
+    assert not any(
+        row["path"] == ".github/workflows/relaxtime-issue130-rs-numerical-pilot-v1.yml"
+        for row in consumers
+    )
 
     claims = json.loads((output / "tables" / "claim_ledger.json").read_text(encoding="utf-8"))
     accepted_claim = next(item for item in claims if item["claim_id"] == "accepted_downstream_default")

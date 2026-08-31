@@ -1,11 +1,11 @@
 # Diagnostic workflow retirement proposal v1
 
-状态：`author_review_required`
+状态：`wave1_author_approved_2026-08-31`
 
 本提案只定义后续动作边界，不是删除或停用指令。任何实际改变 `.github/workflows/` 的操作
 必须另立 PR，使用精确路径和 SHA allowlist，并在合并前重新运行引用扫描。
 
-## A. 不进入退役清单
+## A. Wave 1 不进入退役清单
 
 以下组在当前阶段继续保留：
 
@@ -14,7 +14,9 @@
 - `retain_production`：dense reference、manual/meson/phase-guided production、sysimage。
 - `retain_reusable`：dense/reference/raw archive 的 `workflow_call` 内部 job。
 - `retain_archive_recovery`：raw rho-mu archive、Zenodo draft/restore 和 archive shard。
-- `retain_legacy_audit`：`pnjl-phase-diagram.yml`，因为 legacy audit 脚本仍保留其历史入口名。
+- `retain_legacy_audit`：本轮不执行 `pnjl-phase-diagram.yml` 的退役，因为 legacy audit 脚本仍
+  保留其历史入口名。它不属于 wave 1 四文件 allowlist；在 wave 2 清单中仍可重新审核，若要
+  退役必须先迁移该审计入口的历史引用。
 
 这些分类不代表所有 artifact 永久保留；artifact retention 仍由各 workflow 的配置和 GitHub
 实际到期时间决定。
@@ -62,7 +64,10 @@ CEP、Maxwell、Stage-C 及 crossover pilot/expansion workflow 目前保留定�
 
 ## 作者批准栏
 
-- [ ] 批准四个候选进入 dry-run retirement PR。
-- [ ] 批准每个候选的动作：archive definition / disable trigger / delete。
-- [ ] 批准对应 artifact/provenance 的长期保存位置。
-- [ ] 批准历史失败 run 继续以 diagnostic-only 语义保留。
+- [x] 批准四个候选进入 retirement PR。
+- [x] 批准将四个 YAML 移出 `.github/workflows/`，原字节定义保存在 versioned analysis 包。
+- [x] 批准沿用现有仓库 evidence/manifest 和历史 run URL，不删除 GitHub artifact。
+- [x] 批准历史失败 run 继续以 diagnostic-only 语义保留。
+
+执行包：`docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/`。
+剩余手动入口的合并或第二批退役不属于本次批准范围，必须另行审核。
