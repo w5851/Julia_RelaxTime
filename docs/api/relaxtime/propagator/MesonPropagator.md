@@ -20,7 +20,7 @@ K系数 → 极化函数Π → 介子传播子D → 散射振幅M → 弛豫时�
 ## 单位约定
 
 - 有效耦合系数K：fm²
-- 极化函数Π：fm²（ComplexF64）
+- 极化函数Π：fm⁻²（ComplexF64）
 - 耦合矩阵M：无量纲（ComplexF64矩阵）
 - det_K：fm⁴
 - 传播子D：fm²（ComplexF64）
@@ -52,11 +52,12 @@ meson_propagator_simple(meson_type::Symbol, K_coeffs::NamedTuple, Π::ComplexF64
 
 ##### 物理公式
 
-```
-D(q²) = 1 / (1 - K_α^± Π(q²))
+```math
+D(q^2)=\frac{2K_\alpha^\pm}{1-4K_\alpha^\pm\Pi(q^2)}.
 ```
 
-其中α为介子通道，±表示自旋-宇称通道。
+其中 α 为介子通道，± 表示自旋-宇称通道。该 `2/4` 组合与传入的 `Π`
+归一化绑定，不能与 neutral `(0,3,8)` 矩阵的 `I-2KΠ` 形式机械混用。
 
 ##### 介子类型映射表
 
@@ -80,6 +81,8 @@ D(q²) = 1 / (1 - K_α^± Π(q²))
 **关键映射规则**:
 - 赝标量P（π、K）使用K⁺系数（`*_plus`）
 - 标量S（σ_π、σ_K）使用K⁻系数（`*_minus`）
+- 表中的 `K4567` 是 legacy 聚合接口；在 `phi_u != phi_d` 的 charged-kaon
+  背景下它代数对应 `K67`，物理 `K^±` 必须由完整核显式使用 `K45`
 
 ##### K系数自动选择逻辑
 
@@ -98,7 +101,7 @@ D(q²) = 1 / (1 - K_α^± Π(q²))
 |------|------|------|------|
 | `meson_type` | `Symbol` | 介子类型（`:pi`, `:K`, `:sigma_pi`, `:sigma_K`） | — |
 | `K_coeffs` | `NamedTuple` | 预计算的K系数（通过`EffectiveCouplings.calculate_effective_couplings`获取） | fm² |
-| `Π` | `ComplexF64` | 预计算的极化函数（注意：K介子使用Π_{us}，不是Π_{uu}） | fm² |
+| `Π` | `ComplexF64` | 预计算的极化函数（注意：K介子使用Π_{us}，不是Π_{uu}） | fm⁻² |
 
 ##### 返回值
 
@@ -311,8 +314,8 @@ M88 = K8 - (4/3) * detK * (2Π_uu + Π_ss)
 
 | 参数 | 类型 | 说明 | 单位 |
 |------|------|------|------|
-| `Π_uu` | `ComplexF64` | u/d夸克的极化函数 | fm² |
-| `Π_ss` | `ComplexF64` | s夸克的极化函数 | fm² |
+| `Π_uu` | `ComplexF64` | u/d夸克的极化函数 | fm⁻² |
+| `Π_ss` | `ComplexF64` | s夸克的极化函数 | fm⁻² |
 | `K_coeffs` | `NamedTuple` | 预计算的K系数 | fm² |
 | `channel` | `Symbol` | 通道类型（`:P`为赝标量，`:S`为标量） | — |
 

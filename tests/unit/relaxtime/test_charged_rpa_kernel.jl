@@ -32,21 +32,16 @@ using Main.RelaxTime.MesonPropagator: meson_propagator_simple
         @test K_minus.kernel_pair == :K45
         @test pi_plus.channel == :P
         @test K_minus.channel == :P
-        @test pi_plus.normalization_source == :legacy_scalar_diagnostic
-        @test pi_plus.retarded_convention == :external_retarded
+        @test pi_plus.normalization_source == :charged_ladder_goldstone
+        @test pi_plus.retarded_convention == :retarded_e_minus_iwt
     end
 
-    @testset "P/S and normalization metadata" begin
+    @testset "P/S and fixed normalization metadata" begin
         scalar = charged_rpa_spec(:K_plus; channel=:S)
-        candidate = charged_rpa_spec(:K_plus; normalization=:matrix_scalar_candidate)
 
         @test scalar.channel == :S
-        @test scalar.numerator_factor == 2.0
-        @test scalar.denominator_factor == 4.0
-        @test candidate.numerator_factor == 2.0
-        @test candidate.denominator_factor == 2.0
-        @test candidate.normalization_source == :neutral_matrix_candidate
-        @test candidate.retarded_convention == :external_retarded
+        @test scalar.normalization_source == :charged_ladder_goldstone
+        @test scalar.retarded_convention == :retarded_e_minus_iwt
     end
 
     @testset "full kernel coupling selection" begin
@@ -61,20 +56,16 @@ using Main.RelaxTime.MesonPropagator: meson_propagator_simple
     end
 
     @testset "scalar algebra is explicit and unregularized" begin
-        legacy = charged_rpa_spec(:K_plus)
-        candidate = charged_rpa_spec(:K_plus; normalization=:matrix_scalar_candidate)
+        spec = charged_rpa_spec(:K_plus)
         K_a = 0.35
         Pi_a = 0.20 + 0.03im
 
-        @test charged_rpa_inverse(legacy, K_a, Pi_a) ≈ 1 - 4 * K_a * Pi_a
-        @test charged_rpa_propagator(legacy, K_a, Pi_a) ≈ 2 * K_a / (1 - 4 * K_a * Pi_a)
-        @test charged_rpa_inverse(candidate, K_a, Pi_a) ≈ 1 - 2 * K_a * Pi_a
-        @test charged_rpa_propagator(candidate, K_a, Pi_a) ≈ 2 * K_a / (1 - 2 * K_a * Pi_a)
-        @test charged_rpa_propagator(legacy, K_a, Pi_a) != charged_rpa_propagator(candidate, K_a, Pi_a)
+        @test charged_rpa_inverse(spec, K_a, Pi_a) ≈ 1 - 4 * K_a * Pi_a
+        @test charged_rpa_propagator(spec, K_a, Pi_a) ≈ 2 * K_a / (1 - 4 * K_a * Pi_a)
 
         # Exact poles are exposed to the caller; no epsilon is silently added.
-        @test charged_rpa_inverse(legacy, 0.25, 1.0) == 0.0
-        @test_throws DomainError charged_rpa_propagator(legacy, 0.25, 1.0)
+        @test charged_rpa_inverse(spec, 0.25, 1.0) == 0.0
+        @test_throws DomainError charged_rpa_propagator(spec, 0.25, 1.0)
     end
 
     @testset "isospin-symmetric parity with legacy scalar propagator" begin
@@ -133,9 +124,6 @@ using Main.RelaxTime.MesonPropagator: meson_propagator_simple
     @testset "input validation" begin
         @test_throws ArgumentError charged_rpa_spec(:K0)
         @test_throws ArgumentError charged_rpa_spec(:pi_plus; channel=:unknown)
-        @test_throws ArgumentError charged_rpa_spec(:K_plus; normalization=:unknown)
-        @test_throws ArgumentError charged_rpa_spec(:K_plus; retarded_convention=Symbol(""))
-
         spec = charged_rpa_spec(:pi_plus)
         @test_throws ArgumentError charged_rpa_inverse(spec, Inf, 0.1 + 0im)
         @test_throws ArgumentError charged_rpa_inverse(spec, 0.2, NaN + 0im)

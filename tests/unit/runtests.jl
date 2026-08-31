@@ -70,6 +70,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
     joinpath(UNIT_DIR, "config", "test_config_inheritance.jl"),
     joinpath(UNIT_DIR, "config", "test_sop_governance.jl"),
+    joinpath(UNIT_DIR, "config", "test_formula_route_closure.jl"),
     joinpath(UNIT_DIR, "config", "test_dependency_policy.jl"),
     joinpath(UNIT_DIR, "config", "test_agent_instruction_governance.jl"),
     joinpath(UNIT_DIR, "config", "test_task_ledger.jl"),

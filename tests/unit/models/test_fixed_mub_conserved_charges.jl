@@ -37,6 +37,12 @@ end
     @test densities.rho_S == -0.5
     @test_throws ArgumentError Models.conserved_densities_from_flavor([1.0, 2.0])
 
+    # rho_Q/rho_B=0.4 and rho_S=0 imply rho_s=0 and rho_u/rho_d=7/8.
+    exact_bqs = Models.conserved_densities_from_flavor([7.0 / 8.0, 1.0, 0.0])
+    @test exact_bqs.rho_S == 0.0
+    @test exact_bqs.rho_Q / exact_bqs.rho_B ≈ 0.4 atol=1e-14
+    @test exact_bqs.rho_Q - 0.4 * exact_bqs.rho_B ≈ 0.0 atol=1e-14
+
     components = Models.build_constraint_components(mode)
     @test Models.constraint_name.(components) == [
         :stationarity,

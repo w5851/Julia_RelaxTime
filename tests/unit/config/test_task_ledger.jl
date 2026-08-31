@@ -68,11 +68,13 @@ end
     @test parsed["primary_track"] == "issue130-phase"
     @test tracks["issue130-phase"]["status"] == "accepted"
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
-    @test tracks["rs-transport"]["status"] == "active"
+    @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
-    @test tracks["plot-sop"]["status"] == "triaged"
+    @test tracks["plot-sop"]["status"] == "promoted"
     items = Dict(String(item["id"]) => item for item in parsed["items"])
-    @test items["issue130-phase-reference-retirement"]["status"] == "accepted"
+    @test items["rs-production-after-phase-reference"]["status"] == "archived"
+    @test startswith(items["rs-production-after-phase-reference"]["task_file"], "docs/dev/archived/")
+    @test items["issue130-phase-reference-retirement"]["status"] == "archived"
     @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
     @test isempty(items["issue130-phase-reference-retirement"]["blocked_by"])
     @test occursin("full_hybrid_candidate", read(joinpath(PROJECT_ROOT, "docs", "dev", "task_tracking_governance.md"), String))

@@ -1,3 +1,15 @@
+---
+title: Issue #130：RS `publication_clean` 派生层与 old-reference retirement
+archived: true
+original: docs/dev/active/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：RS `publication_clean` 派生层与 old-reference retirement
 
 状态：accepted；publication-clean v1 已由作者审核并经 PR #275 合并到

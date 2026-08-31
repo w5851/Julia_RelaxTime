@@ -9,6 +9,7 @@
 - `propagator/`：RPA 传播子、介子极点、Mott 阈值
 - `meson_density/`：稳定粒子、BW、BU 相移数密度主线
 - `meson_thermo/`：BU / off-shell / LD 介子压强与 EOS 主线
+- `ChargedRPA_BU_ProductionRoute.md`：固定 BQS quark-only 背景上的 charged-RPA/BU candidate 公式闭合包
 - `scattering/`：振幅、截面、平均散射率
 - `transport/`：弛豫时间与输运系数
 
@@ -21,6 +22,10 @@
 3. `meson_thermo/MesonThermo_BU_EOS_OffShell_LD.md`
 4. `meson_thermo/MesonThermo_QP_LD_Cutoff_Governance.md`
 5. `../models/shared/OmegaTotal_并入介子压强后的统一AD热力学流程.md`
+
+若要审阅带电 `pi^\pm/K^\pm` 路线，先读
+[ChargedRPA_BU_ProductionRoute.md](ChargedRPA_BU_ProductionRoute.md)，再回到
+`couplings/`、`polarization/`、`propagator/` 和 `meson_density/` 的分层公式。
 
 ## 当前重点提醒
 

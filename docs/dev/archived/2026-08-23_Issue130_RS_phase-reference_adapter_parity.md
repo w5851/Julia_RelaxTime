@@ -1,3 +1,15 @@
+---
+title: Issue #130：RS transport phase-reference adapter parity 与限定重验
+archived: true
+original: docs/dev/active/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
 状态：accepted（post-repair audit、versioned result import、合并后 solver-free consumer smoke v2、raw promotion/default migration 与 publication-clean 派生层均已完成并经作者审核）。PR #274 已 squash merge 到 `main@c5ae1057bede6d1df1861da5c1f7659d69bcb052`；两套 `prod_v2` raw 已登记为 `approved`，分析入口默认已迁移到 `prod_v2`，数值审计仍为 `diagnostic_only`。old-reference retirement 已转入独立审计任务

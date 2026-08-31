@@ -1,12 +1,12 @@
 # ChargedRPAProvider
 
-`ChargedRPAProvider` 是 Phase C 的第一层 bubble-provider 契约。它把
-`ChargedRPAKernelSpec` 的有序味道对映射到当前
-`PolarizationAniso.polarization_aniso`/`polarization_with_width` 调用，并返回
-极化值及完整输入元数据。
+`ChargedRPAProvider` 是 Phase-C 的 ordered real-axis bubble 适配层。它把
+`ChargedRPAKernelSpec` 的有序味道映射到现有
+`PolarizationAniso.polarization_aniso`，并把 strict-route candidate 与 legacy
+`num_s_quark=1` oracle 明确分开。
 
-当前实现是可替换 provider 的诊断适配器：它复用已有的 `A`/`B0` 正则化，但不
-声称完成严格 retarded 解析延拓、极点求解、相移或 BU 积分。
+该模块仍是 diagnostic adapter：它复用当前 `A/B0` 计算，不声称已经完成
+second-sheet 极点、有限宽度物理验证、相移或 BU 积分。
 
 ## 入口
 
@@ -14,8 +14,8 @@
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec
 using Main.RelaxTime.ChargedRPAProvider: charged_polarization
 
-spec = charged_rpa_spec(:K_plus; retarded_convention=:external_retarded)
-sample = charged_polarization(
+spec = charged_rpa_spec(:K_plus)
+ordered = charged_polarization(
     spec,
     k0_inv_fm,
     q_inv_fm,
@@ -24,54 +24,58 @@ sample = charged_polarization(
     (T=T_inv_fm, Φ=Phi, Φbar=PhiBar, ξ=xi),
     (u=A_u, d=A_d, s=A_s),
 )
-Pi_us = sample.value
+Pi_us = ordered.value
 ```
 
-## 有序输入
+## 处方边界
 
-provider 不会把共轭通道的输入折叠成同一个数组：
+`prescription` 只有两个值：
 
-| `spec.meson` | `spec.pair` | `m1, μ1, A1` | `m2, μ2, A2` | 默认 `num_s_quark` |
-|---|---|---|---|---:|
-| `:K_plus` | `(:u,:s)` | `u` | `s` | 1 |
-| `:K_minus` | `(:s,:u)` | `s` | `u` | 1 |
-| `:pi_plus` | `(:u,:d)` | `u` | `d` | 0 |
-| `:pi_minus` | `(:d,:u)` | `d` | `u` | 0 |
+| 处方 | strange channel 的 `num_s_quark` | 定位 |
+|---|---:|---|
+| `:ordered_retarded`（默认） | `0` | strict GBU 的 ordered real-axis candidate |
+| `:legacy_symmetrized_B0` | `1` | Rehberg/旧 Fortran/Cpp 对齐 oracle |
 
-返回值同时保留 `pair`、`kernel_pair`、`m1_inv_fm`、`m2_inv_fm`、
-`μ1_inv_fm`、`μ2_inv_fm`、`A1_inv_fm2`、`A2_inv_fm2` 以及 `num_s_quark`，
-便于审计 `Pi_us` 与 `Pi_su` 的来源。
+对 pion 通道两种处方均使用 `num_s_quark=0`。legacy 处方只在每个有序 strange
+通道内部做 `k0/-k0` 平均；它不会把 `(u,s)` 与 `(s,u)` 合并。因此 `K+` 和
+`K-` 始终分别返回 `Pi_us` 与 `Pi_su`。
 
-## 模式与单位
+显式 legacy 调用：
 
-- `mode=:real_axis`（默认）直接调用 `polarization_aniso`，并要求
-  `gamma_inv_fm=0`。
-- `mode=:finite_width` 调用现有 `polarization_with_width`。它是在实轴 `B0`
-  上组合有限宽度项的兼容 proxy，不等于已证明的 retarded continuation。
-- `masses`、`chemical_potentials`、`k0_inv_fm`、`q_inv_fm`、`thermo.T` 的单位为
-  `fm^-1`；`A_values` 为 `fm^-2`；返回的 `value` (`Pi_a`) 为 `fm^-2`。
+```julia
+legacy = charged_polarization(
+    spec,
+    k0_inv_fm,
+    q_inv_fm,
+    masses,
+    chemical_potentials,
+    thermo,
+    A_values;
+    prescription=:legacy_symmetrized_B0,
+)
+```
 
-所有输入必须有限，`q`、`gamma` 非负且 `T>0`。provider 不自动计算或重积分
-`A_f`；调用方需显式传入同一背景下的 `A_u/A_d/A_s`。
+## 返回字段与单位
 
-## 极点与 Mott 诊断记录
+返回值保留 `pair`、`kernel_pair`、`prescription`、`num_s_quark`、有序
+`m1/m2`、`mu1/mu2`、`A1/A2` 和热力学背景。`analytic_scope=:real_axis` 明确表示
+当前没有把 `B0` 延拓到复平面。
 
-`charged_pole_residual(spec, K_a, Pi_a)` 返回
-`Delta_a=1-c_den*K_a*Pi_a` 的复残差、实部、虚部和范数；它只记录候选点，
-不搜索根，也不添加极点 epsilon。`charged_mott_diagnostic(spec, pole_mass, masses)`
-按 `spec.pair` 计算 `m1+m2` 阈值并返回 `:bound`、`:at_threshold` 或 `:continuum`
-分支。这两个 helper 为后续严格极点 provider 统一输出格式，但当前不代表已经
-完成极点求解或 Mott 连续性验证。
+- 质量、化学势、`k0`、`q` 和 `T`：`fm^-1`；
+- `A_values` 和返回的 `value=Pi_a`：`fm^-2`；
+- `Phi`、`PhiBar`、`xi`：无量纲。
 
-## 后续门禁
+所有输入必须有限，`q>=0` 且 `T>0`。provider 不自动计算 `A_f`，调用方必须传入
+同一平均场背景和同一正则化口径下的 `A_u/A_d/A_s`。
 
-本模块已锁定当前 A/B0 计算链的有序参数传递，并用直接调用 parity 测试验证数值
-一致性。以下事项仍未完成：
+## 未完成门禁
 
-1. 严格 retarded `Pi_{us}`/`Pi_{su}` 的解析延拓和半平面约定；
-2. 有限宽度、阈值和电荷共轭关系的物理验证；
-3. 传播子极点、Mott 分支、相移边界和 Levinson 计数；
-4. strict-support/凝聚处理以及 BU 密度接入。
+1. ordered 与 legacy 在 `mu=0`、有限化学势固定点和冻结线上的对照；
+2. legacy `Gamma` 的来源绑定固定点；
+3. second-sheet pole、阈值和 Mott 分支；
+4. 相移、Levinson、Bose support 和 BU 密度接入。
 
+权威公式见
+[`ChargedRPA_BU_ProductionRoute.md`](../../../reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md)。
 实现：`src/relaxtime/ChargedRPAProvider.jl`。测试：
 `tests/unit/relaxtime/test_charged_rpa_provider.jl`。

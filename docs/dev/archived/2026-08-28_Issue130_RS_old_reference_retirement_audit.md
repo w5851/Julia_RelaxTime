@@ -1,3 +1,15 @@
+---
+title: Issue #130：RS old-reference retirement audit
+archived: true
+original: docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md
+archived_date: 2026-08-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：RS old-reference retirement audit
 
 状态：accepted；审计 PR #276 已合并到 `main@ad47ad1482574faa4764af3913b8cfa3b6bae53e`，

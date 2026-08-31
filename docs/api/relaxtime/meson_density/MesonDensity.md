@@ -2,16 +2,15 @@
 
 ## 模块概述
 
-`MesonDensity` 模块提供当前介子数密度主线的最小实现入口，当前覆盖四层最小数值 helper：
+`MesonDensity` 模块提供当前介子数密度主线的解耦入口，当前覆盖四类算法族：
 
-- `π/K` 聚合通道默认简并因子
-- 玻色分布函数
-- 稳定粒子极限数密度
-- reduced strict BW 数密度
-- Stage2 q 依赖复极点 strict BW 数密度
-- `K/π` 比值与温度扫描
-- Phase E3 当前最小口径下的 `π/K` 相移双积分 helper
-- BU2020 审计所需的 real-axis 分支、相位口径与 Bose-domain policy metadata
+- `stable_particle_limit`：稳定粒子极限数密度
+- `reduced_strict_bw`：reduced strict BW 数密度
+- `q_pole_strict_bw`：`q` 依赖复极点 strict BW 数密度
+- `phase_shift_bu`：相移双积分 BU 数密度（含 `current` 和 `gbu_reference` 权重）
+
+玻色分布、`π/K` 简并因子、比值/扫描以及 real-axis/Bose-domain metadata 是这些
+算法族共享的辅助契约，不单独构成第五种数密度算法。
 
 后续 BU / BW / 各向异性扩展将在该模块基础上继续演化。
 
@@ -148,6 +147,10 @@ g(\omega)
 - 仅支持 `xi = 0`
 - 支持 `:pi` / `:K` 聚合通道以及 `:pi_plus` / `:pi_minus` / `:K_plus` / `:K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
+- 当前正能量积分使用 `domega/(2pi)`；对 `d=1`、单 Bose 因子的电荷分辨绝对
+  密度，它比由 `pi` 相移跳变固定的 strict `domega/pi` 少一半。共同因子在同
+  口径 `K/pi` 比值中抵消，因此当前入口是 ratio diagnostic，不是绝对密度
+  production 定义
 
 当前默认参数：
 
@@ -184,13 +187,13 @@ g(\omega)
 平均场背景上的带电耦合，不修改 PNJL/BQS 平衡方程，也不代表完整
 `Omega_M` 反馈或已经认证的 charged-RPA 归一化。
 
-当前支持两个正式 `scheme`：
+当前支持两个可调用的 `scheme`：
 
 - `:current` -> `:phase_shift_current`
-  - 当前生产默认口径
+  - 兼容/对照口径；保留为显式调用选项
   - 使用 `F(\delta)=\delta`
 - `:gbu_reference`（兼容别名 `:gbu`, `:generalized_bu`）-> `:phase_shift_gbu_reference`
-  - 当前更严格参考口径
+  - 当前最终比较默认口径；尚未因该默认而获得 production 授权
   - 使用 `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
 
 real-axis 分支：
@@ -233,8 +236,8 @@ No-anomalous policy：
 
 治理约束：
 
-- `current` 保持默认正式生产主线
-- `gbu_reference` 作为可重复运行的 stricter reference / analysis branch
+- 四类算法族都必须保持可调用并回显各自算法元数据
+- 最终比较固定使用 `gbu_reference`；`current` 作为可重复运行的对照 branch
 - 二者共用同一套 `workflow + continuation + scan` 契约，不允许脚本层平行重组流程
 - `pv_b0_eta0` 与 `finite_eta` 必须在 API 和返回 metadata 中保持可区分；`B0` PV 奇点处理不能和 Bose occupation pole 混为一谈
 

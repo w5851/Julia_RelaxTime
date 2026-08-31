@@ -1,0 +1,79 @@
+schema_version = "v1"
+allowed_statuses = ["draft", "candidate", "production_authorized", "deprecated"]
+required_fields = [
+  "id",
+  "document",
+  "status",
+  "scope",
+  "model_start",
+  "approximations",
+  "external_sources",
+  "formula_tests",
+  "production_authorized",
+  "unresolved_items",
+]
+
+[[route]]
+id = "charged_rpa_bu_quark_only"
+document = "docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md"
+status = "candidate"
+scope = "fixed-BQS quark-only background with charge-resolved pi+/pi-/K+/K-"
+model_start = "PNJL_KMT_three_flavor"
+approximations = [
+  "PNJL mean-field background",
+  "RPA quark-bubble resummation",
+  "no Omega_M or Sigma_M feedback",
+  "four decoupled meson-density algorithms remain callable",
+  "generalized BU is the comparison default; current BU remains callable",
+  "strict GBU uses ordered retarded charged bubbles; source-backed num_s_quark=1 remains a legacy oracle",
+  "second-sheet complex poles are required only for the q-pole strict-BW route",
+  "strict charge-resolved positive-energy BU uses domega/pi; the current domega/(2pi) ratio convention remains diagnostic",
+  "x_min_cut is diagnostic-only and the freezeout route first gates the normal phase",
+]
+density_algorithms = [
+  "stable_particle_limit",
+  "reduced_strict_bw",
+  "q_pole_strict_bw",
+  "phase_shift_bu",
+]
+comparison_scheme = "phase_shift_gbu_reference"
+bose_domain_policy = "normal_phase_gate_x_min_cut_diagnostic"
+external_sources = [
+  "10.1016/0375-9474(96)00247-3",
+  "10.1006/aphy.1996.0140",
+  "10.1103/d7nm-y2vp",
+  "10.1103/PhysRevD.96.094008",
+  "10.3390/particles3010014",
+]
+formula_tests = [
+  "tests/unit/config/test_formula_route_closure.jl",
+  "tests/unit/relaxtime/test_meson_interaction_kernel.jl",
+  "tests/unit/relaxtime/test_meson_rpa.jl",
+  "tests/unit/relaxtime/test_meson_rpa_adapter.jl",
+  "tests/unit/relaxtime/test_polarization_aniso.jl",
+  "tests/unit/relaxtime/test_meson_density.jl",
+  "tests/unit/models/test_fixed_mub_conserved_charges.jl",
+  "tests/regression/relaxtime/test_meson_mass_regression.jl",
+  "tests/validation/relaxtime/test_literature_digitized_meson_mass_targets.jl",
+  "tests/validation/relaxtime/test_legacy_fortran_meson_numeric_mu0_targets.jl",
+]
+production_authorized = false
+unresolved_items = [
+  "implement ordered charged retarded B0 and separate it from the source-backed num_s_quark=1 legacy oracle",
+  "add a provenance-bound legacy Gamma fixed point and a second-sheet pole oracle for q-pole strict-BW",
+  "implement the charge-resolved domega/pi phase-shift measure and stable-particle-limit regression",
+  "implement the high-energy phase anchor, bound-state count, Levinson/Mott and four-algorithm numerical convergence gates",
+  "normal-phase Bose-support gate on the freezeout scan; condensate zero-mode branch if it fails",
+]
+required_document_markers = [
+  "route_id: charged_rpa_bu_quark_only",
+  "状态：candidate（未授权 production）",
+  "公式闭合链",
+  "外部来源与项目转换",
+  "公式 → 代码 → 测试映射",
+  "生产边界与升格条件",
+  "未决项与审查问题",
+  "四类可调用的介子数密度算法",
+  "phase_shift_gbu_reference",
+  "正常相",
+]
