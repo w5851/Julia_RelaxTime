@@ -1,6 +1,6 @@
 # Charged RPA/BU 严格复核与后续实现任务单
 
-更新日期：2026-08-30
+更新日期：2026-08-31
 
 当前状态：in progress。本文承接完整 KMT interaction-kernel 与固定 BQS
 quark-only 后处理诊断，目标是重新核对 charged `π^±/K^±` 的 RPA/BU 数值链，
@@ -11,6 +11,11 @@ PR290 从独立的 `origin/main` 基线建立了
 [公式路线闭合包](../../reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md)
 和治理门禁；本任务单的严格数值复核依赖该 candidate 规范，但不会因文档闭合而
 自动完成或晋升为 production。
+
+PR289 已以 squash commit `dba1d9b8` 合并，落地独立 charged scalar-RPA
+kernel/spec、`K^± -> K45` 映射和第一版 provider 契约。本任务后续按可审核性拆成
+三个 PR：ordered retarded 固定点、严格 BU 测度/相位门禁、全链路收敛与冻结线。
+second-sheet pole solver 保持为独立非阻塞任务。
 
 ## 1. 决策目标与假设
 
@@ -208,8 +213,8 @@ Levinson 检查必须先于冻结线扫描。
 |---|---:|---:|---|
 | charged 耦合 `K67 -> K45` | 是 | 当前背景下很小；强 `phi_u-phi_d` 时可放大 | 已有 diagnostic A/B |
 | charged 分母 `4KPi_ordered` vs `2KPi_matrix` | 否 | 同一二次作用量下严格等价 | 已由 ladder trace + Goldstone 闭合 |
-| `Pi_{us}`/`Pi_{su}` 解析延拓与宽度 | 否 | 直接改变 `K^+` 与 `K^-` 的差异和阈值 | 未决，必须审计 |
-| `num_s_quark=1` vs ordered retarded | 否 | 可能改变有限 `q/mu` 的 kaon 相位 | source-backed legacy 与 strict 路线待数值对照 |
+| `Pi_{us}`/`Pi_{su}` 解析延拓与宽度 | 否 | 直接改变 `K^+` 与 `K^-` 的差异和阈值 | 有限 `eta` ordered backend 已实现；全网格收敛待后续门禁 |
+| `num_s_quark=1` vs ordered retarded | 否 | 可改变有限 `q/mu` 的 kaon 相位 | 固定 BQS 探针已显示 kaon 传播子可达数十个百分点差异 |
 | `A_f/B0` cutoff、热上限、节点 | 否 | 数值漂移或伪峰 | 需收敛门禁 |
 | 相位分支、常数边界、Levinson | 否 | 可造成整体密度偏置 | 需单独测试 |
 | 单电荷 BU 测度 `1/pi` vs `1/(2pi)` | 否 | 绝对密度差一倍；同口径 ratio 抵消 | 公式已由稳定极限闭合，代码待迁移 |
@@ -252,12 +257,40 @@ Phase B 由 `src/relaxtime/ChargedRPAKernel.jl` 落地。该模块只提供经�
 
 ### Phase C：charged bubble provider 与极点
 
-- [x] 从现有 `PolarizationAniso` 提取 ordered real-axis bubble provider；默认
-  `:ordered_retarded` 使用 `num_s_quark=0`，并把 `num_s_quark=1` 仅保留为显式
+- [x] 新增显式有限 `eta>0` 的复能量 `B0_retarded`，默认
+  `:ordered_retarded` 从上半平面求值；历史 `num_s_quark=0` 路线保留为
+  `:ordered_legacy_B0`，`num_s_quark=1` 只保留为
   `:legacy_symmetrized_B0` oracle。
-- [ ] 对 ordered/legacy 两种处方做 `mu=0`、有限化学势固定点和稀疏冻结线对照。
-- [ ] 为 legacy `Gamma` 增加带来源和 hash 的固定点；另为 `q_pole_strict_bw`
-  实现 second-sheet pole 残差/阈值/Mott 分支记录。
+- [x] 以 unit gate 验证 ordered 共轭关系，并在 `T=170 MeV, mu_B=240 MeV`
+  的 `FixedMuBConservedCharges` quark-only 背景完成四 charged 通道固定点对照。
+- [ ] 稀疏冻结线对照推迟到节点、截断、Bose support 和四算法门禁所在的第三个
+  后续 PR，不在本 PR 提前消费未认证相位。
+- [ ] legacy `Gamma` 固定点与 second-sheet pole solver 独立实施；后者仅在需要
+  严格 pole mass/width 时启动，不阻塞实轴 GBU 路线。
+
+固定点脚本为
+`scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl`。它对每个
+`pi^±/K^±` 取阈下 `q=0` 与阈上有限 `q` 两个探针，并分别输出 strict eta-coarse、
+node-coarse、refined、ordered-legacy 与 symmetrized-legacy 五条处方。原始 CSV
+只写入本地 `data/outputs/results/relaxtime/analysis/charged_rpa_ordered_fixedpoint/`，
+不纳入版本库，所有行均标记 `production_candidate_status=not_authorized`。
+
+`mu_B=0` charge-symmetric 参考背景残差为 `9.82e-16`；此时
+`rho_Q-0.4rho_B=0` 只是零密度退化约束，不将 `Q/B=0.4` 解释为有限比值。
+strict refined 在 `q=0` 的正能量 `K^+/K^-` 传播子一致到 `2.64e-10` 相对量级，
+有限 `q=0.35 fm^-1` 时仍有约 `1.30e-3` 的 routing/cutoff 差异；symmetrized
+legacy 在同一门禁下达到机器精度。该小残差不阻塞 ordered 实现进入后续相位审计，
+但必须在 production 评审时与 cutoff/routing 收敛一起解释。
+
+有限 BQS 背景残差为 `1.44e-15`，得到 `mu_Q=-9.22 MeV`、`mu_S=80.27 MeV`。
+在该有限探针集合上，ordered legacy 相对 strict refined 的传播子最大差异约
+`1.32%`；`num_s_quark=1` symmetrized legacy 的 kaon 传播子最大差异约
+`44.8%`，而 pion 的两个 legacy 处方代数上相同。这个结果首次表明旧实现的主要
+新增风险不只来自 `K67 -> K45`，还来自 kaon 内部 `k0/-k0` 平均；但它仍不是
+相位、密度或冻结线结论，且 strict `eta/N_E` 尚未通过全域收敛门禁。
+当前固定点上 `N_E=512 -> 1024` 的传播子最大相对变化约 `1.13e-4`，而
+`eta=0.01 -> 0.005 fm^-1` 仍约为 `1.32%`；因此节点固定点已足够支持本 PR 的
+实现审核，但 `eta -> 0^+` 外推明确留到后续全域收敛 PR。
 
 ### Phase D：strict BU density
 
@@ -342,6 +375,10 @@ Phase B 由 `src/relaxtime/ChargedRPAKernel.jl` 落地。该模块只提供经�
   `src/relaxtime/ChargedRPAKernel.jl`、`src/relaxtime/ChargedRPAProvider.jl`、
   `tests/unit/relaxtime/test_charged_rpa_kernel.jl`、
   `tests/unit/relaxtime/test_charged_rpa_provider.jl`。
+- ordered retarded 固定点诊断：
+  `scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl`、
+  `tests/integration/relaxtime/test_charged_rpa_ordered_fixedpoint_script_contract.jl`；
+  原始 CSV 只在本地保留。
 - 中性矩阵 RPA：`src/relaxtime/MesonRPA.jl`、
   `docs/api/relaxtime/propagator/MesonRPA.md`；charged ladder/Goldstone normalization
   gate：`tests/unit/relaxtime/test_meson_rpa.jl`。

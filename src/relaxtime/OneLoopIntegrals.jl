@@ -15,7 +15,7 @@ using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using Main.Constants_PNJL: Λ_inv_fm
 
-export B0, A
+export B0, B0_retarded, A
 
 # ----------------------------------------------------------------------------
 # 基础工具函数
@@ -507,6 +507,126 @@ function B0(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     real_part = term1[1] - term2[1] + term3[1] - term4[1]
     imag_part = term1[2] - term2[2] + term3[2] - term4[2]
     return real_part, imag_part
+end
+
+# ---------------------------------------------------------------------------
+# Strict ordered retarded continuation
+
+@inline function _require_finite_real(value, label::AbstractString)
+    value isa Real || throw(ArgumentError("$(label) must be real"))
+    converted = Float64(value)
+    isfinite(converted) || throw(ArgumentError("$(label) must be finite"))
+    return converted
+end
+
+@inline function _retarded_energy_grid(m::Float64, energy_nodes::Int)
+    return gauleg(m, energy_cutoff(m), energy_nodes)
+end
+
+@inline function _tilde_B0_retarded(
+    sign_flag::Symbol,
+    z::ComplexF64,
+    q::Float64,
+    m::Float64,
+    m_prime::Float64,
+    μ::Float64,
+    T0::Float64,
+    Φ::Float64,
+    Φbar::Float64,
+    nodes_E::AbstractVector{<:Real},
+    weights_E::AbstractVector{<:Real},
+)
+    total = 0.0 + 0.0im
+    if q < EPS_K
+        @inbounds for i in eachindex(nodes_E, weights_E)
+            E = nodes_E[i]
+            p = internal_momentum(E, m)
+            dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
+            denominator = z^2 + 2z * E + m^2 - m_prime^2
+            total += weights_E[i] * (4p * dist / denominator)
+        end
+        return ComplexF64(total)
+    end
+
+    @inbounds for i in eachindex(nodes_E, weights_E)
+        E = nodes_E[i]
+        p = internal_momentum(E, m)
+        dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
+        common = z^2 + 2z * E - q^2 + m^2 - m_prime^2
+        total += weights_E[i] * dist * (log(common + 2p * q) - log(common - 2p * q)) / q
+    end
+    return ComplexF64(total)
+end
+
+"""
+    B0_retarded(λ, q, m1, μ1, m2, μ2, T;
+                Φ=0.0, Φbar=0.0, eta_inv_fm=1e-3, energy_nodes=128)
+
+Evaluate the ordered two-line integral at `z = λ + i*eta_inv_fm` by direct
+complex Gauss--Legendre quadrature. `λ` already includes the flavor chemical
+potential shift (`k0 + μ1 - μ2`). The result is the dimensionless retarded
+`B0(z,q)` for the repository Fourier convention `exp(-i*ω*t)`.
+
+This entrypoint is intentionally separate from [`B0`](@ref). `B0` preserves
+the historical real-axis principal-value/cut oracle, while `B0_retarded`
+keeps the finite upper-half-plane regulator explicit. Convergence in both
+`eta_inv_fm` and `energy_nodes` is a caller-visible numerical requirement.
+"""
+function B0_retarded(
+    λ::Real,
+    q::Real,
+    m1::Real,
+    μ1::Real,
+    m2::Real,
+    μ2::Real,
+    T0::Real;
+    Φ::Real=0.0,
+    Φbar::Real=0.0,
+    eta_inv_fm::Real=1.0e-3,
+    energy_nodes::Integer=128,
+)
+    λ_value = _require_finite_real(λ, "λ")
+    q_value = _require_finite_real(q, "q")
+    m1_value = _require_finite_real(m1, "m1")
+    μ1_value = _require_finite_real(μ1, "μ1")
+    m2_value = _require_finite_real(m2, "m2")
+    μ2_value = _require_finite_real(μ2, "μ2")
+    T_value = _require_finite_real(T0, "T")
+    Φ_value = _require_finite_real(Φ, "Φ")
+    Φbar_value = _require_finite_real(Φbar, "Φbar")
+    eta_value = _require_finite_real(eta_inv_fm, "eta_inv_fm")
+
+    q_value >= 0.0 || throw(ArgumentError("q must be non-negative"))
+    m1_value >= 0.0 || throw(ArgumentError("m1 must be non-negative"))
+    m2_value >= 0.0 || throw(ArgumentError("m2 must be non-negative"))
+    T_value > 0.0 || throw(ArgumentError("T must be positive"))
+    eta_value > 0.0 || throw(ArgumentError("eta_inv_fm must be positive"))
+    energy_nodes >= 4 || throw(ArgumentError("energy_nodes must be at least 4"))
+
+    nodes1, weights1 = _retarded_energy_grid(m1_value, Int(energy_nodes))
+    nodes2, weights2 = _retarded_energy_grid(m2_value, Int(energy_nodes))
+    z = ComplexF64(λ_value, eta_value)
+
+    term1 = _tilde_B0_retarded(
+        :plus, -z, q_value, m1_value, m2_value, μ1_value, T_value,
+        Φ_value, Φbar_value, nodes1, weights1,
+    )
+    term2 = _tilde_B0_retarded(
+        :minus, z, q_value, m1_value, m2_value, μ1_value, T_value,
+        Φ_value, Φbar_value, nodes1, weights1,
+    )
+    term3 = _tilde_B0_retarded(
+        :plus, z, q_value, m2_value, m1_value, μ2_value, T_value,
+        Φ_value, Φbar_value, nodes2, weights2,
+    )
+    term4 = _tilde_B0_retarded(
+        :minus, -z, q_value, m2_value, m1_value, μ2_value, T_value,
+        Φ_value, Φbar_value, nodes2, weights2,
+    )
+    result = term1 - term2 + term3 - term4
+    isfinite(real(result)) && isfinite(imag(result)) ||
+        throw(ArgumentError("retarded B0 result is not finite"))
+    return ComplexF64(result)
 end
 
 # ---------------------------------------------------------------------------
