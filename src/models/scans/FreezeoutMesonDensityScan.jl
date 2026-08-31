@@ -167,6 +167,8 @@ function _solve_density_point(
     phase_shift_omega_max::Float64,
     phase_shift_omega_nodes::Int,
     phase_shift_eta::Float64,
+    phase_shift_phase_anchor::Symbol,
+    phase_shift_omega_measure::Symbol,
     phase_shift_density_policy::Symbol,
 )
     flavor_chemical = FlavorChemicalProfiles.flavor_mu_profile_fm(flavor_profile, pt.muq_MeV)
@@ -237,6 +239,8 @@ function _solve_density_point(
                 omega_max=phase_shift_omega_max,
                 omega_nodes=phase_shift_omega_nodes,
                 eta=phase_shift_eta,
+                phase_anchor=phase_shift_phase_anchor,
+                omega_measure=phase_shift_omega_measure,
                 density_policy=phase_shift_density_policy,
             ),
         )
@@ -255,6 +259,8 @@ function _solve_density_point(
             omega_max=phase_shift_omega_max,
             omega_nodes=phase_shift_omega_nodes,
             eta=phase_shift_eta,
+            phase_anchor=phase_shift_phase_anchor,
+            omega_measure=phase_shift_omega_measure,
             density_policy=phase_shift_density_policy,
         ),
     )
@@ -390,6 +396,8 @@ function run_freezeout_meson_density_scan(;
     phase_shift_omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     phase_shift_omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     phase_shift_eta::Float64=1e-6,
+    phase_shift_phase_anchor::Symbol=:none,
+    phase_shift_omega_measure::Symbol=:legacy_domega_over_2pi,
     phase_shift_density_policy::Symbol=:strict_normal_domain,
     progress_cb::Union{Nothing, Function}=nothing,
     solver_kwargs::NamedTuple=(; iterations=40),
@@ -456,6 +464,8 @@ function run_freezeout_meson_density_scan(;
                         phase_shift_omega_max=phase_shift_omega_max,
                         phase_shift_omega_nodes=phase_shift_omega_nodes,
                         phase_shift_eta=phase_shift_eta,
+                        phase_shift_phase_anchor=phase_shift_phase_anchor,
+                        phase_shift_omega_measure=phase_shift_omega_measure,
                         phase_shift_density_policy=phase_shift_density_policy,
                     )
                     continuation_state = result.continuation_state

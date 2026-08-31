@@ -120,11 +120,11 @@ status = "accepted"
 current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "完成 dω/pi 绝对密度回归与 phase/Levinson/Mott gate PR；随后独立执行节点/截断/Bose support、四算法和冻结线门禁。"
+next_action = "完成节点/截断、Bose support、四算法和 baseline freeze-out 诊断 smoke；随后评审是否满足 production candidate 门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/charged-rpa-bu-measure-phase-gates"
+current_branch = "codex/charged-rpa-bu-convergence"
 current_sha = "04df891b18992d8b673992149fbb11f049bc396b"
 run_ids = []
 evidence = [
@@ -136,6 +136,9 @@ evidence = [
   "pr:289",
   "sha:dba1d9b8b5196bbb8993453ff7e184201dc09cf3",
   "file:scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl",
+  "file:scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl",
+  "file:tests/unit/relaxtime/test_charged_rpa_bu_convergence_contract.jl",
+  "note:single_point_smoke_7p7GeV_four_algorithms_with_explicit_invalid_density_rows",
   "review:formula_route_audit_complete",
   "review:author_accepted_pr290_sop_closeout",
   "note:strict_follow_up_handoff",
