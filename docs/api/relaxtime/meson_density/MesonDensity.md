@@ -147,10 +147,11 @@ g(\omega)
 - 仅支持 `xi = 0`
 - 支持 `:pi` / `:K` 聚合通道以及 `:pi_plus` / `:pi_minus` / `:K_plus` / `:K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
-- 当前正能量积分使用 `domega/(2pi)`；对 `d=1`、单 Bose 因子的电荷分辨绝对
-  密度，它比由 `pi` 相移跳变固定的 strict `domega/pi` 少一半。共同因子在同
-  口径 `K/pi` 比值中抵消，因此当前入口是 ratio diagnostic，不是绝对密度
-  production 定义
+- `omega_measure=:legacy_domega_over_2pi` 保持历史默认；对 `d=1`、单 Bose
+  因子的电荷分辨绝对密度，它比 strict `domega/pi` 少一半
+- `omega_measure=:single_charge_domega_over_pi` 显式启用 strict 单电荷绝对密度
+  归一化；当前不会自动成为 production 默认
+- 两种 measure 的共同因子在同口径 `K/pi` 比值中抵消
 
 当前默认参数：
 
@@ -163,6 +164,8 @@ g(\omega)
 - `real_axis_mode = :finite_eta`
 - `phase_convention = :arg_propagator`
 - `phase_display = :unwrapped`
+- `phase_anchor = :none`
+- `omega_measure = :legacy_domega_over_2pi`
 - `density_policy = :strict_normal_domain`
 - `noanom_policy = :none`
 
@@ -213,6 +216,13 @@ real-axis 分支：
 - `phase_convention=:arg_inverse_propagator`：BU2020 诊断口径，对 inverse propagator 取相位并按当前符号约定返回
 - `phase_display=:unwrapped`：默认密度核使用 unwrap 后的相移，不强制限制到 `0..pi`
 - `phase_display=:fold_0_pi`：显式诊断/FIG3-like 口径，先用 `pi - abs(mod(delta, 2pi) - pi)` 映射到 `0..pi` 再进入密度权重
+- `phase_anchor=:none`：保持历史从低能端 unwrap、无常数锚定的行为
+- `phase_anchor=:high_energy_zero`：把 `omega_max` 端点纳入相位序列，从高能向低能
+  unwrap 并平移到 `delta(omega_max)=0`；返回 `max_abs_high_energy_phase_before_anchor`、
+  `max_abs_phase_anchor_shift` 和 `max_high_energy_tail_span`
+
+高能锚点只处理相位常数与分支，不等同于 `omega_max` 收敛。严格路线仍需通过
+[`BUPhaseGates.md`](BUPhaseGates.md) 的 tail、Levinson 和 Mott 门禁。
 
 Bose-domain policy：
 

@@ -590,7 +590,7 @@ production 升格，并另建“凝聚零模 + 连续谱”路线；在此之前
 | 中性 `(0,3,8)` 矩阵与 charged 归一化 | `src/relaxtime/MesonRPA.jl`、`MesonRPAAdapter.jl` | `tests/unit/relaxtime/test_meson_rpa.jl` 用显式 ladder 顶角和 Goldstone identity 锁定 `Pi_matrix=2Pi_ordered`；adapter 仍只实现中性矩阵 |
 | `A_f/B0` 泡 | `src/relaxtime/OneLoopIntegrals.jl`、`OneLoopIntegralsAniso.jl`、`PolarizationAniso.jl` | `tests/unit/relaxtime/test_oneloopintegrals*.jl`、`test_polarization_aniso.jl`；`num_s_quark=1` 是 source-backed legacy prescription，strict GBU 的 ordered retarded backend 尚未接入 |
 | legacy pole 回归 | `src/relaxtime/MesonMass.jl`、`PolarizationAniso.polarization_with_width` | `tests/regression/relaxtime/test_meson_mass_regression.jl`、literature/legacy Fortran validation 固定质量；尚缺 hash-bound `Gamma` 固定点 |
-| 四类介子数密度 | `stable_meson_number_density`、`strict_bw_meson_number_density`、`strict_bw_qpole_meson_number_density`、`phase_shift_meson_number_density` | `tests/unit/relaxtime/test_meson_density.jl` 及对应 workflow tests；四类均可调用；phase-shift 当前 `d=1`、单 Bose 因子仍配 `domega/(2pi)`，只属 ratio diagnostic，strict 单电荷绝对密度须迁移到 `domega/pi` 并通过稳定极限 |
+| 四类介子数密度 | `stable_meson_number_density`、`strict_bw_meson_number_density`、`strict_bw_qpole_meson_number_density`、`phase_shift_meson_number_density` | `tests/unit/relaxtime/test_meson_density.jl` 及对应 workflow tests；四类均可调用；phase-shift 已提供显式 strict `domega/pi` 与 legacy `domega/(2pi)`，但 production 默认未切换 |
 | route registry | `config/governance/formula_route_closure.toml`、`scripts/dev/check_formula_route_closure.jl` | `tests/unit/config/test_formula_route_closure.jl`；只检查闭合包完整性 |
 
 当前实现中 `FullKMTInteraction` 可以把 `K12/K45` 注入既有 charged BU 入口，但这

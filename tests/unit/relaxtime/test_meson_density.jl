@@ -21,6 +21,7 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    _real_axis_mode_symbol,
                                    _density_policy_symbol,
                                    _phase_display_symbol,
+                                   _phase_anchor_symbol,
                                    _apply_phase_display,
                                    _noanom_policy_symbol,
                                    _apply_noanom_policy,
@@ -39,6 +40,8 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    stable_kpi_ratio,
                                    stable_kpi_scan
 using Main.RelaxTime.MesonDensity: PhaseShiftInteractionSpec
+using Main.RelaxTime.BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
+                                        LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction, charged_coupling
 using Main.RelaxTime.EffectiveCouplings: calculate_effective_couplings_from_phi
 using Main.Constants_PNJL: G_fm2, K_fm5
@@ -106,12 +109,64 @@ end
     @test _density_policy_symbol(:bose_x_min_cut) == :x_min_cut
     @test _phase_display_symbol(:unwrapped) == :unwrapped
     @test _phase_display_symbol(:folded_0_pi) == :fold_0_pi
+    @test _phase_anchor_symbol(:none) == :none
+    @test _phase_anchor_symbol(:strict_high_energy_zero) == :high_energy_zero
     @test _noanom_policy_symbol(:none) == :none
     @test _noanom_policy_symbol(:temp7_low_energy_branch_subtraction) == :low_energy_branch_subtraction
 
     qp = (m=(u=1.0, d=1.0, s=1.2), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.1))
     tp_bad = (T=0.2, Φ=0.5, Φbar=0.5, ξ=0.1)
     @test_throws ArgumentError phase_shift_meson_density_summary(qp, tp_bad)
+end
+
+@testset "MesonDensity explicit BU measure and high-energy anchor" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+    common = (
+        degeneracy=1,
+        qmax=2.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+        density_policy=:strict_normal_domain,
+    )
+    legacy = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        common...,
+        omega_measure=:legacy_domega_over_2pi,
+    )
+    strict = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        common...,
+        omega_measure=:single_charge_domega_over_pi,
+        phase_anchor=:high_energy_zero,
+    )
+    strict_unanchored = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        common...,
+        omega_measure=:single_charge_domega_over_pi,
+    )
+    @test legacy.omega_measure === LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
+    @test strict.omega_measure === STRICT_SINGLE_CHARGE_OMEGA_MEASURE
+    @test strict_unanchored.density ≈ 2 * legacy.density rtol=1e-12 atol=1e-12
+    @test strict.phase_anchor === :high_energy_zero
+    @test isfinite(strict.max_abs_high_energy_phase_before_anchor)
+    @test isfinite(strict.max_abs_phase_anchor_shift)
+    @test isfinite(strict.max_high_energy_tail_span)
+    @test_throws ArgumentError phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        common...,
+        omega_measure=:invalid,
+    )
 end
 
 @testset "MesonDensity phase display policy" begin
@@ -171,6 +226,21 @@ end
     @test bw_zero.mode == :stable_limit
     @test bw_zero.density ≈ stable rtol=1e-10
     @test bw_zero.omega_min == 0.05
+    @test bw_zero.omega_measure === STRICT_SINGLE_CHARGE_OMEGA_MEASURE
+    @test bw_zero.omega_measure_factor ≈ inv(pi)
+
+    bw_narrow = strict_bw_meson_number_density(
+        0.14,
+        0.001,
+        T;
+        degeneracy=3,
+        qmax=12.0,
+        q_nodes=48,
+        omega_min=0.05,
+        omega_max=10.0,
+        omega_nodes=64,
+    )
+    @test bw_narrow.density ≈ stable rtol=1e-2
 
     bw_finite = strict_bw_meson_number_density(
         0.14,

@@ -21,6 +21,7 @@
 - `../../reference/formula/relaxtime/transport/Transport_EndToEnd_Pipeline.md`
 - `workflow/MesonDensityWorkflow.md`
 - `meson_density/MesonDensity.md`
+- `meson_density/BUPhaseGates.md`（strict BU 测度、高能相位锚点与 Levinson/Mott 门禁）
 - `meson_thermo/MesonThermodynamics.md`
 - `propagator/MesonInteractionKernel.md`（Phase 1.5/2 完整 KMT 相互作用核与中性 RPA 代数后端）
 - `propagator/MesonRPA.md`（中性 `(0,3,8)` RPA 矩阵代数）
@@ -56,6 +57,7 @@
 - `propagator/MesonRPAAdapter.md`
 - `propagator/ChargedRPAKernel.md`
 - `propagator/ChargedRPAProvider.md`
+- `meson_density/BUPhaseGates.md`
 - `scattering/*`
 - `propagator/*`
 - `polarization/*`
