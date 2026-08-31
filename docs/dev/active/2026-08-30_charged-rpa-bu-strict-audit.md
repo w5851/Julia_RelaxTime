@@ -237,16 +237,25 @@ coupling substitution”。
 
 ### Phase B：charged RPA kernel backend（不改旧接口）
 
-- [ ] 新增独立的 charged scalar-RPA kernel/spec，显式记录 `pair`、P/S、
+- [x] 新增独立的 charged scalar-RPA kernel/spec，显式记录 `pair`、P/S、
   numerator、denominator、retarded convention 和 normalization source。
-- [ ] 用同位旋对称极限把该 backend 与旧 `MesonPropagator` 做代数/极点 parity
+- [x] 用同位旋对称极限把该 backend 与旧 `MesonPropagator` 做代数/极点 parity
   测试；不以一轮冻结线 A/B 代替该测试。
-- [ ] 为 `K^+`、`K^-` 分别保留 `Pi_{us}`、`Pi_{su}` 的输入和诊断元数据。
+- [x] 为 `K^+`、`K^-` 分别保留 `Pi_{us}`、`Pi_{su}` 的输入和诊断元数据。
+
+Phase B 由 `src/relaxtime/ChargedRPAKernel.jl` 落地。该模块只提供经过校验的
+通道/归一化契约和纯单通道代数；默认 `MesonPropagator`、相移和 BU 密度语义
+保持不变。PR290 已用 charged ladder trace 和 Goldstone identity 固定
+`D=2K/(1-4KPi_ordered)`，因此本后端不再暴露 `1-2KPi_ordered` 候选。
+同位旋对称 parity 和有序 `Pi_{us}/Pi_{su}` 输入由
+`tests/unit/relaxtime/test_charged_rpa_kernel.jl` 锁定。
 
 ### Phase C：charged bubble provider 与极点
 
-- [ ] 从现有 `PolarizationAniso` 提取 ordered retarded real-axis bubble provider，
-  与 `num_s_quark=1` legacy oracle 分开记录并做固定点/冻结线对照。
+- [x] 从现有 `PolarizationAniso` 提取 ordered real-axis bubble provider；默认
+  `:ordered_retarded` 使用 `num_s_quark=0`，并把 `num_s_quark=1` 仅保留为显式
+  `:legacy_symmetrized_B0` oracle。
+- [ ] 对 ordered/legacy 两种处方做 `mu=0`、有限化学势固定点和稀疏冻结线对照。
 - [ ] 为 legacy `Gamma` 增加带来源和 hash 的固定点；另为 `q_pole_strict_bw`
   实现 second-sheet pole 残差/阈值/Mott 分支记录。
 
@@ -293,10 +302,46 @@ coupling substitution”。
 - 不实现完整 `Omega_M` 反馈、全 hadronic BQS 或显式 `mu_I` 路线。
 - 不提交已有低节点 diagnostic CSV，不更新 production/regression baseline。
 
+### 当前诊断结论与旧实现处置（2026-08-30）
+
+现有冻结线 A/B 的最大 full/legacy 相对差异约为 `0.0233%`。这只约束了
+“在同一 quark-only 背景、同一 `Pi`、同一标量分母和同一 BU 数值设置下，把旧
+`K4567` 换成 charged `K45`”这一局部替换；它不能外推为严格 charged-RPA/BU
+全链路的误差上限。相反，当前旧 scalar BU 的物理比值沿冻结线仍有明显温度/能量
+依赖：`K^+/pi^+` 约由 `10.2` 降至 `1.24`，`K^-/pi^-` 约由 `0.0246`
+升至 `0.695`。因此目前没有证据表明 `K03/K38` 是 charged ratio 大幅变化的
+主因；在当前对角平均场背景中，它们仍只属于中性 `(0,3,8)` 混合块。
+
+代表点 partial-feedback 诊断把 `mu_S` 从 quark-only 的约 `80.3 MeV` 移到约
+`1.5--1.7 MeV`，并得到两个 `O(1)` 的 charged ratio。这一结果说明介子守恒荷
+外层修正对约束解很敏感，但该路线没有把 `Omega_M`/`Sigma_M` 放入驻点方程，不能
+被视为完整热力学反馈或旧实现的 production 修复。
+
+据此，旧实现不需要立即进行破坏性的整体重写，处置分为三层：
+
+1. **保留兼容层。** 旧 `MesonPropagator`、`MesonMass` 和默认 `MesonDensity`
+   入口继续保留，避免改变 transport 和已有 baseline 的语义；其 `K4567` 在
+   `phi_u != phi_d` 时必须明确标注为旧/legacy 的 `K67` 代理，而不是完整 charged
+   `K45`。
+2. **定向新增生产候选层。** `ChargedRPAKernel`/`ChargedRPAProvider` 先作为
+   显式 `K^\pm -> K45` 的并行后端；严格 retarded `Pi_{us}/Pi_{su}`、极点、相位
+   边界和 BU 支撑门禁通过后，再由显式适配器接入生产路线，不静默改写旧接口。
+3. **严格复核层。** ordered/legacy 泡的固定点差异、有限宽度/second-sheet
+   语义、相移边界、`x_min_cut` 与凝聚处理仍需要单独数值验收。若这些门禁暴露
+   系统性偏差，应替换 charged 生产后端；目前没有理由因此修改 `PNJLCore`、
+   引入 `K03/K38` 到 charged 标量通道，或重做 transport 主线。
+
+换言之，当前结论是“旧接口存在非对称 charged-kaon 语义缺口，需要被新后端隔离
+并最终替代”，而不是“旧 PNJL/BU 全部实现已经被证明错误”。
+
 ## 7. 当前证据与引用路径
 
 - 纯代数核：`src/relaxtime/MesonInteractionKernel.jl`、
   `tests/unit/relaxtime/test_meson_interaction_kernel.jl`。
+- charged scalar-RPA 契约与 A/B0 provider 适配：
+  `src/relaxtime/ChargedRPAKernel.jl`、`src/relaxtime/ChargedRPAProvider.jl`、
+  `tests/unit/relaxtime/test_charged_rpa_kernel.jl`、
+  `tests/unit/relaxtime/test_charged_rpa_provider.jl`。
 - 中性矩阵 RPA：`src/relaxtime/MesonRPA.jl`、
   `docs/api/relaxtime/propagator/MesonRPA.md`；charged ladder/Goldstone normalization
   gate：`tests/unit/relaxtime/test_meson_rpa.jl`。

@@ -110,6 +110,8 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_oneloopintegrals.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_effective_couplings.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_interaction_kernel.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_kernel.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_provider.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_rpa.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_rpa_adapter.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_density.jl"),
