@@ -1,0 +1,35 @@
+{
+  "schema_version": "diagnostic_workflow_retirement_wave2_review_v1",
+  "execution_date": "2026-08-31",
+  "repository": "w5851/Julia_RelaxTime",
+  "source_commit": "15e02b8e8f9b23629908b6ee164d1e858f7ac463",
+  "source_pr": 296,
+  "source_task_document": "docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
+  "source_task_document_sha256": "69da989c97fe3cfcc24edf7c4ce1f3ba8d88d5dcd7ad8c2726f60666e3f11f5d",
+  "solver_called": false,
+  "workflow_definitions_changed": false,
+  "numerical_results_changed": false,
+  "wave2_changes_executed": false,
+  "counts": {
+    "active_workflows": 43,
+    "workflow_dispatch": 39,
+    "pure_manual": 25,
+    "reviewed_candidates": 17,
+    "durable_manual_retain": 8,
+    "direct_retirement_review": 8,
+    "consolidation_or_retirement_review": 7,
+    "historical_replay_review": 2
+  },
+  "files": [
+    {"path": "README.md", "role": "scope_and_author_review_contract"},
+    {"path": "manual_workflow_function_review.csv", "role": "candidate_function_and_retirement_matrix"},
+    {"path": "claim_ledger.csv", "role": "claim_evidence_and_boundary_ledger"},
+    {"path": "manifest.json", "role": "this_manifest"}
+  ],
+  "file_hashes": {
+    "README.md": "1149907277dc87d2be8e82ca769e825fa679f24dcd1cf2b5ae40e18409962a3e",
+    "manual_workflow_function_review.csv": "af1b43df7b443e8a122d0f6030793cfe32a4ee7e4025d35f0f5ec8ce7c628c2e",
+    "claim_ledger.csv": "6090da5eaba6fd21bb97168f6816ef60b9fe470ba4cd02e47f60cc67db3060d1"
+  },
+  "next_gate": "author_review_wave2_candidates_and_consolidation_boundaries"
+}

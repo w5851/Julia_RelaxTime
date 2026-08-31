@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,allowed_use,boundary
+wave2_scope_count,"wave1 后仍有 25 个纯 workflow_dispatch 入口，其中 17 个需要第二波审阅，8 个明确保留",supported,manual_workflow_function_review.csv;wave1 manifest,作者审核范围,静态 inventory 快照，不代表未来运行需求
+direct_retirement_group,"8 个已闭环 Issue130/CEP/legacy 专用入口已有替代 evidence，可进入直接退役审核",supported,manual_workflow_function_review.csv;phase_surface_series;accepted phase evidence,退役候选筛选,仍需作者批准和单独 allowlist PR
+consolidation_group,"7 个 phase shadow/Maxwell local 入口具有重复 backend/job 结构，可评估参数化合并",supported,manual_workflow_function_review.csv;wave1 consolidation_groups.csv,合并设计输入,结构相似不等于物理合同等价
+historical_oracle_group,"2 个 CEP oracle/pilot 只有在未来明确复用需求下才应保持 active trigger",diagnostic,manual_workflow_function_review.csv,历史重放保留决策,不得把 oracle 标签写入 runtime selector
+wave2_no_changes,"本包未修改 workflow、solver、reference、run/artifact 或数值结果",supported,manifest.json,治理审阅和后续 PR 边界,必须由后续精确 allowlist PR 执行实际迁移

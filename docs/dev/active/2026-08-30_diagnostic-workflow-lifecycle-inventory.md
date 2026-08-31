@@ -2,7 +2,7 @@
 
 创建日期：2026-08-30
 
-状态：`wave1_retirement_in_review`
+状态：`wave2_author_review`
 
 这是 Issue #130/RS 历史任务文档归档后的第二阶段任务单。归档阶段已经在
 `main@cea8110cdc1e1bafbc9873aa79cb5b0954c3de76` 完成；本 PR 基于
@@ -128,3 +128,19 @@ inventory PR 本身没有执行这些动作。
 `docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/`：四个 YAML 移出
 `.github/workflows/` 并原字节保存在 `definitions/`，不删除历史 run/artifact。剩余 25 个纯
 手动入口已形成第二轮分类和结构相似组；本 PR 不执行第二批退役或合并。
+
+## 7. 第二波审阅包（2026-08-31）
+
+wave 1 已在 PR #296 合并，合并 SHA 为
+`15e02b8e8f9b23629908b6ee164d1e858f7ac463`。在不修改剩余 YAML 的前提下，第二波审阅包
+`docs/analysis/governance/diagnostic_workflow_retirement_wave2_review_v1/` 对 25 个纯手动入口
+中的 17 个给出实际功能、触发/输入、后端脚本、历史 evidence、可退役理由和必须保留的
+provenance 边界。
+
+- 8 个：已闭环 Issue #130/legacy 专用入口，进入直接退役审核；
+- 7 个：phase shadow/Maxwell local 结构重复，进入参数化合并或整体退役审核；
+- 2 个：CEP oracle/pilot，进入历史重放保留审核；
+- 8 个：dense reference、archive/recovery 和 relaxtime production，继续保留。
+
+本轮只生成 solver-free 审阅 evidence；不退役第二波 YAML。作者按组决定后，另立精确
+allowlist 的 retirement 或 parameterization PR。
