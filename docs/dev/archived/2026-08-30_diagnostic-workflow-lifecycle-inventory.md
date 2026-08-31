@@ -1,13 +1,29 @@
+---
+title: Diagnostic workflow lifecycle inventory v1
+archived: true
+original: docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md
+archived_date: 2026-08-31
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Diagnostic workflow lifecycle inventory v1
 
 创建日期：2026-08-30
 
-状态：`wave2_author_review`
+状态：`wave2_completed__pr298_merged`
 
 这是 Issue #130/RS 历史任务文档归档后的第二阶段任务单。归档阶段已经在
 `main@cea8110cdc1e1bafbc9873aa79cb5b0954c3de76` 完成；本 PR 基于
 `main@6b2f4ffeb05001f6e39b6940d59e4cbc9cf9bfed`，中间提交没有修改 workflow 文件。本任务只盘点 workflow 生命周期，
 不执行 workflow 删除、停用、改触发条件或 artifact 迁移。
+
+本文件记录的是 2026-08-30 的 inventory 快照及其后续 wave1/wave2 审阅入口。wave2
+已在 PR #298 合并完成；本文件归档后仅作为治理历史索引，未来新增 workflow 生命周期
+维护必须创建新的 active task，不把后续波次追加到本快照中。
 
 ## 1. 本阶段目标
 
@@ -144,3 +160,12 @@ provenance 边界。
 
 本轮只生成 solver-free 审阅 evidence；不退役第二波 YAML。作者按组决定后，另立精确
 allowlist 的 retirement 或 parameterization PR。
+
+## 8. Wave2 closeout
+
+上述第二波审阅已由作者批准并按精确 allowlist 实施。PR #298
+(`main@c9c76b12ba5a3199831246665721b54237068b34`) 将 16 个入口移入
+`docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/definitions/`，保留
+一个 Maxwell-local target-list 入口；active workflow 计数收口为 27，带
+`workflow_dispatch` 的入口为 23，纯手动入口为 9。原第 7 节的“尚未执行”表述属于
+审阅时点快照，不代表当前状态。
