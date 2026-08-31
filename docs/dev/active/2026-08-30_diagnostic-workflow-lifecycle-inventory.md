@@ -2,7 +2,7 @@
 
 创建日期：2026-08-30
 
-状态：`review_pending_author_retirement_approval`
+状态：`wave1_retirement_in_review`
 
 这是 Issue #130/RS 历史任务文档归档后的第二阶段任务单。归档阶段已经在
 `main@cea8110cdc1e1bafbc9873aa79cb5b0954c3de76` 完成；本 PR 基于
@@ -58,7 +58,7 @@ run/artifact 数量是 2026-08-30 的 GitHub API 观察快照，不是未来保�
 - `pnjl-phase-diagram.yml` 虽然最近 standalone run 较早，但仍被 legacy audit 脚本引用，暂不
   作为删除候选。
 
-### 4.2 保留定义和证据，先不退役
+### 4.2 盘点时的保留定义和证据
 
 以下 workflow 有已完成的 Issue #130/CEP/Maxwell 诊断证据，或仍有测试/活动任务引用。即便
 未来归档定义，也必须先把可复现入口、输入 hash、run ID、artifact provenance 固化到 analysis 包：
@@ -79,14 +79,16 @@ run/artifact 数量是 2026-08-30 的 GitHub API 观察快照，不是未来保�
 - `pnjl-maxwell-endpoint-production-shadow.yml`
 - `pnjl-maxwell-endpoint-refinement.yml`
 - `pnjl-stagec-density-certificate-feasibility-v2.yml`
-- `pnjl-stagec-density-certificate-feasibility.yml`（v1 已 superseded，但测试仍引用）
+- `pnjl-stagec-density-certificate-feasibility.yml`（盘点时 v1 workflow-specific test 仍引用；
+  wave 1 已迁移到 retired definition）
 
-`relaxtime-issue130-rs-numerical-pilot-v1.yml` 的最新 run 失败且仍有不可变诊断 artifact；在
-没有完成证据保留确认前也只列为候选审核，不执行删除。
+盘点时 `relaxtime-issue130-rs-numerical-pilot-v1.yml` 的最新 run 失败且仍有不可变诊断
+artifact，因此先列为候选审核。wave 1 已保留该失败 evidence 和原字节定义，只移除 Actions
+触发入口。
 
-### 4.3 退役候选（仅供作者批准）
+### 4.3 首批退役候选（已获作者批准）
 
-当前只提出四个候选，不等于允许删除：
+首轮提出以下四个候选；作者已于 2026-08-31 批准移出 Actions 目录并保留 versioned definition：
 
 1. `pnjl-c2-cep-manual-bisection.yml`：无仓库活动引用，aggregate artifact 仍可下载；
    先保存 provenance，再决定 archive definition 或 delete。
@@ -97,20 +99,21 @@ run/artifact 数量是 2026-08-30 的 GitHub API 观察快照，不是未来保�
 4. `pnjl-stagec-density-certificate-feasibility.yml`：v2 已替代，但历史测试和证据仍需
    明确迁移；在测试引用迁移前不得删除。
 
-候选动作必须在单独 PR 中用路径、当前文件 hash、替代 evidence、引用迁移结果和作者批准逐项
-列出。inventory PR 本身不执行这些动作。
+执行 PR 使用路径、当前文件 hash、Git blob SHA、替代 evidence 和引用迁移结果逐项记录；
+inventory PR 本身没有执行这些动作。
 
 ## 5. 作者审核问题
 
-作者只需对 `retirement_proposal.md` 中的候选组作决定：
+首批四个候选已经完成作者决定。第二轮需审核
+`diagnostic_workflow_retirement_wave1_v1/manual_dispatch_inventory_v2.csv` 和
+`consolidation_groups.csv`：
 
-1. 四个候选是否允许归档 workflow 定义、仅停用触发入口，或完全删除。
-2. 哪些 run/artifact 必须先复制到仓库 analysis 包或外部不可变 archive。
-3. 统一 artifact 保留期和复现入口；过期 artifact 是否已经有等价 hash-bound evidence。
+1. 已闭环 Issue #130 专用入口是否进入 wave 2 直接退役。
+2. 三个高结构相似组是整体退役，还是保留一个 versioned 参数化入口。
+3. 两个 CEP oracle/pilot 是否仍有明确的未来复用需求。
 4. 是否把未来新增的一次性 workflow 强制登记到本 inventory/ledger 规则。
 
-在这些问题有明确答案前，下一步只能是补充引用审计或制作 dry-run allowlist，不能改变 workflow
-定义。
+在这些问题有明确答案前，不能改变第二轮候选的 workflow 定义。
 
 ## 6. 验收与后续入口
 
@@ -119,8 +122,9 @@ run/artifact 数量是 2026-08-30 的 GitHub API 观察快照，不是未来保�
 - [x] workflow call graph 和活动引用边已记录。
 - [x] 精确 retirement candidate 清单已提出。
 - [x] 未执行删除、停用、solver 或数值重跑。
-- [ ] 作者审核 proposal 并批准下一独立 retirement PR。
+- [x] 作者于 2026-08-31 批准首批四个候选退役，并要求继续审计其余手动 workflow。
 
-作者批准后，另立 `diagnostic-workflow-retirement` PR，先执行 dry-run 路径/hash 校验，再按
-allowlist 归档或删除；同时更新 `docs/guides/scripts/run_script_catalog.md` 中受影响脚本状态，
-并重新运行 workflow/schema、docs、ledger、active-docs 和 data-path governance。
+首批执行包位于
+`docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/`：四个 YAML 移出
+`.github/workflows/` 并原字节保存在 `definitions/`，不删除历史 run/artifact。剩余 25 个纯
+手动入口已形成第二轮分类和结构相似组；本 PR 不执行第二批退役或合并。

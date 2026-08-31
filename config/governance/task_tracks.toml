@@ -177,27 +177,29 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "diagnostic-workflow-lifecycle"
 title = "Diagnostic workflow lifecycle maintenance"
-status = "review"
+status = "active"
 current_task = "retire-stale-one-shot-actions"
 blocked_by = []
 unlocks = []
-next_action = "作者审核 diagnostic workflow inventory/proposal；批准前不归档、停用或删除任何 workflow。"
+next_action = "完成首批四个 workflow 退役 PR；合并后单独审核剩余 25 个纯手动入口的 wave 2 退役或参数化合并建议。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/diagnostic-workflow-inventory"
-current_sha = "cea8110cdc1e1bafbc9873aa79cb5b0954c3de76"
+current_branch = "codex/diagnostic-workflow-retirement"
+current_sha = "123834ec81980f0f588660ed45f62ab2126dbef6"
 run_ids = ["32011954899"]
 evidence = [
   "pr:232",
   "run:32011954899",
   "file:docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/",
   "note:47_workflows_20_one_shot_runs_inventory_snapshot_20260830",
   "note:inventory_snapshot_source_cea_base_fast_forward_6b2_no_workflow_changes",
-  "note:no_workflow_retirement_executed_author_review_required",
+  "review:author_approved_four_wave1_retirements_20260831",
+  "note:wave1_moves_definitions_out_of_actions_without_deleting_runs_or_artifacts",
 ]
-updated_at = "2026-08-30"
+updated_at = "2026-08-31"
 
 [[tracks]]
 id = "phase-evidence-retention"
@@ -719,11 +721,11 @@ evidence = [
 id = "retire-stale-one-shot-actions"
 track_id = "diagnostic-workflow-lifecycle"
 classification = "independent"
-status = "review"
+status = "active"
 parent = "track:diagnostic-workflow-lifecycle"
 task_file = "docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md"
 reason = "Issue #130 的版本化一次性诊断 workflow 持续累积；完成后保留的 Actions 定义会增加维护面和误触发风险，但历史 run/artifact 仍需可追溯。"
-next_action = "作者审核 inventory/proposal 中的四个候选及 artifact/provenance 保留位置；批准后才创建独立 retirement PR。"
+next_action = "合并 wave 1 retirement PR：四个 YAML 移出 Actions 目录，定义、run、artifact 和失败 provenance 保持可追溯。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -737,8 +739,31 @@ evidence = [
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/reference_edges.csv",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/retirement_proposal.md",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/claim_ledger.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/README.md",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/manifest.json",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/retired_workflows.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/reference_migrations.csv",
   "note:inventory_snapshot_source_cea_base_fast_forward_6b2_no_workflow_changes",
-  "note:inventory_is_non_destructive_and_solver_free",
+  "review:author_approved_four_wave1_retirements_20260831",
+  "note:wave1_retirement_is_solver_free_and_preserves_historical_definitions",
+]
+
+[[items]]
+id = "consolidate-manual-diagnostic-workflows"
+track_id = "diagnostic-workflow-lifecycle"
+classification = "required_follow_up"
+status = "triaged"
+parent = "track:diagnostic-workflow-lifecycle"
+task_file = ""
+reason = "首轮盘点只覆盖四个高置信退役候选；剩余纯手动入口中仍有已闭环 Issue130 专用定义和三组高结构相似 workflow，需要在不混淆物理合同的前提下继续退役或参数化合并。"
+next_action = "作者审核 manual_dispatch_inventory_v2.csv 与 consolidation_groups.csv；对每组选择直接退役、保留或建立 versioned 参数化 workflow。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/manual_dispatch_inventory_v2.csv",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/consolidation_groups.csv",
+  "note:25_pure_manual_workflows_remain_after_wave1",
+  "note:17_entries_require_wave2_retirement_or_consolidation_review",
 ]
 
 [[items]]

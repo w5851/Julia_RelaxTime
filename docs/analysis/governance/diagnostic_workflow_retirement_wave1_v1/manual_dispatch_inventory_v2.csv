@@ -1,0 +1,26 @@
+workflow_file,family,active_reference_class,recommendation,reason
+pnjl-c2-cep-limited-feasibility.yml,c2_stagec,workflow_specific_tests,wave2_retirement_review,Issue130 diagnostic is closed and overlaps three-midpoint at structural similarity 0.972
+pnjl-c2-cep-three-midpoint.yml,c2_stagec,workflow_specific_tests,wave2_retirement_review,Same jobs and scripts as limited-feasibility with a narrower fixed target list
+pnjl-c2-cep-xi05-high-side-extension.yml,c2_stagec,workflow_specific_tests,wave2_retirement_review,One-off xi=0.5 extension is already represented in accepted CEP evidence
+pnjl-c2-limited-feasibility.yml,c2_stagec,workflow_specific_tests_and_active_phase_doc,wave2_retirement_review,Closed Issue130 umbrella feasibility workflow should not remain a permanent manual entry
+pnjl-c2-targeted-closure-v1.yml,c2_stagec,workflow_specific_tests,wave2_retirement_review,Closed targeted closure workflow is preserved by evidence and tests can migrate to scripts
+pnjl-stagec-density-certificate-feasibility-v2.yml,c2_stagec,workflow_specific_tests,wave2_retirement_review,Completed solver-free v2 replay is historical evidence rather than an ongoing production entry
+pnjl-cep-deep-oracle.yml,cep_oracle,workflow_specific_tests,historical_replay_review,Specialized expensive oracle may be retained only if a future CEP task needs the same contract
+pnjl-cep-narrow-pilot.yml,cep_oracle,workflow_specific_tests,historical_replay_review,Versioned pilot is historical and should not be generalized without a new CEP requirement
+pnjl-cep-hybrid-production-shadow.yml,phase_shadow,workflow_specific_tests,consolidation_or_retirement_review,Same scripts and jobs as two Maxwell shadow workflows
+pnjl-cep-production-shadow.yml,phase_shadow,workflow_specific_tests,consolidation_or_retirement_review,Adjacent cascade implementation with duplicated aggregate and replay orchestration
+pnjl-maxwell-endpoint-local-production-shadow-v4.yml,phase_shadow,workflow_specific_tests,consolidation_or_retirement_review,Structural similarity 0.917 to hybrid shadow and 0.938 to endpoint shadow
+pnjl-maxwell-endpoint-production-shadow.yml,phase_shadow,workflow_specific_tests,consolidation_or_retirement_review,Structural similarity 0.964 to hybrid shadow and uses the same backend scripts
+pnjl-issue130-maxwell-cep-local-expansion.yml,maxwell_local,workflow_specific_tests,consolidation_or_retirement_review,Expansion and pilot use the same numerical and collector scripts
+pnjl-issue130-maxwell-cep-local-pilot.yml,maxwell_local,workflow_specific_tests,consolidation_or_retirement_review,Pilot can be represented by a target-list mode if this family is retained
+pnjl-maxwell-endpoint-refinement.yml,maxwell_local,workflow_specific_tests,consolidation_or_retirement_review,Specialized refinement can become a scope in a future endpoint workflow or be retired
+pnjl-issue130-crossover-mu-endpoint-pilot.yml,issue130_endpoint,task_ledger_and_historical_evidence,wave2_retirement_review,Completed Issue130 pilot no longer needs an active trigger after expansion evidence was accepted
+pnjl-phase-diagram.yml,legacy_phase,legacy_audit_script,wave2_retirement_review,January legacy phase workflow is superseded by accepted reference and dense reference workflows
+pnjl-dense-reference.yml,dense_reference,production_docs_and_tests,retain_composed_production,Primary parameterized numerical production workflow
+pnjl-dense-reference-replay.yml,dense_reference,production_sop_and_tests,retain_composed_production,Solver-free replay has a distinct recovery contract
+pnjl-dense-reference-resume.yml,dense_reference,production_sop_and_tests,retain_composed_production,Source-resume avoids recomputing completed shards
+pnjl-raw-curve-archive-zenodo-draft.yml,raw_archive,external_archive_contract,retain_archive_recovery,Zenodo draft upload is a distinct credentialed external operation
+pnjl-raw-curve-archive-zenodo-restore.yml,raw_archive,restore_tests,retain_archive_recovery,Restore verification is intentionally separate from upload
+relaxtime-manual-scans.yml,relaxtime_production,manual_entry,retain_distinct_production,Generic manual scan surface is not equivalent to meson or phase-guided production
+relaxtime-meson-density-production.yml,relaxtime_production,formal_docs_and_manifests,retain_distinct_production,Meson density has an independent schema and production artifact contract
+relaxtime-phase-guided-transport-production.yml,relaxtime_production,active_results_scripts_and_tests,retain_distinct_production,Phase-guided transport is the current production consumer workflow

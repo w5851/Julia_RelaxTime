@@ -1,0 +1,50 @@
+{
+  "schema_version": "diagnostic_workflow_retirement_wave1_v1",
+  "execution_date": "2026-08-31",
+  "repository": "w5851/Julia_RelaxTime",
+  "source_commit": "123834ec81980f0f588660ed45f62ab2126dbef6",
+  "source_pr": 295,
+  "author_decision": "approve_four_wave1_retirements",
+  "execution_semantics": "move_out_of_actions_preserve_versioned_definition",
+  "solver_called": false,
+  "github_runs_deleted": false,
+  "github_artifacts_deleted": false,
+  "numerical_results_changed": false,
+  "counts": {
+    "active_workflows_before": 47,
+    "active_workflows_after": 43,
+    "workflow_dispatch_before": 43,
+    "workflow_dispatch_after": 39,
+    "pure_manual_before": 29,
+    "pure_manual_after": 25,
+    "wave1_retired": 4,
+    "durable_manual_retain": 8,
+    "wave2_direct_retirement_review": 8,
+    "consolidation_or_retirement_review": 7,
+    "historical_replay_review": 2
+  },
+  "files": [
+    {"path": "README.md", "role": "scope_and_semantics"},
+    {"path": "retired_workflows.csv", "role": "exact_wave1_allowlist"},
+    {"path": "reference_migrations.csv", "role": "active_reference_migrations"},
+    {"path": "manual_dispatch_inventory_v2.csv", "role": "remaining_manual_workflow_classification"},
+    {"path": "consolidation_groups.csv", "role": "structural_duplication_groups"},
+    {"path": "claim_ledger.csv", "role": "claim_evidence_ledger"},
+    {"path": "definitions/", "role": "byte_preserved_retired_workflow_definitions"},
+    {"path": "manifest.json", "role": "this_manifest"}
+  ],
+  "file_hashes": {
+    "README.md": "c57a042c7dfb277ceaa5588124e2ba9134a8461a4437d8e25b2cb41c142f22a2",
+    "retired_workflows.csv": "b28bd181f49714a216e0e218511cc07bb67c3da191e578a4d38300c989ec80bb",
+    "reference_migrations.csv": "9345ff31d00f401f1bdf566f65f2c318132e60277dd3b90eb38ee26ede8a03c8",
+    "manual_dispatch_inventory_v2.csv": "bdcaa9fe383a569ee0ab9e07787ca4039fd0b84b700574702ce3d3ad788e0c3f",
+    "consolidation_groups.csv": "6ed9e39f4ba4b4522336a18c65767e6029a965cee5df5459cd7f5a1d3af57b75",
+    "claim_ledger.csv": "137065f7015b73e83799894655de421b485e7614b5f78ab228aa2877786e8a23",
+    "definitions/pnjl-c2-cep-manual-bisection.yml": "f5ead68afe4d92acaf062c2551d61f1cd396114ebbc428ab58ed0675e250b3c8",
+    "definitions/pnjl-issue130-crossover-mu-endpoint-expansion.yml": "88bd03d69ac4aa983dfe573567a9c02348df1277082f5a03ae7f68d4eabfed8b",
+    "definitions/pnjl-stagec-density-certificate-feasibility.yml": "5e165340609c118ee595f46bf1480e2d358653b470c3b49ca6f0e726f5e8cf4d",
+    "definitions/relaxtime-issue130-rs-numerical-pilot-v1.yml": "6cdb541b6787ce60bece6c80495a42f095c7c8effe3c1c681b929aa1294f7876"
+  },
+  "next_gate": "author_review_manual_dispatch_inventory_v2_and_consolidation_groups",
+  "wave2_changes_executed": false
+}

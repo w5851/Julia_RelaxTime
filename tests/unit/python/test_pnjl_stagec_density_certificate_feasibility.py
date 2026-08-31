@@ -9,7 +9,16 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_stagec_density_certificate_feasibility.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-stagec-density-certificate-feasibility.yml"
+ACTIVE_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-stagec-density-certificate-feasibility.yml"
+RETIRED_WORKFLOW = (
+    ROOT
+    / "docs"
+    / "analysis"
+    / "governance"
+    / "diagnostic_workflow_retirement_wave1_v1"
+    / "definitions"
+    / "pnjl-stagec-density-certificate-feasibility.yml"
+)
 
 
 def load_module():
@@ -173,9 +182,10 @@ def test_plotter_emits_mathtext_labels_without_parse_errors(tmp_path):
     assert all((tmp_path / entry["path"]).is_file() for entry in entries)
 
 
-def test_workflow_has_dual_sha_matrix_and_replay_contract():
+def test_retired_workflow_preserves_dual_sha_matrix_and_replay_contract():
     module = load_module()
-    text = WORKFLOW.read_text(encoding="utf-8")
+    assert not ACTIVE_WORKFLOW.exists()
+    text = RETIRED_WORKFLOW.read_text(encoding="utf-8")
     assert "calculation_ref" in text
     assert "source_run_id" in text and "source_calculation_sha" in text
     assert "rerun_failed_only" in text and "failed_job_keys" in text

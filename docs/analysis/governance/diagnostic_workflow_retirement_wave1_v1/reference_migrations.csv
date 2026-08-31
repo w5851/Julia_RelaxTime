@@ -1,0 +1,6 @@
+source,old_contract,new_contract,migration_status,reason
+tests/unit/python/test_issue130_rs_numerical_pilot.py,.github/workflows/relaxtime-issue130-rs-numerical-pilot-v1.yml,definitions/relaxtime-issue130-rs-numerical-pilot-v1.yml,migrated,collector tests remain active while historical workflow contract is read from the retired definition
+tests/unit/python/test_pnjl_stagec_density_certificate_feasibility.py,.github/workflows/pnjl-stagec-density-certificate-feasibility.yml,definitions/pnjl-stagec-density-certificate-feasibility.yml,migrated,evaluator tests remain active while historical workflow contract is read from the retired definition
+scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement.py,.github/workflows/relaxtime-issue130-rs-numerical-pilot-v1.yml,no_active_consumer_entry,migrated,retired workflow is historical evidence rather than a current repository consumer
+scripts/analysis/pnjl/audit_issue130_phase_reference_legacy_retirement.py,scripts/analysis/pnjl/audit_issue130_phase_reference_physical_deletion.py,known_nonblocking_migration_tool,migrated,physical-deletion audit is active tooling but not a runtime legacy consumer
+docs/analysis/governance/diagnostic_workflow_inventory_v1/,four active workflow paths,historical inventory rows unchanged,preserved,the source inventory remains an immutable snapshot of the pre-retirement tree

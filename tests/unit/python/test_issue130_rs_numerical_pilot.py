@@ -11,7 +11,16 @@ import yaml
 
 ROOT = Path(__file__).parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "relaxtime" / "collect_issue130_rs_numerical_pilot.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "relaxtime-issue130-rs-numerical-pilot-v1.yml"
+ACTIVE_WORKFLOW = ROOT / ".github" / "workflows" / "relaxtime-issue130-rs-numerical-pilot-v1.yml"
+RETIRED_WORKFLOW = (
+    ROOT
+    / "docs"
+    / "analysis"
+    / "governance"
+    / "diagnostic_workflow_retirement_wave1_v1"
+    / "definitions"
+    / "relaxtime-issue130-rs-numerical-pilot-v1.yml"
+)
 CALCULATION_SHA = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 MODE = "mode_a_fixed_muB_phase_scaled"
 FIELDS = [
@@ -206,8 +215,9 @@ def test_no_common_request_keys_is_hard_failure(tmp_path: Path) -> None:
     assert "no_common_transport_rows" in verdict["hard_failures"]
 
 
-def test_workflow_freezes_paired_scope_and_solver_provenance() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+def test_retired_workflow_preserves_paired_scope_and_solver_provenance() -> None:
+    assert not ACTIVE_WORKFLOW.exists()
+    text = RETIRED_WORKFLOW.read_text(encoding="utf-8")
     payload = yaml.load(text, Loader=yaml.BaseLoader)
     assert payload["jobs"]["numerical_pilot"]["timeout-minutes"] == "720"
     assert payload["env"]["CALCULATION_SHA"] == CALCULATION_SHA
