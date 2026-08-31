@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_production_shadow.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-production-shadow.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-production-shadow.yml"
 
 
 def load_module(path: Path, name: str):

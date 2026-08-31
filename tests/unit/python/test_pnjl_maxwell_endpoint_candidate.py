@@ -7,8 +7,8 @@ ROOT = Path(__file__).resolve().parents[3]
 REPLAY = ROOT / "scripts" / "analysis" / "pnjl_maxwell_endpoint_candidate_feasibility.jl"
 ENDPOINT = ROOT / "scripts" / "analysis" / "pnjl_maxwell_endpoint_refinement.jl"
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_maxwell_endpoint_refinement.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-maxwell-endpoint-refinement.yml"
-EVIDENCE = ROOT / "docs" / "analysis" / "pnjl_maxwell_endpoint_candidate_feasibility_v1"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-maxwell-endpoint-refinement.yml"
+EVIDENCE = ROOT / "docs" / "analysis" / "pnjl" / "cep_maxwell" / "maxwell_contracts" / "pnjl_maxwell_endpoint_candidate_feasibility_v1"
 
 
 def test_solver_free_replay_contract_isolated_from_equilibrium_solver():

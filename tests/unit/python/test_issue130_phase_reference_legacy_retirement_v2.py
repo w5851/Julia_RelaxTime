@@ -50,10 +50,10 @@ def test_post_acceptance_audit_keeps_runtime_and_downstream_boundaries(tmp_path:
     assert decision["schema_version"] == "pnjl_issue130_phase_reference_legacy_retirement_decision_v2"
     assert decision["accepted_downstream_default"] is True
     assert decision["legacy_fallback_key_count"] > 0
-    # The retired RS pilot definition used to contribute one active blocker.
-    # Other historical legacy locators may still grow, so only the semantic
-    # lower bound changes from 25 to 24.
-    assert decision["active_consumer_blocker_count"] >= 24
+    # Wave 1 retired the RS pilot and wave 2 reclassified the phase-diagram
+    # workflow as a historical definition, so the current semantic lower bound
+    # is 23. Other historical legacy locators may still grow.
+    assert decision["active_consumer_blocker_count"] >= 23
     assert decision["unknown_active_reference_count"] == 0
     assert decision["physical_deletion_eligible"] is False
 

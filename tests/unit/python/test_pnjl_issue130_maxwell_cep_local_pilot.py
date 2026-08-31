@@ -10,7 +10,7 @@ from scripts.analysis.collect_pnjl_issue130_maxwell_cep_local_pilot import (
 
 ROOT = Path(__file__).resolve().parents[3]
 TARGET_LIST = ROOT / "docs" / "analysis" / "pnjl" / "issue130_endpoint_refinement_preflight_v1" / "maxwell_local" / "tables" / "target_list.csv"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-issue130-maxwell-cep-local-pilot.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-issue130-maxwell-cep-local-pilot.yml"
 EXPANSION_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-issue130-maxwell-cep-local-expansion.yml"
 RUNNER = ROOT / "scripts" / "analysis" / "pnjl_issue130_maxwell_cep_local_pilot.jl"
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_issue130_maxwell_cep_local_pilot.py"

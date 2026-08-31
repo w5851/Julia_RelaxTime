@@ -2,7 +2,7 @@ using Test
 
 const ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const JOB = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_targeted_closure_job.jl")
-const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-targeted-closure-v1.yml")
+const WORKFLOW = joinpath(ROOT, "docs", "analysis", "governance", "diagnostic_workflow_retirement_wave2_v1", "definitions", "pnjl-c2-targeted-closure-v1.yml")
 
 @testset "C2 targeted closure workflow contract" begin
     job = read(JOB, String)

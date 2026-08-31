@@ -9,7 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_xi05_high_side_extension.py"
 JOB = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_xi05_high_side_extension_job.jl"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-c2-cep-xi05-high-side-extension.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-c2-cep-xi05-high-side-extension.yml"
 PLAN = ROOT / "docs" / "analysis" / "pnjl" / "c2_followups" / "c2_cep_xi05_high_side_extension_v1" / "temperature_plan.csv"
 
 

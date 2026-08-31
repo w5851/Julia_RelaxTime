@@ -8,7 +8,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_narrow_pilot.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-narrow-pilot.yml"
+WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-narrow-pilot.yml"
 
 
 def load_collector():

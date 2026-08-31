@@ -181,12 +181,12 @@ status = "active"
 current_task = "consolidate-manual-diagnostic-workflows"
 blocked_by = []
 unlocks = []
-next_action = "作者审核 wave2 review package 中 17 个候选及三组 consolidation boundary；批准后再创建第二波精确 allowlist PR。"
+next_action = "wave2 精确 allowlist 已按作者决定实施；等待 focused CI、PR 审核和合并后同步主分支状态。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/diagnostic-workflow-retirement-wave2"
-current_sha = "15e02b8e8f9b23629908b6ee164d1e858f7ac463"
+current_branch = "codex/diagnostic-workflow-retirement-wave2-execute"
+current_sha = "f0851cd8ec364c6517fa9ff1c91da6c14ad7071f"
 run_ids = ["32011954899"]
 evidence = [
   "pr:232",
@@ -362,7 +362,7 @@ reason = "Crossover μ endpoint expansion/replay、v7 派生包、统一 ξ 数�
 next_action = ""
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/archived/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19", "file:docs/analysis/governance/issue130_task_document_archive_v1/"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/archived/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/definitions/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19", "note:workflow_retired_definition_preserves_historical_provenance", "file:docs/analysis/governance/issue130_task_document_archive_v1/"]
 
 [[items]]
 id = "issue130-maxwell-cep-local-refinement"
@@ -762,7 +762,7 @@ status = "active"
 parent = "track:diagnostic-workflow-lifecycle"
 task_file = "docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md"
 reason = "首轮盘点只覆盖四个高置信退役候选；剩余纯手动入口中仍有已闭环 Issue130 专用定义和三组高结构相似 workflow，需要在不混淆物理合同的前提下继续退役或参数化合并。"
-next_action = "作者审核 wave2_review_v1 的功能/证据/边界矩阵；对每组选择直接退役、保留或建立 versioned 参数化 workflow。"
+next_action = "focused CI 通过后合并 wave2 retirement PR；保留 versioned definitions 和 Maxwell-local expansion 入口。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -775,6 +775,8 @@ evidence = [
   "file:docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
   "note:25_pure_manual_workflows_remain_after_wave1",
   "note:17_entries_require_wave2_retirement_or_consolidation_review",
+  "review:author_approved_wave2_direct_retirement_phase_shadow_oracle_and_maxwell_local_scope_20260831",
+  "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/",
 ]
 
 [[items]]
