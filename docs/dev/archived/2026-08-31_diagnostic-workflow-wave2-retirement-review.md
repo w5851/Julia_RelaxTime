@@ -1,3 +1,15 @@
+---
+title: Diagnostic workflow wave 2 retirement review
+archived: true
+original: docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md
+archived_date: 2026-08-31
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Diagnostic workflow wave 2 retirement review
 
 创建日期：2026-08-31
@@ -52,3 +64,13 @@
 - [x] 作者按组决定 wave 2 的退役、参数化合并或保留；
 - [x] 已按决定执行精确 allowlist，并生成 versioned evidence package；
 - [ ] CI 通过、PR 合并并同步主分支台账。
+
+## 归档时点收口附录（2026-08-31）
+
+以上正文保留 wave2 审阅时点的原始状态。随后作者批准的精确 allowlist 已由 PR #298
+合并到 `main@c9c76b12ba5a3199831246665721b54237068b34`：16 个 YAML 已移入
+`docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/definitions/`，
+保留一个 Maxwell-local target-list 入口；当前 workflow 计数为 active 27、
+`workflow_dispatch` 23、纯手动 9。历史 run/artifact、原始 YAML 字节和 solver-free
+provenance 均保留。台账现将本任务标为 `archived`；未来波次必须新建 active task，
+不能把本归档任务重新作为执行入口。

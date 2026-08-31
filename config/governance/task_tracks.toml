@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-30"
+updated_at = "2026-08-31"
 
 [[tracks]]
 id = "issue130-phase"
@@ -183,21 +183,21 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "diagnostic-workflow-lifecycle"
 title = "Diagnostic workflow lifecycle maintenance"
-status = "active"
+status = "archived"
 current_task = "consolidate-manual-diagnostic-workflows"
 blocked_by = []
 unlocks = []
-next_action = "wave2 精确 allowlist 已按作者决定实施；等待 focused CI、PR 审核和合并后同步主分支状态。"
+next_action = ""
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/diagnostic-workflow-retirement-wave2-execute"
-current_sha = "f0851cd8ec364c6517fa9ff1c91da6c14ad7071f"
+current_branch = "main"
+current_sha = "c9c76b12ba5a3199831246665721b54237068b34"
 run_ids = ["32011954899"]
 evidence = [
   "pr:232",
   "run:32011954899",
-  "file:docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
+  "file:docs/dev/archived/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/",
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave1_v1/",
   "note:47_workflows_20_one_shot_runs_inventory_snapshot_20260830",
@@ -207,7 +207,10 @@ evidence = [
   "pr:296",
   "sha:15e02b8e8f9b23629908b6ee164d1e858f7ac463",
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_review_v1/",
-  "file:docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
+  "file:docs/dev/archived/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
+  "pr:298",
+  "sha:c9c76b12ba5a3199831246665721b54237068b34",
+  "note:wave2_closeout_27_active_23_dispatch_9_pure_manual",
 ]
 updated_at = "2026-08-31"
 
@@ -736,17 +739,17 @@ evidence = [
 id = "retire-stale-one-shot-actions"
 track_id = "diagnostic-workflow-lifecycle"
 classification = "independent"
-status = "accepted"
+status = "archived"
 parent = "track:diagnostic-workflow-lifecycle"
-task_file = "docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md"
+task_file = "docs/dev/archived/2026-08-30_diagnostic-workflow-lifecycle-inventory.md"
 reason = "Issue #130 的版本化一次性诊断 workflow 持续累积；完成后保留的 Actions 定义会增加维护面和误触发风险，但历史 run/artifact 仍需可追溯。"
-next_action = "wave 1 retirement 已在 PR #296 合并；保留 versioned definitions 和历史 provenance，后续由 wave2 follow-up 继续审阅。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
   "pr:232",
   "run:32011954899",
-  "file:docs/dev/active/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
+  "file:docs/dev/archived/2026-08-30_diagnostic-workflow-lifecycle-inventory.md",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/README.md",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/manifest.json",
   "file:docs/analysis/governance/diagnostic_workflow_inventory_v1/workflow_inventory.csv",
@@ -763,17 +766,19 @@ evidence = [
   "note:wave1_retirement_is_solver_free_and_preserves_historical_definitions",
   "pr:296",
   "sha:15e02b8e8f9b23629908b6ee164d1e858f7ac463",
+  "pr:298",
+  "sha:c9c76b12ba5a3199831246665721b54237068b34",
 ]
 
 [[items]]
 id = "consolidate-manual-diagnostic-workflows"
 track_id = "diagnostic-workflow-lifecycle"
 classification = "required_follow_up"
-status = "active"
+status = "archived"
 parent = "track:diagnostic-workflow-lifecycle"
-task_file = "docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md"
+task_file = "docs/dev/archived/2026-08-31_diagnostic-workflow-wave2-retirement-review.md"
 reason = "首轮盘点只覆盖四个高置信退役候选；剩余纯手动入口中仍有已闭环 Issue130 专用定义和三组高结构相似 workflow，需要在不混淆物理合同的前提下继续退役或参数化合并。"
-next_action = "focused CI 通过后合并 wave2 retirement PR；保留 versioned definitions 和 Maxwell-local expansion 入口。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -783,11 +788,13 @@ evidence = [
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_review_v1/manual_workflow_function_review.csv",
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_review_v1/claim_ledger.csv",
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_review_v1/manifest.json",
-  "file:docs/dev/active/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
+  "file:docs/dev/archived/2026-08-31_diagnostic-workflow-wave2-retirement-review.md",
   "note:25_pure_manual_workflows_remain_after_wave1",
   "note:17_entries_require_wave2_retirement_or_consolidation_review",
   "review:author_approved_wave2_direct_retirement_phase_shadow_oracle_and_maxwell_local_scope_20260831",
   "file:docs/analysis/governance/diagnostic_workflow_retirement_wave2_v1/",
+  "pr:298",
+  "sha:c9c76b12ba5a3199831246665721b54237068b34",
 ]
 
 [[items]]
