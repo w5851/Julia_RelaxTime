@@ -18,7 +18,8 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
     masses = (u=1.50, d=1.55, s=2.50)
     chemical_potentials = (u=0.20, d=-0.10, s=0.05)
     A_values = (u=-3.0, d=-3.1, s=-4.5)
-    thermo = (T=0.75, Φ=0.4, Φbar=0.45, ξ=0.1)
+    thermo = (T=0.75, Φ=0.4, Φbar=0.45, ξ=0.0)
+    thermo_aniso = merge(thermo, (ξ=0.1,))
     k0, q = 0.80, 0.35
 
     @testset "ordered K-plus/K-minus inputs" begin
@@ -58,18 +59,48 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test minus.A2_inv_fm2 == A_values.u
         @test plus.num_s_quark == 0
         @test minus.num_s_quark == 0
-        @test plus.provider == :PolarizationAniso
+        @test plus.provider == :OneLoopIntegralsRetarded
         @test plus.prescription == :ordered_retarded
-        @test plus.analytic_scope == :real_axis
+        @test plus.analytic_scope == :upper_half_plane_probe
         @test plus.retarded_convention == :retarded_e_minus_iwt
+        @test plus.eta_inv_fm == 1.0e-3
+        @test plus.energy_nodes == 128
         @test isfinite(real(plus.value)) && isfinite(imag(plus.value))
         @test isfinite(real(minus.value)) && isfinite(imag(minus.value))
         @test plus.value != minus.value
     end
 
-    @testset "provider reuses current A/B0 algebra" begin
+    @testset "strict ordered relation and legacy oracles" begin
         spec = charged_rpa_spec(:K_plus; channel=:P)
-        sample = charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values)
+        sample = charged_polarization(
+            spec, k0, q, masses, chemical_potentials, thermo, A_values;
+            eta_inv_fm=0.003,
+            energy_nodes=128,
+        )
+        conjugate_reverse = charged_polarization(
+            charged_rpa_spec(:K_minus; channel=:P),
+            -k0,
+            q,
+            masses,
+            chemical_potentials,
+            thermo,
+            A_values;
+            eta_inv_fm=0.003,
+            energy_nodes=128,
+        )
+        @test sample.value ≈ conj(conjugate_reverse.value) rtol=1e-12 atol=1e-12
+        @test sample.polarization_units == :fm_minus2
+
+        ordered_legacy = charged_polarization(
+            spec,
+            k0,
+            q,
+            masses,
+            chemical_potentials,
+            thermo_aniso,
+            A_values;
+            prescription=:ordered_legacy_B0,
+        )
         expected_re, expected_im = polarization_aniso(
             :P,
             k0,
@@ -81,13 +112,17 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
             thermo.T,
             thermo.Φ,
             thermo.Φbar,
-            thermo.ξ,
+            thermo_aniso.ξ,
             A_values.u,
             A_values.s,
             0,
         )
-        @test sample.value ≈ ComplexF64(expected_re, expected_im)
-        @test sample.polarization_units == :fm_minus2
+        @test ordered_legacy.value ≈ ComplexF64(expected_re, expected_im)
+        @test ordered_legacy.provider == :PolarizationAniso
+        @test ordered_legacy.prescription == :ordered_legacy_B0
+        @test ordered_legacy.analytic_scope == :real_axis_legacy
+        @test ordered_legacy.eta_inv_fm == 0.0
+        @test ordered_legacy.energy_nodes == 0
 
         legacy = charged_polarization(
             spec,
@@ -95,7 +130,7 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
             q,
             masses,
             chemical_potentials,
-            thermo,
+            thermo_aniso,
             A_values;
             prescription=:legacy_symmetrized_B0,
         )
@@ -110,7 +145,7 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
             thermo.T,
             thermo.Φ,
             thermo.Φbar,
-            thermo.ξ,
+            thermo_aniso.ξ,
             A_values.u,
             A_values.s,
             1,
@@ -118,7 +153,7 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test legacy.prescription == :legacy_symmetrized_B0
         @test legacy.num_s_quark == 1
         @test legacy.value ≈ ComplexF64(expected_legacy_re, expected_legacy_im)
-        @test legacy.value != sample.value
+        @test legacy.value != ordered_legacy.value
 
         pion_legacy = charged_polarization(
             charged_rpa_spec(:pi_plus),
@@ -126,7 +161,7 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
             q,
             masses,
             chemical_potentials,
-            thermo,
+            thermo_aniso,
             A_values;
             prescription=:legacy_symmetrized_B0,
         )
@@ -139,5 +174,8 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; prescription=:unknown)
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, (T=0.0, Φ=0.4, Φbar=0.4), A_values)
         @test_throws ArgumentError charged_polarization(spec, k0, q, (u=1.5, d=1.5), chemical_potentials, thermo, A_values)
+        @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo_aniso, A_values)
+        @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; eta_inv_fm=0.0)
+        @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; energy_nodes=3)
     end
 end

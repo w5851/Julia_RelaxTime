@@ -32,7 +32,7 @@ const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
 end
-using Main.OneLoopIntegrals: B0, A
+using Main.OneLoopIntegrals: B0, B0_retarded, A
 
 const Λ_INV_FM = Main.OneLoopIntegrals.Λ_inv_fm
 
@@ -150,6 +150,56 @@ end
     end
 end
 
+@testset "OneLoopIntegrals.B0_retarded" begin
+    params = TEST_PARAMS
+
+    @testset "upper-half-plane ordered continuation" begin
+        for q in (0.0, 0.27)
+            forward = B0_retarded(
+                params.λ, q, params.m1, params.μ1, params.m2, params.μ2, params.T;
+                Φ=params.Φ,
+                Φbar=params.Φbar,
+                eta_inv_fm=0.01,
+                energy_nodes=128,
+            )
+            reverse = B0_retarded(
+                -params.λ, q, params.m2, params.μ2, params.m1, params.μ1, params.T;
+                Φ=params.Φ,
+                Φbar=params.Φbar,
+                eta_inv_fm=0.01,
+                energy_nodes=128,
+            )
+
+            @test forward isa ComplexF64
+            @test isfinite(real(forward)) && isfinite(imag(forward))
+            @test forward ≈ conj(reverse) rtol=1e-12 atol=1e-12
+        end
+    end
+
+    @testset "energy-node convergence away from a sharp cut" begin
+        coarse = B0_retarded(
+            params.λ, 0.27, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ,
+            Φbar=params.Φbar,
+            eta_inv_fm=0.01,
+            energy_nodes=64,
+        )
+        fine = B0_retarded(
+            params.λ, 0.27, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ,
+            Φbar=params.Φbar,
+            eta_inv_fm=0.01,
+            energy_nodes=128,
+        )
+        @test coarse ≈ fine rtol=1e-5 atol=3e-6
+    end
+
+    @test_throws ArgumentError B0_retarded(params.λ, -0.1, params.m1, params.μ1, params.m2, params.μ2, params.T)
+    @test_throws ArgumentError B0_retarded(params.λ, 0.1, -params.m1, params.μ1, params.m2, params.μ2, params.T)
+    @test_throws ArgumentError B0_retarded(params.λ, 0.1, params.m1, params.μ1, params.m2, params.μ2, params.T; eta_inv_fm=0.0)
+    @test_throws ArgumentError B0_retarded(params.λ, 0.1, params.m1, params.μ1, params.m2, params.μ2, params.T; energy_nodes=3)
+end
+
 @testset "OneLoopIntegrals.const_integral_term_A" begin
     m = TEST_PARAMS.m1
     integrand(p) = p^2 / sqrt(p^2 + m^2)
@@ -189,6 +239,5 @@ end
 println("\n" * "="^70)
 println("OneLoopIntegrals 模块测试完成！")
 println("="^70)
-
 
 

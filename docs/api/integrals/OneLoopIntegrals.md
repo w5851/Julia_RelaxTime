@@ -2,7 +2,7 @@
 
 ## 模块概述
 
-`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含双传播子积分 `B0` 与单传播子积分 `A` 的数值计算。实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0.md` 与 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A.md` 中的推导，支持 PNJL 模型中的有效分布函数，并自动处理三动量为零和非零的两种积分形态。
+`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含历史实轴积分 `B0`、显式有限 `eta` 的 ordered retarded 积分 `B0_retarded` 与单传播子积分 `A`。实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0.md`、`docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md` 与 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A.md` 中的推导。
 
 ## 依赖
 
@@ -16,11 +16,39 @@
 
 - 外部参数 `λ`, `k`, `m1`, `m2`, `μ1`, `μ2`, `T` 均以 fm⁻¹ 表示
 - 分布函数为无量纲
-- 返回值 `(Re, Im)` 分别对应 B₀ 的实部和虚部，以 fm 为单位
+- `B0` 与 `B0_retarded` 均为无量纲；`A` 为 fm⁻²
 
 ---
 
 ## API 参考
+
+### `B0_retarded(λ, q, m1, μ1, m2, μ2, T; ...)`
+
+在 `z=λ+i*eta_inv_fm` 上直接进行复数 Gauss--Legendre 求积。这里 `λ` 已包含
+`k0+μ1-μ2`，返回值为无量纲 `ComplexF64`。该入口保持 ordered flavor pair，
+用于 strict charged-RPA 实轴上半平面探针；它不替换历史 `B0` oracle。
+
+```julia
+value = B0_retarded(
+    k0 + mu1 - mu2,
+    q,
+    m1,
+    mu1,
+    m2,
+    mu2,
+    T;
+    Φ=Phi,
+    Φbar=PhiBar,
+    eta_inv_fm=1e-3,
+    energy_nodes=128,
+)
+```
+
+`eta_inv_fm` 必须为正，`energy_nodes>=4`。有限 `eta` 是数值探针，不是介子物理
+宽度；调用方必须分别验证 `eta` 与能量节点收敛。该函数使用上半平面复对数，
+不会复用历史 `B0` 的主值/解析切口虚部符号。
+
+---
 
 ### `A(m, μ, T, Φ, Φbar, nodes_p, weights_p)`
 
@@ -126,15 +154,6 @@ T = 0.18
 
 real_part, imag_part = B0(λ, k, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
 println("Re(B0) = $real_part, Im(B0) = $imag_part")
-```
-
-**高精度计算示例**
-
-```julia
-baseline = B0(λ, k, m1, μ1, m2, μ2, T)
-high_accuracy = B0(λ, k, m1, μ1, m2, μ2, T; rtol=1e-6)
-δRe = abs(baseline[1] - high_accuracy[1])
-δIm = abs(baseline[2] - high_accuracy[2])
 ```
 
 **k → 0 极限验证**

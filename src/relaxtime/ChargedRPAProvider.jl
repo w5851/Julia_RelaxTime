@@ -3,23 +3,24 @@
 
 Adapter contract for ordered charged quark-antiquark polarization bubbles.
 
-The provider keeps the ordered flavor pair from `ChargedRPAKernelSpec` and
-calls the existing `PolarizationAniso` implementation with the same `A`/`B0`
-regularization.  The default `:ordered_retarded` prescription keeps
-`Pi_us`/`Pi_su` distinct with `num_s_quark=0`; the source-backed
-`num_s_quark=1` average is available only as the explicit
-`:legacy_symmetrized_B0` oracle.  The adapter does not locate poles, construct
+The default `:ordered_retarded` prescription evaluates the ordered bubble at
+`z=omega+i*eta` using the explicit complex `B0_retarded` backend. Historical
+real-axis `B0` behavior remains available through `:ordered_legacy_B0`, while
+the source-backed `num_s_quark=1` average remains the explicit
+`:legacy_symmetrized_B0` oracle. The adapter does not locate poles, construct
 phase shifts, or perform Beth-Uhlenbeck integration.
 """
 module ChargedRPAProvider
 
 using ..ChargedRPAKernel: ChargedRPAKernelSpec
+using ..OneLoopIntegrals: B0_retarded, EPS_SEGMENT
 using ..PolarizationAniso: polarization_aniso
+using Main.Constants_PNJL: N_color
 
 export charged_polarization
 
 const _FLAVORS = (:u, :d, :s)
-const _PRESCRIPTIONS = (:ordered_retarded, :legacy_symmetrized_B0)
+const _PRESCRIPTIONS = (:ordered_retarded, :ordered_legacy_B0, :legacy_symmetrized_B0)
 
 @inline function _finite_real(value, label::AbstractString)::Float64
     value isa Real || throw(ArgumentError("$(label) must be real"))
@@ -56,7 +57,7 @@ end
 
 @inline function _num_s_quark(spec::ChargedRPAKernelSpec, prescription::Symbol)
     prescription in _PRESCRIPTIONS || throw(ArgumentError(
-        "unknown prescription $(prescription); use :ordered_retarded or :legacy_symmetrized_B0",
+        "unknown prescription $(prescription); use :ordered_retarded, :ordered_legacy_B0, or :legacy_symmetrized_B0",
     ))
     if prescription === :legacy_symmetrized_B0 &&
        (spec.pair[1] === :s || spec.pair[2] === :s)
@@ -75,11 +76,12 @@ provide `u`, `d`, and `s` fields in `fm^-1`, `fm^-1`, and `fm^-2`, respectively.
 `thermo.T` is in `fm^-1`; `thermo.Φ`, `thermo.Φbar`, and optional `thermo.ξ`
 are dimensionless.  The returned `value` is `Pi_a` in `fm^-2`.
 
-`prescription=:ordered_retarded` is the strict-route real-axis candidate and
-uses `num_s_quark=0`.  `:legacy_symmetrized_B0` reproduces the existing
-Rehberg/Fortran/Cpp oracle for strange channels with `num_s_quark=1`.  Both are
-real-axis adapters; finite-width and second-sheet pole semantics remain out of
-scope.
+`prescription=:ordered_retarded` is the strict upper-half-plane probe and uses
+the explicit `eta_inv_fm` and `energy_nodes` controls. It currently supports
+only `xi=0`. `:ordered_legacy_B0` preserves the earlier ordered adapter with
+`num_s_quark=0`, while `:legacy_symmetrized_B0` reproduces the existing
+Rehberg/Fortran/Cpp strange-channel oracle with `num_s_quark=1`. Finite-width
+and second-sheet pole semantics remain out of scope.
 """
 function charged_polarization(
     spec::ChargedRPAKernelSpec,
@@ -90,6 +92,8 @@ function charged_polarization(
     thermo,
     A_values;
     prescription::Symbol=:ordered_retarded,
+    eta_inv_fm::Real=1.0e-3,
+    energy_nodes::Integer=128,
 )
     k0 = _finite_real(k0_inv_fm, "k0_inv_fm")
     q = _finite_real(q_inv_fm, "q_inv_fm")
@@ -107,36 +111,63 @@ function charged_polarization(
     μ1, μ2 = mu_values[flavor1], mu_values[flavor2]
     A1, A2 = A_triplet[flavor1], A_triplet[flavor2]
 
-    Π_re, Π_im = polarization_aniso(
-        spec.channel,
-        k0,
-        q,
-        m1,
-        m2,
-        μ1,
-        μ2,
-        thermo_values.T,
-        thermo_values.Φ,
-        thermo_values.Φbar,
-        thermo_values.ξ,
-        A1,
-        A2,
-        num_s,
-    )
+    eta = _finite_real(eta_inv_fm, "eta_inv_fm")
 
-    re = _finite_real(Π_re, "polarization real part")
-    im = _finite_real(Π_im, "polarization imaginary part")
+    value, provider, analytic_scope, effective_eta, effective_nodes = if prescription === :ordered_retarded
+        abs(thermo_values.ξ) <= EPS_SEGMENT || throw(ArgumentError(
+            ":ordered_retarded currently supports only thermo.ξ=0; use a legacy prescription for diagnostic anisotropic evaluation",
+        ))
+        eta > 0.0 || throw(ArgumentError("eta_inv_fm must be positive for :ordered_retarded"))
+        energy_nodes >= 4 || throw(ArgumentError("energy_nodes must be at least 4 for :ordered_retarded"))
+        λ = ComplexF64(k0 + μ1 - μ2, eta)
+        B0_value = B0_retarded(
+            real(λ), q, m1, μ1, m2, μ2, thermo_values.T;
+            Φ=thermo_values.Φ,
+            Φbar=thermo_values.Φbar,
+            eta_inv_fm=eta,
+            energy_nodes=energy_nodes,
+        )
+        mass_term = spec.channel === :P ? (m1 - m2)^2 : (m1 + m2)^2
+        prefactor = q^2 - λ^2 + mass_term
+        Π = (-N_color / (8π^2)) * (A1 + A2 + prefactor * B0_value)
+        (ComplexF64(Π), :OneLoopIntegralsRetarded, :upper_half_plane_probe, eta, Int(energy_nodes))
+    else
+        Π_re, Π_im = polarization_aniso(
+            spec.channel,
+            k0,
+            q,
+            m1,
+            m2,
+            μ1,
+            μ2,
+            thermo_values.T,
+            thermo_values.Φ,
+            thermo_values.Φbar,
+            thermo_values.ξ,
+            A1,
+            A2,
+            num_s,
+        )
+        Π = ComplexF64(
+            _finite_real(Π_re, "polarization real part"),
+            _finite_real(Π_im, "polarization imaginary part"),
+        )
+        (Π, :PolarizationAniso, :real_axis_legacy, 0.0, 0)
+    end
+
+    isfinite(real(value)) && isfinite(imag(value)) ||
+        throw(ArgumentError("polarization value must be finite"))
     return (
         spec=spec,
         meson=spec.meson,
         pair=spec.pair,
         channel=spec.channel,
         kernel_pair=spec.kernel_pair,
-        value=ComplexF64(re, im),
+        value=value,
         polarization_units=:fm_minus2,
-        provider=:PolarizationAniso,
+        provider=provider,
         prescription=prescription,
-        analytic_scope=:real_axis,
+        analytic_scope=analytic_scope,
         retarded_convention=spec.retarded_convention,
         k0_inv_fm=k0,
         q_inv_fm=q,
@@ -151,6 +182,8 @@ function charged_polarization(
         Φbar=thermo_values.Φbar,
         ξ=thermo_values.ξ,
         num_s_quark=num_s,
+        eta_inv_fm=effective_eta,
+        energy_nodes=effective_nodes,
     )
 end
 

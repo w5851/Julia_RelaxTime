@@ -3,13 +3,14 @@
 route_id: charged_rpa_bu_quark_only
 状态：candidate（未授权 production）
 初始基线：`origin/main` @ `bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b`
-更新日期：2026-08-30
+更新日期：2026-08-31
 
 本文件不是“已经完成的完整 charged-RPA/BU 数值实现”，而是为 PR290 建立的、
 可交给独立审阅者复核的公式规范。本版已经把选定的 strict GBU 主路线从微观
-PNJL/KMT 模型闭合到正常相密度公式；仍未完成的是对应代码、数值收敛和
-production gate。这里的“公式闭合”不等于“实现完成”，任何未决 gate 都必须在
-升格 production 前单独关闭。
+PNJL/KMT 模型闭合到正常相密度公式；ordered retarded bubble 与 charged kernel
+代码已经作为 diagnostic backend 落地，仍未完成的是严格 BU 密度、全域数值
+收敛和 production gate。这里的“公式闭合”不等于“实现完成”，任何未决 gate
+都必须在升格 production 前单独关闭。
 
 ## 1. 范围与计算目标
 
@@ -250,12 +251,13 @@ Pi_su:  omega + mu_s - mu_u,  masses/order=(s,u)
 
 ```math
 \Pi_{ff'}^R(\omega,q;\mu_f,\mu_{f'})
-\stackrel{?}{=}
+=
 \left[\Pi_{f'f}^R(-\omega,q;\mu_{f'},\mu_f)\right]^*,
 ```
 
-并在 `mu_f=mu_f'=0` 恢复正能量 charged-conjugate 极点/相移一致性；问号表示
-这是后续实现必须通过的验证关系，而不是当前 legacy B0 已经证明的性质。
+并在 `mu_f=mu_f'=0` 恢复正能量 charged-conjugate 极点/相移一致性。Phase-C
+strict provider 已通过有限 `eta` 直接复求积验证该 ordered 共轭关系；历史
+real-axis `B0` 仍只作为 legacy oracle，不据此声明同一性质。
 
 ### 5.2 `A_f`/`B0` 组合
 
@@ -300,11 +302,13 @@ Rehberg 等的 Eq. (2.22)–(2.23) 讨论了三动量截断下非等质量 kaon 
 对称本来就成立。这个目的不自动证明平均后的函数是有限 flavor chemical
 potential 下唯一的 retarded 谱函数。
 
-因此本路线把两种模式分开：
+因此本路线把三种模式分开：
 
 - `ordered_retarded`：strict GBU 主路线，分别保留 `Pi_us` 与 `Pi_su`，从
-  Matsubara 泡按 `z=omega+i0^+` 延拓；实现上对应 `num_s_quark=0` 或等价的有序
-  backend；
+  Matsubara 泡按 `z=omega+i0^+` 延拓；当前实现使用显式有限 `eta>0` 的复数
+  Gauss--Legendre 求积，并要求对 `eta` 和能量节点分别做收敛检查；
+- `ordered_legacy_B0`：保留 PR289 中 `num_s_quark=0` 的历史实轴适配器，只用于
+  隔离“ordered flavor 映射”与“严格 retarded 延拓”的数值差异；
 - `legacy_symmetrized_B0`：对应当前 `num_s_quark=1`，保留为 Rehberg 散射处方、
   课题组旧 Fortran/Cpp 对齐和旧质量/宽度回归的显式 oracle。
 

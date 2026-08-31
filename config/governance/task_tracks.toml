@@ -120,12 +120,12 @@ status = "accepted"
 current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "在独立后续 PR 中实现并验证 ordered charged retarded bubble、domega/pi 测度、相位/Levinson/Mott gate 与四算法收敛；保持本 route 为 candidate。"
+next_action = "完成当前 ordered-retarded fixed-point PR；随后独立实现 domega/pi 绝对密度回归与 phase/Levinson/Mott gate，再做全链路收敛和冻结线。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = ""
-current_sha = "fa2e4583cec08fff6d572b3573a7db96be9bf612"
+current_branch = "codex/charged-rpa-ordered-retarded"
+current_sha = "dba1d9b8b5196bbb8993453ff7e184201dc09cf3"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -133,6 +133,9 @@ evidence = [
   "pr:290",
   "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
   "sha:bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b",
+  "pr:289",
+  "sha:dba1d9b8b5196bbb8993453ff7e184201dc09cf3",
+  "file:scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl",
   "review:formula_route_audit_complete",
   "review:author_accepted_pr290_sop_closeout",
   "note:strict_follow_up_handoff",
@@ -302,7 +305,7 @@ status = "accepted"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
 reason = "PR290 已固定 candidate 公式路线；ordered charged retarded bubble、严格 BU 测度、相位/Levinson/Mott gate、Bose 支撑和四算法收敛仍需在独立后续 PR 实现与验收。"
-next_action = "建立独立后续分支，先实现 ordered charged retarded bubble 与 charged kernel backend，再按任务单逐层通过 dω/pi、phase、Levinson/Mott 和 convergence gates。"
+next_action = "完成 ordered-retarded fixed-point PR；下一 PR 实现 dω/pi、绝对密度回归、高能相位锚点及 Levinson/Mott gate。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -310,6 +313,11 @@ evidence = [
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
   "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
   "note:implementation_follow_up_after_pr290",
+  "pr:289",
+  "sha:dba1d9b8b5196bbb8993453ff7e184201dc09cf3",
+  "file:src/relaxtime/OneLoopIntegrals.jl",
+  "file:src/relaxtime/ChargedRPAProvider.jl",
+  "file:scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl",
 ]
 
 [[items]]
