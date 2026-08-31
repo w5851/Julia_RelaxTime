@@ -1,0 +1,68 @@
+{
+  "schema_version": "diagnostic_workflow_inventory_v1",
+  "inventory_date": "2026-08-30",
+  "repository": "w5851/Julia_RelaxTime",
+  "source_branch": "main",
+  "source_tree_sha": "cea8110cdc1e1bafbc9873aa79cb5b0954c3de76",
+  "pr_base_sha": "6b2f4ffeb05001f6e39b6940d59e4cbc9cf9bfed",
+  "source_tree_note": "The inventory snapshot is intentionally frozen at source_tree_sha; the PR base fast-forward changed zero workflow files.",
+  "workflow_file_glob": ".github/workflows/*.yml",
+  "workflow_count": 47,
+  "one_shot_run_rows": 20,
+  "observed_counts": {
+    "artifact_count": 51,
+    "expired_artifact_count": 9,
+    "reference_edge_count": 25,
+    "claim_count": 8,
+    "retirement_candidate_count": 4
+  },
+  "solver_called": false,
+  "scan_boundaries": {
+    "active_reference_scan_excludes": ["docs/dev/archived/**"],
+    "workflow_definitions_changed": false,
+    "github_artifacts_downloaded": false,
+    "numerical_solver_invoked": false,
+    "retirement_executed": false
+  },
+  "commands": [
+    "gh workflow list --all --limit 100",
+    "gh run list --workflow <workflow-file> --limit 1 --json databaseId,status,conclusion,createdAt,updatedAt,event,headBranch,headSha",
+    "gh api repos/w5851/Julia_RelaxTime/actions/runs/<run-id>",
+    "gh api repos/w5851/Julia_RelaxTime/actions/runs/<run-id>/artifacts?per_page=100",
+    "rg -l --glob '!docs/dev/archived/**' '<workflow-file>' .",
+    "git ls-files .github/workflows"
+  ],
+  "files": [
+    {"path": "README.md", "role": "scope_and_reading_contract"},
+    {"path": "workflow_inventory.csv", "role": "workflow_definition_inventory"},
+    {"path": "run_artifact_snapshot.csv", "role": "historical_run_snapshot"},
+    {"path": "reference_edges.csv", "role": "call_and_reference_edges"},
+    {"path": "retirement_proposal.md", "role": "author_review_boundary"},
+    {"path": "claim_ledger.csv", "role": "claim_evidence_ledger"},
+    {"path": "manifest.json", "role": "this_manifest"}
+  ],
+  "hash_policy": "SHA-256 is recorded for each non-manifest package file and the active task document; the manifest hash is intentionally not self-referential.",
+  "file_hashes": {
+    "README.md": "7d22d3370f5e26a55ffd6e6590ab0281f8337936290d8a5405f7e9c4200c9dba",
+    "workflow_inventory.csv": "cf0ccd1b10c41400270ed8e0edbfabceb2e968dbea2d236c32fba590f4b6a4f9",
+    "run_artifact_snapshot.csv": "6279f5bee70dfdd830a28328ff3e87aadf6439157347db200c1656d6a84425c1",
+    "reference_edges.csv": "ae6df815e257af64c2b056559df5bd230da142360dca670e06b9029e8329dd9a",
+    "retirement_proposal.md": "5ae31c4c2ea2ac71c0c2fdf9fe52acd954895ea1690714ad6155cd2b8b9c373e",
+    "claim_ledger.csv": "103a717b1012cc8996aa592b2f154cad0a0680c0c88e95016a8dc61ca6263ef4",
+    "active_task_document": "8cb5b19816f8a7bbd27a27b2a64e24fa154eb56db16f7c2299cf3155bf5c5683"
+  },
+  "disposition_contract": {
+    "retain": "core, scheduled, production, reusable, archive/recovery or legacy-audit workflow; no retirement proposed",
+    "preserve_historical_replay": "completed diagnostic definition/evidence is retained while references or replay value remain",
+    "retirement_candidate_review": "candidate only; author approval and a separate exact-allowlist PR are mandatory",
+    "never_inferred": "no recent standalone run is never sufficient evidence for deletion"
+  },
+  "candidate_workflows": [
+    "pnjl-c2-cep-manual-bisection.yml",
+    "pnjl-issue130-crossover-mu-endpoint-expansion.yml",
+    "relaxtime-issue130-rs-numerical-pilot-v1.yml",
+    "pnjl-stagec-density-certificate-feasibility.yml"
+  ],
+  "retirement_pr_required": true,
+  "generated_without_solver": true
+}
