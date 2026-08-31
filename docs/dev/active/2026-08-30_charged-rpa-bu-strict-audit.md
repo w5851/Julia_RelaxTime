@@ -436,3 +436,71 @@ julia --project=. scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl
 
 本任务单只记录可验证的实现边界和后续 gate，不把任何尚未完成的 charged-RPA/BU
 公式或冻结线结果标记为 production。
+
+## 9. Phase G：同一有限-BQS 背景下的四算法与负密度审计（2026-08-31）
+
+新增只读诊断脚本
+`scripts/analysis/relaxtime/diagnose_charged_rpa_bu_negative_density.jl`，在同一
+`T=170 MeV`、`mu_B=240 MeV`、`rho_Q/rho_B=0.4`、`rho_S=0` 的 quark-only 解上比较
+stable、reduced-BW、q-pole 和 phase-shift/GBU。该脚本只写入本地
+`data/outputs/results/relaxtime/analysis/charged_rpa_bu_negative_density/`，不改变默认
+入口或任何 baseline。
+
+该点的平衡残差为 `1.44e-15`，并得到
+`mu_u=0.3742644`、`mu_d=0.4209955`、`mu_s=0.0142260 fm^-1`，
+`m_pi=0.6737676`、`m_K=2.1885044 fm^-1`。charged chemical potentials 为
+`mu_pi+=-0.0467311`、`mu_K+=0.3600384` 以及相反号的负电荷通道。
+
+### 9.1 四算法结果（同一背景）
+
+| 通道 | stable | reduced strict BW | q-pole strict BW | phase-shift GBU（未锚定） |
+| --- | ---: | ---: | ---: | ---: |
+| `K+/pi+` | `0.56618` | `0.20221` | `NaN`（Bose 支撑失败） | `2.20354` |
+| `K-/pi-` | `0.21112` | `0.07377` | `~6.4e-15` | `0.35023` |
+
+这些算法本来就是不同近似对象，表中数值不要求彼此收敛。q-pole 的 `K+` 失败不是
+极点残差问题：其内层 `omega` 网格硬编码从 `0` 开始，而 `mu_K+>0`，所以调用
+`bose_distribution` 时遇到 `omega <= mu_K`。同一 helper 的 `K-` 极点四个节点均
+接受，残差约 `2.0e-9` 到 `1.7e-12`；`pi` 因零宽度走 stable limit。现有
+`bose_support_gate` 能识别该状态，但 q-pole helper 尚未把它作为显式返回状态，
+这是后续应单独修复的接口缺口，不能把 `NaN` 当作物理零密度。
+
+### 9.2 BU/GBU 负密度的定位
+
+在本点所有相移积分均使用 `omega_min=0.4 fm^-1`，四个 charged 通道的实际积分
+窗口均在正常 Bose 域内；Bose 因子 `g(1+g)` 为正。因此负值不是由
+`mu_M=0`、Bose 奇点或 `domega/pi` 与 `domega/(2pi)` 的共同归一化因子造成的。
+`arg(propagator)` 与 `arg(inverse_propagator)` 的实现结果逐点相同，故也不是两种
+相位对象选择造成的符号差。
+
+真正的证据来自 `phase_shell_breakdown`：
+
+- `K-` 未锚定 GBU 的总积分为 `+0.0239968`；各高-q 壳层仍为正（最低-q 壳层仅有
+  `-9.3e-6` 的微小数值项）。
+- 启用当前 `high_energy_zero` anchor 后，`K-` 的最高 q 壳层变为
+  `-0.0531052`，总和变为 `-0.0375540`，这正对应完整 phase-shift 结果的负密度。
+- 同一高能 anchor 在低 q 节点把原始相位约 `-pi` 平移到约 `+pi`，而在高 q 节点
+  原始高能相位已是正值（例如 `K-` 的 `1.3423`），于是又施加负的常数平移。不同
+  q 的 `tail_before` 从约 `-3.135` 变到 `+1.342`，并非统一的高能极限。
+
+对当前两种权重，
+`F_current(delta)=delta`，`F_GBU(delta)=delta-0.5*sin(2delta)`，且
+`F_GBU'(delta)=2*sin(delta)^2 >= 0`、`F_GBU(0)=0`。所以 GBU 变换不会自动消除
+整体相位符号；当 anchored 相位在某个壳层为负时，正的 Bose 权重会保留该负贡献。
+这说明当前 high-energy anchor 尚未满足统一的相位边界/Levinson 条件，不能用来
+判定物理负介子密度，也不能通过简单全局翻转相位修复。
+
+需要注意：`phase_shift_meson_number_density` 当前返回的 `status=:ok` 只表示
+Bose 能量域通过；它尚未把 `density<0` 作为 helper 内部失败状态。扫描层另行以
+`status=invalid_density` 标记非有限或负密度。因此当前“`ok` 但密度为负”是一个
+可观测的接口语义缺口，后续应在不破坏旧返回结构的前提下增加显式 density-validity
+gate，而不是在数值层静默裁剪。
+
+### 9.3 与旧结果的边界
+
+旧诊断资产 `meson_density_phase_e5_strict_candidates.csv` 已经显示：原始/未锚定
+相移密度通常为正，而 `tail_shifted`/高能尾部平移版本可出现大幅负值（例如
+`T=208 MeV` 的 pion 为约 `-278`）。因此本轮的有限-BQS `K-` 负值是同一类
+相位边界未闭合问题在 ordered charged 背景中的新暴露，并非已经证明旧 PNJL 或
+旧 BU 全部错误。当前应保留负值作为 `invalid_density` 诊断证据，先完成相位端点、
+Levinson/Mott、节点和截断门禁；在此之前不改 production 默认，不把负值裁剪为零。
