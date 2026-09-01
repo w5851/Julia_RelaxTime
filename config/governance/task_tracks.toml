@@ -1,20 +1,20 @@
 schema_version = 1
-primary_track = "issue130-phase"
+primary_track = "formula-route-closure"
 updated_at = "2026-09-01"
 
 [[tracks]]
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
-status = "accepted"
+status = "archived"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "Issue #130 phase-reference/CEP/Maxwell 证据、accepted runtime 与 legacy retirement 已完成并经作者接受；历史任务文档已完成治理归档。后续不再追加数值重跑，workflow lifecycle inventory 作为独立任务推进。"
+next_action = ""
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
 current_branch = "main"
-current_sha = "cc4f71a47f41d3eba20509af0f8409c75d7b9a6d"
+current_sha = "7284282d8891f940725f5822a9123b5aca5ed169"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/archived/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -41,8 +41,11 @@ evidence = [
   "promotion:runtime_default_strict_candidate_with_certified_only_fallback",
   "file:docs/analysis/governance/issue130_task_document_archive_v1/",
   "note:issue130_task_document_archive_17_docs_20260830",
+  "pr:303",
+  "sha:7284282d8891f940725f5822a9123b5aca5ed169",
+  "note:issue130_phase_archived_after_primary_handoff",
 ]
-updated_at = "2026-08-30"
+updated_at = "2026-09-01"
 
 [[tracks]]
 id = "rs-transport"
@@ -120,12 +123,12 @@ status = "accepted"
 current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "完成节点/截断、Bose support、四算法和 baseline freeze-out 诊断 smoke；随后评审是否满足 production candidate 门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
+next_action = "修复 q-pole Bose 支撑返回语义；随后将 ordered charged profile 接入 phase/Levinson/Mott gate，并进行 q/omega/eta/omega_max/cutoff 收敛门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/charged-rpa-bu-convergence"
-current_sha = "04df891b18992d8b673992149fbb11f049bc396b"
+current_branch = "codex/charged-rpa-bu-negative-density-audit"
+current_sha = "3e0e38102b8a64c4a1af7d034ba8e4d15e443338"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -143,8 +146,11 @@ evidence = [
   "review:author_accepted_pr290_sop_closeout",
   "note:strict_follow_up_handoff",
   "note:pr290_independent_from_pr289",
+  "sha:3e0e38102b8a64c4a1af7d034ba8e4d15e443338",
+  "note:codex_thread_019f9ccc_23cc_7972_a31a_316e7346744c",
+  "note:phase_g_negative_density_audit_completed_without_production_switch",
 ]
-updated_at = "2026-08-30"
+updated_at = "2026-09-01"
 
 [[tracks]]
 id = "plot-sop"
@@ -319,7 +325,7 @@ status = "accepted"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
 reason = "PR290 已固定 candidate 公式路线；ordered charged retarded bubble、严格 BU 测度、相位/Levinson/Mott gate、Bose 支撑和四算法收敛仍需在独立后续 PR 实现与验收。"
-next_action = "完成 strict BU measure/phase gate PR；下一 PR 执行节点与截断收敛、Bose support、四算法对照和冻结线扫描。"
+next_action = "修复 q-pole Bose 支撑返回语义；随后将 ordered charged profile 接入 phase/Levinson/Mott gate，并进行 q/omega/eta/omega_max/cutoff 收敛门禁。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -332,20 +338,23 @@ evidence = [
   "file:src/relaxtime/OneLoopIntegrals.jl",
   "file:src/relaxtime/ChargedRPAProvider.jl",
   "file:scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl",
+  "sha:3e0e38102b8a64c4a1af7d034ba8e4d15e443338",
+  "note:codex_thread_019f9ccc_23cc_7972_a31a_316e7346744c",
+  "note:phase_g_negative_density_audit_completed_without_production_switch",
 ]
 
 [[items]]
 id = "issue130-full-hybrid-author-review"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "accepted"
+status = "archived"
 parent = "track:issue130-phase"
 task_file = "docs/dev/archived/2026-07-27_Issue130_CEP三态合同与pilot_v2.md"
-reason = "自动 gate 产生 full_hybrid_candidate 后，作者已审核代表曲线、三个 endpoint 区间、coverage 与成本并接受；phase-reference 侧已闭环，RS formal numerical convergence 已由独立 track 完成。该条目保留为 parent accepted summary anchor。"
-next_action = "保持不可变 phase evidence；历史任务正文已归档，后续仅保留治理索引，不再触发数值运行。"
+reason = "自动 gate 产生 full_hybrid_candidate 后，作者已审核代表曲线、三个 endpoint 区间、coverage 与成本并接受；phase-reference 侧已闭环，RS formal numerical convergence 已由独立 track 完成。Issue #130 主线已归档；该条目作为 archived parent summary anchor 保留，仅用于不可变 evidence 索引。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
-evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/", "review:author_accepted_full_hybrid_candidate", "note:phase_side_accepted_does_not_prove_rs_numerical_convergence", "file:docs/analysis/governance/issue130_task_document_archive_v1/"]
+evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/", "review:author_accepted_full_hybrid_candidate", "note:phase_side_accepted_does_not_prove_rs_numerical_convergence", "file:docs/analysis/governance/issue130_task_document_archive_v1/", "pr:303", "sha:7284282d8891f940725f5822a9123b5aca5ed169", "note:issue130_phase_archived_after_primary_handoff"]
 
 [[items]]
 id = "rs-production-after-phase-reference"

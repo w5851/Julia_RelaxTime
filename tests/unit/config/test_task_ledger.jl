@@ -65,9 +65,12 @@ end
     @test isempty(violations)
     parsed = TOML.parsefile(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"))
     tracks = Dict(String(t["id"]) => t for t in parsed["tracks"])
-    @test parsed["primary_track"] == "issue130-phase"
-    @test tracks["issue130-phase"]["status"] == "accepted"
+    @test parsed["primary_track"] == "formula-route-closure"
+    @test tracks["issue130-phase"]["status"] == "archived"
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
+    @test tracks["formula-route-closure"]["status"] == "accepted"
+    @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-rpa-bu-negative-density-audit"
+    @test tracks["formula-route-closure"]["current_sha"] == "3e0e38102b8a64c4a1af7d034ba8e4d15e443338"
     @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "promoted"
@@ -79,6 +82,8 @@ end
     @test items["issue130-phase-reference-retirement"]["status"] == "archived"
     @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
     @test isempty(items["issue130-phase-reference-retirement"]["blocked_by"])
+    @test items["issue130-full-hybrid-author-review"]["status"] == "archived"
+    @test isempty(items["issue130-full-hybrid-author-review"]["next_action"])
     @test items["docs-analysis-logical-group-migration"]["status"] == "archived"
     @test startswith(items["docs-analysis-logical-group-migration"]["task_file"], "docs/dev/archived/")
     @test isempty(items["docs-analysis-metadata-repair"]["next_action"])
@@ -330,7 +335,7 @@ end
     output = IOBuffer()
     @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=output, git_output=dirty_git))
     report = String(take!(output))
-    @test occursin("primary_track=issue130-phase", report)
+    @test occursin("primary_track=formula-route-closure", report)
     @test occursin("selected_track=rs-transport", report)
     @test occursin("branch=codex/fixture", report)
     @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
