@@ -4,8 +4,8 @@
   "status": "diagnostic_background_only",
   "review_date": "2026-09-01",
   "repository": "D:/w/jrt-ord",
-  "git_head": "81fcc26d8a7c372db44403cfb0be20869f195001",
-  "branch": "codex/charged-rpa-bu-strict-phase-backend",
+  "git_head": "f0fd216bcf011a542dbaa3d7c28c2f336e04e081",
+  "branch": "codex/charged-phase-normalization",
   "scope": [
     "2+1 flavor PNJL/NJL charged K+/pi+ and K-/pi-",
     "ordered unequal-mass charged RPA",
@@ -40,7 +40,8 @@
     "source_screening": "tables/source_screening.csv",
     "evidence_matrix": "tables/evidence_matrix.csv",
     "claim_ledger": "tables/claim_ledger.csv",
-    "publisher_pdf_provenance": "tables/publisher_pdf_provenance.csv"
+    "publisher_pdf_provenance": "tables/publisher_pdf_provenance.csv",
+    "targeted_phase_followup": "targeted_phase_followup_2026-09-01.md"
   },
   "local_evidence_roots": [
     "D:/Desktop/Julia_RelaxTime/temp10/meson_pressure_eos_literature_scan",
