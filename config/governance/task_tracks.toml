@@ -128,7 +128,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
 current_branch = "codex/charged-rpa-bu-strict-phase-backend"
-current_sha = "81fcc26d8a7c372db44403cfb0be20869f195001"
+current_sha = "67ff22896d50bd0680eb1ba2fc19a39036220d75"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
