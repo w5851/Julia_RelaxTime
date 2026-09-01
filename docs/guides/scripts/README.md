@@ -205,7 +205,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
       - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`
       - shared import/audit evidence: `docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/` and each case's `convergence/`
       - registry status: `approved` for raw result; publication-clean filtering remains a separate derived layer
-      - author-accepted `publication_clean_v1` figure-layer snapshot (display-only, byte-preserving) is browsable at `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/`; its tables and derivation provenance remain under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`
+      - author-accepted `publication_clean_v1` figure-layer snapshot (display-only, byte-preserving) is browsable at `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/`; its tables and derivation provenance remain under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`, with the mirror manifest under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v1/`
     - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
       - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
       - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`

@@ -1,13 +1,13 @@
 # RS `publication_clean_v1` figure-layer snapshot
 
-本目录是 Issue #130 RS `publication_clean_v1` 派生显示层的 figure-layer 浏览入口，
-便于在 `data/outputs/figures/` 下查找 mode-A/mode-B 图像。
+本目录是 Issue #130 RS `publication_clean_v1` 派生显示层的 figure-layer 说明与 provenance
+入口；对应的 mode_a/mode_b 图像位于 `data/outputs/figures/` 下的实际目录中。
 
 ## 目录与内容
 
-- `mode_a_fixed_muB_phase_scaled/`：3 个 `muB` panel × 3 个 observable，共 9 张 PNG；
-- `mode_b_fixed_T_sparse_muB/`：3 个 `T` panel × 3 个 observable，共 9 张 PNG；
-- `plot_manifest.json`：沿用 PR275 的图层 manifest，仅将图像路径改为本目录；
+- `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/`：3 个 `muB` panel × 3 个 observable，共 9 张 PNG；
+- `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/`：3 个 `T` panel × 3 个 observable，共 9 张 PNG；
+- `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/plot_manifest.json`：沿用 PR275 的图层 manifest，仅将图像路径改为 figure-layer 目录；
 - `figure_layer_manifest.json`：源包、计算/workflow SHA、逐文件 SHA-256 和字节保持记录。
 
 ## Provenance 与边界
