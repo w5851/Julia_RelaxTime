@@ -54,6 +54,7 @@ include("TotalPropagator.jl")
 include("MesonMass.jl")
 include("MottTransition.jl")
 include("BUPhaseGates.jl")
+include("PhaseNormalization.jl")
 include("ChargedPhaseBackend.jl")
 include("MesonDensity.jl")
 include("MesonThermodynamics.jl")
@@ -82,6 +83,7 @@ using .TotalPropagator
 using .MesonMass
 using .MottTransition
 using .BUPhaseGates
+using .PhaseNormalization
 using .ChargedPhaseBackend
 using .MesonDensity
 using .MesonThermodynamics
@@ -99,7 +101,7 @@ end # module RelaxTime
 # 使现有代码中 `using Main.OneLoopIntegrals` 等引用继续工作。
 for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso,
               :PolarizationCache, :AFieldBuilder, :EffectiveCouplings,
-              :MesonInteractionKernel, :ChargedRPAKernel, :ChargedRPAProvider, :MesonRPA, :MesonRPAAdapter, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :BUPhaseGates, :MesonDensity, :MesonThermodynamics,
+              :MesonInteractionKernel, :ChargedRPAKernel, :ChargedRPAProvider, :MesonRPA, :MesonRPAAdapter, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :BUPhaseGates, :PhaseNormalization, :MesonDensity, :MesonThermodynamics,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
               :ChargedPhaseBackend, :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
               :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)

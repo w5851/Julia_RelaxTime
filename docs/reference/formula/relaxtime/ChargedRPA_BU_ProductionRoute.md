@@ -494,10 +494,35 @@ production 级 gate 对每个 `(channel,q,state)` 至少执行：
 
 该后端允许合成 inverse-propagator 路径验证分支、端点、测度和节点/截断比较，
 但不会把有限窗口 endpoint 平移自动解释为 `delta(infinity)=0`，也不会在 gate
-失败时裁剪负密度。`strict_charged_rpa_bu_density` 只把
+ 失败时裁剪负密度。`strict_charged_rpa_bu_density` 只把
 `1-4K_a Pi_a^R` 与该积分器组合；实际 `ChargedRPAProvider(:ordered_retarded)`
 调用示例位于 `scripts/analysis/relaxtime/audit_charged_phase_backend.jl`。
 `eta`/`omega_max` 外推和 Mott 前后配对仍是 production candidate 的未决项。
+
+### 6.4.2 PhaseNormalization 纯代数闭合层
+
+`src/relaxtime/PhaseNormalization.jl` 将传播子相位映射与 S-matrix 统计力学的
+归一化拆成可独立测试的纯函数。物理散射相位记为 `delta` 时，
+
+```math
+S(\omega)=e^{2i\delta(\omega)},\qquad
+\frac{1}{2\pi}\operatorname{Im}\!\left[S^{-1}\partial_\omega S\right]
+=\frac{1}{\pi}\partial_\omega\delta.
+```
+
+因此：
+
+- `variable=:delta` 对应 `d_delta_over_pi`；
+- `variable=:s_matrix_argument` 对应完整 `arg(S)=2delta` 和
+  `d_arg_s_over_2pi`；
+- `s_matrix_to_phase` 返回主值，连续 branch 仍由 `BUPhaseGates` 的显式 unwrap/
+  endpoint 层负责；
+- `-arg(Delta^R_inverse)` 仍只是当前项目的 propagator-to-phase diagnostic
+  mapping，不能由该纯代数模块自动升级为物理 `delta`。
+
+该层的 scalar/diagonal synthetic tests 锁定单位模、因子 2、
+`Im tr(S^-1 dS)` 和两种测度的等价性。它不修改 `ChargedPhaseBackend` 的默认值，
+也不宣称已经通过真实 charged profile 的 PV、Levinson/Mott 或节点/截断收敛门禁。
 
 ## 7. BU 数密度与带电化学势
 
