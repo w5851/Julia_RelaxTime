@@ -86,7 +86,7 @@ archived_date: 2026-09-01
 - `phase_reference_limited_evidence_audit_v1`：`output_files` 11/15 不匹配；
 - `phase_reference_manual_overlay_promotion_audit_v1`：`output_files` 10/10 不匹配。
 
-修复批次的验收条件：先冻结当前文件字节和旧 hash，明确是否重算 metadata；只允许修改 manifest/checksum 等元数据，不重生成 CSV/JSON/PNG，不改变历史 verdict；修复后重新验证文件集合、输入/输出 hash、路径引用和 provenance，并单独提交。该 follow-up 不因目录迁移完成而自动关闭。
+修复批次的验收条件：先冻结当前文件字节和旧 hash，明确是否重算 metadata；只允许修改 manifest/checksum 等元数据，不重生成 CSV/JSON/PNG，不改变历史 verdict；修复后重新验证文件集合、输入/输出 hash、路径引用和 provenance，并单独提交。该 follow-up 已随本任务完成并归档；后续若发现新的 mismatch，必须另立新的 required follow-up，不重新打开本任务。
 
 ## 4. Validation Minimum
 
