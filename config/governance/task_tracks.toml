@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-31"
+updated_at = "2026-09-01"
 
 [[tracks]]
 id = "issue130-phase"
@@ -262,23 +262,31 @@ updated_at = "2026-08-18"
 [[tracks]]
 id = "analysis-docs-cleanup"
 title = "docs/analysis logical grouping and namespace migration"
-status = "accepted"
+status = "archived"
 current_task = "docs-analysis-logical-group-migration"
 blocked_by = []
 unlocks = []
-next_action = "物理 namespace 迁移已完成；保留 docs-analysis-metadata-repair 为独立 required follow-up，不在本任务中修改 metadata。"
+next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = "codex/analysis-clean-up"
-current_sha = "24ea4222e589e40f6f10fb3e91aaa683581c6130"
+current_branch = "main"
+current_sha = "ac3ce42f06870f4e1eda8ea67922b96ce0f51501"
 run_ids = []
 evidence = [
-  "file:docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
+  "file:docs/dev/archived/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
   "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
+  "pr:242",
+  "sha:8f9833fab40d60173234e9d5a6ac135eabdbe416",
+  "pr:243",
+  "sha:eb9414b855ef495ff84f694f1b071a52696992ef",
+  "pr:257",
+  "sha:ac3ce42f06870f4e1eda8ea67922b96ce0f51501",
   "file:docs/analysis/governance/literature_to_implementation_protocol.md",
+  "file:docs/analysis/governance/metadata_repair_v1/repair_report.md",
+  "file:docs/analysis/pnjl/phase_surface_series/series_manifest.json",
 ]
-updated_at = "2026-08-19"
+updated_at = "2026-09-01"
 
 [[items]]
 id = "formula-route-closure-sop-pr290"
@@ -822,17 +830,25 @@ evidence = [
 id = "docs-analysis-logical-group-migration"
 track_id = "analysis-docs-cleanup"
 classification = "independent"
-status = "accepted"
+status = "archived"
 parent = "track:analysis-docs-cleanup"
-task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
+task_file = "docs/dev/archived/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
 reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
-next_action = "物理 namespace 迁移已完成；Issue #130 phase_surface_series/ 已建立 byte-preserving series index；保留 metadata repair follow-up，单独冻结并修复 hash metadata。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
   "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
+  "pr:242",
+  "sha:8f9833fab40d60173234e9d5a6ac135eabdbe416",
+  "pr:243",
+  "sha:eb9414b855ef495ff84f694f1b071a52696992ef",
+  "pr:257",
+  "sha:ac3ce42f06870f4e1eda8ea67922b96ce0f51501",
+  "file:docs/dev/archived/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
   "file:docs/analysis/README.md",
   "file:docs/analysis/governance/literature_to_implementation_protocol.md",
+  "file:docs/analysis/governance/metadata_repair_v1/repair_report.md",
   "file:docs/analysis/pnjl/phase_surface_series/",
   "file:docs/analysis/pnjl/phase_surface_series/series_manifest.json",
 ]
@@ -845,7 +861,7 @@ status = "archived"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md"
 reason = "phase-reference and phase-guided transport v1 evidence packages contain pre-existing manifest/checksum hashes that do not match current file bytes; the repair must remain separate from namespace migration."
-next_action = "metadata repair v1 已完成、验收并归档；后续新增 mismatch 需另立 required follow-up。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -857,6 +873,8 @@ evidence = [
   "file:docs/analysis/governance/metadata_repair_v1/post_repair_audit.json",
   "file:docs/analysis/governance/metadata_repair_v1/repair_report.md",
   "file:docs/dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md",
+  "pr:243",
+  "sha:eb9414b855ef495ff84f694f1b071a52696992ef",
 ]
 
 [[items]]

@@ -1,8 +1,20 @@
+---
+title: `docs/analysis` 逻辑分组与物理迁移任务单
+archived: true
+original: docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md
+archived_date: 2026-09-01
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # `docs/analysis` 逻辑分组与物理迁移任务单
 
 创建日期：2026-08-19
 
-状态：`namespace_migration_complete`；metadata repair 保持独立 deferred follow-up。本任务只整理诊断分析树的 namespace 和入口，不改变数值语义、正式产物或 production promotion 状态。
+状态：`completed`。namespace migration 已由 PR #242 及后续 phase-surface series PR #257 完成；独立 metadata repair 已由 PR #243 完成并归档。本任务只整理诊断分析树的 namespace 和入口，不改变数值语义、正式产物或 production promotion 状态。
 
 ## 1. Scope Lock
 
@@ -64,9 +76,9 @@
 - post-migration verification：destination payload 仍为 7 files、1,432,967 bytes；6 个既有文件为 `R100`，README 为 `R94` 且仅有 canonical path 文字变化；destination-root inventory SHA-256：`4ff83974b7c709b404f624f62bb8925fbc5e21849cea338a2d0db3287b527df3`；不执行删除、重绘或数值重算；
 - metadata boundary：本批不处理任何 manifest/checksum mismatch；metadata repair 继续作为独立 follow-up。
 
-## 3. Required Follow-up: Analysis Metadata Repair
+## 3. Completed Follow-up: Analysis Metadata Repair
 
-- [ ] 单独建立 metadata 修复批次，处理 phase-reference 包及 phase-guided transport v1 包中既有的 `manifest.json` / `checksums.sha256` 与当前文件字节不一致问题。
+- [x] 已单独建立并完成 metadata 修复批次，处理 phase-reference 包及 phase-guided transport v1 包中既有的 `manifest.json` / `checksums.sha256` 与当前文件字节不一致问题；任务记录归档于 `docs/dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md`，实现提交为 `main@eb9414b855ef495ff84f694f1b071a52696992ef`（PR #243）。
 
 当前已知范围（2026-08-18 迁移前审阅）：
 
@@ -74,7 +86,7 @@
 - `phase_reference_limited_evidence_audit_v1`：`output_files` 11/15 不匹配；
 - `phase_reference_manual_overlay_promotion_audit_v1`：`output_files` 10/10 不匹配。
 
-修复批次的验收条件：先冻结当前文件字节和旧 hash，明确是否重算 metadata；只允许修改 manifest/checksum 等元数据，不重生成 CSV/JSON/PNG，不改变历史 verdict；修复后重新验证文件集合、输入/输出 hash、路径引用和 provenance，并单独提交。该 follow-up 不因目录迁移完成而自动关闭。
+修复批次的验收条件：先冻结当前文件字节和旧 hash，明确是否重算 metadata；只允许修改 manifest/checksum 等元数据，不重生成 CSV/JSON/PNG，不改变历史 verdict；修复后重新验证文件集合、输入/输出 hash、路径引用和 provenance，并单独提交。该 follow-up 已随本任务完成并归档；后续若发现新的 mismatch，必须另立新的 required follow-up，不重新打开本任务。
 
 ## 4. Validation Minimum
 
@@ -87,7 +99,7 @@
 
 - [x] `docs/analysis` 顶层的独立 protocol 文件已归入 `governance/`；其余顶层内容为总索引 `README.md`。
 - [x] `pnjl/`、`relaxtime/`、`historical/` 和 `governance/` 已按逻辑域建立入口；没有发现需要继续物理迁移的同等级未分组目录。
-- [ ] `docs-analysis-metadata-repair`：继续作为独立 required follow-up，不能因 namespace migration 完成而关闭。
+- [x] `docs-analysis-metadata-repair`：已作为独立 required follow-up 完成、验收并归档；后续若发现新的 mismatch，必须另立任务，不重新打开本任务。
 
 ### Batch review: Issue #130 phase surface series namespace
 
@@ -96,3 +108,9 @@
 - pre-migration/post-migration inventory：147 files、82,211,563 bytes；每个 source/destination package 的 file count、byte count 和 inventory SHA-256 相等，完整映射见 `docs/analysis/pnjl/phase_surface_series/series_manifest.json`。
 - semantic boundary：figure layer 的新 `v2`/`v3` 分别保留历史 render 语义 v8/v9；作者接受的 Figure 4 v5 仍在 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/`，不混入 phase-surface series。
 - validation boundary：本批只做文档 namespace、JSON manifest、hash 对照和治理检查；不调用 PNJL solver，不触发 Actions，不执行 reference promotion。
+
+## 6. Final closure
+
+- [x] namespace migration、phase-surface series 索引与 metadata repair 均已完成并有独立 PR/evidence。
+- [x] 没有遗留 blocker、required follow-up 或未迁移的同等级 namespace。
+- [x] 后续 plotting migration、历史图清理或新 metadata mismatch 均属于新的独立任务，不再追加到本任务单。
