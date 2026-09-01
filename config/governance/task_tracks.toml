@@ -127,8 +127,8 @@ next_action = "修复 q-pole Bose 支撑返回语义；随后将 ordered charged
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/charged-rpa-bu-negative-density-audit"
-current_sha = "3e0e38102b8a64c4a1af7d034ba8e4d15e443338"
+current_branch = "codex/charged-rpa-bu-strict-phase-backend"
+current_sha = "81fcc26d8a7c372db44403cfb0be20869f195001"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -149,6 +149,10 @@ evidence = [
   "sha:3e0e38102b8a64c4a1af7d034ba8e4d15e443338",
   "note:codex_thread_019f9ccc_23cc_7972_a31a_316e7346744c",
   "note:phase_g_negative_density_audit_completed_without_production_switch",
+  "file:src/relaxtime/ChargedPhaseBackend.jl",
+  "file:tests/unit/relaxtime/test_charged_phase_backend.jl",
+  "file:docs/analysis/relaxtime/charged_phase_literature_review_v1/",
+  "note:publisher_pdf_provenance_s04_verified_s02_first_page_overlay_s03_not_subscribed",
 ]
 updated_at = "2026-09-01"
 

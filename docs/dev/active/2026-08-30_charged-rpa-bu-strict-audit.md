@@ -551,3 +551,47 @@ q_nodes=2, omega_max=7, omega_nodes=6)`，`omega_min=0.5`。
 因此这次运行证明了真实 ordered profile 已接入并能保留失败诊断，但不构成
 Levinson/Mott 或节点/截断 production 通过证据；临时 `q -> 0` 束缚态计数不能替代
 物理绑定态判定。production 默认与旧 `MesonDensity` 路径均未改变。
+
+## 12. 定向文献综述链接（2026-09-01）
+
+本任务相关的公开文献、公式闭合、来源筛选、代码映射和后续门禁已整理到
+`docs/analysis/relaxtime/charged_phase_literature_review_v1/`。该证据包明确区分
+文献事实、项目数值约定和 production 授权边界；它不改变本任务的 `in progress`
+状态，也不把 strict phase backend 晋升为 production。
+
+## 13. 出版社原文与 PDF provenance（2026-09-01）
+
+在用户明确授权后，使用 Chrome 的 XJTU 网关完成了 APS 访问验证，并对少数需要
+出版社版本核对的条目逐篇保留结果。逐项记录见
+`docs/analysis/relaxtime/charged_phase_literature_review_v1/tables/publisher_pdf_provenance.csv`：
+
+- Rehberg et al. 1996（PRC 53, 410）的 APS 文章页显示 XJTU 授权，正式 PDF 20 页、
+  `pdftotext` 可读，SHA-256 已记录，作为出版社版本证据保留在项目外目录；
+- Dashen--Ma--Bernstein 1969 的 APS 文章页授权成功。此前仅按第一页文本首行判断为
+  内容错配；重新渲染和逐页检查后确认，页 1 下半页包含目标论文标题、作者、摘要和
+  Introduction，页 2--26 为目标论文，只有页 1 顶部残留另一篇液态合金电阻率文章的
+  版面片段。因此 S02 可用于公式核对，但引用页 1 时必须避开残留片段并记录该 caveat；
+- Hüfner et al. 1994 的 ScienceDirect 文章页显示 XJTU 标识，但明确写明 XJTU 不订阅
+  该内容；此前入口触发的机器人 CAPTCHA 未绕过，也未声称取得出版社全文。
+
+版权 PDF 不进入 Git、任务分支或项目分析包；仓库仅保存 DOI、出版社链接、授权路径、
+文件 hash/页数、可读性探针和失败原因。上述局部出版社核对不改变 strict phase backend
+仍处于探索性、未通过 Levinson/Mott 和收敛门禁的状态。
+
+## 14. S02 重新核对后的公式路线影响（2026-09-01）
+
+对保留的 S02 PDF 逐页渲染后确认：页 1 顶部存在版面残留，但目标论文从页 1 下半页
+开始，页 2--26 完整连续。此前基于第一页首行的 `content_mismatch` 记录已修正为
+`publisher_pdf_verified_first_page_overlay`，正文可用于 S-matrix/Levinson 公式核对。
+
+本次公式复核得到三项需要纳入路线闭合的限定：
+
+1. DMB 的直接对象是连通 on-shell (S) 矩阵和
+   ((4\pi i)^{-1}S^{-1}\overleftrightarrow{\partial_E}S)。单道
+   (S=e^{2i\delta}) 时才化为 (\partial_E\delta/\pi)；项目的
+   `-arg(Delta^R)` 是否就是这个 δ，仍需独立的 propagator-to-S-matrix 归一化证明。
+2. DMB 给出守恒 (B,I,S) 的独立化学势乘子，支持显式记录 μ_B、μ_I/μ_Q、μ_S，
+   但不推导 PNJL BQS 闭合或 `mu_s=0.55 mu_u`。
+3. DMB 的相对论性 Levinson 推广是基于非相对论结果的合理猜测；因此项目 gate 应标为
+   conditional，并继续要求独立束缚态计数、阈值/高能端点和 Mott 补偿检查。S02 不改变
+   PV/​i0、ordered charged bubble、KMT 或 Ω_M 反馈的其他文献结论。
