@@ -75,9 +75,10 @@ Deferred/research items:
 
 分析型请求不修改 ledger。实现型请求在验证结果或 blocker 已确认后更新 ledger，并在结束时报告恢复入口；作者审核、昂贵 Actions、reference promotion 和 failed Actions 自动分诊均不由本层代办。
 
-## 当前三条主线
+## 当前主线与已收口轨迹
 
-- `issue130-phase` 已完成 `full_hybrid_candidate` 作者审核、accepted reference promotion、legacy retirement 和历史任务文档归档；保留不可变 evidence 与 parent accepted 摘要，不再追加数值工作。
+- `formula-route-closure` 当前为 primary track。对应 charged-RPA/BU strict implementation 保持 `accepted`，最新诊断已完成 Phase G 负密度审计；下一步是修复 q-pole Bose 支撑返回语义，再接入 phase/Levinson/Mott 与节点/截断收敛门禁。该诊断不改变 production 默认。
+- `issue130-phase` 已完成 `full_hybrid_candidate` 作者审核、accepted reference promotion、legacy retirement 和历史任务文档归档，并在 primary handoff 后归档；保留不可变 evidence 与 archived parent summary anchor，不再追加数值工作。
 - `rs-transport` 已完成 accepted-primary p104/p128 的 matched numerical convergence 并归档；旧 strict-era raw/figure 保持不变，accepted evidence 不替换正式结果。
 - `plot-sop` 的公共 SOP 合同已登记为 `promoted`；后续逐图族迁移仍按独立 task/PR 推进，不由该 promotion 记录吸收历史图像或批量迁移工作。
 - `diagnostic-workflow-lifecycle` 的 wave1/wave2 退役已完成并合并；16 个历史 YAML 保留为 versioned definition，当前保留 27 个 workflow（其中 23 个带 `workflow_dispatch`、9 个纯手动入口），另保留一个 Maxwell-local target-list 入口。后续生命周期整理必须另立新的 active task，不把历史 wave2 任务重新打开。
