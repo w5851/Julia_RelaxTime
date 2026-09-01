@@ -71,12 +71,17 @@ end
     @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "promoted"
+    @test tracks["analysis-docs-cleanup"]["status"] == "archived"
+    @test isempty(tracks["analysis-docs-cleanup"]["next_action"])
     items = Dict(String(item["id"]) => item for item in parsed["items"])
     @test items["rs-production-after-phase-reference"]["status"] == "archived"
     @test startswith(items["rs-production-after-phase-reference"]["task_file"], "docs/dev/archived/")
     @test items["issue130-phase-reference-retirement"]["status"] == "archived"
     @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
     @test isempty(items["issue130-phase-reference-retirement"]["blocked_by"])
+    @test items["docs-analysis-logical-group-migration"]["status"] == "archived"
+    @test startswith(items["docs-analysis-logical-group-migration"]["task_file"], "docs/dev/archived/")
+    @test isempty(items["docs-analysis-metadata-repair"]["next_action"])
     @test occursin("full_hybrid_candidate", read(joinpath(PROJECT_ROOT, "docs", "dev", "task_tracking_governance.md"), String))
     @test !occursin("status = \"full_hybrid_candidate\"", read(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"), String))
 end

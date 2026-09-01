@@ -28,6 +28,14 @@ inbox -> triaged -> ready -> active -> review -> accepted -> promoted -> archive
 
 状态转换合同和字段校验由 `scripts/dev/check_task_ledger.jl` 执行。首版没有自动写入器；状态只有在实现事实、验证结果或明确作者决策成立后才更新。
 
+### Archived 条目的长期压缩门禁
+
+`archived` track/item 默认继续保留在主 ledger，作为机器可读的终态索引和 ID tombstone；完整任务正文仍只保存在 `docs/dev/archived/`。不能仅因任务完成就从 `task_tracks.toml` 删除，否则会失去父子关系、PR/run/SHA/evidence 入口和重复 ID 防护。
+
+当 archived item 达到 50 个或主 ledger 达到 1,500 行时，应启动一次只读 compaction preflight；只有同时出现实际维护成本（例如 30 天内发生至少 3 次 ledger 合并冲突、常规状态审阅明显受历史记录干扰，或 validator/consumer 需要反复绕过终态记录）时，才进入 schema v2 设计。正式迁移还必须满足：待迁移条目不再被 non-terminal track/item、active/backlog 文档、`blocked_by`/`unlocks` 或当前测试直接引用。
+
+长期方案不是直接删除，而是生成版本化、hash-bound 的 terminal ledger archive，并在 live ledger 保留最小 tombstone 与 archive pointer。该方案需要先升级 schema、validator、测试和恢复协议，再批量迁移；在此之前不手工裁剪 archived 条目。2026-09-01 本次收口后的基线为 25 个 archived item、894 行 ledger，尚未达到设计门禁。
+
 ## 四类分诊
 
 新发现任务必须归入且只能归入一个分类：
@@ -73,6 +81,7 @@ Deferred/research items:
 - `rs-transport` 已完成 accepted-primary p104/p128 的 matched numerical convergence 并归档；旧 strict-era raw/figure 保持不变，accepted evidence 不替换正式结果。
 - `plot-sop` 的公共 SOP 合同已登记为 `promoted`；后续逐图族迁移仍按独立 task/PR 推进，不由该 promotion 记录吸收历史图像或批量迁移工作。
 - `diagnostic-workflow-lifecycle` 的 wave1/wave2 退役已完成并合并；16 个历史 YAML 保留为 versioned definition，当前保留 27 个 workflow（其中 23 个带 `workflow_dispatch`、9 个纯手动入口），另保留一个 Maxwell-local target-list 入口。后续生命周期整理必须另立新的 active task，不把历史 wave2 任务重新打开。
+- `analysis-docs-cleanup` 的逻辑 namespace migration、phase-surface series 索引和独立 metadata repair 均已完成并归档；后续 plotting migration、历史图清理或新 metadata mismatch 必须另立任务。
 
 ## 验证与演进
 
