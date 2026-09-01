@@ -504,3 +504,50 @@ gate，而不是在数值层静默裁剪。
 相位边界未闭合问题在 ordered charged 背景中的新暴露，并非已经证明旧 PNJL 或
 旧 BU 全部错误。当前应保留负值作为 `invalid_density` 诊断证据，先完成相位端点、
 Levinson/Mott、节点和截断门禁；在此之前不改 production 默认，不把负值裁剪为零。
+
+## 10. Strict phase backend implementation (2026-09-01)
+
+本阶段新增 `src/relaxtime/ChargedPhaseBackend.jl`，把公式路线中的 strict
+real-axis phase/BU 层收束为 solver-independent diagnostic backend。输入是有序
+retarded 逆传播子 `Delta^R(omega,q)` 的 callable profile，默认相位约定为
+`delta=-arg(Delta^R)`；profile 从高能端反向 unwrap，并显式返回高能端平移量和
+tail span。提供 `strict_phase_gate` 组合阈下根计数、Levinson 阈值相位与高能 tail
+稳定性；提供 `strict_charged_bu_density` 执行单电荷 `domega/pi` 导数型 BU 积分，
+以及 `strict_density_convergence_gate` 比较节点/截断配置。
+
+纯合成路径单测位于
+`tests/unit/relaxtime/test_charged_phase_backend.jl`，覆盖相位对象/符号、branch
+profile、endpoint tail、单电荷测度、显式 gate 失败和 coarse/refined convergence。
+该实现没有接入 `MesonDensity` 默认入口，也没有把有限窗口 anchor 当作已证明的
+`delta(infinity)=0`；真实 `ChargedRPAProvider` profile 的 eta、omega_max、节点、
+Levinson/Mott 和 Bose-support 收敛仍是未决 production gate。
+
+同时新增 `scripts/analysis/relaxtime/audit_charged_phase_backend.jl`，在固定
+`FixedMuBConservedCharges` 背景上通过 `ChargedRPAProvider(:ordered_retarded)` 调用
+该后端，输出四个 charged 通道的 gate/测度/节点配置。绑定态数暂以显式 `q -> 0`
+诊断输入提供，任何物理 Levinson 失败都保留为 `accepted=false`，不会被当作生产结果。
+
+本阶段的完成状态是“公式实现接口、合成测试和真实 profile 诊断已落地”，不是
+production 升格。后续应在真实 profile 通过端点、Levinson/Mott、节点/截断和四算法
+对照后，单独进行 production candidate review。
+
+## 11. 真实 ordered profile 诊断（2026-09-01）
+
+新增脚本已在同一有限 BQS quark-only 背景实际运行：
+`T=170 MeV`、`mu_B=240 MeV`、`rho_Q/rho_B=0.4`、`rho_S=0`，平衡残差为
+`1.44e-15`。脚本对 `pi_plus`、`pi_minus`、`K_plus`、`K_minus` 均使用
+`ChargedRPAProvider(:ordered_retarded)`、完整 charged KMT 耦合和 strict
+`domega/pi`，并比较了 coarse/refined 的 `q`、`omega` 节点及 `qmax/omega_max`。
+
+低成本复现实验输出为未跟踪文件
+`data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/strict_fixed_bqs_t170_mub240_low_refined_v2.csv`。
+本次设置为 coarse `(eta=0.01, Pi_nodes=4, qmax=0.5, q_nodes=2,
+omega_max=6, omega_nodes=4)`，refined `(eta=0.008, Pi_nodes=6, qmax=0.8,
+q_nodes=2, omega_max=7, omega_nodes=6)`，`omega_min=0.5`。
+
+结果边界如下：四个通道的密度均为有限正数，但所有 coarse/refined 行均为
+`accepted=false,status=gate_failed`；`convergence_passed=false`。逐 q 诊断显示
+阈下 root/Levinson gate 在各通道都失败，部分 profile 的高能 tail 也未稳定。
+因此这次运行证明了真实 ordered profile 已接入并能保留失败诊断，但不构成
+Levinson/Mott 或节点/截断 production 通过证据；临时 `q -> 0` 束缚态计数不能替代
+物理绑定态判定。production 默认与旧 `MesonDensity` 路径均未改变。

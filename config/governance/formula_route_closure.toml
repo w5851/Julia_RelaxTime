@@ -52,6 +52,8 @@ formula_tests = [
   "tests/unit/relaxtime/test_meson_rpa_adapter.jl",
   "tests/unit/relaxtime/test_polarization_aniso.jl",
   "tests/unit/relaxtime/test_meson_density.jl",
+  "tests/unit/relaxtime/test_charged_phase_backend.jl",
+  "tests/unit/relaxtime/test_charged_phase_backend_script_contract.jl",
   "tests/unit/models/test_fixed_mub_conserved_charges.jl",
   "tests/regression/relaxtime/test_meson_mass_regression.jl",
   "tests/validation/relaxtime/test_literature_digitized_meson_mass_targets.jl",
@@ -59,11 +61,11 @@ formula_tests = [
 ]
 production_authorized = false
 unresolved_items = [
-  "implement ordered charged retarded B0 and separate it from the source-backed num_s_quark=1 legacy oracle",
+  "run the physical ordered charged profile diagnostic and preserve all endpoint and gate failures",
   "add a provenance-bound legacy Gamma fixed point and a second-sheet pole oracle for q-pole strict-BW",
-  "implement the charge-resolved domega/pi phase-shift measure and stable-particle-limit regression",
-  "implement the high-energy phase anchor, bound-state count, Levinson/Mott and four-algorithm numerical convergence gates",
-  "normal-phase Bose-support gate on the freezeout scan; condensate zero-mode branch if it fails",
+  "run physical charge-resolved domega/pi density and stable-particle-limit regressions",
+  "pass high-energy tail, bound-state count, Levinson/Mott and four-algorithm numerical convergence gates on physical profiles",
+  "run the normal-phase Bose-support gate on the freezeout scan; define a condensate zero-mode branch if it fails",
 ]
 required_document_markers = [
   "route_id: charged_rpa_bu_quark_only",
