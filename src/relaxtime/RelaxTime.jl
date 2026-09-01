@@ -54,6 +54,7 @@ include("TotalPropagator.jl")
 include("MesonMass.jl")
 include("MottTransition.jl")
 include("BUPhaseGates.jl")
+include("ChargedPhaseBackend.jl")
 include("MesonDensity.jl")
 include("MesonThermodynamics.jl")
 include("DifferentialCrossSection.jl")
@@ -81,6 +82,7 @@ using .TotalPropagator
 using .MesonMass
 using .MottTransition
 using .BUPhaseGates
+using .ChargedPhaseBackend
 using .MesonDensity
 using .MesonThermodynamics
 using .DifferentialCrossSection
@@ -99,7 +101,7 @@ for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso
               :PolarizationCache, :AFieldBuilder, :EffectiveCouplings,
               :MesonInteractionKernel, :ChargedRPAKernel, :ChargedRPAProvider, :MesonRPA, :MesonRPAAdapter, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :BUPhaseGates, :MesonDensity, :MesonThermodynamics,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
-              :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
+              :ChargedPhaseBackend, :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
               :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)
     if !isdefined(@__MODULE__, _name)
         Core.eval(@__MODULE__, :(const $_name = RelaxTime.$_name))
