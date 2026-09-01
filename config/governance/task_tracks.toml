@@ -504,6 +504,7 @@ evidence = [
   "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/",
   "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/cep_marker_audit.csv",
   "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/publication_marker_map.csv",
+  "file:data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "sha:22874505877491754eed27519ad8a7b871c82571",
   "note:solver_free_derived_layer_raw_immutable_manuscript_ineligible",
@@ -511,6 +512,7 @@ evidence = [
   "pr:275",
   "sha:ac0674e249176a3453257105bab3b2382e409581",
   "review:author_accepted_publication_clean_v1",
+  "note:publication_clean_figure_layer_mirror_byte_preserved_source_analysis_package_unchanged",
 ]
 
 [[items]]

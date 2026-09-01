@@ -58,7 +58,7 @@
 
 1. `relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/` 是 v1 tau-first 突变和 denominator-chain 分析主包。
 2. `relaxtime/phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/` 是基于 v2 on-shell-kernel production 的迁移和派生显示审计；其表格直接引用 v1 机制摘要，同时新增 v2 定点诊断和一阶分支保护。
-3. `relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/` 是从作者接受的 `prod_v2` raw 派生的论文显示候选层；它保留 raw/clean 双值、19 个相邻点插值和当前 direct-coexistence 两侧 marker，`manuscript_eligible=false`。
+3. `relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/` 是从作者接受的 `prod_v2` raw 派生的论文显示候选层；它保留 raw/clean 双值、19 个相邻点插值和当前 direct-coexistence 两侧 marker，`manuscript_eligible=false`。为便于浏览，18 张已审核 PNG 的字节保持镜像位于 [`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/`](../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/)，对应的图层 manifest 记录在该目录内；分析包仍是派生表和完整 provenance 的 canonical source。
 4. `relaxtime/transport/t200_tauu_spikes/` 现在收纳 T200 tau-u 双窗口机制包，包括两份 Markdown 说明和 `tauu_pos_*.png` 机制图；其默认绘图输出已同步指向该目录。
 
 ## Organization Rules
