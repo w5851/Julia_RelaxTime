@@ -33,6 +33,9 @@ const DEFAULT_OUTPUT = joinpath(
     parse(Float64, get(ENV, name, string(default)))
 @inline _env_int(name::AbstractString, default::Integer) =
     parse(Int, get(ENV, name, string(default)))
+# Supported diagnostic choices: :ordered_retarded and :ordered_pv_cut.
+@inline _prescription() = Symbol(get(ENV, "CHARGED_PHASE_PRESCRIPTION", "ordered_retarded"))
+@inline _omega_measure() = Symbol(get(ENV, "CHARGED_PHASE_OMEGA_MEASURE", "single_charge_domega_over_pi"))
 
 function _solve_background()
     T_MeV = _env_float("CHARGED_PHASE_T_MEV", 170.0)
@@ -84,6 +87,7 @@ end
 function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials, thermo, A_values, kernel, settings)
     spec = charged_rpa_spec(meson)
     coupling = charged_rpa_coupling(kernel, spec)
+    prescription = _prescription()
     m1 = getproperty(masses, spec.pair[1])
     m2 = getproperty(masses, spec.pair[2])
     threshold_fn = q -> sqrt(q^2 + m1^2) + sqrt(q^2 + m2^2)
@@ -95,7 +99,7 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         chemical_potentials,
         thermo,
         A_values;
-        prescription=:ordered_retarded,
+        prescription=prescription,
         eta_inv_fm=settings.eta,
         energy_nodes=settings.polarization_nodes,
     ).value
@@ -124,7 +128,7 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         # zero is an explicit provisional gate input and failures are retained.
         bound_state_count=q -> 0,
         phase_spec=phase_spec,
-        omega_measure=:single_charge_domega_over_pi,
+        omega_measure=_omega_measure(),
         require_levinson=true,
     )
     return (meson=meson, spec=spec, coupling=coupling, μ_meson=μ_meson, result=result, settings=settings)
@@ -171,6 +175,16 @@ function main()
                 profile -> profile.gate !== nothing && !Bool(profile.gate.levinson.passed),
                 q_profiles,
             )
+            gate_profiles = [profile.gate for profile in q_profiles if profile.gate !== nothing]
+            levinson_residual_values = [
+                abs(Float64(gate.levinson.levinson_residual)) for gate in gate_profiles
+            ]
+            levinson_residual_max = isempty(levinson_residual_values) ? NaN : maximum(levinson_residual_values)
+            threshold_phase_values = [Float64(gate.levinson.threshold_phase) for gate in gate_profiles]
+            threshold_phase_min = isempty(threshold_phase_values) ? NaN : minimum(threshold_phase_values)
+            threshold_phase_max = isempty(threshold_phase_values) ? NaN : maximum(threshold_phase_values)
+            tail_span_values = [Float64(gate.levinson.tail_span) for gate in gate_profiles]
+            tail_span_max = isempty(tail_span_values) ? NaN : maximum(tail_span_values)
             push!(rows, (
             route="strict_charged_phase_backend_fixed_bqs",
             production_candidate_status="not_authorized",
@@ -179,6 +193,7 @@ function main()
             mu_meson_inv_fm=Float64(evaluated_item.μ_meson),
             pair="$(evaluated_item.spec.pair[1])bar$(evaluated_item.spec.pair[2])",
             kernel_pair=String(evaluated_item.spec.kernel_pair),
+            polarization_prescription=String(_prescription()),
             T_MeV=background.T_MeV,
             muB_MeV=background.muB_MeV,
             gap_converged=Bool(background.result.converged),
@@ -205,6 +220,10 @@ function main()
             tail_failed_q_count=tail_failed_q_count,
             root_failed_q_count=root_failed_q_count,
             levinson_failed_q_count=levinson_failed_q_count,
+            levinson_residual_max=levinson_residual_max,
+            threshold_phase_min=threshold_phase_min,
+            threshold_phase_max=threshold_phase_max,
+            tail_span_max=tail_span_max,
             density_finite=Bool(result.density_finite),
             density_nonnegative=Bool(result.density_nonnegative),
             threshold_policy=String(result.threshold_policy),

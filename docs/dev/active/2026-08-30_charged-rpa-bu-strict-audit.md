@@ -595,3 +595,51 @@ Levinson/Mott 或节点/截断 production 通过证据；临时 `q -> 0` 束缚�
 3. DMB 的相对论性 Levinson 推广是基于非相对论结果的合理猜测；因此项目 gate 应标为
    conditional，并继续要求独立束缚态计数、阈值/高能端点和 Mott 补偿检查。S02 不改变
    PV/​i0、ordered charged bubble、KMT 或 Ω_M 反馈的其他文献结论。
+
+## 15. 实轴 PV/cut 复核（2026-09-02）
+
+本阶段在 `codex/charged-profile-gates` 分支增加了显式的实轴诊断适配层：
+`OneLoopIntegrals.B0_pv_cut` 与 `ChargedRPAProvider` 的 `:ordered_pv_cut`。
+它不修改历史 `B0`、`PolarizationAniso` 或 production 默认，而是按当前
+`e^{-i omega t}` retarded 边界把已有 `B0` 的主值实部和解析 cut 虚部组合为
+
+```math
+B_0^{\mathrm{PV+ret}}=\operatorname{Re}B_0-i\operatorname{Im}B_0.
+```
+
+纯代数测试已锁定：`B0_pv_cut` 的实部与 `B0` 相同、虚部只做显式边界符号转换；
+provider 元数据返回 `analytic_scope=:real_axis_pv_cut`、`eta_inv_fm=0`，并与
+`:ordered_retarded` 的 `:upper_half_plane_probe`、两个 legacy oracle 区分。
+
+在同一 `T=170 MeV, mu_B=240 MeV, rho_Q/rho_B=0.4, rho_S=0` 的有限-BQS
+quark-only 背景上，低成本网格运行如下：
+
+- `scripts/analysis/relaxtime/audit_charged_phase_backend.jl` 支持通过
+  `CHARGED_PHASE_PRESCRIPTION=ordered_pv_cut` 与
+  `CHARGED_PHASE_OMEGA_MEASURE` 选择诊断处方；CSV 额外保留
+  `polarization_prescription`、Levinson residual、阈值相位范围和高能 tail span。
+- PV-cut 结果保存在未跟踪的
+  `data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/`，不纳入版本库。
+- 在 `qmax=0.4/0.5 fm^-1`、`omega_max=7/8 fm^-1` 的 low/refined 对照中，四个
+  `pi^±/K^±` 密度均为负且 `status=invalid_density`；对应有限-`eta` 运行给出相同
+  量级的正密度，但仍为 `status=gate_failed`。两者均有 `failed_q_count=2`、
+  `tail_failed_q_count=2`，Levinson/root gate 未通过。
+- 这不是 Bose 支撑失败：所有运行都在正常相 `omega>mu_M` 窗口；也不是
+  `domega/pi` 与 `domega/(2pi)` 的共同倍数。PV/retarded 符号差异会改变相位的
+  连续谱方向，但在高能端点和束缚态计数未闭合前，不能把任一符号的密度当作物理
+  结果，更不能做全局相位翻转或把负值裁剪为零。
+
+先前同背景的 `charged_rpa_bu_negative_density` shell breakdown 进一步显示，
+历史 GBU 路径在高能尾端施加常数平移时，K- 的最高 q 壳层可由未锚定的
+`+0.0107` 变为 `-0.0531`；K+ 也出现由 `+0.0414` 变为 `-0.5447` 的壳层。
+这只说明旧的非线性 GBU 权重对相位分支非常敏感，不能直接等同于 strict
+`d(delta)/domega` 积分的误差。strict PV 运行的负值还必须结合 retarded/PV
+切支、端点和独立 Levinson 计数共同判定。当前真实 profile 没有独立的
+Mott 前后态对和物理束缚态计数，因此 Mott 只由合成单元测试覆盖，未宣称真实
+Mott gate 已通过。
+
+当前结论是：旧 `B0` 的实轴主值结构可以作为复核基础，但其 cut 符号不能在没有
+Fourier 边界说明时直接称为本项目 retarded 值。严格 production 前仍需对
+`eta->0+`、PV/cut、相位端点、独立束缚态计数、Levinson/Mott、节点、截断和
+`omega/q` 测度做同一 profile 的联合门禁；本阶段不修改 PNJLCore、Omega_M、
+旧密度入口或 production baseline。

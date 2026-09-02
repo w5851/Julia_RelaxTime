@@ -26,6 +26,11 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 该后端的 `domega/pi` 是默认值；`domega/(2pi)` 只能作为 legacy ratio adapter。
 相位分支、阈值和 Levinson 条件必须先通过，不能用常数 anchor 替代收敛检查。
 
+真实 bubble 可以来自两条独立诊断路径：`ChargedRPAProvider` 的
+`:ordered_retarded`（有限上半平面 `eta`）或 `:ordered_pv_cut`（实轴 Cauchy
+主值实部加解析 cut）。后者不等同于把 `eta` 设成一个很小的正数；两者的
+`eta`、节点、端点和高能尾部都必须分别做收敛对照。
+
 ## 主要 API
 
 ### `StrictChargedPhaseSpec(; ...)`
