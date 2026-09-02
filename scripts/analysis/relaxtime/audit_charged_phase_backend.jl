@@ -23,6 +23,7 @@ using Main.RelaxTime.BUPhaseGates: count_bound_states
 using Main.RelaxTime.ChargedPhaseBackend: StrictChargedPhaseSpec,
                                            strict_charged_rpa_bu_density,
                                            strict_density_convergence_gate
+using Main.RelaxTime.BUPhaseGates: joint_convergence_gate
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction
 
 const CHARGED_MODES = (:pi_plus, :pi_minus, :K_plus, :K_minus)
@@ -177,6 +178,20 @@ function main()
         item = _run_mode(meson, meson_mass, masses, chemical_potentials, thermo, A_values, kernel, _settings(false))
         refined_item = _run_mode(meson, meson_mass, masses, chemical_potentials, thermo, A_values, kernel, _settings(true))
         convergence = strict_density_convergence_gate(item.result, refined_item.result; rtol=0.05)
+        coarse_tail_stable = all(
+            profile -> Bool(profile.profile.tail_stable),
+            item.result.q_profiles,
+        )
+        refined_tail_stable = all(
+            profile -> Bool(profile.profile.tail_stable),
+            refined_item.result.q_profiles,
+        )
+        joint_convergence = joint_convergence_gate([
+            (density=Float64(item.result.density), accepted=Bool(item.result.accepted),
+             tail_stable=coarse_tail_stable),
+            (density=Float64(refined_item.result.density), accepted=Bool(refined_item.result.accepted),
+             tail_stable=refined_tail_stable),
+        ]; rtol=0.05)
         for evaluated_item in (item, refined_item)
             result = evaluated_item.result
             settings = evaluated_item.settings
@@ -259,6 +274,8 @@ function main()
             bound_state_policy=String(result.bound_state_policy),
             convergence_passed=Bool(convergence.passed),
             convergence_relative_difference=convergence.numeric === nothing ? NaN : Float64(convergence.numeric.relative_difference),
+            joint_convergence_passed=Bool(joint_convergence.passed),
+            joint_convergence_endpoint_stable=Bool(joint_convergence.endpoint_stable),
             coarse_density_fm3=Float64(item.result.density),
             refined_density_fm3=Float64(refined_item.result.density),
             ))

@@ -687,8 +687,10 @@ Levinson/Mott gate 均不能通过，不能将这组温度称为已定位的物�
 `BUPhaseGates.joint_convergence_gate` 新增对多个样本的 pairwise 数值比较，并同时
 要求 finite、显式 `accepted` 和（若提供）`tail_stable`。它保留 `eta`、q/omega 节点
 和 cutoff 元数据，适用于下一轮真实 profile 的 PV--finite eta--节点--截断--端点联合
-门禁。当前真实 profile 因复阈下、Levinson 和 tail 失败，联合 gate 仍为 false；没有
-修改 production 默认或旧 `MesonDensity`、PNJLCore、Omega_M 反馈。
+门禁。`audit_charged_phase_backend.jl` 现在同时输出
+`joint_convergence_passed` 与 `joint_convergence_endpoint_stable`。当前真实 profile
+因复阈下、Levinson 和 tail 失败，联合 gate 仍为 false；没有修改 production 默认或
+旧 `MesonDensity`、PNJLCore、Omega_M 反馈。
 
 ### 16.5 当前阶段判定
 

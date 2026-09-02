@@ -11,6 +11,7 @@ const _CHARGED_PHASE_BACKEND_SCRIPT = joinpath(
     @test Meta.parseall(source) isa Expr
     @test occursin("strict_charged_rpa_bu_density", source)
     @test occursin("strict_density_convergence_gate", source)
+    @test occursin("joint_convergence_gate", source)
     @test occursin("charged_polarization", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
     @test occursin("prescription=prescription", source)
@@ -26,6 +27,7 @@ const _CHARGED_PHASE_BACKEND_SCRIPT = joinpath(
     @test occursin("Q_NODES", source)
     @test occursin("OMEGA_NODES", source)
     @test occursin("convergence_passed", source)
+    @test occursin("joint_convergence_passed", source)
     @test occursin("tail_failed_q_count", source)
     @test occursin("meson_mass_inv_fm", source)
     @test occursin("levinson_residual_max", source)
