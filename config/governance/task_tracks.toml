@@ -123,12 +123,12 @@ status = "accepted"
 current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "修复 q-pole Bose 支撑返回语义；随后将 ordered charged profile 接入 phase/Levinson/Mott gate，并进行 q/omega/eta/omega_max/cutoff 收敛门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
+next_action = "建立独立的 charged pole/threshold/bound-state 计数，并沿 q continuation 接入真实 Mott 前后 profile；随后完成 PV、有限 eta、节点、截断和端点联合门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/charged-phase-normalization"
-current_sha = "976b064c2082b370bfd574433c3d44574cd5dc41"
+current_branch = "codex/charged-profile-gates"
+current_sha = "b230571294870799bd9c31699f6f48eda89a398e"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -153,8 +153,11 @@ evidence = [
   "file:tests/unit/relaxtime/test_charged_phase_backend.jl",
   "file:docs/analysis/relaxtime/charged_phase_literature_review_v1/",
   "note:publisher_pdf_provenance_s04_verified_s02_first_page_overlay_s03_not_subscribed",
+  "pr:309",
+  "sha:b230571294870799bd9c31699f6f48eda89a398e",
+  "note:ordered_pv_cut_real_axis_diagnostic_and_profile_gate_audit",
 ]
-updated_at = "2026-09-01"
+updated_at = "2026-09-02"
 
 [[tracks]]
 id = "plot-sop"
