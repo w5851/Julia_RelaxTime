@@ -18,9 +18,12 @@ using Main.Constants_PNJL: ħc_MeV_fm
 using Main.RelaxTime.AFieldBuilder: build_A_triplet
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec, charged_rpa_coupling
 using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAKernel: charged_rpa_inverse
+using Main.RelaxTime.BUPhaseGates: count_bound_states
 using Main.RelaxTime.ChargedPhaseBackend: StrictChargedPhaseSpec,
                                            strict_charged_rpa_bu_density,
                                            strict_density_convergence_gate
+using Main.RelaxTime.BUPhaseGates: joint_convergence_gate
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction
 
 const CHARGED_MODES = (:pi_plus, :pi_minus, :K_plus, :K_minus)
@@ -33,6 +36,9 @@ const DEFAULT_OUTPUT = joinpath(
     parse(Float64, get(ENV, name, string(default)))
 @inline _env_int(name::AbstractString, default::Integer) =
     parse(Int, get(ENV, name, string(default)))
+# Supported diagnostic choices: :ordered_retarded and :ordered_pv_cut.
+@inline _prescription() = Symbol(get(ENV, "CHARGED_PHASE_PRESCRIPTION", "ordered_retarded"))
+@inline _omega_measure() = Symbol(get(ENV, "CHARGED_PHASE_OMEGA_MEASURE", "single_charge_domega_over_pi"))
 
 function _solve_background()
     T_MeV = _env_float("CHARGED_PHASE_T_MEV", 170.0)
@@ -77,6 +83,7 @@ function _settings(refined::Bool)
         omega_min=get_float("OMEGA_MIN", 0.5),
         omega_max=get_float("OMEGA_MAX", refined ? 10.0 : 8.0),
         omega_nodes=get_int("OMEGA_NODES", refined ? 24 : 12),
+        bound_state_nodes=get_int("BOUND_STATE_NODES", refined ? 96 : 64),
         variant=refined ? :refined : :coarse,
     )
 end
@@ -84,6 +91,7 @@ end
 function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials, thermo, A_values, kernel, settings)
     spec = charged_rpa_spec(meson)
     coupling = charged_rpa_coupling(kernel, spec)
+    prescription = _prescription()
     m1 = getproperty(masses, spec.pair[1])
     m2 = getproperty(masses, spec.pair[2])
     threshold_fn = q -> sqrt(q^2 + m1^2) + sqrt(q^2 + m2^2)
@@ -95,10 +103,15 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         chemical_potentials,
         thermo,
         A_values;
-        prescription=:ordered_retarded,
+        prescription=prescription,
         eta_inv_fm=settings.eta,
         energy_nodes=settings.polarization_nodes,
     ).value
+    inverse_fn = (ω, q) -> charged_rpa_inverse(
+        spec,
+        coupling,
+        polarization_fn(ω, q),
+    )
     phase_spec = StrictChargedPhaseSpec(
         tail_points=_env_int("CHARGED_PHASE_TAIL_POINTS", 4),
         tail_tolerance=_env_float("CHARGED_PHASE_TAIL_TOLERANCE", 0.2π),
@@ -120,11 +133,18 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         omega_max=settings.omega_max,
         omega_nodes=settings.omega_nodes,
         threshold=threshold_fn,
-        # The physical bound-state count is not inferred from a finite grid;
-        # zero is an explicit provisional gate input and failures are retained.
-        bound_state_count=q -> 0,
+        # Count subthreshold real-axis zeros independently.  A finite eta
+        # makes this return :complex_subthreshold; that failure remains
+        # visible in q_profiles and is not converted into a physical count.
+        bound_state_count=q -> count_bound_states(
+            inverse_fn,
+            q,
+            threshold_fn(q);
+            omega_nodes=settings.bound_state_nodes,
+            imag_tolerance=_env_float("CHARGED_PHASE_BOUND_STATE_IMAG_TOL", 1.0e-8),
+        ),
         phase_spec=phase_spec,
-        omega_measure=:single_charge_domega_over_pi,
+        omega_measure=_omega_measure(),
         require_levinson=true,
     )
     return (meson=meson, spec=spec, coupling=coupling, μ_meson=μ_meson, result=result, settings=settings)
@@ -158,6 +178,20 @@ function main()
         item = _run_mode(meson, meson_mass, masses, chemical_potentials, thermo, A_values, kernel, _settings(false))
         refined_item = _run_mode(meson, meson_mass, masses, chemical_potentials, thermo, A_values, kernel, _settings(true))
         convergence = strict_density_convergence_gate(item.result, refined_item.result; rtol=0.05)
+        coarse_tail_stable = all(
+            profile -> Bool(profile.profile.tail_stable),
+            item.result.q_profiles,
+        )
+        refined_tail_stable = all(
+            profile -> Bool(profile.profile.tail_stable),
+            refined_item.result.q_profiles,
+        )
+        joint_convergence = joint_convergence_gate([
+            (density=Float64(item.result.density), accepted=Bool(item.result.accepted),
+             tail_stable=coarse_tail_stable),
+            (density=Float64(refined_item.result.density), accepted=Bool(refined_item.result.accepted),
+             tail_stable=refined_tail_stable),
+        ]; rtol=0.05)
         for evaluated_item in (item, refined_item)
             result = evaluated_item.result
             settings = evaluated_item.settings
@@ -171,6 +205,27 @@ function main()
                 profile -> profile.gate !== nothing && !Bool(profile.gate.levinson.passed),
                 q_profiles,
             )
+            bound_state_diagnostics = [
+                profile.bound_state_diagnostic for profile in q_profiles
+                if profile.bound_state_diagnostic !== nothing
+            ]
+            bound_state_complex_q_count = count(
+                diagnostic -> diagnostic.status === :complex_subthreshold,
+                bound_state_diagnostics,
+            )
+            bound_state_status = isempty(bound_state_diagnostics) ? "not_provided" :
+                (bound_state_complex_q_count > 0 ? "complex_subthreshold" :
+                 (all(diagnostic -> diagnostic.status === :ok, bound_state_diagnostics) ? "ok" : "diagnostic_failed"))
+            gate_profiles = [profile.gate for profile in q_profiles if profile.gate !== nothing]
+            levinson_residual_values = [
+                abs(Float64(gate.levinson.levinson_residual)) for gate in gate_profiles
+            ]
+            levinson_residual_max = isempty(levinson_residual_values) ? NaN : maximum(levinson_residual_values)
+            threshold_phase_values = [Float64(gate.levinson.threshold_phase) for gate in gate_profiles]
+            threshold_phase_min = isempty(threshold_phase_values) ? NaN : minimum(threshold_phase_values)
+            threshold_phase_max = isempty(threshold_phase_values) ? NaN : maximum(threshold_phase_values)
+            tail_span_values = [Float64(gate.levinson.tail_span) for gate in gate_profiles]
+            tail_span_max = isempty(tail_span_values) ? NaN : maximum(tail_span_values)
             push!(rows, (
             route="strict_charged_phase_backend_fixed_bqs",
             production_candidate_status="not_authorized",
@@ -179,6 +234,7 @@ function main()
             mu_meson_inv_fm=Float64(evaluated_item.μ_meson),
             pair="$(evaluated_item.spec.pair[1])bar$(evaluated_item.spec.pair[2])",
             kernel_pair=String(evaluated_item.spec.kernel_pair),
+            polarization_prescription=String(_prescription()),
             T_MeV=background.T_MeV,
             muB_MeV=background.muB_MeV,
             gap_converged=Bool(background.result.converged),
@@ -201,16 +257,25 @@ function main()
             omega_min_inv_fm=Float64(result.omega_min),
             omega_max_inv_fm=Float64(result.omega_max),
             omega_nodes=Int(result.omega_nodes),
+            bound_state_nodes=Int(settings.bound_state_nodes),
             failed_q_count=Int(result.failed_q_count),
             tail_failed_q_count=tail_failed_q_count,
             root_failed_q_count=root_failed_q_count,
             levinson_failed_q_count=levinson_failed_q_count,
+            bound_state_complex_q_count=bound_state_complex_q_count,
+            bound_state_status=bound_state_status,
+            levinson_residual_max=levinson_residual_max,
+            threshold_phase_min=threshold_phase_min,
+            threshold_phase_max=threshold_phase_max,
+            tail_span_max=tail_span_max,
             density_finite=Bool(result.density_finite),
             density_nonnegative=Bool(result.density_nonnegative),
             threshold_policy=String(result.threshold_policy),
             bound_state_policy=String(result.bound_state_policy),
             convergence_passed=Bool(convergence.passed),
             convergence_relative_difference=convergence.numeric === nothing ? NaN : Float64(convergence.numeric.relative_difference),
+            joint_convergence_passed=Bool(joint_convergence.passed),
+            joint_convergence_endpoint_stable=Bool(joint_convergence.endpoint_stable),
             coarse_density_fm3=Float64(item.result.density),
             refined_density_fm3=Float64(refined_item.result.density),
             ))

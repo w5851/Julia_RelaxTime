@@ -278,6 +278,21 @@ A_f+A_{f'}+\left[(m_f\mp m_{f'})^2
 [K_ab] = fm^2,  [K_ab Pi_ff'] = 1.
 ```
 
+实轴严格审计同时保留两种可互相校验的数值入口：显式有限 `eta>0` 的
+`B0_retarded` 上半平面探针，以及 `B0_pv_cut` 的“主值实部 + 解析 cut”边界值。
+当前历史 `B0` 的 cut 虚部符号与本项目 `e^{-i omega t}` 的 retarded 边界相反，
+因此
+
+```math
+B_0^{\mathrm{PV+ret}}(\lambda,q)=\operatorname{Re}B_0(\lambda,q)
+ - i\operatorname{Im}B_0(\lambda,q).
+```
+
+这里的负号是边界值约定的显式转换，不是对历史 `B0` 的全局修改；其合理性必须
+通过 `eta -> 0^+`、能量节点和端点测试确认。对应 provider 处方为
+`:ordered_pv_cut`，返回 `analytic_scope=:real_axis_pv_cut`。该诊断入口不绕过
+Levinson/Mott、Bose support 或节点/截断门禁，也不改变 production 默认。
+
 一个与当前凝聚符号相容的 tadpole 关系是
 
 ```math

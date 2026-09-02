@@ -15,7 +15,7 @@ using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using Main.Constants_PNJL: Λ_inv_fm
 
-export B0, B0_retarded, A
+export B0, B0_pv_cut, B0_retarded, A
 
 # ----------------------------------------------------------------------------
 # 基础工具函数
@@ -507,6 +507,32 @@ function B0(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     real_part = term1[1] - term2[1] + term3[1] - term4[1]
     imag_part = term1[2] - term2[2] + term3[2] - term4[2]
     return real_part, imag_part
+end
+
+raw"""
+    B0_pv_cut(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0)
+
+Return the ordered real-axis PV/cut value using the repository's analytic
+principal-value implementation and the `e^{-iωt}` retarded boundary value.
+
+`B0` is retained as the historical real-axis oracle.  Its analytic cut
+component follows the opposite `i0` sign to the explicit upper-half-plane
+probe `B0_retarded(λ+iη)`.  Therefore this diagnostic adapter preserves the
+same PV real part and reverses only the cut imaginary part:
+
+```math
+B_0^{\mathrm{PV+ret}} = \operatorname{Re}B_0 - i\operatorname{Im}B_0.
+```
+
+This is not a change to `B0`'s legacy semantics and does not claim that the
+finite-window regulator, endpoint fallbacks, or numerical cut partition are
+production-converged.  Callers must still perform `eta`, node, and cutoff
+comparisons against `B0_retarded`.
+"""
+function B0_pv_cut(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
+    Φ::Real=0.0, Φbar::Real=0.0) where {T<:Real}
+    real_part, legacy_imag = B0(λ, k, m1, μ1, m2, μ2, T0; Φ=Φ, Φbar=Φbar)
+    return ComplexF64(real_part, -legacy_imag)
 end
 
 # ---------------------------------------------------------------------------

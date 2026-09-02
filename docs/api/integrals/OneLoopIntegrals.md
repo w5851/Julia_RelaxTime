@@ -2,7 +2,7 @@
 
 ## 模块概述
 
-`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含历史实轴积分 `B0`、显式有限 `eta` 的 ordered retarded 积分 `B0_retarded` 与单传播子积分 `A`。实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0.md`、`docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md` 与 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A.md` 中的推导。
+`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含历史实轴积分 `B0`、显式实轴 PV+cut 诊断适配 `B0_pv_cut`、显式有限 `eta` 的 ordered retarded 积分 `B0_retarded` 与单传播子积分 `A`。实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0.md`、`docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md` 与 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A.md` 中的推导。
 
 ## 依赖
 
@@ -16,11 +16,28 @@
 
 - 外部参数 `λ`, `k`, `m1`, `m2`, `μ1`, `μ2`, `T` 均以 fm⁻¹ 表示
 - 分布函数为无量纲
-- `B0` 与 `B0_retarded` 均为无量纲；`A` 为 fm⁻²
+- `B0`、`B0_pv_cut` 与 `B0_retarded` 均为无量纲；`A` 为 fm⁻²
 
 ---
 
 ## API 参考
+
+### `B0_pv_cut(λ, q, m1, μ1, m2, μ2, T; ...)`
+
+在已有 `B0` 的实轴主值实部和解析 cut 幅值基础上，构造当前项目
+`e^{-iωt}` retarded 边界的复数值：`Complex(Re(B0), -Im(B0))`。它是
+严格 phase/BU 审计用的显式 diagnostic，不改变 `B0` 的历史返回语义；
+`eta`、能量节点和截断收敛仍必须与 `B0_retarded` 分别比较。
+
+```julia
+value = B0_pv_cut(
+    k0 + mu1 - mu2,
+    q,
+    m1, mu1, m2, mu2, T;
+    Φ=Phi,
+    Φbar=PhiBar,
+)
+```
 
 ### `B0_retarded(λ, q, m1, μ1, m2, μ2, T; ...)`
 

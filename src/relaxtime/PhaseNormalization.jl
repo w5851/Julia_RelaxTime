@@ -2,10 +2,9 @@
     PhaseNormalization
 
 Pure algebraic contracts connecting a scattering phase, an on-shell
-S-matrix, and the Beth-Uhlenbeck energy measure.  This module deliberately
-does not infer a physical phase from a propagator: that mapping is model and
-analytic-continuation dependent and remains owned by the charged phase
-backend.
+S-matrix, and the Beth-Uhlenbeck energy measure.  The propagator adapter below
+records the project's explicit diagnostic convention; it does not claim that a
+generic off-shell propagator is itself an on-shell S-matrix.
 """
 module PhaseNormalization
 
@@ -17,9 +16,11 @@ export phase_to_s_matrix, s_matrix_argument, s_matrix_to_phase
 export phase_measure_factor, phase_measure
 export s_matrix_log_derivative, s_matrix_density_of_states
 export phase_to_s_matrix_profile, s_matrix_to_phase_profile
+export propagator_phase, propagator_to_s_matrix
 
 const SCATTERING_PHASE = :delta
 const SMATRIX_ARGUMENT = :s_matrix_argument
+const _VALID_PROPAGATOR_OBJECTS = (:inverse_propagator, :propagator)
 
 @inline function phase_variable(variable::Symbol)::Symbol
     variable === SCATTERING_PHASE && return SCATTERING_PHASE
@@ -55,6 +56,45 @@ S-matrix.  If `variable=:s_matrix_argument`, the input is already
     canonical = phase_variable(variable)
     value = _finite_real(phase, "phase")
     return cis(canonical === SCATTERING_PHASE ? 2.0 * value : value)
+end
+
+"""
+    propagator_phase(value; phase_object=:inverse_propagator, phase_sign=...)
+
+Evaluate the explicitly selected local phase convention for a retarded scalar
+propagator object.  The default is the current diagnostic convention
+`delta = -arg(Delta_R_inverse)`.  This is a phase adapter only; endpoint
+branch reconstruction and the physical on-shell normalization remain separate
+gates.
+"""
+@inline function propagator_phase(
+    value::Number;
+    phase_object::Symbol=:inverse_propagator,
+    phase_sign::Integer=(phase_object === :inverse_propagator ? -1 : 1),
+)
+    phase_object in _VALID_PROPAGATOR_OBJECTS || throw(ArgumentError(
+        "phase_object must be :inverse_propagator or :propagator",
+    ))
+    phase_sign in (-1, 1) || throw(ArgumentError("phase_sign must be +1 or -1"))
+    z = _finite_complex(value, "propagator value")
+    return Float64(phase_sign) * atan(imag(z), real(z))
+end
+
+"""Map a retarded propagator object to the diagnostic scalar `S=exp(2im*delta)`.
+
+The returned named tuple keeps the selected object and sign visible to audit
+callers instead of silently treating an off-shell propagator as a scattering
+matrix.
+"""
+@inline function propagator_to_s_matrix(
+    value::Number;
+    phase_object::Symbol=:inverse_propagator,
+    phase_sign::Integer=(phase_object === :inverse_propagator ? -1 : 1),
+)
+    delta = propagator_phase(value; phase_object=phase_object, phase_sign=phase_sign)
+    return (phase=delta, s_matrix=phase_to_s_matrix(delta),
+            phase_object=phase_object, phase_sign=Int(phase_sign),
+            mapping=:diagnostic_propagator_to_scalar_s)
 end
 
 """Return the principal scalar argument of a finite S-matrix value."""
