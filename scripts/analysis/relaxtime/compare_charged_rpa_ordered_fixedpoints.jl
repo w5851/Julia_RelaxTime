@@ -19,6 +19,7 @@ using Main.RelaxTime.AFieldBuilder: build_A_triplet
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec, charged_rpa_coupling,
                                              charged_rpa_inverse, charged_rpa_propagator
 using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAProvider: charged_pair_continuum_thresholds
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction
 
 const FIXEDPOINT_MESONS = (:pi_plus, :pi_minus, :K_plus, :K_minus)
@@ -62,14 +63,20 @@ end
     return abs(value - reference) / scale
 end
 
-function _probe_specs(meson::Symbol, masses)
+function _probe_specs(meson::Symbol, masses, chemical_potentials)
     spec = charged_rpa_spec(meson)
     m1 = getproperty(masses, spec.pair[1])
     m2 = getproperty(masses, spec.pair[2])
-    threshold = m1 + m2
+    μ1 = getproperty(chemical_potentials, spec.pair[1])
+    μ2 = getproperty(chemical_potentials, spec.pair[2])
+    thresholds = charged_pair_continuum_thresholds(0.0, m1, m2, μ1, μ2)
+    threshold = thresholds.k0_threshold_inv_fm
     return (
-        (kind=:below_threshold_q0, omega=0.85 * threshold, q=0.0, threshold=threshold),
-        (kind=:above_threshold_finite_q, omega=sqrt(0.35^2 + (threshold + 0.30)^2), q=0.35, threshold=threshold),
+        (kind=:below_threshold_q0, omega=0.85 * threshold, q=0.0,
+         threshold=threshold, lambda_threshold=thresholds.lambda_threshold_inv_fm),
+        (kind=:above_threshold_finite_q, omega=sqrt(0.35^2 + (threshold + 0.30)^2), q=0.35,
+         threshold=threshold,
+         lambda_threshold=charged_pair_continuum_thresholds(0.35, m1, m2, μ1, μ2).lambda_threshold_inv_fm),
     )
 end
 
@@ -159,7 +166,7 @@ function _fixedpoint_rows(background)
     for meson in FIXEDPOINT_MESONS
         spec = charged_rpa_spec(meson)
         coupling = charged_rpa_coupling(kernel, spec)
-        for probe in _probe_specs(meson, masses)
+        for probe in _probe_specs(meson, masses, chemical_potentials)
             evaluations = NamedTuple[]
             for route in _route_settings()
                 evaluated = charged_polarization(
@@ -232,6 +239,8 @@ function _fixedpoint_rows(background)
                     omega_inv_fm=Float64(probe.omega),
                     q_inv_fm=Float64(probe.q),
                     threshold_inv_fm=Float64(probe.threshold),
+                    lambda_threshold_inv_fm=Float64(probe.lambda_threshold),
+                    threshold_coordinate="external_k0",
                     variant=String(item.route.label),
                     prescription=String(evaluated.prescription),
                     provider=String(evaluated.provider),

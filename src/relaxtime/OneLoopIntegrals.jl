@@ -509,19 +509,105 @@ function B0(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     return real_part, imag_part
 end
 
+"""
+    _tilde_B0_retarded_cut_imag(sign_flag, w, k, m, m_prime, μ, T, Φ, Φbar,
+                                 epsilon_sign)
+
+Return the analytic `eta -> 0+` imaginary part of one logarithmic
+`tilde_B0` term. `w` is the real part of the term's complex argument and
+`epsilon_sign` is the sign of its infinitesimal imaginary part. The sign is
+fixed pointwise by the principal-log boundary rather than by a global flip of
+the historical `B0` cut.
+"""
+function _tilde_B0_retarded_cut_imag(
+    sign_flag::Symbol,
+    w::Real,
+    k::Real,
+    m::Real,
+    m_prime::Real,
+    μ::Real,
+    T0::Real,
+    Φ::Real,
+    Φbar::Real,
+    epsilon_sign::Integer,
+)
+    w_value = Float64(w)
+    k_value = Float64(k)
+    m_value = max(Float64(m), 0.0)
+    m_prime_value = max(Float64(m_prime), 0.0)
+    μ_value = Float64(μ)
+    T_value = Float64(T0)
+    Φ_value = Float64(Φ)
+    Φbar_value = Float64(Φbar)
+    epsilon_sign in (-1, 1) || throw(ArgumentError("epsilon_sign must be +1 or -1"))
+
+    # At k=0, D(E)=z^2+2zE+m^2-m'^2 and the residue follows from
+    # 1/(x+i0*s)=PV(1/x)-i*pi*sign(s)*delta(x).
+    if abs(k_value) < EPS_K
+        abs(w_value) > EPS_SEGMENT || return 0.0
+        Emin = m_value
+        Emax = energy_cutoff(m_value)
+        denominator_term = (w_value^2 + m_value^2 - m_prime_value^2) / 2.0
+        singularity = singularity_k_zero(w_value, Emin, Emax, denominator_term)
+        isempty(singularity) && return 0.0
+        E0 = singularity[1]
+        p0 = internal_momentum(E0, m_value)
+        dist0 = distribution_value_b0(sign_flag, E0, μ_value, T_value, Φ_value, Φbar_value)
+        boundary_sign = sign(epsilon_sign * (w_value + E0))
+        return -2.0 * π * p0 * dist0 / abs(w_value) * boundary_sign
+    end
+
+    Emin = m_value
+    Emax = energy_cutoff(m_value)
+    intervals, _ = singularity_k_positive(
+        w_value, k_value, m_value, m_prime_value, Emin, Emax,
+    )
+    isempty(intervals) && return 0.0
+
+    # The sign of Im[(w+i0+E)^2] can change at E=-w. Split there so the
+    # principal-log boundary sign is constant on every subinterval.
+    total = 0.0
+    for (left, right) in intervals
+        points = Float64[left]
+        if left < -w_value < right
+            push!(points, -w_value)
+        end
+        push!(points, right)
+        sort!(points)
+        for j in 1:(length(points) - 1)
+            a, b = points[j], points[j + 1]
+            b > a || continue
+            midpoint = (a + b) / 2.0
+            p = internal_momentum(midpoint, m_value)
+            common = (w_value + midpoint)^2 - m_prime_value^2
+            numerator = common - (p - k_value)^2
+            denominator = common - (p + k_value)^2
+            log_branch = (numerator < 0.0 ? 1 : 0) - (denominator < 0.0 ? 1 : 0)
+            log_branch == 0 && continue
+            boundary_sign = sign(epsilon_sign * (w_value + midpoint))
+            total += boundary_sign * log_branch * distribution_integral_b0(
+                sign_flag, a, b, μ_value, T_value, Φ_value, Φbar_value,
+            )
+        end
+    end
+    return π * total / k_value
+end
+
 raw"""
     B0_pv_cut(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0)
 
 Return the ordered real-axis PV/cut value using the repository's analytic
 principal-value implementation and the `e^{-iωt}` retarded boundary value.
 
-`B0` is retained as the historical real-axis oracle.  Its analytic cut
-component follows the opposite `i0` sign to the explicit upper-half-plane
-probe `B0_retarded(λ+iη)`.  Therefore this diagnostic adapter preserves the
-same PV real part and reverses only the cut imaginary part:
+`B0` is retained as the historical real-axis oracle. Its PV real part is
+reused, but its cut component is not related to the ordered retarded value by
+one global sign. Each of the four logarithmic terms has its own argument
+`w=+/-lambda` and infinitesimal sign, so the cut is recomputed term by term:
 
 ```math
-B_0^{\mathrm{PV+ret}} = \operatorname{Re}B_0 - i\operatorname{Im}B_0.
+B_0^{\mathrm{PV+ret}} = \operatorname{PV}B_0 + i\operatorname{Im}B_0^{R},
+\qquad
+\operatorname{Im}B_0^{R}=\sum_{j=1}^{4}s_j\operatorname{Im}\widetilde B_{0,j}^{R}.
 ```
 
 This is not a change to `B0`'s legacy semantics and does not claim that the
@@ -531,8 +617,22 @@ comparisons against `B0_retarded`.
 """
 function B0_pv_cut(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     Φ::Real=0.0, Φbar::Real=0.0) where {T<:Real}
-    real_part, legacy_imag = B0(λ, k, m1, μ1, m2, μ2, T0; Φ=Φ, Φbar=Φbar)
-    return ComplexF64(real_part, -legacy_imag)
+    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T0, Φ, Φbar)
+    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T0, Φ, Φbar)
+
+    real_part = term1[1] - term2[1] + term3[1] - term4[1]
+    λ_value = Float64(λ)
+    if abs(λ_value) <= EPS_SEGMENT
+        return ComplexF64(real_part, 0.0)
+    end
+    imag_part =
+        _tilde_B0_retarded_cut_imag(:plus, -λ_value, k, m1, m2, μ1, T0, Φ, Φbar, -1) -
+        _tilde_B0_retarded_cut_imag(:minus, λ_value, k, m1, m2, μ1, T0, Φ, Φbar, 1) +
+        _tilde_B0_retarded_cut_imag(:plus, λ_value, k, m2, m1, μ2, T0, Φ, Φbar, 1) -
+        _tilde_B0_retarded_cut_imag(:minus, -λ_value, k, m2, m1, μ2, T0, Φ, Φbar, -1)
+    return ComplexF64(real_part, imag_part)
 end
 
 # ---------------------------------------------------------------------------

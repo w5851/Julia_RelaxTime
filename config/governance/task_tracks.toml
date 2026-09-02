@@ -127,8 +127,8 @@ next_action = "建立独立的 charged pole/threshold/bound-state 计数，并�
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
-current_branch = "codex/charged-profile-gates"
-current_sha = "64de55f7c40514792dc8319754c21952cf3489f8"
+current_branch = "codex/charged-phase-coordinate-cut-fix"
+current_sha = "6164e4b4fc73f9f9f3db3447ba583fdc851fa268"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -156,6 +156,8 @@ evidence = [
   "pr:309",
   "sha:b230571294870799bd9c31699f6f48eda89a398e",
   "note:ordered_pv_cut_real_axis_diagnostic_and_profile_gate_audit",
+  "sha:6164e4b4fc73f9f9f3db3447ba583fdc851fa268",
+  "note:charged_threshold_coordinate_and_termwise_pv_cut_fix",
 ]
 updated_at = "2026-09-02"
 

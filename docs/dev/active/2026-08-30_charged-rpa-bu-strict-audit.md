@@ -600,14 +600,17 @@ Levinson/Mott 或节点/截断 production 通过证据；临时 `q -> 0` 束缚�
 
 本阶段在 `codex/charged-profile-gates` 分支增加了显式的实轴诊断适配层：
 `OneLoopIntegrals.B0_pv_cut` 与 `ChargedRPAProvider` 的 `:ordered_pv_cut`。
-它不修改历史 `B0`、`PolarizationAniso` 或 production 默认，而是按当前
-`e^{-i omega t}` retarded 边界把已有 `B0` 的主值实部和解析 cut 虚部组合为
+它不修改历史 `B0`、`PolarizationAniso` 或 production 默认，而是复用已有 `B0`
+的主值实部，并按四个 `tilde_B0` 复对数项各自的 `i0` 方向计算当前
+`e^{-i omega t}` retarded 边界 cut；这不是一个全局虚部翻号：
 
 ```math
-B_0^{\mathrm{PV+ret}}=\operatorname{Re}B_0-i\operatorname{Im}B_0.
+B_0^{\mathrm{PV+ret}}=\operatorname{PV}B_0+i\operatorname{Im}B_0^R.
 ```
 
-纯代数测试已锁定：`B0_pv_cut` 的实部与 `B0` 相同、虚部只做显式边界符号转换；
+纯代数/合成测试已锁定：`B0_pv_cut` 的实部与 `B0` 相同，虚部按 cut 区间逐项
+确定；不同 `lambda` 区域可能相对历史值翻转，也可能保持同号。其在远离尖锐端点
+的有限-`eta` 对照中与 `B0_retarded` 相符；
 provider 元数据返回 `analytic_scope=:real_axis_pv_cut`、`eta_inv_fm=0`，并与
 `:ordered_retarded` 的 `:upper_half_plane_probe`、两个 legacy oracle 区分。
 
@@ -625,7 +628,7 @@ quark-only 背景上，低成本网格运行如下：
   量级的正密度，但仍为 `status=gate_failed`。两者均有 `failed_q_count=2`、
   `tail_failed_q_count=2`，Levinson/root gate 未通过。
 - 这不是 Bose 支撑失败：所有运行都在正常相 `omega>mu_M` 窗口；也不是
-  `domega/pi` 与 `domega/(2pi)` 的共同倍数。PV/retarded 符号差异会改变相位的
+  `domega/pi` 与 `domega/(2pi)` 的共同倍数。PV/retarded 切支差异会改变相位的
   连续谱方向，但在高能端点和束缚态计数未闭合前，不能把任一符号的密度当作物理
   结果，更不能做全局相位翻转或把负值裁剪为零。
 
@@ -706,3 +709,21 @@ Levinson/Mott gate 均不能通过，不能将这组温度称为已定位的物�
 - [ ] production candidate 评审。
 
 所有新增数值 CSV 均保持为未跟踪本地诊断产物；当前任务状态继续为 `in progress`。
+
+## 17. 阈值坐标与逐项 PV cut 修正（2026-09-02）
+
+本阶段在独立分支 `codex/charged-phase-coordinate-cut-fix` 中完成两项最小闭合：
+
+1. `ChargedRPAProvider.charged_pair_continuum_thresholds` 明确返回内部
+   `lambda_thr=E_1(q)+E_2(q)` 和外部 `k0_thr=lambda_thr-(mu_1-mu_2)`。
+   strict phase backend 采样的 `omega` 是外部 `k0`，审计脚本与 Mott profile 脚本
+   已改用 `k0_thr`；CSV 同时保留内部阈值和 `threshold_coordinate=external_k0`。
+2. `OneLoopIntegrals.B0_pv_cut` 不再采用未经证明的
+   `Complex(Re(B0),-Im(B0))` 全局翻号，而是对四个复对数项逐项计算解析 cut，
+   `k=0` 使用主值极点的残数边界。历史 `B0`、有限 `eta` 的 `B0_retarded`、
+   legacy provider 和 production 默认均保持不变。
+
+纯单元测试覆盖阈值平移、正负 `lambda` 的不同 cut 符号，并在有限 `eta` 探针远离
+尖锐端点的范围内做数值对照。该修正尚未证明真实 charged profile 通过
+`eta`、节点、截断、端点或 Levinson/Mott gate；若真实 profile 仍出现负密度，必须
+继续检查相位对象/端点和独立束缚态计数，不能把负值裁剪为零。

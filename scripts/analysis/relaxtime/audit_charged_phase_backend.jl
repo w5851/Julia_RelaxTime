@@ -17,7 +17,8 @@ using .Models
 using Main.Constants_PNJL: ħc_MeV_fm
 using Main.RelaxTime.AFieldBuilder: build_A_triplet
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec, charged_rpa_coupling
-using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAProvider: charged_polarization,
+                                           charged_pair_continuum_thresholds
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_inverse
 using Main.RelaxTime.BUPhaseGates: count_bound_states
 using Main.RelaxTime.ChargedPhaseBackend: StrictChargedPhaseSpec,
@@ -94,7 +95,11 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
     prescription = _prescription()
     m1 = getproperty(masses, spec.pair[1])
     m2 = getproperty(masses, spec.pair[2])
-    threshold_fn = q -> sqrt(q^2 + m1^2) + sqrt(q^2 + m2^2)
+    μ1 = getproperty(chemical_potentials, spec.pair[1])
+    μ2 = getproperty(chemical_potentials, spec.pair[2])
+    # strict_charged_bu_density samples external omega=k0.  The ordered
+    # bubble's cut is in lambda=k0+mu1-mu2, hence the explicit shift here.
+    threshold_fn = q -> charged_pair_continuum_thresholds(q, m1, m2, μ1, μ2).k0_threshold_inv_fm
     polarization_fn = (ω, q) -> charged_polarization(
         spec,
         ω,
@@ -195,6 +200,13 @@ function main()
         for evaluated_item in (item, refined_item)
             result = evaluated_item.result
             settings = evaluated_item.settings
+            pair_m1 = Float64(getproperty(masses, evaluated_item.spec.pair[1]))
+            pair_m2 = Float64(getproperty(masses, evaluated_item.spec.pair[2]))
+            pair_mu1 = Float64(getproperty(chemical_potentials, evaluated_item.spec.pair[1]))
+            pair_mu2 = Float64(getproperty(chemical_potentials, evaluated_item.spec.pair[2]))
+            pair_thresholds_q0 = charged_pair_continuum_thresholds(
+                0.0, pair_m1, pair_m2, pair_mu1, pair_mu2,
+            )
             q_profiles = hasproperty(result, :q_profiles) ? result.q_profiles : NamedTuple[]
             tail_failed_q_count = count(profile -> !Bool(profile.profile.tail_stable), q_profiles)
             root_failed_q_count = count(
@@ -243,7 +255,11 @@ function main()
             t_num=background.t_num,
             meson_mass_inv_fm=Float64(meson === :pi_plus || meson === :pi_minus ?
                 background.point.meson_results[:pi].mass : background.point.meson_results[:K].mass),
-            continuum_threshold_q0_inv_fm=Float64(getproperty(masses, evaluated_item.spec.pair[1]) + getproperty(masses, evaluated_item.spec.pair[2])),
+            continuum_threshold_q0_inv_fm=Float64(pair_thresholds_q0.k0_threshold_inv_fm),
+            pair_continuum_threshold_lambda_q0_inv_fm=Float64(
+                pair_thresholds_q0.lambda_threshold_inv_fm,
+            ),
+            threshold_coordinate="external_k0",
             coupling_fm2=Float64(evaluated_item.coupling),
             density_fm3=Float64(result.density),
             accepted=Bool(result.accepted),

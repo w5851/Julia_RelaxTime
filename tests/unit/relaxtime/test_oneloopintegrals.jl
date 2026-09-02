@@ -231,9 +231,9 @@ end
     @test sign(imag(finite_q_probe)) == sign(imag(finite_q_strict))
 
     # At a cut point the explicit upper-half-plane probe approaches the same
-    # PV real part and the opposite analytic-cut sign.  Keep this as a broad
-    # diagnostic tolerance because finite eta and finite energy nodes are not
-    # the exact real-axis limit.
+    # PV real part and the same termwise analytic-cut sign.  Keep this as a
+    # broad diagnostic tolerance because finite eta and finite energy nodes
+    # are not the exact real-axis limit.
     cut = B0_pv_cut(
         0.95, 0.0, 1.5, 0.2, 2.5, 0.05, 0.75;
         Φ=0.4, Φbar=0.45,
@@ -245,6 +245,49 @@ end
     @test real(probe) ≈ real(cut) rtol=0.03 atol=0.01
     @test sign(imag(probe)) == sign(imag(cut))
     @test abs(imag(probe)) > 0.5 * abs(imag(cut))
+
+    @testset "ordered cut sign is termwise, not a global flip" begin
+        # The four logarithmic terms have arguments +/-lambda and opposite
+        # i0 directions.  For one cut the historical sign is reversed, while
+        # another cut keeps it; a single `-imag(B0)` rule cannot represent
+        # both.  The analytic PV/cut adapter agrees with the finite-eta probe
+        # away from the sharp endpoint at this diagnostic resolution.
+        for λ in (0.30, -0.70, 2.00)
+            legacy_value = B0(
+                λ, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+                Φ=params.Φ, Φbar=params.Φbar,
+            )
+            pv_value = B0_pv_cut(
+                λ, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+                Φ=params.Φ, Φbar=params.Φbar,
+            )
+            retarded_value = B0_retarded(
+                λ, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+                Φ=params.Φ, Φbar=params.Φbar, eta_inv_fm=2.0e-3, energy_nodes=1024,
+            )
+            @test real(pv_value) == legacy_value[1]
+            @test real(retarded_value) ≈ real(pv_value) rtol=0.03 atol=0.03
+            @test imag(retarded_value) ≈ imag(pv_value) rtol=0.05 atol=0.03
+        end
+        legacy_low = B0(
+            0.30, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ, Φbar=params.Φbar,
+        )
+        legacy_high = B0(
+            2.00, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ, Φbar=params.Φbar,
+        )
+        pv_low = B0_pv_cut(
+            0.30, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ, Φbar=params.Φbar,
+        )
+        pv_high = B0_pv_cut(
+            2.00, 0.80, params.m1, params.μ1, params.m2, params.μ2, params.T;
+            Φ=params.Φ, Φbar=params.Φbar,
+        )
+        @test sign(imag(pv_low)) == -sign(legacy_low[2])
+        @test sign(imag(pv_high)) == sign(legacy_high[2])
+    end
 end
 
 @testset "OneLoopIntegrals.const_integral_term_A" begin
