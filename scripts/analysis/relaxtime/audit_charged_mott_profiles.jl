@@ -15,6 +15,7 @@ using CSV
 using .Models
 using Main.RelaxTime.AFieldBuilder: build_A_triplet
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec, charged_rpa_coupling
+using Main.RelaxTime.ChargedRPAProvider: charged_pair_continuum_thresholds
 using Main.RelaxTime.ChargedPhaseBackend: strict_mott_gate
 using Main.RelaxTime.MesonInteractionKernel: build_full_kmt_interaction
 
@@ -54,8 +55,16 @@ function _profile_at(background, meson::Symbol, settings)
     )
     mass = meson === :pi_plus || meson === :pi_minus ?
         background.point.meson_results[:pi].mass : background.point.meson_results[:K].mass
-    threshold_q0 = Float64(getproperty(masses, charged_rpa_spec(meson).pair[1]) +
-                           getproperty(masses, charged_rpa_spec(meson).pair[2]))
+    spec = charged_rpa_spec(meson)
+    pair_threshold = charged_pair_continuum_thresholds(
+        0.0,
+        getproperty(masses, spec.pair[1]),
+        getproperty(masses, spec.pair[2]),
+        getproperty(chemical_potentials, spec.pair[1]),
+        getproperty(chemical_potentials, spec.pair[2]),
+    )
+    threshold_q0 = Float64(pair_threshold.k0_threshold_inv_fm)
+    lambda_threshold_q0 = Float64(pair_threshold.lambda_threshold_inv_fm)
     # A high-T pion threshold can fall below the ordinary phase audit window.
     # Lower only this diagnostic window so the threshold endpoint is sampled;
     # record the resulting setting rather than silently extrapolating it.
@@ -76,6 +85,7 @@ function _profile_at(background, meson::Symbol, settings)
         bound_state_count=Int(first_profile.bound_state_count),
         mass=Float64(mass),
         threshold_q0=threshold_q0,
+        lambda_threshold_q0=lambda_threshold_q0,
         bound_state_q_count_min=minimum(Int(profile.bound_state_count) for profile in item.result.q_profiles),
         bound_state_q_count_max=maximum(Int(profile.bound_state_count) for profile in item.result.q_profiles),
         bound_state_complex_q_count=count(
@@ -111,6 +121,8 @@ function main()
             before_mass_inv_fm=before.mass, after_mass_inv_fm=after.mass,
             before_threshold_q0_inv_fm=before.threshold_q0,
             after_threshold_q0_inv_fm=after.threshold_q0,
+            before_pair_threshold_lambda_q0_inv_fm=before.lambda_threshold_q0,
+            after_pair_threshold_lambda_q0_inv_fm=after.lambda_threshold_q0,
             before_mott_gap_inv_fm=before.mass - before.threshold_q0,
             after_mott_gap_inv_fm=after.mass - after.threshold_q0,
             before_bound_state_count=before.bound_state_count,

@@ -280,16 +280,32 @@ A_f+A_{f'}+\left[(m_f\mp m_{f'})^2
 
 实轴严格审计同时保留两种可互相校验的数值入口：显式有限 `eta>0` 的
 `B0_retarded` 上半平面探针，以及 `B0_pv_cut` 的“主值实部 + 解析 cut”边界值。
-当前历史 `B0` 的 cut 虚部符号与本项目 `e^{-i omega t}` 的 retarded 边界相反，
-因此
+这里必须区分外部传播子能量 `k0` 与 bubble 内部变量
+`lambda=k0+mu_f-mu_{f'}`。两体正能量连续谱的内部阈值为
 
 ```math
-B_0^{\mathrm{PV+ret}}(\lambda,q)=\operatorname{Re}B_0(\lambda,q)
- - i\operatorname{Im}B_0(\lambda,q).
+\lambda_{\rm thr}(q)=E_f(q)+E_{f'}(q),\qquad
+k_{0,\rm thr}(q)=\lambda_{\rm thr}(q)-(\mu_f-\mu_{f'}).
 ```
 
-这里的负号是边界值约定的显式转换，不是对历史 `B0` 的全局修改；其合理性必须
-通过 `eta -> 0^+`、能量节点和端点测试确认。对应 provider 处方为
+strict phase backend 的 `omega` 是外部 `k0`，因此阈值门禁必须使用
+`k0_thr`；直接使用 `m_f+m_{f'}` 只在化学势差为零时正确。项目通过
+`ChargedRPAProvider.charged_pair_continuum_thresholds` 同时返回两种坐标。
+
+当前历史 `B0` 的 cut 虚部不能与本项目 `e^{-i omega t}` 的 retarded 边界用一个
+全局符号联系。四个 `tilde_B0` 项分别含有 `+lambda`/`-lambda` 和相反的
+`i0` 方向；`B0_pv_cut` 复用历史 PV 实部，并按每个复对数的负实轴区间逐项
+计算 retarded cut：
+
+```math
+B_0^{\mathrm{PV+ret}}(\lambda,q)=\operatorname{PV}B_0(\lambda,q)
+ + i\operatorname{Im}B_0^{R}(\lambda,q),
+\qquad
+\operatorname{Im}B_0^{R}=\sum_{j=1}^{4}s_j\operatorname{Im}\widetilde B_{0,j}^{R}.
+```
+
+这不是对历史 `B0` 的全局修改；其合理性必须通过 `eta -> 0^+`、能量节点和端点
+测试确认。对应 provider 处方为
 `:ordered_pv_cut`，返回 `analytic_scope=:real_axis_pv_cut`。该诊断入口不绕过
 Levinson/Mott、Bose support 或节点/截断门禁，也不改变 production 默认。
 

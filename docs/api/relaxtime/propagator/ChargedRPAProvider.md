@@ -2,7 +2,7 @@
 
 `ChargedRPAProvider` 是 Phase-C 的 ordered charged bubble 适配层。默认 strict
 处方在 `z=omega+i*eta` 上调用 `OneLoopIntegrals.B0_retarded`；显式的
-`:ordered_pv_cut` 使用实轴主值加解析 cut 的 retarded 边界值；历史实轴
+`:ordered_pv_cut` 使用实轴主值加逐项解析 cut 的 retarded 边界值；历史实轴
 `PolarizationAniso` 则作为两个显式 legacy oracle 保留。
 
 该模块仍是 diagnostic adapter：它不声称已经完成
@@ -29,6 +29,17 @@ ordered = charged_polarization(
 Pi_us = ordered.value
 ```
 
+有序 pair 的连续谱阈值同时存在于内部 `lambda` 坐标和外部传播子 `k0` 坐标。
+`charged_pair_continuum_thresholds` 返回两者，避免把 `m1+m2` 直接当成带化学势的
+外部 `k0` 阈值：
+
+```julia
+using Main.RelaxTime.ChargedRPAProvider: charged_pair_continuum_thresholds
+thresholds = charged_pair_continuum_thresholds(q, m1, m2, mu1, mu2)
+# thresholds.lambda_threshold_inv_fm = E1(q) + E2(q)
+# thresholds.k0_threshold_inv_fm = lambda_threshold - (mu1 - mu2)
+```
+
 ## 处方边界
 
 `prescription` 有四个值：
@@ -36,7 +47,7 @@ Pi_us = ordered.value
 | 处方 | 后端 | strange channel 的 `num_s_quark` | 定位 |
 |---|---|---:|---|
 | `:ordered_retarded`（默认） | `B0_retarded(z=omega+i*eta)` | `0` | strict GBU 上半平面探针 |
-| `:ordered_pv_cut` | `B0_pv_cut`（PV 实部 + retarded cut） | `0` | strict 实轴 PV/cut diagnostic |
+| `:ordered_pv_cut` | `B0_pv_cut`（PV 实部 + 逐项 retarded cut） | `0` | strict 实轴 PV/cut diagnostic |
 | `:ordered_legacy_B0` | 历史 `PolarizationAniso` | `0` | PR289 ordered adapter 兼容 oracle |
 | `:legacy_symmetrized_B0` | 历史 `PolarizationAniso` | `1` | Rehberg/旧 Fortran/Cpp 对齐 oracle |
 
@@ -78,6 +89,8 @@ legacy = charged_polarization(
 `:ordered_pv_cut` 返回 `analytic_scope=:real_axis_pv_cut`、`eta_inv_fm=0` 和
 `energy_nodes=0`。它不表示已经通过 `eta->0+`、端点、Levinson/Mott 或节点/截断
 门禁；这些比较必须由分析脚本显式记录。
+其 cut 虚部按四个 `tilde_B0` 复对数项分别判断 `i0` 方向，不能用
+`-imag(B0)` 的全局翻号替代。
 
 ## 未完成门禁
 

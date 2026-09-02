@@ -11,7 +11,8 @@ if !isdefined(Main, :RelaxTime)
 end
 
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec
-using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAProvider: charged_polarization,
+                                           charged_pair_continuum_thresholds
 using Main.RelaxTime.PolarizationAniso: polarization_aniso
 
 @testset "ChargedRPAProvider Phase C contract" verbose=true begin
@@ -21,6 +22,29 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
     thermo = (T=0.75, Φ=0.4, Φbar=0.45, ξ=0.0)
     thermo_aniso = merge(thermo, (ξ=0.1,))
     k0, q = 0.80, 0.35
+
+    @testset "ordered pair threshold coordinates" begin
+        thresholds = charged_pair_continuum_thresholds(
+            0.0, masses.u, masses.s, chemical_potentials.u, chemical_potentials.s,
+        )
+        λ_expected = masses.u + masses.s
+        @test thresholds.lambda_threshold_inv_fm ≈ λ_expected
+        @test thresholds.chemical_potential_shift_inv_fm ≈ chemical_potentials.u - chemical_potentials.s
+        @test thresholds.k0_threshold_inv_fm ≈ λ_expected - (chemical_potentials.u - chemical_potentials.s)
+
+        finite_q = charged_pair_continuum_thresholds(
+            q, masses.u, masses.s, chemical_potentials.u, chemical_potentials.s,
+        )
+        @test finite_q.lambda_threshold_inv_fm > thresholds.lambda_threshold_inv_fm
+        @test finite_q.k0_threshold_inv_fm ≈ finite_q.lambda_threshold_inv_fm -
+            thresholds.chemical_potential_shift_inv_fm
+        @test_throws ArgumentError charged_pair_continuum_thresholds(
+            -q, masses.u, masses.s, chemical_potentials.u, chemical_potentials.s,
+        )
+        @test_throws ArgumentError charged_pair_continuum_thresholds(
+            q, -masses.u, masses.s, chemical_potentials.u, chemical_potentials.s,
+        )
+    end
 
     @testset "ordered K-plus/K-minus inputs" begin
         plus = charged_polarization(
