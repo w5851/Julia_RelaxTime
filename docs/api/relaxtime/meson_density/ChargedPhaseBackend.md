@@ -79,6 +79,11 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 `BUPhaseGates.mott_phase_gate` 检查绑定态数和阈值相位的同步下降。绑定态数是显式
 输入，不由有限网格自动猜测。
 
+分析脚本 `scripts/analysis/relaxtime/audit_charged_mott_profiles.jl` 在两个显式温度
+上配对真实 ordered profile，并输出质量--阈值差、独立束缚态状态、Levinson 与 Mott
+gate。它不会自动寻找 Mott 温度；默认温度只是诊断候选，任何 `complex_subthreshold`
+或 phase gate 失败都必须保留，不能晋升为物理转变结论。
+
 ### `strict_density_convergence_gate(coarse, refined; rtol=..., atol=...)`
 
 同时检查两次结果是否有限、两次 strict gates 是否通过以及密度是否满足显式相对/

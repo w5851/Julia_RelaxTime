@@ -643,3 +643,64 @@ Fourier 边界说明时直接称为本项目 retarded 值。严格 production �
 `eta->0+`、PV/cut、相位端点、独立束缚态计数、Levinson/Mott、节点、截断和
 `omega/q` 测度做同一 profile 的联合门禁；本阶段不修改 PNJLCore、Omega_M、
 旧密度入口或 production baseline。
+
+## 16. 严格 phase 路线实施更新（2026-09-02）
+
+### 16.1 显式 phase--S-matrix 适配
+
+`PhaseNormalization` 新增 `propagator_phase` 和 `propagator_to_s_matrix`。它们把
+当前诊断约定 `delta = -arg(Delta_R_inverse)`（或显式选择 propagator/符号）映射为
+`S_diagnostic = exp(2im*delta)`，并返回所选对象、符号和映射标签。该适配只闭合
+代数因子二，不声称任意 off-shell 传播子已经等于 on-shell 物理 S 矩阵；连续分支、
+端点和 DMB 测度仍由独立 gate 负责。`tests/unit/relaxtime/test_phase_normalization.jl`
+新增反向映射和对象选择测试。
+
+### 16.2 独立束缚态计数与 q continuation
+
+`BUPhaseGates.count_bound_states` 对给定 `q` 独立采样阈下逆传播子并复用简单实根
+bracket 计数；`continue_bound_state_counts` 对显式 `q_values` 每点重新计数，返回
+前一点差值。该 API 不从 phase unwrap 推断束缚态，也不把有限虚部丢弃；超过阈值时
+返回 `status=:complex_subthreshold`、`passed=false`。strict density backend 现在
+接受整数或此类计数结果，并在每个 `q_profile` 保留 `bound_state_diagnostic`。
+
+真实 fixed-BQS ordered profile 已改为调用该独立计数器，而非旧的 `q -> 0` 占位。
+在低成本设置（`eta=0.01/0.005`、`Pi_nodes=16/32`、`q_nodes=2`、
+`BOUND_STATE_NODES=64/96`）下，四个通道均出现 `bound_state_status=complex_subthreshold`，
+且所有 profile 仍为 `gate_failed`；这说明有限 eta 下无法认证物理束缚态数，不能把
+符号变号计数写成 Levinson 的 `n_B`。
+
+### 16.3 真实 Mott 前后配对
+
+新增分析脚本 `scripts/analysis/relaxtime/audit_charged_mott_profiles.jl`，在两个
+显式温度上配对真实 ordered profile，输出质量--阈值差、两侧独立计数状态、q 点计数
+范围、Levinson 和 Mott gate。高温 pion 阈值低于普通 `omega_min` 时，脚本只在该诊断
+profile 内自动降低窗口下界以覆盖阈值，并记录实际设置。
+
+低成本 `T_before=170 MeV`、`T_after=230 MeV` 运行结果保存在未跟踪本地文件
+`data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/strict_mott_profile_pair_low.csv`。
+该运行显示 pion 的 `m_M-(m_q1+m_q2)` 从负值变为正值，具有阈值跨越迹象；但两侧
+阈下计数均为 `complex_subthreshold`，K 通道的符号变号计数也随 q 改变。因此两侧
+Levinson/Mott gate 均不能通过，不能将这组温度称为已定位的物理 Mott 转变。
+
+### 16.4 联合收敛合同
+
+`BUPhaseGates.joint_convergence_gate` 新增对多个样本的 pairwise 数值比较，并同时
+要求 finite、显式 `accepted` 和（若提供）`tail_stable`。它保留 `eta`、q/omega 节点
+和 cutoff 元数据，适用于下一轮真实 profile 的 PV--finite eta--节点--截断--端点联合
+门禁。当前真实 profile 因复阈下、Levinson 和 tail 失败，联合 gate 仍为 false；没有
+修改 production 默认或旧 `MesonDensity`、PNJLCore、Omega_M 反馈。
+
+### 16.5 当前阶段判定
+
+本次代码与诊断只完成了严格路线的可审核基础设施和失败可见性：
+
+- [x] 显式 phase--S-matrix 代数适配与纯测试；
+- [x] 独立阈下计数、q continuation API 与脚本接入；
+- [x] 真实 Mott profile 配对脚本与低成本诊断；
+- [x] 多轴联合收敛 gate；
+- [ ] 真实 profile 的 PV/有限 eta 极限一致性；
+- [ ] 物理束缚态计数、Levinson/Mott 补偿；
+- [ ] 节点、截断、端点联合通过；
+- [ ] production candidate 评审。
+
+所有新增数值 CSV 均保持为未跟踪本地诊断产物；当前任务状态继续为 `in progress`。

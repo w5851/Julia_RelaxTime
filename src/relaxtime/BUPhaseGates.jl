@@ -11,8 +11,10 @@ module BUPhaseGates
 export STRICT_SINGLE_CHARGE_OMEGA_MEASURE, LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
 export bu_omega_measure, bu_omega_measure_factor
 export anchor_phase_high_energy, count_subthreshold_roots
+export count_bound_states, continue_bound_state_counts
 export levinson_phase_gate, mott_phase_gate
 export bose_support_gate, convergence_gate, four_density_algorithm_labels
+export joint_convergence_gate
 
 const STRICT_SINGLE_CHARGE_OMEGA_MEASURE = :single_charge_domega_over_pi
 const LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE = :legacy_domega_over_2pi
@@ -171,6 +173,77 @@ function count_subthreshold_roots(
         status=status,
         passed=status === :ok,
     )
+end
+
+"""
+    count_bound_states(inverse_fn, q, threshold; kwargs...)
+
+Independently sample a retarded inverse propagator below the two-particle
+threshold and count simple real-axis zero brackets.  A finite imaginary part
+does not get silently discarded: the result is marked `:complex_subthreshold`
+and is diagnostic-only.  This routine is intentionally separate from phase
+unwrapping/Levinson evaluation.
+"""
+function count_bound_states(
+    inverse_fn,
+    q::Real,
+    threshold::Real;
+    omega_min::Real=0.0,
+    omega_nodes::Integer=64,
+    zero_tolerance::Real=1.0e-10,
+    imag_tolerance::Real=1.0e-8,
+)
+    q_value = Float64(q)
+    threshold_value = Float64(threshold)
+    lower = Float64(omega_min)
+    all(isfinite, (q_value, threshold_value, lower)) ||
+        throw(ArgumentError("q, threshold, and omega_min must be finite"))
+    q_value >= 0.0 || throw(ArgumentError("q must be nonnegative"))
+    threshold_value > lower || throw(ArgumentError("threshold must exceed omega_min"))
+    omega_nodes >= 4 || throw(ArgumentError("omega_nodes must be at least 4"))
+    omega = collect(range(lower, threshold_value; length=Int(omega_nodes) + 1))[1:end-1]
+    values = ComplexF64[inverse_fn(Float64(w), q_value) for w in omega]
+    roots = count_subthreshold_roots(
+        omega,
+        values,
+        threshold_value;
+        zero_tolerance=zero_tolerance,
+        imag_tolerance=imag_tolerance,
+    )
+    return merge(roots, (q=q_value, omega_nodes=Int(omega_nodes),
+                         omega_min=lower, independent=true,
+                         counting_method=:subthreshold_sign_brackets))
+end
+
+"""
+    continue_bound_state_counts(inverse_fn, q_values, threshold_fn; kwargs...)
+
+Run the independent bound-state counter along a momentum continuation.  No
+count is inferred from the previous point; `continuation_delta` is reported so
+that a branch jump can be reviewed explicitly.
+"""
+function continue_bound_state_counts(
+    inverse_fn,
+    q_values::AbstractVector{<:Real},
+    threshold_fn;
+    kwargs...
+)
+    isempty(q_values) && throw(ArgumentError("q_values must not be empty"))
+    previous_count = nothing
+    rows = NamedTuple[]
+    for q in q_values
+        q_value = Float64(q)
+        threshold = threshold_fn isa Function ? threshold_fn(q_value) : threshold_fn
+        result = count_bound_states(inverse_fn, q_value, Float64(threshold); kwargs...)
+        delta = previous_count === nothing ? missing : result.count - previous_count
+        push!(rows, merge(result, (
+            continuation_previous_count=previous_count === nothing ? missing : previous_count,
+            continuation_delta=delta,
+            continuation_index=length(rows) + 1,
+        )))
+        previous_count = result.count
+    end
+    return rows
 end
 
 function _linear_interpolate(x::Vector{Float64}, y::Vector{Float64}, point::Float64)
@@ -339,6 +412,61 @@ function convergence_gate(
         relative_difference=relative_difference,
         rtol=rel_tol,
         atol=abs_tol,
+    )
+end
+
+"""
+    joint_convergence_gate(samples; value_field=:density, rtol=..., atol=...)
+
+Apply pairwise numerical convergence checks to an ordered sequence of strict
+diagnostic results.  The contract also requires explicit acceptance and,
+when present, a stable endpoint flag on every sample.  Optional metadata such
+as `eta_inv_fm`, `q_nodes`, `omega_nodes`, `qmax_inv_fm`, and `omega_max_inv_fm`
+is copied into the returned audit record; no axis is silently treated as
+converged merely because a density is finite.
+"""
+function joint_convergence_gate(
+    samples::AbstractVector;
+    value_field::Symbol=:density,
+    rtol::Real=0.05,
+    atol::Real=1.0e-10,
+    require_accepted::Bool=true,
+)
+    length(samples) >= 2 || throw(ArgumentError("at least two convergence samples are required"))
+    all(sample -> hasproperty(sample, value_field), samples) ||
+        throw(ArgumentError("every sample must provide $(value_field)"))
+    finite = all(sample -> isfinite(Float64(getproperty(sample, value_field))), samples)
+    pairwise = [
+        convergence_gate(
+            Float64(getproperty(samples[i], value_field)),
+            Float64(getproperty(samples[i + 1], value_field));
+            rtol=rtol,
+            atol=atol,
+        ) for i in 1:(length(samples) - 1)
+    ]
+    accepted = all(sample -> !require_accepted ||
+        (hasproperty(sample, :accepted) && Bool(getproperty(sample, :accepted))), samples)
+    endpoint_stable = all(sample -> !hasproperty(sample, :tail_stable) ||
+        Bool(getproperty(sample, :tail_stable)), samples)
+    return (
+        passed=finite && accepted && endpoint_stable && all(item -> item.passed, pairwise),
+        finite=finite,
+        accepted=accepted,
+        endpoint_stable=endpoint_stable,
+        pairwise=pairwise,
+        sample_count=length(samples),
+        value_field=value_field,
+        rtol=Float64(rtol),
+        atol=Float64(atol),
+        metadata=map(samples) do sample
+            (
+                eta_inv_fm=hasproperty(sample, :eta_inv_fm) ? getproperty(sample, :eta_inv_fm) : missing,
+                qmax_inv_fm=hasproperty(sample, :qmax_inv_fm) ? getproperty(sample, :qmax_inv_fm) : missing,
+                q_nodes=hasproperty(sample, :q_nodes) ? getproperty(sample, :q_nodes) : missing,
+                omega_max_inv_fm=hasproperty(sample, :omega_max_inv_fm) ? getproperty(sample, :omega_max_inv_fm) : missing,
+                omega_nodes=hasproperty(sample, :omega_nodes) ? getproperty(sample, :omega_nodes) : missing,
+            )
+        end,
     )
 end
 

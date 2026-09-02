@@ -30,6 +30,7 @@ using ..BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
                       mott_phase_gate,
                       anchor_phase_high_energy,
                       convergence_gate
+using ..PhaseNormalization: propagator_phase, propagator_to_s_matrix
 
 export StrictChargedPhaseSpec
 export strict_retarded_phase
@@ -104,7 +105,11 @@ end
     ))
     phase_sign in (-1, 1) || throw(ArgumentError("phase_sign must be +1 or -1"))
     z = _finite_complex(inverse_value, "inverse_value")
-    return Float64(phase_sign) * atan(imag(z), real(z))
+    return propagator_phase(
+        z;
+        phase_object=phase_object,
+        phase_sign=phase_sign,
+    )
 end
 
 """
@@ -124,10 +129,12 @@ function strict_phase_profile(
         "omega and inverse_values must have the same length",
     ))
     values = ComplexF64[_finite_complex(value, "inverse_values[$i]") for (i, value) in enumerate(inverse_values)]
-    raw = Float64[
-        strict_retarded_phase(value; phase_object=spec.phase_object, phase_sign=spec.phase_sign)
+    mapped = [
+        propagator_to_s_matrix(value; phase_object=spec.phase_object, phase_sign=spec.phase_sign)
         for value in values
     ]
+    raw = Float64[mapping.phase for mapping in mapped]
+    s_matrix_values = ComplexF64[mapping.s_matrix for mapping in mapped]
     anchored = anchor_phase_high_energy(
         ω,
         raw;
@@ -138,6 +145,7 @@ function strict_phase_profile(
     return (
         omega=ω,
         inverse_values=values,
+        s_matrix_values=s_matrix_values,
         raw_phase=raw,
         unwrapped_phase=anchored.unwrapped_phase,
         anchored_phase=anchored.anchored_phase,
@@ -345,6 +353,7 @@ function strict_charged_bu_density(
     q_profiles = NamedTuple[]
     q_integral = 0.0
     failed_q_count = 0
+    previous_bound_state_count = nothing
 
     @inbounds for iq in eachindex(q_grid, q_weights)
         q = Float64(q_grid[iq])
@@ -352,8 +361,12 @@ function strict_charged_bu_density(
         profile = strict_phase_profile(ω_grid, values; spec=phase_spec)
         threshold_q = threshold isa Function ? Float64(threshold(q)) :
             (threshold === nothing ? NaN : Float64(threshold))
-        bound_state_count_q = bound_state_count isa Function ? Int(bound_state_count(q)) :
-            (bound_state_count === nothing ? 0 : Int(bound_state_count))
+        bound_state_input = bound_state_count isa Function ? bound_state_count(q) :
+            (bound_state_count === nothing ? 0 : bound_state_count)
+        bound_state_count_q = bound_state_input isa Integer ? Int(bound_state_input) :
+            (hasproperty(bound_state_input, :count) ? Int(getproperty(bound_state_input, :count)) :
+             throw(ArgumentError("bound_state_count(q) must return an integer or a count result")))
+        bound_state_diagnostic = bound_state_input isa Integer ? nothing : bound_state_input
         isfinite(threshold_q) && ωmin < threshold_q < ωmax || threshold === nothing ||
             throw(ArgumentError("threshold(q) must be finite and inside the omega grid"))
         bound_state_count_q >= 0 || throw(ArgumentError("bound_state_count(q) must be nonnegative"))
@@ -384,7 +397,12 @@ function strict_charged_bu_density(
             accepted=accepted_q,
             profile=profile,
             gate=gate,
+            bound_state_diagnostic=bound_state_diagnostic,
+            continuation_previous_count=previous_bound_state_count === nothing ? missing : previous_bound_state_count,
+            continuation_delta=previous_bound_state_count === nothing ? missing :
+                bound_state_count_q - previous_bound_state_count,
         ))
+        previous_bound_state_count = bound_state_count_q
     end
 
     density = Float64(degeneracy) * q_integral / temperature

@@ -18,6 +18,8 @@ using Main.Constants_PNJL: ħc_MeV_fm
 using Main.RelaxTime.AFieldBuilder: build_A_triplet
 using Main.RelaxTime.ChargedRPAKernel: charged_rpa_spec, charged_rpa_coupling
 using Main.RelaxTime.ChargedRPAProvider: charged_polarization
+using Main.RelaxTime.ChargedRPAKernel: charged_rpa_inverse
+using Main.RelaxTime.BUPhaseGates: count_bound_states
 using Main.RelaxTime.ChargedPhaseBackend: StrictChargedPhaseSpec,
                                            strict_charged_rpa_bu_density,
                                            strict_density_convergence_gate
@@ -80,6 +82,7 @@ function _settings(refined::Bool)
         omega_min=get_float("OMEGA_MIN", 0.5),
         omega_max=get_float("OMEGA_MAX", refined ? 10.0 : 8.0),
         omega_nodes=get_int("OMEGA_NODES", refined ? 24 : 12),
+        bound_state_nodes=get_int("BOUND_STATE_NODES", refined ? 96 : 64),
         variant=refined ? :refined : :coarse,
     )
 end
@@ -103,6 +106,11 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         eta_inv_fm=settings.eta,
         energy_nodes=settings.polarization_nodes,
     ).value
+    inverse_fn = (ω, q) -> charged_rpa_inverse(
+        spec,
+        coupling,
+        polarization_fn(ω, q),
+    )
     phase_spec = StrictChargedPhaseSpec(
         tail_points=_env_int("CHARGED_PHASE_TAIL_POINTS", 4),
         tail_tolerance=_env_float("CHARGED_PHASE_TAIL_TOLERANCE", 0.2π),
@@ -124,9 +132,16 @@ function _run_mode(meson::Symbol, meson_mass::Real, masses, chemical_potentials,
         omega_max=settings.omega_max,
         omega_nodes=settings.omega_nodes,
         threshold=threshold_fn,
-        # The physical bound-state count is not inferred from a finite grid;
-        # zero is an explicit provisional gate input and failures are retained.
-        bound_state_count=q -> 0,
+        # Count subthreshold real-axis zeros independently.  A finite eta
+        # makes this return :complex_subthreshold; that failure remains
+        # visible in q_profiles and is not converted into a physical count.
+        bound_state_count=q -> count_bound_states(
+            inverse_fn,
+            q,
+            threshold_fn(q);
+            omega_nodes=settings.bound_state_nodes,
+            imag_tolerance=_env_float("CHARGED_PHASE_BOUND_STATE_IMAG_TOL", 1.0e-8),
+        ),
         phase_spec=phase_spec,
         omega_measure=_omega_measure(),
         require_levinson=true,
@@ -175,6 +190,17 @@ function main()
                 profile -> profile.gate !== nothing && !Bool(profile.gate.levinson.passed),
                 q_profiles,
             )
+            bound_state_diagnostics = [
+                profile.bound_state_diagnostic for profile in q_profiles
+                if profile.bound_state_diagnostic !== nothing
+            ]
+            bound_state_complex_q_count = count(
+                diagnostic -> diagnostic.status === :complex_subthreshold,
+                bound_state_diagnostics,
+            )
+            bound_state_status = isempty(bound_state_diagnostics) ? "not_provided" :
+                (bound_state_complex_q_count > 0 ? "complex_subthreshold" :
+                 (all(diagnostic -> diagnostic.status === :ok, bound_state_diagnostics) ? "ok" : "diagnostic_failed"))
             gate_profiles = [profile.gate for profile in q_profiles if profile.gate !== nothing]
             levinson_residual_values = [
                 abs(Float64(gate.levinson.levinson_residual)) for gate in gate_profiles
@@ -216,10 +242,13 @@ function main()
             omega_min_inv_fm=Float64(result.omega_min),
             omega_max_inv_fm=Float64(result.omega_max),
             omega_nodes=Int(result.omega_nodes),
+            bound_state_nodes=Int(settings.bound_state_nodes),
             failed_q_count=Int(result.failed_q_count),
             tail_failed_q_count=tail_failed_q_count,
             root_failed_q_count=root_failed_q_count,
             levinson_failed_q_count=levinson_failed_q_count,
+            bound_state_complex_q_count=bound_state_complex_q_count,
+            bound_state_status=bound_state_status,
             levinson_residual_max=levinson_residual_max,
             threshold_phase_min=threshold_phase_min,
             threshold_phase_max=threshold_phase_max,
