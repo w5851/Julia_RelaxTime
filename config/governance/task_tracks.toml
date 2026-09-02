@@ -128,7 +128,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
 current_branch = "codex/charged-profile-gates"
-current_sha = "44dfd1800d36c7e9e1930c32e8ca1fcf79e0ccde"
+current_sha = "64de55f7c40514792dc8319754c21952cf3489f8"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
