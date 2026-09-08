@@ -5,12 +5,12 @@ route_id: charged_rpa_bu_quark_only
 初始基线：`origin/main` @ `bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b`
 更新日期：2026-08-31
 
-本文件不是“已经完成的完整 charged-RPA/BU 数值实现”，而是为 PR290 建立的、
-可交给独立审阅者复核的公式规范。本版已经把选定的 strict GBU 主路线从微观
-PNJL/KMT 模型闭合到正常相密度公式；ordered retarded bubble 与 charged kernel
-代码已经作为 diagnostic backend 落地，仍未完成的是严格 BU 密度、全域数值
-收敛和 production gate。这里的“公式闭合”不等于“实现完成”，任何未决 gate
-都必须在升格 production 前单独关闭。
+本文件不是“已经授权 production 的完整 charged-RPA/BU 数值实现”，而是为 PR290
+建立的、可交给独立审阅者复核的公式规范。本版已经把选定的 strict GBU 主路线从
+微观 PNJL/KMT 模型闭合到正常相密度公式，并新增独立的
+`ChargedPhaseBackend` strict phase/BU 诊断后端；真实 ordered charged profile 已
+接入固定 BQS 诊断，但全域数值收敛和 production gate 尚未通过。这里的“公式闭合”不
+等于“production 授权”，任何未决 gate 都必须在升格 production 前单独关闭。
 
 ## 1. 范围与计算目标
 
@@ -483,6 +483,22 @@ production 级 gate 对每个 `(channel,q,state)` 至少执行：
 这就是“高能相位归一化和 Levinson gate”的具体含义。它防止任意 `2pi` branch
 或常数偏移在使用相移本体的 BU 公式中产生伪密度。
 
+### 6.4.1 Strict charged phase backend 的唯一代码合同
+
+`src/relaxtime/ChargedPhaseBackend.jl` 将上述连续公式收束为一个不依赖求解器的
+诊断接口：输入有序 `Delta^R(omega,q)`，默认计算
+`delta=-arg(Delta^R)`，从高能端反向 unwrap，报告有限端点的 tail span，并在
+提供阈值和束缚态数时组合 root-count/Levinson gate。密度使用导数型
+`domega/pi`；这与旧 `MesonDensity` 的分部积分式、legacy `domega/(2pi)` 和
+`phase_anchor=:high_energy_zero` 明确分离。
+
+该后端允许合成 inverse-propagator 路径验证分支、端点、测度和节点/截断比较，
+但不会把有限窗口 endpoint 平移自动解释为 `delta(infinity)=0`，也不会在 gate
+失败时裁剪负密度。`strict_charged_rpa_bu_density` 只把
+`1-4K_a Pi_a^R` 与该积分器组合；实际 `ChargedRPAProvider(:ordered_retarded)`
+调用示例位于 `scripts/analysis/relaxtime/audit_charged_phase_backend.jl`。
+`eta`/`omega_max` 外推和 Mott 前后配对仍是 production candidate 的未决项。
+
 ## 7. BU 数密度与带电化学势
 
 ### 7.1 介子化学势
@@ -588,9 +604,10 @@ production 升格，并另建“凝聚零模 + 连续谱”路线；在此之前
 | PNJL 平均场、质量、BQS | `src/models/pnjl_physics/PNJLCore.jl`、`src/models/solver/spec/ConstraintModes.jl`、`src/models/solver/spec/Conditions.jl` | `FixedMuBConservedCharges` 代数/求解测试（含 `tests/unit/models/test_fixed_mub_conserved_charges.jl`）；不含 `Omega_M` |
 | KMT `K_ab` | `src/relaxtime/MesonInteractionKernel.jl` | `tests/unit/relaxtime/test_meson_interaction_kernel.jl`；纯代数 backend |
 | 中性 `(0,3,8)` 矩阵与 charged 归一化 | `src/relaxtime/MesonRPA.jl`、`MesonRPAAdapter.jl` | `tests/unit/relaxtime/test_meson_rpa.jl` 用显式 ladder 顶角和 Goldstone identity 锁定 `Pi_matrix=2Pi_ordered`；adapter 仍只实现中性矩阵 |
-| `A_f/B0` 泡 | `src/relaxtime/OneLoopIntegrals.jl`、`OneLoopIntegralsAniso.jl`、`PolarizationAniso.jl` | `tests/unit/relaxtime/test_oneloopintegrals*.jl`、`test_polarization_aniso.jl`；`num_s_quark=1` 是 source-backed legacy prescription，strict GBU 的 ordered retarded backend 尚未接入 |
+| `A_f/B0` 泡 | `src/relaxtime/OneLoopIntegrals.jl`、`OneLoopIntegralsAniso.jl`、`PolarizationAniso.jl` | `tests/unit/relaxtime/test_oneloopintegrals*.jl`、`test_polarization_aniso.jl`；`num_s_quark=1` 是 source-backed legacy prescription，ordered retarded profile 已由诊断脚本接入，production gate 仍待通过 |
 | legacy pole 回归 | `src/relaxtime/MesonMass.jl`、`PolarizationAniso.polarization_with_width` | `tests/regression/relaxtime/test_meson_mass_regression.jl`、literature/legacy Fortran validation 固定质量；尚缺 hash-bound `Gamma` 固定点 |
 | 四类介子数密度 | `stable_meson_number_density`、`strict_bw_meson_number_density`、`strict_bw_qpole_meson_number_density`、`phase_shift_meson_number_density` | `tests/unit/relaxtime/test_meson_density.jl` 及对应 workflow tests；四类均可调用；phase-shift 已提供显式 strict `domega/pi` 与 legacy `domega/(2pi)`，但 production 默认未切换 |
+| strict charged phase/BU diagnostic | `src/relaxtime/ChargedPhaseBackend.jl` | `tests/unit/relaxtime/test_charged_phase_backend.jl`；合成路径锁定 `-arg(Delta^R)`、高能 tail、`domega/pi` 与 convergence contract；不改变 production 默认 |
 | route registry | `config/governance/formula_route_closure.toml`、`scripts/dev/check_formula_route_closure.jl` | `tests/unit/config/test_formula_route_closure.jl`；只检查闭合包完整性 |
 
 当前实现中 `FullKMTInteraction` 可以把 `K12/K45` 注入既有 charged BU 入口，但这

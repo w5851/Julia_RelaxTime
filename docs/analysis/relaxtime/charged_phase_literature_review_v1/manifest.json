@@ -1,0 +1,74 @@
+{
+  "artifact": "charged_phase_literature_review_v1",
+  "title": "charged-RPA/BU 严格路线定向文献综述",
+  "status": "diagnostic_background_only",
+  "review_date": "2026-09-01",
+  "repository": "D:/w/jrt-ord",
+  "git_head": "81fcc26d8a7c372db44403cfb0be20869f195001",
+  "branch": "codex/charged-rpa-bu-strict-phase-backend",
+  "scope": [
+    "2+1 flavor PNJL/NJL charged K+/pi+ and K-/pi-",
+    "ordered unequal-mass charged RPA",
+    "retarded i0/PV phase and branch reconstruction",
+    "bound-state counting, Levinson and Mott endpoint closure",
+    "standard BU and generalized BU density",
+    "full KMT coupling and isospin/mu_I/BQS closure",
+    "freezeout path and qualitative experimental trend"
+  ],
+  "not_claimed": [
+    "literal exhaustive census of every published paper",
+    "unique author implementation of every numerical phase convention",
+    "production authorization for the current strict branch",
+    "full Omega_M feedback or complete hadronic BQS equilibrium"
+  ],
+  "databases_and_routes": [
+    "arXiv public metadata/full text",
+    "APS and SCOAP3 open pages/files",
+    "CPC/IHEP open pages/files",
+    "INSPIRE public metadata and open-file links",
+    "local temp10 extracted corpus for prior project evidence"
+  ],
+  "search_limitations": [
+    "INSPIRE MCP search tools were not available in this runtime",
+    "web search result counts are dynamic and were not used as exact population counts",
+    "publisher paywalls were not bypassed",
+    "XJTU institution route used only after explicit user authorization; publisher pages/PDFs remain outside Git"
+  ],
+  "files": {
+    "report": "README.md",
+    "search_log": "tables/search_log.csv",
+    "source_screening": "tables/source_screening.csv",
+    "evidence_matrix": "tables/evidence_matrix.csv",
+    "claim_ledger": "tables/claim_ledger.csv",
+    "publisher_pdf_provenance": "tables/publisher_pdf_provenance.csv"
+  },
+  "local_evidence_roots": [
+    "D:/Desktop/Julia_RelaxTime/temp10/meson_pressure_eos_literature_scan",
+    "D:/w/jrt-ord/src/relaxtime/OneLoopIntegrals.jl",
+    "D:/w/jrt-ord/src/relaxtime/ChargedRPAProvider.jl",
+    "D:/w/jrt-ord/src/relaxtime/ChargedPhaseBackend.jl",
+    "D:/w/jrt-ord/src/relaxtime/BUPhaseGates.jl",
+    "D:/w/jrt-ord/src/relaxtime/MesonDensity.jl",
+    "D:/w/jrt-ord/docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
+  ],
+  "source_ids": [
+    "S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13", "S14", "S15", "S16", "S17", "S18", "S19", "S20", "S21", "S22", "S23", "S24"
+  ],
+  "publisher_follow_up": {
+    "verified": ["S04"],
+    "verified_with_first_page_overlay": ["S02"],
+    "institution_not_subscribed": ["S03"],
+    "blocked_by_captcha": ["S03"],
+    "repository_retention": "Only metadata, route evidence, file hash and verification status are tracked; copyrighted PDFs remain in D:/Desktop/paper/dev/outputs/gateway_fetch"
+  },
+  "s02_follow_up": {
+    "documented_in": "README.md section 10",
+    "verified_pages": "page 1 lower article body plus pages 2-26; page 1 top overlay excluded",
+    "changed_conclusions": [
+      "DMB directly fixes the on-shell S-matrix derivative normalization, conditional on phase normalization",
+      "the relativistic Levinson extension is conditional rather than an unconditional theorem",
+      "retarded-propagator phase, unwrap and high_energy_zero remain later field-theory/numerical mappings"
+    ]
+  },
+  "review_decision": "public_full_text_and_public_metadata_are_sufficient_for_the_core_formula_and_route_audit; S04 publisher PDF is cleanly verified, S02 is usable with a documented first-page overlay after visual/page-level review, and S03 has no authorized full text because ScienceDirect reports that Xi'an Jiaotong University does not subscribe to the content"
+}

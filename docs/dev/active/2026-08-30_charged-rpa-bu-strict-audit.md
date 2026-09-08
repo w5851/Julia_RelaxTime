@@ -504,3 +504,94 @@ gate，而不是在数值层静默裁剪。
 相位边界未闭合问题在 ordered charged 背景中的新暴露，并非已经证明旧 PNJL 或
 旧 BU 全部错误。当前应保留负值作为 `invalid_density` 诊断证据，先完成相位端点、
 Levinson/Mott、节点和截断门禁；在此之前不改 production 默认，不把负值裁剪为零。
+
+## 10. Strict phase backend implementation (2026-09-01)
+
+本阶段新增 `src/relaxtime/ChargedPhaseBackend.jl`，把公式路线中的 strict
+real-axis phase/BU 层收束为 solver-independent diagnostic backend。输入是有序
+retarded 逆传播子 `Delta^R(omega,q)` 的 callable profile，默认相位约定为
+`delta=-arg(Delta^R)`；profile 从高能端反向 unwrap，并显式返回高能端平移量和
+tail span。提供 `strict_phase_gate` 组合阈下根计数、Levinson 阈值相位与高能 tail
+稳定性；提供 `strict_charged_bu_density` 执行单电荷 `domega/pi` 导数型 BU 积分，
+以及 `strict_density_convergence_gate` 比较节点/截断配置。
+
+纯合成路径单测位于
+`tests/unit/relaxtime/test_charged_phase_backend.jl`，覆盖相位对象/符号、branch
+profile、endpoint tail、单电荷测度、显式 gate 失败和 coarse/refined convergence。
+该实现没有接入 `MesonDensity` 默认入口，也没有把有限窗口 anchor 当作已证明的
+`delta(infinity)=0`；真实 `ChargedRPAProvider` profile 的 eta、omega_max、节点、
+Levinson/Mott 和 Bose-support 收敛仍是未决 production gate。
+
+同时新增 `scripts/analysis/relaxtime/audit_charged_phase_backend.jl`，在固定
+`FixedMuBConservedCharges` 背景上通过 `ChargedRPAProvider(:ordered_retarded)` 调用
+该后端，输出四个 charged 通道的 gate/测度/节点配置。绑定态数暂以显式 `q -> 0`
+诊断输入提供，任何物理 Levinson 失败都保留为 `accepted=false`，不会被当作生产结果。
+
+本阶段的完成状态是“公式实现接口、合成测试和真实 profile 诊断已落地”，不是
+production 升格。后续应在真实 profile 通过端点、Levinson/Mott、节点/截断和四算法
+对照后，单独进行 production candidate review。
+
+## 11. 真实 ordered profile 诊断（2026-09-01）
+
+新增脚本已在同一有限 BQS quark-only 背景实际运行：
+`T=170 MeV`、`mu_B=240 MeV`、`rho_Q/rho_B=0.4`、`rho_S=0`，平衡残差为
+`1.44e-15`。脚本对 `pi_plus`、`pi_minus`、`K_plus`、`K_minus` 均使用
+`ChargedRPAProvider(:ordered_retarded)`、完整 charged KMT 耦合和 strict
+`domega/pi`，并比较了 coarse/refined 的 `q`、`omega` 节点及 `qmax/omega_max`。
+
+低成本复现实验输出为未跟踪文件
+`data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/strict_fixed_bqs_t170_mub240_low_refined_v2.csv`。
+本次设置为 coarse `(eta=0.01, Pi_nodes=4, qmax=0.5, q_nodes=2,
+omega_max=6, omega_nodes=4)`，refined `(eta=0.008, Pi_nodes=6, qmax=0.8,
+q_nodes=2, omega_max=7, omega_nodes=6)`，`omega_min=0.5`。
+
+结果边界如下：四个通道的密度均为有限正数，但所有 coarse/refined 行均为
+`accepted=false,status=gate_failed`；`convergence_passed=false`。逐 q 诊断显示
+阈下 root/Levinson gate 在各通道都失败，部分 profile 的高能 tail 也未稳定。
+因此这次运行证明了真实 ordered profile 已接入并能保留失败诊断，但不构成
+Levinson/Mott 或节点/截断 production 通过证据；临时 `q -> 0` 束缚态计数不能替代
+物理绑定态判定。production 默认与旧 `MesonDensity` 路径均未改变。
+
+## 12. 定向文献综述链接（2026-09-01）
+
+本任务相关的公开文献、公式闭合、来源筛选、代码映射和后续门禁已整理到
+`docs/analysis/relaxtime/charged_phase_literature_review_v1/`。该证据包明确区分
+文献事实、项目数值约定和 production 授权边界；它不改变本任务的 `in progress`
+状态，也不把 strict phase backend 晋升为 production。
+
+## 13. 出版社原文与 PDF provenance（2026-09-01）
+
+在用户明确授权后，使用 Chrome 的 XJTU 网关完成了 APS 访问验证，并对少数需要
+出版社版本核对的条目逐篇保留结果。逐项记录见
+`docs/analysis/relaxtime/charged_phase_literature_review_v1/tables/publisher_pdf_provenance.csv`：
+
+- Rehberg et al. 1996（PRC 53, 410）的 APS 文章页显示 XJTU 授权，正式 PDF 20 页、
+  `pdftotext` 可读，SHA-256 已记录，作为出版社版本证据保留在项目外目录；
+- Dashen--Ma--Bernstein 1969 的 APS 文章页授权成功。此前仅按第一页文本首行判断为
+  内容错配；重新渲染和逐页检查后确认，页 1 下半页包含目标论文标题、作者、摘要和
+  Introduction，页 2--26 为目标论文，只有页 1 顶部残留另一篇液态合金电阻率文章的
+  版面片段。因此 S02 可用于公式核对，但引用页 1 时必须避开残留片段并记录该 caveat；
+- Hüfner et al. 1994 的 ScienceDirect 文章页显示 XJTU 标识，但明确写明 XJTU 不订阅
+  该内容；此前入口触发的机器人 CAPTCHA 未绕过，也未声称取得出版社全文。
+
+版权 PDF 不进入 Git、任务分支或项目分析包；仓库仅保存 DOI、出版社链接、授权路径、
+文件 hash/页数、可读性探针和失败原因。上述局部出版社核对不改变 strict phase backend
+仍处于探索性、未通过 Levinson/Mott 和收敛门禁的状态。
+
+## 14. S02 重新核对后的公式路线影响（2026-09-01）
+
+对保留的 S02 PDF 逐页渲染后确认：页 1 顶部存在版面残留，但目标论文从页 1 下半页
+开始，页 2--26 完整连续。此前基于第一页首行的 `content_mismatch` 记录已修正为
+`publisher_pdf_verified_first_page_overlay`，正文可用于 S-matrix/Levinson 公式核对。
+
+本次公式复核得到三项需要纳入路线闭合的限定：
+
+1. DMB 的直接对象是连通 on-shell (S) 矩阵和
+   ((4\pi i)^{-1}S^{-1}\overleftrightarrow{\partial_E}S)。单道
+   (S=e^{2i\delta}) 时才化为 (\partial_E\delta/\pi)；项目的
+   `-arg(Delta^R)` 是否就是这个 δ，仍需独立的 propagator-to-S-matrix 归一化证明。
+2. DMB 给出守恒 (B,I,S) 的独立化学势乘子，支持显式记录 μ_B、μ_I/μ_Q、μ_S，
+   但不推导 PNJL BQS 闭合或 `mu_s=0.55 mu_u`。
+3. DMB 的相对论性 Levinson 推广是基于非相对论结果的合理猜测；因此项目 gate 应标为
+   conditional，并继续要求独立束缚态计数、阈值/高能端点和 Mott 补偿检查。S02 不改变
+   PV/​i0、ordered charged bubble、KMT 或 Ω_M 反馈的其他文献结论。
