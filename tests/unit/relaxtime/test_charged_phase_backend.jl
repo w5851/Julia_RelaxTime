@@ -154,6 +154,29 @@ end
     @test !negative.accepted
 end
 
+@testset "GL omega weights reproduce an analytic linear-phase integral" begin
+    slope, temperature, lo, hi, qmax = 0.01, 0.4, 0.2, 3.0, 2.0
+    result = strict_charged_bu_density((w,q)->cis(-slope*w),0.1,temperature;
+        qmax=qmax,q_nodes=4,omega_min=lo,omega_max=hi,omega_nodes=48,
+        require_levinson=false)
+    integral = temperature*(log(-expm1(-hi/temperature))-log(-expm1(-lo/temperature)))
+    expected = qmax^3/(6pi^3)*slope*integral
+    @test isapprox(result.density,expected;rtol=1e-10,atol=1e-14)
+end
+
+@testset "Charged phase literature identifiers and escaped text" begin
+    root=normpath(joinpath(@__DIR__,"..","..",".."))
+    report=joinpath(root,"docs","analysis","relaxtime","charged_phase_literature_review_v1")
+    for table in ("claim_ledger.csv","evidence_matrix.csv")
+        rows=readlines(joinpath(report,"tables",table))[2:end]
+        ids=[first(split(row,',')) for row in rows if !isempty(row)]
+        @test length(unique(ids))==length(ids)
+    end
+    body=read(joinpath(report,"README.md"),String)
+    @test !any(c->Int(c)<32 && !(c in ('\n','\r')),body)
+    @test !occursin(r"\r(?!\n)",body)
+end
+
 @testset "Charged RPA adapter composes the strict phase backend" begin
     spec = Main.RelaxTime.ChargedRPAKernel.charged_rpa_spec(:K_plus)
     K_a = 0.25

@@ -341,7 +341,7 @@ function strict_charged_bu_density(
     end
 
     q_grid, q_weights = gauleg(0.0, qmax_value, Int(q_nodes))
-    ω_grid, _ = gauleg(ωmin, ωmax, Int(omega_nodes))
+    ω_grid, ω_weights = gauleg(ωmin, ωmax, Int(omega_nodes))
     q_profiles = NamedTuple[]
     q_integral = 0.0
     failed_q_count = 0
@@ -374,7 +374,7 @@ function strict_charged_bu_density(
             _bose(Float64(ω), chemical_potential, temperature) * derivative[i]
             for (i, ω) in enumerate(profile.omega)
         ]
-        shell = (q^2 / (2.0 * π^2)) * factor * _trapz(profile.omega, integrand)
+        shell = (q^2 / (2.0 * π^2)) * factor * sum(ω_weights .* integrand)
         q_integral += Float64(q_weights[iq]) * shell
         push!(q_profiles, (
             q=q,
