@@ -387,7 +387,8 @@ function strict_charged_bu_density(
         ))
     end
 
-    density = Float64(degeneracy) * q_integral / temperature
+    # g(omega) d(delta)/domega already has the density measure; no extra 1/T.
+    density = Float64(degeneracy) * q_integral
     density_finite = isfinite(density)
     density_nonnegative = density >= -1.0e-12
     accepted = failed_q_count == 0 && density_finite && density_nonnegative
