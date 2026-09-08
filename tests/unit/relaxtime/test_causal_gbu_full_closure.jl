@@ -101,7 +101,7 @@ end
     for (left,right) in ((-10.,0.9),(3.1,7.),(-1.,-0.2))
         bound=testcausalgbufullclosure_FCG.inverse_enclosure(cells,1.,left,right)
         for w in range(left,right;length=11)
-            v=real(1-4FCG.R.cauchy_transform(p,w))
+            v=real(1-4testcausalgbufullclosure_FCG.R.cauchy_transform(p,w))
             @test bound.lower<=v<=bound.upper
         end
     end
@@ -109,7 +109,7 @@ end
     tail=testcausalgbufullclosure_FCG.tail_exclusion(cells,1.)
     @test tail.passed && tail.inverse_deviation_bound<=0.5
     for z in (tail.radius_inv_fm, -2tail.radius_inv_fm, tail.radius_inv_fm*im)
-        @test abs(4FCG.R.cauchy_transform(p,z))<=tail.inverse_deviation_bound
+        @test abs(4testcausalgbufullclosure_FCG.R.cauchy_transform(p,z))<=tail.inverse_deviation_bound
     end
     audit=testcausalgbufullclosure_FCG.count_all_real_gaps(p,1.,0.)
     @test audit.passed

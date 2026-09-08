@@ -5,7 +5,7 @@ const testcausalgbudirectionb_B=CausalGBUDirectionB
 @testset "Static thermal extension is a differentiable potential" begin
     for phi in (0.,0.3,1.),bar in (0.,0.4,1.),x in (-20.,-1.,0.,1.,20.)
         @test ForwardDiff.derivative(y->testcausalgbudirectionb_B.log_partition(y,phi,bar),x)≈
-            -3B.P.occupation(x,phi,bar) atol=1e-14
+            -3testcausalgbudirectionb_B.P.occupation(x,phi,bar) atol=1e-14
     end
     for mu in (-0.2,0.,0.4),tc in (3.,8.),phi in (0.3,1.)
         f(v)=testcausalgbudirectionb_B.static_flavor(v[1],v[2],0.8,phi,0.4,3.,tc;nodes=64).omega_inv_fm4
