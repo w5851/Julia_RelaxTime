@@ -70,7 +70,7 @@ end
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
     @test tracks["formula-route-closure"]["status"] == "accepted"
     @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-phase-coordinate-cut-fix"
-    @test tracks["formula-route-closure"]["current_sha"] == "6164e4b4fc73f9f9f3db3447ba583fdc851fa268"
+    @test tracks["formula-route-closure"]["current_sha"] == "fa34a3975d858ca5c517f3490476178720f0d23e"
     @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "promoted"

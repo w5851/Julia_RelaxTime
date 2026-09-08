@@ -16,6 +16,7 @@ using Main.RelaxTime.BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
                                         anchor_phase_high_energy,
                                         count_subthreshold_roots,
                                         count_bound_states,
+                                        certify_gap_roots, continue_gap_roots,
                                         continue_bound_state_counts,
                                         levinson_phase_gate,
                                         mott_phase_gate,
@@ -31,6 +32,42 @@ using Main.RelaxTime.BUPhaseGates: STRICT_SINGLE_CHARGE_OMEGA_MEASURE,
     @test bu_omega_measure_factor(:legacy_domega_over_2pi) ≈ inv(2pi)
     @test bu_omega_measure_factor(:strict) ≈ 2 * bu_omega_measure_factor(:legacy)
     @test_throws ArgumentError bu_omega_measure(:unknown)
+end
+
+@testset "Physical-sheet analytic gaps, not imaginary cancellation" begin
+    inverse(w,q) = (w-(0.8+0.1q)) * (w-0.25)
+    gaps(q) = [(0.5, 1.5)] # the lower zero is on an excluded cut
+    roots = certify_gap_roots(inverse, 0.0, gaps(0.0); physical_sheet=true, real_axis=true)
+    @test roots.passed
+    @test roots.count == 1
+    @test roots.roots[1].omega_inv_fm ≈ 0.8 atol=1e-9
+    @test roots.roots[1].residual < 1e-8
+    @test !roots.completeness_certified
+    @test roots.count_scope === :provided_analytic_gaps
+    for (physical_sheet,real_axis) in ((false,true),(true,false))
+        denied = certify_gap_roots(inverse,0.0,gaps(0.0);physical_sheet,real_axis)
+        @test !denied.passed
+        @test denied.count == 0
+    end
+    complex_gap = certify_gap_roots((w,q)->inverse(w,q)+1e-3im,0.0,gaps(0.0);
+                                    physical_sheet=true,real_axis=true)
+    @test !complex_gap.passed
+    @test complex_gap.count == 0
+    pole = certify_gap_roots((w,q)->inv(w-0.8),0.0,gaps(0.0);physical_sheet=true,real_axis=true)
+    @test !pole.passed
+    @test pole.count == 0
+    exact = certify_gap_roots((w,q)->w-1.0,0.0,[(0.5,1.5)];
+                             physical_sheet=true,real_axis=true,omega_nodes=5)
+    @test exact.count == 1
+    tracked = continue_gap_roots(inverse,[0.0,0.5,1.0],gaps;physical_sheet=true,real_axis=true)
+    @test all(r.roots[1].track_id == 1 for r in tracked)
+    @test tracked[3].roots[1].event === :continued
+    @test isempty(tracked[3].lost_tracks)
+    lost = continue_gap_roots((w,q)->w-(0.8+q),[0.0,1.0],gaps;
+                             physical_sheet=true,real_axis=true)
+    @test lost[2].count == 0
+    @test lost[2].lost_tracks[1].event === :not_recovered
+    @test_throws ArgumentError continue_gap_roots(inverse,[0.5,0.0],gaps;physical_sheet=true,real_axis=true)
 end
 
 @testset "Independent bound-state counting and q continuation" begin
@@ -151,6 +188,9 @@ end
         (density=1.0005, accepted=false, tail_stable=true),
     ]; rtol=1e-3)
     @test !rejected.passed
+    nonfinite = joint_convergence_gate([(density=1.0,accepted=true),(density=NaN,accepted=false)])
+    @test !nonfinite.passed
+    @test !nonfinite.finite
     @test four_density_algorithm_labels() == (
         :stable_particle_limit,
         :reduced_strict_bw,

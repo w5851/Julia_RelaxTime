@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "formula-route-closure"
-updated_at = "2026-09-01"
+updated_at = "2026-09-07"
 
 [[tracks]]
 id = "issue130-phase"
@@ -123,12 +123,12 @@ status = "accepted"
 current_task = "charged-rpa-bu-strict-implementation"
 blocked_by = []
 unlocks = []
-next_action = "建立独立的 charged pole/threshold/bound-state 计数，并沿 q continuation 接入真实 Mott 前后 profile；随后完成 PV、有限 eta、节点、截断和端点联合门禁。second-sheet pole solver 按需作为独立非阻塞任务。"
+next_action = "见strict-audit第22.24节：已接显式Models/CLI无限热B研究生产入口，固定quark-only BQS的完整配置冻结线10点/40通道通过，4160条壳层记录与输出哈希已核验。作者授权本次完整扫描，不等于旧默认或论文production晋升；图面视觉审核待作者确认。保持旧默认/PNJLCore/baseline，不裁谱、不手动拼接诊断、不自动切A或合并PR310；后续审核方法适用边界与图表。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
 current_branch = "codex/charged-phase-coordinate-cut-fix"
-current_sha = "6164e4b4fc73f9f9f3db3447ba583fdc851fa268"
+current_sha = "fa34a3975d858ca5c517f3490476178720f0d23e"
 run_ids = []
 evidence = [
   "file:docs/guides/sop/formula_route_closure.md",
@@ -158,8 +158,34 @@ evidence = [
   "note:ordered_pv_cut_real_axis_diagnostic_and_profile_gate_audit",
   "sha:6164e4b4fc73f9f9f3db3447ba583fdc851fa268",
   "note:charged_threshold_coordinate_and_termwise_pv_cut_fix",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_full_closure.jl",
+  "file:scripts/analysis/relaxtime/summarize_causal_gbu_full_closure.jl",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_pereira.jl",
+  "file:docs/reference/formula/relaxtime/Pereira2024_RegularizationAudit.md",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_pnjl_stability.jl",
+  "file:docs/reference/formula/relaxtime/ChargedGBU_PNJLStability.md",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_thermal_admissibility.jl",
+  "file:docs/reference/formula/relaxtime/ChargedGBU_ThermalAdmissibility.md",
+  "file:docs/reference/formula/relaxtime/ChargedGBU_DirectionB.md",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_direction_b.jl",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_source_functional.jl",
+  "file:docs/reference/formula/relaxtime/ChargedGBU_ObservableClosure.md",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_observable_closure.jl",
+  "file:docs/reference/formula/relaxtime/ChargedGBU_EndpointClosure.md",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_endpoint_closure.jl",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_continuation_gate.jl",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_source_continuation.jl",
+  "file:scripts/analysis/relaxtime/audit_causal_gbu_mott_refinement.jl",
+  "note:direction_b_endpoint_obstruction12_normal_mott8_source_onset8_finite_q_edges24_no_full_spectrum_or_density_acceptance",
+  "note:direction_b_gbu_algebra_24_real_probes_signed_tail_preserved_no_stationary_yield_or_global_count_certification",
+  "note:direction_b_fixed_projector_source_hessian_dynamic48_static16_signed_subtraction_not_physical_yield",
+  "note:author_prioritizes_direction_b_static_36_identities_not_dynamic_response_certification",
+  "note:thermal_only_pair_negative_analytic_and_96_cut_witnesses_physical_interpretation_review_required",
+  "note:pnjl_health_32_cases_signed_thermal_spectrum_and_single_sphere_routing_risks_retained",
+  "note:pereira_formula_parity_144_cases_diagnostic_only_pnjl_and_thermal_extensions_separate",
+  "note:author_prioritizes_regulator_closure_then_production_workflow_no_manual_freezeout_densification",
 ]
-updated_at = "2026-09-02"
+updated_at = "2026-09-07"
 
 [[tracks]]
 id = "plot-sop"
@@ -334,7 +360,7 @@ status = "accepted"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
 reason = "PR290 已固定 candidate 公式路线；ordered charged retarded bubble、严格 BU 测度、相位/Levinson/Mott gate、Bose 支撑和四算法收敛仍需在独立后续 PR 实现与验收。"
-next_action = "修复 q-pole Bose 支撑返回语义；随后将 ordered charged profile 接入 phase/Levinson/Mott gate，并进行 q/omega/eta/omega_max/cutoff 收敛门禁。"
+next_action = "strict-audit第22.24节的显式无限热B研究生产入口已完成10能量点/40通道扫描及数值验收；v2原产物和源码快照保留。下一步作者确认图面、方法和论文使用范围；有限网格通过不代表全频解析证明或全部背景覆盖。保持双球真空、无限PNJL热差、固定quark-only BQS、旧默认与baseline；不裁谱、不手动拼接、不自动promotion。"
 blocked_by = []
 backlog_file = ""
 evidence = [

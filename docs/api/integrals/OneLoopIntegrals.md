@@ -22,6 +22,36 @@
 
 ## API 参考
 
+### 2026-09-05 物理 cut 审查警告
+
+现有 `B0_pv_cut` 与 `B0_retarded` 在等质量、近真空的 spacelike 区域产生非零
+虚部，且冻结 BQS 的有限 q、`k0=0` 检查也失败。二者相互接近不能证明正确，
+因为它们共享四个 shifted-residue/log 的解析结构。旧实现保留供追溯，不能据此
+认证 finite-q physical sheet 或 production 密度。证据见 strict-audit 任务第 20 节。
+
+### `B0_spectral_cut(lambda,q,m1,mu1,m2,mu2,T; ...)`
+
+独立两条谱线的实轴 cut oracle；只返回虚部，不返回复传播子：
+
+- `imaginary=pair+landau`：无量纲 `Im B0`，按 `s!=t` / `s==t` 分开。
+- `regulator=:both_line_momenta`：两条内部线均满足 `p<pmax_inv_fm`。
+- `pmax_inv_fm` 默认 `Λ_inv_fm`，`energy_nodes` 默认 64、至少 4。
+- `component=:full` 保留原语义；`:vacuum` 仅取 `theta(-s)`，`:thermal` 取
+  `n_s-theta(-s)`，允许以两个显式 cutoff 构造完整真空/热谱分解。
+- q 非负，质量、T、pmax 为正且有限；所有能量量均用 `fm^-1`。
+- `static_degeneracy_unresolved=true` 表示 q=lambda=0 且质量相同的退化静态点，
+  返回的零值不认证潜在 delta 分布；`production_authorized=false` 始终保留。
+- pair/Landau 各有符号分支先用同一两球交集的精确能量极值排除支撑外与端点，
+  再求角向 delta 的允许区间；q>=2pmax 时交集无体积。该几何判定不按谱幅值裁零，
+  防止浮点二次式在 cutoff 端点生成伪非零值并被后续插值延伸进 gap。
+
+该 oracle 从 Matsubara 两线 occupation difference 与 on-shell delta 支撑计算，
+不复用旧 complex-log 分支。来源结构与不等质量推广见公式路线第 6.4.4 节。
+它通过真空无 Landau、unitary 归一化、flavor 反射和零外频率占据差检验，但没有
+给出相同 regulator 下的实部。禁止与旧 PV 实部直接拼接为新物理传播子。
+同域完整泡及独立 Cauchy/PV 重建现由
+[CausalSpectralBubble](CausalSpectralBubble.md) 提供，仍不替换旧默认。
+
 ### `B0_pv_cut(λ, q, m1, μ1, m2, μ2, T; ...)`
 
 在已有 `B0` 的实轴主值实部基础上，按四个 `tilde_B0` 复对数项的各自

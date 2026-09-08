@@ -17,6 +17,65 @@ using Main.RelaxTime.ChargedPhaseBackend: StrictChargedPhaseSpec,
                                            strict_charged_bu_density,
                                            strict_charged_rpa_bu_density,
                                            strict_density_convergence_gate
+using Main.RelaxTime.ChargedPhaseBackend: bu_phase_integral, bu_phase_integral_parts, split_bu_shell
+using Main.RelaxTime.BUPhaseGates: certify_gap_roots
+
+@testset "Finite-window BU boundary terms are not optional" begin
+    w = [0.1,0.2,0.5,0.9]
+    for phase in ([0.3,0.3,0.3,0.3],[0.4,0.3,0.2,0.1]), weight in (:current,:gbu)
+        parts = bu_phase_integral_parts(w,phase,0.8;weight=weight)
+        @test parts.derivative ≈ parts.bulk+parts.boundary atol=1e-13
+        @test abs(parts.identity_residual) < 1e-13
+        @test parts.bulk > 0
+        @test parts.boundary < 0
+        @test parts.derivative <= 0
+        @test !parts.production_authorized
+    end
+    phase = [0.4,0.3,0.2,0.1]
+    original = bu_phase_integral_parts(w,phase,0.8)
+    shifted = bu_phase_integral_parts(w,phase .+ 0.7,0.8)
+    @test original.derivative ≈ shifted.derivative
+    @test original.bulk != shifted.bulk
+    @test original.boundary != shifted.boundary
+    @test_throws ArgumentError strict_retarded_phase(0.0+0.0im)
+    @test_throws ArgumentError strict_phase_profile(w,ComplexF64[1,0,1,1])
+    @test isfinite(strict_retarded_phase(1e-200+0im))
+end
+
+@testset "Discrete pi weights and continuum measures are independent" begin
+    roots = certify_gap_roots((w,q)->w-0.8,0.5,[(0.5,1.0)];physical_sheet=true,real_axis=true)
+    for T in (0.2, 0.8, 1.4), weight in (:current, :gbu)
+        r = split_bu_shell(roots,NamedTuple[],0.5,T;μ=0.1,weight=weight)
+        @test r.bound_weight ≈ inv(expm1((0.8-0.1)/T)) rtol=1e-8
+        @test r.continuum_weight == 0
+        @test r.total_shell_inv_fm2 ≈ 0.5^2/(2π^2)*r.bound_weight
+    end
+    w = [0.5,0.8-1e-6,0.8+1e-6,1.2]
+    phase = [0.0,0.0,Float64(π),Float64(π)]
+    current = bu_phase_integral(w,phase,0.8;μ=0.1)
+    @test current ≈ inv(expm1((0.8-0.1)/0.8)) rtol=1e-10
+    @test bu_phase_integral(w,phase,0.8;μ=0.1,weight=:gbu) ≈ current
+    @test bu_phase_integral(w,phase .+ 0.37,0.8;μ=0.1) ≈ current
+    # Coordinate covariance: k0=lambda-mu, so g(k0;0)=g(lambda;mu).
+    @test bu_phase_integral(w .- 0.1,phase,0.8) ≈ current
+    continuum = [(omega=[1.1,1.2,2.0,3.0],phase=[Float64(π),Float64(π),0.3π,0.0])]
+    segment = only(continuum)
+    gbu_continuum = bu_phase_integral(segment.omega,segment.phase,0.8;μ=0.1,weight=:gbu)
+    @test bu_phase_integral(segment.omega,segment.phase .+ π,0.8;μ=0.1,weight=:gbu) ≈ gbu_continuum
+    @test !isapprox(bu_phase_integral(segment.omega,segment.phase .+ 0.37,0.8;μ=0.1,weight=:gbu),gbu_continuum)
+    split = split_bu_shell(roots,continuum,0.5,0.8;μ=0.1)
+    @test split.continuum_weight < 0
+    @test split.total_shell_inv_fm2 == split.bound_shell_inv_fm2 + split.continuum_shell_inv_fm2
+    @test_throws ArgumentError split_bu_shell(roots,[(omega=w,phase=phase)],0.5,0.8)
+end
+
+@testset "Derivative density has energy-cubed units, not energy-squared" begin
+    inverse(w,q) = cis(-0.7π*exp(-((w-1.0)/0.3)^2))
+    calc(scale) = strict_charged_bu_density((w,q)->inverse(w/scale,q/scale),
+        0.6scale,0.8scale;qmax=2scale,q_nodes=4,omega_min=0.1scale,
+        omega_max=4scale,omega_nodes=64,require_levinson=false)
+    @test calc(2.0).density ≈ 8calc(1.0).density rtol=1e-12
+end
 
 @testset "Strict charged phase algebra" begin
     δ = 0.7
@@ -121,7 +180,7 @@ end
 
 @testset "Strict backend exposes Levinson/Mott and density-sign gates" begin
     ω = collect(range(0.1, 4.0; length=80))
-    before_phase = [x <= 2.0 ? π : (x <= 3.0 ? π * (3.0 - x) : 0.0) for x in ω]
+    before_phase = [x < 1.0 ? 0.0 : (x <= 2.0 ? π : (x <= 3.0 ? π * (3.0 - x) : 0.0)) for x in ω]
     after_phase = zeros(length(ω))
     before = strict_phase_profile(ω, cis.(-before_phase))
     after = strict_phase_profile(ω, cis.(-after_phase))
@@ -138,6 +197,12 @@ end
         after_bound_state_count=0,
     )
     @test mott.passed
+    mismatch = strict_phase_gate(after; threshold=2.0, bound_state_count=1,phase_tolerance=4π)
+    @test !mismatch.count_matches
+    @test !mismatch.passed
+    shifted = strict_phase_profile(ω,cis.(-after_phase);spec=StrictChargedPhaseSpec(target=0.1))
+    @test_throws ArgumentError strict_mott_gate(before,shifted;before_threshold=2.0,after_threshold=2.0,
+        before_bound_state_count=1,after_bound_state_count=0)
 
     # A falling phase has a negative derivative.  The value is retained for
     # diagnosis, but the strict backend must not accept it as a density.

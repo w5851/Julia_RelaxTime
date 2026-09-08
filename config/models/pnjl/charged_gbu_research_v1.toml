@@ -1,0 +1,48 @@
+# Explicit analysis-only contract. Not consumed by PNJLCore or MesonDensity.
+schema = "charged_gbu_research_v1"
+observable = "fixed_quark_only_gbu_partial_yield"
+production_authorized = false
+background = "FixedMuBConservedCharges"
+charge_to_baryon_ratio = 0.4
+strangeness_density_fm3 = 0.0
+meson_feedback = false
+additional_pion_fugacity = false
+phase = "minus_arg_retarded_inverse"
+frequency = "external_k0"
+internal_frequency = "lambda=k0+mu1-mu2"
+bose_weight = "g(k0;mu=0)"
+weight = "delta-sin(2delta)/2"
+counting = "independent_analytic_gap_roots_plus_signed_continua"
+regulator = "two_line_vacuum_thermal"
+vacuum_cutoff_source = "model_Lambda"
+q0_reference = "lambda_invariant_timelike_extrapolation"
+fold_for_density = false
+delete_landau = false
+clip_density = false
+
+[channels]
+pi_plus = ["u", "d", "K12"]
+pi_minus = ["d", "u", "K12"]
+K_plus = ["u", "s", "K45"]
+K_minus = ["s", "u", "K45"]
+
+[numerics]
+thermal_max_inv_fm = 20.0
+omega_min_inv_fm = 0.0001
+omega_max_inv_fm = 48.0
+qmax_inv_fm = 8.0
+q_nodes = 16
+segment_nodes = 256
+omega_nodes = 2400
+momentum_nodes = 128
+angle_nodes = 64
+energy_nodes = 64
+root_nodes = 128
+
+[gates]
+phase_tolerance = 0.005
+root_residual_tolerance = 1.0e-8
+static_imag_tolerance = 1.0e-8
+relative_density_target = 0.01
+mott_bracket_width_MeV = 0.25
+complete_curve_requires_sparse_acceptance = true

@@ -36,6 +36,18 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
             q, masses.u, masses.s, chemical_potentials.u, chemical_potentials.s,
         )
         @test finite_q.lambda_threshold_inv_fm > thresholds.lambda_threshold_inv_fm
+        @test finite_q.lambda_threshold_inv_fm ≈ hypot(q, masses.u + masses.s)
+        p1 = q * masses.u / (masses.u + masses.s)
+        @test finite_q.lambda_threshold_inv_fm ≈ hypot(p1, masses.u) + hypot(q-p1, masses.s)
+        @test finite_q.lambda_landau_bound_inv_fm ≈ hypot(q, masses.u-masses.s)
+        @test finite_q.analytic_gap_inv_fm == (finite_q.k0_landau_upper_inv_fm, finite_q.k0_threshold_inv_fm)
+        # A continuum point between the true and old thresholds must have a cut.
+        old_threshold = hypot(q, masses.u) + hypot(q, masses.s)
+        lambda_probe = (old_threshold + finite_q.lambda_threshold_inv_fm) / 2
+        cut = Main.RelaxTime.OneLoopIntegrals.B0_pv_cut(lambda_probe, q,
+            masses.u, chemical_potentials.u, masses.s, chemical_potentials.s, thermo.T;
+            Φ=thermo.Φ, Φbar=thermo.Φbar)
+        @test abs(imag(cut)) > 1e-4
         @test finite_q.k0_threshold_inv_fm ≈ finite_q.lambda_threshold_inv_fm -
             thresholds.chemical_potential_shift_inv_fm
         @test_throws ArgumentError charged_pair_continuum_thresholds(
@@ -178,6 +190,7 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test pv_cut.analytic_scope == :real_axis_pv_cut
         @test pv_cut.eta_inv_fm == 0.0
         @test pv_cut.energy_nodes == 0
+        @test !pv_cut.physical_cut_certified
 
         legacy = charged_polarization(
             spec,

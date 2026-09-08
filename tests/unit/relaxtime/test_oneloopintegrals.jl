@@ -32,9 +32,59 @@ const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
 end
-using Main.OneLoopIntegrals: B0, B0_pv_cut, B0_retarded, A
+using Main.OneLoopIntegrals: B0, B0_pv_cut, B0_retarded, B0_spectral_cut, A
 
 const Λ_INV_FM = Main.OneLoopIntegrals.Λ_inv_fm
+
+@testset "Independent two-line cut: vacuum, KMS and pair normalization" begin
+    for q in (0.2,0.8,1.0), l in (-0.5q,0.5q)
+        vacuum = B0_spectral_cut(l,q,1.0,0.0,1.0,0.0,0.001)
+        @test vacuum.pair == 0
+        @test abs(vacuum.landau) < 1e-100
+        @test vacuum.regulator === :both_line_momenta
+        @test !vacuum.production_authorized
+    end
+    for q in (0.0,0.5,1.0)
+        l = 3.0
+        pair = B0_spectral_cut(l,q,1.0,0.0,1.0,0.0,0.001)
+        @test pair.imaginary ≈ π*sqrt(1-4/(l^2-q^2)) rtol=1e-10
+        @test pair.landau == 0
+    end
+    for q in (0.0,0.5,1.0), pair in ((1.0,0.2,1.4,-0.1),(1.2,0.2,1.2,0.2))
+        m1,mu1,m2,mu2 = pair
+        zero_frequency = B0_spectral_cut(mu1-mu2,q,m1,mu1,m2,mu2,0.8;Φ=0.3,Φbar=0.4)
+        @test abs(zero_frequency.imaginary) < 1e-12
+    end
+    for l in (-0.4,0.3,3.5)
+        forward = B0_spectral_cut(l,0.8,1.0,0.2,1.4,-0.1,0.8;Φ=0.3,Φbar=0.4)
+        reverse = B0_spectral_cut(-l,0.8,1.4,-0.1,1.0,0.2,0.8;Φ=0.3,Φbar=0.4)
+        @test forward.imaginary ≈ -reverse.imaginary atol=1e-12
+    end
+    # Equal-mass FD Landau integral, including both-line cutoff end terms.
+    for (l,q) in ((0.1,0.8),(0.3,0.8),(0.5,1.0))
+        mass,T,cutoff = 1.0,0.8,3.0
+        center = q*sqrt(1+4mass^2/(q^2-l^2))/2
+        emin, eplus, ecut = center-l/2,center+l/2,hypot(mass,cutoff)
+        primitive(E) = T*log1p(exp(-E/T))
+        expected = -2π/q*(primitive(emin)-primitive(eplus)-primitive(ecut-l)+primitive(ecut))
+        thermal = B0_spectral_cut(l,q,mass,0.0,mass,0.0,T;Φ=1.0,Φbar=1.0,pmax_inv_fm=cutoff)
+        @test thermal.landau ≈ expected rtol=1e-11
+        @test thermal.landau < 0
+        @test thermal.pair == 0
+    end
+    for (l,q) in ((0.3,0.8),(0.8,0.8),(-0.8,0.8),(3.5,0.8)), s in (-1,1), t in (-1,1)
+        intervals = Main.OneLoopIntegrals._spectral_cut_intervals(l,q,1.0,1.4,3.0,s,t)
+        for E1 in range(1.0+1e-5,hypot(1.0,3.0)-1e-5;length=31)
+            E2 = t*(s*E1-l)
+            p = sqrt(E1^2-1.0)
+            allowed = 1.4 < E2 < hypot(1.4,3.0) && abs((p^2+q^2+1.4^2-E2^2)/(2p*q)) < 1
+            @test any(lo < E1 < hi for (lo,hi) in intervals) == allowed
+        end
+    end
+    @test_throws ArgumentError B0_spectral_cut(1.0,-0.1,1.0,0.0,1.0,0.0,0.8)
+    @test_throws ArgumentError B0_spectral_cut(1.0,0.1,1.0,0.0,1.0,0.0,0.0)
+    @test_throws ArgumentError B0_spectral_cut(1.0,0.1,1.0,0.0,1.0,0.0,0.8;energy_nodes=3)
+end
 
 const DEFAULT_P_MAX = 20.0
 const DEFAULT_GAUSS_POINTS = 128

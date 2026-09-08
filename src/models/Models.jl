@@ -24,6 +24,7 @@ export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan
 export run_isentropic_meson_mass_scan
 export run_freezeout_meson_density_scan
+export run_charged_gbu_freezeout_scan
 export run_crossover_meson_density_scan
 export run_external_path_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point

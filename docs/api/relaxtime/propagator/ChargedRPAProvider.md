@@ -36,11 +36,21 @@ Pi_us = ordered.value
 ```julia
 using Main.RelaxTime.ChargedRPAProvider: charged_pair_continuum_thresholds
 thresholds = charged_pair_continuum_thresholds(q, m1, m2, mu1, mu2)
-# thresholds.lambda_threshold_inv_fm = E1(q) + E2(q)
+# thresholds.lambda_threshold_inv_fm = hypot(q, m1 + m2)
 # thresholds.k0_threshold_inv_fm = lambda_threshold - (mu1 - mu2)
 ```
 
+q 是总动量；两个粒子的阈值动量分别为 `m1*q/(m1+m2)` 和 `m2*q/(m1+m2)`。
+新增 `lambda_landau_bound_inv_fm=hypot(q,m1-m2)`、外频率 Landau 上下界及
+`analytic_gap_inv_fm`。这些是未截断运动学包络，不认证 cutoff 造成的额外 gap，
+也不能把 unitary 阈下区域全部当成无 cut 区域。
+
 ## 处方边界
+
+2026-09-05 独立谱线审计发现，当前 PV/log 两种延拓在真空 spacelike 区域和有限 q
+零外频率检验中失败。返回值新增 `physical_cut_certified=false`；不能把处方名称
+或两者相互接近当作 physical retarded 认证。`B0_spectral_cut` 仅是独立虚部
+oracle，不得直接与旧实部拼接。旧入口和 production 默认未改变。
 
 `prescription` 有四个值：
 

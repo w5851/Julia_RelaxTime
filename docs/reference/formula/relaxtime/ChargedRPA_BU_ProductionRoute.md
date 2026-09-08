@@ -2,8 +2,22 @@
 
 route_id: charged_rpa_bu_quark_only
 状态：candidate（未授权 production）
+上述状态属于本旧provider公式注册项；显式无限热GBU研究生产入口已验收，旧默认不变。
 初始基线：`origin/main` @ `bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b`
-更新日期：2026-08-31
+更新日期：2026-09-07
+
+## 当前有效方法与历史规范的优先级
+
+本页保留PR290–310的公式审查过程。当前研究产额方法以
+[无限热GBU](ChargedGBU_InfiniteThermal.md)及
+[显式研究生产入口](../../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)
+为准：双线真空Lambda、无限PNJL热差、独立解析gap根与连续谱GBU分账。
+固定quark-only BQS配置冻结线10点/40通道已经验收，作者已审核图像。
+下文旧PV/log provider、有限热硬端点与旧PhaseBackend的candidate限制仍适用于
+各自历史实现，不能据此否定新入口，也不能将其混用为新生产核。
+合入代码不等于切换旧MesonDensity默认或引入介子反馈；完整反馈/最终强子
+产额与全频解析证明仍不在本次授权内。历史“尚未接入/尚未验收”表述按其
+所属阶段阅读，不是当前研究生产入口状态。
 
 本文件不是“已经授权 production 的完整 charged-RPA/BU 数值实现”，而是为 PR290
 建立的、可交给独立审阅者复核的公式规范。本版已经把选定的 strict GBU 主路线从
@@ -11,6 +25,10 @@ route_id: charged_rpa_bu_quark_only
 `ChargedPhaseBackend` strict phase/BU 诊断后端；真实 ordered charged profile 已
 接入固定 BQS 诊断，但全域数值收敛和 production gate 尚未通过。这里的“公式闭合”不
 等于“production 授权”，任何未决 gate 都必须在升格 production 前单独关闭。
+
+2026-09-05 审查限定：旧 finite-q PV/log provider 已失败独立谱支撑检验；
+第 5.2.1 节给出同域完整谱泡和 Cauchy/PV 的研究候选，不能把历史实现完成标记
+理解为真实有限 q 物理闭合。GBU partial yield 与守恒荷热力学导数也必须分开。
 
 ## 1. 范围与计算目标
 
@@ -284,13 +302,20 @@ A_f+A_{f'}+\left[(m_f\mp m_{f'})^2
 `lambda=k0+mu_f-mu_{f'}`。两体正能量连续谱的内部阈值为
 
 ```math
-\lambda_{\rm thr}(q)=E_f(q)+E_{f'}(q),\qquad
+\lambda_{\rm thr}(q)=\sqrt{q^2+(m_f+m_{f'})^2},\qquad
 k_{0,\rm thr}(q)=\lambda_{\rm thr}(q)-(\mu_f-\mu_{f'}).
 ```
 
 strict phase backend 的 `omega` 是外部 `k0`，因此阈值门禁必须使用
-`k0_thr`；直接使用 `m_f+m_{f'}` 只在化学势差为零时正确。项目通过
+`k0_thr`；直接使用 `m_f+m_{f'}` 只在 `q=0` 且化学势差为零时正确。项目通过
 `ChargedRPAProvider.charged_pair_continuum_thresholds` 同时返回两种坐标。
+
+2026-09-05 数学修正：这里 q 是两体**总动量**。极小化
+`E_f(p)+E_f'(q-p)` 得到 `p=m_f*q/(m_f+m_f')`，因此不是
+`E_f(q)+E_f'(q)`。Landau cut 的未截断运动学包络为
+`|lambda| <= sqrt(q^2+(m_f-m_f')^2)`；只有该上界与 unitary 阈值之间的
+开区间可先作为保守解析 gap。三动量 cutoff 可缩小 cut 支撑，但其造成的额外
+gap 必须逐项分析，不能仅凭总虚部数值为零来认证。
 
 当前历史 `B0` 的 cut 虚部不能与本项目 `e^{-i omega t}` 的 retarded 边界用一个
 全局符号联系。四个 `tilde_B0` 项分别含有 `+lambda`/`-lambda` 和相反的
@@ -320,6 +345,72 @@ Levinson/Mott、Bose support 或节点/截断门禁，也不改变 production �
 所以旧 `calculate_G_from_A` 返回的是历史 helper `H_f`，不是另一个物理凝聚。
 新路线应优先复用平衡解中已经得到的 `phi_f`；`A_f` 仍可作为夸克泡本身的积分
 输入，二者不能因为命名相似而混为同一计算角色。
+
+### 5.2.1 同一 regulator 的完整谱泡（研究候选，2026-09-05）
+
+本候选的固定背景 observable、通道、频率、计数、截断及验收合同集中于
+[Charged GBU 研究方法 v1](ChargedGBU_ResearchMethod_v1.md)。方法冻结不等于
+production 或实验预测授权；同背景比较与 regulator 风险见 strict-audit 第 22 节。
+
+**文献事实**：2014 [arXiv:1305.3907v3](https://arxiv.org/abs/1305.3907v3)
+Appendix A.18/A.36 给出 normal-phase 的两线 occupation difference 和 P/S
+Dirac 投影。Pereira 等 [PRC 109, 025206 (2024)](https://doi.org/10.1103/PhysRevC.109.025206)
+Eq.(26)--(28)/(60) 进一步直接提供 NJL 不等质量/化学势的双球交集与同域
+单线项，Appendix C18/C19 给出外频率 retarded 虚部符号；独立实现映射见
+[Pereira 正则化审查](Pereira2024_RegularizationAudit.md)。PNJL 占据、热项延伸
+和最终 finite-BQS GBU 部分密度的组合仍需项目验证，不宣称上述文献已认证。
+
+**数学推导**：令 `r=p-q`、`E1=sqrt(p^2+m1^2)`、`E2=sqrt(r^2+m2^2)`，
+`z=k0+mu1-mu2+i eta`、`u_st=s E1-t E2`、`R_st=s t (n2_t-n1_s)`，并记
+`c=Nc/(8 pi^2)`、`M_P^2=(m1-m2)^2`、`M_S^2=(m1+m2)^2`。则单个 ordered 泡为
+
+```math
+\Pi_X(z,q)=c\int\frac{p^2dp\,dx}{E_1E_2}
+ \sum_{s,t=\pm1}\frac{R_{st}\,[u_{st}^2-q^2-M_X^2]}{z-u_{st}}.
+```
+
+方括号由 `-Tr[(slash p_s+m1) Gamma_X (slash r_t+m2) Gamma_X]/2`
+得到，P 顶角为 `i gamma5`，S 顶角为 1。测试显式构造 4x4 gamma 矩阵核对，
+不从旧 B0 数值反拟合符号。
+
+在同一个积分域内，`sum R_st=0` 且
+
+```math
+C(q)=\int\frac{p^2dp\,dx}{E_1E_2}
+ 2\{E_1(n_{2,+}-n_{2,-})+E_2(n_{1,+}-n_{1,-})\},
+\qquad
+\Pi_X=c\{(z^2-q^2-M_X^2)B_0-C(q)\}.
+```
+
+这固定了 contact/tadpole，不能自由加上旧 A。q=0 时 `C=A1+A2`；有限 q 的
+双线截断交集使 C 具有 q 依赖，因此强行用常数 `A1+A2` 会改变完整泡。
+
+**项目 regulator**：真空 occupation 为 `n_s^vac=theta(-s)`，热修正为
+`n_+^th=f_q(E)`、`n_-^th=-f_antiquark(E)`，分别做完整谱积分。真空两线均
+限制在 Lambda 内；热两线均限制在显式 `L_th>=Lambda` 内。`L_th=Lambda`
+是全项硬截断，增大 `L_th` 才逼近当前上游的“真空截断、热项延伸”约定。
+q=0、相同热节点时，后者与已有 A 精确匹配并恢复既有 Goldstone 代数；这不是
+有限 q cutoff 独立性或 Lorentz 不变性的证明。真空截断而热项延伸时，高能
+Pauli-blocking 修正可使相关谱有符号，不能暗中取绝对值。
+
+**实轴数值方法**：`CausalSpectralBubble` 同时提供两种独立表示：
+
+1. 对以上完整谱投影直接做 `(p,x)` 求积，评估上半平面的 Pi、B0、导数和 C；
+2. 解析角向 delta 得到同一 regulator 的 `rho=Im Pi`，以分段线性插值的精确
+   Cauchy 变换计算 `Pi(z)=integral rho(v)/(v-z) dv/pi`。实轴用减法型 PV，
+   虚部取该插值本身，不拼接旧 PV；插值精度须由节点加密和第一种表示验证。
+
+这里仅 rho 是插值，束缚态数不由插值角度 unwrap 决定。cut 的运动学端点在
+内部 lambda 坐标直接生成，避免 `lambda -> k0 -> lambda` 舍入把阈值虚部
+传播进整个 gap。q=0 硬截断跳变的最后网格单元仍有积分误差，必须单独加密。
+
+**可用于研究的解释边界**：保留 Landau、unitary 和离散根全部贡献；把
+`g_B(k0;0)` 与 `F(delta)=delta-sin(2delta)/2` 用作显式 GBU partial-yield 近似。
+在正常相 `delta(k0)=c1*k0+...` 时，GBU 红外可积，而 ordinary BU 的单正频率
+Landau 数目积分一般仍可有对数依赖。后者不能通过抬高下界变成唯一有限结果。
+本路线不声称独立介子数是守恒量，也不等同于含反馈的 `-dOmega_total/dmu`。
+若论文目标是严格总守恒荷/热力学自洽，而非固定 quark-only 背景上的 partial
+meson yield，则仍需另行授权的热力学推导与反馈路线。
 
 ### 5.3 `num_s_quark=1` 的来源、用途与边界
 
@@ -555,7 +646,88 @@ S(\omega)=e^{2i\delta(\omega)},\qquad
 `Im tr(S^-1 dS)` 和两种测度的等价性。它不修改 `ChargedPhaseBackend` 的默认值，
 也不宣称已经通过真实 charged profile 的 PV、Levinson/Mott 或节点/截断收敛门禁。
 
+### 6.4.3 离散根与连续谱分离（诊断合同，2026-09-05）
+
+`certify_gap_roots` 只在外部给定的物理 sheet、实轴解析 gap 内寻找简单根，
+二分后验证完整复残差和非零实斜率；`count_scope=provided_analytic_gaps` 不等于
+完整态数。旧 sign-bracket helper 不认证 Landau cut 内的零点或根的残差。
+`continue_gap_roots` 跟踪根位置与 ID，不把 `not_recovered` 自动称为进入连续谱。
+
+数学推导：解析简单零点附近 `F(z)=a(z-omega_b)+O((z-omega_b)^2)`，实数 `a!=0`。
+在 `delta=-arg F(omega+i0)` 下，`-Im(d log F/domega)` 的奇异部分为
+`+pi*delta_D(omega-omega_b)`，不由实轴 `atan` 的 signed zero 或 unwrap 决定。
+每个被认证的正能根因此单独贡献 `g_B(omega_b)`。连续谱只在不跨根的各段积分。
+对 GBU，同样有 `F_GBU(delta+pi)-F_GBU(delta)=pi`；不能把光滑链式法则
+`2 sin(delta)^2 * delta'` 直接用于未解析的跳变。`split_bu_shell` 保留离散项、
+连续项和有符号部分和，绝不裁零。
+
+anchor 限定：`d(delta+C)=d delta` 只直接保证普通 BU 不变。对 GBU，
+`dF(delta+C)=2 sin(delta+C)^2 d delta` 在一般常数 C 下不等于 `dF(delta)`；
+整数倍 pi 平移才保持不变。有限窗口的非整数 pi anchor 因此还可能改变 GBU
+连续谱权重，必须随高能端点检查，不能视为物理修复。
+
+现有单 unitary-cut 的 `delta(thr)-delta(infinity)=pi*n_B` 门禁在有限温度存在
+Landau cut 时只作 **conditional** 检查，不是全谱论证。还需确认低能端、所有 cut、
+cutoff/routing 和 Gaussian log-propagator 的解析性质；有限窗口 tail span 为零也不能
+单独证明 `omega_max` 足够大。
+
+### 6.4.4 两线谱权重与低能边界审查（2026-09-05）
+
+**文献事实**：Blaschke et al. 2014，DOI
+[10.1016/j.aop.2014.06.002](https://doi.org/10.1016/j.aop.2014.06.002)，
+[arXiv:1305.3907](https://arxiv.org/abs/1305.3907) Eq. (82)-(90) 明确区分外 Matsubara
+频率与减化学势后的极点位置，由 Gaussian `Tr log D^-1` 推导 BU。Eq. (90) 后还
+明确说明该相位是 log-propagator 的谱参数化，不是 on-shell 可观测散射相移。
+因此 physical-S 映射不是本 Gaussian 路线的必需前置条件；第 6.4.2 节的 S 代数
+只在额外声称该映射时适用。此修正不免除 retarded 解析性、态数及热权重验证。
+
+**数学推广**：从两条 Matsubara 夸克线的部分分式求和，在本项目 B0 归一化下：
+
+```math
+B_{0,\mathrm{spec}}(\lambda,q)=\int dp\,p^2\int_{-1}^{1}\frac{dx}{E_1E_2}
+\sum_{s,t=\pm1}\frac{st\,[f(tE_2;\mu_2)-f(sE_1;\mu_1)]}
+{\lambda-sE_1+tE_2+i0},\qquad E_2=\sqrt{p^2+q^2-2pqx+m_2^2}.
+```
+
+上述写法中 `E2` 依赖 x。它是对该文 Appendix A.3
+两线 occupation-difference 结构的不等质量/不等化学势推广，不是该文直接给出的
+finite-BQS 完成结果。`f(-E;mu)=1-f_antiquark(E;mu)`；`s!=t` 为 pair cut，
+`s==t` 为 Landau cut。新 `B0_spectral_cut` 解析执行角向 delta 积分，并明确
+对两条线施加同一 pmax；不等同于历史 shift 后各自截断的一线表达式。
+
+零外频率检验：on-shell 条件是 `sE1-tE2=lambda=k0+mu1-mu2`。在 k0=0 时
+`sE1-mu1=tE2-mu2`，所以 occupation difference 应消失。在零温无占据真空，
+Landau 项也必须消失。这两条检验不依赖相位的 unwrap/fold。
+
+**当前反例**：旧 `B0_pv_cut` 在 m1=m2=q=1、mu1=mu2=0、T=0.001 fm^-1 下，
+lambda=0.1/0.5/0.9 的 Im B0 为 0.314159/1.570796/2.827433；有限 eta 探针相近。
+独立谱线 oracle 在这三个 spacelike 点为零；lambda=3 的 unitary 值双方同为
+2.221441469。故旧两种表达相互一致不构成 physical cut 正确性的证明，之前的
+“finite-q 负贡献属于真实物理连续谱”的说法必须降级为未经认证的 provider 输出。
+
+**边界项**：对任意连续窗，令 F=delta 或 delta-sin(2delta)/2，有
+
+```math
+\int_a^b\frac{g\,dF}{\pi}=\frac{g(b)F(b)-g(a)F(a)}{\pi}
+ +\int_a^b\frac{F\,g(1+g)}{\pi T}\,d\omega.
+```
+
+`bu_phase_integral_parts` 锁定其离散 Stieltjes 乘积恒等式。如果 F 在低能端非零，
+体项与边界项可以分别很大且符号相反。仅保留正体项不是原导数积分的等价变形。
+当前 frozen provider 的低能相位为 `delta0+c*k0+...`；其 `g(k0;0)*F'` 可出现
+`T*F'(0)/k0` 的对数下界依赖。由于该 provider 已失败物理 cut 检查，不能把此
+发散归因于模型最终物理限制。先修复同一 regulator 下完整复泡，再重做态数和 IR 检验。
+
 ## 7. BU 数密度与带电化学势
+
+**坐标限定（2026-09-05）**：下文 `g_B(omega;mu_M,T)` 中 omega 是未减去
+介子化学势的能量，不能不经转换便同时指 provider 的 Matsubara 外频率 `k0`。
+按第 5.1 节的 `lambda=k0+mu_M`，同一谱积分的两种表示必须满足
+`g_B(k0;0,T)=g_B(lambda;mu_M,T)`，并同时平移根、cut 和积分窗口。
+原审计脚本的 `g_B(k0;mu_M,T)` 会再次减去化学势。其值保留为历史 diagnostic
+敏感性列，不能用来声称绝对密度公式闭合；新 split audit 显式记录两种权重。
+这不是把物理 `mu_M` 设为零，也不改变 BQS 背景。完整 charged 正负频率/KMS
+组织仍需审阅；physical-S 的非必要性见第 6.4.4 节，不得仅以代数坐标恒等式授权 production。
 
 ### 7.1 介子化学势
 
@@ -677,7 +849,7 @@ production 升格，并另建“凝聚零模 + 连续谱”路线；在此之前
 | Rehberg & Klevansky, *Ann. Phys.* 252 (1996) 422–457, DOI [10.1006/aphy.1996.0140](https://doi.org/10.1006/aphy.1996.0140)；开放版本 [hep-ph/9510221](https://arxiv.org/abs/hep-ph/9510221) | arXiv v2 Eq. (19) 的 flavor-order 结构、Eq. (84)–(89) 的一圈积分/解析结构；出版物方程编号需按具体版本复核，不再写成不存在的 Eq. (4.9)/(6.5)–(6.10) | 保留有序 `(f,f')`；项目 `Pi` 的 `fm^-2` 约定与 `K Pi` 无量纲检查必须同时使用 |
 | Tian et al., *Phys. Rev. D* 114 (2026) 034012, DOI [10.1103/d7nm-y2vp](https://doi.org/10.1103/d7nm-y2vp) | Eq. (2)–(3) 完整 KMT 有效耦合（含 `K03/K30/K38/K83`）；Eq. (20)–(22)、(26) 中性 `(0,3,8)` RPA 矩阵组织 | 该文使用 NJL、外磁场和 Pauli–Villars；本项目只采用耦合/矩阵结构，把 PNJL/零磁场/BU 数值另行闭合 |
 | Blaschke et al., *Phys. Rev. D* 96 (2017) 094008, DOI [10.1103/PhysRevD.96.094008](https://doi.org/10.1103/PhysRevD.96.094008) | charged ladder 顶角、`1-2G_S Pi`、`z_p=M-iGamma/2`、实轴 phase shift、Mott 跳变和 Levinson/高能相位边界 | ladder 顶角证明其 `Pi` 是 Rehberg 单个 ordered bubble 的 2 倍；GBU 采用实轴 retarded 相位，second-sheet pole 只属于 strict pole/BW 路线 |
-| Blaschke et al., *Particles* 3 (2020) 169–177, DOI [10.3390/particles3010014](https://doi.org/10.3390/particles3010014)；arXiv [1912.13162](https://arxiv.org/abs/1912.13162) | 开放版本 Eq. (18) 标准 BU 部分密度、Eq. (20) `delta -> delta - sin(2delta)/2` 的广义替换；最终比较采用广义形式 | 四类数密度算法均保持可调用；最终路线比较默认 `phase_shift_gbu_reference`，单 charged 物种取 `d=1`；实验趋势只作参照 |
+| Blaschke et al., *Particles* 3 (2020) 169–177, DOI [10.3390/particles3010014](https://doi.org/10.3390/particles3010014)；arXiv [1912.13162](https://arxiv.org/abs/1912.13162) | 本轮保留的开放 PDF Eq. (14) 标准 BU 部分密度、Eq. (16) `delta -> delta - sin(2delta)/2`；Eq. (12) 后明确使用介质内 Lorentz 不变外推近似 | 四类算法保留；比较默认 `phase_shift_gbu_reference`，单 charged 物种取 `d=1`；不同版本编号不混用，有限 q 推广需独立论证 |
 
 这些来源分别支撑“微观模型/传播子”“有序泡与归一化”“BU 方法结构”和
 “`pi/K` 带电比值工作流”。来源之间若采用不同的 `Pi`、相移或 KMT 符号，必须

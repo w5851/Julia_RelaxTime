@@ -10,6 +10,17 @@ Models 统一流程入口（阶段 C）：
 """
 
 export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
+export run_charged_gbu_freezeout_scan
+
+const _charged_gbu_load_lock = ReentrantLock()
+"""Opt-in infinite-thermal charged GBU research scan; legacy defaults unchanged."""
+function run_charged_gbu_freezeout_scan(;kwargs...)
+    lock(_charged_gbu_load_lock) do
+        isdefined(Main,:ChargedGBUResearchWorkflow) || Base.include(Main,
+            joinpath(@__DIR__,"workflow_apps","ChargedGBUResearchWorkflow.jl"))
+    end
+    return Base.invokelatest(() -> Main.ChargedGBUResearchWorkflow.run_scan(;kwargs...))
+end
 export run_freezeout_fixedmu_scan
 export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan

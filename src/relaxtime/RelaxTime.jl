@@ -39,6 +39,7 @@ include("KinematicChecks.jl")
 
 # ── Relaxtime submodules (dependency order) ──
 include("OneLoopIntegrals.jl")
+include("CausalSpectralBubble.jl")
 include("OneLoopIntegralsAniso.jl")
 include("PolarizationAniso.jl")
 include("PolarizationCache.jl")
