@@ -13,14 +13,14 @@ phase shifts, or perform Beth-Uhlenbeck integration.
 module ChargedRPAProvider
 
 using ..ChargedRPAKernel: ChargedRPAKernelSpec
-using ..OneLoopIntegrals: B0_retarded, EPS_SEGMENT
+using ..OneLoopIntegrals: B0_pv_cut, B0_retarded, EPS_SEGMENT
 using ..PolarizationAniso: polarization_aniso
 using Main.Constants_PNJL: N_color
 
 export charged_polarization
 
 const _FLAVORS = (:u, :d, :s)
-const _PRESCRIPTIONS = (:ordered_retarded, :ordered_legacy_B0, :legacy_symmetrized_B0)
+const _PRESCRIPTIONS = (:ordered_retarded, :ordered_pv_cut, :ordered_legacy_B0, :legacy_symmetrized_B0)
 
 @inline function _finite_real(value, label::AbstractString)::Float64
     value isa Real || throw(ArgumentError("$(label) must be real"))
@@ -57,7 +57,7 @@ end
 
 @inline function _num_s_quark(spec::ChargedRPAKernelSpec, prescription::Symbol)
     prescription in _PRESCRIPTIONS || throw(ArgumentError(
-        "unknown prescription $(prescription); use :ordered_retarded, :ordered_legacy_B0, or :legacy_symmetrized_B0",
+        "unknown prescription $(prescription); use :ordered_retarded, :ordered_pv_cut, :ordered_legacy_B0, or :legacy_symmetrized_B0",
     ))
     if prescription === :legacy_symmetrized_B0 &&
        (spec.pair[1] === :s || spec.pair[2] === :s)
@@ -77,9 +77,11 @@ provide `u`, `d`, and `s` fields in `fm^-1`, `fm^-1`, and `fm^-2`, respectively.
 are dimensionless.  The returned `value` is `Pi_a` in `fm^-2`.
 
 `prescription=:ordered_retarded` is the strict upper-half-plane probe and uses
-the explicit `eta_inv_fm` and `energy_nodes` controls. It currently supports
-only `xi=0`. `:ordered_legacy_B0` preserves the earlier ordered adapter with
-`num_s_quark=0`, while `:legacy_symmetrized_B0` reproduces the existing
+the explicit `eta_inv_fm` and `energy_nodes` controls. `:ordered_pv_cut` is the
+real-axis principal-value plus analytic-cut adapter with the retarded
+`e^{-iωt}` imaginary-part sign. Both ordered strict prescriptions currently
+support only `xi=0`. `:ordered_legacy_B0` preserves the earlier ordered adapter
+with `num_s_quark=0`, while `:legacy_symmetrized_B0` reproduces the existing
 Rehberg/Fortran/Cpp strange-channel oracle with `num_s_quark=1`. Finite-width
 and second-sheet pole semantics remain out of scope.
 """
@@ -131,6 +133,19 @@ function charged_polarization(
         prefactor = q^2 - λ^2 + mass_term
         Π = (-N_color / (8π^2)) * (A1 + A2 + prefactor * B0_value)
         (ComplexF64(Π), :OneLoopIntegralsRetarded, :upper_half_plane_probe, eta, Int(energy_nodes))
+    elseif prescription === :ordered_pv_cut
+        abs(thermo_values.ξ) <= EPS_SEGMENT || throw(ArgumentError(
+            ":ordered_pv_cut currently supports only thermo.ξ=0; use a legacy prescription for diagnostic anisotropic evaluation",
+        ))
+        B0_value = B0_pv_cut(
+            k0 + μ1 - μ2, q, m1, μ1, m2, μ2, thermo_values.T;
+            Φ=thermo_values.Φ,
+            Φbar=thermo_values.Φbar,
+        )
+        mass_term = spec.channel === :P ? (m1 - m2)^2 : (m1 + m2)^2
+        prefactor = q^2 - (k0 + μ1 - μ2)^2 + mass_term
+        Π = (-N_color / (8π^2)) * (A1 + A2 + prefactor * B0_value)
+        (ComplexF64(Π), :OneLoopIntegralsPV, :real_axis_pv_cut, 0.0, 0)
     else
         Π_re, Π_im = polarization_aniso(
             spec.channel,

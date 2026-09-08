@@ -119,6 +119,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_phase_normalization.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_phase_backend.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_phase_backend_script_contract.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_charged_mott_profile_script_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_bu_convergence_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_bu_negative_density_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_scan_workflow_entry.jl"),

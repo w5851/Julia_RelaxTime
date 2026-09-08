@@ -37,6 +37,8 @@ end
     @test profile.anchored_phase[end] ≈ 0.0 atol=1e-14
     @test profile.tail_stable
     @test maximum(abs.(profile.anchored_phase .- δ)) < 1e-6
+    @test length(profile.s_matrix_values) == length(ω)
+    @test maximum(abs.(abs.(profile.s_matrix_values) .- 1.0)) < 1e-12
 
     unstable = strict_phase_profile(
         ω,
@@ -77,6 +79,8 @@ end
     @test strict.status === :ok
     @test strict.density > 0.0
     @test strict.omega_measure_factor ≈ 1 / π
+    @test ismissing(strict.q_profiles[1].continuation_delta)
+    @test all(hasproperty(profile, :continuation_delta) for profile in strict.q_profiles)
     @test strict.density ≈ 2.0 * legacy.density rtol=1e-12
 
     changed = strict_charged_bu_density(

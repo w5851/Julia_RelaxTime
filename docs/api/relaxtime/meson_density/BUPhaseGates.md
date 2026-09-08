@@ -42,6 +42,12 @@ gate = levinson_phase_gate(
 若阈下虚部超过 `imag_tolerance`，返回 `status=:complex_subthreshold` 和
 `passed=false`，不会把复结构静默计作束缚态。
 
+`count_bound_states(inverse_fn, q, threshold; ...)` 是独立采样适配器；它把 callable
+的阈下 profile 交给同一计数器，并标记 `independent=true`。
+`continue_bound_state_counts` 沿显式 `q_values` 重复计数并返回前一点差值；该差值只是
+continuation 诊断，不会替代每个动量点的独立判定。有限 `eta` 导致
+`:complex_subthreshold` 时，计数必须继续作为失败/待复核状态处理。
+
 `levinson_phase_gate` 检查：
 
 ```math

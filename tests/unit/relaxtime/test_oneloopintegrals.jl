@@ -32,7 +32,7 @@ const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
 end
-using Main.OneLoopIntegrals: B0, B0_retarded, A
+using Main.OneLoopIntegrals: B0, B0_pv_cut, B0_retarded, A
 
 const Λ_INV_FM = Main.OneLoopIntegrals.Λ_inv_fm
 
@@ -200,6 +200,53 @@ end
     @test_throws ArgumentError B0_retarded(params.λ, 0.1, params.m1, params.μ1, params.m2, params.μ2, params.T; energy_nodes=3)
 end
 
+@testset "OneLoopIntegrals.B0_pv_cut" begin
+    params = TEST_PARAMS
+    legacy = B0(
+        params.λ, 0.0, params.m1, params.μ1, params.m2, params.μ2, params.T;
+        Φ=params.Φ, Φbar=params.Φbar,
+    )
+    strict = B0_pv_cut(
+        params.λ, 0.0, params.m1, params.μ1, params.m2, params.μ2, params.T;
+        Φ=params.Φ, Φbar=params.Φbar,
+    )
+    @test strict == ComplexF64(legacy[1], -legacy[2])
+    @test isfinite(real(strict)) && isfinite(imag(strict))
+
+    finite_q_legacy = B0(
+        0.95, 0.35, 1.5, 0.2, 2.5, 0.05, 0.75;
+        Φ=0.4, Φbar=0.45,
+    )
+    finite_q_strict = B0_pv_cut(
+        0.95, 0.35, 1.5, 0.2, 2.5, 0.05, 0.75;
+        Φ=0.4, Φbar=0.45,
+    )
+    @test finite_q_strict == ComplexF64(finite_q_legacy[1], -finite_q_legacy[2])
+    @test isfinite(real(finite_q_strict)) && isfinite(imag(finite_q_strict))
+    finite_q_probe = B0_retarded(
+        0.95, 0.35, 1.5, 0.2, 2.5, 0.05, 0.75;
+        Φ=0.4, Φbar=0.45, eta_inv_fm=2.0e-3, energy_nodes=512,
+    )
+    @test real(finite_q_probe) ≈ real(finite_q_strict) rtol=0.03 atol=0.01
+    @test sign(imag(finite_q_probe)) == sign(imag(finite_q_strict))
+
+    # At a cut point the explicit upper-half-plane probe approaches the same
+    # PV real part and the opposite analytic-cut sign.  Keep this as a broad
+    # diagnostic tolerance because finite eta and finite energy nodes are not
+    # the exact real-axis limit.
+    cut = B0_pv_cut(
+        0.95, 0.0, 1.5, 0.2, 2.5, 0.05, 0.75;
+        Φ=0.4, Φbar=0.45,
+    )
+    probe = B0_retarded(
+        0.95, 0.0, 1.5, 0.2, 2.5, 0.05, 0.75;
+        Φ=0.4, Φbar=0.45, eta_inv_fm=1.0e-3, energy_nodes=512,
+    )
+    @test real(probe) ≈ real(cut) rtol=0.03 atol=0.01
+    @test sign(imag(probe)) == sign(imag(cut))
+    @test abs(imag(probe)) > 0.5 * abs(imag(cut))
+end
+
 @testset "OneLoopIntegrals.const_integral_term_A" begin
     m = TEST_PARAMS.m1
     integrand(p) = p^2 / sqrt(p^2 + m^2)
@@ -239,5 +286,3 @@ end
 println("\n" * "="^70)
 println("OneLoopIntegrals 模块测试完成！")
 println("="^70)
-
-

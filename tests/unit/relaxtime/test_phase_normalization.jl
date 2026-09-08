@@ -24,6 +24,8 @@ using Main.RelaxTime.PhaseNormalization: SCATTERING_PHASE,
                                            s_matrix_density_of_states,
                                            phase_to_s_matrix_profile,
                                            s_matrix_to_phase_profile
+using Main.RelaxTime.PhaseNormalization: propagator_phase,
+                                           propagator_to_s_matrix
 using Main.RelaxTime.BUPhaseGates: anchor_phase_high_energy
 
 @testset "Phase variable and measure contract" begin
@@ -52,6 +54,17 @@ end
     S_argument = phase_to_s_matrix(argument; variable=:s_matrix_argument)
     @test S_argument ≈ S atol=1e-14
     @test s_matrix_to_phase(S_argument; variable=:s_matrix_argument) ≈ argument atol=1e-14
+end
+
+@testset "Propagator-to-S diagnostic adapter is explicit" begin
+    inverse = cis(-0.31)
+    mapped = propagator_to_s_matrix(inverse)
+    @test mapped.phase ≈ 0.31 atol=1e-14
+    @test mapped.s_matrix ≈ cis(0.62) atol=1e-14
+    @test mapped.phase_object === :inverse_propagator
+    @test mapped.mapping === :diagnostic_propagator_to_scalar_s
+    @test propagator_phase(conj(inverse); phase_object=:propagator) ≈ 0.31 atol=1e-14
+    @test_throws ArgumentError propagator_to_s_matrix(inverse; phase_object=:bad)
 end
 
 @testset "Synthetic profile preserves continuous phase and DMB measure" begin

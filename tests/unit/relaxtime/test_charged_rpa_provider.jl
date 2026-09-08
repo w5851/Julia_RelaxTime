@@ -124,6 +124,37 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test ordered_legacy.eta_inv_fm == 0.0
         @test ordered_legacy.energy_nodes == 0
 
+        pv_cut = charged_polarization(
+            spec,
+            k0,
+            q,
+            masses,
+            chemical_potentials,
+            thermo,
+            A_values;
+            prescription=:ordered_pv_cut,
+        )
+        expected_pv = Main.RelaxTime.OneLoopIntegrals.B0_pv_cut(
+            k0 + chemical_potentials.u - chemical_potentials.s,
+            q,
+            masses.u,
+            chemical_potentials.u,
+            masses.s,
+            chemical_potentials.s,
+            thermo.T;
+            Φ=thermo.Φ,
+            Φbar=thermo.Φbar,
+        )
+        prefactor_pv = q^2 - (k0 + chemical_potentials.u - chemical_potentials.s)^2 + (masses.u - masses.s)^2
+        expected_pv_pi = (-Main.Constants_PNJL.N_color / (8π^2)) *
+            (A_values.u + A_values.s + prefactor_pv * expected_pv)
+        @test pv_cut.value ≈ ComplexF64(expected_pv_pi)
+        @test pv_cut.provider == :OneLoopIntegralsPV
+        @test pv_cut.prescription == :ordered_pv_cut
+        @test pv_cut.analytic_scope == :real_axis_pv_cut
+        @test pv_cut.eta_inv_fm == 0.0
+        @test pv_cut.energy_nodes == 0
+
         legacy = charged_polarization(
             spec,
             k0,
@@ -177,5 +208,6 @@ using Main.RelaxTime.PolarizationAniso: polarization_aniso
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo_aniso, A_values)
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; eta_inv_fm=0.0)
         @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo, A_values; energy_nodes=3)
+        @test_throws ArgumentError charged_polarization(spec, k0, q, masses, chemical_potentials, thermo_aniso, A_values; prescription=:ordered_pv_cut)
     end
 end

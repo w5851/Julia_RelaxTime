@@ -1,7 +1,8 @@
 # ChargedRPAProvider
 
 `ChargedRPAProvider` 是 Phase-C 的 ordered charged bubble 适配层。默认 strict
-处方在 `z=omega+i*eta` 上调用 `OneLoopIntegrals.B0_retarded`；历史实轴
+处方在 `z=omega+i*eta` 上调用 `OneLoopIntegrals.B0_retarded`；显式的
+`:ordered_pv_cut` 使用实轴主值加解析 cut 的 retarded 边界值；历史实轴
 `PolarizationAniso` 则作为两个显式 legacy oracle 保留。
 
 该模块仍是 diagnostic adapter：它不声称已经完成
@@ -30,11 +31,12 @@ Pi_us = ordered.value
 
 ## 处方边界
 
-`prescription` 有三个值：
+`prescription` 有四个值：
 
 | 处方 | 后端 | strange channel 的 `num_s_quark` | 定位 |
 |---|---|---:|---|
 | `:ordered_retarded`（默认） | `B0_retarded(z=omega+i*eta)` | `0` | strict GBU 上半平面探针 |
+| `:ordered_pv_cut` | `B0_pv_cut`（PV 实部 + retarded cut） | `0` | strict 实轴 PV/cut diagnostic |
 | `:ordered_legacy_B0` | 历史 `PolarizationAniso` | `0` | PR289 ordered adapter 兼容 oracle |
 | `:legacy_symmetrized_B0` | 历史 `PolarizationAniso` | `1` | Rehberg/旧 Fortran/Cpp 对齐 oracle |
 
@@ -72,6 +74,10 @@ legacy = charged_polarization(
 所有输入必须有限，`q>=0` 且 `T>0`。strict 后端当前只支持 `xi=0`；非零各向
 异性只能显式选择 legacy 处方。provider 不自动计算 `A_f`，调用方必须传入
 同一平均场背景和同一正则化口径下的 `A_u/A_d/A_s`。
+
+`:ordered_pv_cut` 返回 `analytic_scope=:real_axis_pv_cut`、`eta_inv_fm=0` 和
+`energy_nodes=0`。它不表示已经通过 `eta->0+`、端点、Levinson/Mott 或节点/截断
+门禁；这些比较必须由分析脚本显式记录。
 
 ## 未完成门禁
 

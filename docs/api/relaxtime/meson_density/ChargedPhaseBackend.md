@@ -26,6 +26,11 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 该后端的 `domega/pi` 是默认值；`domega/(2pi)` 只能作为 legacy ratio adapter。
 相位分支、阈值和 Levinson 条件必须先通过，不能用常数 anchor 替代收敛检查。
 
+真实 bubble 可以来自两条独立诊断路径：`ChargedRPAProvider` 的
+`:ordered_retarded`（有限上半平面 `eta`）或 `:ordered_pv_cut`（实轴 Cauchy
+主值实部加解析 cut）。后者不等同于把 `eta` 设成一个很小的正数；两者的
+`eta`、节点、端点和高能尾部都必须分别做收敛对照。
+
 ## 主要 API
 
 ### `StrictChargedPhaseSpec(; ...)`
@@ -73,6 +78,11 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 对 Mott 转变前后的两个 profile 分别执行端点/Levinson gate，再调用
 `BUPhaseGates.mott_phase_gate` 检查绑定态数和阈值相位的同步下降。绑定态数是显式
 输入，不由有限网格自动猜测。
+
+分析脚本 `scripts/analysis/relaxtime/audit_charged_mott_profiles.jl` 在两个显式温度
+上配对真实 ordered profile，并输出质量--阈值差、独立束缚态状态、Levinson 与 Mott
+gate。它不会自动寻找 Mott 温度；默认温度只是诊断候选，任何 `complex_subthreshold`
+或 phase gate 失败都必须保留，不能晋升为物理转变结论。
 
 ### `strict_density_convergence_gate(coarse, refined; rtol=..., atol=...)`
 

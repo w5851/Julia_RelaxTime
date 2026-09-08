@@ -43,6 +43,11 @@ rho = s_matrix_density_of_states(S, dS)
 `delta=-arg(Delta^R_inverse)` 作为项目诊断映射。该映射必须由同一传播子、解析延拓
 和 `S`-matrix 归一化的独立验证支持；本模块的代数恒等式不把它升级为文献唯一算法。
 
+`propagator_phase` 与 `propagator_to_s_matrix` 提供显式、可审计的诊断适配：调用者
+必须指定传播子对象（逆传播子或传播子）及符号，返回值同时保留这些元数据和
+`mapping=:diagnostic_propagator_to_scalar_s`。它们只表示项目当前的 scalar phase
+convention，不把任意 off-shell 传播子自动提升为物理 on-shell `S` 矩阵。
+
 对多通道对角 `S`，`s_matrix_log_derivative(S,dS)` 返回
 `Im tr(S^-1*dS)`，即 `d arg(det(S))`。若单独跟踪 eigenphase，仍须记录通道基底和
 分支选择；非对角 coupled-channel 的生产实现不由本模块自动提供。
