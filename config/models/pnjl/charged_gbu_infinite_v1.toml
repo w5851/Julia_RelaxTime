@@ -1,0 +1,30 @@
+schema = "charged_gbu_infinite_v1"
+observable = "fixed_quark_only_gbu_partial_yield"
+thermal_target = "infinity"
+vacuum_regulator = "two_line_Lambda"
+background = "FixedMuBConservedCharges"
+charge_to_baryon_ratio = 0.4
+strangeness_density_fm3 = 0.0
+meson_feedback = false
+production_default = false
+freezeout_profile = "default"
+energies_GeV = [3.0, 5.0, 7.7, 11.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+
+[numerics]
+background_nodes = 48
+mesh = 512
+cut_nodes = 96
+omega_nodes = 96
+q_orders = [8, 16, 32]
+q_bulk_max_inv_fm = 8.0
+q_tail_edges_inv_fm = [8.0, 12.0, 16.0, 24.0, 32.0]
+tail_order = 8
+
+[gates]
+kernel_absolute_inv_fm2 = 1.0e-6
+q_relative = 0.005
+component_relative = 0.01
+inner_relative = 0.005
+eta_relative = 0.01
+tail_fraction = 1.0e-6
+background_residual = 1.0e-7

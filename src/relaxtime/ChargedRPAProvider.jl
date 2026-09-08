@@ -8,7 +8,14 @@ The default `:ordered_retarded` prescription evaluates the ordered bubble at
 real-axis `B0` behavior remains available through `:ordered_legacy_B0`, while
 the source-backed `num_s_quark=1` average remains the explicit
 `:legacy_symmetrized_B0` oracle. The adapter does not locate poles, construct
-phase shifts, or perform Beth-Uhlenbeck integration.
+phase shifts, or perform Beth-Uhlenbeck integration. The
+`charged_pair_continuum_thresholds` helper keeps the internal shifted-energy
+coordinate `lambda` separate from the external propagator-energy coordinate
+`k0` used by the phase backend.
+
+The retained PV/log continuations fail independent vacuum-spacelike and
+zero-external-frequency spectral checks (2026-09-05). All returned values
+remain diagnostic; physical_cut_certified is false.
 """
 module ChargedRPAProvider
 
@@ -17,7 +24,7 @@ using ..OneLoopIntegrals: B0_pv_cut, B0_retarded, EPS_SEGMENT
 using ..PolarizationAniso: polarization_aniso
 using Main.Constants_PNJL: N_color
 
-export charged_polarization
+export charged_polarization, charged_pair_continuum_thresholds
 
 const _FLAVORS = (:u, :d, :s)
 const _PRESCRIPTIONS = (:ordered_retarded, :ordered_pv_cut, :ordered_legacy_B0, :legacy_symmetrized_B0)
@@ -52,6 +59,48 @@ end
         Φ=_finite_real(thermo.Φ, "thermo.Φ"),
         Φbar=_finite_real(thermo.Φbar, "thermo.Φbar"),
         ξ=hasproperty(thermo, :ξ) ? _finite_real(thermo.ξ, "thermo.ξ") : 0.0,
+    )
+end
+
+"""
+    charged_pair_continuum_thresholds(q, m1, m2, mu1, mu2)
+
+Return the two equivalent coordinates of the ordered pair-creation threshold.
+The internal bubble variable is
+`lambda = k0 + mu1 - mu2`, so the positive-energy cut starts at
+`lambda_thr = sqrt(q^2 + (m1 + m2)^2)`, obtained by minimizing
+`E1(p) + E2(q-p)` at fixed total momentum q. The phase backend samples
+the external propagator energy `k0`; its threshold is therefore
+`k0_thr = lambda_thr - (mu1 - mu2)`.  All arguments and returned values use
+`fm^-1`.
+"""
+function charged_pair_continuum_thresholds(
+    q::Real,
+    m1::Real,
+    m2::Real,
+    μ1::Real,
+    μ2::Real,
+)
+    q_value = _finite_real(q, "q")
+    m1_value = _finite_real(m1, "m1")
+    m2_value = _finite_real(m2, "m2")
+    μ1_value = _finite_real(μ1, "μ1")
+    μ2_value = _finite_real(μ2, "μ2")
+    q_value >= 0.0 || throw(ArgumentError("q must be non-negative"))
+    m1_value >= 0.0 || throw(ArgumentError("m1 must be non-negative"))
+    m2_value >= 0.0 || throw(ArgumentError("m2 must be non-negative"))
+    λ_threshold = hypot(q_value, m1_value + m2_value)
+    λ_landau = hypot(q_value, m1_value - m2_value)
+    μ_shift = μ1_value - μ2_value
+    return (
+        lambda_threshold_inv_fm=λ_threshold,
+        k0_threshold_inv_fm=λ_threshold - μ_shift,
+        chemical_potential_shift_inv_fm=μ_shift,
+        lambda_landau_bound_inv_fm=λ_landau,
+        k0_landau_lower_inv_fm=-λ_landau - μ_shift,
+        k0_landau_upper_inv_fm=λ_landau - μ_shift,
+        analytic_gap_inv_fm=(λ_landau - μ_shift, λ_threshold - μ_shift),
+        threshold_scope=:uncut_kinematic_envelope,
     )
 end
 
@@ -199,6 +248,7 @@ function charged_polarization(
         num_s_quark=num_s,
         eta_inv_fm=effective_eta,
         energy_nodes=effective_nodes,
+        physical_cut_certified=false,
     )
 end
 

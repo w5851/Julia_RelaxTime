@@ -40,13 +40,19 @@ rho = s_matrix_density_of_states(S, dS)
 不证明 `omega_max` 已足够大。
 
 现有 `ChargedPhaseBackend` 使用
-`delta=-arg(Delta^R_inverse)` 作为项目诊断映射。该映射必须由同一传播子、解析延拓
-和 `S`-matrix 归一化的独立验证支持；本模块的代数恒等式不把它升级为文献唯一算法。
+`delta=-arg(Delta^R_inverse)` 作为项目诊断映射。该映射必须验证同一传播子的解析
+延拓与计数；本模块的代数恒等式不把它升级为文献唯一算法。
+
+2026-09-05 文献边界修正：Blaschke et al. 2014，arXiv:1305.3907 Eq. (85)-(90)
+直接从 Gaussian `Tr log D^-1` 得到 BU，并在 Eq. (90) 后明确区分这种 log-propagator
+相位与可观测 on-shell 散射相移。因此 physical S 映射不是该 Gaussian BU 路线的
+必需前置门禁；若另外声称 S-matrix 等价，则仍需独立证明。
 
 `propagator_phase` 与 `propagator_to_s_matrix` 提供显式、可审计的诊断适配：调用者
 必须指定传播子对象（逆传播子或传播子）及符号，返回值同时保留这些元数据和
 `mapping=:diagnostic_propagator_to_scalar_s`。它们只表示项目当前的 scalar phase
 convention，不把任意 off-shell 传播子自动提升为物理 on-shell `S` 矩阵。
+精确复零点的相位未定义，`propagator_phase` 和对应 adapter 会抛出 `ArgumentError`。
 
 对多通道对角 `S`，`s_matrix_log_derivative(S,dS)` 返回
 `Im tr(S^-1*dS)`，即 `d arg(det(S))`。若单独跟踪 eigenphase，仍须记录通道基底和

@@ -59,6 +59,21 @@ continuation 诊断，不会替代每个动量点的独立判定。有限 `eta` 
 
 ## Mott 门禁
 
+2026-09-05 新增 gap-aware 诊断 API：
+
+- `certify_gap_roots(inverse_fn,q,gaps; physical_sheet,real_axis,...)`：外部提供开
+  区间及 sheet 依据；只在这些区间采样、二分简单根，并检查复残差与非零斜率。
+  `passed` 只认证已采样 gap，`completeness_certified=false` 始终明确保留。
+  无法以零虚部抵消认证 cut 内的束缚态；有限 eta、非物理 sheet、非有限值、
+  复 gap 或残差失败都拒绝认证。
+- `continue_gap_roots(inverse_fn,q_values,gaps_fn;max_motion,...)`：q 必须严格递增；
+  只作唯一近邻匹配，返回 root ID、位置、距 gap 两端距离和事件。
+  `appeared_or_unresolved` / `not_recovered` 不能直接解释为物理产生/解离。
+
+所有能量、q、gap 端点及 `max_motion` 使用 `fm^-1`，逆传播子 residual/slope 的
+单位由 callable 决定；默认容差对应项目无量纲 RPA 分母。偶重根和未分辨根对
+不在简单根计数的完备性保证中，production 前须另行验证节点及端点覆盖。
+
 ```julia
 transition = mott_phase_gate(before_gate, after_gate)
 ```

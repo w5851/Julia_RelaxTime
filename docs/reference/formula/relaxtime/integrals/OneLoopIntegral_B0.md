@@ -205,6 +205,67 @@ E = \sqrt{k^2 + m_1^2}
   - 两个解都在区间内：虚部积分从 \( E_1 \) 到 \( E_2 \)。
 - 在数值计算中，表示一更常用，因为它直接提供了积分区间。
 
+### 3.4 严格 retarded 边界：外部 `k0`、内部 `lambda` 与逐项 cut
+
+上面的实轴表达式保留了历史 `B0` 的记号，但严格 charged-RPA 后端必须区分
+外部传播子能量和圈积分内部的化学势平移变量。对有序 pair `(f, f')`，定义
+
+```math
+\lambda = k_0 + \mu_f - \mu_{f'},\qquad
+z = k_0 + i0^+,\qquad
+\lambda^R = \lambda + i0^+ .
+```
+
+因此 `B0_retarded` 的实参数入口接收已经平移后的 `lambda`，而 phase/threshold
+后端的 `omega` 是外部 `k0`。正能量两粒子连续谱的阈值先在内部坐标中写成
+
+```math
+\lambda_{\rm thr}(q)=E_f(q)+E_{f'}(q),\qquad
+E_i(q)=\sqrt{q^2+m_i^2},
+```
+
+再转换为外部坐标
+
+```math
+k_{0,\rm thr}(q)=\lambda_{\rm thr}(q)-(\mu_f-\mu_{f'}).
+```
+
+只有在 `mu_f=mu_f'` 时，才可以把 `m_f+m_f'`（或其有限 `q` 推广）直接当作
+外部 `k0` 阈值。
+
+对 `q>0` 的角向积分，每个 `tilde_B0` 项都是一个复对数差。若某项的复参数为
+`w+i0*epsilon_sign`，主支边界
+
+```math
+\log(x+i0\,s)=\log|x|+i\pi s\,\Theta(-x),\qquad s\in\{+1,-1\},
+```
+
+给出该项的 cut 虚部
+
+```math
+\operatorname{Im}\tilde B_0^R
+ =\frac{\pi}{q}\int dE\,s(E)f(E)\,
+   [\Theta(-N(E))-\Theta(-D(E))],
+```
+
+其中 `N`、`D` 是对数分子和分母，且在不穿过 `w+E=0` 的子区间上
+`s(E)=sign[epsilon_sign*(w+E)]`。四个 `tilde_B0` 项的 `w` 和
+`epsilon_sign` 不同，故
+必须逐项组合后再得到 `Im B0^R`；不能用 `-imag(B0)` 对历史结果做全局翻号来
+代替。`q=0` 时使用
+
+```math
+\frac{1}{x+i0\,s}=\mathcal P\frac1x-i\pi s\,\delta(x),
+```
+
+并把 `D(E;w+i0s)` 中的局部导数符号一并计入。项目中的 `B0_pv_cut` 正是
+“历史 PV 实部 + 上述逐项解析 cut”的 diagnostic 适配器；`B0` 本身仍保留旧
+的实轴返回语义。
+
+有限 `eta` 的 `B0_retarded` 是上半平面探针，不是介子物理宽度。PV/cut 是
+`eta\to0^+` 的解析候选，两者必须通过 eta、节点、端点和截断对照后才能用于
+production；本节不把任一低节点有限窗口结果宣称为已收敛结果。
+
 
 
 ## 4. 参数说明表

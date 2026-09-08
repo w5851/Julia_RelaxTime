@@ -1,6 +1,7 @@
 schema_version = "v1"
 
 [scripts]
+"scripts/relaxtime/run_charged_gbu_freezeout_scan.jl" = "public-authoritative"
 "scripts/relaxtime/run_relaxtime_orchestrator.jl" = "public-authoritative"
 "scripts/relaxtime/run_gap_transport_scan.jl" = "internal-authoritative"
 "scripts/relaxtime/scan_relaxation_times_vs_T.jl" = "internal-authoritative"

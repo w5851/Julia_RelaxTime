@@ -15,7 +15,7 @@ using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using Main.Constants_PNJL: Λ_inv_fm
 
-export B0, B0_pv_cut, B0_retarded, A
+export B0, B0_pv_cut, B0_retarded, B0_spectral_cut, A
 
 # ----------------------------------------------------------------------------
 # 基础工具函数
@@ -509,34 +509,276 @@ function B0(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     return real_part, imag_part
 end
 
+"""
+    _tilde_B0_retarded_cut_imag(sign_flag, w, k, m, m_prime, μ, T, Φ, Φbar,
+                                 epsilon_sign)
+
+Return the analytic `eta -> 0+` imaginary part of one logarithmic
+`tilde_B0` term. `w` is the real part of the term's complex argument and
+`epsilon_sign` is the sign of its infinitesimal imaginary part. The sign is
+fixed pointwise by the principal-log boundary rather than by a global flip of
+the historical `B0` cut.
+"""
+function _tilde_B0_retarded_cut_imag(
+    sign_flag::Symbol,
+    w::Real,
+    k::Real,
+    m::Real,
+    m_prime::Real,
+    μ::Real,
+    T0::Real,
+    Φ::Real,
+    Φbar::Real,
+    epsilon_sign::Integer,
+)
+    w_value = Float64(w)
+    k_value = Float64(k)
+    m_value = max(Float64(m), 0.0)
+    m_prime_value = max(Float64(m_prime), 0.0)
+    μ_value = Float64(μ)
+    T_value = Float64(T0)
+    Φ_value = Float64(Φ)
+    Φbar_value = Float64(Φbar)
+    epsilon_sign in (-1, 1) || throw(ArgumentError("epsilon_sign must be +1 or -1"))
+
+    # At k=0, D(E)=z^2+2zE+m^2-m'^2 and the residue follows from
+    # 1/(x+i0*s)=PV(1/x)-i*pi*sign(s)*delta(x).
+    if abs(k_value) < EPS_K
+        abs(w_value) > EPS_SEGMENT || return 0.0
+        Emin = m_value
+        Emax = energy_cutoff(m_value)
+        denominator_term = (w_value^2 + m_value^2 - m_prime_value^2) / 2.0
+        singularity = singularity_k_zero(w_value, Emin, Emax, denominator_term)
+        isempty(singularity) && return 0.0
+        E0 = singularity[1]
+        p0 = internal_momentum(E0, m_value)
+        dist0 = distribution_value_b0(sign_flag, E0, μ_value, T_value, Φ_value, Φbar_value)
+        boundary_sign = sign(epsilon_sign * (w_value + E0))
+        return -2.0 * π * p0 * dist0 / abs(w_value) * boundary_sign
+    end
+
+    Emin = m_value
+    Emax = energy_cutoff(m_value)
+    intervals, _ = singularity_k_positive(
+        w_value, k_value, m_value, m_prime_value, Emin, Emax,
+    )
+    isempty(intervals) && return 0.0
+
+    # The sign of Im[(w+i0+E)^2] can change at E=-w. Split there so the
+    # principal-log boundary sign is constant on every subinterval.
+    total = 0.0
+    for (left, right) in intervals
+        points = Float64[left]
+        if left < -w_value < right
+            push!(points, -w_value)
+        end
+        push!(points, right)
+        sort!(points)
+        for j in 1:(length(points) - 1)
+            a, b = points[j], points[j + 1]
+            b > a || continue
+            midpoint = (a + b) / 2.0
+            p = internal_momentum(midpoint, m_value)
+            common = (w_value + midpoint)^2 - m_prime_value^2
+            numerator = common - (p - k_value)^2
+            denominator = common - (p + k_value)^2
+            log_branch = (numerator < 0.0 ? 1 : 0) - (denominator < 0.0 ? 1 : 0)
+            log_branch == 0 && continue
+            boundary_sign = sign(epsilon_sign * (w_value + midpoint))
+            total += boundary_sign * log_branch * distribution_integral_b0(
+                sign_flag, a, b, μ_value, T_value, Φ_value, Φbar_value,
+            )
+        end
+    end
+    return π * total / k_value
+end
+
 raw"""
     B0_pv_cut(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0)
 
 Return the ordered real-axis PV/cut value using the repository's analytic
 principal-value implementation and the `e^{-iωt}` retarded boundary value.
 
-`B0` is retained as the historical real-axis oracle.  Its analytic cut
-component follows the opposite `i0` sign to the explicit upper-half-plane
-probe `B0_retarded(λ+iη)`.  Therefore this diagnostic adapter preserves the
-same PV real part and reverses only the cut imaginary part:
+`B0` is retained as the historical real-axis oracle. Its PV real part is
+reused, but its cut component is not related to the ordered retarded value by
+one global sign. Each of the four logarithmic terms has its own argument
+`w=+/-lambda` and infinitesimal sign, so the cut is recomputed term by term:
 
 ```math
-B_0^{\mathrm{PV+ret}} = \operatorname{Re}B_0 - i\operatorname{Im}B_0.
+B_0^{\mathrm{PV+ret}} = \operatorname{PV}B_0 + i\operatorname{Im}B_0^{R},
+\qquad
+\operatorname{Im}B_0^{R}=\sum_{j=1}^{4}s_j\operatorname{Im}\widetilde B_{0,j}^{R}.
 ```
 
 This is not a change to `B0`'s legacy semantics and does not claim that the
 finite-window regulator, endpoint fallbacks, or numerical cut partition are
 production-converged.  Callers must still perform `eta`, node, and cutoff
 comparisons against `B0_retarded`.
+
+The 2026-09-05 independent spectral audit found spurious vacuum-spacelike
+weight in this continuation. Agreement with B0_retarded is not physical-cut
+certification. B0_spectral_cut is a separate cut-only oracle, not a replacement.
 """
 function B0_pv_cut(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
     Φ::Real=0.0, Φbar::Real=0.0) where {T<:Real}
-    real_part, legacy_imag = B0(λ, k, m1, μ1, m2, μ2, T0; Φ=Φ, Φbar=Φbar)
-    return ComplexF64(real_part, -legacy_imag)
+    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T0, Φ, Φbar)
+    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T0, Φ, Φbar)
+
+    real_part = term1[1] - term2[1] + term3[1] - term4[1]
+    λ_value = Float64(λ)
+    if abs(λ_value) <= EPS_SEGMENT
+        return ComplexF64(real_part, 0.0)
+    end
+    imag_part =
+        _tilde_B0_retarded_cut_imag(:plus, -λ_value, k, m1, m2, μ1, T0, Φ, Φbar, -1) -
+        _tilde_B0_retarded_cut_imag(:minus, λ_value, k, m1, m2, μ1, T0, Φ, Φbar, 1) +
+        _tilde_B0_retarded_cut_imag(:plus, λ_value, k, m2, m1, μ2, T0, Φ, Φbar, 1) -
+        _tilde_B0_retarded_cut_imag(:minus, -λ_value, k, m2, m1, μ2, T0, Φ, Φbar, -1)
+    return ComplexF64(real_part, imag_part)
 end
 
 # ---------------------------------------------------------------------------
 # Strict ordered retarded continuation
+
+"""Exact energy support of the intersection of two radius-L momentum balls.
+
+The extrema include collinear stationary points and cutoff surfaces. This is
+a geometric exclusion, not a threshold on a small spectral occupation weight.
+"""
+function _spectral_two_line_support(q, a, b, L)
+    q >= 2L && return nothing
+    left, right = max(0.0,q-L), L
+    p = clamp(q*a/(a+b),left,right)
+    pair = (hypot(p,a)+hypot(p-q,b),hypot(L,a)+hypot(L,b))
+    function maximum_difference(a,b)
+        value = max(hypot(left,a)-hypot(left-q,b),hypot(right,a)-hypot(right-q,b))
+        if a != b
+            stationary = q*a/(a-b)
+            if left <= stationary <= right
+                value = max(value,hypot(stationary,a)-hypot(stationary-q,b))
+            end
+        end
+        return value
+    end
+    return (pair=pair,landau=(-maximum_difference(b,a),maximum_difference(a,b)))
+end
+
+function _spectral_cut_intervals(lambda, q, m1, m2, pmax, s, t)
+    lo, hi = m1, hypot(m1,pmax)
+    d = lambda^2 - q^2 + m1^2 - m2^2
+    a = lambda^2 - q^2
+    points = [lo,hi]
+    for edge in (m2,hypot(m2,pmax))
+        x = s*(lambda+t*edge)
+        lo < x < hi && push!(points,x)
+    end
+    # Angular delta support: (2*s*lambda*E-d)^2 < 4*q^2*(E^2-m1^2).
+    if abs(a) <= 64eps(Float64)*max(lambda^2,q^2,1.0)
+        b, c = -4s*lambda*d, d^2+4q^2*m1^2
+        if b != 0
+            x = -c/b
+            lo < x < hi && push!(points,x)
+        end
+    else
+        disc = d^2-4a*m1^2
+        if disc >= 0
+            for x in ((s*lambda*d-q*sqrt(disc))/(2a),(s*lambda*d+q*sqrt(disc))/(2a))
+                lo < x < hi && push!(points,x)
+            end
+        end
+    end
+    sort!(points)
+    unique!(points)
+    intervals = Tuple{Float64,Float64}[]
+    for i in 1:length(points)-1
+        left, right = points[i],points[i+1]
+        E1 = (left+right)/2
+        E2 = t*(s*E1-lambda)
+        E2 > m2 || continue
+        E2 < hypot(m2,pmax) || continue
+        p = sqrt(E1^2-m1^2)
+        abs(2s*lambda*E1-d) < 2p*q || continue
+        push!(intervals,(left,right))
+    end
+    return intervals
+end
+
+"""Independent ordered two-line spectral cut, with no inherited PV/log branches.
+
+Uses the Matsubara residue sum
+`sum(s*t*(n(t*E2,mu2)-n(s*E1,mu1))/(lambda-s*E1+t*E2+i0))`
+and integrates its angular delta function analytically. Both line momenta
+obey the explicit `pmax_inv_fm` cutoff. This regulator is NOT asserted equal
+to the shifted one-line cutoffs used by legacy B0. The result contains only
+Im B0; mixing it with a different PV real part is not an analytic completion.
+All inputs use fm^-1 except Phi/PhiBar; the returned cut is dimensionless.
+"""
+function B0_spectral_cut(lambda::Real, q::Real, m1::Real, mu1::Real,
+                         m2::Real, mu2::Real, T::Real;
+                         Φ::Real=0.0, Φbar::Real=0.0,
+                         pmax_inv_fm::Real=Λ_inv_fm, energy_nodes::Integer=64,
+                         component::Symbol=:full)
+    l,k,a,u,b,v,temp,phi,phibar,cutoff = Float64.((lambda,q,m1,mu1,m2,mu2,T,Φ,Φbar,pmax_inv_fm))
+    all(isfinite,(l,k,a,u,b,v,temp,phi,phibar,cutoff)) || throw(ArgumentError("spectral cut inputs must be finite"))
+    k >= 0 && a > 0 && b > 0 && temp > 0 && cutoff > 0 ||
+        throw(ArgumentError("spectral cut requires q>=0, positive masses, T and pmax"))
+    energy_nodes >= 4 || throw(ArgumentError("energy_nodes must be at least 4"))
+    component in (:full,:vacuum,:thermal) || throw(ArgumentError("unknown spectral component $(component)"))
+    function occupation(s,E,mu)
+        component === :vacuum && return s == -1 ? 1.0 : 0.0
+        if component === :thermal
+            return s == 1 ? quark_distribution(E,mu,temp,phi,phibar) :
+                           -antiquark_distribution(E,mu,temp,phi,phibar)
+        end
+        return distribution_value_b0(s==1 ? :plus : :minus,E,mu,temp,phi,phibar)
+    end
+    pair, landau = 0.0,0.0
+    support = _spectral_two_line_support(k,a,b,cutoff)
+    for s in (-1,1), t in (-1,1)
+        support === nothing && continue
+        lower,upper = s == t ? support.landau : support.pair
+        # Endpoints have zero measure. Exclude them BEFORE the quadratic
+        # arithmetic can turn roundoff into a spurious nonzero endpoint cell.
+        lower < s*l < upper || continue
+        # Exact kinematic exclusions, before nearly degenerate quadratic roots.
+        if s == t
+            abs(l) >= hypot(k,a-b) && continue
+        else
+            abs(l) <= hypot(k,a+b) && continue
+            abs(l) >= hypot(a,cutoff)+hypot(b,cutoff) && continue
+        end
+        contribution = 0.0
+        if k == 0
+            l == 0 && continue # coincident static point, not a resolved delta peak
+            E1 = (l^2+a^2-b^2)/(2s*l)
+            E2 = t*(s*E1-l)
+            if a < E1 < hypot(a,cutoff) && b < E2 < hypot(b,cutoff)
+                p = sqrt(E1^2-a^2)
+                contribution = -2π*p*s*t*(occupation(t,E2,v)-occupation(s,E1,u))/abs(l)
+            end
+        else
+            for (left,right) in _spectral_cut_intervals(l,k,a,b,cutoff,s,t)
+                nodes, weights = gauleg(left,right,Int(energy_nodes))
+                for i in eachindex(nodes,weights)
+                    E1 = nodes[i]
+                    E2 = t*(s*E1-l)
+                    contribution -= π/k*weights[i]*s*t*(occupation(t,E2,v)-occupation(s,E1,u))
+                end
+            end
+        end
+        if s == t
+            landau += contribution
+        else
+            pair += contribution
+        end
+    end
+    return (imaginary=pair+landau,pair=pair,landau=landau,
+            regulator=:both_line_momenta,component=component,pmax_inv_fm=cutoff,energy_nodes=Int(energy_nodes),
+            static_degeneracy_unresolved=(k==0 && l==0 && a==b),
+            production_authorized=false)
+end
 
 @inline function _require_finite_real(value, label::AbstractString)
     value isa Real || throw(ArgumentError("$(label) must be real"))
@@ -595,7 +837,9 @@ potential shift (`k0 + μ1 - μ2`). The result is the dimensionless retarded
 
 This entrypoint is intentionally separate from [`B0`](@ref). `B0` preserves
 the historical real-axis principal-value/cut oracle, while `B0_retarded`
-keeps the finite upper-half-plane regulator explicit. Convergence in both
+keeps the finite upper-half-plane regulator explicit. The current logarithmic
+continuation fails independent vacuum-spacelike spectral checks; its name
+does not certify a physical retarded correlator. Convergence in both
 `eta_inv_fm` and `energy_nodes` is a caller-visible numerical requirement.
 """
 function B0_retarded(

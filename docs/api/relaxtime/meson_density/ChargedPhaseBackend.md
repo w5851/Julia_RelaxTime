@@ -19,12 +19,14 @@
 单电荷严格 BU 使用
 
 ```math
-n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
-\int\frac{d\omega}{\pi},g_B(\omega)\frac{\partial δ_M}{\partial\omega}.
+n_M=d_M\int\frac{dq\,q^2}{2\pi^2}
+\int\frac{d\omega}{\pi}\,g_B(\omega)\frac{\partial δ_M}{\partial\omega}.
 ```
 
 该后端的 `domega/pi` 是默认值；`domega/(2pi)` 只能作为 legacy ratio adapter。
 相位分支、阈值和 Levinson 条件必须先通过，不能用常数 anchor 替代收敛检查。
+导数式无额外 `1/T`；该因子仅在分部积分后的 `g_B(1+g_B) delta` 形式中出现。
+数密度单位为 `fm^-3`，单 q 壳层 `dn/dq` 为 `fm^-2`。
 
 真实 bubble 可以来自两条独立诊断路径：`ChargedRPAProvider` 的
 `:ordered_retarded`（有限上半平面 `eta`）或 `:ordered_pv_cut`（实轴 Cauchy
@@ -49,6 +51,35 @@ n_M=\frac{d_M}{T}\int\frac{dq\,q^2}{2\pi^2}
 
 组合阈下 inverse 实部符号变号根计数、Levinson 阈值相位和高能 tail gate。失败
 时返回 `passed=false`，不静默修正相位。
+采样根数也必须等于显式 `bound_state_count`。这仍是全 profile 的保守旧诊断门禁，
+不能替代分 cut 的物理 sheet 判定。
+
+### `bu_phase_integral(omega, phase, T; μ=0, weight=:current)`
+
+对有序有限采样执行 `g_B dF/pi` 的 Stieltjes 求积，`weight` 为 `:current` 或
+`:gbu`。先对 GBU 权重作差，保留离散跳变，禁止输入 folded display 作为物理分支。
+omega、T、μ 使用 `fm^-1`，返回无量纲谱权重。调用方必须固定同一能量坐标。
+常数 anchor 不改变普通 BU 的 `d delta`，但一般会改变 GBU 的 `dF(delta)`；
+仅整数倍 pi 平移对后者也不变。GBU 的有限窗口 anchor 不是无代价的归一化操作。
+
+### `bu_phase_integral_parts(omega,phase,T; μ=0,weight=:current)`
+
+返回 `derivative`、`bulk`、`boundary`、`lower_boundary`、`upper_boundary`、
+`reconstructed` 与 `identity_residual`，均为无量纲谱权重。离散乘积恒等式为
+`derivative=bulk+boundary`，其中 `bulk=-sum(mean(F)*diff(g))/pi`。
+这不是对连续 `F*g*(1+g)/T` 的独立积分收敛证明。有限窗口、非零端点相位时，
+不得丢弃 `boundary`；正的 `bulk` 不保证完整积分为正。
+
+`strict_retarded_phase` 现在拒绝精确复零点；该处角度没有定义，必须用单侧极限
+和独立根计数。非零小残差不被任意容差裁掉。
+
+### `split_bu_shell(root_result, segments, q, T; μ=0, weight=:current)`
+
+`root_result` 来自 `BUPhaseGates.certify_gap_roots`，且必须通过 gap 内认证。
+`segments` 是按能量排序、互不相交的 `(omega,phase)` 列表，不能包含已认证根。
+返回 `bound_shell_inv_fm2`、`continuum_shell_inv_fm2`、`total_shell_inv_fm2`；
+每个正能根在 current/GBU 中都贡献一个 Bose 权重。负的连续谱/部分和原样保留。
+不自动授予完整束缚态计数、Levinson 或 production 资格。
 
 ### `strict_charged_bu_density(inverse_fn, mass, T; ...)`
 

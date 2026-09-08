@@ -9,7 +9,7 @@ implements the project formula contract
 ```math
 δ(ω,q) = -\operatorname{arg} Δ^R(ω,q),
 \qquad
-n_M = \frac{d_M}{T}\int\frac{dq\,q^2}{2π^2}
+n_M = d_M\int\frac{dq\,q^2}{2π^2}
        \int\frac{dω}{π}\,g_B(ω)\frac{∂δ}{∂ω}.
 ```
 
@@ -39,6 +39,7 @@ export strict_charged_bu_density
 export strict_charged_rpa_bu_density
 export strict_mott_gate
 export strict_density_convergence_gate
+export bu_phase_integral, bu_phase_integral_parts, split_bu_shell
 
 const _VALID_PHASE_OBJECTS = (:inverse_propagator, :propagator)
 
@@ -190,11 +191,13 @@ function strict_phase_gate(
         tail_tolerance=profile.tail_tolerance,
         tail_points=profile.tail_points,
     )
-    passed = profile.tail_stable && roots.passed && levinson.passed
+    count_matches = roots.count == bound_state_count
+    passed = profile.tail_stable && roots.passed && count_matches && levinson.passed
     return (
         passed=passed,
         tail_stable=profile.tail_stable,
         roots=roots,
+        count_matches=count_matches,
         levinson=levinson,
         threshold=Float64(threshold),
         bound_state_count=Int(bound_state_count),
@@ -219,6 +222,9 @@ function strict_mott_gate(
     expected_bound_state_drop::Integer=1,
     transition_phase_tolerance::Real=0.10 * π,
 )
+    all(field -> getproperty(before_profile, field) == getproperty(after_profile, field),
+        (:phase_object, :phase_sign, :target)) ||
+        throw(ArgumentError("Mott profiles must use the same phase object, sign and anchor target"))
     before = strict_phase_gate(
         before_profile;
         threshold=before_threshold,
@@ -268,6 +274,80 @@ function _phase_derivative(omega::Vector{Float64}, phase::Vector{Float64})
         out[i] = (phase[i + 1] - phase[i - 1]) / (omega[i + 1] - omega[i - 1])
     end
     return out
+end
+
+"""Signed Stieltjes quadrature of g dF/pi, including sampled jumps.
+
+`weight=:gbu` differences F(delta)=delta-sin(2delta)/2 before integrating;
+the smooth chain rule cannot be used across a discrete pi jump. `omega` and
+`mu` must use the same energy coordinate. No extra 1/T occurs in this form.
+"""
+function bu_phase_integral(omega, phase, T::Real; μ::Real=0.0, weight::Symbol=:current)
+    return bu_phase_integral_parts(omega, phase, T; μ=μ, weight=weight).derivative
+end
+
+"""Discrete integration-by-parts audit of g dF/pi on a finite window.
+
+The product identity is exact for trapezoidal Stieltjes sums. `bulk` is
+`-sum(mean(F)*diff(g))/pi`, not an independent continuous quadrature of
+F*g*(1+g)/T. `boundary` must be retained; none of these fields certifies the
+physical phase, infrared limit, or production acceptance.
+"""
+function bu_phase_integral_parts(omega, phase, T::Real; μ::Real=0.0, weight::Symbol=:current)
+    w = _validate_grid(omega)
+    length(w) == length(phase) || throw(ArgumentError("omega and phase lengths differ"))
+    all(isfinite, phase) || throw(ArgumentError("phase must be finite"))
+    temperature, mu = Float64(T), Float64(μ)
+    isfinite(temperature) && temperature > 0 || throw(ArgumentError("T must be finite and positive"))
+    isfinite(mu) || throw(ArgumentError("mu must be finite"))
+    weight in (:current, :gbu) || throw(ArgumentError("weight must be :current or :gbu"))
+    f = weight === :current ? Float64.(phase) : [d - sin(2d) / 2 for d in phase]
+    g = [_bose(x, mu, temperature) for x in w]
+    derivative = sum((f[i+1] - f[i]) * (g[i+1] + g[i]) / 2 for i in 1:length(w)-1) / π
+    bulk = -sum((g[i+1] - g[i]) * (f[i+1] + f[i]) / 2 for i in 1:length(w)-1) / π
+    lower_boundary, upper_boundary = g[1]*f[1]/π, g[end]*f[end]/π
+    boundary = upper_boundary - lower_boundary
+    return (derivative=derivative, bulk=bulk, boundary=boundary,
+            lower_boundary=lower_boundary, upper_boundary=upper_boundary,
+            reconstructed=bulk+boundary, identity_residual=derivative-(bulk+boundary),
+            weight=weight, production_authorized=false)
+end
+
+"""Separate exact positive pi pole weights from disjoint continuum profiles.
+
+`root_result` must come from an independently certified analytic-gap search.
+Segments must exclude all poles and must not bridge gaps/cuts. This helper
+reports a signed partial shell in fm^-2, not production acceptance or global
+state-count completeness. The caller owns sheet, cut and Levinson coverage.
+"""
+function split_bu_shell(root_result, segments, q::Real, T::Real;
+                        μ::Real=0.0, weight::Symbol=:current)
+    weight in (:current, :gbu) || throw(ArgumentError("weight must be :current or :gbu"))
+    q_value, temperature, mu = Float64(q), Float64(T), Float64(μ)
+    all(isfinite, (q_value, temperature, mu)) && q_value >= 0 && temperature > 0 ||
+        throw(ArgumentError("q, T and mu must be finite with q>=0 and T>0"))
+    root_result.passed || throw(ArgumentError("root_result must pass analytic-gap certification"))
+    hasproperty(root_result, :counting_method) && root_result.counting_method === :analytic_gap_bisection ||
+        throw(ArgumentError("root_result must be independent of phase unwrap"))
+    roots = root_result.roots
+    last_endpoint = -Inf
+    continuum = 0.0
+    for segment in segments
+        w = _validate_grid(segment.omega)
+        first(w) > last_endpoint || throw(ArgumentError("continuum segments must be ordered and disjoint"))
+        any(r -> first(w) <= r.omega_inv_fm <= last(w), roots) &&
+            throw(ArgumentError("continuum segment includes a certified pole"))
+        continuum += bu_phase_integral(w, segment.phase, temperature; μ=mu, weight=weight)
+        last_endpoint = last(w)
+    end
+    # F(delta+pi)-F(delta)=pi for both current and GBU.
+    bound = sum((_bose(r.omega_inv_fm, mu, temperature) for r in roots); init=0.0)
+    prefactor = q_value^2 / (2π^2)
+    return (bound_shell_inv_fm2=prefactor * bound,
+            continuum_shell_inv_fm2=prefactor * continuum,
+            total_shell_inv_fm2=prefactor * (bound + continuum),
+            bound_weight=bound, continuum_weight=continuum,
+            weight=weight, production_authorized=false)
 end
 
 """
@@ -376,13 +456,15 @@ function strict_charged_bu_density(
             bound_state_count=bound_state_count_q,
             phase_tolerance=Float64(phase_tolerance),
         )
-        accepted_q = profile.tail_stable && (!require_levinson || Bool(gate.passed))
+        independent_count_passed = bound_state_diagnostic === nothing ||
+            (hasproperty(bound_state_diagnostic, :passed) && Bool(bound_state_diagnostic.passed))
+        accepted_q = profile.tail_stable && independent_count_passed && (!require_levinson || Bool(gate.passed))
         accepted_q || (failed_q_count += 1)
 
         derivative = _phase_derivative(profile.omega, profile.anchored_phase)
-        # The phase profile contains the positive bound-state jump below the
-        # continuum threshold and the compensating continuum fall-off.  The
-        # BU spectral measure is the signed derivative `d(delta)/domega`.
+        # This full-profile path remains diagnostic: unwrap alone cannot
+        # orient exact pi jumps. Use independently certified roots and
+        # split_bu_shell for explicit discrete/continuum attribution.
         integrand = Float64[
             _bose(Float64(ω), chemical_potential, temperature) * derivative[i]
             for (i, ω) in enumerate(profile.omega)

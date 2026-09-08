@@ -12,6 +12,7 @@ export STRICT_SINGLE_CHARGE_OMEGA_MEASURE, LEGACY_POSITIVE_ENERGY_OMEGA_MEASURE
 export bu_omega_measure, bu_omega_measure_factor
 export anchor_phase_high_energy, count_subthreshold_roots
 export count_bound_states, continue_bound_state_counts
+export certify_gap_roots, continue_gap_roots
 export levinson_phase_gate, mott_phase_gate
 export bose_support_gate, convergence_gate, four_density_algorithm_labels
 export joint_convergence_gate
@@ -246,6 +247,144 @@ function continue_bound_state_counts(
     return rows
 end
 
+"""Certify sampled simple zeros only inside caller-supplied physical-sheet gaps.
+
+Open gap endpoints must come from cut kinematics, not from a small imaginary
+part (cut terms may cancel). Each bracket is bisected and must pass both a
+complex residual and a nonzero real-slope check. A pole sign change is not a
+zero. `passed` certifies the sampled gaps only, not completeness outside them
+or exclusion of unresolved even-multiplicity/closely-spaced zeros.
+"""
+function certify_gap_roots(inverse_fn, q::Real, gaps;
+    physical_sheet::Bool, real_axis::Bool, omega_nodes::Integer=128,
+    endpoint_margin::Real=1e-6, root_tolerance::Real=1e-10,
+    residual_tolerance::Real=1e-8, imag_tolerance::Real=1e-8,
+    slope_tolerance::Real=1e-8, max_iterations::Integer=80)
+    qv = Float64(q)
+    isfinite(qv) && qv >= 0 || throw(ArgumentError("q must be finite and nonnegative"))
+    omega_nodes >= 4 || throw(ArgumentError("omega_nodes must be at least 4"))
+    max_iterations > 0 || throw(ArgumentError("max_iterations must be positive"))
+    tolerances = Float64.((endpoint_margin, root_tolerance, residual_tolerance, imag_tolerance, slope_tolerance))
+    all(x -> isfinite(x) && x > 0, tolerances) || throw(ArgumentError("gap tolerances must be finite and positive"))
+    roots, rejected = NamedTuple[], NamedTuple[]
+    validated_gaps = Tuple{Float64,Float64}[]
+    previous_hi = -Inf
+    for gap in gaps
+        lo, hi = Float64.(gap)
+        isfinite(lo) && isfinite(hi) && hi > lo && lo >= previous_hi ||
+            throw(ArgumentError("analytic gaps must be finite, increasing and disjoint"))
+        push!(validated_gaps, (lo, hi))
+        previous_hi = hi
+    end
+    base = (q=qv, gaps=validated_gaps, independent=true,
+            counting_method=:analytic_gap_bisection, count_scope=:provided_analytic_gaps,
+            completeness_certified=false, omega_nodes=Int(omega_nodes))
+    if !physical_sheet || !real_axis
+        return merge(base, (roots=roots, rejected=rejected, count=0, passed=false,
+                            status=:physical_real_axis_required))
+    end
+    max_imag = 0.0
+    for (gap_index, (lo, hi)) in enumerate(validated_gaps)
+        if hi - lo <= 2endpoint_margin
+            push!(rejected, (gap_index=gap_index, omega_inv_fm=(lo+hi)/2, status=:unresolved_gap))
+            continue
+        end
+        grid = collect(range(lo + endpoint_margin, hi - endpoint_margin; length=Int(omega_nodes)))
+        values = ComplexF64[inverse_fn(w, qv) for w in grid]
+        if !all(isfinite, values)
+            push!(rejected, (gap_index=gap_index, omega_inv_fm=NaN, status=:nonfinite_gap))
+            continue
+        end
+        gap_imag = maximum(abs ∘ imag, values)
+        max_imag = max(max_imag, gap_imag)
+        if gap_imag > imag_tolerance
+            push!(rejected, (gap_index=gap_index, omega_inv_fm=NaN, status=:complex_gap))
+            continue
+        end
+        # Exact grid zeros and sign brackets are deduplicated after refinement.
+        brackets = Tuple{Float64,Float64}[]
+        for i in eachindex(grid)
+            real(values[i]) == 0 && push!(brackets, (grid[i], grid[i]))
+            i == length(grid) && continue
+            real(values[i]) * real(values[i+1]) < 0 && push!(brackets, (grid[i], grid[i+1]))
+        end
+        for (left, right) in brackets
+            a, b = left, right
+            fa = real(inverse_fn(a, qv))
+            for _ in 1:Int(max_iterations)
+                b - a <= root_tolerance && break
+                mid = (a + b) / 2
+                fm = real(inverse_fn(mid, qv))
+                if !isfinite(fm) || fm == 0
+                    a = b = mid
+                    break
+                elseif signbit(fm) == signbit(fa)
+                    a, fa = mid, fm
+                else
+                    b = mid
+                end
+            end
+            root = (a + b) / 2
+            z = ComplexF64(inverse_fn(root, qv))
+            h = min(1e-5 * max(1.0, abs(root)), (root-lo)/4, (hi-root)/4)
+            zl, zr = ComplexF64(inverse_fn(root-h, qv)), ComplexF64(inverse_fn(root+h, qv))
+            slope = real(zr-zl) / (2h)
+            valid = all(isfinite, (z, zl, zr)) && abs(real(z)) <= residual_tolerance &&
+                maximum(abs ∘ imag, (z, zl, zr)) <= imag_tolerance &&
+                isfinite(slope) && abs(slope) > slope_tolerance && b-a <= root_tolerance
+            if valid
+                any(r -> abs(r.omega_inv_fm-root) <= 2root_tolerance, roots) && continue
+                push!(roots, (omega_inv_fm=root, bracket=(left,right),
+                              residual=abs(z), slope=slope, gap_index=gap_index,
+                              distance_to_gap_lower=root-lo, distance_to_gap_upper=hi-root,
+                              phase_jump=Float64(pi)))
+            else
+                push!(rejected, (gap_index=gap_index, omega_inv_fm=root, status=:uncertified_zero))
+            end
+        end
+    end
+    sort!(roots; by=r -> r.omega_inv_fm)
+    passed = isempty(rejected) && !isempty(validated_gaps)
+    return merge(base, (roots=roots, rejected=rejected, count=length(roots), passed=passed,
+                        status=passed ? :sampled_gaps_certified : :gap_certification_failed,
+                        max_abs_imag=max_imag))
+end
+
+"""Track gap roots by unique proximity, never infer a Mott event from a lost root.
+Unmatched roots are `appeared_or_unresolved`; absent tracks are `not_recovered`.
+An event needs subsequent cut/endpoint refinement before physical interpretation.
+"""
+function continue_gap_roots(inverse_fn, q_values, gaps_fn; max_motion::Real=0.25, kwargs...)
+    qgrid = Float64.(q_values)
+    !isempty(qgrid) && all(isfinite, qgrid) && all(diff(qgrid) .> 0) ||
+        throw(ArgumentError("q_values must be finite, nonempty and strictly increasing"))
+    isfinite(max_motion) && max_motion > 0 || throw(ArgumentError("max_motion must be finite and positive"))
+    rows, previous = NamedTuple[], NamedTuple[]
+    next_id = 0
+    for q in qgrid
+        result = certify_gap_roots(inverse_fn, q, gaps_fn(q); kwargs...)
+        tracked, used = NamedTuple[], Set{Int}()
+        for r in result.roots
+            candidates = [p for p in previous if abs(p.omega_inv_fm-r.omega_inv_fm) <= max_motion]
+            unique_match = length(candidates) == 1 &&
+                count(s -> abs(s.omega_inv_fm-candidates[1].omega_inv_fm) <= max_motion, result.roots) == 1
+            if unique_match
+                id, event = candidates[1].track_id, :continued
+                push!(used, id)
+            else
+                next_id += 1
+                id, event = next_id, isempty(rows) ? :initial : :appeared_or_unresolved
+            end
+            push!(tracked, merge(r, (track_id=id, event=event)))
+        end
+        lost = [(track_id=p.track_id, omega_inv_fm=p.omega_inv_fm, event=:not_recovered)
+                for p in previous if !(p.track_id in used)]
+        push!(rows, merge(result, (roots=tracked, lost_tracks=lost)))
+        previous = result.passed ? tracked : NamedTuple[]
+    end
+    return rows
+end
+
 function _linear_interpolate(x::Vector{Float64}, y::Vector{Float64}, point::Float64)
     x[1] <= point <= x[end] || throw(ArgumentError("interpolation point is outside the profile"))
     index = searchsortedlast(x, point)
@@ -436,14 +575,14 @@ function joint_convergence_gate(
     all(sample -> hasproperty(sample, value_field), samples) ||
         throw(ArgumentError("every sample must provide $(value_field)"))
     finite = all(sample -> isfinite(Float64(getproperty(sample, value_field))), samples)
-    pairwise = [
+    pairwise = finite ? [
         convergence_gate(
             Float64(getproperty(samples[i], value_field)),
             Float64(getproperty(samples[i + 1], value_field));
             rtol=rtol,
             atol=atol,
         ) for i in 1:(length(samples) - 1)
-    ]
+    ] : NamedTuple[]
     accepted = all(sample -> !require_accepted ||
         (hasproperty(sample, :accepted) && Bool(getproperty(sample, :accepted))), samples)
     endpoint_stable = all(sample -> !hasproperty(sample, :tail_stable) ||

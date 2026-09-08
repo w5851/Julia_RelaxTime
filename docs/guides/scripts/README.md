@@ -11,6 +11,14 @@
 
 ## 1. 推荐稳定入口
 
+### 显式研究生产：无限热 charged GBU
+
+作者选择该研究路线时使用 `scripts/relaxtime/run_charged_gbu_freezeout_scan.jl`，
+通过 `Models.run_charged_gbu_freezeout_scan` 完成冻结线映射、quark-only BQS
+求解、四通道密度、自动门禁、checkpoint及ratio图。它不替代旧默认，
+也不意味着PR310自动晋升。方法、参数、输出和失败语义见
+[研究入口合同](../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)。
+
 全量 `run_*.jl` 脚本功能目录见：
 
 - [run_script_catalog.md](run_script_catalog.md)

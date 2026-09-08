@@ -77,6 +77,7 @@ gates.
     ))
     phase_sign in (-1, 1) || throw(ArgumentError("phase_sign must be +1 or -1"))
     z = _finite_complex(value, "propagator value")
+    iszero(z) && throw(ArgumentError("phase is undefined at an exact propagator zero; use one-sided limits and independent pole counting"))
     return Float64(phase_sign) * atan(imag(z), real(z))
 end
 
