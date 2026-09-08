@@ -1,6 +1,8 @@
 # charged-RPA/BU 严格路线定向文献综述
 
 **状态**：研究背景与公式路线审计；不是 production 授权、数值基线或实验拟合结论。
+**历史快照说明**：以下项目状态和路线建议对应2026-09-01，并非当前生产决策。最新无限热GBU显式研究入口及作者审核结果见[当前任务记录](../../../dev/active/2026-08-30_charged-rpa-bu-strict-audit.md)第22.23–22.25节。旧PV/log核已被独立谱审查否定，不能继续作为新路线的物理核。
+
 **检索截止**：2026-09-01。
 **仓库状态**：`codex/charged-rpa-bu-strict-phase-backend`，HEAD `81fcc26d8a7c372db44403cfb0be20869f195001`。
 **问题范围**：2+1 味 PNJL/NJL 中的 (K^+/pi^+)、(K^-/pi^-)，不等质量有序 charged RPA，相移的 (i0^+)/PV 极限，束缚态计数，Levinson/Mott 闭合，标准 BU/GBU 密度，完整 KMT 耦合以及冻结线/守恒荷约束。
@@ -12,8 +14,8 @@
 公开文献可以拼出一条自洽的模块化路线，但没有找到一篇同时满足以下全部条件的已发表工作：
 
 1. 完整三味 KMT (mathcal K_{ab})；
-2. BQS 或 (ho_Q/ho_B,ho_S) 约束下的上游解；
-3. (uar s)、(sar u) 有序 charged kaon RPA；
+2. BQS 或 (\rho_Q/\rho_B,\rho_S) 约束下的上游解；
+3. (u\bar s)、(s\bar u) 有序 charged kaon RPA；
 4. 严格实轴 (i0^+)/PV 相移；
 5. q-resolved 标准 BU 与 GBU 密度；
 6. 沿同一化学冻结线输出两个 charged ratio；
@@ -31,7 +33,7 @@
 - Mott 转变时束缚态从阈下进入连续谱，阈值相位应发生相应跳变；
 - Levinson 型端点关系必须闭合，通常写成
   [
-  delta(omega_{m th})-delta(infty)=pi N_{m bound}
+  delta(omega_{\mathrm th})-delta(infty)=pi N_{\mathrm bound}
   ]
   （半束缚态需另加约定）。
 
@@ -42,7 +44,7 @@
 稳定粒子极限只保留一个窄壳准粒子；reduced BW 用一个极点/宽度近似；标准 BU 使用完整相移导数；GBU 的
 
 [
-F_{m GBU}(delta)=delta-	frac12sin(2delta)
+F_{\mathrm GBU}(delta)=delta-\tfrac12sin(2delta)
 \]
 
 来自特定的 (Phi)-derivable/广义 BU 推导，用于处理连续谱与重复计数，不能被当作标准 BU 的数值稳定化因子。四种结果不应被要求收敛到同一数值；应分别报告其公式、适用范围和失败状态。
@@ -55,7 +57,7 @@ Rehberg 1996 以及 Mei 等人的现代实现给出
 K_{03},K_{30},K_{38},K_{83}propto sigma_u-sigma_d,
 ]
 
-它们直接改变 (pi^0)-(eta)-(eta') 的 (0/3/8) RPA 矩阵。带电 kaon 的非对称映射是 (K^+leftrightarrow K_{45})、(K^-leftrightarrow K_{45}) 的共轭通道，(K^0,ar K^0) 对应 (K_{67}) 及其共轭。因而在当前没有中性混合反馈的 charged-only 后端中，(K_{03}/K_{38}) 不应被直接归因于 (K^pm/pi^pm) 密度变化；它们只有通过重新求解凝聚、质量和极化函数产生间接影响。
+它们直接改变 (pi^0)-(eta)-(eta') 的 (0/3/8) RPA 矩阵。带电 kaon 的非对称映射是 (K^+leftrightarrow K_{45})、(K^-leftrightarrow K_{45}) 的共轭通道，(K^0,\bar K^0) 对应 (K_{67}) 及其共轭。因而在当前没有中性混合反馈的 charged-only 后端中，(K_{03}/K_{38}) 不应被直接归因于 (K^pm/pi^pm) 密度变化；它们只有通过重新求解凝聚、质量和极化函数产生间接影响。
 
 ### 1.5 反馈是另一项热力学闭合问题
 
@@ -71,7 +73,7 @@ K_{03},K_{30},K_{38},K_{83}propto sigma_u-sigma_d,
 2. 如何处理实轴分支、(i0^+)、PV、束缚态、连续谱和高能尾；
 3. 如何用 Levinson/Mott 检查相移是否物理闭合；
 4. 如何将相移放入标准 BU 或 GBU 压强/密度；
-5. 不等质量 (uar s/sar u) charged kaon 如何排序；
+5. 不等质量 (u\bar s/s\bar u) charged kaon 如何排序；
 6. 完整 KMT 耦合、显式 (mu_I)、BQS 和介子反馈在流程中处于哪一层；
 7. 化学冻结线和实验 (K/pi) 激发函数能提供什么数量级/趋势约束。
 
@@ -96,8 +98,8 @@ K_{03},K_{30},K_{38},K_{83}propto sigma_u-sigma_d,
 共同的结构是
 
 [
-mathcal L_{m NJL/KMT}
-longrightarrow 	ext{MFA 背景 }(M_f,Phi,sigma_f,mu_f)
+mathcal L_{\mathrm NJL/KMT}
+longrightarrow \text{MFA 背景 }(M_f,Phi,sigma_f,mu_f)
 longrightarrow Pi^R_{ij}(omega,q)
 longrightarrow D^R_{ij}(omega,q)
 longrightarrow delta_{ij}(omega,q).
@@ -112,7 +114,7 @@ D^{-1,R}_{ij}=1-2K_{ij}Pi^R_{ij},
 或项目旧接口使用的等价因子约定。矩阵通道则必须使用矩阵逆和 determinant/eigenphase；例如中性 (0/3/8) 扇区的物理相位应从
 
 [
-delta_{m mat}=-operatorname{Im}lndet D^{-1,R}
+delta_{\mathrm mat}=-operatorname{Im}lndet D^{-1,R}
 ]
 
 或等价的 retarded/advanced 比值构造，而不能在强混合时任意挑一个固定分量的相位。
@@ -122,7 +124,7 @@ delta_{m mat}=-operatorname{Im}lndet D^{-1,R}
 Blaschke 等的 GBU 论文给出的代表性定义是
 
 [
-delta_X(omega,q)=-operatorname{Im}ln[eta^2S_X^{-1}(omega-mu_X+ieta,q)].
+delta_X(omega,q)=-operatorname{Im}ln[\beta^2S_X^{-1}(omega-mu_X+ieta,q)].
 ]
 
 PNJL K/π 论文用等价的传播子/逆传播子 arctan 写法。关键不是某一行 `atan`，而是：
@@ -139,18 +141,18 @@ PNJL K/π 论文用等价的传播子/逆传播子 arctan 写法。关键不是�
 严格实轴边界的数学对象是
 
 [
-Pi^R(omega)=operatorname{PV}Pi_{m real}(omega)-i,operatorname{Im}Pi(omega),
+Pi^R(omega)=Re Pi^R(omega)+i Im Pi^R(omega),
 ]
 
-其中实部在奇点处使用 Cauchy 主值，虚部由解析 continuation/切割结构给出。项目 `OneLoopIntegrals.B0` 的“PV 实部 + 解析 imaginary cut”最接近 (eta	o0^+) 的严格实现；`B0_retarded` 直接在 (omega+ieta) 上做有限 (eta) 复积分，只能作为 retarded probe 或交叉检查，不能自动等同于严格极限。有限 (eta) 还会移动窄峰、平滑阈值并改变 branch tracking，因此必须记录 (eta)、PV gap、端点和网格。
+其中实部在奇点处使用 Cauchy 主值，虚部由解析 continuation/切割结构给出。历史上曾将项目 `OneLoopIntegrals.B0` 的“PV 实部 + 解析 imaginary cut”作为候选；该具体实现后续未通过独立谱支撑审查，以下仅记录当时方案： (eta\to0^+) 的严格实现；`B0_retarded` 直接在 (omega+ieta) 上做有限 (eta) 复积分，只能作为 retarded probe 或交叉检查，不能自动等同于严格极限。有限 (eta) 还会移动窄峰、平滑阈值并改变 branch tracking，因此必须记录 (eta)、PV gap、端点和网格。
 
 ### 3.4 BU、密度和 GBU
 
 标准 BU 的典型结构为
 
 [
-p_X=-d_XT!int!rac{d^3q}{(2pi)^3}
-int_0^infty!rac{domega}{2pi}
+p_X=-d_XT!int!\frac{d^3q}{(2pi)^3}
+int_0^infty!\frac{domega}{2pi}
 Bigl[ln(1-e^{-(omega-mu_X)/T})+ln(1-e^{-(omega+mu_X)/T})Bigr]
 partial_omegadelta_X.
 ]
@@ -158,7 +160,7 @@ partial_omegadelta_X.
 对 (mu_X) 求导得到带正、负电荷的密度；本项目的单电荷 `domega/pi` 版本必须把“只算一个 charged species”与粒子/反粒子是否显式相加写清楚。GBU 在特定 (Phi)-derivable 推导中把相位导数替换为
 
 [
-partial_omega!left[delta_X-	frac12sin(2delta_X)ight],
+partial_omega!left[delta_X-\tfrac12sin(2delta_X)\right],
 ]
 
 以避免部分连续谱重复计数。它不是所有相移密度都应默认使用的普适修正。
@@ -167,9 +169,9 @@ partial_omega!left[delta_X-	frac12sin(2delta_X)ight],
 
 标准检查为：
 
-1. 独立确定每个 (q) 的阈下 pole/bound-state 数 (N_{m bound}(q))；
-2. 独立确定连续谱阈值 (omega_{m th}(q))；
-3. 检查 (delta(omega_{m th})-delta(infty)=pi N_{m bound})；
+1. 独立确定每个 (q) 的阈下 pole/bound-state 数 (N_{\mathrm bound}(q))；
+2. 独立确定连续谱阈值 (omega_{\mathrm th}(q))；
+3. 检查 (delta(omega_{\mathrm th})-delta(infty)=pi N_{\mathrm bound})；
 4. 在 Mott 点检查束缚态从阈下进入连续谱，阈值相位从 (pi) 变为 0（依赖整体相位 convention）；
 5. 检查相位导数的 continuum 贡献能否补偿 pole/resonance 贡献，使高温/高能相关项消失。
 
@@ -225,13 +227,13 @@ Blaschke 2014 的 Gaussian BU、Oertel--Buballa--Wambach 的 (1/N_c)/meson-loop 
 - 只把已算出的 (Omega_M) 数值加回而不改 quark self-energy 会丢失热力学自洽；
 - (Phi)-derivable/one-loop 方案必须审计 double counting 以及 Goldstone/Ward identity。
 
-所以当前 partial feedback 应保留为 diagnostic；它不能用来证明 (ho_s+ho_K=0) 已经实现了完整热力学平衡。
+所以当前 partial feedback 应保留为 diagnostic；它不能用来证明 (\rho_s+\rho_K=0) 已经实现了完整热力学平衡。
 
 ## 5. 与当前仓库实现的逐模块映射
 
 | 代码模块 | 当前行为 | 文献支持的部分 | 仍缺的生产门禁 |
 |---|---|---|---|
-| `src/relaxtime/OneLoopIntegrals.jl` | `B0` 为 PV 实部加解析切；`B0_retarded` 为有限 (eta>0) 复积分 | 与严格 retarded 边界的分解相符 | PV gap、cut、(eta	o0) 和节点的联合收敛 |
+| `src/relaxtime/OneLoopIntegrals.jl` | `B0` 为 PV 实部加解析切；`B0_retarded` 为有限 (eta>0) 复积分 | 与严格 retarded 边界的分解相符 | PV gap、cut、(eta\to0) 和节点的联合收敛 |
 | `src/relaxtime/ChargedRPAProvider.jl` | `ordered_retarded`/legacy ordered bubble；有序单通道 | 对应 unequal-mass charged (q\bar q') RPA | 传播子归一化、pole/threshold 和 ordered/legacy 固定点闭合 |
 | `src/relaxtime/ChargedPhaseBackend.jl` | `-arg(\Delta^R)`、unwrap、tail/Levinson/Mott gate | 实现了文献约束的接口骨架 | 物理 bound count、统一高能 anchor、真实 Mott 点和 branch continuation |
 | `src/relaxtime/BUPhaseGates.jl` | sign-change 阈下根计数和端点 phase gate | 可作快速 diagnostic | 独立 pole solver 或可靠实轴束缚态判定 |
@@ -248,8 +250,8 @@ Blaschke 2014 的 Gaussian BU、Oertel--Buballa--Wambach 的 (1/N_c)/meson-loop 
 ### 6.1 推荐的文献闭合顺序
 
 1. 固定一种相位 convention：retarded inverse propagator 的复对数，明确 sign、branch 和端点。
-2. 以 `B0` 的 PV+analytic-cut 作为 (eta	o0^+) 主线；`B0_retarded` 只做有限-(eta) 交叉检查。
-3. 对每个 (q) 独立确定 ordered (u\bar s/s\bar u) 的阈值、pole 和 (N_{m bound})。
+2. 以 `B0` 的 PV+analytic-cut 作为 (eta\to0^+) 主线；`B0_retarded` 只做有限-(eta) 交叉检查。
+3. 对每个 (q) 独立确定 ordered (u\bar s/s\bar u) 的阈值、pole 和 (N_{\mathrm bound})。
 4. 以端点/Levinson/Mott gate 为必要条件，再做 (omega,q,eta,omega_{max}) 收敛。
 5. 单独比较 stable、reduced BW、q-pole BW、标准 BU 和 GBU；不强求算法数值相同。
 6. 完整 (K_{45}) charged kernel 通过上述门禁后，才将其作为 production candidate；(K_{03}/K_{38}) 仍作为 neutral-mixing 后续支线。
@@ -274,7 +276,7 @@ Blaschke 2014 的 Gaussian BU、Oertel--Buballa--Wambach 的 (1/N_c)/meson-loop 
 尚需作者确认/后续实验的关键项：
 
 1. 项目最终采用 `delta=-arg(D^{-1,R})` 还是严格 retarded/advanced log ratio；
-2. (omega	oinfty) 的数值锚定如何从统一尾部测试导出；
+2. (omega\toinfty) 的数值锚定如何从统一尾部测试导出；
 3. 阈值半束缚态如何计数；
 4. anomalous (K^+) 低能模是保留、显式拆分还是做物理投影；
 5. GBU (sin^2delta) 权重的 (Phi)-derivable 适用条件；

@@ -69,8 +69,8 @@ end
     @test tracks["issue130-phase"]["status"] == "archived"
     @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
     @test tracks["formula-route-closure"]["status"] == "accepted"
-    @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-rpa-bu-negative-density-audit"
-    @test tracks["formula-route-closure"]["current_sha"] == "3e0e38102b8a64c4a1af7d034ba8e4d15e443338"
+    @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-rpa-bu-strict-phase-backend"
+    @test tracks["formula-route-closure"]["current_sha"] == "67ff22896d50bd0680eb1ba2fc19a39036220d75"
     @test tracks["rs-transport"]["status"] == "archived"
     @test isempty(tracks["rs-transport"]["blocked_by"])
     @test tracks["plot-sop"]["status"] == "promoted"
