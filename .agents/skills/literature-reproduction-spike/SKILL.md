@@ -1,6 +1,6 @@
 ---
 name: literature-reproduction-spike
-description: Run an isolated Julia_RelaxTime literature-reproduction spike for a specified paper figure, formula, table, threshold, or numerical claim. Use a tempN sandbox, audit stated and unstated conventions, and maintain an operational status; issue the scientific verdict aligned or insufficient-information only after the verdict gate is complete.
+description: Use only for an isolated, reproducible comparison to a specified paper figure, formula, table, threshold, or claim; sandbox and audit conventions before any verdict. Do not use for repository production or ordinary regression work.
 ---
 
 # Literature Reproduction Spike

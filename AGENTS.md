@@ -19,7 +19,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 
 - `.github/copilot-instructions.md` is present and must be followed.
 - No `.cursorrules` file or `.cursor/rules/` directory exists.
-- New core Julia modules require unit tests; stable public entrypoints also require `docs/api/` updates.
+- New core Julia modules require unit tests; stable public entrypoints require corresponding `docs/api/` updates.
 - Model config belongs in `config/models/<model>/`; shared physics constants belong in `config/physics/`.
 - Preserve test layering: `tests/unit/`, `tests/integration/`, `tests/regression/`, `tests/validation/`, and `benchmark/`.
 - Non-test scripts do not belong under `tests/`; analysis scripts belong in `scripts/analysis/`; performance probes belong in `scripts/perf/`.
@@ -30,14 +30,15 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 
 ### Task Execution
 
-- Before editing `src/models/`, `src/relaxtime/`, or `src/simulation/`, read the relevant entrypoints and corresponding test layer.
+- Match repository reading and validation to task scope: for a typo, isolated documentation edit, or other low-risk change, inspect only the affected file and its immediate contract; before editing `src/models/`, `src/relaxtime/`, or `src/simulation/`, read the relevant entrypoint and corresponding test layer.
 - For unified solver or workflow changes, preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
 - For cross-module refactors, prefer the smallest convergent change and introduce shared abstractions only when required.
 - For stable CLI workflows, prefer `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` as documented in `docs/guides/scripts/README.md`.
 - For ambiguous continuation requests, multiple active tracks, or newly discovered follow-ups, read and validate `config/governance/task_tracks.toml` before choosing the next task.
 - Use `scripts/dev/check_task_ledger.jl --preflight` to report branch, HEAD, and dirty paths; preserve user changes and do not infer a clean worktree.
 - Classify new work as `blocker`, `required_follow_up`, `independent`, or `research`; do not silently replace the current primary track.
-- Unless the user asks for analysis only, implement, validate, and report rather than stopping at a proposal.
+- Unless the user asks for analysis only, define completion as implementation plus proportionate validation and a concise report; do not stop at a proposal or the first plausible patch.
+- Local tests that use disposable fixtures and have no production or external-service access may be run, and failures caused by the requested change may be fixed and rerun without asking for approval at each iteration. Keep network, credential, production-data, publication, and destructive actions subject to the existing approval boundaries.
 
 ### Scope, Verification, And Knowledge Governance
 
@@ -131,7 +132,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Keep finiteness, positivity, and grid-compatibility safeguards explicit.
 - Avoid allocations and repeated calculations in hot loops; add `@inline` or `@inbounds` only with hot-path justification.
 - Put performance comparisons in `benchmark/`, not smoke tests.
-- Every new core module needs unit tests; stable public entrypoints also need `docs/api/` updates.
+- Testing and documentation obligations are defined above; select affected tests first and expand by numerical/workflow risk.
 
 ## Commit Message Governance (Mandatory)
 

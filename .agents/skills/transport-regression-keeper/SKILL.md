@@ -1,6 +1,6 @@
 ---
 name: transport-regression-keeper
-description: 管理 Julia_RelaxTime transport/relaxtime 改动的测试层选择、固定点回归、数值漂移判断和证据汇报。用于截面、散射率、弛豫时间或输运工作流的具体改动；全仓 baseline 制度建设使用 baseline-regression-governance。
+description: 用于 transport/relaxtime 改动的受影响测试选择、固定点回归与数值漂移判断；全仓 baseline 制度使用 baseline-regression-governance。
 ---
 
 # Transport Regression Keeper

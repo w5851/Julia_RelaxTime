@@ -1,6 +1,6 @@
 ---
 name: analysis-artifact
-description: 为 Julia_RelaxTime 的正式数值产物、诊断产物或研究结果生成可追溯分析包。适用于 docs/analysis 分析产物沉淀、输入证据审计、派生表和关键图生成、机制/归因边界判定、claim ledger、论文写作前的 evidence package；可覆盖 transport、relaxtime、phase structure、meson 或其他仓库内数值产物。
+description: 仅在需要把已有数值结果整理为可追溯分析包时使用：审计输入、派生表、关键图、claim ledger 与机制边界；不负责重跑、正式晋升或文献复现。
 ---
 
 # analysis-artifact

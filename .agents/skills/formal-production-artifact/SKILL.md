@@ -1,6 +1,6 @@
 ---
 name: formal-production-artifact
-description: 在 Julia_RelaxTime 中通过收敛性 gate、正式重跑、审计 manifest 和图表追踪生产可入库的高精度数值产物。仅用于正式 production 晋升；baseline 治理、transport 漂移判断、实验日志或隔离文献复现应使用各自专用 skill。
+description: 仅用于正式高精度数值产物晋升：收敛性 gate、正式重跑、manifest 与图表追踪；不用于 baseline 治理、日常漂移诊断、实验日志或文献复现。
 ---
 
 # formal-production-artifact
