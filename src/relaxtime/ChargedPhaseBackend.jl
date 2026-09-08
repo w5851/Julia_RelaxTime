@@ -487,6 +487,7 @@ function strict_charged_bu_density(
         previous_bound_state_count = bound_state_count_q
     end
 
+    # g(omega) d(delta)/domega already has the density measure; no extra 1/T.
     density = Float64(degeneracy) * q_integral
     density_finite = isfinite(density)
     density_nonnegative = density >= -1.0e-12
