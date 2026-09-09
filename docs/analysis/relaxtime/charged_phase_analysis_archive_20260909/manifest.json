@@ -12,6 +12,7 @@
   "policy": {
     "analysis_production_authorized": false,
     "bulk_analysis_committed": false,
+    "selected_evidence_committed": true,
     "formal_baseline_promoted": false,
     "delete_external_worktree": false
   },
@@ -32,7 +33,14 @@
       "file_count": 26,
       "bytes": 1106787,
       "inventory_sha256": "6b1b49a396e3175cb38711abdac8db46c843f1f4e90c9fbb03ad167800a12dc4",
-      "note": "The group is diagnostic only; all source manifests set production_authorized=false."
+      "committed_paths": [
+        "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/fig4_like_freezeout_ratio_dense_20260905_v3 (payload; source_snapshot and figures excluded)",
+        "data/outputs/figures/relaxtime/charged_rpa_phase_backend/fig4_like_freezeout_ratio_dense_20260905_v3 (PNG payload)"
+      ],
+      "committed_file_count": 18,
+      "committed_bytes": 894159,
+      "committed_inventory_sha256": "035677dfeb36de16a219c906baa477b92f0db7aae3bc6e4a90285c5c905f113f",
+      "note": "The group is diagnostic only; the dense comparison CSV/JSON payload and PNG display payload are committed in PR #311, while the method_v1 auxiliary directories and embedded source_snapshot remain untracked. All source manifests set production_authorized=false."
     },
     {
       "id": "historical_trho_overlay",
@@ -40,7 +48,14 @@
       "file_count": 6,
       "bytes": 689745,
       "inventory_sha256": "13f77bc435bc2a48423d6481191cc424156fd3e2c2a244b2b5200c0edbcd29a1",
-      "note": "Context-only projection with unmatched historical background; not a quantitative overlay gate."
+      "committed_paths": [
+        "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/freezeout_on_historical_trho_20260905 (payload; source_snapshot, images excluded)",
+        "data/outputs/figures/relaxtime/charged_rpa_phase_backend/freezeout_on_historical_trho_20260905 (PNG payload)"
+      ],
+      "committed_file_count": 6,
+      "committed_bytes": 546760,
+      "committed_inventory_sha256": "f24ab84f25b353feba51b9bc9c523fb7267e8a30088333521eb61fede145e5d4",
+      "note": "Context-only projection with unmatched historical background; its CSV/JSON payload and PNG display payload are committed in PR #311 but remain diagnostic and are not a quantitative overlay gate. The embedded source_snapshot and generated SVG remain untracked."
     }
   ],
   "light_inventory": {

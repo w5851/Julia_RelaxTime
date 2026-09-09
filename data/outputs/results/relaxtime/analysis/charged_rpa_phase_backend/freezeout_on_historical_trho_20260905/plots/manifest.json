@@ -1,0 +1,27 @@
+{
+  "status": "diagnostic_coordinate_overlay",
+  "source_coordinate_sha256": "97ec02b92c1e3c768f169c27fcfdceb156228c2a75bbc91014d56af11f6c5221",
+  "source_manifest_sha256": "383f6b2daa4fb7a63638d1c37d11dd8ef70a1cd77e87fbdc7695dad2dd56291e",
+  "historical_input_hashes": {
+    "D:\\w\\jrt-ord\\data\\outputs\\results\\relaxtime\\meson_density\\trho_asymmetric_kplus_piplus_scan_v1\\combined_meson_density_scan.csv": "254eb72f921aee389fd4fe536b21e23be282c7dd839a7638488eac0db31af01d",
+    "D:\\w\\jrt-ord\\data\\outputs\\figures\\relaxtime\\meson_density\\trho_asymmetric_kplus_piplus_scan_v1\\plot_manifest.json": "c14739b9aee35db197a9565bf5018fcbdb40eb4f1f9de6c84f5947979a6f7ecc",
+    "D:\\w\\jrt-ord\\data\\outputs\\figures\\relaxtime\\meson_density\\trho_asymmetric_kplus_piplus_scan_v1\\combined_meson_density_scan.png": "bb418a557347ed33aa88b887a34f7c8c925ade80f38fcaf142d95856df78523a",
+    "D:\\w\\jrt-ord\\data\\outputs\\figures\\relaxtime\\meson_density\\trho_asymmetric_kplus_piplus_scan_v1\\combined_meson_density_scan.svg": "2619cf2982f0e293819aa37022af5841dec4c925129c838b382920206e534b07"
+  },
+  "script_sha256": "34a4f8bbf6e1754f78fb6d502dbe96ed6bdc8c1921909b9575fbda21b5a8d2e2",
+  "renderer_sha256": "2a26f4ce9e6f79b373efe5d90fe7168672a1fd399a5d629c10a11ca6ff9598c9",
+  "color_vmin": 0.310601,
+  "color_vmax": 260.526881,
+  "points": 10,
+  "inside_historical_grid": 1,
+  "outside_historical_grid": 9,
+  "historical_ratio_interpolation": false,
+  "new_ratio_overlay": false,
+  "production_authorized": false,
+  "cell_boundary_policy": "outer half-cells clipped to the sampled centre rectangle; no extrapolation",
+  "output_hashes": {
+    "historical_all_regimes_with_freezeout.png": "309ddadb64050cca0a7ea6edc3f424de475b8084c8ff6d4c6b1c9b38a23dc26b",
+    "historical_gbu_with_freezeout.png": "df86d0749e936088db1f6f2db0c5d3bf236089367fb24c5f1ad08334a38348b3",
+    "historical_gbu_with_freezeout.svg": "d36c27f020254d4e36b991287bad6bf211aa51d022715b7874c42b5dcff4d4cb"
+  }
+}

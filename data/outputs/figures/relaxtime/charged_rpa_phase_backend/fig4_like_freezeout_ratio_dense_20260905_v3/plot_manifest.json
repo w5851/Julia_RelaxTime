@@ -1,0 +1,12 @@
+{
+  "schema": "charged_gbu_fig4_like_figure_payload_v1",
+  "production_authorized": false,
+  "source_result_path": "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/fig4_like_freezeout_ratio_dense_20260905_v3",
+  "source_plot_manifest": "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/fig4_like_freezeout_ratio_dense_20260905_v3/plots/manifest.json",
+  "files": {
+    "current_bqs_fig4_like.png": "1b7e62cac22c80dc8a688716aedd7ff59a3eec86aab40a2b0613b4bc5fc76794",
+    "fig4_like_current_vs_historical.png": "477d411252b372c7d7e81804fb2461e30eba3b15b2db6d144737f3b25f3f858e",
+    "historical_fixedasymrho_context.png": "0b1dc0eaf0c1d1a073694300ed50af91b74fc83db71e04a81770c92d7ca5fec4"
+  },
+  "notes": "PNG display payload only; the source SVG and source_snapshot remain in the untracked diagnostic archive."
+}

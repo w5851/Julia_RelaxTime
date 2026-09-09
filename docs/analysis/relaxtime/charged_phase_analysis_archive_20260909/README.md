@@ -18,14 +18,16 @@ baseline.
   `data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/`.
   Their own manifests all set `production_authorized=false`; the historical
   overlay is explicitly a context-only, unmatched projection.
-- The analysis files are intentionally still untracked bulk evidence. This
-  commit records their paths and hashes, but does not stage the PNG/CSV trees
-  themselves. The source snapshots embedded in two analysis directories are
-  also recorded only by count, size, and aggregate hash.
+- The two selected evidence groups named below are committed in PR #311 as
+  review evidence (CSV/PNG/manifest payloads). Their embedded source
+  snapshots are deliberately not staged: they remain byte-preserved local
+  provenance copies in the current checkout and external worktree. The
+  remaining analysis directories are intentionally still untracked bulk
+  evidence and are not silently promoted by this commit.
 
 ## Scope of the light index
 
-The detailed inventory covers 32 evidence files (1,796,532 bytes):
+The detailed light inventory covers 32 evidence files (1,796,532 bytes):
 
 - `method_v1_freezeout_comparison_v2/` and
   `method_v1_freezeout_q0_reference_v3/` provide the ten-point finite-q/q=0
@@ -35,10 +37,13 @@ The detailed inventory covers 32 evidence files (1,796,532 bytes):
 - `freezeout_on_historical_trho_20260905/` provides the historical T-rho
   overlay and its context plots.
 
-The complete main-tree analysis root currently contains 3,582 files and
-33,924,685 bytes. Its aggregate inventory hash is recorded in `manifest.json`;
-the other retained diagnostic directories are not silently treated as part of
-the 32-file light package.
+The selected commit scope contains 24 payload files and 1,440,919 bytes
+(18 finite-q/q=0 comparison payloads and 6 historical-overlay payloads). The
+two untracked source snapshots and the generated historical SVG are excluded
+from that scope. The complete main-tree analysis root currently contains 3,582
+files and 33,924,685 bytes. Its aggregate inventory hash is recorded in
+`manifest.json`; the other retained diagnostic directories are not silently
+treated as part of the selected commit scope.
 
 ## External worktree decision
 
