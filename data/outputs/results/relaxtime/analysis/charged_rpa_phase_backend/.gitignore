@@ -1,0 +1,23 @@
+# Local diagnostic runs retained outside the selected PR evidence payload.
+direction_b_infinite_acceptance_v2_20260907/
+direction_b_infinite_gate_recovery_20260907/
+direction_b_infinite_mott_refined_20260907/
+direction_b_infinite_oracle_20260907/
+direction_b_infinite_readiness_20260907/
+full_signed_regulator_probe_v3_20260906/
+method_v1_freezeout_comparison_v2/
+method_v1_freezeout_q0_reference_v3/
+pereira_formula_checks_20260906/
+pnjl_routing_stability_v2_20260906/
+regulator_routing_closure_refined_20260905/
+temp7_controlled_overlay_20260905/
+thermal_admissibility_v2_20260906/
+
+# Generated figure duplicates; the selected display payload lives in docs/analysis.
+fig4_like_freezeout_ratio_dense_20260905_v3/plots/*.png
+fig4_like_freezeout_ratio_dense_20260905_v3/plots/*.svg
+freezeout_on_historical_trho_20260905/plots/*.png
+freezeout_on_historical_trho_20260905/plots/*.svg
+
+# Embedded checkout snapshots are local provenance, not repository payload.
+**/source_snapshot/
