@@ -5,7 +5,7 @@
 作者明确：理论热积分遍及全内部动量空间；有限 Lth 是数值积分上限，
 不是新模型参数。真空 Lambda 则仍是模型参数。本文接续
 [方向B源定义](ChargedGBU_DirectionB.md)与[端点分析](ChargedGBU_EndpointClosure.md)，
-不改变 PNJLCore、quark-only BQS 约束或生产默认。
+不改变 PNJLCore 或 quark-only BQS 约束；当前 smoke production 默认采用关系在本页末尾记录。
 
 计算量固定为 quark-only 背景上的 GBU 介子部分产额，不要求将介子反馈加入
 上游驻点作为此次准入条件，也不将它改称实验最终强子产额。
@@ -81,7 +81,7 @@ n_M(q)=\frac{q^2}{2\pi^2}\left[
 - `audit_causal_gbu_infinite_production_gate.jl`：自动外层分段、热上限差与尾区检查。
 - `causal_gbu_infinite_limits.jl`：与根数独立的阈值极限及近端点围道窗口。
 - `audit_causal_gbu_infinite_gate_recovery.jl`：带旧证据哈希约束的失败点自动恢复。
-- `audit_causal_gbu_infinite_readiness.jl`：五阶段证据完整性/数值验收归并，不授权默认晋升。
+- `audit_causal_gbu_infinite_readiness.jl`：五阶段证据完整性/数值验收归并，不单独授权 formal baseline 晋升。
 
 上述模块保留 analysis 单一源码；第22.24节新增的显式研究生产适配器
 `Models.run_charged_gbu_freezeout_scan` 调用同一核，并逐背景执行自动门禁。
@@ -123,6 +123,7 @@ F(U)落在原Pi误差预算经4K换算的范围内时拒绝认证；不放宽门
 
 strict-audit第22.23节的自动归并5/5通过，支持无限热B路线在保留背景上的
 研究级GBU部分产额数值可行。旧有限硬端点的全谱辅助根误差仍未获得认证，
-不能用正常分支的小差值替代该证明。显式研究生产入口现由统一脚本对每个新
-背景运行失败封闭的门禁；完整冻结线状态以该次运行的 manifest 为准，
-不把代表点验收扩大为全部背景或默认生产授权。
+不能用正常分支的小差值替代该证明。smoke production 默认入口现由统一脚本对每个新
+背景运行失败封闭的门禁；完整冻结线状态以该次运行的 manifest 为准。
+该默认授权仅覆盖 quark-only BQS charged GBU smoke production，不改变
+PNJLCore、通用 legacy MesonDensity 兼容 API 或正式数值 baseline。

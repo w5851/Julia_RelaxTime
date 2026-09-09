@@ -2,7 +2,7 @@
 
 route_id: charged_rpa_bu_quark_only
 状态：candidate（未授权 production）
-上述状态属于本旧provider公式注册项；显式无限热GBU研究生产入口已验收，旧默认不变。
+上述状态属于本旧provider公式注册项；显式无限热GBU研究生产入口已验收，并独立授权为 charged smoke production 默认；旧通用 MesonDensity 默认仍保持兼容。
 初始基线：`origin/main` @ `bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b`
 更新日期：2026-09-07
 

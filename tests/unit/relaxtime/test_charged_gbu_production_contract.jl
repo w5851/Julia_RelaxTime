@@ -5,9 +5,11 @@ const W=ChargedGBUResearchWorkflow
 @testset "Infinite GBU explicit production contract" begin
     c=TOML.parsefile(W.DEFAULT_CONFIG)
     @test W.validate_config(c)===c
+    @test endswith(replace(W.default_figure_output("data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/freezeout_test"),'\\'=>'/'),
+        "data/outputs/figures/relaxtime/meson_density/charged_gbu_infinite/freezeout_test")
     @test W.energy_grid([3.,200.,7.7])==[200.,7.7,3.]
     for e in (Float64[],[0.],[NaN],[3.,3.]);@test_throws ArgumentError W.energy_grid(e);end
-    for (key,value) in (("thermal_target","finite"),("meson_feedback",true),("production_default",true))
+    for (key,value) in (("thermal_target","finite"),("meson_feedback",true),("production_default",false),("default_tier","formal"))
         bad=deepcopy(c);bad[key]=value;@test_throws ArgumentError W.validate_config(bad)
     end
     bad=deepcopy(c);bad["gates"]["q_relative"]=.1;@test_throws ArgumentError W.validate_config(bad)

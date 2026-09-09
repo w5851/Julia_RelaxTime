@@ -11,12 +11,14 @@
 
 ## 1. 推荐稳定入口
 
-### 显式研究生产：无限热 charged GBU
+### 默认 smoke production：无限热 charged GBU
 
-作者选择该研究路线时使用 `scripts/relaxtime/run_charged_gbu_freezeout_scan.jl`，
+当前 charged 介子数密度的 smoke production 默认路线使用
+`scripts/relaxtime/run_charged_gbu_freezeout_scan.jl`，
 通过 `Models.run_charged_gbu_freezeout_scan` 完成冻结线映射、quark-only BQS
-求解、四通道密度、自动门禁、checkpoint及ratio图。它不替代旧默认，
-也不意味着PR310自动晋升。方法、参数、输出和失败语义见
+求解、四通道密度、自动门禁、checkpoint及ratio图。该默认范围仅指
+quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不改变
+通用 legacy MesonDensity 兼容 API。方法、参数、输出和失败语义见
 [研究入口合同](../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)。
 
 全量 `run_*.jl` 脚本功能目录见：

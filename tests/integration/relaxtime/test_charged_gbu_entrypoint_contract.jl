@@ -2,7 +2,7 @@ using Test
 const ROOT=normpath(joinpath(@__DIR__,"..","..",".."))
 isdefined(Main,:Models) || Base.include(Main,joinpath(ROOT,"src","models","Models.jl"))
 include(joinpath(ROOT,"scripts","relaxtime","run_charged_gbu_freezeout_scan.jl"))
-@testset "Opt-in Models/CLI wiring leaves legacy path unchanged" begin
+@testset "Charged GBU default wiring leaves legacy path unchanged" begin
     @test isdefined(Main.Models,:run_charged_gbu_freezeout_scan)
     @test isdefined(Main.Models,:run_freezeout_meson_density_scan)
     cli=ChargedGBUFreezeoutCLI
@@ -10,6 +10,8 @@ include(joinpath(ROOT,"scripts","relaxtime","run_charged_gbu_freezeout_scan.jl")
     opts=cli.parse_args(["--sqrts-list","3,7.7,200","--workers","1","--no-plot","--resume"])
     @test opts[:energies]==[3.,7.7,200.]
     @test opts[:workers]==1 && opts[:resume] && !opts[:make_plot]
+    figopts=cli.parse_args(["--figure-output","figures"])
+    @test figopts[:figure_output]=="figures"
     @test_throws ErrorException cli.parse_args(["--unknown"])
     @test_throws ErrorException cli.parse_args(["--output"])
     # Dispatch and validation are exercised without starting an equilibrium solve.

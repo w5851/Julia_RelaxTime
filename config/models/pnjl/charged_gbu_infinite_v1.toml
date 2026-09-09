@@ -6,7 +6,8 @@ background = "FixedMuBConservedCharges"
 charge_to_baryon_ratio = 0.4
 strangeness_density_fm3 = 0.0
 meson_feedback = false
-production_default = false
+production_default = true
+default_tier = "smoke"
 freezeout_profile = "default"
 energies_GeV = [3.0, 5.0, 7.7, 11.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
 
