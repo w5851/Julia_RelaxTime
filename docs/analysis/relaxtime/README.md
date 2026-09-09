@@ -35,6 +35,10 @@ v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_
 
 这些目录有保存价值，但应在总索引中标为 `historical`，不应和当前 phase-guided transport 机制包混合。
 
+## Charged RPA/GBU phase audit
+
+`charged_phase_analysis_archive_20260909/` 记录当前 PR #311 审查所需的有限-q/q=0 对照和历史冻结线叠加。原始 CSV/PNG 仍保留在 `data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/`，但保持 diagnostic-only、未跟踪状态；该 index 只保存逐文件哈希、目录级清单和 `D:/w/jrt-ord` 的一致性证据。`freezeout_20260907_v2` 的 accepted smoke-production result 仍以 `data/outputs/results/relaxtime/meson_density/` 为正式 result-side 路径。
+
 ## Package Contract
 
 新的 transport 分析包优先采用：
