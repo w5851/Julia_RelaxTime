@@ -13,7 +13,11 @@ export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
 export run_charged_gbu_freezeout_scan
 
 const _charged_gbu_load_lock = ReentrantLock()
-"""Opt-in infinite-thermal charged GBU research scan; legacy defaults unchanged."""
+"""Default smoke-production infinite-thermal charged GBU freezeout scan.
+
+The generic legacy MesonDensity compatibility APIs remain explicit and are not
+silently rewritten by this entrypoint.
+"""
 function run_charged_gbu_freezeout_scan(;kwargs...)
     lock(_charged_gbu_load_lock) do
         isdefined(Main,:ChargedGBUResearchWorkflow) || Base.include(Main,

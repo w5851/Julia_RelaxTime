@@ -1,0 +1,146 @@
+{
+  "schema": "charged_phase_analysis_archive_v1",
+  "generated_at": "2026-09-09",
+  "repository": "w5851/Julia_RelaxTime",
+  "inventory_encoding": "UTF-8 lines sorted by relative path: path<TAB>bytes<TAB>sha256<LF>",
+  "checkout": {
+    "path": "D:/Desktop/Julia_RelaxTime",
+    "branch": "codex/charged-gbu-smoke-default",
+    "head": "adccd28084d6555a48693c1682405fa09a870fdb",
+    "pull_request": 311
+  },
+  "policy": {
+    "analysis_production_authorized": false,
+    "bulk_analysis_committed": false,
+    "selected_evidence_committed": true,
+    "formal_baseline_promoted": false,
+    "delete_external_worktree": false
+  },
+  "main_analysis_root": {
+    "path": "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend",
+    "file_count": 3583,
+    "bytes": 33925663,
+    "inventory_sha256": "c44be1d6885e7ea57fc89d655476d9368a007729f0a683d38d0bd2b30b56ef60"
+  },
+  "evidence_groups": [
+    {
+      "id": "finite_q_q0_comparison",
+      "paths": [
+        "method_v1_freezeout_comparison_v2",
+        "method_v1_freezeout_q0_reference_v3",
+        "fig4_like_freezeout_ratio_dense_20260905_v3"
+      ],
+      "file_count": 26,
+      "bytes": 1106787,
+      "inventory_sha256": "6b1b49a396e3175cb38711abdac8db46c843f1f4e90c9fbb03ad167800a12dc4",
+      "committed_paths": [
+        "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/fig4_like_freezeout_ratio_dense_20260905_v3 (payload; source_snapshot and figures excluded)",
+        "docs/analysis/relaxtime/charged_phase_analysis_archive_20260909/figures/fig4_like_freezeout_ratio_dense_20260905_v3 (PNG and plot-manifest payload)"
+      ],
+      "committed_file_count": 18,
+      "committed_bytes": 894257,
+      "committed_inventory_sha256": "b0bdbd1c461f86bb691d18b8739ab17383aa705f2fe6ffdd2427cf803b15cea7",
+      "note": "The group is diagnostic only; the dense comparison CSV/JSON payload and analysis-layer PNG display payload are committed in PR #311, while the method_v1 auxiliary directories and embedded source_snapshot remain untracked. All source manifests set production_authorized=false."
+    },
+    {
+      "id": "historical_trho_overlay",
+      "paths": ["freezeout_on_historical_trho_20260905"],
+      "file_count": 6,
+      "bytes": 689745,
+      "inventory_sha256": "13f77bc435bc2a48423d6481191cc424156fd3e2c2a244b2b5200c0edbcd29a1",
+      "committed_paths": [
+        "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/freezeout_on_historical_trho_20260905 (payload; source_snapshot, images excluded)",
+        "docs/analysis/relaxtime/charged_phase_analysis_archive_20260909/figures/freezeout_on_historical_trho_20260905 (PNG and plot-manifest payload)"
+      ],
+      "committed_file_count": 6,
+      "committed_bytes": 546847,
+      "committed_inventory_sha256": "f01980e38a5c6286071369ad4b9677ad260cd0c9ef85a360bc3c29fa2b6edbd7",
+      "note": "Context-only projection with unmatched historical background; its CSV/JSON payload and analysis-layer PNG display payload are committed in PR #311 but remain diagnostic and are not a quantitative overlay gate. The embedded source_snapshot, generated duplicate plots, and source SVG remain untracked."
+    }
+  ],
+  "light_inventory": {
+    "file_count": 33,
+    "bytes": 1654579,
+    "inventory_sha256": "888f48406590d51443e673873f7d2f881c5dea8490ee703c324c761a47a5d091",
+    "files": [
+      {"path":"method_v1_freezeout_comparison_v2/component_totals.csv","bytes":4860,"sha256":"7faa1e50e2dd672ff5c17d9f119511d3ef8ac979d8b1ad27fb9ac8b2fd025aba"},
+      {"path":"method_v1_freezeout_comparison_v2/freezeout_route_audit.png","bytes":115526,"sha256":"15a5c9c3550e61a74065398eb31c904b2ffe4ad4f9d2329881d2680ff924b43d"},
+      {"path":"method_v1_freezeout_comparison_v2/historical_context.csv","bytes":3090,"sha256":"5cfc8892b0e6599c27ea3d3f5107076d566614e7cfcfa67ec05b81b8d87aaffe"},
+      {"path":"method_v1_freezeout_comparison_v2/manifest.json","bytes":1892,"sha256":"d28f6208ca52a900819c43f5929077b40a2f96b0199bd8a11689987632c223ec"},
+      {"path":"method_v1_freezeout_comparison_v2/ratio_comparison.csv","bytes":817,"sha256":"d6114090571ca06beb6a1ad9243a8cfbfde30cc6d3d23e0e29d38c5d4e8127aa"},
+      {"path":"method_v1_freezeout_q0_reference_v3/manifest.json","bytes":851,"sha256":"ebaa2142c24644291a983da5cc19c8b0d789d6382bb1b5ce1d7e7a262237cbe9"},
+      {"path":"method_v1_freezeout_q0_reference_v3/reference_densities.csv","bytes":1138,"sha256":"d4d0718dd5508934e410f5ea38e2087a8f7cf31618d3444c3b79b4c13bc88faf"},
+      {"path":"method_v1_freezeout_q0_reference_v3/reference_ratios.csv","bytes":227,"sha256":"d81e83764dce9eb69eca49df0f087561c9c6dba31ae8e05954d47743d5d1858a"},
+      {"path":"method_v1_freezeout_q0_reference_v3/reference_shells.csv","bytes":85074,"sha256":"eb947d57ede950d166dd2d6fce1fc85588063337e7ba72ed879304538cde35ab"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/audit/component_totals.csv","bytes":15834,"sha256":"770224a7c01c79a816baa3c7ed131f553d05e132ab072b546ca48144c5bccebb"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/audit/density_factors.csv","bytes":1765,"sha256":"85568c102e03e60db5b229ef2365ab874fb038da1378d742185faef1695d7a4e"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/audit/manifest.json","bytes":714,"sha256":"823c572a1d431c3156f5ff473420ce58966eccb7a61ab9cd74688f92e8fc827a"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/backgrounds.csv","bytes":3683,"sha256":"a893bdc5c32ab3fb96fad5863e89a1224afd45954e7555e63761df32e94aba5e"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/direct_densities.csv","bytes":4782,"sha256":"0d2ac868743b2c1b85bfae3f272a7d1644f3173d023507adcdadf3a7b8d477cb"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/direct_shells.csv","bytes":280199,"sha256":"e10099589140afa4d3754d5b3d9ad064ddd0b45cc961949250259cc1ae4e5c7d"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/manifest.json","bytes":37568,"sha256":"da2caecd08342ae2c1ca1b2f5182d5b298a3052d08d97f1b8dee0bafe2944c6e"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/figures/current_bqs_fig4_like.png","bytes":71992,"sha256":"1b7e62cac22c80dc8a688716aedd7ff59a3eec86aab40a2b0613b4bc5fc76794"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/figures/fig4_like_current_vs_historical.png","bytes":127959,"sha256":"477d411252b372c7d7e81804fb2461e30eba3b15b2db6d144737f3b25f3f858e"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/figures/historical_fixedasymrho_context.png","bytes":52157,"sha256":"0b1dc0eaf0c1d1a073694300ed50af91b74fc83db71e04a81770c92d7ca5fec4"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/figures/plot_manifest.json","bytes":945,"sha256":"ab4127b7f291c249f8fe5756f9852d220f50327dcfd70597ee424c1d255ad79c"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/plots/manifest.json","bytes":1775,"sha256":"162bd666e44711e1557e2eb42d3250d7cca152e2946046c4d7d35b79c886b2be"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/plots/README.md","bytes":467,"sha256":"0a66f90cb2c81a46c2de32502b4cbfc39c8a90b17617dc781d86cba8a3b3605a"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/progress.json","bytes":2080,"sha256":"6710fc688bbdfb6a2f0b15e465f5621f99fe52a0411891393d79cc86fa7c5152"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/ratio_comparison.csv","bytes":1324,"sha256":"bd6097bcd6d1a73ecc9d08113855ea0f37939f3a371e90b8ec075ddc244345ac"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/reference_densities.csv","bytes":4903,"sha256":"c313f99779c0119c27ca067a530673eb07c239de5db3f8637126edacf5582b59"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/reference_shells.csv","bytes":283306,"sha256":"7dc7760c956a7957785a11e3f1d65c98774a0cf69ddadbac0e2a4c2534919405"},
+      {"path":"fig4_like_freezeout_ratio_dense_20260905_v3/timings.csv","bytes":2804,"sha256":"12eb7c18133f4463bc129ac5a5f6bce3b17cca939676b69f012062b7b37b8519"},
+      {"path":"freezeout_on_historical_trho_20260905/freezeout_trho_coordinates.csv","bytes":3897,"sha256":"97ec02b92c1e3c768f169c27fcfdceb156228c2a75bbc91014d56af11f6c5221"},
+      {"path":"freezeout_on_historical_trho_20260905/manifest.json","bytes":34251,"sha256":"383f6b2daa4fb7a63638d1c37d11dd8ef70a1cd77e87fbdc7695dad2dd56291e"},
+      {"path":"freezeout_on_historical_trho_20260905/figures/historical_all_regimes_with_freezeout.png","bytes":241050,"sha256":"309ddadb64050cca0a7ea6edc3f424de475b8084c8ff6d4c6b1c9b38a23dc26b"},
+      {"path":"freezeout_on_historical_trho_20260905/figures/historical_gbu_with_freezeout.png","bytes":264714,"sha256":"df86d0749e936088db1f6f2db0c5d3bf236089367fb24c5f1ad08334a38348b3"},
+      {"path":"freezeout_on_historical_trho_20260905/figures/plot_manifest.json","bytes":920,"sha256":"3ac2d1991d4ecbd7b081d35ef5774c34ac7723014c6ab7ae933999d21faec27c"},
+      {"path":"freezeout_on_historical_trho_20260905/plots/manifest.json","bytes":2015,"sha256":"8f01cc00dd06fe4b6ce5bcf51f8d363fc0d3fc649c180a893bbd2f9e988930b0"}
+    ]
+  },
+  "embedded_source_snapshots": {
+    "fig4_like_freezeout_ratio_dense_20260905_v3": {
+      "file_count": 302,
+      "bytes": 2669157,
+      "inventory_sha256": "721598d760557b43bc08172b4ac8ad2eb4ab662e653a4a0095caabd4ec5427e2"
+    },
+    "freezeout_on_historical_trho_20260905": {
+      "file_count": 292,
+      "bytes": 2578692,
+      "inventory_sha256": "899fb383f88d5f5d2ed302b788fb13340a33e93bbf27faeb37b415c3a19110d7"
+    },
+    "note": "Source snapshots are not staged in this commit."
+  },
+  "external_worktree": {
+    "path": "D:/w/jrt-ord",
+    "analysis_root_file_count": 16716,
+    "analysis_root_bytes": 257481669,
+    "analysis_root_inventory_sha256": "d50f33e97ba5c65f5b51beee23a2b53b011f77a62b4313d68753478e38e24e0f",
+    "target_evidence_match": false,
+    "target_evidence_inventory_sha256": "ff2628f0185b92523f3d626365e67b1c5ff402deb55d9894ed94dd126f63df6e",
+    "main_selected_evidence_inventory_sha256": "888f48406590d51443e673873f7d2f881c5dea8490ee703c324c761a47a5d091",
+    "relocation_note": "Payload bytes remain equivalent, but figure paths moved from data/outputs/figures to docs/analysis in the main checkout.",
+    "source_snapshot_inventory_sha256": {
+      "fig4_like_freezeout_ratio_dense_20260905_v3": "721598d760557b43bc08172b4ac8ad2eb4ab662e653a4a0095caabd4ec5427e2",
+      "freezeout_on_historical_trho_20260905": "899fb383f88d5f5d2ed302b788fb13340a33e93bbf27faeb37b415c3a19110d7"
+    },
+    "deletion_authorized": false
+  },
+  "production_result": {
+    "path": "data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/freezeout_20260907_v2",
+    "status": "complete_research_curve_accepted",
+    "point_count": 10,
+    "tracked_result_file_count": 149,
+    "tracked_result_bytes": 2125755,
+    "tracked_result_inventory_sha256": "37960f6778e007c03115df9a7bf1e065dea6e88b92a759d5aeb65264283ef4b0",
+    "manifest_sha256": "2c180374b66ce5a0563a44be1f697341cdbb90910bc700e1be0ce6b926be2078",
+    "route_config_default": true,
+    "route_default_tier": "smoke",
+    "historical_run_manifest_production_default": false,
+    "source_snapshot_untracked": {
+      "file_count": 419,
+      "bytes": 3679372,
+      "inventory_sha256": "0cc47a10a40c24e5db0aaece1e656a30ce5415500623fdcb7e22926e6ac351f1"
+    }
+  }
+}

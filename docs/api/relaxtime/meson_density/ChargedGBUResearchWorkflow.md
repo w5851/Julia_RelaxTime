@@ -1,16 +1,18 @@
-# 无限热 charged GBU 研究生产入口
+# 无限热 charged GBU smoke production 默认入口
 
 ## 授权与默认
 
-`Models.run_charged_gbu_freezeout_scan` 是作者明确选择的研究生产入口。
+`Models.run_charged_gbu_freezeout_scan` 是 charged 介子密度的 smoke production
+默认入口。它固定使用 quark-only BQS 背景、无限 PNJL 热差和无介子反馈；通用
+legacy `MesonDensity` API 仍保留为显式兼容入口。
 它不修改 `Models.run_freezeout_meson_density_scan`、MesonDensity regime 或
-PNJLCore；不更新正式 baseline，不自动晋升 PR310。
+PNJLCore；不更新正式 baseline，也不把 smoke default 晋升为 formal baseline。
 观察量是固定 quark-only BQS 背景上的 GBU 部分产额，非最终强子产额，
 不含介子反馈、额外 pion fugacity 或负谱裁零。
 
-计算核暂保持在已验收的 analysis 单一源码中，由惰性加载的研究 workflow
-显式调用；没有复制一个不同的生产物理核。这是过渡性研究适配器，不代表
-全部 analysis API 已获稳定公共 API 授权。运行 manifest 保存实际依赖快照。
+计算核保持已验收的单一源码，由默认 workflow 惰性加载；没有复制一个不同的
+生产物理核。该入口的稳定范围是 charged GBU smoke production，不代表全部
+analysis API 已获稳定公共 API 授权。运行 manifest 保存实际依赖快照。
 
 作者已审核2026-09-07的v2冻结线图像；10个配置能量点、40个通道全部通过。
 这是固定方法/网格的研究产额验收，不是实验定量拟合或连续背景全域认证。
@@ -27,8 +29,8 @@ Models.run_charged_gbu_freezeout_scan(
 ```
 
 CLI：`scripts/relaxtime/run_charged_gbu_freezeout_scan.jl`；参数包括
-`--output DIR`、`--config TOML`、`--sqrts-list ...`、`--workers 1..4`、
-`--resume` 和 `--no-plot`。默认方法配置为
+`--output DIR`、`--figure-output DIR`、`--config TOML`、`--sqrts-list ...`、
+`--workers 1..4`、`--resume` 和 `--no-plot`。默认方法配置为
 `config/models/pnjl/charged_gbu_infinite_v1.toml`。
 使用项目 sysimage wrapper；元数据不匹配时用 `-MismatchPolicy fallback`，
 不自动构建或静默加载旧物理源码的 sysimage。
@@ -59,7 +61,8 @@ CLI：`scripts/relaxtime/run_charged_gbu_freezeout_scan.jl`；参数包括
 
 每个energy子目录保存背景、通道结果、积分shell checkpoint。
 JSON中的非有限值使用null，CSV中使用NaN；两者不代表零。
-`run.json`固定配置/源码身份；`manifest.json`汇总最终状态及输出哈希。
+`run.json`固定配置/源码身份；`manifest.json`汇总最终状态及结果输出哈希，
+图像目录另有 `plot_manifest.json` 记录图像与 `ratios.csv` 的输入哈希。
 完整遍历但有失败点的状态为`complete_scan_with_failed_points`，不能冒充
 `complete_research_curve_accepted`。PNG/PDF仅连通过点，线段用于引导视线。
 

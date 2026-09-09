@@ -17,6 +17,8 @@
 1) 出现 `joinpath(..., "outputs", "results", ...)` 且同一行未包含 `"data"`。
 2) 出现文本 `outputs/results` 且不包含 `data/outputs/results`。
 3) 新增/复制/重命名 tracked 图像文件位于 `data/outputs/results/**.{png,svg,pdf}`。
+   已验收的 immutable charged GBU v2 bundle 是唯一保留的哈希绑定历史包例外；
+   新生产运行仍必须把图像写入 `data/outputs/figures/`。
 4) 新增/复制/重命名 tracked 非图像文件位于 `data/outputs/figures/**`，且不是 `plot_manifest.json`。
 """
 
@@ -25,6 +27,10 @@ struct GuardConfig
     base::Union{Nothing, String}
     head::Union{Nothing, String}
 end
+
+const IMMUTABLE_RESULT_BUNDLE_PREFIXES = (
+    "data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/freezeout_20260907_v2/",
+)
 
 function project_root()
     return normpath(joinpath(@__DIR__, "..", ".."))
@@ -139,6 +145,7 @@ end
 function is_result_figure_path(path::AbstractString)
     normalized = normalize_path(path)
     startswith(normalized, "data/outputs/results/") || return false
+    any(startswith(normalized, prefix) for prefix in IMMUTABLE_RESULT_BUNDLE_PREFIXES) && return false
     ext = lowercase(splitext(normalized)[2])
     return ext in (".png", ".svg", ".pdf")
 end

@@ -1,8 +1,9 @@
-"""Opt-in research-production orchestration; never loaded by the default provider.
+"""Default smoke-production orchestration for charged infinite-thermal GBU.
 
-The verified infinite-thermal kernel remains single-source in analysis during
-PR310 review. This explicit adapter is not promotion of the legacy MesonDensity
-defaults. All runtime dependencies are snapshotted for reproducibility.
+The verified infinite-thermal kernel remains single-source in the analysis
+modules. This is the charged GBU default route for smoke production. Legacy
+generic MesonDensity compatibility APIs remain available explicitly and are not
+silently rewritten. All runtime dependencies are snapshotted for reproducibility.
 """
 module ChargedGBUResearchWorkflow
 using CSV,JSON3,SHA,TOML,Distributed
@@ -40,11 +41,15 @@ function output_hashes(output)
         if !occursin("source_snapshot",root) && !(f in ("manifest.json","manifest.json.sha256")))
 end
 
+default_figure_output(output)=joinpath(ROOT,"data","outputs","figures","relaxtime","meson_density",
+    "charged_gbu_infinite",basename(normpath(output)))
+
 function validate_config(c)
     for (key,value) in (("schema","charged_gbu_infinite_v1"),("thermal_target","infinity"),
         ("observable","fixed_quark_only_gbu_partial_yield"),("vacuum_regulator","two_line_Lambda"),
         ("background","FixedMuBConservedCharges"),("charge_to_baryon_ratio",0.4),
-        ("strangeness_density_fm3",0.0),("meson_feedback",false),("production_default",false))
+        ("strangeness_density_fm3",0.0),("meson_feedback",false),("production_default",true),
+        ("default_tier","smoke"))
         c[key]==value || throw(ArgumentError("unsupported method contract: $(key)"))
     end
     n=c["numerics"];g=c["gates"]
@@ -182,7 +187,7 @@ function ratio_row(e,pt,results)
     end
     plus,pg=ratio("K_plus","pi_plus");minus,mg=ratio("K_minus","pi_minus")
     return (sqrt_s_NN_GeV=e,T_MeV=pt.T_MeV,muB_MeV=pt.muB_MeV,Kplus_over_pi_plus=plus,
-        Kminus_over_pi_minus=minus,plus_passed=pg,minus_passed=mg,production_default=false)
+        Kminus_over_pi_minus=minus,plus_passed=pg,minus_passed=mg,production_default=true)
 end
 
 function snapshot(output,config)
@@ -207,11 +212,13 @@ end
 Resume requires identical source/config/energy hashes; successful and failed
 channel records are retained, never silently overwritten or reused across methods.
 """
-function run_scan(;output,config=DEFAULT_CONFIG,energies=nothing,resume=false,make_plot=true,workers=3)
+function run_scan(;output,config=DEFAULT_CONFIG,energies=nothing,resume=false,make_plot=true,
+    figure_output=nothing,workers=3)
     workers in 1:4 || throw(ArgumentError("workers must be 1..4"))
     c=validate_config(TOML.parsefile(config))
     es=energy_grid(energies===nothing ? c["energies_GeV"] : energies)
-    output=abspath(output); identity=bytes2hex(sha256(JSON3.write((config=c,energies=es))))
+    output=abspath(output); figure_output=figure_output===nothing ? default_figure_output(output) : abspath(figure_output)
+    identity=bytes2hex(sha256(JSON3.write((config=c,energies=es))))
     statepath=joinpath(output,"run.json")
     if ispath(output)
         resume || error("output exists; explicit --resume required")
@@ -221,7 +228,7 @@ function run_scan(;output,config=DEFAULT_CONFIG,energies=nothing,resume=false,ma
     else
         mkpath(output);hashes=snapshot(output,config)
         writejson(statepath,(identity=identity,config=c,energies_GeV=es,source_hashes=hashes,
-            git_head=readchomp(`git -C $ROOT rev-parse HEAD`),route="charged_gbu_infinite_v1",production_default=false))
+            git_head=readchomp(`git -C $ROOT rev-parse HEAD`),route="charged_gbu_infinite_v1",production_default=true,default_tier="smoke"))
     end
     points=Models.build_freezeout_scan_points(es;profile=Models.load_freezeout_profile(profile=c["freezeout_profile"]),traversal=:sqrts_descending)
     model=Models.create_model(:PNJL);jobs=[];seed=nothing
@@ -273,12 +280,15 @@ function run_scan(;output,config=DEFAULT_CONFIG,energies=nothing,resume=false,ma
     passed=all(r.plus_passed && r.minus_passed for r in ratios)
     record=Dict("status"=>passed ? "complete_research_curve_accepted" : "complete_scan_with_failed_points",
         "point_count"=>length(es),"accepted_ratio_pairs"=>count(r->r.plus_passed && r.minus_passed,ratios),
-        "config_identity"=>identity,"source_hashes"=>hashes,"production_default"=>false,
+        "config_identity"=>identity,"source_hashes"=>hashes,"production_default"=>true,"default_tier"=>"smoke",
         "thermal_target"=>"infinity","meson_feedback"=>false,"q_tail_global_analytic_proof"=>false,
-        "kernel_dependency"=>"single_source_reviewed_analysis_modules_opt_in_adapter")
+        "kernel_dependency"=>"single_source_reviewed_analysis_modules_default_adapter",
+        "figure_output"=>make_plot ? replace(relpath(figure_output,ROOT),'\\'=>'/') : nothing,
+        "figure_manifest"=>make_plot ? replace(relpath(joinpath(figure_output,"plot_manifest.json"),ROOT),'\\'=>'/') : nothing)
     if make_plot
         Base.include(@__MODULE__,joinpath(ROOT,"scripts","relaxtime","workflow","charged_gbu_plot.jl"))
-        Base.invokelatest(() -> render_ratio(ratios,output))
+        Base.invokelatest(() -> render_ratio(ratios,figure_output;result_output=output,
+            git_head=readchomp(`git -C $ROOT rev-parse HEAD`)))
     end
     record["output_hashes"]=output_hashes(output)
     writejson(joinpath(output,"manifest.json"),record)

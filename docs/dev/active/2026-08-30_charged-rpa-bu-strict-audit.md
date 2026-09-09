@@ -2991,3 +2991,19 @@ PR308的822060f5和PR309的658bfaf7仅修复合并历史，文件树分别与此
 PNJLCore、baseline与介子反馈保持不变；模型处方依赖、实验末态产额映射和
 论文图表冻结不能由CI或PR合并自动授权。保留所有分支、其他工作树及诊断目录，
 本轮不做工作树更新或分支删除。
+
+### 22.26 charged GBU smoke production default adoption（2026-09-09）
+
+作者进一步授权：无限热 charged GBU 路线作为 charged 介子密度的 smoke
+production 默认入口。该授权固定 `FixedMuBConservedCharges` quark-only BQS
+背景、`rho_Q/rho_B=0.4`、`rho_S=0`、无介子反馈、现有 charged 通道与
+`production_default=true`、`default_tier="smoke"` 配置；不改变 PNJLCore、旧
+通用 `MesonDensity` 兼容入口或 formal baseline。
+
+`data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/freezeout_20260907_v2/`
+作为 smoke production 展示结果保留。其原始 manifest、CSV、图像和源快照均保持
+字节不变；该运行生成于默认标记切换前，原始 `run.json`/`ratios.csv` 中的
+`production_default=false` 是历史运行身份，不是当前入口配置。采用关系、原始
+manifest SHA 和验证边界见结果目录的 `README.md`。本次只把该 5.5 MB 结果包纳入
+版本控制；约 32 MB 的 phase/routing/finite-q 诊断目录继续作为外部诊断归档，
+不冒充 production result，也不写入 baseline。

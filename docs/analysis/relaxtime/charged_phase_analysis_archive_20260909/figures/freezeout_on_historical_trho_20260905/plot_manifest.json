@@ -1,0 +1,12 @@
+{
+  "schema": "charged_gbu_historical_trho_overlay_figure_payload_v1",
+  "artifact_layer": "docs/analysis",
+  "production_authorized": false,
+  "source_result_path": "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/freezeout_on_historical_trho_20260905",
+  "source_plot_manifest": "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/freezeout_on_historical_trho_20260905/plots/manifest.json",
+  "files": {
+    "historical_all_regimes_with_freezeout.png": "309ddadb64050cca0a7ea6edc3f424de475b8084c8ff6d4c6b1c9b38a23dc26b",
+    "historical_gbu_with_freezeout.png": "df86d0749e936088db1f6f2db0c5d3bf236089367fb24c5f1ad08334a38348b3"
+  },
+  "notes": "Analysis-layer PNG display payload only; the source SVG and source_snapshot remain in the diagnostic archive. Historical background is context-only and unmatched for quantitative validation. This is not a production figure or baseline."
+}
