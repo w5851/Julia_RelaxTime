@@ -18,8 +18,8 @@
 - workflow head：`22874505877491754eed27519ad8a7b871c82571`；
 - 本次仅复制已审核的派生 PNG，内容按字节保持；没有调用 solver，也没有修改 raw result、
   `production_registry.json` 或分析包中的表格/图像；
-- 新增的 `tau_*`、`eta`、`sigma`、`zeta` 图由当前 `prod_v2` raw 值直接绘制；tau-specific 清理配方尚未建立，
-  因而不能将这些图表述为 tau 数值清理或新的收敛证明；字段政策见分析包的 `tables/observable_policy.csv`；
+- 新增的 `tau_*`、`eta`、`sigma`、`zeta` 图与三个比值图共享当前 v2 的 phase-gated 邻点插值后处理；
+  raw 值、clean 值和窗口审计均保留，不能将这些图表述为新的收敛证明；字段政策见分析包的 `tables/observable_policy.csv`；
 - `publication_clean_v1` 仍是 display-only 派生层，`manuscript_eligible=false`，不等同于
   raw production/reference 晋升。
 

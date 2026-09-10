@@ -1,0 +1,11 @@
+window_id,scope,mode_key,plot_panel,plot_series,xi,left_xi,right_xi,diagnostic_observable,cause,source_policy
+mode_b_T200p0_muB450p0_xip0p31_1,thesis/candidate,mode_b,T200.0,muB450.0,0.31,0.30,0.32,tau_dbar,channel-rate spike; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB0p0_alpha1p0_xip0p37_manual,journal/main,mode_a,muB0.0,alpha1.0,0.37,0.36,0.38,tau_dbar,manual review: residual local one-point artifact in muB0 alpha_T=1.0 clean figures,historical_clean_window_revalidated_current_v2
+mode_a_muB450p0_alpha1p0_xip0p26_2,journal/main,mode_a,muB450.0,alpha1.0,0.26,0.25,0.27,tau_ubar,channel-rate spike; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB0p0_alpha1p1_xip0p48_1,journal/main,mode_a,muB0.0,alpha1.1,0.48,0.47,0.49,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB900p0_alpha1p1_xip0p18_1,journal/main,mode_a,muB900.0,alpha1.1,0.18,0.17,0.19,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB450p0_alpha1p1_xip0p35_1,journal/main,mode_a,muB450.0,alpha1.1,0.35,0.34,0.36,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB900p0_alpha1p2_xip0p49_1,journal/main,mode_a,muB900.0,alpha1.2,0.49,0.48,0.50,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB450p0_alpha1p0_xim0p20_1,journal/main,mode_a,muB450.0,alpha1.0,-0.20,-0.21,-0.19,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_b_T200p0_muB0p0_xim0p21_1,thesis/candidate,mode_b,T200.0,muB0.0,-0.21,-0.22,-0.20,tau_dbar,weak/broad variation; small denominator supported,historical_clean_window_revalidated_current_v2
+mode_a_muB0p0_alpha1p2_xim0p47_supplement,supplemental_author_review,mode_a,muB0.0,alpha1.2,-0.47,-0.48,-0.46,tau_s,isolated strange-flavor tau dip with smooth equilibrium background,current_v2_author_reviewed_supplement
