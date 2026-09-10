@@ -65,7 +65,38 @@ CEP_BOUNDARY = (
     / "cep_boundary_strict_reference_v1.csv"
 )
 
-DISPLAY_FIELDS = ["eta_over_s", "zeta_over_s", "sigma_over_T"]
+# The original publication-clean layer exposed only the three dimensionless
+# ratios.  Keep that set as the default for the small unit-test fixtures and
+# for callers that intentionally request the legacy three-observable view;
+# the production build below explicitly renders the complete 12-observable
+# source contract, including the tau and absolute transport quantities.
+CORE_DISPLAY_FIELDS = ["eta_over_s", "zeta_over_s", "sigma_over_T"]
+ADDITIONAL_DISPLAY_FIELDS = [
+    "tau_u",
+    "tau_d",
+    "tau_s",
+    "tau_ubar",
+    "tau_dbar",
+    "tau_sbar",
+    "eta",
+    "sigma",
+    "zeta",
+]
+DISPLAY_FIELDS = [*CORE_DISPLAY_FIELDS, *ADDITIONAL_DISPLAY_FIELDS]
+OBSERVABLE_LABELS = {
+    "eta_over_s": r"$\eta/s$",
+    "zeta_over_s": r"$\zeta/s$",
+    "sigma_over_T": r"$\sigma/T$",
+    "tau_u": r"$\tau_u$",
+    "tau_d": r"$\tau_d$",
+    "tau_s": r"$\tau_s$",
+    "tau_ubar": r"$\tau_{\bar u}$",
+    "tau_dbar": r"$\tau_{\bar d}$",
+    "tau_sbar": r"$\tau_{\bar s}$",
+    "eta": r"$\eta$",
+    "sigma": r"$\sigma$",
+    "zeta": r"$\zeta$",
+}
 # These are explicit author-requested display-layer repairs for the current
 # prod_v2 candidate.  They are deliberately kept outside the historical
 # pole-sensitive recipe so that an audit can distinguish inherited choices
@@ -79,7 +110,7 @@ REVIEW_ADJUSTMENTS = (
         "xi": "-0.10",
         "left_xi": "-0.11",
         "right_xi": "-0.09",
-        "observables": DISPLAY_FIELDS[:2],
+        "observables": CORE_DISPLAY_FIELDS[:2],
         "reason": "author-requested local spike smoothing; current raw point is a small downward residual against adjacent xi samples",
     },
     {
@@ -90,7 +121,7 @@ REVIEW_ADJUSTMENTS = (
         "xi": "0.36",
         "left_xi": "0.35",
         "right_xi": "0.37",
-        "observables": DISPLAY_FIELDS[:2],
+        "observables": CORE_DISPLAY_FIELDS[:2],
         "reason": "author-requested local spike smoothing; current raw point is a small downward residual against adjacent xi samples",
     },
 )
@@ -180,6 +211,26 @@ def parse_finite(row: dict[str, str], field: str) -> float:
     return value
 
 
+def normalize_observables(observables: Iterable[str] | None = None) -> list[str]:
+    """Return an ordered, validated observable selection.
+
+    The default deliberately remains the historical three-ratio view so the
+    unit-test fixtures and any external diagnostic caller that only provides
+    those columns keep their old contract.  The command-line build passes
+    ``DISPLAY_FIELDS`` explicitly to opt into all twelve source observables.
+    """
+
+    selected = list(CORE_DISPLAY_FIELDS if observables is None else observables)
+    if not selected:
+        raise ValueError("observable selection must not be empty")
+    unknown = sorted(set(selected) - set(DISPLAY_FIELDS))
+    if unknown:
+        raise ValueError(f"unknown observables: {unknown}")
+    if len(set(selected)) != len(selected):
+        raise ValueError("observable selection contains duplicates")
+    return selected
+
+
 def canonical_xi(value: str | float) -> str:
     return f"{float(value):.10f}"
 
@@ -207,8 +258,11 @@ def case_paths(mode_key: str) -> dict[str, Path]:
 
 
 def validate_scan(
-    mode_key: str, paths: dict[str, Path]
+    mode_key: str,
+    paths: dict[str, Path],
+    observables: Iterable[str] | None = None,
 ) -> tuple[list[dict[str, str]], dict[tuple[str, str, str], dict[str, str]], dict[tuple[str, str], list[dict[str, str]]], dict[str, Any]]:
+    observables = normalize_observables(observables)
     rows = read_csv(paths["scan"])
     if not rows:
         raise ValueError(f"{mode_key}: empty scan")
@@ -225,7 +279,7 @@ def validate_scan(
         "converged",
         "quality_flag",
         "quality_reason",
-        *DISPLAY_FIELDS,
+        *observables,
     }
     missing = sorted(required - set(rows[0]))
     if missing:
@@ -233,7 +287,7 @@ def validate_scan(
     index: dict[tuple[str, str, str], dict[str, str]] = {}
     curves: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
-        for field in ["T_MeV", "muB_MeV", "xi", *DISPLAY_FIELDS]:
+        for field in ["T_MeV", "muB_MeV", "xi", *observables]:
             parse_finite(row, field)
         if row["converged"].lower() != "true":
             raise ValueError(f"{mode_key}: non-converged scan row {point_key(row)}")
@@ -286,7 +340,10 @@ def validate_scan(
     return rows, index, dict(curves), manifest
 
 
-def load_inputs() -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
+def load_inputs(
+    observables: Iterable[str] | None = None,
+) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    observables = normalize_observables(observables)
     loaded: dict[str, dict[str, Any]] = {}
     inventory: list[dict[str, Any]] = []
     for mode_key in MODE_CONFIG:
@@ -294,7 +351,7 @@ def load_inputs() -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
         for name in ("scan", "diagnostics", "failed", "manifest", "effective_config"):
             if not paths[name].exists():
                 raise FileNotFoundError(f"missing {mode_key} input {paths[name]}")
-        rows, index, curves, manifest = validate_scan(mode_key, paths)
+        rows, index, curves, manifest = validate_scan(mode_key, paths, observables)
         loaded[mode_key] = {
             "paths": paths,
             "rows": rows,
@@ -682,6 +739,7 @@ def interpolate_curve_value(
 def build_publication_marker_map(
     loaded: dict[str, dict[str, Any]],
     specs: Iterable[dict[str, str]] | None = None,
+    observables: Iterable[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Build display-only midpoint markers from confirmed phase-switch brackets.
 
@@ -693,6 +751,7 @@ def build_publication_marker_map(
     ``publication_clean_points.csv`` so no transport value is fabricated as raw
     data.
     """
+    observables = normalize_observables(observables)
     out: list[dict[str, Any]] = []
     for spec in PHASE_SWITCH_MARKERS if specs is None else specs:
         mode_key = spec["mode_key"]
@@ -721,7 +780,7 @@ def build_publication_marker_map(
             right_kind = right["phase_reference_kind"]
             if left_kind == right_kind:
                 raise ValueError(f"phase-label bracket has no label switch: {spec['window_id']}")
-        for observable in DISPLAY_FIELDS:
+        for observable in observables:
             left_value = parse_finite(left, observable)
             right_value = parse_finite(right, observable)
             display_value = (left_value + right_value) / 2.0
@@ -768,8 +827,10 @@ def build_cep_marker_map(
     loaded: dict[str, dict[str, Any]],
     cep_slice_audit: list[dict[str, Any]],
     cep_rows: list[dict[str, str]],
+    observables: Iterable[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Build display-only stars for genuine fixed-slice CEP intersections."""
+    observables = normalize_observables(observables)
     out: list[dict[str, Any]] = []
     for audit in cep_slice_audit:
         if not audit["strict_intersection"]:
@@ -793,7 +854,7 @@ def build_cep_marker_map(
                 matches.append(row)
         for row in matches:
             xi = float(row["xi"])
-            for observable in DISPLAY_FIELDS:
+            for observable in observables:
                 out.append(
                     {
                         "window_id": (
@@ -898,7 +959,9 @@ def build_clean_points(
     loaded: dict[str, dict[str, Any]],
     replacements: list[dict[str, Any]],
     markers: list[dict[str, Any]],
+    observables: Iterable[str] | None = None,
 ) -> list[dict[str, Any]]:
+    observables = normalize_observables(observables)
     replacement_index = {
         (row["mode_key"], row["plot_panel"], row["plot_series"], row["xi"], row["observable"]): row
         for row in replacements
@@ -911,7 +974,7 @@ def build_clean_points(
     out: list[dict[str, Any]] = []
     for mode_key, payload in loaded.items():
         for row in payload["rows"]:
-            for observable in DISPLAY_FIELDS:
+            for observable in observables:
                 xi = canonical_xi(row["xi"])
                 replacement = replacement_index.get(
                     (mode_key, row["plot_panel"], row["plot_series"], xi, observable)
@@ -992,6 +1055,7 @@ def render_figures(
     points: list[dict[str, Any]],
     cep_markers: list[dict[str, Any]] | None = None,
     publication_markers: list[dict[str, Any]] | None = None,
+    observables: Iterable[str] | None = None,
 ) -> list[Path]:
     try:
         import matplotlib
@@ -1001,8 +1065,9 @@ def render_figures(
     except ImportError as exc:  # pragma: no cover - exercised only in plot environments
         raise RuntimeError("matplotlib is required to render publication-clean figures") from exc
 
+    observables = normalize_observables(observables)
     colors = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE"]
-    labels = {"eta_over_s": r"$\eta/s$", "zeta_over_s": r"$\zeta/s$", "sigma_over_T": r"$\sigma/T$"}
+    labels = OBSERVABLE_LABELS
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in points:
         grouped[(row["mode_key"], row["plot_panel"], row["plot_series"])].append(row)
@@ -1013,7 +1078,7 @@ def render_figures(
         panels = sorted({key[1] for key in grouped if key[0] == mode_key})
         for panel in panels:
             series_names = sorted({key[2] for key in grouped if key[:2] == (mode_key, panel)})
-            for observable in DISPLAY_FIELDS:
+            for observable in observables:
                 fig, ax = plt.subplots(figsize=(6.75, 4.6))
                 marker_present = False
                 publication_marker_present = False
@@ -1122,12 +1187,61 @@ def render_figures(
     return paths
 
 
+def build_observable_policy(
+    observables: Iterable[str],
+    points: list[dict[str, Any]],
+    replacements: list[dict[str, Any]],
+    publication_markers: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Summarize the display contract for every rendered observable."""
+
+    observables = normalize_observables(observables)
+    point_rows = defaultdict(list)
+    for row in points:
+        point_rows[row["observable"]].append(row)
+    replacement_rows = defaultdict(list)
+    for row in replacements:
+        replacement_rows[row["observable"]].append(row)
+    marker_rows = defaultdict(list)
+    for row in publication_markers:
+        marker_rows[row["observable"]].append(row)
+    out = []
+    for observable in observables:
+        is_core = observable in CORE_DISPLAY_FIELDS
+        out.append(
+            {
+                "observable": observable,
+                "group": "core_ratio" if is_core else "additional_absolute_or_tau",
+                "display_label": OBSERVABLE_LABELS[observable],
+                "point_count": len(point_rows[observable]),
+                "replacement_count": len(replacement_rows[observable]),
+                "publication_marker_count": len(marker_rows[observable]),
+                "raw_value_preserved": True,
+                "tau_specific_recipe": False if observable.startswith("tau_") else "not_applicable",
+                "solver_called": False,
+                "review_status": (
+                    "inherited_ratio_recipe_and_author_review_candidates"
+                    if is_core
+                    else "raw_current_v2_display_only; tau_specific_cleaning_not_established"
+                ),
+                "scope_note": (
+                    "Existing ratio replacement recipes remain display-only; raw_value is retained."
+                    if is_core
+                    else "No v2 tau/absolute-value smoothing recipe was imported from historical v1 rules."
+                ),
+            }
+        )
+    return out
+
+
 def claim_ledger(
     inherited_replacements: list[dict[str, Any]],
     review_adjustments: list[dict[str, Any]],
     markers: list[dict[str, Any]],
     publication_markers: list[dict[str, Any]],
+    observables: Iterable[str] | None = None,
 ) -> list[dict[str, Any]]:
+    observables = normalize_observables(observables)
     midpoint_count = sum(
         row["marker_status"] == "confirmed_interval_midpoint"
         for row in publication_markers
@@ -1189,11 +1303,22 @@ def claim_ledger(
             "evidence": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_summary.csv; tables/denominator_chain_summary.csv; tables/downstream_transport_response_summary.csv",
             "scope_limit": "机制证据是定点分解/复现支持，不把它升级为新的 solver 收敛或论文定稿结论。",
         },
+        {
+            "claim_id": "PC-V1-009",
+            "status": "supported_with_scope_limit",
+            "claim_zh": (
+                f"本轮 publication-clean 管线补齐了 {len(observables)} 个 source observables；"
+                f"其中新增 {len([field for field in observables if field not in CORE_DISPLAY_FIELDS])} 个 tau/绝对输运量字段按当前 prod_v2 raw 值绘图。"
+            ),
+            "evidence": "tables/observable_policy.csv; tables/publication_clean_points.csv; figures/plot_manifest.json",
+            "scope_limit": "新增 tau/绝对输运量字段没有迁移旧 v1 tau 删除规则，也不声称 tau-specific smoothing、数值重算或 manuscript eligibility。",
+        },
     ]
 
 
 def render_readme(
     inventory: list[dict[str, Any]],
+    observables: Iterable[str],
     inherited_replacements: list[dict[str, Any]],
     review_adjustments: list[dict[str, Any]],
     markers: list[dict[str, Any]],
@@ -1202,7 +1327,10 @@ def render_readme(
     cep_markers: list[dict[str, Any]],
     publication_markers: list[dict[str, Any]],
     figure_paths: list[Path],
+    curve_count: int,
 ) -> str:
+    observables = normalize_observables(observables)
+    additional_observables = [field for field in observables if field not in CORE_DISPLAY_FIELDS]
     inventory_lines = "\n".join(
         f"| {row['mode_key']} | {row['scan_rows']} | {row['diagnostic_rows']} | `{row['scan_sha256']}` | `{row['diagnostics_sha256']}` |"
         for row in inventory
@@ -1227,10 +1355,12 @@ def render_readme(
 - source solver：已调用；本次派生：`solver_called=false`
 - marker contract：`confirmed_interval_midpoint_v1`（严格 CEP/相标签切换区间的中点 display proxy）
 - 旧显示配方：`{relpath(REPLACEMENT_RECIPE)}`（SHA 记录于 manifest）
-- 本包生成图：{len(figure_paths)} 张 PNG，见 `figures/plot_manifest.json`
+- 本包生成图：{len(figure_paths)} 张 PNG（6 个 panel × {len(observables)} 个 observable），见 `figures/plot_manifest.json`
+- observable 合同：核心比值 `{", ".join(CORE_DISPLAY_FIELDS)}`；新增字段 `{", ".join(additional_observables)}`。
+- 新增 tau/绝对输运量默认保留当前 v2 raw 值；未静默迁移旧 v1 tau 删除规则，具体政策见 `tables/observable_policy.csv`。
 - 历史 marker：{len(markers)} 条审计记录，其中 {len(rendered_markers)} 条历史 raw marker 实际渲染；T=120、μB=900 的 3 条历史星标被抑制。
 - CEP-slice 审计：{len(cep_slice_audit)} 个固定切片，严格固定切片交点星标为 {len(cep_markers)} 条。
-- 论文显示 marker：{len(publication_markers)} 条（3 个 observable × 2 个已确认区间），均为区间中点的 display-only proxy。
+- 论文显示 marker：{len(publication_markers)} 条（{len(observables)} 个 observable × 2 个已确认区间），均为区间中点的 display-only proxy。
 
 ## 派生规则
 
@@ -1242,6 +1372,7 @@ def render_readme(
 6. 历史配方中 T=120 MeV、μB=900 MeV、ξ=−0.09 的星标只作为审计输入，不进入 publication-clean 图；图上改为显示作者确认的 `phase_reference_kind: crossover → first_order` 最小切换区间 `ξ∈[−0.14,−0.13]` 的中点 `ξ=−0.135`。严格 CEP 表仍作为独立坐标审计，区间中点是论文显示 proxy，不宣称零宽度精确 CEP 坐标。
 7. `publication_marker_map.csv` 保存两个已确认区间的左右端点 phase label、质量标志和 observable 值；`ξ=0` 与 `ξ=−0.135` 的星标都不进入 `publication_clean_points.csv`。
 8. mode-A μB=450 MeV、αT=1.0、ξ=−0.20 的非一阶斜率变化与既有 `simple_1m4KΠ` 小分母机制窗口一致；这属于机制归因证据，不是新的相变标签。
+9. 新增 tau/绝对输运量只经过有限性检查和 solver-free rendering；没有建立 v2 tau-specific smoothing recipe，因此局部尖点仍是 raw evidence，不能写成已清理或已数值收敛。
 
 ## 结果文件
 
@@ -1253,10 +1384,11 @@ def render_readme(
 - `tables/cep_marker_audit.csv`：固定输运切片与 strict CEP 表的坐标配对；严格交点与论文区间中点是分开的语义。
 - `tables/cep_marker_map.csv`：仅在存在 strict 固定切片交点时生成的 CEP 星标及其显示值；当前为空。
 - `tables/publication_marker_map.csv`：两个作者确认的最小相标签切换区间中点 marker，包含左右端点 provenance 和 display 值。
-- `tables/publication_clean_points.csv`：三种论文展示 observable 的长表，含 raw/clean/status。
-- `tables/curve_index.csv`：18 条 panel/series/observable 曲线的覆盖和替换计数。
+- `tables/observable_policy.csv`：每个 observable 的字段分组、替换计数、marker 计数和 tau-specific 清理边界。
+- `tables/publication_clean_points.csv`：{len(observables)} 种论文展示 observable 的长表，含 raw/clean/status。
+- `tables/curve_index.csv`：{curve_count} 条 panel/series/observable 曲线的覆盖和替换计数。
 - `tables/claim_ledger.csv`：证据强度、范围限制和未声明事项。
-- `figures/plot_manifest.json` 与 `figures/**.png`：同构的 18 张显示候选图，未声明为 manuscript-ready。
+- `figures/plot_manifest.json` 与 `figures/**.png`：同构的 {len(figure_paths)} 张显示候选图，未声明为 manuscript-ready。
 
 ## 复现
 
@@ -1270,7 +1402,8 @@ python -m pytest tests/unit/python/test_phase_guided_publication_clean_v1.py
 
 
 def main() -> None:
-    loaded, inventory = load_inputs()
+    observables = list(DISPLAY_FIELDS)
+    loaded, inventory = load_inputs(observables)
     replacement_recipe, marker_recipe = load_recipe()
     cep_rows = load_cep_boundary()
     inherited_replacements = build_replacement_map(loaded, replacement_recipe)
@@ -1278,13 +1411,16 @@ def main() -> None:
     replacements = [*inherited_replacements, *review_adjustments]
     markers = build_marker_map(loaded, marker_recipe)
     cep_slice_audit = build_cep_slice_audit(loaded, markers, cep_rows)
-    cep_markers = build_cep_marker_map(loaded, cep_slice_audit, cep_rows)
-    publication_markers = build_publication_marker_map(loaded)
+    cep_markers = build_cep_marker_map(loaded, cep_slice_audit, cep_rows, observables)
+    publication_markers = build_publication_marker_map(loaded, observables=observables)
     marker_semantics = build_marker_semantics_audit(loaded, markers, cep_slice_audit)
     rendered_markers = [row for row in markers if row.get("render_marker", True)]
-    points = build_clean_points(loaded, replacements, rendered_markers)
+    points = build_clean_points(loaded, replacements, rendered_markers, observables)
     curves = build_curve_index(points)
-    figure_paths = render_figures(points, cep_markers, publication_markers)
+    figure_paths = render_figures(points, cep_markers, publication_markers, observables)
+    observable_policy = build_observable_policy(
+        observables, points, replacements, publication_markers
+    )
 
     input_fields = [
         "mode_key", "mode", "scan_rows", "diagnostic_rows", "failed_rows", "xi_count",
@@ -1332,6 +1468,12 @@ def main() -> None:
         "display_value", "reason", "render_marker", "canonical_data_modified",
     ]
     write_csv(TABLE_DIR / "publication_marker_map.csv", publication_markers, publication_marker_fields)
+    observable_policy_fields = [
+        "observable", "group", "display_label", "point_count", "replacement_count",
+        "publication_marker_count", "raw_value_preserved", "tau_specific_recipe",
+        "solver_called", "review_status", "scope_note",
+    ]
+    write_csv(TABLE_DIR / "observable_policy.csv", observable_policy, observable_policy_fields)
     point_fields = [
         "mode_key", "mode", "plot_panel", "plot_series", "plot_series_label", "T_MeV", "muB_MeV", "xi",
         "observable", "raw_value", "clean_value", "display_status", "value_source", "phase_structure",
@@ -1345,7 +1487,13 @@ def main() -> None:
     write_csv(TABLE_DIR / "curve_index.csv", curves, curve_fields)
     write_csv(
         TABLE_DIR / "claim_ledger.csv",
-        claim_ledger(inherited_replacements, review_adjustments, markers, publication_markers),
+        claim_ledger(
+            inherited_replacements,
+            review_adjustments,
+            markers,
+            publication_markers,
+            observables,
+        ),
         ["claim_id", "status", "claim_zh", "evidence", "scope_limit"],
     )
 
@@ -1358,7 +1506,13 @@ def main() -> None:
         "base_git_commit": git_head(),
         "generator": relpath(generator_path),
         "generator_sha256": sha256_file(generator_path),
-        "observables": DISPLAY_FIELDS,
+        "observables": observables,
+        "observable_groups": {
+            "core_ratio": CORE_DISPLAY_FIELDS,
+            "additional_absolute_or_tau": [
+                field for field in observables if field not in CORE_DISPLAY_FIELDS
+            ],
+        },
         "replacement_count": len(replacements),
         "inherited_replacement_count": len(inherited_replacements),
         "review_adjustment_count": len(review_adjustments),
@@ -1372,7 +1526,7 @@ def main() -> None:
         "phase_switch_midpoint_count": len(publication_markers),
         "manuscript_eligible": False,
         "canonical_data_modified": False,
-        "rendering_semantics": "current prod_v2 raw curves with inherited and author-requested adjacent-neighbour display replacements; historical markers suppressed from rendering; confirmed CEP/phase-switch interval midpoints rendered as display-only stars; exact strict fixed-slice intersections remain separately audited; no raw mutation",
+        "rendering_semantics": "current prod_v2 raw curves with inherited and author-requested adjacent-neighbour display replacements for core ratios; tau and absolute observables retain current prod_v2 raw display values; historical markers suppressed from rendering; confirmed CEP/phase-switch interval midpoints rendered as display-only stars; exact strict fixed-slice intersections remain separately audited; no raw mutation",
         "figures": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
             for path in figure_paths
@@ -1384,6 +1538,7 @@ def main() -> None:
     readme_path.write_text(
         render_readme(
             inventory,
+            observables,
             inherited_replacements,
             review_adjustments,
             markers,
@@ -1392,6 +1547,7 @@ def main() -> None:
             cep_markers,
             publication_markers,
             figure_paths,
+            len(curves),
         ),
         encoding="utf-8",
     )
@@ -1443,6 +1599,7 @@ def main() -> None:
             "cep_marker_render_rows": len(cep_markers),
             "publication_marker_render_rows": len(publication_markers),
             "phase_switch_midpoint_rows": len(publication_markers),
+            "observable_policy_rows": len(observable_policy),
             "marker_semantics_audit_rows": len(marker_semantics),
             "publication_clean_point_rows": len(points),
             "curve_rows": len(curves),
@@ -1454,6 +1611,7 @@ def main() -> None:
             "T=200 mode-B xi=-0.10 (muB=900) and xi=0.36 (muB=0) have author-requested display-only smoothing candidates",
             "T=120 mode-B muB=900 xi=-0.09 historical first-order marker is suppressed; publication uses the author-confirmed phase-label-switch interval midpoint",
             "mode_a muB=450 alpha_T=1.0 xi=-0.20 retains the raw non-first-order slope change; prior mechanism evidence is simple_1m4KPi",
+            "tau and absolute transport observables are rendered from current prod_v2 raw values; no historical v1 tau deletion recipe is silently applied",
             "derived display values are not solver recomputations or numerical convergence evidence",
             "old prod_v1 and phase-reference legacy fallback are retained; retirement is a separate audit",
         ],

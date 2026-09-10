@@ -31,6 +31,15 @@ def _row(*, panel: str = "muB450.0", series: str = "alpha1.0", xi: str = "0.0", 
         "eta_over_s": value,
         "zeta_over_s": str(float(value) + 1.0),
         "sigma_over_T": str(float(value) + 2.0),
+        "tau_u": str(float(value) + 3.0),
+        "tau_d": str(float(value) + 4.0),
+        "tau_s": str(float(value) + 5.0),
+        "tau_ubar": str(float(value) + 6.0),
+        "tau_dbar": str(float(value) + 7.0),
+        "tau_sbar": str(float(value) + 8.0),
+        "eta": str(float(value) + 9.0),
+        "sigma": str(float(value) + 10.0),
+        "zeta": str(float(value) + 11.0),
         "run_id": "fixture",
     }
 
@@ -366,3 +375,13 @@ def test_curve_index_counts_derived_rows() -> None:
         "point_count": 4, "replacement_count": 2, "marker_count": 1, "xi_min": 0.0, "xi_max": 0.2,
         "canonical_data_modified": False,
     }]
+
+
+def test_explicit_full_observable_selection_keeps_tau_and_absolute_fields() -> None:
+    row = _row(xi="0.0", value="1.0")
+    loaded = _loaded([row])
+    points = MODULE.build_clean_points(loaded, [], [], MODULE.DISPLAY_FIELDS)
+    assert len(points) == len(MODULE.DISPLAY_FIELDS)
+    assert {item["observable"] for item in points} == set(MODULE.DISPLAY_FIELDS)
+    assert all(item["display_status"] == "raw" for item in points)
+    assert all(item["clean_value"] == item["raw_value"] for item in points)

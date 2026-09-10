@@ -6,22 +6,24 @@
   "solver_called": false,
   "source_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1",
   "source_plot_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/plot_manifest.json",
-  "source_plot_manifest_sha256": "4363951e16b9458442c8c59c87b36cae6c1998a0ffd040c8945c3f471ac5890d",
+  "source_plot_manifest_sha256": "8acd826b7d163512c5b99161b9ad4eaeb774c05c3c3b674ac69c9d1db65d5206",
   "target_plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/plot_manifest.json",
-  "target_plot_manifest_sha256": "7230264973d60ad82ddecbd3555de8fea137ae36ecf7ff2e5f88e10fc02a5b74",
+  "target_plot_manifest_sha256": "5745d094a61159b6d9abe82f2abfcfd63aa226df69bce4161f0ca025e844a664",
+  "sync_generator": "scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer.py",
+  "sync_generator_sha256": "9af7a31584621528b5df4cd092f399f127e8646669bdffc9fb6316c34bbd6d9a",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
   "source_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
   "mode_counts": {
-    "mode_a": 9,
-    "mode_b": 9
+    "mode_a": 36,
+    "mode_b": 36
   },
-  "figure_count": 18,
+  "figure_count": 72,
   "content_policy": "byte_preserve",
   "source_package_unchanged": true,
   "raw_results_unchanged": true,
   "production_registry_unchanged": true,
-  "generated_at_utc": "2026-09-01T03:12:29.382130+00:00",
+  "generated_at_utc": "2026-09-10T05:46:22.281207+00:00",
   "assets": [
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.png",
@@ -29,14 +31,59 @@
       "sha256": "b0a666ef3a0266254ada9291ef2149b5bc5c3cecf03e40f5d76c4fc24ac73c80"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
+      "bytes": 241171,
+      "sha256": "58c4b7a62ab9323858e4933c540b71bd25a3f6bedefe9dfb3f408b789db9cc0c"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
       "bytes": 339044,
       "sha256": "7b80a604b07cdd91189282e247aa69672a2e5b9326a90394b15907f697d9f16b"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
-      "bytes": 241171,
-      "sha256": "58c4b7a62ab9323858e4933c540b71bd25a3f6bedefe9dfb3f408b789db9cc0c"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi.png",
+      "bytes": 235955,
+      "sha256": "25aaba570d8f2951bf7aa22bb5391c69d00871daf68fb63f7914c9a6552e4730"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi.png",
+      "bytes": 236474,
+      "sha256": "d0589bd319d5a6df3e5bc3c816f2f0b9b0fbe6eeed0983a36c3377993638848b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi.png",
+      "bytes": 230611,
+      "sha256": "02a76b4d1aef53fc218e6b39227e82d0d541b8c6445333e01ac937f8038d3b2b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi.png",
+      "bytes": 235985,
+      "sha256": "51b17aeca81a8b6800b09af27ed5b2aca91e69da3ca42d07ad719e84ad0c3dd1"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi.png",
+      "bytes": 236517,
+      "sha256": "4d2da0dc3195be8932b55d375b21214fcaa132b42e855c24a99eb2abacfcf9ee"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi.png",
+      "bytes": 230660,
+      "sha256": "f97bd5200b1a48711404c0ba743f49d0c98f6697e585c0f072a30f1715847c63"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi.png",
+      "bytes": 301799,
+      "sha256": "79312993a54ccfc7987be14d29b35cb364e297743f906385dde05a28f9777404"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.png",
+      "bytes": 354231,
+      "sha256": "d119e345882177e7fa45af67c78d339f481e1344cca53f1ae4990cae8fe628d8"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi.png",
+      "bytes": 265744,
+      "sha256": "521c0c0f42d12ab51f7423a8f9998d07c3d11e29dec883035270860bc416b707"
     },
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi.png",
@@ -44,14 +91,59 @@
       "sha256": "12084b8903b474ae04ec5892c5edaec5a08f75373b54d89608c616d9598517e2"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
+      "bytes": 244633,
+      "sha256": "f1c1e9e1cb582f4c7b9a4200c20ad812996d0f2df7693868e372fbcb4e8c2958"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
       "bytes": 358257,
       "sha256": "23abfd16476b98bd34bf16f8e030ebf8530e83266bf5248ceaf23d527881127c"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
-      "bytes": 244633,
-      "sha256": "f1c1e9e1cb582f4c7b9a4200c20ad812996d0f2df7693868e372fbcb4e8c2958"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi.png",
+      "bytes": 242298,
+      "sha256": "ef676e1848bfa9c24e722db4d41f3b24b2dc67452bf5c1f9c0f08ae60d68899f"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.png",
+      "bytes": 242677,
+      "sha256": "8708525f31a51f57a0817ea260be5097b29e9004f4765135e42d6e0784db9cfb"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi.png",
+      "bytes": 215648,
+      "sha256": "a637ed6eac35e4bd44d54533cafa4b2b5a3b12f279699db27a48fcfb528196bb"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi.png",
+      "bytes": 232560,
+      "sha256": "22d898b8798545f3b6417b82494c31e09594aca6274a0f7b42f939eabbf35d0a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi.png",
+      "bytes": 233092,
+      "sha256": "93e9685afd083b635aa29ff6da9ebf8c80bc38fe88210fff00b5aa7e41cbaffe"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi.png",
+      "bytes": 232361,
+      "sha256": "5254f23271f8005a85319a554e0fdf16802619e588092fa2aa73b8de076a01d4"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi.png",
+      "bytes": 311593,
+      "sha256": "d69ebd2d49a5aebd73ade325f812fbfb393085c4dc8f6ff3ceb721375f75438e"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi.png",
+      "bytes": 375997,
+      "sha256": "52e82f3db1fd4e9cbca4cabde6193e4fab82e5fbe20fdd12c4f7e25c836edf9a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi.png",
+      "bytes": 277470,
+      "sha256": "99f3a13394549bde417684f9effbac3637f6d51242ad02d47ee48d939b249da3"
     },
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.png",
@@ -59,14 +151,59 @@
       "sha256": "b15aa8bc039f38f3c077bd2a2a422c8ca3e16ac6e1b2b151815aa2bcb936c64a"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "bytes": 252105,
+      "sha256": "cae21202e3abaaed0531c152c62a349f8469fb940f2774f385f28e4ce69509bf"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
       "bytes": 348277,
       "sha256": "6759d5fc4d9b2196ebce394338558a501525b9c005e29845d00d5a10f1695bfb"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
-      "bytes": 252105,
-      "sha256": "cae21202e3abaaed0531c152c62a349f8469fb940f2774f385f28e4ce69509bf"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+      "bytes": 241865,
+      "sha256": "6242d3d3e6a7b4df39a9def5e20371deafb3e231863382cae54c463a7ae024b5"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi.png",
+      "bytes": 242368,
+      "sha256": "e4bd88612d53b4cf6431d8d8c1e54ce5bcae3c3072bdadf5a8ad786882e44f41"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi.png",
+      "bytes": 238377,
+      "sha256": "a94e4fa1a19f6d93a259fab87c76c0f49fea65e87a9c67e704109c648b1a6fba"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi.png",
+      "bytes": 234686,
+      "sha256": "fe48e1aaf229448c07f98846755c59c4ed466283fd5cbd64aebd362ba753060b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi.png",
+      "bytes": 235185,
+      "sha256": "a0da9c11e274bdc22867e28412f8f2a3fc8e47e90698457eb986c03add90b71c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi.png",
+      "bytes": 239267,
+      "sha256": "e7f9bb072f6bc26eb3dab669cd319d77505add4fe628c2ae439ee84a369b47c4"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi.png",
+      "bytes": 335565,
+      "sha256": "17bfece1b4ea86afa66593166da425962b4088dd8346f61bad7405083a4f2f7a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi.png",
+      "bytes": 372177,
+      "sha256": "256fbb5c2b94f2ee1bd00574804252a3825f6fd2bbbb844c339868277bc86ad1"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi.png",
+      "bytes": 371519,
+      "sha256": "ad817710e4f64c01543f9ae81cdf8387ee8ec01ba3c42486a195ad0d28fc0669"
     },
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.png",
@@ -74,14 +211,59 @@
       "sha256": "c84b61253d5183c972c5a8bed6de88f1230f60dc3b3e828a2df7f0612ccb3dce"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.png",
+      "bytes": 224335,
+      "sha256": "f786a146a32d42cf2f34bfedf7b8957279cfb8ec556142ab3be9827a270151f7"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi.png",
       "bytes": 232208,
       "sha256": "4bcd955fea17ba844031e940bcfa785cf09cc0290d38d3372781961edd9dfee8"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.png",
-      "bytes": 224335,
-      "sha256": "f786a146a32d42cf2f34bfedf7b8957279cfb8ec556142ab3be9827a270151f7"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+      "bytes": 245982,
+      "sha256": "ee7c1bc9982a30d477b766fefc8e003af79d8eb76fbebd311637688774b502d0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi.png",
+      "bytes": 246552,
+      "sha256": "ac76c856ad4585d88986cd172e63b1f6f2e454f58fc9b5abd3439debb81db7f6"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi.png",
+      "bytes": 242476,
+      "sha256": "a5e5955b71ad62c4319dbf57f2624b6ee0ab6a5c3618851e7d52a44f04ff889c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.png",
+      "bytes": 233061,
+      "sha256": "d2ff90fe14d7a677850158c950b219b9bd4b6518d22c9696ec085b7744228a4c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi.png",
+      "bytes": 233663,
+      "sha256": "49da1736721d56566ffb9523ba5566af052584c64f73f5c22a090bfd061d2c89"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi.png",
+      "bytes": 242083,
+      "sha256": "fb773f277e7ce043f600745f9ad481bcb2d31b211af7b55ba6af89a6eef3bc88"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi.png",
+      "bytes": 256825,
+      "sha256": "d15fb3ea39e028a26c3e3576b9b472118112d6940378137dd056b9774fb9f4d3"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi.png",
+      "bytes": 242896,
+      "sha256": "7a3d3e570b79f0b151d332a91f92e77be9e725f62dcac57514bf9de5df7276ac"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi.png",
+      "bytes": 350374,
+      "sha256": "9863fa9d566626b1d2224357a3e91c529d3c0dcdea91f1b651993738dde0b338"
     },
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi.png",
@@ -89,14 +271,59 @@
       "sha256": "dd1451e3c95e0598d55cd5c261d0792a674331b25c27c118673ab4409b8e7c95"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+      "bytes": 202173,
+      "sha256": "848d31224d33b75cbac9238246bdfe0dd75d9d03d97dfe67aa7ae25cb2f7a56e"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi.png",
       "bytes": 233998,
       "sha256": "4343fb0e6a591c83ab154c25cfc250a4303c2a1a3d5b25cc4dc83fe71af29d08"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
-      "bytes": 202173,
-      "sha256": "848d31224d33b75cbac9238246bdfe0dd75d9d03d97dfe67aa7ae25cb2f7a56e"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi.png",
+      "bytes": 210266,
+      "sha256": "56697007973a78777d0ec0a559601f38891bc37878a5af9d07a3bce66147f51e"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi.png",
+      "bytes": 210823,
+      "sha256": "439dfd76462b5472627bae8b42c9fca5c5404723f7a244a2841d97e401e6d704"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi.png",
+      "bytes": 214621,
+      "sha256": "c6431a2e7c63f6793751967e4dcaf4a924a272bd37fe97d01087255e1c639101"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.png",
+      "bytes": 198339,
+      "sha256": "8a1b9a86e370431af2b525345322cc1c4201c0086381f28c60ce80d9d004822d"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi.png",
+      "bytes": 198939,
+      "sha256": "becce161313146dfbf3030de1ff207b9352c959e9c4ae0e06247ffa8f5cd65a0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi.png",
+      "bytes": 208979,
+      "sha256": "5703a2a5813485600c6d3feb79256617ee0ca577a03917d8063dfe1d1cdd7f9b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi.png",
+      "bytes": 227202,
+      "sha256": "a6fbc64fda8476202ccad4f54677a8328afe3420da3aedc590fc5516f56ee678"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi.png",
+      "bytes": 220201,
+      "sha256": "4a4db4d55afc897cb66885b507ff199723ecd5375ae470c0e5ca6290fe235ae9"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi.png",
+      "bytes": 272117,
+      "sha256": "37130e4990c50f98e926d751478fd823f4e4f54021628662797b56ee226942b6"
     },
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi.png",
@@ -104,14 +331,59 @@
       "sha256": "9b373b63d0b32edfbf28d0b2a2983e3e1362a3a5f9eac828fbd6cebd7cfa0b24"
     },
     {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.png",
+      "bytes": 273163,
+      "sha256": "b5aea3ffa781cdc92fcf9ee1490fb93f33d8324932b7150d20c02611cdb39b63"
+    },
+    {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
       "bytes": 236796,
       "sha256": "f6d7041d067468879e215df81199d3ee3967e7653750c7c4474b681cd2524e0d"
     },
     {
-      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.png",
-      "bytes": 273163,
-      "sha256": "b5aea3ffa781cdc92fcf9ee1490fb93f33d8324932b7150d20c02611cdb39b63"
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi.png",
+      "bytes": 226385,
+      "sha256": "7f4cd228055c7ae0cad33ecea26732ab412963015f44d5da4283d22b84841d97"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi.png",
+      "bytes": 226873,
+      "sha256": "df1b2c9191677cff2c240af70fecb210d2036f7fcbefd053c0e0fdac50faec23"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi.png",
+      "bytes": 234980,
+      "sha256": "7fc81f5ec0bea7f644691e5c685620a776380fb935b304a8b0e14a236487c03a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi.png",
+      "bytes": 197795,
+      "sha256": "a362926cc81adc494ab9dfbfcb4b2df3a7f253335a0578b912ea5838d195b9e7"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi.png",
+      "bytes": 198386,
+      "sha256": "8bf832cc131f6abe11bded6e4a13a068abb2391e0980e1eec096c18fdc4cfe88"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi.png",
+      "bytes": 214407,
+      "sha256": "29e5b5c956c797079bff1fb6273f5bf886af21935d5c3f809a9e1d96a19e6fc4"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi.png",
+      "bytes": 217963,
+      "sha256": "3ee290f107b239a660a34efb10277a5ac771af8532dc48f19ff22eb31c7fc9e9"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi.png",
+      "bytes": 242757,
+      "sha256": "e7d1cc00b10177d5165af4ee7654d59c0a49d2174bf9edbf3c4944ccbeba351a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi.png",
+      "bytes": 265088,
+      "sha256": "ab1728ef52a40c02d45051f406464f06acecab50a1ae3526c47d534bb82fbabd"
     }
   ]
 }
