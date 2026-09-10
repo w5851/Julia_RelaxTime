@@ -1,7 +1,7 @@
 {
   "schema": "phase_guided_transport_publication_clean_figure_layer_manifest_v1",
   "figure_layer_role": "publication_clean_display_mirror",
-  "status": "derived_author_review_required",
+  "status": "derived_author_accepted_display_only",
   "manuscript_eligible": false,
   "solver_called": false,
   "source_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1",
@@ -10,7 +10,7 @@
   "target_plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/plot_manifest.json",
   "target_plot_manifest_sha256": "9f41a141c4ec12c7741e8468584872dcb18f316e7352f6065730bc0a55661c75",
   "sync_generator": "scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer.py",
-  "sync_generator_sha256": "bfbd098ccb11bd4f20959478f50bb61e9927832269597165cbb8d6e87ba17d33",
+  "sync_generator_sha256": "9af7a31584621528b5df4cd092f399f127e8646669bdffc9fb6316c34bbd6d9a",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
   "source_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
@@ -23,7 +23,7 @@
   "source_package_unchanged": true,
   "raw_results_unchanged": true,
   "production_registry_unchanged": true,
-  "generated_at_utc": "2026-09-10T06:46:42.623849+00:00",
+  "generated_at_utc": "2026-09-10T06:59:36.701982+00:00",
   "assets": [
     {
       "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.png",

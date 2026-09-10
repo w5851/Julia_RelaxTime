@@ -177,7 +177,7 @@ def build_figure_layer_manifest(
     return {
         "schema": "phase_guided_transport_publication_clean_figure_layer_manifest_v1",
         "figure_layer_role": "publication_clean_display_mirror",
-        "status": "derived_author_review_required",
+        "status": "derived_author_accepted_display_only",
         "manuscript_eligible": False,
         "solver_called": False,
         "source_analysis_package": relpath(ANALYSIS_ROOT),
