@@ -120,7 +120,19 @@ def sync_figures(analysis_manifest: dict[str, Any]) -> list[dict[str, Any]]:
         target_hash = sha256_file(target)
         if target_hash != source_hash:
             raise ValueError(f"byte-preserving copy failed: {target}")
-        assets.append({"path": relpath(target), "bytes": target.stat().st_size, "sha256": target_hash})
+        mirrored = {
+            key: value
+            for key, value in asset.items()
+            if key not in {"path", "bytes", "sha256"}
+        }
+        assets.append(
+            {
+                **mirrored,
+                "path": relpath(target),
+                "bytes": target.stat().st_size,
+                "sha256": target_hash,
+            }
+        )
 
     existing_pngs = {path.resolve() for path in PUBLIC_ROOT.rglob("*.png") if path.is_file()}
     stale = sorted(existing_pngs - expected_public_paths)
@@ -172,6 +184,10 @@ def main() -> None:
         "calculation_sha": package_manifest["calculation_sha"],
         "workflow_head_sha": package_manifest["workflow_head_sha"],
         "source_case": package_manifest["source_case"],
+        "axis_scale_policy": analysis_manifest.get("axis_scale_policy"),
+        "log_y_dynamic_range_threshold": analysis_manifest.get("log_y_dynamic_range_threshold"),
+        "axis_scale_counts": analysis_manifest.get("axis_scale_counts", {}),
+        "legend_format_policy": analysis_manifest.get("legend_format_policy"),
         "mode_counts": mode_counts,
         "figure_count": len(assets),
         "content_policy": "byte_preserve",

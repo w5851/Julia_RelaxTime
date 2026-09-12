@@ -96,3 +96,38 @@ def test_phase_switch_inventory_distinguishes_crossover_bookkeeping() -> None:
     assert len(inventory) == 1
     assert inventory[0]["physical_first_order_candidate"] is False
     assert inventory[0]["render_gap"] is False
+
+
+def test_display_series_labels_use_publication_typography_and_integer_mev() -> None:
+    mode_a = {
+        "plot_series": "alpha1.0",
+        "plot_series_label": "alpha_T=1.0, T=125.737 MeV",
+        "T_MeV": "125.73725802686799",
+        "muB_MeV": "900.0",
+    }
+    mode_b = {
+        "plot_series": "muB900.0",
+        "plot_series_label": "muB=900.0 MeV",
+        "T_MeV": "120.0",
+        "muB_MeV": "900.0",
+    }
+    assert MODULE.display_series_label("mode_a", mode_a) == r"$\alpha_T=1.0,\;T=126\,\mathrm{MeV}$"
+    assert MODULE.display_series_label("mode_b", mode_b) == r"$\mu_B=900\,\mathrm{MeV}$"
+
+
+def test_figure_axis_spec_uses_log_only_for_positive_high_range_first_order_panel() -> None:
+    rows = [{"clean_value": "1.0"}, {"clean_value": "100.0"}]
+    gap = [{"gap_xi_low": -0.01, "gap_xi_high": 0.01}]
+    spec = MODULE.figure_axis_spec(rows, gap)
+    assert spec["axis_scale"] == "log"
+    assert spec["axis_scale_reason"] == "first_order_gap_and_positive_range_ratio_ge_100"
+
+    no_gap = MODULE.figure_axis_spec(rows, [])
+    assert no_gap["axis_scale"] == "linear"
+    assert no_gap["axis_scale_reason"] == "no_rendered_first_order_gap"
+
+    non_positive = MODULE.figure_axis_spec(
+        [{"clean_value": "-1.0"}, {"clean_value": "100.0"}], gap
+    )
+    assert non_positive["axis_scale"] == "linear"
+    assert non_positive["axis_scale_reason"] == "non_positive_display_value"

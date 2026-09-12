@@ -4,10 +4,11 @@
 
 本包是 `publication_clean_v1` 的版本化、solver-free 显示语义修正。v1 保持不变；v2 不修改 `data/outputs/results/**`、production registry 或任何 raw CSV，也不调用 equilibrium/transport solver。
 
-本轮只处理两件事：
+本轮处理三件事：
 
 1. 一阶相变端点之间不再用实线桥接；端点使用当前 raw `phase_curr` 标注为手征恢复相（quark）或手征破缺相（hadron）。
 2. 旧的 CEP/phase-switch 中点星标不再渲染；中点和旧 bracket 仅保留在 provenance 表中，图例不再出现 `CEP`。
+3. 统一 figure-only 的显示规则：存在一阶断线且正值动态范围达到 100 倍的图使用 log-y；其余图保持线性坐标。图例使用 `α_T`/`μ_B` 和四舍五入到个位的 MeV 显示值；CSV 中的原始精度不变。
 
 `mode_b, T=120 MeV, mu_B=900 MeV` 的历史 phase-kind bracket 为 `[-0.14,-0.13]`，但当前 raw 扫描的 `phase_curr` 实际由 quark 切换为 hadron 的相邻端点为 `[-0.13,-0.12]`。v2 用后者断线，并在 `boundary_gap_map.csv` 保留前者作为来源 bracket；这是语义对齐，不是新的 solver 复核。
 
@@ -22,6 +23,7 @@
 - source solver 已调用；本次派生 `solver_called=false`。
 - v1 快照仍保留；v2 另建目录，避免破坏既有 manifest/hash。
 - 本包生成图：72 张 PNG（6 个 panel × 12 个 observable）；曲线索引 216 条。
+- y 轴策略：linear=64, log=8（阈值 `max/min ≥ 100`，且必须存在已渲染一阶断线和全为正的显示值）。
 - 本轮平滑候选：4 条；仍是 display-only，raw 值和现有 provenance 不变。
 
 ## 断线与端点合同
@@ -43,6 +45,12 @@ mode-B 相变线左侧的高 `eta/s` 区域可靠度较低。这一条是论文�
 - 本轮不做独立 bulk 全局分支复核；历史 `bulk_derivative_branch_audit.csv` 继续作为历史证据。
 - 不把断线或端点标记写回 raw/reference；不生成新的 CEP 数值。
 - `manuscript_eligible=false`，待作者审核 v2 图后再决定是否作为公开候选。
+
+## Figure-only 显示策略
+
+- log-y 只改变坐标变换，用于避免高动态范围曲线压缩一阶跳变；它不改变数值、插值或 phase 语义。
+- 当前所有 mode-B 输入观测量均为正值；若未来输入含非正值，渲染器自动回退到线性坐标并在 figure manifest 中记录原因。
+- mode-A 图例格式为 `α_T=… , T=… MeV`，mode-B 图例格式为 `μ_B=… MeV`；显示温度/化学势四舍五入到个位，目录和表格仍保留原始键。
 
 ## 复现
 
