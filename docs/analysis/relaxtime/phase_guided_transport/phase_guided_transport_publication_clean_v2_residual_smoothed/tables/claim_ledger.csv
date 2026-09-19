@@ -1,0 +1,5 @@
+claim_id,status,claim_zh,evidence,scope_limit
+PC-V2R-001,supported_with_scope_limit,本包只消费 publication_clean_v2 的 display table，raw_value 与 v2_clean_value 均保留。,manifest.json; tables/publication_clean_points.csv; tables/residual_point_audit.csv,不是新的 solver 结果或 production 数据。
+PC-V2R-002,supported_with_scope_limit,329 个点按显式窗口作局部 display-only residual smoothing。,tables/residual_smoothing_window_audit.csv; tables/residual_curve_audit.csv; tables/residual_point_audit.csv,平滑参数是显示选择，不代表物理宽度或传播子正则化。
+PC-V2R-003,supported,实际一阶 gap 不被跨越；端点继续使用 v2 endpoint 值。,tables/boundary_gap_map.csv; tables/publication_clean_points.csv; figures/plot_manifest.json,gap 语义沿用 v2，不构造区间内输运值。
+PC-V2R-004,author_check,平滑后的曲线适合作者审阅和图形排版，不应替代 raw/v2 曲线作定量机制结论。,figures/residual_smoothing_overview.png; figures/residual_smoothing_delta.png,正式论文使用仍需作者确认显示强度与窗口清单。

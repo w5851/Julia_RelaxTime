@@ -1,0 +1,54 @@
+# Preserve SHA256-bound publication snapshots and their exact input bytes.
+# These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v3/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4_mechanism_review/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v2_residual_smoothing/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v3_residual_smoothing/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v4_residual_smoothing/** -text
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/** -text
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4/** -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json -text
+data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv -text
+data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv -text
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json -text
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json -text
+scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py -text
+scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2_residual_smoothed.py -text
+scripts/analysis/relaxtime/build_phase_guided_publication_clean_v3.py -text
+scripts/analysis/relaxtime/build_phase_guided_publication_clean_v4.py -text
+scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl -text
+scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v3.py -text
+scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v4.py -text
+
+# CRLF is part of these immutable snapshots, not trailing whitespace.
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v3/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v3/figure_layer_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

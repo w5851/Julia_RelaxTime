@@ -1,0 +1,44 @@
+{
+  "schema": "phase_guided_transport_publication_clean_formalization_v1",
+  "status": "author_accepted_formal_publication_figure_layer",
+  "recorded_at_utc": "2026-09-19T04:41:40.584741+00:00",
+  "current_publication_layer": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4",
+  "current_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
+  "current_figure_layer_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4/figure_layer_manifest.json",
+  "source_v4_manifest_sha256": "a3d31abc436d52080f073c22fc959147c4bafdfbd7d92780e85265e4c0069b4b",
+  "source_v4_plot_manifest_sha256": "7c3f4fa8816c3fdd03f744cc6ffae908543a02bbef853befeb4c954da040479e",
+  "source_v4_public_plot_manifest_sha256": "9b91f41ecab23a94fff7e64ecf6166d4c215e21d8941dcc6aa45a05625fffb0a",
+  "source_v4_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677",
+  "immutable_v3_parent_manifest_sha256": "6ed0168cb60730da10a964ddc0f03bad08758e7dc53fd174e2fc12fa84ac4bbe",
+  "immutable_v3_parent_plot_manifest_sha256": "5bb0e08244f80d987686935128d419a34901a45abac8fb2f4ca50f979c08fd96",
+  "immutable_v3_parent_public_plot_manifest_sha256": "b023a30dbc33d918beae4a994f5bc44137f67307470259943b9326c801510e9f",
+  "final_hashes": {
+    "package_manifest_sha256": "a0e939e7dee125585d274112d37713778a924c4e5d7dc06e6e2553d96b354308",
+    "plot_manifest_sha256": "0d7711cfb0efe902475eae158ac6229d56f25a761883ad0d7e480c620b3496e1",
+    "public_plot_manifest_sha256": "ca655b05c1a17f52a39fb7f30a1ce865fc1c00c6c3297c44989ef7fdbfac37c8",
+    "figure_layer_manifest_sha256": "3d850f2ef68f70814f70828bb871f34900fb364ff0e0032d784cfd22a445add7",
+    "claim_ledger_sha256": "2a4c33d47b2a71002a27868fb07c7b58e750aa610a4b37f71ccba19dea460fab"
+  },
+  "figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "solver_called": false,
+  "production_write": false,
+  "canonical_data_modified": false,
+  "raw_results_unchanged": true,
+  "production_registry_unchanged": true,
+  "numerical_status": "diagnostic_only",
+  "figure_status": "author_accepted_formal_layout",
+  "superseded_intermediate": {
+    "analysis": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3",
+    "public": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3",
+    "status": "retained_unchanged_as_parent_evidence"
+  },
+  "known_boundaries": [
+    "display values are not new solver results",
+    "the tau_sbar endpoint is not a replacement branch solution",
+    "mechanism evidence does not constitute a high-rate convergence gate"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "phase_guided_transport_p128_xi001_analysis_plot_manifest_v1",
+  "figures": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/figures/tau_jump_windows_overview.png",
+      "sha256": "6b52214b63838f3273875bc60f4f66860f166b63ed1c894edbd2e519a36e5f07",
+      "bytes": 429687
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/figures/downstream_response_windows.png",
+      "sha256": "bc4f18d831950880e9de577fb158067594c3a37e06424162cf716796ea192972",
+      "bytes": 479156
+    }
+  ],
+  "input_tables": [
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/input_inventory.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/tau_jump_step_candidates.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/tau_jump_window_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/tau_jump_channel_attribution.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/downstream_transport_response_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/mechanism_window_candidates.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/claim_ledger.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/mechanism_window_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/denominator_chain_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/denominator_chain_band_table.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/denominator_ds_samples.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/upstream_branch_smoothness_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/global_nonmonotonic_mechanism_summary.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/local_rate_convergence_gate.csv",
+    "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/tables/mechanism_manifest.json"
+  ]
+}

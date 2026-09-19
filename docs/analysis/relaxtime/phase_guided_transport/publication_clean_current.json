@@ -1,0 +1,15 @@
+{
+  "schema": "phase_guided_transport_publication_clean_current_v1",
+  "status": "author_accepted_formal_publication_figure_layer",
+  "current_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
+  "current_public_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4",
+  "current_figure_layer": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4",
+  "formalization_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json",
+  "manifest_sha256": "a0e939e7dee125585d274112d37713778a924c4e5d7dc06e6e2553d96b354308",
+  "plot_manifest_sha256": "0d7711cfb0efe902475eae158ac6229d56f25a761883ad0d7e480c620b3496e1",
+  "public_plot_manifest_sha256": "ca655b05c1a17f52a39fb7f30a1ce865fc1c00c6c3297c44989ef7fdbfac37c8",
+  "superseded_intermediate": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3",
+  "manuscript_eligible": false,
+  "numerical_status": "diagnostic_only",
+  "figure_status": "author_accepted_formal_layout"
+}

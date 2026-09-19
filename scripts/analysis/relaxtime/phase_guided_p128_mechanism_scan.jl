@@ -488,7 +488,15 @@ function band_index(ds::Float64)
     return length(BAND_EDGES) - 1
 end
 
-function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg, opts::MechanismOptions)
+function exchange_channels_for_process(process::Symbol)
+    channels = Main.Constants_PNJL.SCATTERING_MESON_MAP[process][:channels]
+    # qqbar has s/t exchange; qq has t/u exchange. Keep the canonical order
+    # so CSV output is reproducible and never fabricate an unavailable channel.
+    return Tuple(channel for channel in (:s, :t, :u) if haskey(channels, channel))
+end
+
+function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg, opts::MechanismOptions;
+    exchange_channel::Symbol=:s)
     th = process_threshold_info(process, state.quark_params)
     grid = ds_grid(opts)
     sample_rows = Dict{String, Any}[]
@@ -502,9 +510,9 @@ function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg,
         s = th.s_th + ds
         tb = Main.TotalCrossSection.calculate_t_bounds(s, th.mi, th.mj, th.mc, th.md)
         t = 0.5 * (tb.t_min + tb.t_max)
-        cms = Main.TotalPropagator.calculate_cms_momentum(process, s, t, :s, state.quark_params)
-        simple = simple_p_branch_for_channel(process, :s, cms.k0, cms.k, state.quark_params, state.thermo_params, state.K_coeffs)
-        mixed = mixed_p_branch_for_channel(process, :s, cms.k0, cms.k, state.quark_params, state.thermo_params, state.K_coeffs)
+        cms = Main.TotalPropagator.calculate_cms_momentum(process, s, t, exchange_channel, state.quark_params)
+        simple = simple_p_branch_for_channel(process, exchange_channel, cms.k0, cms.k, state.quark_params, state.thermo_params, state.K_coeffs)
+        mixed = mixed_p_branch_for_channel(process, exchange_channel, cms.k0, cms.k, state.quark_params, state.thermo_params, state.K_coeffs)
         D_total = simple.D_simple + mixed.D_mixed
         sigma = Main.TotalCrossSection.total_cross_section(
             process, s, state.quark_params, state.thermo_params, state.K_coeffs;
@@ -520,6 +528,8 @@ function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg,
             push!(sample_rows, Dict{String, Any}(
                 "window_id" => window_id,
                 "channel" => String(process),
+                "exchange_channel" => String(exchange_channel),
+                "sigma_scope" => "full_process",
                 "xi" => state.thermo_params.ξ,
                 "ds" => ds,
                 "s_value" => s,
@@ -537,23 +547,43 @@ function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg,
         end
     end
     sigma_idx = argmax(sigma_vals)
-    simple_idx = argmax(replace(simple_inv, NaN => -Inf))
-    mixed_idx = argmax(replace(mixed_inv, NaN => -Inf))
-    simple_peak = simple_inv[simple_idx]
-    mixed_peak = mixed_inv[mixed_idx]
-    branch = (isfinite(mixed_peak) && mixed_peak > simple_peak) ? "mixed_detM" : "simple_1m4KPi"
-    branch_idx = branch == "mixed_detM" ? mixed_idx : simple_idx
-    aligned = band_index(grid[sigma_idx]) == band_index(grid[branch_idx])
+    # A channel may have no applicable simple or mixed propagator branch.
+    # Do not compare a finite peak against NaN: that used to mislabel a mixed
+    # determinant window as simple_1m4KPi.
+    finite_peak_index(values) = begin
+        finite_idx = findall(isfinite, values)
+        isempty(finite_idx) ? nothing : finite_idx[argmax(values[finite_idx])]
+    end
+    simple_idx = finite_peak_index(simple_inv)
+    mixed_idx = finite_peak_index(mixed_inv)
+    simple_peak = simple_idx === nothing ? NaN : simple_inv[simple_idx]
+    mixed_peak = mixed_idx === nothing ? NaN : mixed_inv[mixed_idx]
+    if simple_idx === nothing && mixed_idx === nothing
+        branch = "unavailable"
+        branch_idx = nothing
+    elseif simple_idx === nothing
+        branch = "mixed_detM"
+        branch_idx = mixed_idx
+    elseif mixed_idx === nothing
+        branch = "simple_1m4KPi"
+        branch_idx = simple_idx
+    else
+        branch = mixed_peak > simple_peak ? "mixed_detM" : "simple_1m4KPi"
+        branch_idx = branch == "mixed_detM" ? mixed_idx : simple_idx
+    end
+    aligned = branch_idx === nothing ? false : band_index(grid[sigma_idx]) == band_index(grid[branch_idx])
 
     summary = Dict{String, Any}(
         "window_id" => window_id,
         "channel" => String(process),
+        "exchange_channel" => String(exchange_channel),
+        "sigma_scope" => "full_process",
         "xi" => state.thermo_params.ξ,
         "sigma_peak_ds" => grid[sigma_idx],
         "sigma_peak_value" => sigma_vals[sigma_idx],
-        "simple_peak_ds" => grid[simple_idx],
+        "simple_peak_ds" => simple_idx === nothing ? NaN : grid[simple_idx],
         "simple_peak_invabs" => simple_peak,
-        "mixed_peak_ds" => isfinite(mixed_peak) ? grid[mixed_idx] : NaN,
+        "mixed_peak_ds" => mixed_idx === nothing ? NaN : grid[mixed_idx],
         "mixed_peak_invabs" => mixed_peak,
         "dominant_denominator_branch" => branch,
         "denominator_sigma_same_band" => aligned,
@@ -570,6 +600,8 @@ function process_branch_scan(window_id::String, process::Symbol, state, tau_cfg,
         push!(band_rows, Dict{String, Any}(
             "window_id" => window_id,
             "channel" => String(process),
+            "exchange_channel" => String(exchange_channel),
+            "sigma_scope" => "full_process",
             "xi" => state.thermo_params.ξ,
             "band" => b,
             "ds_left" => BAND_EDGES[b],
@@ -852,48 +884,62 @@ function main()
             else
                 0.0
             end
+            # `compute_rate_band_stats` and `total_cross_section` are complete
+            # process quantities.  Evaluate/write the rate bands once per
+            # process state; the exchange loop below remains denominator-only.
+            target_rate_checked = false
             for (xi, st) in sort(collect(states); by=x -> x[1])
-                summary, bands, samples = try
-                    process_branch_scan(window_id, process, st, tau_cfg, opts)
-                catch err
-                    if closeval(xi, fval(cand, :xi); atol=1.0e-7)
-                        push!(dominant_notes, "$(channel):denominator_scan_skipped=$(replace(sprint(showerror, err), ',' => ';'))")
+                for exchange_channel in exchange_channels_for_process(process)
+                    summary, bands, samples = try
+                        process_branch_scan(window_id, process, st, tau_cfg, opts; exchange_channel=exchange_channel)
+                    catch err
+                        if closeval(xi, fval(cand, :xi); atol=1.0e-7)
+                            push!(dominant_notes, "$(channel):exchange=$(exchange_channel):denominator_scan_skipped=$(replace(sprint(showerror, err), ',' => ';'))")
+                        end
+                        continue
                     end
-                    continue
-                end
-                append!(denom_rows, [merge(summary, Dict{String, Any}("mode_key" => mode_key, "observable" => sval(cand, :observable)))])
-                append!(band_rows, bands)
-                append!(sample_rows, samples)
+                    append!(denom_rows, [merge(summary, Dict{String, Any}("mode_key" => mode_key, "observable" => sval(cand, :observable)))])
+                    append!(band_rows, bands)
+                    append!(sample_rows, samples)
 
-                if closeval(xi, fval(cand, :xi); atol=1.0e-7)
-                    rate_stats = compute_rate_band_stats(process, st, tau_cfg)
-                    for b in 1:(length(BAND_EDGES) - 1)
-                        b <= length(rate_stats.omega) || continue
-                        push!(band_rows, Dict{String, Any}(
-                            "window_id" => window_id,
-                            "channel" => channel,
-                            "xi" => xi,
-                            "band" => b,
-                            "ds_left" => BAND_EDGES[b],
-                            "ds_right" => BAND_EDGES[b + 1],
-                            "prefactor" => rate_stats.prefactor,
-                            "omega_bin" => rate_stats.omega[b],
-                            "omega_sigma_bin" => rate_stats.omega_sigma[b],
-                            "sigma_eff_bin" => rate_stats.omega[b] == 0.0 ? NaN : rate_stats.omega_sigma[b] / rate_stats.omega[b],
-                            "rate_bin" => rate_stats.prefactor * rate_stats.omega_sigma[b],
-                            "rate_func" => rate_stats.rate,
-                        ))
+                    if closeval(xi, fval(cand, :xi); atol=1.0e-7)
+                        if !target_rate_checked
+                            rate_stats = compute_rate_band_stats(process, st, tau_cfg)
+                            for b in 1:(length(BAND_EDGES) - 1)
+                                b <= length(rate_stats.omega) || continue
+                                push!(band_rows, Dict{String, Any}(
+                                    "window_id" => window_id,
+                                    "channel" => channel,
+                                    # The rate and sigma are complete-process
+                                    # quantities, not one exchange contribution.
+                                    "exchange_channel" => "all",
+                                    "sigma_scope" => "full_process_rate",
+                                    "xi" => xi,
+                                    "band" => b,
+                                    "ds_left" => BAND_EDGES[b],
+                                    "ds_right" => BAND_EDGES[b + 1],
+                                    "prefactor" => rate_stats.prefactor,
+                                    "omega_bin" => rate_stats.omega[b],
+                                    "omega_sigma_bin" => rate_stats.omega_sigma[b],
+                                    "sigma_eff_bin" => rate_stats.omega[b] == 0.0 ? NaN : rate_stats.omega_sigma[b] / rate_stats.omega[b],
+                                    "rate_bin" => rate_stats.prefactor * rate_stats.omega_sigma[b],
+                                    "rate_func" => rate_stats.rate,
+                                ))
+                            end
+                            err = isfinite(direct_rate) && abs(direct_rate) > 0 ? abs(rate_stats.rate - direct_rate) / abs(direct_rate) : 0.0
+                            max_rate_err = max(max_rate_err, err)
+                            target_rate_checked = true
+                            push!(dominant_notes, "$(channel):full_process_rate_rel_err=$(round(err; sigdigits=4))")
+                        end
+                        branch_aligned_any |= Bool(summary["denominator_sigma_same_band"])
+                        if Bool(summary["denominator_sigma_same_band"]) && branch_score > dominant_branch_score
+                            dominant_branch = String(summary["dominant_denominator_branch"])
+                            dominant_branch_score = branch_score
+                        elseif isempty(dominant_branch)
+                            dominant_branch = String(summary["dominant_denominator_branch"])
+                        end
+                        push!(dominant_notes, "$(channel):exchange=$(exchange_channel):branch=$(summary["dominant_denominator_branch"]),aligned=$(summary["denominator_sigma_same_band"])")
                     end
-                    err = isfinite(direct_rate) && abs(direct_rate) > 0 ? abs(rate_stats.rate - direct_rate) / abs(direct_rate) : 0.0
-                    max_rate_err = max(max_rate_err, err)
-                    branch_aligned_any |= Bool(summary["denominator_sigma_same_band"])
-                    if Bool(summary["denominator_sigma_same_band"]) && branch_score > dominant_branch_score
-                        dominant_branch = String(summary["dominant_denominator_branch"])
-                        dominant_branch_score = branch_score
-                    elseif isempty(dominant_branch)
-                        dominant_branch = String(summary["dominant_denominator_branch"])
-                    end
-                    push!(dominant_notes, "$(channel):rate_rel_err=$(round(err; sigdigits=4)),branch=$(summary["dominant_denominator_branch"]),aligned=$(summary["denominator_sigma_same_band"])")
                 end
             end
         end
@@ -1009,13 +1055,13 @@ function main()
         ["window_id", "window_label", "mode_key", "plot_panel", "plot_series", "observable", "primary_species", "xi", "mechanism_verdict", "evidence_score", "dominant_channels", "channel_coverage_share", "dominant_denominator_branch", "max_rate_reproduction_rel_error", "denominator_sigma_alignment", "upstream_branch_flag", "mechanism_note"],
         mechanism_rows)
     write_csv_rows(joinpath(opts.out_dir, "denominator_chain_summary.csv"),
-        ["window_id", "mode_key", "observable", "channel", "xi", "sigma_peak_ds", "sigma_peak_value", "simple_peak_ds", "simple_peak_invabs", "mixed_peak_ds", "mixed_peak_invabs", "dominant_denominator_branch", "denominator_sigma_same_band", "max_abs_D_simple_sq", "max_abs_D_mixed_sq", "max_abs_D_total_sq"],
+        ["window_id", "mode_key", "observable", "channel", "exchange_channel", "sigma_scope", "xi", "sigma_peak_ds", "sigma_peak_value", "simple_peak_ds", "simple_peak_invabs", "mixed_peak_ds", "mixed_peak_invabs", "dominant_denominator_branch", "denominator_sigma_same_band", "max_abs_D_simple_sq", "max_abs_D_mixed_sq", "max_abs_D_total_sq"],
         denom_rows)
     write_csv_rows(joinpath(opts.out_dir, "denominator_chain_band_table.csv"),
-        ["window_id", "channel", "xi", "band", "ds_left", "ds_right", "area_invabs_den_simple", "area_invabs_detM", "area_abs_D_total_sq", "area_sigma", "prefactor", "omega_bin", "omega_sigma_bin", "sigma_eff_bin", "rate_bin", "rate_func"],
+        ["window_id", "channel", "exchange_channel", "sigma_scope", "xi", "band", "ds_left", "ds_right", "area_invabs_den_simple", "area_invabs_detM", "area_abs_D_total_sq", "area_sigma", "prefactor", "omega_bin", "omega_sigma_bin", "sigma_eff_bin", "rate_bin", "rate_func"],
         band_rows)
     write_csv_rows(joinpath(opts.out_dir, "denominator_ds_samples.csv"),
-        ["window_id", "channel", "xi", "ds", "s_value", "den_simple_re", "den_simple_im", "detM_re", "detM_im", "invabs_den_simple", "invabs_detM", "abs_D_simple_sq", "abs_D_mixed_sq", "abs_D_total_sq", "sigma"],
+        ["window_id", "channel", "exchange_channel", "sigma_scope", "xi", "ds", "s_value", "den_simple_re", "den_simple_im", "detM_re", "detM_im", "invabs_den_simple", "invabs_detM", "abs_D_simple_sq", "abs_D_mixed_sq", "abs_D_total_sq", "sigma"],
         sample_rows)
     write_csv_rows(joinpath(opts.out_dir, "upstream_branch_smoothness_summary.csv"),
         ["window_id", "n_points", "max_rel_step", "max_rel_curvature", "dominant_background_driver", "upstream_branch_flag"],
@@ -1050,6 +1096,7 @@ function main()
         "convergence_n_sigma_points" => opts.convergence_n_sigma_points,
         "convergence_sigma_grid_n" => opts.convergence_sigma_grid_n,
         "only_convergence_gate" => opts.only_convergence_gate,
+        "exchange_channel_contract" => "denominator diagnostics are emitted per legal exchange channel; total_cross_section and rate bands are full-process quantities and rate bands are emitted once with exchange_channel=all",
         "repository_head" => readchomp(`git -C $PROJECT_ROOT rev-parse HEAD`),
         "generator" => relpath(@__FILE__, PROJECT_ROOT),
         "generator_sha256" => bytes2hex(open(sha256, @__FILE__)),

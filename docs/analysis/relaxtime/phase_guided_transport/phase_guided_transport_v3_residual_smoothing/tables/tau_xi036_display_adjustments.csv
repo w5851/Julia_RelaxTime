@@ -1,0 +1,5 @@
+adjustment_id,mode_key,plot_panel,plot_series,observable,target_xi,anchor_left_xi,anchor_right_xi,phase_policy,method,reason
+v3_mode_b_T200p0_muB0p0_xip0p36_tau,mode_b,T200.0,muB0.0,tau_u,0.36,0.35,0.37,crossover_only,linear_interpolation,remove the isolated three-point shoulder while retaining the two neighboring display anchors
+v3_mode_b_T200p0_muB0p0_xip0p36_tau,mode_b,T200.0,muB0.0,tau_d,0.36,0.35,0.37,crossover_only,linear_interpolation,remove the isolated three-point shoulder while retaining the two neighboring display anchors
+v3_mode_b_T200p0_muB0p0_xip0p36_tau,mode_b,T200.0,muB0.0,tau_ubar,0.36,0.35,0.37,crossover_only,linear_interpolation,remove the isolated three-point shoulder while retaining the two neighboring display anchors
+v3_mode_b_T200p0_muB0p0_xip0p36_tau,mode_b,T200.0,muB0.0,tau_dbar,0.36,0.35,0.37,crossover_only,linear_interpolation,remove the isolated three-point shoulder while retaining the two neighboring display anchors

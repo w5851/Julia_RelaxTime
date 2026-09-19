@@ -8,6 +8,8 @@
 | --- | --- | --- |
 | v1 tau-first analysis | [`phase_guided_transport_p128_xi001_analysis/`](phase_guided_transport_p128_xi001_analysis/) | 从 tau/channel-rate 突变出发，记录下游输运响应、denominator-chain 候选和 claim ledger |
 | v2 pole-sensitive rendering | [`phase_guided_transport_v2_pole_sensitive_rendering/`](phase_guided_transport_v2_pole_sensitive_rendering/) | 在 v2 on-shell-kernel production 上迁移 v1 机制窗口，加入 v2 定点诊断、pole-sensitive mask、论文候选显示和一阶分支保护 |
+| publication-clean current | [`phase_guided_transport_publication_clean_v4/`](phase_guided_transport_publication_clean_v4/) | 作者已接受的当前 publication figure layer；只改变显示派生值，不改变 raw/production 数值 |
+| publication-clean intermediate | [`phase_guided_transport_publication_clean_v3/`](phase_guided_transport_publication_clean_v3/) | v4 的不可变父级和中间版本，仅保留 provenance，不作为当前 publication layer |
 
 v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_window_summary.csv`；v2 是连续审计阶段，不覆盖、不合并、也不重写 v1。
 
@@ -24,6 +26,10 @@ v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_
 - v1 root `manifest.json` 在迁移前已经存在 2/21 个 `outputs` hash mismatch；这不是本次目录移动造成的变化，也不在本批修复。
 - metadata 修复已登记为独立 follow-up：[`2026-08-19_docs-analysis-metadata-repair-task.md`](../../../dev/active/2026-08-19_docs-analysis-metadata-repair-task.md)。
 
-## Non-goals
+## Publication promotion boundary
 
-本分组不晋升 phase reference，不修改 solver、transport kernel 或 production registry，也不把论文候选图解释为已通过 production convergence gate 的正式结果。
+v4 已由作者接受为当前 publication-clean **图层**。该接受只覆盖
+`author_accepted_formal_layout` 的显示产物，不晋升 phase reference，不修改
+solver、transport kernel 或 production registry，也不把显示派生值解释为新的
+production-grade 数值结果或 convergence certificate。raw numerical status 仍为
+`diagnostic_only`，v3 父级内容保持不变。

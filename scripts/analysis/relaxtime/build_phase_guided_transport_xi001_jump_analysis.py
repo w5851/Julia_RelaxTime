@@ -278,7 +278,18 @@ def validate_inputs(loaded: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
             raise ValueError(f"{mode_key} missing scan columns: {missing_scan}")
         if missing_diag:
             raise ValueError(f"{mode_key} missing diagnostics columns: {missing_diag}")
-        plot_count = int(data["plot_manifest"].get("count", -1))
+        # v2 manifests record the concrete figure entries but do not require a
+        # redundant top-level ``count`` field.  Accept both schemas while
+        # keeping the file-count check below as the authoritative consistency
+        # gate.
+        plot_manifest = data["plot_manifest"]
+        if "count" in plot_manifest:
+            plot_count = int(plot_manifest["count"])
+        else:
+            figure_entries = plot_manifest.get("figures")
+            if not isinstance(figure_entries, list):
+                raise ValueError(f"{mode_key} plot manifest has no count or figures list")
+            plot_count = len(figure_entries)
         png_count = len(list(cfg["figure_dir"].glob("plot_panel=*/*.png")))
         if plot_count != png_count:
             raise ValueError(f"{mode_key} plot count mismatch: manifest={plot_count}, files={png_count}")
@@ -1087,6 +1098,13 @@ def make_claim_ledger(
     ]
     if mechanism_rows:
         verdict_by_window = {row["window_id"]: row for row in mechanism_rows}
+        rate_errors = [
+            float(row["max_rate_reproduction_rel_error"])
+            for row in mechanism_rows
+            if row.get("max_rate_reproduction_rel_error", "") not in ("", None)
+        ]
+        max_rate_error = max(rate_errors) if rate_errors else math.nan
+        max_rate_error_text = f"{max_rate_error:.4g}" if math.isfinite(max_rate_error) else "未记录"
         mode_a = verdict_by_window.get("mode_a_muB450p0_alpha1p0_xip0p26_2")
         mode_b = verdict_by_window.get("mode_b_T200p0_muB450p0_xip0p31_1")
         if mode_a:
@@ -1107,9 +1125,9 @@ def make_claim_ledger(
                     "claim_id": "CLAIM-MECH-XI001-002",
                     "status": "supported_with_scope_limit" if mode_b_supported else "author_check",
                     "claim_zh": (
-                        "非一阶窗口 mode B, T=200, muB=450, xi=0.31 的 tau 单点下探在 denominator-chain 证据层支持 simple 1-4KΠ 小分母机制：主导通道在同一近阈值 band 对齐，修正 A-builder 诊断口径后 production rate 可精确复现；但本轮没有完成额外 high-rate gate。"
+                        f"非一阶窗口 mode B, T=200, muB=450, xi=0.31 的 tau 单点下探在 denominator-chain 证据层支持 simple 1-4KΠ 小分母机制：主导通道在同一近阈值 band 对齐，修正 A-builder 诊断口径后 production rate 可复现到机器精度量级（最大相对误差 {mode_b.get('max_rate_reproduction_rel_error', '未记录')}）；但本轮没有完成额外 high-rate gate。"
                         if mode_b_supported
-                        else "非一阶窗口 mode B, T=200, muB=450, xi=0.31 的 tau 单点下探具有 simple 1-4KΠ 近阈值小分母候选证据，但机制脚本直调 rate 与 channel diagnostics 的生产 rate 未闭合，不能在当前证据下写成 paper-ready 小分母结论。"
+                        else f"非一阶窗口 mode B, T=200, muB=450, xi=0.31 的 tau 单点下探具有 simple 1-4KΠ 近阈值小分母候选证据，但机制脚本直调 rate 与 channel diagnostics 的生产 rate 未闭合（最大相对误差 {mode_b.get('max_rate_reproduction_rel_error', '未记录')}），不能在当前证据下写成 paper-ready 小分母结论。"
                     ),
                     "evidence": "tables/mechanism_window_summary.csv; tables/denominator_chain_summary.csv; tables/local_rate_reproduction_mismatch_root_cause.csv",
                     "fields_or_points": f"window_id={mode_b['window_id']}; verdict={mode_b['mechanism_verdict']}; branch={mode_b['dominant_denominator_branch']}; max_rate_reproduction_rel_error={mode_b['max_rate_reproduction_rel_error']}",
@@ -1130,11 +1148,11 @@ def make_claim_ledger(
             rows.append(
                 {
                     "claim_id": "CLAIM-MECH-XI001-004",
-                    "status": "supported_with_scope_limit",
+                    "status": "supported_with_scope_limit" if all_weak_supported else "author_check",
                     "claim_zh": (
-                        "6 个 weak_or_broad_tau_variation_candidate 窗口已全部完成 denominator-chain 深拆，均支持 simple 1-4KΠ 近阈值小分母机制；该结论仍是机制补证，不替代逐点 high-rate convergence gate。"
+                        f"{len(weak_supported)} 个 weak_or_broad_tau_variation_candidate 窗口已完成 denominator-chain 深拆，均支持 simple 1-4KΠ 近阈值小分母机制；该结论仍是机制补证，不替代逐点 high-rate convergence gate。"
                         if all_weak_supported
-                        else "已深拆的 weak_or_broad_tau_variation_candidate 窗口支持 simple 1-4KΠ 近阈值小分母机制；未深拆窗口不能外推。"
+                        else f"已深拆的 {len(weak_supported)}/{len(weak_window_ids)} 个 weak_or_broad_tau_variation_candidate 窗口支持 simple 1-4KΠ 近阈值小分母机制；未深拆窗口不能外推。"
                     ),
                     "evidence": "tables/mechanism_window_summary.csv; tables/denominator_chain_summary.csv",
                     "fields_or_points": "; ".join(f"{row['window_id']}={row['mechanism_verdict']}/{row['dominant_denominator_branch']}" for row in weak_supported),
@@ -1144,9 +1162,9 @@ def make_claim_ledger(
             {
                 "claim_id": "CLAIM-MECH-XI001-005",
                 "status": "supported",
-                "claim_zh": "此前 mode B 约 0.47 的 rate 复现偏差来自机制诊断脚本的 A-builder 口径未对齐，而不是 production channel_diagnostics 的物理/数值 bug；修正为 production workflow 的 a_builder 配置后，生产 rate 可复现到机器精度。",
+                "claim_zh": f"此前 mode B 约 0.47 的 rate 复现偏差来自机制诊断脚本的 A-builder 口径未对齐，而不是 production channel_diagnostics 的物理/数值 bug；修正为 production workflow 的 a_builder 配置后，已扫描窗口的 production rate 可复现到机器精度量级（最大相对误差 {max_rate_error_text}）。",
                 "evidence": "tables/local_rate_reproduction_mismatch_root_cause.csv; tables/mechanism_window_summary.csv; tables/mechanism_manifest.json",
-                "fields_or_points": "production_a_builder_config; max_rate_reproduction_rel_error=0.0",
+                "fields_or_points": f"production_a_builder_config; max_rate_reproduction_rel_error_max={max_rate_error_text}",
             }
         )
         if not convergence_rows:
@@ -1204,17 +1222,43 @@ def write_readme(
     ]
     mechanism_section = ""
     if mechanism_rows:
+        channel_spike_count = sum(
+            row["cause_verdict"] == "channel_rate_spike_supported"
+            for row in window_rows
+        )
+        weak_window_ids = {
+            str(row["window_id"])
+            for row in window_rows
+            if row.get("cause_verdict") == "weak_or_broad_tau_variation_candidate"
+        }
+        weak_supported_ids = {
+            str(row["window_id"])
+            for row in mechanism_rows
+            if str(row.get("window_id")) in weak_window_ids
+            and row.get("mechanism_verdict") == "small_denominator_supported"
+        }
+        rate_errors = [
+            float(row["max_rate_reproduction_rel_error"])
+            for row in mechanism_rows
+            if row.get("max_rate_reproduction_rel_error", "") not in ("", None)
+        ]
+        max_rate_error = max(rate_errors) if rate_errors else math.nan
+        max_rate_error_text = f"{max_rate_error:.4g}" if math.isfinite(max_rate_error) else "未记录"
+        mechanism_notes = "\n".join(
+            f"- `{row['window_id']}`：verdict=`{row['mechanism_verdict']}`；主导分母分支=`{row['dominant_denominator_branch']}`；rate 复现最大相对误差=`{row['max_rate_reproduction_rel_error']}`；denominator-sigma 对齐=`{row['denominator_sigma_alignment']}`。"
+            for row in mechanism_rows
+        )
         mechanism_section = f"""
 ## 非一阶 channel-rate spike 的 denominator-chain 补证
 
-本轮对 `channel_rate_spike_supported` 的两个非一阶窗口做定点深拆，并把 6 个 `weak_or_broad_tau_variation_candidate` 窗口全部纳入 denominator-chain 检查；`eta_over_s/zeta_over_s` 仍作为 tau 的下游响应，不进入根因判定。
+本轮对 {channel_spike_count} 个 `channel_rate_spike_supported` 窗口以及 {len(weak_window_ids)} 个 `weak_or_broad_tau_variation_candidate` 窗口完成定点深拆；`eta_over_s/zeta_over_s` 仍作为 tau 的下游响应，不进入根因判定。
 
 {markdown_table(mechanism_rows, ["window_id", "plot_panel", "plot_series", "observable", "primary_species", "mechanism_verdict", "dominant_channels", "dominant_denominator_branch", "max_rate_reproduction_rel_error", "denominator_sigma_alignment", "upstream_branch_flag"], limit=10)}
 
-- `mode_a_muB450p0_alpha1p0_xip0p26_2`：在 denominator-chain 证据层支持小分母机制。`uubar_to_uubar/uubar_to_ddbar` 贡献覆盖主导份额，`sigma(s)` 峰和 mixed `detM` 峰都落在近阈值 band；修正机制脚本口径后，直调 rate 与 channel diagnostics 的复现误差为机制表中的机器精度量级。该窗口的上游背景量平滑，因此近因不是一阶相变或上游分支突跳；但本轮没有完成额外 high-rate gate，论文表述应保留 scope limit。
-- `mode_b_T200p0_muB450p0_xip0p31_1`：在 denominator-chain 证据层也支持小分母机制。`dubar_to_dubar/uubar_to_uubar/uubar_to_ddbar` 的 `sigma(s)` 峰和 simple `1-4KΠ` 峰在近阈值 band 对齐，且上游背景量平滑；修正机制脚本的 A-builder 口径后，直调 `average_scattering_rate` 与生产 `channel_diagnostics.csv` 的 rate 复现误差为 `0`。
+- 已深拆窗口的逐窗口 verdict、主导分支和 rate 复现误差如下：
+{mechanism_notes}
 - 此前 mode B 约 `0.47` 的 rate 复现误差来自诊断脚本 bug：机制脚本手工重建传播子 A 场时没有使用 production workflow 的 `a_builder` 配置。当前机制脚本已显式记录并使用 `p_nodes=16,p_max=20.0,cos_nodes=4,use_aniso=true`；这不是 production 数据 bug。
-- 6 个 weak/broad 窗口全部完成深拆，均显示 simple `1-4KΠ` 小分母支持；新增的 4 个窗口是 `mode_a_muB450p0_alpha1p1_xip0p35_1`、`mode_a_muB900p0_alpha1p2_xip0p49_1`、`mode_a_muB450p0_alpha1p0_xim0p20_1` 和 `mode_b_T200p0_muB0p0_xim0p21_1`。
+- 当前 {len(weak_supported_ids)}/{len(weak_window_ids)} 个 weak/broad 窗口在表中得到 `small_denominator_supported`；未列入深拆表的窗口不能外推。已扫描窗口的 rate 复现最大相对误差为 `{max_rate_error_text}`。
 - 本机尝试的局部 high-rate convergence gate 未在可控时间内完成；`local_rate_convergence_gate.csv` 因此只保留表头。当前结论是 denominator-chain 补证，不是新的 production-grade 收敛证明。
 """
     elif any(row["cause_verdict"] == "channel_rate_spike_supported" for row in window_rows):
