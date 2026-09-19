@@ -1,0 +1,5 @@
+claim_id,status,claim_zh,evidence,scope_limit
+PC-V3-001,supported_with_scope_limit,publication_clean_v3 以 publication_clean_v2_residual_smoothed 为父级显示表，并保留 raw_value 与原始 v2_clean_value。,manifest.json; tables/publication_clean_points.csv; tables/v3_tau_adjustment_map.csv,不是新的 solver 结果、production 数据或传播子正则化。
+PC-V3-002,supported_with_scope_limit,在同一 crossover phase gate 内，对 4 个 tau 点使用显式三点局部线性插值。,tables/v3_tau_adjustment_map.csv; tables/v3_curve_audit.csv; figures/plot_manifest.json,插值是显示层选择，不证明原始局部结构是数值伪影或传播子小分母机制。
+PC-V3-003,supported,v3 不修改一阶相变 gap、端点或跨分支连接；完整 publication figure 集从 v3 point table 重新渲染。,tables/boundary_gap_map.csv; tables/publication_clean_points.csv; figures/plot_manifest.json,phase 语义沿用父级 v2 residual-smoothed 包。
+PC-V3-004,author_check,v3 图形可供作者审查，但不能替代 raw/v2 数据进行精确输运量、峰值或机制结论。,README.md; audit/tau_xi036_before_after.png; tables/v3_tau_adjustment_map.csv,正式 manuscript eligibility 仍为 false，需作者确认。

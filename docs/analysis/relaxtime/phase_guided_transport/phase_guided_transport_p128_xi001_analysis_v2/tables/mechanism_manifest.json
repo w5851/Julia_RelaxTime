@@ -1,0 +1,28 @@
+{
+  "ds_grid_n": 60,
+  "convergence_gate_enabled": false,
+  "convergence_angle_nodes": 0,
+  "generator_sha256": "41ab4f6664223f7fe0e2fe7b72b6114ef9ed5d68025ea8807bf5660595bf27a8",
+  "only_convergence_gate": false,
+  "coverage_threshold": 0.7,
+  "convergence_phi_nodes": 0,
+  "generator": "scripts\\analysis\\relaxtime\\phase_guided_p128_mechanism_scan.jl",
+  "max_ds": 2.0,
+  "convergence_n_sigma_points": 0,
+  "window_count": 8,
+  "schema": "phase_guided_p128_mechanism_scan_manifest_v1",
+  "exchange_channel_contract": "denominator diagnostics are emitted per legal exchange channel; total_cross_section and rate bands are full-process quantities and rate bands are emitted once with exchange_channel=all",
+  "production_a_builder_config": {
+    "p_max": 20.0,
+    "cos_nodes": 4,
+    "use_aniso": true,
+    "p_nodes": 16
+  },
+  "channel_limit": 4,
+  "convergence_sigma_grid_n": 0,
+  "repository_head": "7d58534dd5d95d6eb51cc2304f4e68aeea338b1d",
+  "convergence_p_nodes": 0,
+  "integration_mode": "semi_infinite",
+  "candidate_csv": "docs\\analysis\\relaxtime\\phase_guided_transport\\phase_guided_transport_p128_xi001_analysis_v2\\tables\\mechanism_window_candidates.csv",
+  "case_name": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2"
+}

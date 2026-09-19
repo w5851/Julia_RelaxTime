@@ -1,0 +1,3 @@
+window_id,n_points,max_rel_step,max_rel_curvature,dominant_background_driver,upstream_branch_flag
+mode_a_muB900p0_alpha1p0_xim0p003_sbar_review,3,0.14351965037754455,0.21315262249920097,m_u,true
+mode_a_muB900p0_alpha1p0_xim0p01_sbar_review,3,0.07388667825588814,0.004253706134231741,m_u,false
