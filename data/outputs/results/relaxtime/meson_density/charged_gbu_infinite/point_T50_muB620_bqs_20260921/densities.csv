@@ -1,0 +1,5 @@
+channel,density_fm3,passed,status,reason
+pi_plus,5.8481395635567366e-6,true,accepted,
+pi_minus,6.439011653302186e-6,true,accepted,
+K_plus,3.7183733172004564e-7,true,accepted,
+K_minus,NaN,false,local_gate_failed,
