@@ -1,0 +1,58 @@
+name: Arena BQS cold-start residual verification
+on:
+  push:
+    branches: [arena/01a0c36e-julia-relaxtime]
+    paths:
+      - .github/workflows/arena-bqs-cold-start.yml
+      - scripts/analysis/relaxtime/check_charged_gbu_bqs_cold_start.jl
+permissions:
+  contents: read
+  actions: read
+  checks: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      JULIA_NUM_THREADS: '1'
+      JULIA_NUM_PRECOMPILE_TASKS: '2'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12.5'
+      - uses: julia-actions/cache@v2
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: w5851/Julia_RelaxTime
+          run-id: 35587522965
+          name: bqs-T50-muB620-4ff25878932c1997748ad994e918bc2283396bc3
+          path: tmp/original
+      - run: julia --project=. -e 'using Pkg; Pkg.instantiate(;allow_autoprecomp=false)'
+      - name: Tighten only the diagnostic solve of the same eight equations
+        run: |
+          set -euo pipefail
+          julia --project=. scripts/analysis/relaxtime/check_charged_gbu_bqs_cold_start.jl \
+            tmp/original/data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/point_T50_muB620_bqs_20260921 \
+            tmp/cold_start_verification.json 2>&1 | tee tmp/cold_start_verification.log
+      - name: Publish diagnostic evidence
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const path='tmp/cold_start_verification.json';
+            const text=fs.existsSync(path)?fs.readFileSync(path,'utf8'):'No diagnostic produced';
+            const passed=fs.existsSync(path)&&JSON.parse(text).passed;
+            await github.rest.checks.create({owner:context.repo.owner,repo:context.repo.repo,
+              name:'BQS cold-start verification evidence',head_sha:context.sha,status:'completed',
+              conclusion:passed?'success':'failure',output:{title:'Same-residual tighter cold-start check',
+              summary:'Original production solver, density outputs and failed records are unchanged.',text}});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bqs-cold-start-verification
+          path: tmp/cold_start_verification.*
+          retention-days: 30
