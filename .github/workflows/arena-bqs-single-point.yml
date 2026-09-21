@@ -1,0 +1,63 @@
+name: Arena BQS single point T50 muB620
+
+# Branch-only research run. This workflow never writes to main (or any branch).
+on:
+  push:
+    branches: [arena/01a0c36e-julia-relaxtime]
+    paths:
+      - .github/workflows/arena-bqs-single-point.yml
+      - scripts/analysis/relaxtime/compute_charged_gbu_bqs_point.jl
+      - tests/unit/relaxtime/test_charged_gbu_bqs_point_adapter.jl
+
+permissions:
+  contents: read
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      JULIA_NUM_THREADS: '1'
+      JULIA_NUM_PRECOMPILE_TASKS: '2'
+      OPENBLAS_NUM_THREADS: '1'
+      RESULT_DIR: data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/point_T50_muB620_bqs_20260921
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12.5'
+      - uses: julia-actions/cache@v2
+      - name: Install pinned dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(;allow_autoprecomp=false)'
+      - name: Governance preflight and focused validation
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/bqs-validation
+          julia --project=. scripts/dev/check_task_ledger.jl --preflight | tee tmp/bqs-validation/preflight.log
+          for test in \
+            tests/unit/models/test_fixed_mub_conserved_charges.jl \
+            tests/unit/relaxtime/test_charged_gbu_production_contract.jl \
+            tests/unit/relaxtime/test_charged_gbu_bqs_point_adapter.jl \
+            tests/integration/relaxtime/test_charged_gbu_entrypoint_contract.jl; do
+            if [ -f "$test" ]; then
+              julia --project=. "$test" | tee "tmp/bqs-validation/$(basename "$test").log"
+            else
+              echo "Missing required test: $test"; exit 1
+            fi
+          done
+      - name: Compute constrained point with unchanged GBU gates
+        run: |
+          set -euo pipefail
+          bash scripts/dev/run_with_sysimage.sh --mismatch-policy=fallback \
+            scripts/analysis/relaxtime/compute_charged_gbu_bqs_point.jl \
+            --T-MeV 50 --muB-MeV 620 --workers 2 --output "$RESULT_DIR" \
+            2>&1 | tee tmp/bqs-validation/computation.log
+      - name: Preserve results including failed gates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bqs-T50-muB620-${{ github.sha }}
+          path: |
+            data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/point_T50_muB620_bqs_20260921
+            tmp/bqs-validation
+          retention-days: 30
