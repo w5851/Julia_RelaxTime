@@ -1,0 +1,65 @@
+name: Arena BQS result audit
+on:
+  push:
+    branches: [arena/01a0c36e-julia-relaxtime]
+    paths: [.github/workflows/arena-bqs-review.yml]
+permissions:
+  contents: read
+  actions: read
+  checks: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: w5851/Julia_RelaxTime
+          run-id: 35587522965
+          name: bqs-T50-muB620-4ff25878932c1997748ad994e918bc2283396bc3
+          path: evidence
+      - name: Independently inspect frozen output (no numerical rerun)
+        run: |
+          python - <<'PY'
+          import csv, json, hashlib, pathlib
+          root=pathlib.Path('evidence/data/outputs/results/relaxtime/meson_density/charged_gbu_infinite/point_T50_muB620_bqs_20260921')
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          manifest=json.loads((root/'manifest.json').read_text())
+          hashes_ok=all(sha(root/p)==h for p,h in manifest['output_hashes'].items())
+          files={}
+          names=['ratios.csv','densities.csv','bqs_diagnostics.csv','background.json','background_p96.json','background_cold.json','background_checks.json']
+          for name in names: files[name]=(root/name).read_text()
+          channels={}
+          independent={}
+          for ch in ('pi_plus','pi_minus','K_plus','K_minus'):
+            r=json.loads((root/f'{ch}.json').read_text())
+            channels[ch]={k:v for k,v in r.items() if k!='rows'}
+            if r['passed']:
+              rows=list(csv.DictReader((root/f'{ch}_shells.csv').open()))
+              chosen=[x for x in rows if x['band']!='bulk' or int(x['order'])==r['final_order']]
+              n=sum(float(x['weight'])*float(x['density']) for x in chosen)
+              independent[ch]={'sum':n,'reported':r['density'],'absolute_difference':abs(n-r['density'])}
+          result={'source_run':35587522965,'source_sha':'4ff25878932c1997748ad994e918bc2283396bc3',
+            'artifact_id':10633463464,'all_original_output_hashes_match':hashes_ok,
+            'manifest_status':manifest['status'],'files':files,'channels':channels,
+            'independent_shell_sums':independent,'original_file_hashes':{n:sha(root/n) for n in names}}
+          pathlib.Path('audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          assert hashes_ok
+          assert all(x['absolute_difference']<1e-14 for x in independent.values())
+          PY
+      - name: Publish audit through the GitHub API (repository remains read-only)
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const text = fs.existsSync('audit.json') ? fs.readFileSync('audit.json','utf8') : 'No audit produced';
+            if (Buffer.byteLength(text)>65000) throw new Error('Audit exceeds check output limit');
+            await github.rest.checks.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              name: 'BQS frozen result evidence', head_sha: context.sha,
+              status: 'completed', conclusion: 'neutral',
+              output: {title: 'Original output plus independent sum/hash audit',
+                summary: 'Evidence only; inspect per-channel and background gates. Not an all-passed scientific verdict.',text}
+            });
