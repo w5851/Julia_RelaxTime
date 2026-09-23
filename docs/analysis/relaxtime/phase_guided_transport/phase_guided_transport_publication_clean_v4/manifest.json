@@ -14,7 +14,7 @@
   "mechanism_review_artifact": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4_mechanism_review",
   "mechanism_review_summary_sha256": "59c17d77f95c2a18acc401decd5dd484480003503f0f62a1846054f45b2b8372",
   "status": "derived_author_accepted_display_only",
-  "manuscript_eligible": false,
+  "manuscript_eligible": true,
   "canonical_data_modified": false,
   "production_write": false,
   "solver_called": false,
@@ -90,13 +90,17 @@
     "the mode-A first-order gap remains a hard split and is not filled",
     "the tau_sbar endpoint display value is not a replacement equilibrium branch solution",
     "denominator-chain evidence is mechanism context, not a finite-width regularization",
-    "the local high-rate convergence gate was not run"
+    "the local high-rate convergence gate was not run",
+    "manuscript eligibility applies to the author-accepted v4 display layer only",
+    "source raw numerical status remains diagnostic_only",
+    "the local high-rate convergence gate was not run and is not claimed as passed",
+    "the mode-B composite mechanism remains unassessed"
   ],
   "outputs": [
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/README.md",
-      "sha256": "c7ca996608a1ca3314266fe4e37f28bebef64f17cb3d148a83289d30aa5d6de9",
-      "bytes": 2583
+      "sha256": "e9e3261b15591c2bb246190048dee73cc9df108f56341a8f1f92536968dcee89",
+      "bytes": 3021
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/tables/boundary_gap_map.csv",
@@ -115,8 +119,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/tables/claim_ledger.csv",
-      "sha256": "2a4c33d47b2a71002a27868fb07c7b58e750aa610a4b37f71ccba19dea460fab",
-      "bytes": 2194
+      "sha256": "ab06aa75e949d8df6c05b4a144f3c93858b4a5a14bc6855d6c076dafff1ba7ec",
+      "bytes": 2776
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/tables/curve_index.csv",
@@ -205,8 +209,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/figures/plot_manifest.json",
-      "sha256": "0d7711cfb0efe902475eae158ac6229d56f25a761883ad0d7e480c620b3496e1",
-      "bytes": 48285
+      "sha256": "90ae66d4478d5cfc699bfbf35dd7c9bffbea00da0268c8b13bb42068235779e6",
+      "bytes": 48765
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
@@ -580,7 +584,7 @@
     }
   ],
   "figure_status": "author_accepted_formal_layout",
-  "numerical_status": "diagnostic_only",
+  "numerical_status": "author_accepted_display_only",
   "current_publication_layer": true,
   "supersedes": [
     "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3",
@@ -599,5 +603,19 @@
   "promoted_from_manifest_sha256": "a3d31abc436d52080f073c22fc959147c4bafdfbd7d92780e85265e4c0069b4b",
   "promoted_from_plot_manifest_sha256": "7c3f4fa8816c3fdd03f744cc6ffae908543a02bbef853befeb4c954da040479e",
   "promoted_from_public_plot_manifest_sha256": "9b91f41ecab23a94fff7e64ecf6166d4c215e21d8941dcc6aa45a05625fffb0a",
-  "promoted_from_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677"
+  "promoted_from_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677",
+  "manuscript_eligibility_scope": "publication_clean_v4_display_layer_only",
+  "raw_numerical_status": "diagnostic_only",
+  "raw_manuscript_eligible": false,
+  "convergence_gate_status": "local_high_rate_gate_not_run",
+  "manuscript_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json",
+  "eligibility_decision_basis": "explicit_author_acceptance_of_v4_display_layer",
+  "convergence_claim": false,
+  "author_manuscript_acceptance": {
+    "status": "accepted",
+    "scope": "publication_clean_v4_display_layer_only",
+    "recorded_at_utc": "2026-09-23T05:17:32.789092+00:00",
+    "raw_results_unchanged": true,
+    "local_high_rate_gate_run": false
+  }
 }

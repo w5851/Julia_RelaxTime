@@ -9,11 +9,19 @@ adjustment to mode-A tau_sbar at the audited first-order left endpoint.
 The first-order gap remains split. Raw results, production registries, and
 solver outputs are unchanged.
 
-The layer is author-accepted as the current formal publication layout.
-`manuscript_eligible=false` still applies to raw numerical claims: the
-underlying layer remains solver-free and numerically diagnostic-only. The
-mechanism review is retained as diagnostic context; it is not a propagator
-regularization or a production convergence certificate.
+The layer is author-accepted and `manuscript_eligible=true` for display
+use with raw/display values and local adjustments disclosed.  Source raw
+numerical data remain `diagnostic_only` and are not promoted by this decision.
+No local high-rate convergence gate was run; the figure status does not imply
+that such a gate passed.
+
+The mode-B composite adjustment has no separate mechanism verdict in the v4
+record.  The `tau_sbar` endpoint remains a display extrapolation and cannot be
+used as a replacement branch solution or an exact jump amplitude.
+
+Eligibility record:
+
+    docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json
 
 Acceptance record:
 

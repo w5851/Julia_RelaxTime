@@ -7,12 +7,21 @@ from the reviewed v4 candidate on `2026-09-19T04:41:40.584741+00:00`.  It is a s
 display-only derivative of the approved raw transport case.  The raw CSVs,
 production registry, canonical data, and solver outputs are unchanged.
 
-The numerical layer remains `diagnostic_only`: local display interpolation and
-one-sided endpoint extrapolation are not new equilibrium or transport
-solutions, and they are not a convergence certificate.  The figure layer is
-accepted as the formal publication layout.  `manuscript_eligible=false` on
-the numerical manifest therefore refers to raw numerical claims, not to the
-author acceptance of these display figures.
+The v4 display derivative is `author_accepted_display_only` and is
+`manuscript_eligible=true` for the disclosed display layer.  Source raw
+numerical data remain `diagnostic_only` and `raw_manuscript_eligible=false`;
+this decision does not certify a new solver result or convergence.  The local
+high-rate gate was not run and is not represented as passed.
+
+Manuscript eligibility covers the 72 v4 figures and the explicit raw/display
+provenance in `tables/publication_clean_points.csv` and
+`tables/v4_display_adjustment_map.csv`.  The mode-B composite mechanism
+remains unassessed.  The mode-A `tau_sbar` endpoint remains a display
+extrapolation, not a replacement branch solution or a basis for an exact jump
+amplitude.  The first-order gap remains unfilled.
+
+The eligibility decision is recorded in
+`../publication_clean_v4_manuscript_eligibility_v1.json`.
 
 ## Accepted display rules
 
