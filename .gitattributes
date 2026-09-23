@@ -27,6 +27,7 @@ data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/
 data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json -text
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2_residual_smoothed.py -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v3.py -text

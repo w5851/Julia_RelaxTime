@@ -32,7 +32,7 @@
     "linear": 64,
     "log": 8
   },
-  "manuscript_eligible": false,
+  "manuscript_eligible": true,
   "canonical_data_modified": false,
   "production_write": false,
   "solver_called": false,
@@ -1050,10 +1050,10 @@
   ],
   "figure_layer_role": "publication_clean_display_mirror",
   "source_analysis_plot_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/figures/plot_manifest.json",
-  "source_analysis_plot_manifest_sha256": "0d7711cfb0efe902475eae158ac6229d56f25a761883ad0d7e480c620b3496e1",
+  "source_analysis_plot_manifest_sha256": "90ae66d4478d5cfc699bfbf35dd7c9bffbea00da0268c8b13bb42068235779e6",
   "status": "derived_author_accepted_display_only",
   "figure_status": "author_accepted_formal_layout",
-  "numerical_status": "diagnostic_only",
+  "numerical_status": "author_accepted_display_only",
   "current_publication_layer": true,
   "supersedes": [
     "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3",
@@ -1072,5 +1072,12 @@
   "promoted_from_manifest_sha256": "a3d31abc436d52080f073c22fc959147c4bafdfbd7d92780e85265e4c0069b4b",
   "promoted_from_plot_manifest_sha256": "7c3f4fa8816c3fdd03f744cc6ffae908543a02bbef853befeb4c954da040479e",
   "promoted_from_public_plot_manifest_sha256": "9b91f41ecab23a94fff7e64ecf6166d4c215e21d8941dcc6aa45a05625fffb0a",
-  "promoted_from_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677"
+  "promoted_from_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677",
+  "manuscript_eligibility_scope": "publication_clean_v4_display_layer_only",
+  "raw_numerical_status": "diagnostic_only",
+  "raw_manuscript_eligible": false,
+  "convergence_gate_status": "local_high_rate_gate_not_run",
+  "manuscript_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json",
+  "eligibility_decision_basis": "explicit_author_acceptance_of_v4_display_layer",
+  "convergence_claim": false
 }
