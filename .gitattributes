@@ -31,6 +31,8 @@ data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_stric
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json -text
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json -text
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2_residual_smoothed.py -text
 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v3.py -text
@@ -42,7 +44,13 @@ scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v4.p
 # CRLF is part of these immutable snapshots, not trailing whitespace.
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v3/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/figure_layer_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

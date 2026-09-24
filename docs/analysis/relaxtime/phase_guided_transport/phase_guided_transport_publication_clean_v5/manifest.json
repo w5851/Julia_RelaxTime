@@ -13,8 +13,8 @@
   "adjustment_recipe_sha256": "e8c1e932869e11fdd44fee4f55df945ce2ba28def9cd3587ba042bdd0a487866",
   "mechanism_review_artifact": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4_mechanism_review",
   "mechanism_review_summary_sha256": "59c17d77f95c2a18acc401decd5dd484480003503f0f62a1846054f45b2b8372",
-  "status": "derived_author_review_required",
-  "manuscript_eligible": false,
+  "status": "derived_author_accepted_display_only",
+  "manuscript_eligible": true,
   "canonical_data_modified": false,
   "production_write": false,
   "solver_called": false,
@@ -91,18 +91,21 @@
     "the tau_sbar endpoint display value is not a replacement equilibrium branch solution",
     "denominator-chain evidence is mechanism context, not a finite-width regularization",
     "the local high-rate convergence gate was not run",
-    "manuscript eligibility applies to the author-accepted v4 display layer only",
     "source raw numerical status remains diagnostic_only",
     "the local high-rate convergence gate was not run and is not claimed as passed",
     "the mode-B composite mechanism remains unassessed",
     "v5 is a label-only review derivative of v4; v4 remains unchanged",
-    "tau axis units and endpoint wording do not alter numerical values or phase semantics"
+    "tau axis units and endpoint wording do not alter numerical values or phase semantics",
+    "publication_clean_v4 remains the immutable accepted parent display snapshot",
+    "v5 changes only tau-axis units and first-order endpoint legend wording",
+    "raw numerical status remains diagnostic_only and raw_manuscript_eligible=false",
+    "the first-order gap and all inherited display adjustment boundaries remain unchanged"
   ],
   "outputs": [
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/README.md",
-      "sha256": "f012290bb192913687c6b3a8eb9f0da05e9de343e2a99aec8a160b732ba33191",
-      "bytes": 2050
+      "sha256": "7f1399c42a1e45e07d9aceff410a93485652f191996885e31c44b6e330827329",
+      "bytes": 2275
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/boundary_gap_map.csv",
@@ -121,8 +124,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/claim_ledger.csv",
-      "sha256": "ab06aa75e949d8df6c05b4a144f3c93858b4a5a14bc6855d6c076dafff1ba7ec",
-      "bytes": 2776
+      "sha256": "3fa47ef7f79718eeddefc75e22b011f11d3034b9d7e5e9352bfa2f09a3721f68",
+      "bytes": 3511
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/curve_index.csv",
@@ -216,8 +219,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/figures/plot_manifest.json",
-      "sha256": "56070525f305237bf485a02866b7e6967c836d4a17b033b000ab072d770bc2f9",
-      "bytes": 50728
+      "sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf",
+      "bytes": 51057
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
@@ -600,23 +603,24 @@
   "author_acceptance": {
     "status": "accepted",
     "scope": "formal_publication_figure_layer",
-    "recorded_at_utc": "2026-09-19T04:41:40.584741+00:00",
+    "recorded_at_utc": "2026-09-24T10:38:42Z",
+    "source": "formal_manuscript_uses_publication_clean_v5",
     "runtime_default_unchanged": true,
     "raw_results_unchanged": true,
     "production_registry_unchanged": true
   },
-  "formalization_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json",
+  "formalization_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json",
   "promoted_from_artifact": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
   "promoted_from_manifest_sha256": "a3d31abc436d52080f073c22fc959147c4bafdfbd7d92780e85265e4c0069b4b",
   "promoted_from_plot_manifest_sha256": "7c3f4fa8816c3fdd03f744cc6ffae908543a02bbef853befeb4c954da040479e",
   "promoted_from_public_plot_manifest_sha256": "9b91f41ecab23a94fff7e64ecf6166d4c215e21d8941dcc6aa45a05625fffb0a",
   "promoted_from_figure_layer_manifest_sha256": "82e14120436dd34ed96069afc1f73efb169e7fffec01497f3b044e7a7f8ab677",
-  "manuscript_eligibility_scope": "publication_clean_v4_display_layer_only",
+  "manuscript_eligibility_scope": "publication_clean_v5_display_layer_only",
   "raw_numerical_status": "diagnostic_only",
   "raw_manuscript_eligible": false,
   "convergence_gate_status": "local_high_rate_gate_not_run",
-  "manuscript_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json",
-  "eligibility_decision_basis": "explicit_author_acceptance_of_v4_display_layer",
+  "manuscript_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json",
+  "eligibility_decision_basis": "explicit_author_confirmation_that_formal_manuscript_uses_v5",
   "convergence_claim": false,
   "author_manuscript_acceptance": {
     "status": "accepted",
@@ -645,5 +649,7 @@
     },
     "canonical_data_modified": false,
     "solver_called": false
-  }
+  },
+  "parent_accepted_display_layer": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
+  "parent_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json"
 }

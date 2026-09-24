@@ -1,14 +1,19 @@
-# RS publication_clean_v5 figure-layer review candidate
+# RS `publication_clean_v5` formal publication figure layer
 
-This directory records the byte-preserving public mirror for the v5 label-only
-derivative of publication_clean_v4.  It adds `[fm]` to relaxation-time y-axis
-labels and replaces `quark`/`hadron` endpoint wording with chirally restored /
-chirally broken branch endpoint wording.  Numerical values, raw data, audit
-tables, phase gaps, and solver outputs are unchanged.
+This directory records the byte-preserving public mirror for the
+author-accepted current publication-clean layer, adopted on `2026-09-24T10:38:42Z`.
+It is the label-only derivative of `publication_clean_v4`: relaxation-time
+axes carry `[fm]`, and the endpoint legend uses chirally restored/broken branch
+wording.  Numerical values, raw data, audit tables, phase gaps, and solver
+outputs are unchanged.
 
-The layer is for author review only and remains `manuscript_eligible=false`.
+`figure_status=author_accepted_formal_layout` and
+`manuscript_eligible=true` apply to the disclosed display layer only.
+`numerical_status=author_accepted_display_only`, while the source raw numerical
+status remains `diagnostic_only` and `raw_manuscript_eligible=false`.  No local
+high-rate convergence gate was run.
 
-Reproduction:
+Acceptance records:
 
-    python scripts/analysis/relaxtime/build_phase_guided_publication_clean_v5.py
-    python scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v5.py
+    docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json
+    docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json

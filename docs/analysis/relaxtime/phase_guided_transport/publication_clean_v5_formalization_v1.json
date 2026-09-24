@@ -1,0 +1,71 @@
+{
+  "schema": "phase_guided_transport_publication_clean_v5_formalization_v1",
+  "status": "author_accepted_formal_publication_figure_layer",
+  "recorded_at_utc": "2026-09-24T10:38:42Z",
+  "decision_basis": "explicit_author_confirmation_that_formal_manuscript_uses_v5",
+  "current_publication_layer": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5",
+  "current_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5",
+  "current_figure_layer_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/figure_layer_manifest.json",
+  "parent_v4_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json",
+  "parent_v4_eligibility_record_sha256": "2b9c88350d7a823b8f356f61c5732b9f949f7626f6ed31f2b326381be7030fc8",
+  "source_v5_hashes_before": {
+    "package_manifest_sha256": "7df5f3177f71026cbb6df7ec58be76cfe8ec7f1964d4a8089d8d81a7d551e784",
+    "plot_manifest_sha256": "56070525f305237bf485a02866b7e6967c836d4a17b033b000ab072d770bc2f9",
+    "public_plot_manifest_sha256": "220372efbea99fc34bb832c83ee5fa7cbb0cd85ddc52f05b576955d2866a9ad0",
+    "figure_layer_manifest_sha256": "e17b86cb3e8b0693d825f9d272bee2883ec4e76ea4f4c5c56bb5d0feb65a89b7"
+  },
+  "parent_v4_hashes": {
+    "package_manifest_sha256": "e78f2c4b727b16a9294c79c896cd6733a7566df06fefb696166084e7357bc7eb",
+    "plot_manifest_sha256": "90ae66d4478d5cfc699bfbf35dd7c9bffbea00da0268c8b13bb42068235779e6",
+    "public_plot_manifest_sha256": "64b426eb4dea4dae202647e6f104ed776d5656c6f25d4c6eb806703100b64cee",
+    "figure_layer_manifest_sha256": "a03dc260ac659eafb84b000db93a4a6c7e385a2d786bfd513255414dca3535a9"
+  },
+  "final_hashes": {
+    "package_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
+    "plot_manifest_sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf",
+    "public_plot_manifest_sha256": "b59c0ea8895567c2360ad4a10b33a8c3ec22f55639b0d280d2c89c3df1a027f9",
+    "figure_layer_manifest_sha256": "1be5424a5bb7cdb4906a82e05bac02b3c8e81f326a72278722045432e2568e87",
+    "claim_ledger_sha256": "3fa47ef7f79718eeddefc75e22b011f11d3034b9d7e5e9352bfa2f09a3721f68"
+  },
+  "figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "solver_called": false,
+  "production_write": false,
+  "canonical_data_modified": false,
+  "raw_results_unchanged": true,
+  "production_registry_unchanged": true,
+  "numerical_status": "author_accepted_display_only",
+  "manuscript_eligible": true,
+  "manuscript_eligibility_scope": "publication_clean_v5_display_layer_only",
+  "raw_numerical_status": "diagnostic_only",
+  "raw_manuscript_eligible": false,
+  "convergence_gate_status": "local_high_rate_gate_not_run",
+  "convergence_claim": false,
+  "display_label_update": {
+    "kind": "display_label_only",
+    "tau_y_axis_unit": "fm",
+    "tau_fields": [
+      "tau_u",
+      "tau_d",
+      "tau_s",
+      "tau_ubar",
+      "tau_dbar",
+      "tau_sbar"
+    ],
+    "endpoint_legend_labels": {
+      "quark": "chirally restored branch endpoint",
+      "hadron": "chirally broken branch endpoint"
+    },
+    "canonical_data_modified": false,
+    "solver_called": false
+  },
+  "known_boundaries": [
+    "v4 remains retained unchanged as the accepted parent display layer",
+    "raw numerical results remain diagnostic_only",
+    "no high-rate convergence claim is made",
+    "v5 label changes do not alter values, phase gaps, or branch semantics"
+  ]
+}

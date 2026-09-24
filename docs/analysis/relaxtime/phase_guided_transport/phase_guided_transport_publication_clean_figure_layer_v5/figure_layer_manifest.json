@@ -1,16 +1,16 @@
 {
   "schema": "phase_guided_transport_publication_clean_figure_layer_manifest_v5",
   "figure_layer_role": "publication_clean_display_mirror",
-  "status": "derived_author_review_required",
-  "manuscript_eligible": false,
+  "status": "derived_author_accepted_display_only",
+  "manuscript_eligible": true,
   "solver_called": false,
   "source_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5",
   "source_analysis_package_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/manifest.json",
-  "source_analysis_package_manifest_sha256": "7df5f3177f71026cbb6df7ec58be76cfe8ec7f1964d4a8089d8d81a7d551e784",
+  "source_analysis_package_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
   "source_plot_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/figures/plot_manifest.json",
-  "source_plot_manifest_sha256": "56070525f305237bf485a02866b7e6967c836d4a17b033b000ab072d770bc2f9",
+  "source_plot_manifest_sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf",
   "target_plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5/plot_manifest.json",
-  "target_plot_manifest_sha256": "220372efbea99fc34bb832c83ee5fa7cbb0cd85ddc52f05b576955d2866a9ad0",
+  "target_plot_manifest_sha256": "b59c0ea8895567c2360ad4a10b33a8c3ec22f55639b0d280d2c89c3df1a027f9",
   "sync_generator": "scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v5.py",
   "sync_generator_sha256": "9a5dcde222079f1bc4285ee09dbc609f1c12887293e631568d14c7d52e0afc33",
   "source_parent_artifact": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
@@ -1056,5 +1056,27 @@
       "bytes": 251270,
       "sha256": "31d03581961e549c8eb3e1434184b13102c2ff9e44b4096ca460059b868f0f17"
     }
-  ]
+  ],
+  "figure_status": "author_accepted_formal_layout",
+  "numerical_status": "author_accepted_display_only",
+  "manuscript_eligibility_scope": "publication_clean_v5_display_layer_only",
+  "raw_numerical_status": "diagnostic_only",
+  "raw_manuscript_eligible": false,
+  "convergence_gate_status": "local_high_rate_gate_not_run",
+  "convergence_claim": false,
+  "current_publication_layer": true,
+  "eligibility_decision_basis": "explicit_author_confirmation_that_formal_manuscript_uses_v5",
+  "author_acceptance": {
+    "status": "accepted",
+    "scope": "formal_publication_figure_layer",
+    "recorded_at_utc": "2026-09-24T10:38:42Z",
+    "source": "formal_manuscript_uses_publication_clean_v5",
+    "runtime_default_unchanged": true,
+    "raw_results_unchanged": true,
+    "production_registry_unchanged": true
+  },
+  "formalization_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json",
+  "manuscript_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json",
+  "parent_accepted_display_layer": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4",
+  "parent_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json"
 }
