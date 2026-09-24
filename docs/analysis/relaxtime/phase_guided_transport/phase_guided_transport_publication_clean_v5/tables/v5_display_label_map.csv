@@ -1,0 +1,9 @@
+scope,key,old_label,new_label,unit_or_semantics,canonical_data_modified
+relaxation_time_y_axis,tau_u,$\tau_u$,$\tau_u\;[\mathrm{fm}]$,fm,False
+relaxation_time_y_axis,tau_d,$\tau_d$,$\tau_d\;[\mathrm{fm}]$,fm,False
+relaxation_time_y_axis,tau_s,$\tau_s$,$\tau_s\;[\mathrm{fm}]$,fm,False
+relaxation_time_y_axis,tau_ubar,$\tau_{\bar u}$,$\tau_{\bar u}\;[\mathrm{fm}]$,fm,False
+relaxation_time_y_axis,tau_dbar,$\tau_{\bar d}$,$\tau_{\bar d}\;[\mathrm{fm}]$,fm,False
+relaxation_time_y_axis,tau_sbar,$\tau_{\bar s}$,$\tau_{\bar s}\;[\mathrm{fm}]$,fm,False
+first_order_endpoint_legend,quark,chiral-restored (quark) endpoint,chirally restored branch endpoint,branch endpoint wording only,False
+first_order_endpoint_legend,hadron,chiral-broken (hadron) endpoint,chirally broken branch endpoint,branch endpoint wording only,False

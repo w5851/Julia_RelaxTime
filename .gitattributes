@@ -5,8 +5,10 @@ docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publicatio
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v3/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v4/** -text
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4_mechanism_review/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v2_residual_smoothing/** -text
@@ -14,6 +16,7 @@ docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v3_residua
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v4_residual_smoothing/** -text
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/** -text
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4/** -text
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5/** -text
 data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv -text
 data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json -text
 data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv -text
