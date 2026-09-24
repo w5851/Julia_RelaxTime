@@ -1,0 +1,54 @@
+{
+  "schema": "phase_guided_transport_publication_clean_v5_manuscript_eligibility_v1",
+  "status": "author_accepted_display_only_manuscript_eligible",
+  "recorded_at_utc": "2026-09-24T10:38:42Z",
+  "decision_basis": "explicit_author_confirmation_that_formal_manuscript_uses_v5",
+  "current_analysis_package": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5",
+  "current_public_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5",
+  "current_figure_layer_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/figure_layer_manifest.json",
+  "formalization_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json",
+  "formalization_record_sha256": "919270f0fcda53aa5f38fe5ff02f919a97e6bf455250c886399ed5799f80e4c1",
+  "parent_v4_eligibility_record": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json",
+  "parent_v4_eligibility_record_sha256": "2b9c88350d7a823b8f356f61c5732b9f949f7626f6ed31f2b326381be7030fc8",
+  "final_hashes": {
+    "package_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
+    "plot_manifest_sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf",
+    "public_plot_manifest_sha256": "b59c0ea8895567c2360ad4a10b33a8c3ec22f55639b0d280d2c89c3df1a027f9",
+    "figure_layer_manifest_sha256": "1be5424a5bb7cdb4906a82e05bac02b3c8e81f326a72278722045432e2568e87",
+    "claim_ledger_sha256": "3fa47ef7f79718eeddefc75e22b011f11d3034b9d7e5e9352bfa2f09a3721f68"
+  },
+  "figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "numerical_status": "author_accepted_display_only",
+  "manuscript_eligible": true,
+  "manuscript_eligibility_scope": "publication_clean_v5_display_layer_only",
+  "raw_numerical_status": "diagnostic_only",
+  "raw_manuscript_eligible": false,
+  "source_production_status": "diagnostic_only",
+  "source_solver_called": true,
+  "display_derivative_solver_called": false,
+  "production_write": false,
+  "raw_results_modified": false,
+  "production_registry_modified": false,
+  "convergence_gate_status": "local_high_rate_gate_not_run",
+  "convergence_claim": false,
+  "display_label_map": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v5_display_label_map.csv",
+  "raw_display_provenance": {
+    "point_table": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/publication_clean_points.csv",
+    "adjustment_map": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v4_display_adjustment_map.csv",
+    "inherited_parent": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v4"
+  },
+  "accepted_scope": [
+    "six tau y-axis units are labeled in fm",
+    "first-order endpoint legend wording uses chirally restored/broken branch terminology"
+  ],
+  "boundaries": [
+    "eligibility covers the v5 display derivative only",
+    "raw numerical results remain diagnostic_only and are not promoted to production_grade",
+    "the local high-rate convergence gate was not run and is not claimed as passed",
+    "v5 does not change numerical values, phase gaps, branch solutions, or transport kernels"
+  ]
+}
