@@ -111,7 +111,7 @@ jobs:
       - name: Download diagnostic shards
         uses: actions/download-artifact@v4
         with:
-          pattern: charged-gbu-contour-${{ inputs.output_tag }}-shard-*
+          pattern: charged-gbu-contour-${{ inputs.output_tag || format('push-{0}', github.run_id) }}-shard-*
           path: contour-shards
           merge-multiple: false
       - name: Write aggregation note
