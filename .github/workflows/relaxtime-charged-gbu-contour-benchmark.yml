@@ -1,0 +1,121 @@
+name: Charged GBU contour benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Timing mode"
+        required: false
+        default: "warm"
+        type: choice
+        options: [single, warm]
+      points:
+        description: "Comma-separated T_MeV:muB_MeV points"
+        required: false
+        default: "165.923:23.525,118.524:553.066,79.957:719.076,80:1000,140:900,200:800"
+        type: string
+      repeats:
+        description: "Warm/seed background repetitions per point"
+        required: false
+        default: "5"
+        type: string
+      density_repeats:
+        description: "Low-resolution density repetitions at every point"
+        required: false
+        default: "3"
+        type: string
+      mesh:
+        description: "Screening profile mesh"
+        required: false
+        default: "64"
+        type: string
+      q_nodes:
+        description: "Screening q nodes"
+        required: false
+        default: "8"
+        type: string
+      production_points:
+        description: "Representative full-gate production T_MeV:muB_MeV points"
+        required: false
+        default: "165.923:23.525,79.957:719.076"
+        type: string
+      production_repeats:
+        description: "Full-gate production density repetitions per point"
+        required: false
+        default: "1"
+        type: string
+  push:
+    branches:
+      - codex/charged-gbu-contour-benchmark
+    paths:
+      - "benchmark/relaxtime/bench_charged_gbu_contour_point.jl"
+      - "benchmark/relaxtime/charged_gbu_benchmark_utils.jl"
+      - ".github/workflows/relaxtime-charged-gbu-contour-benchmark.yml"
+      - "src/models/**"
+      - "src/relaxtime/**"
+      - "scripts/analysis/relaxtime/**"
+      - "config/models/pnjl/charged_gbu_infinite_v1.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [screening, production]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      JULIA_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      BENCH_CGBU_WORKLOAD: ${{ matrix.workload }}
+      BENCH_CGBU_MODE: ${{ inputs.mode || 'warm' }}
+      BENCH_CGBU_POINTS: ${{ matrix.workload == 'production' && (inputs.production_points || '165.923:23.525,79.957:719.076') || (inputs.points || '165.923:23.525,118.524:553.066,79.957:719.076,80:1000,140:900,200:800') }}
+      BENCH_CGBU_REPEATS: ${{ inputs.repeats || '5' }}
+      BENCH_CGBU_DENSITY_REPEATS: ${{ matrix.workload == 'production' && (inputs.production_repeats || '1') || (inputs.density_repeats || '3') }}
+      BENCH_CGBU_MESH: ${{ inputs.mesh || '64' }}
+      BENCH_CGBU_Q_NODES: ${{ inputs.q_nodes || '8' }}
+      BENCH_CGBU_OUTPUT: benchmark-output/charged_gbu_contour_benchmark.json
+    steps:
+      - name: Checkout immutable workflow revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-charged-gbu-contour-benchmark
+      - name: Instantiate and precompile dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Run benchmark and capture process wall time
+        run: |
+          set -o pipefail
+          mkdir -p benchmark-output
+          /usr/bin/time -f 'wall_s=%e\nuser_s=%U\nsys_s=%S\nmax_rss_kb=%M' \
+            -o benchmark-output/process_time.txt \
+            julia --project=. benchmark/relaxtime/bench_charged_gbu_contour_point.jl \
+            2>&1 | tee benchmark-output/benchmark_stdout.log
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-benchmark-${{ matrix.workload }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: benchmark-output/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Write summary
+        if: always()
+        run: |
+          echo "## Charged GBU contour benchmark" >> "$GITHUB_STEP_SUMMARY"
+          echo "- workload: ${BENCH_CGBU_WORKLOAD}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- mode: ${BENCH_CGBU_MODE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- points: ${BENCH_CGBU_POINTS}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- repeats: ${BENCH_CGBU_REPEATS}; density repeats: ${BENCH_CGBU_DENSITY_REPEATS}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- kernel: charged_gbu_infinite_v1" >> "$GITHUB_STEP_SUMMARY"
+          echo "- process wall-time and JSON are in artifact charged-gbu-contour-benchmark-${{ matrix.workload }}-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_STEP_SUMMARY"
