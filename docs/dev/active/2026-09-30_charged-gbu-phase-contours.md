@@ -119,7 +119,10 @@ BQS 相变边界；超出 screening 域的线段保持空白。候选选择器
 `K+/pi+` 梯度极值、mask 边界和相变参考线选取稀疏点，失败点不派发。新的
 `relaxtime-charged-gbu-contour-full-gate.yml` 按候选点并行运行四通道完整
 local/Mott/topology/eta/tail/q-order gate，每点独立保留 provenance；其结果仍为
-diagnostic，不更新 production baseline。
+diagnostic，不更新 production baseline。GitHub 的 `workflow_dispatch` 只会在默认
+分支已注册 workflow 后提供该入口，因此本轮 topic branch 的实际 12 点 dispatch
+使用了仓库已有的 benchmark workflow `production` workload；新 workflow 保留为
+合并后可复用的稀疏入口。
 
 ## 6. 后续任务
 
@@ -157,9 +160,20 @@ diagnostic，不更新 production baseline。
 
 - [x] 由 solver-free 选择器在冻结线、相变参考线覆盖域、mask 边界和 ratio 梯度
       大的单元抽取候选点；未覆盖的相变线段显式计数，不伪造网格点。
-- [ ] 对冻结线代表点、等高线 extrema 和 mask 两侧点运行完整 production gates
-      （workflow 已实现，尚待远程 dispatch）。
-- [ ] 比较 screening 与完整 gates 点，记录是否改变 horn/单调性判断。
+- [x] 通过现有 benchmark workflow 的 `production` workload 在 GitHub Actions 运行
+      12 个稀疏代表点（每点四个 charged channel）；run IDs 为
+      `36863447044`、`36863456109`、`36863466376`、`36863474205`、
+      `36863484426`、`36863494390`、`36863503078`、`36863513408`、
+      `36863524728`、`36863533978`、`36863547938`、`36863558667`。
+      这些点覆盖冻结线、梯度极值、mask 两侧和 crossover 参考线；候选源为
+      screening run `36862279055` 的 manifest SHA-256
+      `1562a6fc32d8aa48531749db874a36e3316eb5ab0fa391362481de6687f68ffe`。
+      12/12 points、48/48 channels 均 `accepted`，`final_order=16`，没有把失败
+      点转成零或成功值；production 总耗时范围为 `667.4--851.7 s/point`。
+- [x] 对同一 12 点比较 screening 与 full-gate 的 `K+/pi+`：最大绝对相对差约
+      `2.91%`，平均绝对相对差约 `0.885%`。因此 screening 可用于候选筛选，不能
+      取代 full gate；该对照未改变当前局部的 ratio 单调性/高梯度区域判断，也不
+      构成全网格收敛或 production baseline 更新授权。
 
 ### M4：证据治理
 
