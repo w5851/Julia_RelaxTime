@@ -28,6 +28,12 @@ on:
         required: false
         default: "diagnostic"
         type: string
+  push:
+    branches:
+      - codex/charged-gbu-contour-benchmark
+    paths:
+      - ".github/workflows/relaxtime-charged-gbu-contour-scan.yml"
+      - "scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl"
 
 jobs:
   prepare:
@@ -39,7 +45,7 @@ jobs:
       - id: plan
         shell: bash
         env:
-          SHARD_COUNT: ${{ inputs.shard_count }}
+          SHARD_COUNT: ${{ inputs.shard_count || '4' }}
         run: |
           set -euo pipefail
           [[ "${SHARD_COUNT}" =~ ^[1-9][0-9]*$ ]] || { echo "shard_count must be positive" >&2; exit 2; }
@@ -79,9 +85,9 @@ jobs:
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
       - name: Run diagnostic shard
         env:
-          T_GRID: ${{ inputs.t_grid }}
-          MUB_GRID: ${{ inputs.muB_grid }}
-          CHANNELS: ${{ inputs.channels }}
+          T_GRID: ${{ inputs.t_grid || '40:220:10' }}
+          MUB_GRID: ${{ inputs.muB_grid || '0:800:50' }}
+          CHANNELS: ${{ inputs.channels || 'pi_plus,K_plus,pi_minus,K_minus' }}
           SHARD_INDEX: ${{ matrix.shard_index }}
           SHARD_COUNT: ${{ needs.prepare.outputs.shard_count }}
           OUTPUT: contour-output
@@ -93,7 +99,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: charged-gbu-contour-${{ inputs.output_tag }}-shard-${{ matrix.shard_index }}
+          name: charged-gbu-contour-${{ inputs.output_tag || format('push-{0}', github.run_id) }}-shard-${{ matrix.shard_index }}
           path: contour-output
           retention-days: 30
 
