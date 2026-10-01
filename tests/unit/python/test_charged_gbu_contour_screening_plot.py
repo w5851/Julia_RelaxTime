@@ -88,3 +88,16 @@ def test_plotter_is_solver_free_and_explicitly_no_interpolation():
     assert '"interpolation_policy": "none"' in source
     assert "failed rows remain masked" in source
     assert "zero-fill" in source
+
+
+def test_reference_lines_keep_bqs_and_equal_flavor_coordinate_contract():
+    module = _load_module()
+    lines = module.load_reference_lines()
+    assert set(lines) == {"freezeout", "crossover", "first_order_maxwell"}
+    assert lines["freezeout"]["points"]
+    assert lines["crossover"]["coordinate_convention"].startswith("input mu_MeV")
+    assert "equal-flavor" in lines["first_order_maxwell"]["background_scope"]
+    dataset = {"T_grid": [40.0, 50.0], "muB_grid": [0.0, 50.0]}
+    x_limits, y_limits = module._axis_limits(dataset, {"freezeout": {"points": [{"T_MeV": 100.0, "muB_MeV": 200.0}]}})
+    assert x_limits[1] == 200.0
+    assert y_limits[1] == 100.0

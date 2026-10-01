@@ -129,6 +129,16 @@ jobs:
             --output-dir contour-plots \
             --source-run-id "$SOURCE_RUN_ID" \
             --git-sha "$SOURCE_GIT_SHA"
+      - name: Select sparse full-gate candidates
+        env:
+          SOURCE_RUN_ID: ${{ github.run_id }}
+          SOURCE_GIT_SHA: ${{ github.sha }}
+        run: |
+          python scripts/analysis/relaxtime/select_charged_gbu_contour_candidates.py \
+            --input contour-plots/contour_points_merged.csv \
+            --output-dir contour-candidates \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --git-sha "$SOURCE_GIT_SHA"
       - name: Write aggregation note
         shell: bash
         run: |
@@ -148,5 +158,13 @@ jobs:
         with:
           name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-plots
           path: contour-plots
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Upload sparse candidate manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-candidates
+          path: contour-candidates
           if-no-files-found: warn
           retention-days: 30

@@ -10,8 +10,11 @@ The benchmark separates process/JIT effects from steady-state work:
 
 Julia process startup is outside this script and is reported explicitly as
 excluded. The density workload uses the current infinite-thermal kernel at a
-small resolution and is a screening probe; it does not run the full production
-local/Mott/topology/eta/q-order gates.
+small resolution and is a screening probe by default. When
+``BENCH_CGBU_WORKLOAD=production`` is selected, the same entrypoint calls the
+full ``Workflow.channel_density`` path and records the
+local/Mott/topology/eta/q-order/tail gates; that workload is intentionally
+separate because it is orders of magnitude slower.
 """
 
 const CGBU_BENCH_ROOT = normpath(joinpath(@__DIR__, "..", ".."))

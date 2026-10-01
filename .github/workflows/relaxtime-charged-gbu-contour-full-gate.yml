@@ -1,0 +1,127 @@
+name: Charged GBU sparse contour full gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      points:
+        description: "Comma-separated T_MeV:muB_MeV points from candidate_manifest.json"
+        required: true
+        type: string
+      source_run_id:
+        description: "Screening run id that produced the candidate manifest"
+        required: false
+        default: ""
+        type: string
+      candidate_manifest_sha256:
+        description: "SHA-256 of candidate_manifest.json"
+        required: false
+        default: ""
+        type: string
+      output_tag:
+        description: "Artifact tag"
+        required: false
+        default: "diagnostic-full-gate"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      points: ${{ steps.parse.outputs.points }}
+    steps:
+      - id: parse
+        shell: bash
+        env:
+          POINTS: ${{ inputs.points }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          raw = os.environ.get("POINTS", "")
+          values = [item.strip() for item in raw.split(",") if item.strip()]
+          if not values:
+              raise SystemExit("points must not be empty")
+          pattern = re.compile(r"^[0-9]+(?:\.[0-9]+)?:[0-9]+(?:\.[0-9]+)?$")
+          if any(not pattern.fullmatch(value) for value in values):
+              raise SystemExit("points must be comma-separated T_MeV:muB_MeV values")
+          if len(set(values)) != len(values):
+              raise SystemExit("points must be unique")
+          print("points=" + json.dumps(values, separators=(",", ":")))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write("points=" + json.dumps(values, separators=(",", ":")) + "\n")
+          PY
+
+  full-gate:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        point: ${{ fromJSON(needs.prepare.outputs.points) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      JULIA_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      BENCH_CGBU_WORKLOAD: production
+      BENCH_CGBU_MODE: single
+      BENCH_CGBU_POINTS: ${{ matrix.point }}
+      BENCH_CGBU_REPEATS: "1"
+      BENCH_CGBU_DENSITY_REPEATS: "1"
+      BENCH_CGBU_OUTPUT: full-gate-output/charged_gbu_full_gate.json
+    steps:
+      - name: Checkout immutable workflow revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-charged-gbu-contour-full-gate
+      - name: Instantiate and precompile dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Write dispatch provenance
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CANDIDATE_MANIFEST_SHA256: ${{ inputs.candidate_manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p full-gate-output
+          cat > full-gate-output/dispatch_provenance.json <<EOF
+          {"source_screening_run_id":"${SOURCE_RUN_ID}","candidate_manifest_sha256":"${CANDIDATE_MANIFEST_SHA256}","point":"${{ matrix.point }}","workflow_run_id":"${{ github.run_id }}","git_sha":"${{ github.sha }}","diagnostic_only":true,"production_default":false}
+          EOF
+      - name: Run full production-gate point
+        run: |
+          set -o pipefail
+          /usr/bin/time -f 'wall_s=%e\nuser_s=%U\nsys_s=%S\nmax_rss_kb=%M' \
+            -o full-gate-output/process_time.txt \
+            julia --project=. benchmark/relaxtime/bench_charged_gbu_contour_point.jl \
+            2>&1 | tee full-gate-output/full_gate_stdout.log
+      - name: Upload full-gate point artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-${{ matrix.point }}
+          path: full-gate-output
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Write summary
+        if: always()
+        run: |
+          echo "## Charged GBU sparse full gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "- point: ${{ matrix.point }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- source screening run: ${{ inputs.source_run_id }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- scope: four charged channels; full local/Mott/topology/eta/tail/q-order gates" >> "$GITHUB_STEP_SUMMARY"
+          echo "- diagnostic_only=true; production_default=false" >> "$GITHUB_STEP_SUMMARY"

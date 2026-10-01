@@ -17,6 +17,8 @@ const CGBU_BENCH_UTILS = Main.ChargedGBUBenchmarkUtils
     @test occursin("source_hashes_before", source)
     @test occursin("source_hashes_after", source)
     @test occursin("process_startup_included=false", source)
+    @test occursin("full ``Workflow.channel_density`` path", source)
+    @test occursin("gate_scope=settings.workload == \"screening\" ? \"screening_only;full_production_gates_omitted\" : \"full_smoke_production_gates\"", source)
     @test !occursin("sqrt_s_NN_GeV=NaN", source)
     @test !occursin("CausalGBUResearch", source)
     @test !occursin("thermal=24", source)

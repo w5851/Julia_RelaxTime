@@ -19,6 +19,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+import tomllib
 from typing import Any, Iterable
 
 
@@ -47,6 +48,15 @@ VALUE_COLUMNS = (
     "Kminus_over_pi_minus",
 )
 SCHEMA_VERSION = "charged_gbu_contour_screening_plot_manifest_v1"
+DEFAULT_FREEZEOUT_PROFILE = REPOSITORY_ROOT / "config" / "physics" / "freezeout" / "default.toml"
+DEFAULT_PHASE_REFERENCE_ROOT = (
+    REPOSITORY_ROOT
+    / "data"
+    / "reference"
+    / "pnjl"
+    / "issue130_phase_reference_v2"
+    / "accepted"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -244,7 +254,137 @@ def _edges(values: list[float]) -> list[float]:
     return [2 * values[0] - mids[0], *mids, 2 * values[-1] - mids[-1]]
 
 
-def _render_figures(dataset: dict[str, Any], output_dir: Path) -> list[Path]:
+def _reference_points(reference_lines: dict[str, Any]) -> list[tuple[float, float]]:
+    return [
+        (float(point["muB_MeV"]), float(point["T_MeV"]))
+        for line in reference_lines.values()
+        for point in line["points"]
+    ]
+
+
+def load_reference_lines(
+    *,
+    freezeout_profile: Path = DEFAULT_FREEZEOUT_PROFILE,
+    phase_reference_root: Path = DEFAULT_PHASE_REFERENCE_ROOT,
+    xi: float = 0.0,
+    sqrt_s_min_GeV: float = 3.0,
+    sqrt_s_max_GeV: float = 200.0,
+    freezeout_points: int = 256,
+) -> dict[str, Any]:
+    """Load solver-free reference curves with explicit coordinate provenance.
+
+    The phase-reference tables use ``mu_MeV`` as the quark chemical potential;
+    the contour axes use ``muB_MeV`` and therefore apply ``muB=3*mu_q``.  The
+    accepted phase tables are an equal-flavor historical reference, not a
+    solved BQS phase boundary; that distinction is retained in the manifest and
+    plot labels.
+    """
+
+    if freezeout_points < 2:
+        raise ValueError("freezeout_points must be at least 2")
+    if not freezeout_profile.is_file():
+        raise ValueError(f"freeze-out profile does not exist: {freezeout_profile}")
+    cfg = tomllib.loads(freezeout_profile.read_text(encoding="utf-8"))
+    coeff = cfg.get("coefficients", {})
+    required = ("a_GeV", "b_GeV_inv1", "c_GeV_inv3", "d_GeV", "e_GeV_inv1")
+    if any(key not in coeff for key in required):
+        raise ValueError(f"freeze-out profile missing coefficients: {freezeout_profile}")
+    a, b, c = (float(coeff[key]) for key in required[:3])
+    d, e = (float(coeff[key]) for key in required[3:])
+    if not all(math.isfinite(value) for value in (a, b, c, d, e)):
+        raise ValueError(f"freeze-out profile has non-finite coefficients: {freezeout_profile}")
+    if sqrt_s_min_GeV <= 0 or sqrt_s_max_GeV < sqrt_s_min_GeV:
+        raise ValueError("invalid freeze-out sqrt(s) range")
+    freezeout = []
+    for index in range(freezeout_points):
+        sqrt_s = sqrt_s_min_GeV + (sqrt_s_max_GeV - sqrt_s_min_GeV) * index / (freezeout_points - 1)
+        muB_GeV = d / (1.0 + e * sqrt_s)
+        T_GeV = a - b * muB_GeV**2 - c * muB_GeV**4
+        if math.isfinite(muB_GeV) and math.isfinite(T_GeV) and T_GeV > 0:
+            freezeout.append({"sqrt_s_NN_GeV": sqrt_s, "muB_MeV": 1000.0 * muB_GeV, "T_MeV": 1000.0 * T_GeV})
+    lines: dict[str, Any] = {
+        "freezeout": {
+            "label": "chemical freeze-out (default profile; quark-only BQS target)",
+            "style": {"color": "white", "linestyle": "-", "linewidth": 1.35},
+            "points": freezeout,
+            "source": str(freezeout_profile),
+            "source_sha256": sha256_file(freezeout_profile),
+            "coordinate_convention": "muB_MeV; Cleymans-like profile evaluated from config",
+        }
+    }
+    phase_files = {
+        "crossover": "crossover_surface_accepted_phase_map_v1.csv",
+        "first_order_maxwell": "maxwell_surface_accepted_phase_map_v1.csv",
+    }
+    phase_styles = {
+        "crossover": {"color": "cyan", "linestyle": "--", "linewidth": 1.0},
+        "first_order_maxwell": {"color": "yellow", "linestyle": ":", "linewidth": 1.15},
+    }
+    for key, filename in phase_files.items():
+        path = phase_reference_root / "tables" / filename
+        if not path.is_file():
+            raise ValueError(f"phase reference table does not exist: {path}")
+        points = []
+        with path.open("r", newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                try:
+                    row_xi = float(row["xi"])
+                    temperature = float(row["T_MeV"])
+                    mu_q = float(row["mu_MeV"])
+                except (KeyError, TypeError, ValueError) as exc:
+                    raise ValueError(f"invalid phase reference row in {path}: {row}") from exc
+                if abs(row_xi - xi) > 1.0e-9:
+                    continue
+                if not all(math.isfinite(value) for value in (temperature, mu_q)):
+                    raise ValueError(f"non-finite phase reference row in {path}: {row}")
+                points.append({"muB_MeV": 3.0 * mu_q, "T_MeV": temperature})
+        points.sort(key=lambda point: (point["muB_MeV"], point["T_MeV"]))
+        lines[key] = {
+            "label": f"{key.replace('_', ' ')} reference (equal-flavor; muB=3 muq)",
+            "style": phase_styles[key],
+            "points": points,
+            "source": str(path),
+            "source_sha256": sha256_file(path),
+            "xi": xi,
+            "coordinate_convention": "input mu_MeV interpreted as mu_q; plotted muB_MeV=3*mu_q",
+            "background_scope": "equal-flavor historical reference; not current BQS phase boundary",
+        }
+    return lines
+
+
+def _plot_reference_lines(ax: Any, reference_lines: dict[str, Any]) -> None:
+    import matplotlib.patheffects as path_effects
+
+    for line in reference_lines.values():
+        points = line["points"]
+        if not points:
+            continue
+        plotted = ax.plot(
+            [point["muB_MeV"] for point in points],
+            [point["T_MeV"] for point in points],
+            label=line["label"],
+            **line["style"],
+            zorder=4,
+        )
+        # Keep the white freeze-out guide visible both over the heatmap and in
+        # the blank region where a reference line extends beyond the scan.
+        if line.get("style", {}).get("color") == "white":
+            plotted[0].set_path_effects([
+                path_effects.Stroke(linewidth=float(line["style"].get("linewidth", 1.0)) + 1.6, foreground="black"),
+                path_effects.Normal(),
+            ])
+
+
+def _axis_limits(dataset: dict[str, Any], reference_lines: dict[str, Any]) -> tuple[tuple[float, float], tuple[float, float]]:
+    x_edges = _edges(dataset["muB_grid"])
+    y_edges = _edges(dataset["T_grid"])
+    points = _reference_points(reference_lines)
+    x_values = [x_edges[0], x_edges[-1], *[point[0] for point in points]]
+    y_values = [y_edges[0], y_edges[-1], *[point[1] for point in points]]
+    return (min(x_values), max(x_values)), (min(y_values), max(y_values))
+
+
+def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: dict[str, Any]) -> list[Path]:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -270,6 +410,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path) -> list[Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     x_edges = _edges(dataset["muB_grid"])
     y_edges = _edges(dataset["T_grid"])
+    x_limits, y_limits = _axis_limits(dataset, reference_lines)
     figures: list[Path] = []
 
     def heatmap(field: str, filename: str, title: str, colorbar: str, cmap: str) -> None:
@@ -289,9 +430,14 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path) -> list[Path]:
         )
         ax.set_xlabel(r"$\mu_B$ (MeV)")
         ax.set_ylabel(r"$T$ (MeV)")
-        ax.set_title(title)
-        ax.set_xlim(x_edges[0], x_edges[-1])
-        ax.set_ylim(y_edges[0], y_edges[-1])
+        ax.set_title(title + "\nfixed quark-only BQS; diagnostic screening")
+        _plot_reference_lines(ax, reference_lines)
+        ax.axvline(x_edges[-1], color="white", linestyle="-.", linewidth=0.8, alpha=0.8,
+                   label="screening domain boundary" if field == "Kplus_over_pi_plus" else None)
+        ax.set_xlim(*x_limits)
+        ax.set_ylim(*y_limits)
+        if field == "Kplus_over_pi_plus":
+            ax.legend(loc="best", fontsize=6.5, framealpha=0.75)
         fig.colorbar(image, ax=ax, label=colorbar)
         path = output_dir / filename
         fig.savefig(path)
@@ -321,12 +467,13 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path) -> list[Path]:
         )
         ax.set_title(name)
         ax.set_xlabel(r"$\mu_B$ (MeV)")
-        ax.set_xlim(x_edges[0], x_edges[-1])
-        ax.set_ylim(y_edges[0], y_edges[-1])
+        _plot_reference_lines(ax, reference_lines)
+        ax.set_xlim(*x_limits)
+        ax.set_ylim(*y_limits)
     axes[0].set_ylabel(r"$T$ (MeV)")
     cbar = fig.colorbar(image, ax=axes.ravel().tolist(), ticks=[0, 1, 2], shrink=0.88)
     cbar.ax.set_yticklabels(["pass", "channel fail", "point fail"])
-    fig.suptitle("Charged GBU screening masks (failed points are not zero-filled)")
+    fig.suptitle("Charged GBU screening masks (failed points are not zero-filled)\nfixed quark-only BQS; reference phase lines are not BQS solves")
     mask_path = output_dir / "screening_failure_masks.png"
     fig.savefig(mask_path)
     plt.close(fig)
@@ -353,7 +500,7 @@ def _write_merged_csv(dataset: dict[str, Any], path: Path) -> None:
             writer.writerow(output)
 
 
-def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], merged_csv: Path, source_run_id: str | None, git_sha: str | None) -> dict[str, Any]:
+def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], merged_csv: Path, source_run_id: str | None, git_sha: str | None, reference_lines: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -387,6 +534,24 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "interpolation_policy": "none",
         "missing_value_policy": "mask; never zero-fill",
         "units": {"T": "MeV", "muB": "MeV", "density": "fm^-3"},
+        "background_contract": {
+            "scope": "fixed quark-only BQS GBU partial yield",
+            "rho_Q_over_rho_B": 0.4,
+            "rho_S_fm3": 0.0,
+            "meson_feedback": False,
+            "diagnostic_only": True,
+        },
+        "reference_lines": {
+            key: {field: value for field, value in line.items() if field != "points"}
+            | {"point_count": len(line["points"])}
+            for key, line in reference_lines.items()
+        },
+        "reference_coordinate_note": "phase tables use mu_q=mu_MeV; plots convert to muB_MeV=3*mu_q; phase references are equal-flavor historical guides, not current BQS boundaries",
+        "screening_domain": {
+            "T_MeV": [min(dataset["T_grid"]), max(dataset["T_grid"])],
+            "muB_MeV": [min(dataset["muB_grid"]), max(dataset["muB_grid"])],
+            "reference_lines_may_extend_beyond_domain": True,
+        },
         "merged_csv": {"path": str(merged_csv), "sha256": sha256_file(merged_csv)},
         "figures": [
             {"path": str(path), "bytes": path.stat().st_size, "sha256": sha256_file(path), "format": "png"}
@@ -410,6 +575,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--source-run-id", default=None)
     parser.add_argument("--git-sha", default=None)
+    parser.add_argument("--freezeout-profile", type=Path, default=DEFAULT_FREEZEOUT_PROFILE)
+    parser.add_argument("--phase-reference-root", type=Path, default=DEFAULT_PHASE_REFERENCE_ROOT)
+    parser.add_argument("--reference-xi", type=float, default=0.0)
+    parser.add_argument("--no-reference-lines", action="store_true")
     return parser.parse_args(argv)
 
 
@@ -421,10 +590,15 @@ def main(argv: list[str] | None = None) -> int:
         raise FileExistsError(f"refusing to overwrite non-empty output directory: {output_dir}")
     dataset = load_dataset(input_root)
     output_dir.mkdir(parents=True, exist_ok=True)
+    reference_lines = {} if args.no_reference_lines else load_reference_lines(
+        freezeout_profile=args.freezeout_profile.resolve(),
+        phase_reference_root=args.phase_reference_root.resolve(),
+        xi=args.reference_xi,
+    )
     merged_csv = output_dir / "contour_points_merged.csv"
     _write_merged_csv(dataset, merged_csv)
-    figures = _render_figures(dataset, output_dir)
-    manifest = _manifest(dataset, output_dir, figures, merged_csv, args.source_run_id, args.git_sha)
+    figures = _render_figures(dataset, output_dir, reference_lines)
+    manifest = _manifest(dataset, output_dir, figures, merged_csv, args.source_run_id, args.git_sha, reference_lines)
     manifest_path = output_dir / "plot_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": "complete", "row_count": len(dataset["rows"]), "figures": [path.name for path in figures], "manifest": str(manifest_path)}, ensure_ascii=False))

@@ -111,6 +111,16 @@ run `36849353973` 完成一次 4-shard diagnostic scan。scan workflow 现在只
 rows，失败行保留为 mask，不插值、不零填充。远程 artifact 保留 point JSON、CSV、
 manifest、聚合索引和 PNG/plot manifest；本地只下载到临时审计目录，不写入仓库。
 
+当前绘图器还默认叠加化学冻结线、crossover 和 Maxwell 参考线，并在 plot
+manifest 中记录 `rho_Q/rho_B=0.4`、`rho_S=0`、无介子反馈、单位及 `muB=3 muq`
+坐标转换。phase reference 是 equal-flavor 历史参考，只作导向线，不能宣称为当前
+BQS 相变边界；超出 screening 域的线段保持空白。候选选择器
+`select_charged_gbu_contour_candidates.py` 读取合并 screening CSV，按冻结线、
+`K+/pi+` 梯度极值、mask 边界和相变参考线选取稀疏点，失败点不派发。新的
+`relaxtime-charged-gbu-contour-full-gate.yml` 按候选点并行运行四通道完整
+local/Mott/topology/eta/tail/q-order gate，每点独立保留 provenance；其结果仍为
+diagnostic，不更新 production baseline。
+
 ## 6. 后续任务
 
 ### M0：可靠 benchmark
@@ -139,18 +149,22 @@ manifest、聚合索引和 PNG/plot manifest；本地只下载到临时审计目
       三联失败/mask 图；run `36854992530` 的 plots artifact manifest 确认
       `323` 行、`321 screened`、`2 gate_failed`，四张 PNG 均非空且带 SHA-256。
       绘图器为 solver-free，失败点不插值、不零填充。
-- [ ] 叠加明确标注单位、BQS、diagnostic 状态的参考线。
+- [x] 叠加明确标注单位、BQS、diagnostic 状态的参考线；参考线的 equal-flavor
+      与 `mu_q -> mu_B` 转换在 plot manifest 中显式记录。
 - [x] mask/failed 图已随上述 aggregate artifact 生成。
 
 ### M3：局部加密与完整验收
 
-- [ ] 在冻结线、相变参考线、低温高 μB 区域和 ratio 梯度大的单元加密。
-- [ ] 对冻结线代表点、等高线 extrema 和 mask 两侧点运行完整 production gates。
+- [x] 由 solver-free 选择器在冻结线、相变参考线覆盖域、mask 边界和 ratio 梯度
+      大的单元抽取候选点；未覆盖的相变线段显式计数，不伪造网格点。
+- [ ] 对冻结线代表点、等高线 extrema 和 mask 两侧点运行完整 production gates
+      （workflow 已实现，尚待远程 dispatch）。
 - [ ] 比较 screening 与完整 gates 点，记录是否改变 horn/单调性判断。
 
 ### M4：证据治理
 
-- [ ] 生成 manifest、输入/源码 hash、行数、NaN/Inf/失败点摘要和图形清单。
+- [x] 绘图器和候选选择器生成 manifest、输入/源码 hash、行数、NaN/Inf/失败点摘要
+      和图形/候选清单。
 - [ ] 只有作者审核后才提升为 accepted research artifact；不自动更新 baseline。
 
 ## 7. 风险与回退
