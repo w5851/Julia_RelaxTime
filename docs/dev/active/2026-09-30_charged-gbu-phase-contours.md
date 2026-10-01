@@ -106,8 +106,10 @@ muB 上限。该 equal-flavor 参考不认证 BQS 相变位置；BQS 附近的�
 scanner、scan workflow 和 scan contract 已提交到 topic branch，并通过 GitHub Actions
 run `36849353973` 完成一次 4-shard diagnostic scan。scan workflow 现在只保留
 `workflow_dispatch`；本轮用于触发扫描的 topic-branch `push` 已移除，避免后续提交
-自动重跑整张网格。远程 artifact 保留 point JSON、CSV、manifest 和聚合索引；本地
-只下载到临时审计目录，不写入仓库。
+自动重跑整张网格。aggregate job 还会用 solver-free Python 绘图器生成
+`n_pi+`、`n_K+`、`K+/pi+` 热图和三联失败/mask 图；绘图器只接受精确 screened
+rows，失败行保留为 mask，不插值、不零填充。远程 artifact 保留 point JSON、CSV、
+manifest、聚合索引和 PNG/plot manifest；本地只下载到临时审计目录，不写入仓库。
 
 ## 6. 后续任务
 
@@ -133,7 +135,9 @@ run `36849353973` 完成一次 4-shard diagnostic scan。scan workflow 现在只
 
 ### M2：图形与参考线
 
-- [ ] 生成 `n_pi+`、`n_K+`、`K+/pi+` 热图/等高图。
+- [ ] 通过 scan aggregate job 生成 `n_pi+`、`n_K+`、`K+/pi+` 热图以及
+      三联失败/mask 图；绘图器契约已通过本地 solver-free artifact 检查，仍需
+      新 Actions run 的 plots artifact 作为远程证据。
 - [ ] 叠加明确标注单位、BQS、diagnostic 状态的参考线；另画 mask/failed 图。
 
 ### M3：局部加密与完整验收
