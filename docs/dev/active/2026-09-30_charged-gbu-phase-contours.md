@@ -100,11 +100,14 @@ muB 上限。该 equal-flavor 参考不认证 BQS 相变位置；BQS 附近的�
   kernel 的冷/warm/continuation benchmark artifact。screening 与 production
   两个 job，各用 Julia 1.12.5 和单线程，在包 instantiate/precompile 后运行。
   immutable checkout、run id/attempt、源码/环境快照、stdout、process wall time
-  和失败时 artifact 均保留。初次只对当前 topic 分支窄路径 push 触发，手动入口
-  可重复；不为执行新 workflow 自动合并 main。
+  和失败时 artifact 均保留。workflow 只保留 `workflow_dispatch`，因此每次运行
+  都可指定网格、分片和 tag；不为执行新 workflow 自动合并 main。
 
-本地 scanner、scan workflow 和 scan contract 仍是未提交草稿，未发布或触发。
-恢复时 source/config 身份、逐点 checksum、失败重跑和聚合完整性还需补齐。
+scanner、scan workflow 和 scan contract 已提交到 topic branch，并通过 GitHub Actions
+run `36849353973` 完成一次 4-shard diagnostic scan。scan workflow 现在只保留
+`workflow_dispatch`；本轮用于触发扫描的 topic-branch `push` 已移除，避免后续提交
+自动重跑整张网格。远程 artifact 保留 point JSON、CSV、manifest 和聚合索引；本地
+只下载到临时审计目录，不写入仓库。
 
 ## 6. 后续任务
 
@@ -119,8 +122,14 @@ muB 上限。该 equal-flavor 参考不认证 BQS 相变位置；BQS 附近的�
 
 ### M1：远程筛选
 
-- [ ] 用确定的步长启动 diagnostic shards。
-- [ ] 合并点文件，验证每个网格 key 唯一、source hash 一致、失败点未被当作零。
+- [x] 用确定的步长启动 diagnostic shards（`T=40:10:220 MeV`、
+      `muB=0:50:800 MeV`，4 个 T-row shards）。
+- [x] 合并点文件，验证 323/323 个网格 key 唯一、每个 shard 的源码 hash
+      一致，且失败点未被当作零；分片点数为 `85/85/85/68`，321 点为
+      `screened`，2 点（`T=160 MeV, muB=200/250 MeV`）因 `K±` 的
+      `static instability or unresolved Bose endpoint` 为 `gate_failed`。
+- [x] 保留 run `36849353973` 的远程 artifacts 作为 diagnostic evidence；该
+      结果不是 full production、不是 baseline，也不授权自动绘图或物理晋升。
 
 ### M2：图形与参考线
 
@@ -143,4 +152,5 @@ muB 上限。该 equal-flavor 参考不认证 BQS 相变位置；BQS 附近的�
 - BQS solver 在一阶线附近可能有多支；保存 seed、残差和失败点，不拼接共存相。
 - Bose 支撑不安全时 mask 并保留 gate 信息，不裁零。
 - 低分辨率伪结构必须由 M3 完整 gates 点复核。
-- GitHub Actions benchmark 未运行前，不给出可靠墙钟或步长结论。
+- GitHub Actions 已给出 screening 的远程墙钟与 M1 网格完整性证据；full
+  production 仍按单点/单通道 shard 运行，不能由 screening 成本外推。

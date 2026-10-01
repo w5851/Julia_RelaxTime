@@ -28,13 +28,6 @@ on:
         required: false
         default: "diagnostic"
         type: string
-  push:
-    branches:
-      - codex/charged-gbu-contour-benchmark
-    paths:
-      - ".github/workflows/relaxtime-charged-gbu-contour-scan.yml"
-      - "scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl"
-
 jobs:
   prepare:
     runs-on: ubuntu-latest

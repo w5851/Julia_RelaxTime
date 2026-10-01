@@ -44,18 +44,6 @@ on:
         required: false
         default: "1"
         type: string
-  push:
-    branches:
-      - codex/charged-gbu-contour-benchmark
-    paths:
-      - "benchmark/relaxtime/bench_charged_gbu_contour_point.jl"
-      - "benchmark/relaxtime/charged_gbu_benchmark_utils.jl"
-      - ".github/workflows/relaxtime-charged-gbu-contour-benchmark.yml"
-      - "src/models/**"
-      - "src/relaxtime/**"
-      - "scripts/analysis/relaxtime/**"
-      - "config/models/pnjl/charged_gbu_infinite_v1.toml"
-
 permissions:
   contents: read
 
