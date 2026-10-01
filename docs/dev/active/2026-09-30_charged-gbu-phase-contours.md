@@ -43,14 +43,32 @@ shell 的单位是 fm^-2，外层 q 权重积分后密度才是 fm^-3。
 compile 字段仅覆盖 `@timed` 内可见的工作，不能声称包含全部调用者 inference，也不
 从总耗时中机械扣除；报告 warm 样本中观察到编译的次数。
 
-本机仅做了一次短实现探针（Julia 1.12.5、同进程两个 continuation 点、低分辨率）：
-冷首背景约 `30.28 s`，同点 warm 无 seed/seed 约 `1.31/1.43 s`，一个 continuation
-点约 `0.40 s`，四个通道的 warm screening shell 约 `0.47--0.64 s/channel`。
-这组数只证明计时分层和当前无限热入口可运行，不用于决定远程扫描步长；runner
-硬件、重复样本和完整 production gates 尚未测量。
+本机不承担数值扫描。GitHub Actions run `36832410627`（Julia 1.12.5、单线程、
+screening 六点）给出：进程首背景 `15.98 s`，同点 warm no-seed/seed 中位数
+`0.84/0.87 s`；其余点 warm 背景约 `0.15--1.73 s`。低分辨率四通道 screening
+density 每点约 `1.02--1.06 s`，benchmark 命令的 process wall time 为 `142.46 s`；
+包 instantiate/precompile 是 workflow 的独立步骤，不计入这些点成本。
 
-必须在 GitHub Actions 上运行重复样本后，才决定二维扫描步长；本机不运行完整
-二维网格。
+同一 run 的 production job 在 60 分钟上限前只完成首点：四通道完整 smoke gate
+通过，density 首调用 `842.82 s`、一次重复 `837.58 s`，第二点尚未完成，任务被取消。
+因此 screening 秒级成本不能外推 full production。
+
+随后 GitHub Actions run `36840120193` 对代表点 `(T,muB)=(165.923,23.525) MeV`
+进行两次完整 production density 重复：背景 cold `16.26 s`、warm no-seed/seed
+`0.848/0.844 s`；density 首调用 `835.05 s`，两次重复中位数 `830.11 s`
+（`829.67--830.56 s`），三者及四通道均通过 `full_smoke_production_gates`，
+首调用与重复差约 `0.59%`。该结果把首调用初始化与 production 稳态成本分开，
+但仍只是一个代表点，不构成完整网格收敛。
+
+上述结果说明背景 warm 求解不是历史意义上的毫秒级单一 gap solve：当前入口是
+8 维 `FixedMuBConservedCharges` 联合求解，含多候选 seed、BQS 热力学积分和 AD
+Jacobian；production density 还包括 q-order、local/Mott/topology、eta 与 tail
+等完整门禁。`@timed` 的 compile 字段只覆盖表达式内部可观察的编译，不能用来从
+总耗时机械扣除 JIT。
+
+screening benchmark 已足以支持先按 `T=40:10:220 MeV`、`muB=0:50:800 MeV`
+启动 diagnostic 网格；正式 production 仍必须按单点/单通道 shard 运行。二维网格
+和所有数值任务均通过 GitHub Actions，不在本机运行。
 
 ## 4. 建议初始范围
 
@@ -93,9 +111,11 @@ muB 上限。该 equal-flavor 参考不认证 BQS 相变位置；BQS 附近的�
 ### M0：可靠 benchmark
 
 - [x] 修正无限热入口、重复采样、JIT/GC 字段、源码前后 hash 和纯合成统计测试。
-- [ ] 在 GitHub Actions 上完成至少一组 warm 重复与 continuation 样本。
-- [ ] 报告冷首 JIT、warm 背景、seed continuation、density probe 的均值/中位数/
-      范围，并据此决定 `T`、`muB` 步长和 shard 数。
+- [x] 在 GitHub Actions 上完成 warm 重复、seed continuation 与代表点完整
+      production 重复（runs `36832410627`、`36840120193`）。
+- [x] 报告冷首 JIT、warm 背景、seed continuation、screening density 与 full-gate
+      density 的中位数/范围；初始 diagnostic 网格采用 `10/50 MeV` 步长，使用
+      远程 T-row shards。production 步长不由 screening 成本推断。
 
 ### M1：远程筛选
 

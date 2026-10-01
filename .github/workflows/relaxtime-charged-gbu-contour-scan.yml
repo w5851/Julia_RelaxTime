@@ -1,0 +1,123 @@
+name: Charged GBU contour scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      t_grid:
+        description: "T grid start:stop:step in MeV"
+        required: false
+        default: "40:220:10"
+        type: string
+      muB_grid:
+        description: "muB grid start:stop:step in MeV"
+        required: false
+        default: "0:800:50"
+        type: string
+      channels:
+        description: "Comma-separated charged channels"
+        required: false
+        default: "pi_plus,K_plus,pi_minus,K_minus"
+        type: string
+      shard_count:
+        description: "Number of parallel T-row shards"
+        required: false
+        default: "4"
+        type: string
+      output_tag:
+        description: "Artifact tag"
+        required: false
+        default: "diagnostic"
+        type: string
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      shard_count: ${{ steps.plan.outputs.shard_count }}
+      shard_ids: ${{ steps.plan.outputs.shard_ids }}
+    steps:
+      - id: plan
+        shell: bash
+        env:
+          SHARD_COUNT: ${{ inputs.shard_count }}
+        run: |
+          set -euo pipefail
+          [[ "${SHARD_COUNT}" =~ ^[1-9][0-9]*$ ]] || { echo "shard_count must be positive" >&2; exit 2; }
+          ids=$(python - <<'PY'
+          import os
+          n=int(os.environ['SHARD_COUNT'])
+          print(','.join(str(i) for i in range(n)))
+          PY
+          )
+          echo "shard_count=${SHARD_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "shard_ids=[${ids}]" >> "$GITHUB_OUTPUT"
+
+  scan:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: ${{ fromJSON(needs.prepare.outputs.shard_ids) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-charged-gbu-contour-scan
+      - name: Instantiate and precompile
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Run diagnostic shard
+        env:
+          T_GRID: ${{ inputs.t_grid }}
+          MUB_GRID: ${{ inputs.muB_grid }}
+          CHANNELS: ${{ inputs.channels }}
+          SHARD_INDEX: ${{ matrix.shard_index }}
+          SHARD_COUNT: ${{ needs.prepare.outputs.shard_count }}
+          OUTPUT: contour-output
+        run: |
+          julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl \
+            --output "$OUTPUT" --t-grid "$T_GRID" --muB-grid "$MUB_GRID" \
+            --channels "$CHANNELS" --shard-index "$SHARD_INDEX" --shard-count "$SHARD_COUNT"
+      - name: Upload diagnostic shard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-${{ inputs.output_tag }}-shard-${{ matrix.shard_index }}
+          path: contour-output
+          retention-days: 30
+
+  aggregate:
+    needs: scan
+    if: ${{ always() && needs.scan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download diagnostic shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: charged-gbu-contour-${{ inputs.output_tag }}-shard-*
+          path: contour-shards
+          merge-multiple: false
+      - name: Write aggregation note
+        shell: bash
+        run: |
+          set -euo pipefail
+          find contour-shards -name manifest.json -print | sort > contour-shards/manifests.txt
+          test -s contour-shards/manifests.txt
+          echo "Shard artifacts downloaded; merge and plotting remain an explicit review step." > contour-shards/aggregation_note.txt
+      - name: Upload shard index
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-${{ inputs.output_tag }}-index
+          path: contour-shards
+          retention-days: 30

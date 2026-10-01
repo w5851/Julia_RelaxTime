@@ -127,6 +127,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_infinite_readiness.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_gbu_production_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_gbu_contour_benchmark_contract.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_charged_gbu_contour_scan_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_research_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_effective_couplings.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_interaction_kernel.jl"),
