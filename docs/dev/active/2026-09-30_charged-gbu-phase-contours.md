@@ -135,10 +135,12 @@ manifest、聚合索引和 PNG/plot manifest；本地只下载到临时审计目
 
 ### M2：图形与参考线
 
-- [ ] 通过 scan aggregate job 生成 `n_pi+`、`n_K+`、`K+/pi+` 热图以及
-      三联失败/mask 图；绘图器契约已通过本地 solver-free artifact 检查，仍需
-      新 Actions run 的 plots artifact 作为远程证据。
-- [ ] 叠加明确标注单位、BQS、diagnostic 状态的参考线；另画 mask/failed 图。
+- [x] 通过 scan aggregate job 生成 `n_pi+`、`n_K+`、`K+/pi+` 热图以及
+      三联失败/mask 图；run `36854992530` 的 plots artifact manifest 确认
+      `323` 行、`321 screened`、`2 gate_failed`，四张 PNG 均非空且带 SHA-256。
+      绘图器为 solver-free，失败点不插值、不零填充。
+- [ ] 叠加明确标注单位、BQS、diagnostic 状态的参考线。
+- [x] mask/failed 图已随上述 aggregate artifact 生成。
 
 ### M3：局部加密与完整验收
 
