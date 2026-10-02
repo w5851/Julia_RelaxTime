@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -14,6 +15,7 @@ if str(_SCRIPT_PROJECT_ROOT) not in sys.path:
 
 from scripts.plotting.plot_manifest import MANIFEST_SCHEMA, PROJECT_ROOT, sha256_file
 from scripts.plotting.plot_style import ALLOWED_PROFILES, load_profile
+from scripts.plotting.plot_quality import inspect_export
 
 
 ALLOWED_MODES = {"audit", "estimated_midpoint", "strict", "legacy"}
@@ -90,6 +92,7 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
 
     path = Path(manifest_path).resolve()
     errors: list[str] = []
+    profile = None
     try:
         manifest = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -200,7 +203,7 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
             if fmt == "png" and output_path is not None:
                 _check_png_dpi(output_path, record.get("dpi"), label=label, errors=errors)
     if mode == "strict":
-        missing_formats = {"png", "svg"} - formats
+        missing_formats = set(profile.formats if profile is not None else ("png", "svg")) - formats
         if missing_formats:
             errors.append(f"strict outputs missing required formats: {sorted(missing_formats)}")
         png_records = [record for record in outputs if isinstance(record, dict) and str(record.get("format", "")).lower() == "png"]
@@ -232,6 +235,8 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
                 errors.append("strict rendering.figure_size_inches must be [width, height]")
             else:
                 expected_size = profile.data["figure_size_in"][column] if profile is not None else None
+                if rendering.get("size_override_reason") and profile is not None and profile.data.get("quality", {}).get("contract") == "final_size_v2":
+                    expected_size = declared_size
                 if expected_size is not None and any(abs(float(a) - float(b)) > 1.0e-9 for a, b in zip(declared_size, expected_size)):
                     errors.append(f"strict rendering size {declared_size} does not match profile {expected_size}")
 
@@ -241,7 +246,163 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
     if profile is not None and mode == "strict" and profile.data["semantics"].get("allow_connector") is not False:
         errors.append("strict profile must disallow connector rows")
 
+    if profile is not None and profile.data.get("quality", {}).get("contract") == "final_size_v2":
+        _check_final_size_contract(manifest, profile, repo_root, errors)
+
     return errors
+
+
+def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Path, errors: list[str]) -> None:
+    """Apply v2 display checks equally to review and strict assets.
+
+    Passing these checks never promotes the source numerical evidence.
+    """
+    policy = profile.data["quality"]
+    rendering = manifest.get("rendering", {})
+    if not isinstance(rendering, dict):
+        errors.append("v2 rendering metadata must be an object")
+        return
+    quality = rendering.get("quality", {})
+    if not isinstance(quality, dict):
+        errors.append("v2 rendering.quality must be an object")
+        return
+    outputs = manifest.get("outputs", [])
+    if not isinstance(outputs, list):
+        return
+    formats = {item.get("format") for item in outputs if isinstance(item, dict)}
+    delivery_stage = rendering.get("delivery_stage")
+    if delivery_stage not in {None, "png_review", "vector_delivery"}:
+        errors.append(f"v2 delivery_stage is invalid: {delivery_stage!r}")
+    if delivery_stage == "png_review":
+        required_formats = {"png"}
+        if formats != {"png"}:
+            errors.append("v2 png_review must contain PNG only; vector delivery is a later stage")
+        if manifest.get("manuscript_eligible") is not False:
+            errors.append("v2 png_review must keep manuscript_eligible=false")
+        if manifest.get("current_publication_layer") is not False:
+            errors.append("v2 png_review must keep current_publication_layer=false")
+        if rendering.get("vector_delivery_pending") is not True:
+            errors.append("v2 png_review must record vector_delivery_pending=true")
+    else:
+        required_formats = set(profile.formats)
+    if required_formats - formats:
+        errors.append(f"v2 outputs missing required formats: {sorted(required_formats - formats)}")
+    width = quality.get("intended_width_inches")
+    if not isinstance(width, (int, float)) or not math.isfinite(width) or width <= 0:
+        errors.append("v2 quality.intended_width_inches must be positive")
+        return
+    if width > float(policy["max_width_inches"]):
+        errors.append("v2 final width exceeds journal profile maximum")
+    declared_size = quality.get("figure_size_inches")
+    if (not isinstance(declared_size, list) or len(declared_size) != 2
+            or any(not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0 for value in declared_size)):
+        errors.append("v2 measured figure_size_inches is required")
+        return
+    expected_size = profile.data["figure_size_in"].get(rendering.get("column"))
+    if expected_size is None:
+        errors.append("v2 rendering.column must be single_column or double_column")
+    elif not rendering.get("size_override_reason") and declared_size != expected_size:
+        errors.append("v2 figure size override requires a documented reason")
+    if rendering.get("figure_size_inches") != declared_size:
+        errors.append("v2 rendering size must equal measured figure size")
+    scale = quality.get("placement_scale")
+    if not isinstance(scale, (int, float)) or not math.isfinite(scale) or abs(scale - width / declared_size[0]) > 1e-9:
+        errors.append("v2 placement_scale disagrees with intended/exported width")
+    for field in ("minimum_capital_numeral_height_mm", "minimum_curve_linewidth_pt"):
+        value = quality.get(field)
+        if not isinstance(value, (int, float)) or not math.isfinite(value):
+            errors.append(f"v2 quality.{field} must be a finite measurement")
+            return
+    for field in ("clipped_text", "text_overlap_pairs", "smallest_glyphs", "tick_axes"):
+        if not isinstance(quality.get(field), list):
+            errors.append(f"v2 quality.{field} must contain measurement evidence")
+            return
+    glyphs = quality["smallest_glyphs"]
+    if not glyphs or any(not isinstance(glyph, dict) or not isinstance(glyph.get("final_height_mm"), (int, float)) for glyph in glyphs):
+        errors.append("v2 smallest_glyphs must record actual displayed glyphs")
+    elif abs(min(glyph["final_height_mm"] for glyph in glyphs) - quality["minimum_capital_numeral_height_mm"]) > 1e-9:
+        errors.append("v2 minimum glyph height disagrees with glyph evidence")
+    for record in outputs:
+        if not isinstance(record, dict) or record.get("format") not in {"pdf", "png"}:
+            continue
+        output = _resolve_artifact_path(str(record.get("path", "")), root)
+        if not output.is_file():
+            continue
+        try:
+            inspection = inspect_export(output)
+        except (RuntimeError, ValueError, OSError) as exc:
+            errors.append(str(exc))
+            continue
+        if record.get("inspection") != inspection:
+            errors.append(f"v2 exported inspection evidence mismatch: {record.get('path')}")
+        if any(abs(float(actual) - float(expected)) > 0.005 for actual, expected in zip(inspection["physical_size_inches"], declared_size)):
+            errors.append("v2 exported physical size differs from measured figure size (tight crop or resize)")
+        if record["format"] == "pdf":
+            if record.get("vector") is not True or inspection["raster_image_count"]:
+                errors.append("v2 line chart PDF must contain vector curves, not embedded raster images")
+            if not inspection["fonts_embedded"] or inspection["type3_font_count"]:
+                errors.append("v2 PDF fonts must be embedded and not Type 3")
+            if inspection["page_count"] != 1:
+                errors.append("v2 chart PDF must have exactly one page")
+        elif inspection["size_pixels"][0] / width + 1 < profile.dpi:
+            errors.append("v2 PNG effective dpi at final placement is below profile dpi")
+    glyph_height = quality.get("minimum_capital_numeral_height_mm", 0)
+    typography_exception = rendering.get("typography_exception")
+    if typography_exception in {"dense_composite_review_compact_legend", "dense_composite_review_compact_typography"}:
+        if (manifest.get("figure_mode") != "audit" or manifest.get("publication_scope") != "internal_review"
+                or delivery_stage != "png_review" or manifest.get("manuscript_eligible") is not False
+                or manifest.get("current_publication_layer") is not False):
+            errors.append("compact typography exception is restricted to non-eligible audit/internal PNG review")
+        if float(glyph_height) < 1.5:
+            errors.append("compact typography review glyph height is below 1.5 mm")
+    elif float(glyph_height) < float(policy["min_capital_numeral_height_mm"]):
+        errors.append("v2 final capital/numeral glyph height is below 2 mm")
+    if float(quality.get("minimum_curve_linewidth_pt", 0)) < float(policy["min_curve_linewidth_pt"]):
+        errors.append("v2 final curve linewidth is below profile minimum")
+    marker = quality.get("minimum_landmark_diameter_mm")
+    if marker is not None and (not isinstance(marker, (int, float)) or not math.isfinite(marker) or marker < float(policy["min_landmark_diameter_mm"])):
+        errors.append("v2 final landmark diameter is below 1 mm")
+    if quality.get("clipped_text") or quality.get("text_overlap_pairs"):
+        errors.append("v2 contains clipped or overlapping text")
+    if quality.get("legend_axes_overlap_count") != 0:
+        allowed_in_axes_policy = rendering.get("legend_policy") in {
+            "shared_in_first_panel_reviewed",
+            "shared_in_top_row_panel_reviewed",
+            "best_in_axes_reviewed",
+            "shared_in_panel_reviewed_geometry_checked",
+        }
+        if not allowed_in_axes_policy:
+            errors.append("v2 legend must be outside data axes; in-axes layout requires a separately reviewed contract")
+        elif rendering.get("legend_policy") == "shared_in_panel_reviewed_geometry_checked":
+            if quality.get("legend_in_axes_overflow_count") != 0:
+                errors.append("v2 geometry-checked in-axes legend exceeds its host axes")
+            for kind in ("curve", "landmark"):
+                overlap_count = quality.get(f"legend_{kind}_overlap_count")
+                records = quality.get(f"legend_{kind}_overlaps")
+                if not isinstance(overlap_count, int) or not isinstance(records, list):
+                    errors.append(f"v2 geometry-checked in-axes legend requires {kind} overlap evidence")
+                elif overlap_count != len(records):
+                    errors.append(f"v2 legend {kind} overlap count disagrees with evidence")
+                elif overlap_count != 0:
+                    errors.append(f"v2 geometry-checked in-axes legend intersects a plotted {kind}")
+    ticks = quality.get("tick_axes", [])
+    if not ticks or any(not isinstance(item, dict) or not item.get("inward") or not item.get("both_sides") or not item.get("minor_count") or not item.get("major_count") for item in ticks):
+        errors.append("v2 requires inward major/minor ticks on all four sides")
+    axes = manifest.get("axes", [])
+    for axis in axes if isinstance(axes, list) else []:
+        if not isinstance(axis, dict):
+            continue
+        label = axis.get("label")
+        if not isinstance(label, str) or not label:
+            errors.append("v2 axes.label must record the rendered label")
+        elif axis.get("display_unit") != "dimensionless" and ("[" in label or "]" in label or "(" not in label or ")" not in label):
+            errors.append("v2 dimensional axes must use parentheses for units")
+    if rendering.get("color_route") == "color_online_grayscale_print" and not ({"eps", "ps"} & formats):
+        errors.append("APS color-online/grayscale-print production route requires PS/EPS")
+    if rendering.get("color_route") not in {"color_print_and_online", "color_online_grayscale_print", "undecided_review"}:
+        errors.append("v2 rendering.color_route is required")
+    if manifest.get("figure_mode") == "strict" and rendering.get("color_route") == "undecided_review":
+        errors.append("strict v2 production must select its color/print route")
 
 
 def main() -> int:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Plotting SOP"
+  short_description: "Produce traceable figures under the current plotting SOP."
+  default_prompt: "Use $plotting-sop to create or review figures from frozen inputs under the repository's current plotting contract."

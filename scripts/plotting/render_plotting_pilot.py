@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Render three read-only plotting-contract pilot cases.
+"""Reproduce three historical v1 plotting-contract pilot cases.
 
 The pilot consumes existing CSV/JSON artifacts only. It creates new sibling
 directories, refuses to overwrite an existing case, and never calls Julia or
-any solver. The output is intentionally a review package, not a final SOP.
+any solver. This is the v1 compatibility renderer; new paper cases use the
+APS v2 final-size contract documented in figure_production.md.
 """
 
 from __future__ import annotations
@@ -244,8 +245,8 @@ def phase_case(output_root: Path, command: str, suffix: str = "") -> Path:
     state_legend = axis.legend(handles=state_handles, loc="upper right", fontsize=7)
     axis.add_artist(state_legend)
     axis.legend(title="xi", loc="lower left", fontsize=7, title_fontsize=7, frameon=False)
-    axis.set_xlabel(r"$\mu_B$ [MeV]")
-    axis.set_ylabel(r"$T$ [MeV]")
+    axis.set_xlabel(r"$\mu_B$ (MeV)")
+    axis.set_ylabel(r"$T$ (MeV)")
     axis.set_xlim(left=0.0)
     axis.set_ylim(bottom=0.0)
     axis.text(
@@ -338,8 +339,8 @@ def meson_case(output_root: Path, command: str, suffix: str = "") -> Path:
             marker=support_marker,
             label=r"$K$" if index == 0 else None,
         )
-    axis.set_xlabel(r"$\sqrt{s_{NN}}$ [GeV]")
-    axis.set_ylabel(r"mass [fm$^{-1}$]")
+    axis.set_xlabel(r"$\sqrt{s_{NN}}$ (GeV)")
+    axis.set_ylabel(r"mass (fm$^{-1}$)")
     axis.set_xscale("log")
     axis.legend(frameon=False, loc="best")
     outputs = save_outputs(figure, output_dir=out_dir, stem="freezeout_meson_mass_pi_K_strict", profile=profile)
@@ -446,8 +447,8 @@ def c1_case(analysis_root: Path, c1_root: Path, command: str, suffix: str = "") 
         ):
             axis.plot(xis, values, zs, color="#222222", linestyle=linestyle, linewidth=linewidth, alpha=alpha)
     axis.set_xlabel(r"$\xi$")
-    axis.set_ylabel(r"$T$ [MeV]")
-    axis.set_zlabel(r"$\mu$ [MeV]")
+    axis.set_ylabel(r"$T$ (MeV)")
+    axis.set_zlabel(r"$\mu$ (MeV)")
     axis.set_title("C1 phase-surface estimated-midpoint review", fontsize=9, pad=8)
     axis.text2D(
         0.01,

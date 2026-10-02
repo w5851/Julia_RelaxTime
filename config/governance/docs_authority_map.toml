@@ -124,20 +124,22 @@ authoritative_for = ["paper_figure_production_contract", "figure_mode_style_prof
 entrypoints = [
   "scripts/plotting/validate_plot_artifact.py",
   "scripts/plotting/inventory_figure_assets.py",
-  "scripts/plotting/render_plotting_pilot.py",
 ]
 stable_entrypoints = [
   "scripts/plotting/validate_plot_artifact.py",
 ]
+legacy_entrypoints = [
+  "scripts/plotting/render_plotting_pilot.py",
+]
 configs = [
-  "config/plotting/audit_v1.toml",
-  "config/plotting/candidate_origin_like_v1.toml",
-  "config/plotting/strict_origin_like_v1.toml",
+  "config/plotting/candidate_aps_v2.toml",
+  "config/plotting/strict_aps_v2.toml",
 ]
 review_cycle_days = 120
-last_verified = "2026-08-15"
+last_verified = "2026-10-01"
 verification_commands = [
   "python -m pytest -q tests/unit/python/test_plotting_contract.py",
+  "python -m pytest -q tests/unit/python/test_plotting_quality.py",
   "python -m pytest -q tests/unit/python/test_plotting_asset_inventory.py",
   "python scripts/plotting/inventory_figure_assets.py --root data/outputs/figures --registry docs/analysis/governance/figure_asset_registry_v1/asset_registry.json --candidates docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv",
   "python scripts/plotting/validate_plot_artifact.py <path-to-plot_manifest.json>",

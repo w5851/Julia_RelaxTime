@@ -1,5 +1,16 @@
 # Preserve SHA256-bound publication snapshots and their exact input bytes.
 # These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
+
+# Frozen v10 parent and v11 PNG/PDF/placement snapshots.
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v10_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_pdf_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_paper_size_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/publication_review_history_v6_v9_*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/** -text
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2_residual_smoothed/** -text

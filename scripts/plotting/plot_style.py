@@ -18,7 +18,11 @@ PROFILE_FILES = {
     "audit_v1": PROFILE_ROOT / "audit_v1.toml",
     "candidate_origin_like_v1": PROFILE_ROOT / "candidate_origin_like_v1.toml",
     "strict_origin_like_v1": PROFILE_ROOT / "strict_origin_like_v1.toml",
+    "candidate_aps_v2": PROFILE_ROOT / "candidate_aps_v2.toml",
+    "strict_aps_v2": PROFILE_ROOT / "strict_aps_v2.toml",
 }
+ACTIVE_PROFILE_IDS = frozenset({"candidate_aps_v2", "strict_aps_v2"})
+LEGACY_PROFILE_IDS = frozenset(set(PROFILE_FILES) - set(ACTIVE_PROFILE_IDS))
 ALLOWED_COLUMNS = {"single_column", "double_column"}
 ALLOWED_PROFILES = frozenset(PROFILE_FILES)
 
@@ -42,6 +46,14 @@ class PlotProfile:
     @property
     def optional_formats(self) -> tuple[str, ...]:
         return tuple(str(item).lower() for item in self.data["output"].get("optional_formats", []))
+
+    @property
+    def lifecycle_status(self) -> str:
+        return str(self.data.get("status", "active"))
+
+    @property
+    def is_legacy(self) -> bool:
+        return self.profile_id in LEGACY_PROFILE_IDS or self.lifecycle_status != "active"
 
     @property
     def dpi(self) -> int:
@@ -93,6 +105,13 @@ def _validate_profile(data: Mapping[str, Any], path: Path) -> str:
     profile_id = str(data["profile_id"])
     if profile_id not in ALLOWED_PROFILES:
         raise ValueError(f"{path}: unsupported profile_id={profile_id!r}")
+    status = str(data.get("status", "active"))
+    if status not in {"active", "deprecated"}:
+        raise ValueError(f"{path}: status must be active or deprecated")
+    if profile_id in ACTIVE_PROFILE_IDS and status != "active":
+        raise ValueError(f"{path}: current profile {profile_id!r} must remain active")
+    if profile_id in LEGACY_PROFILE_IDS and status != "deprecated":
+        raise ValueError(f"{path}: legacy profile {profile_id!r} must be deprecated")
     if str(data["default_column"]) not in ALLOWED_COLUMNS:
         raise ValueError(f"{path}: invalid default_column")
     sizes = data["figure_size_in"]
@@ -189,10 +208,10 @@ def configure_matplotlib(profile: PlotProfile) -> dict[str, str]:
             "axes.linewidth": axes_linewidth,
             "axes.labelsize": font_size,
             "axes.titlesize": font_size,
-            "legend.fontsize": max(7.0, font_size - 1.0),
+            "legend.fontsize": float(profile.data.get("legend_font_size_pt", max(7.0, font_size - 1.0))),
             "legend.frameon": False,
-            "xtick.labelsize": max(7.0, font_size - 1.0),
-            "ytick.labelsize": max(7.0, font_size - 1.0),
+            "xtick.labelsize": float(profile.data.get("tick_font_size_pt", max(7.0, font_size - 1.0))),
+            "ytick.labelsize": float(profile.data.get("tick_font_size_pt", max(7.0, font_size - 1.0))),
             "xtick.direction": "in",
             "ytick.direction": "in",
             "xtick.top": True,
@@ -205,8 +224,27 @@ def configure_matplotlib(profile: PlotProfile) -> dict[str, str]:
             "ps.fonttype": 42,
             "svg.fonttype": "none",
             "savefig.dpi": profile.dpi,
-            "savefig.bbox": "tight",
+            "savefig.bbox": None if profile.data["output"].get("bbox_inches") == "fixed" else "tight",
             "savefig.pad_inches": 0.08,
         }
     )
     return resolve_font(profile)
+
+
+def configure_axis_ticks(ax: Any, profile: PlotProfile) -> None:
+    """Set scale-aware minor ticks after the figure family chooses its scales."""
+    from matplotlib.ticker import AutoMinorLocator, LogLocator, NullFormatter
+
+    settings = profile.data.get("ticks", {})
+    for axis, scale in ((ax.xaxis, ax.get_xscale()), (ax.yaxis, ax.get_yscale())):
+        if scale == "linear":
+            axis.set_minor_locator(AutoMinorLocator(int(settings.get("linear_minor_subdivisions", 5))))
+        elif scale == "log":
+            axis.set_minor_locator(LogLocator(base=10, subs=settings.get("log_minor_subs", range(2, 10))))
+            axis.set_minor_formatter(NullFormatter())
+        else:
+            raise ValueError(f"minor tick policy is undefined for {scale!r}")
+    ax.tick_params(axis="both", which="both", direction="in", top=True, bottom=True, left=True, right=True)
+    ax.tick_params(which="major", length=3.5, width=0.7)
+    ax.tick_params(which="minor", length=2, width=0.5)
+    ax.tick_params(axis="x", which="major", pad=6)
