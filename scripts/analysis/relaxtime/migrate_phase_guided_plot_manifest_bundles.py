@@ -17,13 +17,14 @@ if str(ROOT) not in sys.path:
 
 from scripts.plotting.plot_bundle import build_bundle, expand_bundle, load_chart_records
 from scripts.plotting.plot_manifest import input_record, sha256_file, write_manifest
-from scripts.plotting.plot_provenance import is_code_record, read_manifest_record
+from scripts.plotting.plot_provenance import git_source, is_code_record, read_manifest_record
 
 BASE = ROOT / "data/outputs/figures/relaxtime/transport/phase_guided"
 ANALYSIS = ROOT / "docs/analysis/relaxtime/phase_guided_transport"
 DESTINATION = ANALYSIS / "publication_plot_manifest_migration_v1"
 ARCHIVE = DESTINATION / "original_manifest_graph.zip"
 REPORT = DESTINATION / "manifest.json"
+METADATA_ARCHIVE = DESTINATION / "original_package_metadata.zip"
 CASES = (
     ("publication_clean_v10_png_review", "plot_manifest.json"),
     ("publication_clean_v11_png_review", "plot_manifest.json"),
@@ -56,6 +57,34 @@ def archive_originals() -> dict:
         with zipfile.ZipFile(ARCHIVE) as archive:
             assert all(archive.read(name) == payload for name, payload in original.items())
     return input_record(ARCHIVE, role="immutable_original_manifest_graph")
+
+
+def archive_package_metadata() -> dict:
+    paths = [
+        ANALYSIS / "publication_clean_v11_stage_acceptance_v1.json",
+        ANALYSIS / "publication_clean_current.json",
+        ANALYSIS / "phase_guided_transport_publication_clean_v11_paper_size_review/placement_report.json",
+        *(ANALYSIS / f"phase_guided_transport_{case}/manifest.json" for case, _ in CASES),
+    ]
+    commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+    originals = {relative(path): git_source(str(ROOT), commit, relative(path))
+                 for path in paths}
+    if METADATA_ARCHIVE.exists():
+        with zipfile.ZipFile(METADATA_ARCHIVE) as snapshot:
+            if set(snapshot.namelist()) != set(originals) or any(
+                    snapshot.read(name) != payload for name, payload in originals.items()):
+                raise ValueError("package metadata snapshot differs from its original Git bytes")
+    else:
+        METADATA_ARCHIVE.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(METADATA_ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as snapshot:
+            for name, payload in originals.items():
+                info = zipfile.ZipInfo(name, date_time=(2026, 10, 2, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                snapshot.writestr(info, payload, compresslevel=9)
+    with zipfile.ZipFile(METADATA_ARCHIVE) as snapshot:
+        if any(snapshot.read(name) != payload for name, payload in originals.items()):
+            raise ValueError("package metadata archive read-back differs from original Git bytes")
+    return input_record(METADATA_ARCHIVE, role="immutable_original_package_metadata")
 
 
 def protected_records() -> list[dict]:
@@ -172,9 +201,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--archive-only", action="store_true")
+    action.add_argument("--metadata-snapshot", action="store_true")
     action.add_argument("--apply", action="store_true")
     action.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    if args.metadata_snapshot:
+        print(json.dumps(archive_package_metadata(), indent=2))
+        return
     if args.archive_only:
         print(json.dumps(archive_originals(), indent=2))
         return

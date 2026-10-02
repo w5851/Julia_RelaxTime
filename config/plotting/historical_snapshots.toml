@@ -10,6 +10,11 @@ code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
 archive = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_code_snapshot_v1.zip"
 sha256 = "69c865b056db47e07ac13778d92b0c12752937bbc2378d345e2bebedf5bcd510"
 
+[[code_snapshots]]
+code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+archive = "docs/analysis/relaxtime/phase_guided_transport/publication_plot_manifest_migration_v1/original_package_metadata.zip"
+sha256 = "09683ddc9796705795657ef35d8a337921f728a2b21e8def3e5074d3d10ca01c"
+
 [publication_clean_v11_stage]
 code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
 acceptance = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json"

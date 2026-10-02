@@ -74,7 +74,11 @@ def git_source(root: str, commit: str, relative: str) -> bytes:
         raise ValueError("code_ref must be a full Git commit SHA")
     registry = Path(root) / "config/plotting/historical_snapshots.toml"
     if registry.is_file():
-        entries = tomllib.loads(registry.read_text(encoding="utf-8")).get("code_snapshots", [])
+        registered = tomllib.loads(registry.read_text(encoding="utf-8"))
+        entries = registered.get("code_snapshots", []) + [
+            {**entry, "code_commit": entry.get("source_commit")}
+            for entry in registered.get("manifest_archives", [])
+        ]
         for entry in entries:
             if entry.get("code_commit") != commit:
                 continue
@@ -85,8 +89,8 @@ def git_source(root: str, commit: str, relative: str) -> bytes:
                 with zipfile.ZipFile(archive) as snapshot:
                     return snapshot.read(relative)
             except KeyError:
-                # A registered snapshot contains only its retained dependency closure.
-                break
+                # Several archives can jointly retain one historical dependency closure.
+                continue
             except (OSError, zipfile.BadZipFile) as exc:
                 raise ValueError(f"historical code archive unavailable: {archive}") from exc
     try:
