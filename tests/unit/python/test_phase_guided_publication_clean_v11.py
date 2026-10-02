@@ -11,10 +11,13 @@ from scripts.plotting.plot_manifest import sha256_file
 from scripts.plotting.plot_quality import measure_figure
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
 from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.plot_provenance import validate_hash_record
+import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py"
+CODE_REF = tomllib.loads((ROOT / "config/plotting/historical_snapshots.toml").read_text(encoding="utf-8"))["publication_clean_v11_stage"]["code_commit"]
 
 
 @pytest.fixture(scope="module")
@@ -178,7 +181,7 @@ def test_v11_review_artifacts_counts_hashes_and_geometry(module):
     for chart in index["charts"]:
         manifest_path = ROOT / chart["manifest"]
         assert sha256_file(manifest_path) == chart["manifest_sha256"]
-        assert validate_manifest(manifest_path) == []
+        assert validate_manifest(manifest_path, code_ref=CODE_REF) == []
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         assert manifest["manuscript_eligible"] is False
         assert manifest["current_publication_layer"] is False
@@ -214,7 +217,7 @@ def test_v11_package_preserves_v5_v10_raw_and_current_and_records_caption_scope(
     assert package["manuscript_eligible"] is False
     assert package["new_display_values"] is False
     for item in [*package["inputs"], *package["outputs"]]:
-        assert sha256_file(ROOT / item["path"]) == item["sha256"]
+        assert validate_hash_record(item, root=ROOT, label="package", code_ref=CODE_REF) == []
     retained = {item["path"]: item["sha256"] for item in package["inputs"] if item["role"] == "retained_v10_review_artifact"}
     assert retained == {item["path"]: item["sha256"] for item in module.retained_v10_records()}
     for name, expected in package["inherited_table_hashes"].items():

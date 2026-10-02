@@ -8,6 +8,7 @@ from pathlib import Path
 from scripts.plotting.plot_manifest import sha256_file
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
 from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.plot_provenance import validate_hash_record
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -45,7 +46,7 @@ def _assert_only_recorded_historical_drift(manifest_path):
                 f"inputs[{index}].sha256 mismatch for {record['path']}",
             ])
     assert len(expected) == 4
-    assert validate_manifest(manifest_path) == expected
+    assert set(validate_manifest(manifest_path, code_ref=stage.FROZEN_CODE_REF)) == set(expected)
 
 
 def test_v10_style_contract_is_png_review_only():
@@ -145,7 +146,7 @@ def test_v10_preserves_v5_tables_and_current_pointer():
     _stage_module().audit_v10_snapshot()
     for record in [*package["inputs"], *package["outputs"]]:
         if record["path"] not in _stage_module().HISTORICAL_CONTRACT_PATHS:
-            assert sha256_file(ROOT / record["path"]) == record["sha256"]
+            assert validate_hash_record(record, root=ROOT, label="inputs", code_ref=_stage_module().FROZEN_CODE_REF) == []
     for name, expected in package["inherited_table_hashes"].items():
         assert sha256_file(module.V5_TABLE_ROOT / name) == expected
         assert sha256_file(module.TABLE_ROOT / name) == expected

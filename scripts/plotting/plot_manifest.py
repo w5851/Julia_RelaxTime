@@ -72,6 +72,7 @@ def generator_record(
     command: str,
     root: Path = PROJECT_ROOT,
     runtime: Mapping[str, Any] | None = None,
+    source_snapshot: str | Path | None = None,
 ) -> dict[str, Any]:
     """Describe the exact plotting generator used for a case."""
 
@@ -86,6 +87,11 @@ def generator_record(
         "command": command,
         "runtime": dict(runtime or {}),
     }
+    if source_snapshot is not None:
+        snapshot = input_record(source_snapshot, role="generator_source_snapshot", root=root)
+        if snapshot["sha256"] != result["sha256"]:
+            raise ValueError("generator source_snapshot must contain the exact generator bytes")
+        result["source_snapshot"] = snapshot
     return result
 
 

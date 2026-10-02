@@ -115,7 +115,7 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
   - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
 - `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`
-  - 验证作者已接受的 v11 阶段结果；同时核验 v10 历史快照边界、PNG/PDF hash、完整 renderer 依赖及 current=v5。`--apply` 只创建新的验收记录，不覆盖旧记录，不运行数值 gate
+  - 按 `config/plotting/historical_snapshots.toml` 中固定的代码 commit 验证已接受的 v11 manifest graph、renderer/合同来源和现存数据、PNG/PDF、current=v5 字节；历史 SOP/skill 不与当前正文绑定。该检查不重跑历史 renderer、不补数值 gate、不晋升论文资格；`--apply` 只创建新验收记录并拒绝覆盖
 - `scripts/analysis/relaxtime/archive_phase_guided_publication_review_history.py restore --archive <zip> --destination <new-empty-directory>`
   - 从本地历史归档逐文件校验并恢复 v6-v9 中间产物；拒绝覆盖现有目标目录。归档目前未上传远端，索引位于 phase_guided_transport 分析根目录
 - 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)

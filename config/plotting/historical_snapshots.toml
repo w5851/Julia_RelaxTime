@@ -1,0 +1,18 @@
+# Code/contract snapshot for retained evidence; inputs/outputs still use current artifact bytes.
+# The full SHA is intentionally explicit so a moving branch never becomes the authority.
+[[code_snapshots]]
+code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+archive = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_code_snapshot_v1.zip"
+sha256 = "69c865b056db47e07ac13778d92b0c12752937bbc2378d345e2bebedf5bcd510"
+
+[publication_clean_v11_stage]
+code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+acceptance = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json"
+
+[publication_clean_v10]
+code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+manifest_prefix = "publication_clean_v10_"
+
+[publication_clean_v11]
+code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
+manifest_prefix = "publication_clean_v11_"

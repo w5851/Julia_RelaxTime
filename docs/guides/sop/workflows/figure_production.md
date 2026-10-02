@@ -150,16 +150,26 @@ data/outputs/figures/<domain>/<figure_family>/<case_slug>__plotv1__strict/
 
 ## 11. Regression / Validation 验收
 
-每个新 case 至少运行：
+每个新 case 验证本次输入、逐图 manifest 和实际输出，并完成适用的视觉审核：
 
 ```powershell
 python scripts/plotting/validate_plot_artifact.py <path-to-plot_manifest.json>
+```
+
+公共绘图框架、profile、validator 或质量规则变化时，运行受影响的公共测试：
+
+```powershell
 python -m pytest -q tests/unit/python/test_plotting_contract.py
 python -m pytest -q tests/unit/python/test_plotting_quality.py
-julia --project=. scripts/dev/check_docs_consistency.jl
-julia --project=. scripts/dev/check_sop_governance.jl
-julia --project=. scripts/dev/check_script_entrypoints.jl
 ```
+
+图族选择、轴类型、单位或布局逻辑变化时选择该图族行为测试。已有生成器的新参数/case
+无需重复公共测试。文档链接、SOP registry 或脚本入口变化时才运行对应治理检查；
+单纯生成新图不附带全部 Julia 文档与入口检查。
+
+历史快照核验使用 `validate_plot_artifact.py --snapshot --code-ref <full-sha>`，
+或已登记图族的专用检查入口。它检查冻结 manifest graph 与数据/输出完整性，
+不自动重跑历史 renderer，也不宣称满足新的视觉或数值资格。
 
 新的 APS v2 case 必须检查 PNG 元数据和最终插入宽度下的有效 DPI 均不低于 600，PDF 为单页矢量曲线图、字体嵌入且非 Type 3，导出物理尺寸与测量一致。不能只凭 `.pdf` 扩展名、`dpi=600` 或 manifest 的 `vector=true` 判定矢量输出。输入 hash、forbidden state、跨 gap 连接等 strict 资格要求继续保留。candidate/review 同样执行样式检查，但不因此获得数值资格。
 
@@ -167,7 +177,11 @@ julia --project=. scripts/dev/check_script_entrypoints.jl
 
 绘图失败时保留输入和失败原因，不修改源 CSV/JSON。若目标目录已经产生部分输出，下一次运行必须使用新的 sibling suffix，或由明确的开发者操作清理未完成的临时目录；不得覆盖已通过验证的 case。
 
-输入 hash、脚本 hash、profile、Git commit 或 source run 不一致时，停止 strict 生成并退回 audit/作者审核。重跑绘图不等于重跑数值计算，必须在 manifest 中记录新的 generator/output hash。
+输入和输出 hash、profile 或 source run 不一致时，停止 strict 生成并退回 audit/作者审核。历史
+manifest 的 generator/plotting-contract 记录使用 manifest 中的 `git_commit`、登记的
+`code_ref` 或保留的 `source_snapshot` 核对；当前脚本或 SOP 后续修改不要求重写已经冻结的
+历史 manifest。数据、图像和 manifest 文件本身仍按记录的字节/hash 校验。重跑绘图不等于重跑
+数值计算，必须在新 manifest 中记录新的 generator/output hash。
 
 ## 13. Diagnostic 与 Formal Production 的边界
 
@@ -205,28 +219,10 @@ strict 不把 single-column 尺寸和 legend 位置视为不可变硬编码。�
 必须同时记录图例位置、端点 marker 颜色策略、曲线可见性审核和
 `legend_outside=false`；validator 不会因此把它误判为默认外置图例。
 
-对于论文/组内博士论文风格的密集输运复合图，图例可以采用一次性的
-case-level in-panel key，但必须遵守以下收缩规则：参数曲线只保留
-`$\alpha_T=1.0$`、`$\alpha_T=1.1$`、`$\alpha_T=1.2$`；端点项使用
-`First-order (restored)` 与 `First-order (broken)`；若最终 panel 的曲线几何
-不允许容纳完整短语，可以退为 marker 旁的 `restored` 与 `broken`，但必须
-在 caption 中明确它们是 first-order transition 的 chirally restored/broken
-endpoints。分开的端点 key 使用共同标题 `First-order`，其下分别写圆圈
-`restored` 和方块 `broken`，避免重复相同文字。圆圈和方块的完整物理含义放入 caption，而不是在 panel 内重复
-长句。标题与条目左对齐、同字号、常规字重；使用公开的 legend
-`alignment="left"`，不操作 `_legend_box` 等私有属性。可将参数图例与端点
-图例分放到两个有空白的 panel，各只出现一次；
-不能为固定的“一处五项图例”遮盖数据。子图编号统一放在左上方；若该位置
-仍有数据，可以全图统一移到框外左上方，并保留行间距和标题间隔。不可只把
-承载图例的编号移到低值曲线区域来规避图例。把复合图轴标签、
-刻度、标题及 legend 字号作为 case override 记录（通常约 10--11 pt）；不能
-因为压缩图例而牺牲最终尺寸下的可读性。图例 bbox 与所有实际曲线路径必须
-通过几何检查，不能仅检查文字与坐标框是否重叠；`legend_curve_overlap_count`
-必须为 0，除非 manifest 明确列出并由作者接受该例外。圆圈/方块等端点
-还必须通过 `legend_landmark_overlap_count=0` 检查。caption 分别限定适用范围：
-参数颜色/线型 key 全图通用；端点 key 仅解释实际具有一阶端点 marker 的曲线。
-本输运图族的端点对应 `mu_B=900 MeV, alpha_T=1.0`，不能笼统写两个 key
-均适用于所有 panel。
+图例 host、端点标签、字号和 caption 参数映射由图族案例合同规定。
+phase-guided transport 的已审查细节见
+[案例合同](../../../analysis/relaxtime/phase_guided_transport/plotting_case_contract.md)，
+不作为其他图族的默认布局。
 
 ### APS v2 最终尺寸检查
 
@@ -238,37 +234,9 @@ endpoints。分开的端点 key 使用共同标题 `First-order`，其下分别�
 6. 复合图从冻结点表在最终物理尺寸绘制，保持矢量曲线和文本；不得把大单图 PNG 拼接、缩小后再包成 PDF 作为矢量交付。
 7. 交接 paper 时记录插入宽度、最小可接受缩放和完整 caption 参数映射；改了 LaTeX 缩放后重新测量。`undecided_review` 表示作者尚未选择彩印/灰印路线，strict 生产交付必须选定。
 
-输运 v7--v10 保留历史 `1st-order` 措辞；新 v11 审查层使用 `First-order`。
-完整的 chirally restored/broken、endpoint、温度及分支断线解释在 caption handoff。
-复合图默认只显示三个 x 轴数字刻度（左右端点和零点）；底层 tick 策略和
-case override 必须写入 manifest。Figure 1 指四行弛豫时间图，Figure 2 指三行
-输运系数图，不按外部 review 的图号推断目标。v11 的 Figure 1 全部 12 个
-panel 统一 log-y，匹配的 mode-A 弛豫时间单图也使用 log-y；Figure 2 保持
-线性轴和已审查的布局。独立 y 范围保留，caption 必须说明对数轴及各 panel
-范围不同；不能把 log 变换后的视觉曲率解释为绝对增长率或饱和证据。这是
-本正值输运图族的 case-level 规则，不是对其他图族强制使用 log 的要求。
-标题单位使用显式可见空格，轴标签统一使用 `$\tau_u\;(\mathrm{fm})$`
-一类的数学变量+正体单位格式。复合图记录 figsize、hspace/wspace、legend
-host、legend 字号和 `legend_curve_overlap_count`。
-
-### 多面板数字刻度一致性
-
-- 线性轴同一物理量的一行统一小数位，按该行最细的主刻度间距确定；这只是
-  显示格式，不表示数据不确定度或有效精度。本图族的 `eta/s`、`zeta/s`
-  为两位小数，`sigma/T` 为三位；不同物理量之间不强求相同小数位。
-- log-y 优先在 `1,2,5` 乘以十的整数次幂处标出普通数字，如
-  `0.5,1,2,5,10,20`；统一去除冗余尾零，不强制写成 `1.00`，不使用含混的
-  offset。窄范围可补充其他整洁的实值刻度，争取每个 panel 约 3--5 个
-  标签；宽范围允许稀疏采样，具体刻度与格式规则写入 manifest。
-- 普通数字标签不改变对数位置。log 小刻度保持 `2--9` locator，去除与主
-  刻度重复的位置，不标小刻度数字。改变轴类型、formatter 或 legend 宽度后，
-  必须重新检查文字拥挤、裁切以及曲线/端点遮挡。
-
-线性复合图 y 轴默认约 4--5 个主刻度，不能以降低数字字号掩盖刻度线过密。
-`sigma_over_T` 采用三位小数时，主刻度必须落在 `0.001` 的整数倍上，避免
-把 `0.0175` 等实际刻度标成 `0.018`。保留前置零；如使用公共倍率，
-必须是真实的乘法尺度（如 `10^{-3}`）且记录 transform，不能把重复的
-`0.` 提取成含混的公共前缀。
+图族的布局、端点措辞、刻度精度和 log-y 选择放在对应案例文档；
+phase-guided transport v11 见
+[案例合同](../../../analysis/relaxtime/phase_guided_transport/plotting_case_contract.md)。
 
 ## 15. 关联公式、API 和测试
 

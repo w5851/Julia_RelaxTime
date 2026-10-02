@@ -8,12 +8,15 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import hashlib
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.plotting.plot_manifest import generator_record, input_record, sha256_file, write_manifest
+from scripts.plotting.plot_provenance import git_source, is_code_record, validate_snapshot
 
 EXPORT_SCRIPT = ROOT / "scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py"
 SPEC = importlib.util.spec_from_file_location("v11_stage_frozen_exporter", EXPORT_SCRIPT)
@@ -30,6 +33,7 @@ HISTORICAL_CONTRACT_PATHS = {
     "docs/guides/sop/workflows/figure_production.md",
     ".agents/skills/plotting-sop/SKILL.md",
 }
+FROZEN_CODE_REF = tomllib.loads((ROOT / "config/plotting/historical_snapshots.toml").read_text(encoding="utf-8"))["publication_clean_v11_stage"]["code_commit"]
 
 
 def read_json(path: Path) -> dict:
@@ -49,7 +53,8 @@ def audit_v10_snapshot() -> list[dict]:
     drift = []
     for record in package["inputs"]:
         path = ROOT / record["path"]
-        actual = sha256_file(path)
+        actual = (hashlib.sha256(git_source(str(ROOT), FROZEN_CODE_REF, record["path"])).hexdigest()
+                  if is_code_record(path, ROOT) else sha256_file(path))
         if actual != record["sha256"]:
             if record["path"] not in HISTORICAL_CONTRACT_PATHS:
                 raise ValueError(f"unexpected v10 historical input drift: {record['path']}")
@@ -115,9 +120,9 @@ def collect_payload() -> dict:
 
 def validate_acceptance() -> dict:
     retained = read_json(ACCEPTANCE)
-    actual = collect_payload()
-    if retained != actual:
-        raise ValueError("stage acceptance no longer matches the frozen package or its reviewed boundaries")
+    errors = validate_snapshot(ACCEPTANCE, root=ROOT, code_ref=FROZEN_CODE_REF)
+    if errors:
+        raise ValueError("stage snapshot verification failed: " + "; ".join(errors))
     return retained
 
 

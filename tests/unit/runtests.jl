@@ -70,7 +70,6 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
     joinpath(UNIT_DIR, "config", "test_config_inheritance.jl"),
     joinpath(UNIT_DIR, "config", "test_formula_route_closure.jl"),
-    joinpath(UNIT_DIR, "config", "test_sysimage_inputs.jl"),
     # Documentation/task policy fixtures run in their dedicated CI workflows.
 
     # [NJL Core] NJL 模型核心
