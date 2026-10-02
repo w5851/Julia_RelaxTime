@@ -183,3 +183,18 @@ def test_replot_workflow_skips_scan_and_keeps_source_and_render_runs_separate():
     assert "run-id: ${{ inputs.replot_run_id || github.run_id }}" in source
     assert "--postprocess-run-id" in source
     assert "always() && needs.prepare.result == 'success'" in source
+
+
+def test_label_collision_suppression_changes_only_text_visibility():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    module = _load_module()
+    fig, ax = plt.subplots()
+    labels = [ax.text(0.2, 0.2, "0.8"), ax.text(0.2, 0.2, "1.6"), ax.text(0.8, 0.8, "2.4")]
+    fig.canvas.draw()
+    counts = module.suppress_overlapping_contour_labels(labels, fig.canvas.get_renderer())
+    assert counts == {"visible": 2, "hidden_overlapping_text": 1}
+    assert [label.get_visible() for label in labels] == [True, False, True]
+    assert [label.get_text() for label in labels] == ["0.8", "1.6", "2.4"]
+    plt.close(fig)

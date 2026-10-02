@@ -322,6 +322,18 @@ def contour_label_positions(segments: list[Any], x_span: float, y_span: float) -
     return positions
 
 
+def suppress_overlapping_contour_labels(labels: list[Any], renderer: Any) -> dict[str, int]:
+    """Hide overlapping label text only; keep every contour line and raw value."""
+    kept = []
+    for label in labels:
+        bounds = label.get_window_extent(renderer).expanded(1.10, 1.10)
+        if any(bounds.overlaps(other) for other in kept):
+            label.set_visible(False)
+        else:
+            kept.append(bounds)
+    return {"visible": len(kept), "hidden_overlapping_text": len(labels) - len(kept)}
+
+
 def _reference_points(reference_lines: dict[str, Any]) -> list[tuple[float, float]]:
     return [
         (float(point["muB_MeV"]), float(point["T_MeV"]))
@@ -498,6 +510,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
         ax.set_xlabel(r"$\mu_B$ (MeV)")
         ax.set_ylabel(r"$T$ (MeV)")
         ax.set_title(title + "\nfixed quark-only BQS; diagnostic screening")
+        contour_labels = []
         if contours and contour_info["levels"]:
             lines = ax.contour(
                 dataset["muB_grid"], dataset["T_grid"], values,
@@ -506,7 +519,8 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
             )
             positions = contour_label_positions(lines.allsegs, x_limits[1] - x_limits[0], y_limits[1] - y_limits[0])
             labels = ax.clabel(lines, manual=[point for _, point in positions],
-                               inline=True, fontsize=8.5, fmt=lambda value: f"{value:.2g}") if positions else []
+                               inline=False, fontsize=8.5, fmt=lambda value: f"{value:.2g}") if positions else []
+            contour_labels = labels
             import matplotlib.patheffects as path_effects
             lines.set_path_effects([path_effects.Stroke(linewidth=1.2, foreground="black"), path_effects.Normal()])
             for label in labels:
@@ -530,6 +544,11 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
         if handles:
             fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.02), fontsize=8.5, frameon=False)
         fig.colorbar(image, ax=ax, label=colorbar)
+        if contours:
+            fig.canvas.draw()
+            dataset.setdefault("contour_label_visibility", {})[field] = suppress_overlapping_contour_labels(
+                contour_labels, fig.canvas.get_renderer(),
+            )
         path = output_dir / filename
         fig.savefig(path)
         plt.close(fig)
@@ -620,7 +639,8 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
             "single_figure_size_inches": [6.75, 5.9],
             "legend_policy": "outside data axes, below figure",
             "minor_ticks": "one per adjacent linear major ticks",
-            "contour_label_policy": "at most one per level on longest path; staggered arc positions; paths below normalized length 0.10 not labeled",
+            "contour_label_policy": "at most one per level on longest path; staggered arc positions; no inline path mutation; short paths unlabeled; overlapping label text suppressed without removing contour lines",
+            "contour_label_visibility": dataset.get("contour_label_visibility", {}),
         },
         "input_root": str(dataset["input_root"]),
         "input_manifests": [

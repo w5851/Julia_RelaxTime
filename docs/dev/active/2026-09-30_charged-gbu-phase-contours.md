@@ -235,9 +235,15 @@ muB=1100--1200 MeV 的部分网格：最小 `n_K+=-8.6194608535e-4 fm^-3`，
 manifest 分开数值 source SHA/run 与 postprocess SHA/run，不能把重绘 commit
 写成数值 source commit。该入口用于本轮排版修复，不启动新的数值采样。
 
-Python 绘图/候选契约 `14/14` 通过，包括负值保留、短路径标签、replot 跳过扫描
+Python 绘图/候选契约 `15/15` 通过，包括负值保留、短路径标签、replot 跳过扫描
 和 source/postprocess 分离；未改物理核、生产配置或容差。全仓数值 regression
 未运行，因为本轮没有这些数值实现改动。
+
+首个冻结重绘 run `36960286457` 已成功，scan job 实际 `skipped`，CSV hash
+与数值 run 完全相同。进一步标签复核用最终画布上的 text bbox 排除相交标签；
+只隐藏重叠的文字，不隐藏等高线、不删数值。标签不使用 inline 路径裁切，避免
+逐次贴标签改变路径后把下一个标签吸附到邻近等高级；这是显示修正，不是物理
+phase branch 或积分方式的修正。
 
 ## 7. 风险与回退
 
