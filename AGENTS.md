@@ -19,7 +19,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 
 - `.github/copilot-instructions.md` is present and must be followed.
 - No `.cursorrules` file or `.cursor/rules/` directory exists.
-- New core Julia modules require unit tests; stable public entrypoints require corresponding `docs/api/` updates.
+- New core behavior requires meaningful test coverage; reuse existing coverage when sufficient. Changes to stable public entrypoints require corresponding `docs/api/` updates.
 - Model config belongs in `config/models/<model>/`; shared physics constants belong in `config/physics/`.
 - Preserve test layering: `tests/unit/`, `tests/integration/`, `tests/regression/`, `tests/validation/`, and `benchmark/`.
 - Non-test scripts do not belong under `tests/`; analysis scripts belong in `scripts/analysis/`; performance probes belong in `scripts/perf/`.
@@ -35,8 +35,8 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - For cross-module refactors, prefer the smallest convergent change and introduce shared abstractions only when required.
 - For stable CLI workflows, prefer `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` as documented in `docs/guides/scripts/README.md`.
 - For ambiguous continuation requests, multiple active tracks, or newly discovered follow-ups, read and validate `config/governance/task_tracks.toml` before choosing the next task.
-- Use `scripts/dev/check_task_ledger.jl --preflight` to report branch, HEAD, and dirty paths; preserve user changes and do not infer a clean worktree.
-- Classify new work as `blocker`, `required_follow_up`, `independent`, or `research`; do not silently replace the current primary track.
+- For track changes or ambiguous continuations, use `scripts/dev/check_task_ledger.jl --preflight` to report branch, HEAD, and dirty paths. For a clearly scoped task, inspect Git state directly and preserve user changes.
+- Classify cross-track work as `blocker`, `required_follow_up`, `independent`, or `research`; a scoped fix may be tracked in its issue/PR without a new ledger entry. Do not silently replace the current primary track.
 - Unless the user asks for analysis only, define completion as implementation plus proportionate validation and a concise report; do not stop at a proposal or the first plausible patch.
 - Local tests that use disposable fixtures and have no production or external-service access may be run, and failures caused by the requested change may be fixed and rerun without asking for approval at each iteration. Keep network, credential, production-data, publication, and destructive actions subject to the existing approval boundaries.
 
@@ -75,7 +75,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 
 ### Reusable Workflow Capture
 
-- After the same collaboration pattern appears three or more times, capture it as a skill, script entrypoint, or template.
+- Capture a recurring workflow as a skill, script entrypoint, or template when reuse reduces actual maintenance work.
 - Put durable process rules in `docs/dev/` or the relevant skill rather than leaving them only in chat history.
 - Repository skills under `.agents/skills/` are canonical; do not duplicate the same skill name in a user-level root.
 - Keep positive triggers in SKILL.md frontmatter; keep bodies focused on execution, boundaries, resources, and validation.
@@ -134,16 +134,9 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Put performance comparisons in `benchmark/`, not smoke tests.
 - Testing and documentation obligations are defined above; select affected tests first and expand by numerical/workflow risk.
 
-## Commit Message Governance (Mandatory)
+## Commit Messages
 
-Before every commit:
-
-1. Run `git log -10 --oneline` and sample recent prefix patterns.
-2. Use an existing recent prefix (`docs:`, `fix:`, `refactor:`, `ci:`, `feat:`, or an observed scoped form).
-3. Prefer the nearest three commits in the same category and keep the subject concise, intent-driven, and single-line.
-4. Verify that prefix, scope/category, and wording match the actual staged change.
-5. If history is inconclusive, use `docs:` for docs-only, `fix:` for bugs, `refactor:` for non-functional restructuring, or `ci:` for workflow changes, and note the fallback.
-6. Revise any non-compliant message before committing.
+Use a concise, single-line subject describing the staged change. Prefer familiar prefixes such as `docs:`, `fix:`, `refactor:`, `ci:`, or `feat:`; consult recent history when the local convention is unclear. Check that the subject matches the actual staged scope.
 
 ## Literature-To-Implementation Subagents
 

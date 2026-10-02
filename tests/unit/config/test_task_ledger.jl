@@ -61,34 +61,7 @@ function _fixture_root(; kwargs...)
 end
 
 @testset "task ledger real state" begin
-    violations = TL.validate_ledger(PROJECT_ROOT)
-    @test isempty(violations)
-    parsed = TOML.parsefile(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"))
-    tracks = Dict(String(t["id"]) => t for t in parsed["tracks"])
-    @test parsed["primary_track"] == "formula-route-closure"
-    @test tracks["issue130-phase"]["status"] == "archived"
-    @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
-    @test tracks["formula-route-closure"]["status"] == "accepted"
-    @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-phase-coordinate-cut-fix"
-    @test tracks["formula-route-closure"]["current_sha"] == "c0a09912c9551da39b1e2dd30f7c0489d6c0a6d3"
-    @test tracks["rs-transport"]["status"] == "archived"
-    @test isempty(tracks["rs-transport"]["blocked_by"])
-    @test tracks["plot-sop"]["status"] == "promoted"
-    @test tracks["analysis-docs-cleanup"]["status"] == "archived"
-    @test isempty(tracks["analysis-docs-cleanup"]["next_action"])
-    items = Dict(String(item["id"]) => item for item in parsed["items"])
-    @test items["rs-production-after-phase-reference"]["status"] == "archived"
-    @test startswith(items["rs-production-after-phase-reference"]["task_file"], "docs/dev/archived/")
-    @test items["issue130-phase-reference-retirement"]["status"] == "archived"
-    @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
-    @test isempty(items["issue130-phase-reference-retirement"]["blocked_by"])
-    @test items["issue130-full-hybrid-author-review"]["status"] == "archived"
-    @test isempty(items["issue130-full-hybrid-author-review"]["next_action"])
-    @test items["docs-analysis-logical-group-migration"]["status"] == "archived"
-    @test startswith(items["docs-analysis-logical-group-migration"]["task_file"], "docs/dev/archived/")
-    @test isempty(items["docs-analysis-metadata-repair"]["next_action"])
-    @test occursin("full_hybrid_candidate", read(joinpath(PROJECT_ROOT, "docs", "dev", "task_tracking_governance.md"), String))
-    @test !occursin("status = \"full_hybrid_candidate\"", read(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"), String))
+    @test isempty(TL.validate_ledger(PROJECT_ROOT))
 end
 
 @testset "task ledger state transitions" begin

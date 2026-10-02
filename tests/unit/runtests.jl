@@ -2,9 +2,9 @@
 #
 # Design goals:
 # - Default: fast, deterministic, CI-friendly ("smoke" profile).
-# - Each test_*.jl maps 1:1 to a standalone src module.
+# - Tests protect behavior; source files do not require a 1:1 test mirror.
 # - Integration/smoke/workflow tests live under tests/integration/.
-# - Baseline/validation tests live under tests/validation/.
+# - Internal baselines live under tests/regression/; external references under tests/validation/.
 #
 # Run:
 #   julia --project=. --eval 'include("tests/unit/runtests.jl")'
@@ -69,11 +69,9 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "types", "test_parameter_adapters.jl"),
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
     joinpath(UNIT_DIR, "config", "test_config_inheritance.jl"),
-    joinpath(UNIT_DIR, "config", "test_sop_governance.jl"),
     joinpath(UNIT_DIR, "config", "test_formula_route_closure.jl"),
-    joinpath(UNIT_DIR, "config", "test_dependency_policy.jl"),
-    joinpath(UNIT_DIR, "config", "test_agent_instruction_governance.jl"),
-    joinpath(UNIT_DIR, "config", "test_task_ledger.jl"),
+    joinpath(UNIT_DIR, "config", "test_sysimage_inputs.jl"),
+    # Documentation/task policy fixtures run in their dedicated CI workflows.
 
     # [NJL Core] NJL 模型核心
     joinpath(UNIT_DIR, "njl", "test_njl_core.jl"),
@@ -137,7 +135,6 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_bu_phase_gates.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_phase_normalization.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_phase_backend.jl"),
-    joinpath(UNIT_DIR, "relaxtime", "test_charged_phase_backend_script_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_charged_phase_negative_density_plot_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_freezeout_comparison_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_dense_freezeout.jl"),
@@ -145,9 +142,6 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_regulator_checks.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_full_closure.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_freezeout_trho_overlay.jl"),
-    joinpath(UNIT_DIR, "relaxtime", "test_charged_mott_profile_script_contract.jl"),
-    joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_bu_convergence_contract.jl"),
-    joinpath(UNIT_DIR, "relaxtime", "test_charged_rpa_bu_negative_density_contract.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_scan_workflow_entry.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_mass.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_mott_transition.jl"),

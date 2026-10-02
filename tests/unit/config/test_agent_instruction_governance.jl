@@ -36,12 +36,16 @@ end
         @test isempty(Main.AgentInstructionGovernance.validate_repository(valid; max_root_lines=20))
 
         embedded = _write_agent_fixture(joinpath(temp, "embedded"); agents=_AGENT_REQUIRED * "\n## Test Commands\n")
-        violations = Main.AgentInstructionGovernance.validate_repository(embedded; max_root_lines=20)
-        @test any(item -> occursin("embedding ## Test Commands", item), violations)
+        advisories = String[]
+        @test isempty(Main.AgentInstructionGovernance.validate_repository(embedded; max_root_lines=20, advisories))
+        @test !isempty(advisories)
 
         too_long = _write_agent_fixture(joinpath(temp, "too_long"); agents=_AGENT_REQUIRED * repeat("extra\n", 20))
-        violations = Main.AgentInstructionGovernance.validate_repository(too_long; max_root_lines=10)
-        @test any(item -> occursin("maximum is 10", item), violations)
+        @test isempty(Main.AgentInstructionGovernance.validate_repository(too_long; max_root_lines=10, advisories))
+        @test any(item -> occursin("consider shortening", item), advisories)
+
+        renamed = _write_agent_fixture(joinpath(temp, "renamed"); agents="# 项目指导\nSee docs/dev/agent_command_reference.md.\n")
+        @test isempty(Main.AgentInstructionGovernance.validate_repository(renamed))
 
         missing_reference = _write_agent_fixture(joinpath(temp, "missing_reference"); command_reference=nothing)
         violations = Main.AgentInstructionGovernance.validate_repository(missing_reference; max_root_lines=20)

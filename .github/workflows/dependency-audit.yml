@@ -2,6 +2,21 @@ name: Dependency Audit
 
 on:
   pull_request:
+    paths:
+      - "src/**"
+      - "scripts/dev/**"
+      - "tests/unit/config/**"
+      - "docs/architecture/**"
+      - "docs/decisions/**"
+      - "docs/dev/agent_command_reference.md"
+      - "AGENTS.md"
+      - "Project.toml"
+      - "Manifest.toml"
+      - "benchmark/Project.toml"
+      - "config/ci/dependency_policy.toml"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/dependency-audit.yml"
   push:
     paths:
       - "src/**"
@@ -62,6 +77,9 @@ jobs:
 
       - name: Check agent instruction governance
         run: julia --project=. scripts/dev/check_agent_instructions.jl
+
+      - name: Test dependency and instruction policy
+        run: julia --project=. -e 'include("tests/unit/config/test_dependency_policy.jl"); include("tests/unit/config/test_agent_instruction_governance.jl")'
 
       - name: Check precompile profile coverage
         run: julia --project=. scripts/dev/check_precompile_profile_coverage.jl

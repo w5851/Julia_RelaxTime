@@ -37,12 +37,18 @@ quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不
 用途：
 
 - 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
-- wrapper 会同时校验 Julia 版本、平台信息与 `git_commit`
+- wrapper 会同时校验 Julia 版本、平台信息与 `build_inputs_fingerprint`
 - 默认 mismatch policy 为 `rebuild`
-- 若 sysimage 缺失、元数据缺失或 `git_commit` 与当前 `HEAD` 不一致，则默认自动重建本地 sysimage
+- 若 sysimage 缺失、元数据缺失或构建输入发生变化，则默认自动重建本地 sysimage
 - PowerShell wrapper 可配合 `-MismatchPolicy strict|fallback|rebuild`
 - POSIX wrapper 可配合 `--mismatch-policy=strict|fallback|rebuild`
 - `-BuildIfMissing` / `--build-if-missing` 仍保留，作为 `rebuild` 别名
+
+构建输入包括 `src/**/*.jl`、`config/models/`、`config/physics/`、根 Project/Manifest
+以及构建脚本、预编译 workload 和 fingerprint helper。未提交的相关修改、增删和重命名
+也会使缓存失效；文档、图表、测试和 task ledger 变化不影响复用。
+`git_commit` 继续记录来源，不再是缓存有效性门禁。旧 metadata 缺少 fingerprint 时需
+重建一次；选择 `fallback` 可先用普通 Julia，`strict` 会报告不兼容原因。
 
 如需先获取预构建 sysimage：
 

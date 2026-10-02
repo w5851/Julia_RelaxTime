@@ -1,7 +1,7 @@
 schema_version = "v1"
 allowed_statuses = ["draft", "active", "deprecated"]
 stable_entrypoint_index = "docs/guides/scripts/README.md"
-required_sections = [
+recommended_sections = [
   "## 1. 目的与适用范围",
   "## 2. 非适用范围",
   "## 3. 权威入口",

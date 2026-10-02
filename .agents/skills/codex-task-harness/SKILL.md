@@ -1,6 +1,6 @@
 ---
 name: codex-task-harness
-description: 将宽泛或跨主线的 Julia_RelaxTime 需求收束为可执行 harness，并从 task ledger 恢复主线、依赖、下一步和四类新任务分诊。用于多个 active track、主线不明确、继续/下一步请求出现跨线歧义，或发现 blocker、required follow-up、independent、research 项；明确单一 active task 文件时交给 doc-implementation。
+description: 将宽泛或跨主线的 Julia_RelaxTime 需求收束为执行范围，并从 task ledger 恢复主线、依赖和下一步。用于多个 active track、主线不明确、继续请求存在跨线歧义或需要切换主线；明确的 issue、修复或单一 active task 直接实施。
 ---
 
 # Codex Task Harness
@@ -15,7 +15,7 @@ description: 将宽泛或跨主线的 Julia_RelaxTime 需求收束为可执行 h
 
 ## Hard rules
 
-- 先写不允许改变的范围和契约，再写允许修改的内容。
+- 明确目标、允许修改的范围和必须保持的契约；复用请求中已有的信息。
 - 只保留会影响执行的风险和假设。
 - 给出最小必要验证，不以“以后补测试”代替验收。
 - 只路由最少但足够的 skill；边界清楚后立即执行。
@@ -49,14 +49,13 @@ description: 将宽泛或跨主线的 Julia_RelaxTime 需求收束为可执行 h
 - 明确指定一个 active task 文件的“继续”“下一步”或“按计划推进”，直接路由
   `doc-implementation`，不重复触发本 harness。
 - 存在多个 active track、primary 不明确、请求引入新 blocker/follow-up，或需要在多个待办中选下一项时，先执行本 harness，再把选定任务交给最小后续 skill。
-- 新增 repair、PR 或 workflow 但没有明确主线时，先登记分诊类别和父任务，不自动创建 PR。
+- 明确范围的 repair、issue 或 workflow 直接实施；用 issue/PR 跟踪即可。只有改变主线、引入阻塞依赖或需要跨会话恢复时才登记 ledger。
 
 ## Start protocol
 
-1. 运行 `julia --project=. scripts/dev/check_task_ledger.jl`。
-2. 读取 `primary_track`、对应 `current_task`、相关 active task 和必要 evidence。
-3. 运行 `julia --project=. scripts/dev/check_task_ledger.jl --preflight`，记录 branch、HEAD 和 dirty paths；不覆盖用户改动。
-4. 输出当前主线、当前任务、状态、阻塞依赖、下一步、本轮 scope、non-goals 和 deferred/research items。
+1. 运行 `julia --project=. scripts/dev/check_task_ledger.jl --preflight`，一次完成 ledger 校验和 branch、HEAD、dirty paths 检查。
+2. 读取与本轮选择相关的 track、current task 和必要 evidence。
+3. 简述选定任务、阻塞依赖、范围和验证；不重复输出无关的全部状态。
 
 ## Triage contract
 
@@ -64,7 +63,7 @@ description: 将宽泛或跨主线的 Julia_RelaxTime 需求收束为可执行 h
 
 - `blocker`：可暂时切换，但先保存原任务和恢复路径。
 - `required_follow_up`：挂到父任务，不能因当前任务结束而消失。
-- `independent`：使用独立 track、branch 和 PR。
+- `independent`：不替换当前主线；短小任务用 issue/PR 跟踪，需要跨会话恢复时再建立 track。
 - `research`：放入 backlog 或 `deferred`，不自动实现。
 
 使用 `inbox -> triaged -> ready -> active -> blocked|review -> accepted -> promoted -> archived`
