@@ -12,12 +12,19 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 import pdfplumber
 from pypdf import PdfReader, PdfWriter, Transformation
 
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.plotting.plot_bundle import load_chart_records
+
 PNG_ROOT = ROOT / "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/composites"
+PNG_MANIFEST = PNG_ROOT.parent / "plot_manifest.json"
 DEFAULT_REPORT_ROOT = ROOT / "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_paper_size_review"
 FIGURES = ("figure1_relaxation_times_comparison", "figure2_transport_coefficients_comparison")
 MM_PER_PDF_POINT = 25.4 / 72
@@ -26,6 +33,15 @@ MM_PER_PDF_POINT = 25.4 / 72
 def file_record(path: Path) -> dict:
     return {"path": str(path.resolve()), "bytes": path.stat().st_size,
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def figure_manifest(figure: str) -> dict:
+    _, records = load_chart_records(PNG_MANIFEST, root=ROOT)
+    stem = (PNG_ROOT / figure).relative_to(ROOT).as_posix()
+    matches = [record for chart, record in records if chart.get("stem") == stem]
+    if len(matches) != 1:
+        raise ValueError(f"expected exactly one composite record for {figure}, got {len(matches)}")
+    return matches[0]
 
 
 def a4_scale(page_width_pt: float, page_height_pt: float, margin_mm: float) -> float:
@@ -53,7 +69,7 @@ def measure_placement(pdf: Path) -> list[dict]:
     results = []
     with pdfplumber.open(pdf) as document:
         for figure in FIGURES:
-            manifest = json.loads((PNG_ROOT / f"{figure}.plot_manifest.json").read_text(encoding="utf-8"))
+            manifest = figure_manifest(figure)
             quality = manifest["rendering"]["quality"]
             pixels = tuple(manifest["outputs"][0]["inspection"]["size_pixels"])
             matches = [(index, page, image) for index, page in enumerate(document.pages)
@@ -93,7 +109,7 @@ def measure_placement(pdf: Path) -> list[dict]:
                 "caption_top_pdf_pt": caption_top,
                 "caption_gap_mm": (caption_top - image["bottom"]) * MM_PER_PDF_POINT,
                 "print_scenarios": scenarios,
-                "native_png_manifest": file_record(PNG_ROOT / f"{figure}.plot_manifest.json"),
+                "native_png_manifest": {**file_record(PNG_MANIFEST), "figure_id": manifest["asset_id"]},
             })
     return results
 
