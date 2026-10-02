@@ -23,4 +23,13 @@ const CGBU_CONTOUR_SCAN = Main.ChargedGBUContourScan
     opts = CGBU_CONTOUR_SCAN.parse_args(["--output", "x", "--t-grid", "40:60:10", "--resume"])
     @test opts[:resume] && opts[:output] == "x"
     @test CGBU_CONTOUR_SCAN.parse_args(["--help"]) === nothing
+    @test opts[:density_route] == "direct_finite_q"
+    @test CGBU_CONTOUR_SCAN.parse_args(["--output", "x", "--density-route", "q0_lambda_reference"])[:density_route] == "q0_lambda_reference"
+    @test_throws ArgumentError CGBU_CONTOUR_SCAN.parse_args(["--output", "x", "--density-route", "folded"])
+    settings = CGBU_CONTOUR_SCAN.screening_settings()
+    @test settings == (mesh=64, cut_nodes=32, tail_nodes=32, omega_nodes=64, q_nodes=8, qmax=8.)
+    direct = CGBU_CONTOUR_SCAN._scan_identity(Dict(), [40.], [0.], [:pi_plus], settings, 0, 1, Dict())
+    extrapolated = CGBU_CONTOUR_SCAN._scan_identity(Dict(), [40.], [0.], [:pi_plus], settings, 0, 1, Dict(); route="q0_lambda_reference")
+    @test direct != extrapolated # Never resume a different algorithm's points.
+    @test occursin("external omega", CGBU_CONTOUR_SCAN.coordinate_contract("q0_lambda_reference").bose_frequency)
 end

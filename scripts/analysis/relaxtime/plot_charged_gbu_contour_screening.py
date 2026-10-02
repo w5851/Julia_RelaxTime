@@ -162,6 +162,14 @@ def load_dataset(input_root: str | Path) -> dict[str, Any]:
         manifests.append(payload)
 
     first = manifests[0]
+    # Old frozen shards predate the explicit route field and are finite-q.
+    route = first.get("density_route", "direct_finite_q")
+    if route not in {"direct_finite_q", "q0_lambda_reference"}:
+        raise ValueError(f"unsupported density_route: {route}")
+    if any(manifest.get("density_route", "direct_finite_q") != route for manifest in manifests[1:]):
+        raise ValueError("scan manifests disagree on density_route")
+    if any(manifest.get("coordinate_contract") != first.get("coordinate_contract") for manifest in manifests[1:]):
+        raise ValueError("scan manifests disagree on coordinate_contract")
     invariant_fields = ("T_grid", "muB_grid", "channels", "settings", "config", "git_head")
     for field in invariant_fields:
         expected = _canonical(first.get(field))
@@ -209,6 +217,8 @@ def load_dataset(input_root: str | Path) -> dict[str, Any]:
         "muB_grid": sorted(muB_grid),
         "channels": list(first["channels"]),
         "settings": first["settings"],
+        "density_route": route,
+        "coordinate_contract": first.get("coordinate_contract"),
         "config": first["config"],
         "git_head": first["git_head"],
         "source_hashes": first["source_hashes"],
@@ -655,6 +665,8 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "config": dataset["config"],
         "channels": dataset["channels"],
         "settings": dataset["settings"],
+        "density_route": dataset["density_route"],
+        "coordinate_contract": dataset["coordinate_contract"],
         "grid": {"T_MeV": dataset["T_grid"], "muB_MeV": dataset["muB_grid"]},
         "row_count": len(dataset["rows"]),
         "status_counts": dataset["status_counts"],

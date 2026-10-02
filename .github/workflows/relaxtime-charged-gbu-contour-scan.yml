@@ -18,6 +18,14 @@ on:
         required: false
         default: "pi_plus,K_plus,pi_minus,K_minus"
         type: string
+      density_route:
+        description: "Direct finite-q or internal-lambda q=0 extrapolation (same infinite thermal kernel)"
+        required: false
+        default: "direct_finite_q"
+        type: choice
+        options:
+          - direct_finite_q
+          - q0_lambda_reference
       shard_count:
         description: "Number of parallel T-row shards"
         required: false
@@ -82,18 +90,24 @@ jobs:
           cache-name: julia-cache-charged-gbu-contour-scan
       - name: Instantiate and precompile
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Verify synthetic route and integration contracts
+        env:
+          UNIT_FILES: relaxtime/test_charged_gbu_contour_scan_contract.jl,relaxtime/test_charged_gbu_q0_reference.jl
+        run: julia --project=. tests/unit/runtests.jl
       - name: Run diagnostic shard
         env:
           T_GRID: ${{ inputs.t_grid || '40:220:10' }}
           MUB_GRID: ${{ inputs.muB_grid || '0:800:50' }}
           CHANNELS: ${{ inputs.channels || 'pi_plus,K_plus,pi_minus,K_minus' }}
+          DENSITY_ROUTE: ${{ inputs.density_route || 'direct_finite_q' }}
           SHARD_INDEX: ${{ matrix.shard_index }}
           SHARD_COUNT: ${{ needs.prepare.outputs.shard_count }}
           OUTPUT: contour-output
         run: |
           julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl \
             --output "$OUTPUT" --t-grid "$T_GRID" --muB-grid "$MUB_GRID" \
-            --channels "$CHANNELS" --shard-index "$SHARD_INDEX" --shard-count "$SHARD_COUNT"
+            --channels "$CHANNELS" --density-route "$DENSITY_ROUTE" \
+            --shard-index "$SHARD_INDEX" --shard-count "$SHARD_COUNT"
       - name: Upload diagnostic shard
         if: always()
         uses: actions/upload-artifact@v4
@@ -140,6 +154,13 @@ jobs:
             --source-run-id "$SOURCE_RUN_ID" \
             --postprocess-run-id "$POSTPROCESS_RUN_ID" \
             --git-sha "$SOURCE_GIT_SHA"
+      - name: Render like-for-like freeze-out neighborhood meeting map
+        run: |
+          python scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py \
+            --csv contour-plots/contour_points_merged.csv \
+            --source-manifest contour-plots/plot_manifest.json \
+            --presentation --band-MeV 50 --comparison-color-limits 0 1.15 \
+            --output-dir contour-neighborhood
       - name: Select sparse full-gate candidates
         env:
           SOURCE_RUN_ID: ${{ inputs.replot_run_id || github.run_id }}
@@ -177,5 +198,13 @@ jobs:
         with:
           name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-candidates
           path: contour-candidates
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Upload freeze-out neighborhood map
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-neighborhood
+          path: contour-neighborhood
           if-no-files-found: warn
           retention-days: 30

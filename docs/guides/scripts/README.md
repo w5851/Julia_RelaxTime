@@ -21,6 +21,16 @@ quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不
 通用 legacy MesonDensity 兼容 API。方法、参数、输出和失败语义见
 [研究入口合同](../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)。
 
+二维 screening 入口 `scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl`
+默认仍为 `--density-route direct_finite_q`；显式指定
+`--density-route q0_lambda_reference` 可用同一个无限热 q=0 核进行 timelike
+内部坐标外推：`lambda=omega+(mu1-mu2)`、
+`lambda0=sqrt(lambda^2-q^2)`（仅 `lambda>=q`，其余区域参考相位为零）。
+Bose 权重始终使用外部 `omega`，束缚态独立计数并保留连续谱边界项。
+两种路线的网格、背景、screening 设置相同，manifest/resume 身份区分算法；
+这不是改变上述 smoke production 默认，也不是完整门禁验收。
+GitHub Actions 的 `Charged GBU contour scan` 支持对应 `density_route` 选项。
+
 全量 `run_*.jl` 脚本功能目录见：
 
 - [run_script_catalog.md](run_script_catalog.md)

@@ -198,3 +198,23 @@ def test_label_collision_suppression_changes_only_text_visibility():
     assert [label.get_visible() for label in labels] == [True, False, True]
     assert [label.get_text() for label in labels] == ["0.8", "1.6", "2.4"]
     plt.close(fig)
+
+
+def test_loader_rejects_mixed_density_routes(tmp_path):
+    module = _load_module()
+    _write_shard(tmp_path, 0, [_row("40", "0"), _row("40", "50")])
+    _write_shard(tmp_path, 1, [_row("50", "0"), _row("50", "50")])
+    path = tmp_path / "shard-1/manifest.json"
+    manifest = json.loads(path.read_text())
+    manifest["density_route"] = "q0_lambda_reference"
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="density_route"):
+        module.load_dataset(tmp_path)
+
+
+def test_q0_workflow_uses_same_infinite_kernel_grid_and_new_scan():
+    source = (ROOT / ".github/workflows/relaxtime-charged-gbu-contour-scan.yml").read_text()
+    assert 'default: "direct_finite_q"' in source
+    assert '--density-route "$DENSITY_ROUTE"' in source
+    assert "--comparison-color-limits 0 1.15" in source
+    assert "--presentation --band-MeV 50" in source

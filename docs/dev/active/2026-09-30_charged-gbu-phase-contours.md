@@ -264,6 +264,104 @@ run `36957893472` / `eb77d0616be4da6597df01e6159ad69b6eb19b89`。
 - 本轮的 source/config/point/figure 都保留 provenance，数据没有进入 Git；
   Actions artifacts 保留 30 天，不等于永久研究档案，作者接受后再治理保留。
 
+### M6：冻结线附近的二维 ratio 调整地图（2026-10-02）
+
+用户授权仅使用既有数据快速作图，不重新扫描、不拟合实验、不更改默认冻结线。
+新增 `scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py`，从 M5
+冻结 CSV 和 manifest 验证 hash、唯一键、行数、status、ratio 与两通道密度的一致性。
+绘图选取 `0<=muB<=750 MeV`、`|T-Tfo(muB)|<=20 MeV` 的探针带：
+`242 screened`、`6 failed`，有效 ratio 范围 `0.279063--0.744012`。
+这只是已采样邻域，不是冻结线置信带或全精度验收。
+
+局部颜色使用线性尺度 `0.25--0.75`，等高值步长 `0.05`；原始值不改变、不裁切。
+热图无插值；等高线仍只在四个有效角点的单元内 display-only 取线，
+`corner_mask=false`，不跨失败或未选区域。图中默认线的数字为碰撞能量 GeV；
+`a±10 MeV` 示意线只改变 `a_GeV`，保持 `b,c,d,e` 和能量到 muB 的映射不变。
+示意线是坐标探针，不是新产额或实验拟合。
+
+此旧分支缺少 v2 公共层，生成命令通过 `--plotting-support-root` 只读复用
+`D:/Desktop/Julia_RelaxTime` 的当前 v2 层，不迁移或修改该工作树。该支持工作树
+存在其他任务改动，因此 manifest 同时保存其 HEAD、dirty 标记和所消费模块/profile
+的精确 hashes；不能仅用 HEAD 代表其内容。输入和支持文件生成前后 hash 相同。
+
+最终新 sibling：
+`D:/Temp/charged-gbu-contour-fine-36957893472/freezeout-guidance-v3/`。
+`freezeout_neighborhood_ratio.png` 已经 agent 视觉审核；公共 v2 validator 通过，
+600 dpi、最小测量字高约 `2.096 mm`、无裁切/文字重叠、图例位于 axes 外。
+保持 `audit/png_review`、`manuscript_eligible=false`，等待作者审核。
+新合成/输入契约测试 `6/6`；本轮绘图与候选测试合计 `21/21`；所复用的公共
+plotting contract/quality 测试 `31/31`。不运行数值 regression，因为未修改计算核。
+
+复现入口：上述脚本以 `--csv <M5 final-plots/contour_points_merged.csv>`、
+`--source-manifest <M5 final-plots/plot_manifest.json>`、
+`--plotting-support-root <含当前v2层的只读工作树>`、`--output-dir <新目录>` 运行。
+已有输出目录被拒绝覆盖；本轮未 push、dispatch Actions、创建 PR 或修改 production。
+
+#### M6 组会显示修订：±50 MeV（2026-10-02）
+
+用户明确要求扩大到冻结线 ±50 MeV、移除参数探针和能量数字，并强调本图用于
+组会，不执行论文级正式化。新增同一脚本的 `--presentation --band-MeV 50`
+分支；原 v2 审查模式保留。组会分支不加载论文级公共层、不申请 APS/矢量资格，
+但继续验证输入 hash、状态、ratio、mask 和不覆盖历史目录。
+
+显示 `muB=0--750 MeV`、已有 `T=40--220 MeV` 网格中的选定邻域：
+`608 screened`、`7 failed`，ratio 范围 `0.0475296--1.12918`。带的低温端
+低于 40 MeV 时截在原输入域，不补算或外推。默认冻结线改用红虚线以区别黑色
+等高线；没有 a±10MeV 曲线、没有能量标签。全部等高值使用 0.05 步长，色标
+也按 0.05 标注。标签在一次 inline-clabel 调用中直接嵌在对应路径上，生成时
+逐一核对其文本与选取的原等级一致；长曲线补重复标签，不跨 mask 重连。
+
+组会最终 PNG/manifest 位于
+`D:/Temp/charged-gbu-contour-fine-36957893472/freezeout-guidance-band50-meeting-v2/`。
+画布 `12.2×8.8 in`、220 dpi，仅作组会显示审核；已 agent 视觉检查，不声称
+v2 最终尺寸/投稿合格。相关新契约 `9/9` 与既有绘图/候选契约 `15/15` 通过，
+原始数值 CSV hash 不变。未改变默认配置、计算核、全精度 gate 或数值 baseline。
+
+组会标签简化版保留在同根目录 `freezeout-guidance-band50-meeting-v3/`：
+去掉标签白色底框，只保留 0.7 pt 细描边；标签和色标数字每 0.10 一次，
+等高线仍为 0.05。与 meeting-v2 的输入 CSV hash、全部 contour levels、
+color limits、608 screened 和 7 failed 均相同。11/11 相关契约测试通过，
+agent 已审核 PNG；这是显示修订，不是新数值计算。
+
+### M7：同网格 q=0 外推远程重算（2026-10-02）
+
+用户授权在 GitHub Actions **新计算** M5 的同一完整网格，生成与 M6
+`meeting-v3` 同构的冻结线邻域组会图；不是从 finite-q 数据改标签。
+
+- 网格 `T=40:5:220 MeV`、`muB=0:25:1200 MeV`，1813 点、4 个 T-row shards；
+  CLI 为 start:stop:step，即 `40:220:5`、`0:1200:25`。
+- 同一 quark-only BQS continuation、四通道、无限 PNJL 热目标、双线真空截断；
+  同一 `mesh/cut/tail/omega/q=64/32/32/64/8`、`qmax=8 fm^-1`。
+- 新的 `charged_gbu_q0_reference.jl` 仅复用当前无限热 profile，不调用历史
+  有限热 `bubble_at`。沿用此前对照的 `q0_lambda_reference`：
+  `lambda0=sqrt((omega+shift)^2-q^2)`，仅 `omega+shift>=q`；其他区域相位零
+  是该外推近似的定义，不是删除直接 finite-q 谱。
+- 根在 q=0 解析 gap 中独立计数，再映射为 `hypot(lambda_root,q)-shift`。
+  Bose 用外部 omega，GBU 分部积分保留 `-n*g(omega_threshold)`；单位 fm^-3。
+  保留同一 shell 支撑、阈值/Mott 不确定性和 UV 门槛，不 fold/翻符号/裁零。
+- 显示同一 `muB=0--750`、冻结线 ±50 MeV、已采样 `T=40--220`；同一
+  12.2×8.8 in、220 dpi、0.05 等高线、0.10 无底框标签、红虚线，无参数探针
+  或能量数字。固定色标 `[0,1.15]`；若超界，显示 overflow 色及色标端箭头，
+  不改数值。mask 由新计算的失败结果决定，不能复制旧 mask 强求一致。
+
+- [x] 实现显式 route selector、source hash 和 resume 隔离；默认 finite-q 不变。
+- [x] workflow 接入新数值 route 和 solver-free 同构组会图。
+- [x] 完成合成根/坐标/GBU 边界、route 混用拒绝和绘图不变约束验证。
+- [ ] 推送最小源码变更并新 dispatch；核对数值 SHA、参数和实际 scan jobs。
+- [ ] 审核1813个唯一网格点、四分片、背景一致性、失败/负值和输入输出 hashes。
+- [ ] 下载并视觉审核组会 PNG；报告与 finite-q 的诊断差异，不晋升 production。
+
+新增 Julia 测试仅用合成 profile/纯代数；真实数值运行全部留在 Actions。
+生产配置、PNJLCore、上游求解器与 baseline 不修改；不在本轮合并分支。
+
+本轮 focused Julia `68/68`、Python `30/30` 通过。首轮 Julia 的唯一失败是测试
+将 Float64 相位与精确 Irrational π 严格比较；改为同类型断言后通过，未改物理
+核或容差。docs consistency、formula-route、script entrypoint/governance、
+data-output guard、task-ledger preflight 与 `git diff --check` 均通过。
+全仓 active-doc 检查报告五份既有 2026-07 文档超龄（>60d）；这些文档未修改，
+不在本轮擅自归档。完整数值 regression/full gates 未运行：本轮新增的是独立
+screening 近似，生产实现/config/baseline 与 finite-q 分支的求值调用不变。
+
 ## 7. 风险与回退
 
 - BQS solver 在一阶线附近可能有多支；保存 seed、残差和失败点，不拼接共存相。

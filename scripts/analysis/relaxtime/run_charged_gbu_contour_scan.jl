@@ -22,10 +22,22 @@ using Main.Models
 
 const ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const Workflow = Main.ChargedGBUResearchWorkflow
+include("charged_gbu_q0_reference.jl")
+const Reference = ChargedGBUQ0Reference
 const CHANNELS = Workflow.R.CHANNELS
 const DEFAULT_CONFIG = Workflow.DEFAULT_CONFIG
 const DEFAULT_T_GRID = "40:220:10"
 const DEFAULT_MUB_GRID = "0:800:50"
+const DENSITY_ROUTES = ("direct_finite_q", "q0_lambda_reference")
+
+function density_route(value)
+    value in DENSITY_ROUTES || throw(ArgumentError("unsupported density_route: $(value)"))
+    return String(value)
+end
+
+coordinate_contract(route) = (internal_frequency="lambda=omega+(mu1-mu2)",
+    bose_frequency="external omega", extrapolation=route == "q0_lambda_reference" ?
+        "lambda0=sqrt(lambda^2-q^2) for lambda>=q; phase=0 otherwise" : "none; direct finite-q loop")
 
 _float(value, label) = begin
     result = try parse(Float64, String(value)) catch
@@ -112,27 +124,42 @@ function source_hashes(config_path)
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "causal_gbu_infinite_thermal.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "causal_gbu_infinite_profile.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "causal_gbu_infinite_yield.jl"),
+        joinpath(ROOT, "scripts", "analysis", "relaxtime", "charged_gbu_q0_reference.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "run_charged_gbu_contour_scan.jl"), config_path]
     return Dict(replace(relpath(p, ROOT), '\\' => '/') => bytes2hex(sha256(read(p))) for p in paths)
 end
 
-function _scan_identity(config, T_values, muB_values, channels, settings, shard_index, shard_count, hashes)
+function _scan_identity(config, T_values, muB_values, channels, settings, shard_index, shard_count, hashes;
+        route="direct_finite_q")
     payload = JSON3.write((config=config, T_values=T_values, muB_values=muB_values,
         channels=String.(channels), settings=settings, shard_index=shard_index,
+        density_route=density_route(route), coordinate_contract=coordinate_contract(route),
         shard_count=shard_count, source_hashes=hashes, schema="charged_gbu_contour_scan_v2"))
     bytes2hex(sha256(payload))
 end
 
-function _channel_record(bg, channel, settings)
+function _channel_record(bg, channel, settings; route="direct_finite_q")
+    density_route(route)
     started = Base.time_ns()
     try
         q_values, q_weights = Workflow.R.gauleg(0.0, settings.qmax, settings.q_nodes)
+        ref = if route == "q0_lambda_reference"
+            kernel0 = Workflow.I.kernel(bg, channel, 0.; cut_nodes=settings.cut_nodes,
+                split_inv_fm=max(36.0, 28.0 * bg.T + 2.0))
+            Reference.reference(Workflow.P.profile(kernel0; mesh=settings.mesh, tail_nodes=settings.tail_nodes))
+        else
+            nothing
+        end
         rows = NamedTuple[]
         for (q, weight) in zip(q_values, q_weights)
-            kernel = Workflow.I.kernel(bg, channel, q; cut_nodes=settings.cut_nodes,
-                split_inv_fm=max(36.0, q + 28.0 * bg.T + 2.0))
-            profile = Workflow.P.profile(kernel; mesh=settings.mesh, tail_nodes=settings.tail_nodes)
-            shell = Workflow.Y.shell(profile; nodes=settings.omega_nodes)
+            shell = if route == "q0_lambda_reference"
+                Reference.shell(ref, q; nodes=settings.omega_nodes)
+            else
+                kernel = Workflow.I.kernel(bg, channel, q; cut_nodes=settings.cut_nodes,
+                    split_inv_fm=max(36.0, q + 28.0 * bg.T + 2.0))
+                profile = Workflow.P.profile(kernel; mesh=settings.mesh, tail_nodes=settings.tail_nodes)
+                Workflow.Y.shell(profile; nodes=settings.omega_nodes)
+            end
             push!(rows, (q_inv_fm=q, weight=weight, density=shell.density,
                 root_count=shell.root_count, passed=isfinite(shell.density)))
         end
@@ -140,10 +167,12 @@ function _channel_record(bg, channel, settings)
         return (status=isfinite(density) && all(row.passed for row in rows) ? "screened" : "nonfinite",
             passed=isfinite(density) && all(row.passed for row in rows), density_inv_fm3=density,
             elapsed_s=_elapsed_seconds(started), rows=rows,
+            density_route=route,
             gate_scope="finite_shell_output_only;full_production_gates_omitted", reason="")
     catch err
         err isa InterruptException && rethrow()
         return (status="evaluation_failed", passed=false, density_inv_fm3=NaN,
+            density_route=route,
             elapsed_s=_elapsed_seconds(started), rows=NamedTuple[], gate_scope="screening", reason=sprint(showerror, err))
     end
 end
@@ -190,7 +219,7 @@ end
 function parse_args(args=ARGS)
     options = Dict{Symbol,Any}(:t_grid=>DEFAULT_T_GRID, :muB_grid=>DEFAULT_MUB_GRID,
         :channels=>join(String.(CHANNELS), ","), :output=>nothing, :shard_index=>0, :shard_count=>1,
-        :resume=>false, :config=>DEFAULT_CONFIG)
+        :resume=>false, :config=>DEFAULT_CONFIG, :density_route=>"direct_finite_q")
     i = 1
     while i <= length(args)
         arg = args[i]
@@ -198,10 +227,11 @@ function parse_args(args=ARGS)
             return nothing
         elseif arg == "--resume"
             options[:resume] = true
-        elseif arg in ("--t-grid", "--muB-grid", "--channels", "--output", "--shard-index", "--shard-count", "--config")
+        elseif arg in ("--t-grid", "--muB-grid", "--channels", "--output", "--shard-index", "--shard-count", "--config", "--density-route")
             i < length(args) || throw(ArgumentError("missing value for $(arg)")); i += 1
             key = arg == "--t-grid" ? :t_grid : arg == "--muB-grid" ? :muB_grid : arg == "--channels" ? :channels :
-                arg == "--output" ? :output : arg == "--shard-index" ? :shard_index : arg == "--shard-count" ? :shard_count : :config
+                arg == "--output" ? :output : arg == "--shard-index" ? :shard_index : arg == "--shard-count" ? :shard_count :
+                arg == "--density-route" ? :density_route : :config
             options[key] = key in (:shard_index, :shard_count) ? parse(Int, args[i]) : args[i]
         else
             throw(ArgumentError("unknown option $(arg)"))
@@ -209,19 +239,21 @@ function parse_args(args=ARGS)
         i += 1
     end
     options[:output] === nothing && throw(ArgumentError("--output is required"))
+    density_route(options[:density_route])
     return options
 end
 
-print_help() = println("Usage: julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl --output DIR [--t-grid 40:220:10] [--muB-grid 0:800:50] [--channels pi_plus,K_plus] [--shard-index 0] [--shard-count 4] [--resume]")
+print_help() = println("Usage: julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl --output DIR [--t-grid 40:220:10] [--muB-grid 0:800:50] [--channels pi_plus,K_plus] [--shard-index 0] [--shard-count 4] [--density-route direct_finite_q|q0_lambda_reference] [--resume]")
 
 function run_scan(options)
     config_path = abspath(String(options[:config]))
     c = Workflow.validate_config(TOML.parsefile(config_path))
     T_values = parse_grid(options[:t_grid]; label="T grid"); muB_values = parse_grid(options[:muB_grid]; label="muB grid")
     channels = parse_channels(options[:channels]); settings = screening_settings(); output = abspath(String(options[:output]))
+    route = density_route(options[:density_route])
     options[:shard_count] <= length(T_values) || throw(ArgumentError("shard_count cannot exceed T-row count"))
     ispath(output) && !options[:resume] && throw(ArgumentError("output exists; use --resume")); mkpath(output)
-    hashes = source_hashes(config_path); identity = _scan_identity(c, T_values, muB_values, channels, settings, options[:shard_index], options[:shard_count], hashes)
+    hashes = source_hashes(config_path); identity = _scan_identity(c, T_values, muB_values, channels, settings, options[:shard_index], options[:shard_count], hashes; route=route)
     manifest_path = joinpath(output, "manifest.json")
     if options[:resume] && isfile(manifest_path)
         previous = _read_json(manifest_path)
@@ -250,7 +282,7 @@ function run_scan(options)
             try
                 started = Base.time_ns(); solved = Workflow.background(model, point(T_values[row_index], muB_MeV), c; seed=seed)
                 elapsed_s = _elapsed_seconds(started); bg = solved.bg; seed = solved.seed; background_seed = solved.seed
-                for channel in channels; records[channel] = _channel_record(bg, channel, settings); end
+                for channel in channels; records[channel] = _channel_record(bg, channel, settings; route=route); end
             catch err
                 err isa InterruptException && rethrow(); seed = nothing; failure_reason = sprint(showerror, err)
                 @warn "charged GBU contour point failed" row_index col_index T_MeV=T_values[row_index] muB_MeV failure_reason
@@ -264,6 +296,7 @@ function run_scan(options)
     manifest = (schema="charged_gbu_contour_scan_v2", scan_identity=identity, generated_at_utc=string(Dates.now(Dates.UTC)),
         git_head=readchomp(`git -C $ROOT rev-parse HEAD`), config=replace(relpath(config_path, ROOT), '\\'=>'/'),
         source_hashes=hashes, T_grid=T_values, muB_grid=muB_values, channels=String.(channels), settings=settings,
+        density_route=route, coordinate_contract=coordinate_contract(route),
         shard_index=options[:shard_index], shard_count=options[:shard_count], point_count=length(rows),
         successful_points=count(row->row.status == "screened", rows), production_default=false, diagnostic_only=true)
     _write_atomic(joinpath(output, "manifest.json"), manifest); return manifest
