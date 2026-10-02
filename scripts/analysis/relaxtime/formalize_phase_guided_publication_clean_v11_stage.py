@@ -8,12 +8,16 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import hashlib
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.plotting.plot_manifest import generator_record, input_record, sha256_file, write_manifest
+from scripts.plotting.plot_provenance import git_source, is_code_record, validate_snapshot
+from scripts.plotting.plot_bundle import load_chart_records
 
 EXPORT_SCRIPT = ROOT / "scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py"
 SPEC = importlib.util.spec_from_file_location("v11_stage_frozen_exporter", EXPORT_SCRIPT)
@@ -30,6 +34,7 @@ HISTORICAL_CONTRACT_PATHS = {
     "docs/guides/sop/workflows/figure_production.md",
     ".agents/skills/plotting-sop/SKILL.md",
 }
+FROZEN_CODE_REF = tomllib.loads((ROOT / "config/plotting/historical_snapshots.toml").read_text(encoding="utf-8"))["publication_clean_v11_stage"]["code_commit"]
 
 
 def read_json(path: Path) -> dict:
@@ -44,12 +49,14 @@ def audit_v10_snapshot() -> list[dict]:
     actual_paths = {V11.relative(path) for root in (V11.V10.FIGURE_ROOT, V11.V10.ANALYSIS_ROOT)
                     for path in root.rglob("*") if path.is_file()}
     if {record["path"] for record in frozen} != actual_paths:
-        raise ValueError("retained v10 snapshot file set changed")
+        from scripts.analysis.relaxtime.migrate_phase_guided_plot_manifest_bundles import check_migration
+        check_migration()
     package = read_json(V11.V10.ANALYSIS_ROOT / "manifest.json")
     drift = []
     for record in package["inputs"]:
         path = ROOT / record["path"]
-        actual = sha256_file(path)
+        actual = (hashlib.sha256(git_source(str(ROOT), FROZEN_CODE_REF, record["path"])).hexdigest()
+                  if is_code_record(path, ROOT) else sha256_file(path))
         if actual != record["sha256"]:
             if record["path"] not in HISTORICAL_CONTRACT_PATHS:
                 raise ValueError(f"unexpected v10 historical input drift: {record['path']}")
@@ -64,18 +71,17 @@ def collect_payload() -> dict:
     pdf_package_path = EXPORT.ANALYSIS_ROOT / "manifest.json"
     pdf_package = read_json(pdf_package_path)
     EXPORT.verify_records([*pdf_package["inputs"], *pdf_package["outputs"]])
-    pdf_index = read_json(EXPORT.FIGURE_ROOT / "pdf_review_index.json")
-    if len(png_index["charts"]) != 74 or len(pdf_index["charts"]) != 74:
+    pdf_index_path = EXPORT.FIGURE_ROOT / "plot_manifest.json"
+    _, pdf_records = load_chart_records(pdf_index_path, root=ROOT)
+    if len(png_index["charts"]) != 74 or len(pdf_records) != 74:
         raise ValueError("v11 requires 72 single and two composite charts per format")
     violations = []
-    for chart in pdf_index["charts"]:
-        manifest_path = ROOT / chart["manifest"]
-        if sha256_file(manifest_path) != chart["manifest_sha256"]:
-            raise ValueError(f"PDF companion manifest changed: {manifest_path}")
-        if errors := EXPORT.verify_companion(manifest_path):
+    for chart, record in pdf_records:
+        if errors := EXPORT.verify_companion_record(record):
             raise ValueError(f"PDF technical preflight failed: {errors}")
         if chart["submission_preflight_violations"]:
-            violations.append({"manifest": chart["manifest"], "violations": chart["submission_preflight_violations"]})
+            violations.append({"manifest": V11.relative(pdf_index_path), "figure_id": record.get("asset_id", record["outputs"][0]["path"]),
+                               "violations": chart["submission_preflight_violations"]})
     if len(violations) != 2:
         raise ValueError("expected exactly two retained composite typography blockers")
     pointer = read_json(V11.CURRENT_POINTER)
@@ -98,7 +104,7 @@ def collect_payload() -> dict:
         "png_package": input_record(EXPORT.PNG_PACKAGE, role="accepted_v11_png_package"),
         "pdf_package": input_record(pdf_package_path, role="accepted_v11_pdf_companions"),
         "png_index": input_record(EXPORT.PNG_INDEX, role="accepted_v11_png_index"),
-        "pdf_index": input_record(EXPORT.FIGURE_ROOT / "pdf_review_index.json", role="accepted_v11_pdf_index"),
+        "pdf_index": input_record(pdf_index_path, role="accepted_v11_pdf_index"),
         "placement_report": input_record(PLACEMENT, role="measured_paper_placement_report"),
         "historical_archive_index": input_record(ARCHIVE_INDEX, role="local_restorable_history_index"),
         "renderer_dependency_closure": [input_record(path, role="retained_frozen_renderer_dependency") for path in closure],
@@ -115,9 +121,9 @@ def collect_payload() -> dict:
 
 def validate_acceptance() -> dict:
     retained = read_json(ACCEPTANCE)
-    actual = collect_payload()
-    if retained != actual:
-        raise ValueError("stage acceptance no longer matches the frozen package or its reviewed boundaries")
+    errors = validate_snapshot(ACCEPTANCE, root=ROOT, code_ref=FROZEN_CODE_REF)
+    if errors:
+        raise ValueError("stage snapshot verification failed: " + "; ".join(errors))
     return retained
 
 

@@ -15,7 +15,7 @@ QuadGK 自提交 `f08256cc` 起作为根环境直接依赖存在，最初用于 
 1. 根 `Project.toml` 不直接依赖 QuadGK；`src/`、`scripts/` 和 `tests/` 不导入或调用 QuadGK。
 2. QuadGK 只允许作为 `benchmark/Project.toml` 中的隔离对照 oracle。先用 `--project=benchmark` 实例化；需要同时 include 根源码时，必须显式把 `benchmark` 环境叠加到仅该 benchmark 进程的 `LOAD_PATH`。benchmark 结果不得自动成为 production 正确性证据。
 3. 根环境测试和分析脚本使用仓库内规则或根环境已有的 `FastGaussQuadrature` 构造独立固定/收敛对照。
-4. 根 `AGENTS.md` 只保存高优先级、跨仓库适用的强约束，行数上限为 220。完整命令清单迁到 `docs/dev/agent_command_reference.md`。
+4. 根 `AGENTS.md` 只保存高优先级、跨仓库适用的约束，220 行是精简建议；标题、长度和命令目录组织只产生 advisory。完整命令清单留在 `docs/dev/agent_command_reference.md`，不存在的实际引用仍报错。此调整对应 Issue #319（2026-10-02）。
 5. 只有子树存在真正局部且不适用于全仓的约束时才增加 scoped `AGENTS.md`；不得用 scoped 文件复制根规则或命令目录。
 6. `scripts/dev/check_dependency_policy.jl` 与 `scripts/dev/check_agent_instructions.jl` 在 dependency-audit CI 中执行，并由 unit 测试覆盖有效/无效 fixture。
 

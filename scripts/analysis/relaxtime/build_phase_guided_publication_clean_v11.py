@@ -33,7 +33,8 @@ from scripts.plotting.plot_manifest import (
 )
 from scripts.plotting.plot_quality import export_figure
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.validate_plot_artifact import validate_manifest_record
+from scripts.plotting.plot_bundle import build_bundle
 
 
 V10_SCRIPT = ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py"
@@ -336,13 +337,11 @@ def write_chart(figure: Any, stem: Path, specs: list[dict], profile: Any,
         "vector_delivery_pending": True, "workflow_head_sha": PARENT.V5.V4.V3.V2.V1.WORKFLOW_HEAD_SHA,
         "numerical_status": "inherited_author_accepted_display_only", "raw_manuscript_eligible": False,
     })
-    path = stem.with_suffix(".plot_manifest.json")
-    write_manifest(path, manifest)
-    violations = validate_manifest(path)
+    violations = validate_manifest_record(manifest)
     plt.close(figure)
     if violations:
         raise ValueError(f"{stem.name}: " + "; ".join(violations))
-    return {"stem": relative(stem), "manifest": relative(path), "manifest_sha256": sha256_file(path),
+    return {"stem": relative(stem), "manifest_record": manifest,
             "kind": "composite" if composite else "single", "mode_key": specs[0]["mode_key"],
             "axis_scales": sorted({spec["axis_scale"] for spec in specs}), "outputs": outputs}
 
@@ -507,13 +506,13 @@ def main() -> None:
     style["generated_at_utc"] = dt.datetime.now(dt.timezone.utc).isoformat()
     write_manifest(STYLE_MANIFEST, style)
     index_path = FIGURE_ROOT / "plot_manifest.json"
-    write_manifest(index_path, {
+    write_manifest(index_path, build_bundle({
         "schema": "publication_clean_v11_png_review_figure_index_v1", "status": "author_review_required",
         "manuscript_eligible": False, "current_publication_layer": False, "solver_called": False,
         "canonical_data_modified": False, "delivery_stage": "png_review", "vector_delivery_pending": True,
         "single_figure_count": 72, "composite_figure_count": 2, "mode_counts": {"mode_a": 36, "mode_b": 36},
         "style_manifest": relative(STYLE_MANIFEST), "style_manifest_sha256": sha256_file(STYLE_MANIFEST), "charts": charts,
-    })
+    }, [chart["manifest_record"] for chart in charts]))
     (ANALYSIS_ROOT / "README.md").write_text(f"""# publication_clean_v11 PNG review layer
 
 v11 reuses frozen v5 data and v10's reviewed physical layout. Figure 1 is the

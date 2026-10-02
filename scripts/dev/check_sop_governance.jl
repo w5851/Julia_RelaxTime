@@ -88,6 +88,7 @@ function validate_registry(
     root::AbstractString=PROJECT_ROOT;
     registry_rel::AbstractString=DEFAULT_REGISTRY_REL,
     current_date::Date=today(),
+    advisories::Vector{String}=String[],
 )
     violations = String[]
     parsed = _load_registry(root, registry_rel, violations)
@@ -97,7 +98,9 @@ function validate_registry(
         push!(violations, "schema_version must be v1")
 
     allowed_statuses = Set(_string_vector(parsed, "allowed_statuses", "registry", violations))
-    required_sections = _string_vector(parsed, "required_sections", "registry", violations)
+    section_key = haskey(parsed, "recommended_sections") ? "recommended_sections" : "required_sections"
+    recommended_sections = haskey(parsed, section_key) ?
+        _string_vector(parsed, section_key, "registry", violations) : String[]
     forbidden_patterns = _string_vector(parsed, "forbidden_patterns", "registry", violations)
 
     index_rel = _nonempty_string(
@@ -190,17 +193,17 @@ function validate_registry(
         last_verified = _parse_date(get(raw, "last_verified", nothing), "$(item_label).last_verified", violations)
         if status == "active" && review_days !== nothing && last_verified !== nothing
             if last_verified > current_date
-                push!(violations, "$(item_label).last_verified is in the future: $(last_verified)")
+                push!(advisories, "$(item_label).last_verified is in the future: $(last_verified)")
             elseif Dates.value(current_date - last_verified) > review_days
-                push!(violations, "$(item_label) review is overdue: last_verified=$(last_verified), review_cycle_days=$(review_days)")
+                push!(advisories, "$(item_label) review is overdue: last_verified=$(last_verified), review_cycle_days=$(review_days)")
             end
         end
 
         if status == "active" && sop_path !== nothing && isfile(sop_path)
             content = read(sop_path, String)
-            for section in required_sections
+            for section in recommended_sections
                 occursin(section, content) ||
-                    push!(violations, "$(item_label) missing required section: $(section)")
+                    push!(advisories, "$(item_label) missing recommended section: $(section)")
             end
             for pattern in forbidden_patterns
                 occursin(pattern, content) &&
@@ -214,7 +217,9 @@ end
 
 function main(args::Vector{String}=collect(String.(ARGS)))
     isempty(args) || error("check_sop_governance.jl does not accept arguments")
-    violations = validate_registry()
+    advisories = String[]
+    violations = validate_registry(; advisories)
+    foreach(item -> println("[sop-governance] advisory: " * item), advisories)
     if !isempty(violations)
         println("[sop-governance] FAILED: $(length(violations)) violation(s)")
         for item in violations

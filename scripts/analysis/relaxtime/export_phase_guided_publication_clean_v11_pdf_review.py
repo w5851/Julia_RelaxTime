@@ -8,6 +8,7 @@ not vector_delivery: unresolved final-size violations remain explicit.
 from __future__ import annotations
 
 import copy
+import argparse
 import datetime as dt
 import hashlib
 import importlib.util
@@ -26,9 +27,11 @@ from PIL import Image
 from scripts.plotting.plot_manifest import (
     generator_record, input_record, runtime_record, sha256_file, write_manifest,
 )
-from scripts.plotting.plot_quality import export_figure, inspect_export
+from scripts.plotting.plot_quality import export_figure
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import _check_final_size_contract, validate_manifest
+from scripts.plotting.validate_plot_artifact import _check_final_size_contract, validate_manifest_record, validate_review_companion
+from scripts.plotting.plot_bundle import build_bundle, load_chart_records
+from scripts.plotting.plot_provenance import code_ref_for_manifest, validate_hash_record
 
 V11_SCRIPT = ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py"
 SPEC = importlib.util.spec_from_file_location("retained_publication_v11_pdf_renderer", V11_SCRIPT)
@@ -50,29 +53,26 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def verify_records(records: list[dict[str, Any]]) -> None:
     for record in records:
-        path = ROOT / record["path"]
-        if not path.is_file() or sha256_file(path) != record["sha256"]:
-            raise ValueError(f"frozen input/output changed: {record['path']}")
-        if "bytes" in record and path.stat().st_size != record["bytes"]:
-            raise ValueError(f"frozen byte count changed: {record['path']}")
+        if errors := validate_hash_record(record, root=ROOT, label="frozen",
+                                         code_ref=code_ref_for_manifest(PNG_INDEX, ROOT)):
+            raise ValueError(f"frozen input/output changed: {errors}")
 
 
 def load_frozen_case() -> tuple[dict, dict, list[dict]]:
-    package, index = read_json(PNG_PACKAGE), read_json(PNG_INDEX)
+    package = read_json(PNG_PACKAGE)
+    index, pairs = load_chart_records(PNG_INDEX, root=ROOT)
+    index["charts"] = [{**chart, "manifest_record": record} for chart, record in pairs]
     verify_records([*package["inputs"], *package["outputs"]])
     if len(index["charts"]) != 74:
         raise ValueError("v11 must contain 72 singles and two composites")
     retained = [input_record(PNG_PACKAGE, role="frozen_v11_png_package")]
     retained.extend(package["inputs"])
     retained.extend(package["outputs"])
-    for chart in index["charts"]:
-        path = ROOT / chart["manifest"]
-        if sha256_file(path) != chart["manifest_sha256"]:
-            raise ValueError(f"v11 chart manifest changed: {path}")
-        errors = validate_manifest(path)
+    for chart, record in pairs:
+        errors = validate_manifest_record(record, code_ref=code_ref_for_manifest(PNG_INDEX, ROOT))
         if errors:
-            raise ValueError(f"invalid retained PNG: {path}: {errors}")
-        retained.append(input_record(path, role="frozen_v11_png_chart_manifest"))
+            raise ValueError(f"invalid retained PNG: {chart}: {errors}")
+    retained.append(input_record(PNG_INDEX, role="frozen_v11_png_bundle"))
     return package, index, retained
 
 
@@ -103,8 +103,8 @@ def submission_preflight(source: dict, output: dict, quality: dict, profile: Any
 
 
 def export_chart(chart: dict, grouped: dict, gap_map: dict, profile: Any, font: dict) -> dict:
-    source_path = ROOT / chart["manifest"]
-    source = read_json(source_path)
+    source_path = PNG_INDEX
+    source = chart["manifest_record"]
     old_specs = source["rendering"]["panel_specs"]
     composite = chart["kind"] == "composite"
     if composite:
@@ -126,7 +126,6 @@ def export_chart(chart: dict, grouped: dict, gap_map: dict, profile: Any, font: 
             raise ValueError(f"unexpected PDF preflight failures: {source_path}: {unexpected}")
         # The original PNG case and its SOP remain frozen. A companion records
         # failures rather than extending the PNG-only exception to delivery.
-        path = stem.with_suffix(".pdf_review_manifest.json")
         manifest = {
             "schema": "publication_clean_v11_pdf_review_companion_v1",
             "delivery_stage": "pdf_review_preflight", "status": "technical_pdf_review_only",
@@ -134,7 +133,8 @@ def export_chart(chart: dict, grouped: dict, gap_map: dict, profile: Any, font: 
             "formal_vector_delivery_complete": False, "solver_called": False,
             "canonical_data_modified": False, "new_display_values": False,
             "author_png_visual_acceptance": "user accepted the current PNG version before requesting paper-size checks and PDFs",
-            "source_png_manifest": input_record(source_path, role="accepted_png_review_manifest"),
+            "source_png_manifest": {**input_record(source_path, role="accepted_png_review_manifest"),
+                                    "figure_id": source["asset_id"]},
             "source_png_output": reference, "source_png_pixel_comparison": pixels,
             "generator": generator_record(Path(__file__),
                 command="python scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py",
@@ -150,8 +150,7 @@ def export_chart(chart: dict, grouped: dict, gap_map: dict, profile: Any, font: 
                 "scope": "native-size visual/export contract only; no numerical eligibility promotion"},
             "calculation_sha": source["calculation_sha"], "workflow_head_sha": source["workflow_head_sha"],
         }
-        write_manifest(path, manifest)
-        return {"manifest": V11.relative(path), "manifest_sha256": sha256_file(path),
+        return {"manifest_record": manifest,
                 "kind": chart["kind"], "mode_key": chart["mode_key"], "outputs": outputs,
                 "submission_preflight_violations": errors}
     finally:
@@ -159,35 +158,27 @@ def export_chart(chart: dict, grouped: dict, gap_map: dict, profile: Any, font: 
 
 
 def verify_companion(path: Path) -> list[str]:
-    manifest = read_json(path)
-    errors = []
-    for field in ("manuscript_eligible", "current_publication_layer", "formal_vector_delivery_complete",
-                  "solver_called", "canonical_data_modified", "new_display_values"):
-        if manifest.get(field) is not False:
-            errors.append(f"{field} must remain false")
-    if manifest.get("delivery_stage") != "pdf_review_preflight":
-        errors.append("companion is not a PDF review preflight")
-    verify_records([manifest["source_png_manifest"], manifest["source_png_output"], manifest["renderer"], *manifest["outputs"]])
-    source = read_json(ROOT / manifest["source_png_manifest"]["path"])
-    if manifest["panel_specs"] != source["rendering"]["panel_specs"]:
-        errors.append("panel specifications do not match the frozen PNG")
-    output = manifest["outputs"][0]
-    inspection = inspect_export(ROOT / output["path"])
-    if inspection != output["inspection"]:
-        errors.append("PDF inspection evidence changed")
-    if (inspection["page_count"] != 1 or inspection["raster_image_count"] != 0
-            or not inspection["fonts_embedded"] or inspection["type3_font_count"] != 0):
-        errors.append("PDF is not a single-page embedded-font vector chart")
-    profile = load_profile(source["style_profile"])
-    actual = submission_preflight(source, output, manifest["quality"], profile)
-    if actual != manifest["submission_preflight"]["violations"]:
-        errors.append("submission preflight violations were lost or changed")
-    if any(error != GLYPH_BLOCKER for error in actual):
+    return verify_companion_record(read_json(path))
+
+
+def verify_companion_record(manifest: dict) -> list[str]:
+    errors = validate_review_companion(manifest, code_ref=code_ref_for_manifest(PNG_INDEX, ROOT))
+    if any(error != GLYPH_BLOCKER for error in manifest["submission_preflight"]["violations"]):
         errors.append("unresolved non-typography export failures")
     return errors
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="validate existing companions without rendering")
+    args = parser.parse_args(argv)
+    if args.check:
+        _, pairs = load_chart_records(FIGURE_ROOT / "plot_manifest.json", root=ROOT)
+        for _, record in pairs:
+            if errors := verify_companion_record(record):
+                raise ValueError(f"invalid PDF companion: {errors}")
+        print(f"[v11-pdf-review] verified {len(pairs)} retained PDFs; no rendering")
+        return
     if FIGURE_ROOT.exists() or ANALYSIS_ROOT.exists():
         raise FileExistsError("refusing to overwrite an existing v11 PDF review companion")
     package, index, retained = load_frozen_case()
@@ -199,19 +190,19 @@ def main() -> None:
     charts = []
     for number, chart in enumerate(index["charts"], 1):
         result = export_chart(chart, grouped, gap_map, profile, font)
-        if errors := verify_companion(ROOT / result["manifest"]):
+        if errors := verify_companion_record(result["manifest_record"]):
             raise ValueError(f"invalid PDF companion: {errors}")
         charts.append(result)
         if number % 12 == 0 or number == len(index["charts"]):
             print(f"[v11-pdf-review] {number}/{len(index['charts'])} vector charts checked", flush=True)
     verify_records(retained)
-    figure_index = FIGURE_ROOT / "pdf_review_index.json"
-    write_manifest(figure_index, {
+    figure_index = FIGURE_ROOT / "plot_manifest.json"
+    write_manifest(figure_index, build_bundle({
         "schema": "publication_clean_v11_pdf_review_index_v1", "delivery_stage": "pdf_review_preflight",
         "manuscript_eligible": False, "current_publication_layer": False, "formal_vector_delivery_complete": False,
         "single_figure_count": 72, "composite_figure_count": 2, "mode_counts": {"mode_a": 36, "mode_b": 36},
         "charts": charts,
-    })
+    }, [chart["manifest_record"] for chart in charts]))
     readme = ANALYSIS_ROOT / "README.md"
     readme.write_text("""# publication_clean_v11 PDF review companion
 
@@ -229,9 +220,9 @@ their hash-bound generators/contracts, v5/current, numerical values, raw
 provenance, and paper-project files remain unchanged. The package keeps
 manuscript_eligible=false and formal_vector_delivery_complete=false.
 
-Per-chart *.pdf_review_manifest.json files retain the accepted PNG manifest,
-PDF inspection, panel specifications, and all native-size preflight failures.
-pdf_review_index.json indexes all 74 files. Native dimensions are unchanged;
+One plot_manifest.json retains shared provenance and all 74 per-chart records:
+the accepted PNG reference, PDF inspection, panel specifications, and all
+native-size preflight failures. Native dimensions are unchanged;
 paper insertion/printing dimensions require a separate placement assessment.
 
 ```powershell

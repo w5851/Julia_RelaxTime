@@ -7,7 +7,9 @@ from pathlib import Path
 
 from scripts.plotting.plot_manifest import sha256_file
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.validate_plot_artifact import validate_manifest_record
+from scripts.plotting.plot_bundle import load_chart_records
+from scripts.plotting.plot_provenance import validate_hash_record
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -32,8 +34,7 @@ def _stage_module():
     return module
 
 
-def _assert_only_recorded_historical_drift(manifest_path):
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+def _assert_only_recorded_historical_drift(manifest, hash_cache):
     stage = _stage_module()
     drift_paths = stage.HISTORICAL_CONTRACT_PATHS
     expected = []
@@ -45,7 +46,7 @@ def _assert_only_recorded_historical_drift(manifest_path):
                 f"inputs[{index}].sha256 mismatch for {record['path']}",
             ])
     assert len(expected) == 4
-    assert validate_manifest(manifest_path) == expected
+    assert set(validate_manifest_record(manifest, code_ref=stage.FROZEN_CODE_REF, hash_cache=hash_cache)) == set(expected)
 
 
 def test_v10_style_contract_is_png_review_only():
@@ -74,22 +75,21 @@ def test_v10_review_package_counts_hashes_and_layout_contract():
     module = _module()
     index_path = module.FIGURE_ROOT / "plot_manifest.json"
     assert index_path.is_file(), "build v10 with --png-review before running focused artifact checks"
-    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index, pairs = load_chart_records(index_path, root=ROOT)
     assert index["schema"] == "publication_clean_v10_png_review_figure_index_v1"
     assert index["single_figure_count"] == 72
     assert index["mode_counts"] == {"mode_a": 36, "mode_b": 36}
     assert index["composite_figure_count"] == 2
     assert index["manuscript_eligible"] is False
     assert index["current_publication_layer"] is False
-    assert len(index["charts"]) == 74
+    assert len(pairs) == 74
+    assert list(module.FIGURE_ROOT.rglob("*.json")) == [index_path]
     assert len(list(module.FIGURE_ROOT.rglob("*.png"))) == 74
     assert len(list(module.FIGURE_ROOT.rglob("*.pdf"))) == 0
 
-    for chart in index["charts"]:
-        manifest_path = ROOT / chart["manifest"]
-        assert sha256_file(manifest_path) == chart["manifest_sha256"]
-        _assert_only_recorded_historical_drift(manifest_path)
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    hash_cache = {}
+    for chart, manifest in pairs:
+        _assert_only_recorded_historical_drift(manifest, hash_cache)
         assert manifest["manuscript_eligible"] is False
         assert manifest["current_publication_layer"] is False
         assert manifest["canonical_data_modified"] is False
@@ -122,8 +122,7 @@ def test_v10_review_package_counts_hashes_and_layout_contract():
                 assert tick["major_count"] >= (3 if chart["kind"] == "composite" else 4)
 
     composite_manifests = [
-        json.loads((ROOT / chart["manifest"]).read_text(encoding="utf-8"))
-        for chart in index["charts"]
+        manifest for chart, manifest in pairs
         if chart["kind"] == "composite"
     ]
     figure1 = next(item for item in composite_manifests if item["case_slug"] == "figure1_relaxation_times_comparison")
@@ -145,7 +144,7 @@ def test_v10_preserves_v5_tables_and_current_pointer():
     _stage_module().audit_v10_snapshot()
     for record in [*package["inputs"], *package["outputs"]]:
         if record["path"] not in _stage_module().HISTORICAL_CONTRACT_PATHS:
-            assert sha256_file(ROOT / record["path"]) == record["sha256"]
+            assert validate_hash_record(record, root=ROOT, label="inputs", code_ref=_stage_module().FROZEN_CODE_REF) == []
     for name, expected in package["inherited_table_hashes"].items():
         assert sha256_file(module.V5_TABLE_ROOT / name) == expected
         assert sha256_file(module.TABLE_ROOT / name) == expected

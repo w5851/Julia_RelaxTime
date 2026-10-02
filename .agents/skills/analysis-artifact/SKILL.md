@@ -15,7 +15,7 @@ description: 仅在需要把已有数值结果整理为可追溯分析包时使�
 
 - 只使用仓库内证据，除非用户明确要求新增文献检索或外部对比。
 - 不修改正式 result/figure 产物；分析输出默认写入 `docs/analysis/...`。
-- 先验证输入，再写结论：CSV 行数、关键字段、manifest/hash、failed points、convergence gate 和 figure manifest 必须先检查。
+- 先验证支撑本轮结论的输入：关键字段、失败点、适用的 convergence gate 和来源记录。首次接收、冻结或交付分析包时校验其 manifest/hash；普通局部分析复用已验证记录，输入变化时检查受影响文件。
 - 区分四层表述：
   - observation：结果表/图直接支持的趋势和局部结构。
   - attribution：可分解诊断表支持的贡献来源。
@@ -37,19 +37,19 @@ description: 仅在需要把已有数值结果整理为可追溯分析包时使�
    - 读取 figure-side `plot_manifest.json` 和关键 PNG；必要时抽查图像。
 
 3. Input validation
-   - 检查所有输入存在、row count 符合 audit、关键字段存在。
+   - 检查实际使用的输入存在、row count 符合 audit、关键字段存在。
    - 检查 NaN/Inf、失败点、负贡献、重复 key。
-   - 记录输入 hash、生成命令、repo HEAD 和脚本 hash。
+   - 记录输入来源、生成命令和代码版本。已有 manifest 可引用；冻结/交付时绑定输入 hash 与代码 commit 或源码快照，无须因后续代码变化重写旧记录。
 
 4. Derived evidence
-   - 生成全局趋势摘要：端点差、极值、turning count、单调性分类。
+   - 按分析问题选择摘要：端点差、极值、turning count、单调性分类。
    - 生成收敛风险摘要：高相对差异点、阈值分档和 gate 边界。
    - 生成 attribution 摘要：按 case 合适的维度汇总主导贡献与局部变化。
    - 若要写 mechanism，生成机制候选窗口和定点诊断表；没有机制表时不要升级解释。
    - 生成 claim ledger：每条论文候选陈述绑定证据文件、字段、点位或图号。
 
 5. Figures
-   - 生成全局 overview 图、局部结构放大图和 attribution/mechanism 图。
+   - 只生成支撑所需结论的 overview、局部结构或 attribution/mechanism 图。
    - 写 `figures/plot_manifest.json`，记录输入 hash、图 hash、生成命令和脚本信息。
 
 6. Analysis document
@@ -58,8 +58,8 @@ description: 仅在需要把已有数值结果整理为可追溯分析包时使�
    - 对旧产物只写 supersession 和不足边界，不把旧图作为当前 production-grade 证据。
 
 7. Validation
-   - 运行生成脚本 smoke，确认派生表无 NaN/Inf、key 唯一、claim 引用文件和字段存在、图文件非空。
-   - 运行仓库治理检查：`git diff --check`、`julia --project=. scripts/dev/check_docs_consistency.jl`；新增脚本时加跑 script governance checks。
+   - 生成逻辑改变时运行受影响路径，确认派生表缺失/失败语义、key 唯一、claim 引用文件和字段存在、图文件可读取。
+   - 检查差异；文档链接或脚本入口变化时运行相应检查。局部解释或已有脚本的新参数任务无需运行全部公共测试与治理检查。
    - 汇报哪些结论可直接用于论文，哪些仍需作者确认或补充诊断。
 
 ## Output Contract

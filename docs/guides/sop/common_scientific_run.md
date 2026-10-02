@@ -61,7 +61,7 @@ git status --short
 - 从仓库根目录使用 `--project=.`；
 - CI 当前固定 Julia `1.12.5`，根项目兼容下限为 Julia `1.10`；
 - 稳定 CLI 优先使用 `scripts/dev/run_with_sysimage.ps1` 或 `.sh`；
-- sysimage 必须通过 wrapper 的版本、平台和 git commit 校验；
+- sysimage 通过 wrapper 的 Julia/平台与实际构建输入校验；git commit 记录代码来源，纯文档提交不使缓存失效；
 - 正式结果必须能定位到 git commit、argv、有效配置和输入数据版本。
 
 工作树不干净不必自动阻断探索运行，但正式产物必须记录差异，并避免把未提交代码生成的结果误认为可长期复现基线。

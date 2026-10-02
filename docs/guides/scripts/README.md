@@ -37,12 +37,18 @@ quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不
 用途：
 
 - 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
-- wrapper 会同时校验 Julia 版本、平台信息与 `git_commit`
+- wrapper 会同时校验 Julia 版本、平台信息与 `build_inputs_fingerprint`
 - 默认 mismatch policy 为 `rebuild`
-- 若 sysimage 缺失、元数据缺失或 `git_commit` 与当前 `HEAD` 不一致，则默认自动重建本地 sysimage
+- 若 sysimage 缺失、元数据缺失或构建输入发生变化，则默认自动重建本地 sysimage
 - PowerShell wrapper 可配合 `-MismatchPolicy strict|fallback|rebuild`
 - POSIX wrapper 可配合 `--mismatch-policy=strict|fallback|rebuild`
 - `-BuildIfMissing` / `--build-if-missing` 仍保留，作为 `rebuild` 别名
+
+构建输入包括 `src/**/*.jl`、`config/models/`、`config/physics/`、根 Project/Manifest
+以及构建脚本、预编译 workload 和 fingerprint helper。未提交的相关修改、增删和重命名
+也会使缓存失效；文档、图表、测试和 task ledger 变化不影响复用。
+`git_commit` 继续记录来源，不再是缓存有效性门禁。旧 metadata 缺少 fingerprint 时需
+重建一次；选择 `fallback` 可先用普通 Julia，`strict` 会报告不兼容原因。
 
 如需先获取预构建 sysimage：
 
@@ -95,7 +101,7 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 ### 论文级绘图合同工具
 
 - [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
-  - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位、support/mask 和 strict gate；APS v2 还核验实际物理尺寸、有效 DPI、PDF 矢量内容/字体嵌入、最终字形高度、四侧刻度和文字/图例布局
+  - 单图或多图总 `plot_manifest.json` 的稳定验证入口；多图包展开 `shared + figures[].record` 后逐记录检查输入/输出 hash、单位、support/mask 和 strict gate；APS v2 还核验实际物理尺寸、有效 DPI、PDF 矢量内容/字体嵌入、最终字形高度、四侧刻度和文字/图例布局
 - `scripts/plotting/inventory_figure_assets.py`
   - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
 - `scripts/plotting/render_plotting_pilot.py`
@@ -109,7 +115,11 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
   - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
 - `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`
-  - 验证作者已接受的 v11 阶段结果；同时核验 v10 历史快照边界、PNG/PDF hash、完整 renderer 依赖及 current=v5。`--apply` 只创建新的验收记录，不覆盖旧记录，不运行数值 gate
+  - 按 `config/plotting/historical_snapshots.toml` 中固定的代码 commit 验证已接受的 v11 manifest graph、renderer/合同来源和现存数据、PNG/PDF、current=v5 字节；历史 SOP/skill 不与当前正文绑定。该检查不重跑历史 renderer、不补数值 gate、不晋升论文资格；`--apply` 只创建新验收记录并拒绝覆盖
+- `scripts/analysis/relaxtime/migrate_phase_guided_plot_manifest_bundles.py --check`
+  - 检查作者授权的 v10/v11 manifest 存储迁移：三个图包各只有一份总 manifest，222 条逐图记录无损，225 份旧图谱在登记的 ZIP/hash 中保留，315 个受保护文件字节不变；不重绘、不求解、不修改资格或 current。`--archive-only` / `--apply` 仅用于首次迁移，拒绝覆盖迁移报告
+- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py --check`
+  - 不重绘地检查总 manifest 中全部 PDF 记录、真矢量/字体证据及保留的 native-size preflight 失败
 - `scripts/analysis/relaxtime/archive_phase_guided_publication_review_history.py restore --archive <zip> --destination <new-empty-directory>`
   - 从本地历史归档逐文件校验并恢复 v6-v9 中间产物；拒绝覆盖现有目标目录。归档目前未上传远端，索引位于 phase_guided_transport 分析根目录
 - 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
@@ -236,7 +246,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
       - v4 remains the accepted parent display layer and is retained unchanged. To formalize a newly reviewed v5 candidate, build and mirror it, then run `python scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v5.py --apply`. This metadata-only step validates the v4 parent, all 72 v5 figures and hashes, the label map, and inherited CSV bytes; it does not run a solver or high-rate gate.
       - the v5 formalization and manuscript display eligibility records are `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json` and `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json`; the current-layer pointer is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json`. The v4 records remain retained as parent provenance.
       - v6-v9 are superseded review snapshots, retained in a locally verified ZIP indexed by `docs/analysis/relaxtime/phase_guided_transport/publication_review_history_v6_v9_archive_v1.json`; their full figure packages and old artifact tests are not part of the current Git checkout. Their renderer dependencies remain in source for v11. Historical shared-input hash drift is recorded, not repaired by rewriting old manifests.
-      - v11 is the author-accepted stage display result. The Git checkout retains v10 parent snapshots, v11 PNG/PDF packages and the paper-size report; the additive acceptance record is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json`. Each format contains 72 singles and two composites. The PNG package and PDF companions remain immutable and non-manuscript-eligible; current=v5 and all numerical provenance are unchanged. Stage acceptance is not final APS delivery or numerical production promotion.
+      - v11 is the author-accepted stage display result. The Git checkout retains v10 parent snapshots, v11 PNG/PDF packages and the paper-size report; the additive acceptance record is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json`. Each format contains 72 singles and two composites. PNG/PDF bytes and acceptance remain immutable and non-manuscript-eligible; current=v5 and all numerical provenance are unchanged. The author-authorized metadata-only migration stores one total `plot_manifest.json` per v10/v11 format package and retains original manifest bytes/hashes in `publication_plot_manifest_migration_v1/`. Stage acceptance is not final APS delivery or numerical production promotion.
     - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
       - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
       - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
