@@ -181,6 +181,35 @@ diagnostic，不更新 production baseline。GitHub 的 `workflow_dispatch` 只�
       和图形/候选清单。
 - [ ] 只有作者审核后才提升为 accepted research artifact；不自动更新 baseline。
 
+### M5：授权扩域与加密 screening（2026-10-02）
+
+用户明确授权在 GitHub Actions 运行 `T=40:5:220 MeV`、
+`muB=0:25:1200 MeV`，共 `37×49=1813` 点。四通道、quark-only BQS 背景和
+单点 screening 设置保持不变；这只是外部扫描网格加密，不提高每点内部积分
+精度，不运行额外 benchmark，也不全量运行 production gates。
+
+用户指定沿用无 BQS 约束的 equal-flavor 相变/CEP 参考，不另行定位 BQS CEP。
+图和 manifest 仍区分“密度计算的 BQS 背景”与“相变导向线的 equal-flavor 背景”。
+当前范围覆盖历史 CEP 附近，但 T 下限仍为 40 MeV，不声称覆盖到 T=5 MeV 的
+完整一阶参考线。
+
+本轮绘图新增三个带数值标签的等高线版本，同时保留三个原值热图和失败/mask
+图。热图无插值；等高线仅在四角均为 `screened` 的单元内进行 display-only
+取线，`corner_mask=false`，不跨失败区、不平滑、不外推、不裁负值。正密度若跨
+两数量级以上，选取七个对数间隔的等高值（原值和热图颜色尺度不变）；ratio
+以及存在非正密度的情况使用线性等高值。具体等高值、有效/阻断单元数和
+生成器 hash 写入 manifest。图例移到数据 axes 外，PNG 输出 600 dpi。
+
+该旧分支尚无当前 `figure_production_v2` 公共层；本轮图仍是独立的 diagnostic
+PNG 审查产物，不声称通过论文级字体/布局测量、公共 validator 或矢量交付验收。
+没有为作图迁移其他主线，也不修改生产数值配置。
+
+- [x] 新增等高线、mask 保持和原值保留的合成 profile/PNG 契约测试。
+- [ ] 在 topic branch 推送并 dispatch 四个 T-row shards；CLI 网格参数为
+      `--t-grid 40:220:5 --muB-grid 0:1200:25`（start:stop:step）。
+- [ ] 核对远程网格唯一性、点/失败数、source hashes 和输出 hashes。
+- [ ] 下载并视觉审核热图、等高线和 mask；不自动晋升正式研究/论文产物。
+
 ## 7. 风险与回退
 
 - BQS solver 在一阶线附近可能有多支；保存 seed、残差和失败点，不拼接共存相。

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Render diagnostic heatmaps from charged-GBU screening artifacts.
+"""Render diagnostic heatmaps and labeled contours from screening artifacts.
 
 This script is deliberately solver-free.  It consumes the immutable CSV/JSON
 files emitted by ``run_charged_gbu_contour_scan.jl`` and writes PNG review
-figures plus a provenance manifest.  Failed points remain masked; no
-interpolation, smoothing, or zero-filling is performed.
+figures plus a provenance manifest. Failed points remain masked. Heatmaps use
+exact grid values; contours interpolate only within cells with four valid
+corners, with no smoothing, extrapolation, gap bridging, or zero-filling.
 """
 
 from __future__ import annotations
@@ -47,7 +48,12 @@ VALUE_COLUMNS = (
     "K_minus_density_inv_fm3",
     "Kminus_over_pi_minus",
 )
-SCHEMA_VERSION = "charged_gbu_contour_screening_plot_manifest_v1"
+SCHEMA_VERSION = "charged_gbu_contour_screening_plot_manifest_v2"
+PLOT_FIELDS = (
+    "pi_plus_density_inv_fm3",
+    "K_plus_density_inv_fm3",
+    "Kplus_over_pi_plus",
+)
 DEFAULT_FREEZEOUT_PROFILE = REPOSITORY_ROOT / "config" / "physics" / "freezeout" / "default.toml"
 DEFAULT_PHASE_REFERENCE_ROOT = (
     REPOSITORY_ROOT
@@ -254,6 +260,46 @@ def _edges(values: list[float]) -> list[float]:
     return [2 * values[0] - mids[0], *mids, 2 * values[-1] - mids[-1]]
 
 
+def contour_payload(dataset: dict[str, Any], field: str) -> tuple[Any, dict[str, Any]]:
+    """Keep every failed corner masked and select display-only contour levels."""
+    import numpy as np
+    from matplotlib.ticker import MaxNLocator
+
+    values = np.array(
+        [[np.nan if value is None else value for value in row] for row in matrix(dataset, field)],
+        dtype=float,
+    )
+    valid = np.isfinite(values)
+    cells = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
+    supported = np.zeros_like(valid)
+    for row_offset, col_offset in ((0, 0), (0, 1), (1, 0), (1, 1)):
+        supported[row_offset:row_offset + cells.shape[0], col_offset:col_offset + cells.shape[1]] |= cells
+    samples = values[supported]
+    levels: list[float] = []
+    policy = "no supported nonconstant cells"
+    if samples.size and float(samples.min()) < float(samples.max()):
+        low, high = float(samples.min()), float(samples.max())
+        if field.endswith("density_inv_fm3") and low > 0 and high / low > 100:
+            levels = [float(value) for value in np.geomspace(low, high, 9)[1:-1]]
+            policy = "seven logarithmically spaced density levels; original values unchanged"
+        else:
+            levels = [float(value) for value in MaxNLocator(nbins=7).tick_values(low, high) if low < value < high]
+            policy = "linear nice levels over signed supported values; original values unchanged"
+    return np.ma.masked_invalid(values), {
+        "field": field,
+        "levels": levels,
+        "level_selection": policy,
+        "valid_nodes": int(valid.sum()),
+        "masked_nodes": int((~valid).sum()),
+        "valid_cells": int(cells.sum()),
+        "blocked_cells": int((~cells).sum()),
+        "corner_mask": False,
+        "interpolation": "display-only cellwise contour extraction; all four corners must be screened",
+        "smoothing": "none",
+        "extrapolation": "none",
+    }
+
+
 def _reference_points(reference_lines: dict[str, Any]) -> list[tuple[float, float]]:
     return [
         (float(point["muB_MeV"]), float(point["T_MeV"]))
@@ -390,6 +436,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.colors import BoundaryNorm, ListedColormap
+    from matplotlib.ticker import AutoMinorLocator
     import numpy as np
 
     matplotlib.rcParams.update(
@@ -402,8 +449,8 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
             "ytick.direction": "in",
             "xtick.top": True,
             "ytick.right": True,
-            "savefig.dpi": 300,
-            "savefig.bbox": "tight",
+            "savefig.dpi": 600,
+            "savefig.bbox": None,
             "savefig.pad_inches": 0.08,
         }
     )
@@ -413,40 +460,56 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
     x_limits, y_limits = _axis_limits(dataset, reference_lines)
     figures: list[Path] = []
 
-    def heatmap(field: str, filename: str, title: str, colorbar: str, cmap: str) -> None:
-        values = np.array(
-            [[np.nan if value is None else value for value in row] for row in matrix(dataset, field)],
-            dtype=float,
-        )
-        fig, ax = plt.subplots(figsize=(6.75, 4.6))
+    def heatmap(field: str, filename: str, title: str, colorbar: str, cmap: str, *, contours: bool = False) -> None:
+        values, contour_info = contour_payload(dataset, field)
+        fig, ax = plt.subplots(figsize=(6.75, 5.9))
+        fig.subplots_adjust(left=0.13, right=0.88, bottom=0.29, top=0.90)
         color_map = plt.get_cmap(cmap).copy()
         color_map.set_bad("#d9d9d9")
         image = ax.pcolormesh(
             x_edges,
             y_edges,
-            np.ma.masked_invalid(values),
+            values,
             shading="flat",
             cmap=color_map,
         )
         ax.set_xlabel(r"$\mu_B$ (MeV)")
         ax.set_ylabel(r"$T$ (MeV)")
         ax.set_title(title + "\nfixed quark-only BQS; diagnostic screening")
+        if contours and contour_info["levels"]:
+            lines = ax.contour(
+                dataset["muB_grid"], dataset["T_grid"], values,
+                levels=contour_info["levels"], corner_mask=False,
+                colors="white", linewidths=0.7, zorder=3,
+            )
+            labels = ax.clabel(lines, inline=True, fontsize=8.5, fmt=lambda value: f"{value:.2g}")
+            import matplotlib.patheffects as path_effects
+            lines.set_path_effects([path_effects.Stroke(linewidth=1.2, foreground="black"), path_effects.Normal()])
+            for label in labels:
+                label.set_path_effects([path_effects.Stroke(linewidth=1.3, foreground="black"), path_effects.Normal()])
         _plot_reference_lines(ax, reference_lines)
-        ax.axvline(x_edges[-1], color="white", linestyle="-.", linewidth=0.8, alpha=0.8,
-                   label="screening domain boundary" if field == "Kplus_over_pi_plus" else None)
         ax.set_xlim(*x_limits)
         ax.set_ylim(*y_limits)
-        if field == "Kplus_over_pi_plus":
-            ax.legend(loc="best", fontsize=6.5, framealpha=0.75)
+        ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+        ax.yaxis.set_minor_locator(AutoMinorLocator(2))
+        ax.tick_params(which="both", direction="in", top=True, right=True)
+        handles, labels = ax.get_legend_handles_labels()
+        if handles:
+            fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.02), fontsize=8.5, frameon=False)
         fig.colorbar(image, ax=ax, label=colorbar)
         path = output_dir / filename
         fig.savefig(path)
         plt.close(fig)
         figures.append(path)
 
-    heatmap("pi_plus_density_inv_fm3", "n_pi_plus_screening.png", r"Charged GBU screening: $n_{\pi^+}$", r"$n_{\pi^+}$ (fm$^{-3}$)", "viridis")
-    heatmap("K_plus_density_inv_fm3", "n_K_plus_screening.png", "Charged GBU screening: $n_{K^+}$", r"$n_{K^+}$ (fm$^{-3}$)", "plasma")
-    heatmap("Kplus_over_pi_plus", "Kplus_over_pi_plus_screening.png", r"Charged GBU screening: $K^+/\pi^+$", r"$K^+/\pi^+$", "magma")
+    specifications = (
+        ("pi_plus_density_inv_fm3", "n_pi_plus", r"$n_{\pi^+}$", r"$n_{\pi^+}$ (fm$^{-3}$)", "viridis"),
+        ("K_plus_density_inv_fm3", "n_K_plus", r"$n_{K^+}$", r"$n_{K^+}$ (fm$^{-3}$)", "plasma"),
+        ("Kplus_over_pi_plus", "Kplus_over_pi_plus", r"$K^+/\pi^+$", r"$K^+/\pi^+$", "magma"),
+    )
+    for field, stem, label, colorbar, cmap in specifications:
+        heatmap(field, f"{stem}_screening.png", f"Charged GBU screening: {label}", colorbar, cmap)
+        heatmap(field, f"{stem}_screening_contours.png", f"Charged GBU labeled contours: {label}", colorbar, cmap, contours=True)
 
     masks = [
         ("status", mask_matrix(dataset), ["screened", "gate failed", "other failure"]),
@@ -514,6 +577,14 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "source_git_sha": git_sha,
         "repository_head_at_plot": _repo_head(),
         "renderer": {"python": platform.python_version(), "matplotlib": _matplotlib_version()},
+        "generator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__))},
+        "rendering": {
+            "figure_scope": "diagnostic screening; not publication-style qualified",
+            "dpi": 600,
+            "single_figure_size_inches": [6.75, 5.9],
+            "legend_policy": "outside data axes, below figure",
+            "minor_ticks": "one per adjacent linear major ticks",
+        },
         "input_root": str(dataset["input_root"]),
         "input_manifests": [
             {"path": str(path), "bytes": path.stat().st_size, "sha256": sha256_file(path)}
@@ -532,6 +603,8 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "status_counts": dataset["status_counts"],
         "selection_rule": "exact screened rows from scan CSV; failed rows remain masked",
         "interpolation_policy": "none",
+        "contour_interpolation_policy": "display-only within four-valid-corner cells; corner_mask=false; no smoothing, extrapolation, or gap bridging",
+        "contour_fields": {field: contour_payload(dataset, field)[1] for field in PLOT_FIELDS},
         "missing_value_policy": "mask; never zero-fill",
         "units": {"T": "MeV", "muB": "MeV", "density": "fm^-3"},
         "background_contract": {

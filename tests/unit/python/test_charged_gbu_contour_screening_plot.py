@@ -101,3 +101,63 @@ def test_reference_lines_keep_bqs_and_equal_flavor_coordinate_contract():
     x_limits, y_limits = module._axis_limits(dataset, {"freezeout": {"points": [{"T_MeV": 100.0, "muB_MeV": 200.0}]}})
     assert x_limits[1] == 200.0
     assert y_limits[1] == 100.0
+
+
+def test_contours_block_every_cell_touching_a_failed_corner(tmp_path):
+    module = _load_module()
+    rows = [_row(str(T), str(muB)) for T in (40, 50) for muB in (0, 50)]
+    rows[-1] = _row("50", "50", status="gate_failed")
+    _write_shard(tmp_path, 0, rows)
+    dataset = module.load_dataset(tmp_path)
+    values, info = module.contour_payload(dataset, "Kplus_over_pi_plus")
+    assert values.mask.tolist() == [[False, False], [False, True]]
+    assert info["valid_cells"] == 0
+    assert info["blocked_cells"] == 1
+    assert info["corner_mask"] is False
+    assert info["levels"] == []
+
+
+def test_contour_levels_preserve_signed_values_and_use_no_smoothing(tmp_path):
+    module = _load_module()
+    rows = [_row(str(T), str(muB)) for T in (40, 50) for muB in (0, 50)]
+    for row, value in zip(rows, (-1, 0, 1, 2)):
+        row["Kplus_over_pi_plus"] = str(value)
+    _write_shard(tmp_path, 0, rows)
+    dataset = module.load_dataset(tmp_path)
+    values, info = module.contour_payload(dataset, "Kplus_over_pi_plus")
+    assert values.tolist() == [[-1.0, 0.0], [1.0, 2.0]]
+    assert min(info["levels"]) < 0 < max(info["levels"])
+    assert info["valid_cells"] == 1
+    assert info["smoothing"] == "none"
+    assert info["extrapolation"] == "none"
+
+
+def test_wide_positive_density_levels_are_log_spaced_without_changing_data(tmp_path):
+    module = _load_module()
+    rows = [_row(str(T), str(muB)) for T in (40, 50) for muB in (0, 50)]
+    for row, value in zip(rows, (1e-6, 1e-4, 1e-2, 1.0)):
+        row["pi_plus_density_inv_fm3"] = str(value)
+    _write_shard(tmp_path, 0, rows)
+    dataset = module.load_dataset(tmp_path)
+    values, info = module.contour_payload(dataset, "pi_plus_density_inv_fm3")
+    assert values.tolist() == [[1e-6, 1e-4], [1e-2, 1.0]]
+    assert len(info["levels"]) == 7
+    assert "logarithmically spaced" in info["level_selection"]
+
+
+def test_png_render_smoke_retains_failed_mask_and_emits_contour_figures(tmp_path):
+    module = _load_module()
+    rows = [_row(str(T), str(muB)) for T in (40, 50) for muB in (0, 50)]
+    for row, value in zip(rows, (0.1, 0.3, 0.5, 0.7)):
+        row["Kplus_over_pi_plus"] = str(value)
+    _write_shard(tmp_path / "input", 0, rows)
+    output = tmp_path / "figures"
+    assert module.main(["--input-root", str(tmp_path / "input"), "--output-dir", str(output), "--no-reference-lines"]) == 0
+    manifest = json.loads((output / "plot_manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["figures"]) == 7
+    assert len(list(output.glob("*_contours.png"))) == 3
+    assert manifest["contour_fields"]["Kplus_over_pi_plus"]["corner_mask"] is False
+    assert manifest["manuscript_eligible"] is False
+    assert manifest["generator"]["sha256"] == module.sha256_file(PLOTTER)
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        module.main(["--input-root", str(tmp_path / "input"), "--output-dir", str(output)])
