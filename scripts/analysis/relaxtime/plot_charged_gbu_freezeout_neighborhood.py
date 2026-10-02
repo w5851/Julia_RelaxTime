@@ -250,7 +250,7 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
                loc="lower center", bbox_to_anchor=(.47, .067), ncol=2, fontsize=16)
     fig.text(.47, .043, r"Contour spacing: $\Delta R_+=0.05$; label spacing: $0.10$.",
              ha="center", fontsize=16)
-    fig.text(.47, .012, r"Band clipped to existing $T\geq40$ MeV data; no rescan or fit.",
+    fig.text(.47, .012, r"Band clipped to $T\geq40$ MeV input; no fit.",
              ha="center", fontsize=14)
     return fig, {"minimum": minimum, "maximum": maximum, "color_limits": [lower, upper],
                  "colorbar_extend": extend, "density_route": route,

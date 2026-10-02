@@ -347,9 +347,9 @@ agent 已审核 PNG；这是显示修订，不是新数值计算。
 - [x] 实现显式 route selector、source hash 和 resume 隔离；默认 finite-q 不变。
 - [x] workflow 接入新数值 route 和 solver-free 同构组会图。
 - [x] 完成合成根/坐标/GBU 边界、route 混用拒绝和绘图不变约束验证。
-- [ ] 推送最小源码变更并新 dispatch；核对数值 SHA、参数和实际 scan jobs。
-- [ ] 审核1813个唯一网格点、四分片、背景一致性、失败/负值和输入输出 hashes。
-- [ ] 下载并视觉审核组会 PNG；报告与 finite-q 的诊断差异，不晋升 production。
+- [x] 推送最小源码变更并新 dispatch；核对数值 SHA、参数和实际 scan jobs。
+- [x] 审核1813个唯一网格点、四分片、背景一致性、失败/负值和输入输出 hashes。
+- [x] 下载并视觉审核组会 PNG；报告与 finite-q 的诊断差异，不晋升 production。
 
 新增 Julia 测试仅用合成 profile/纯代数；真实数值运行全部留在 Actions。
 生产配置、PNJLCore、上游求解器与 baseline 不修改；不在本轮合并分支。
@@ -361,6 +361,66 @@ data-output guard、task-ledger preflight 与 `git diff --check` 均通过。
 全仓 active-doc 检查报告五份既有 2026-07 文档超龄（>60d）；这些文档未修改，
 不在本轮擅自归档。完整数值 regression/full gates 未运行：本轮新增的是独立
 screening 近似，生产实现/config/baseline 与 finite-q 分支的求值调用不变。
+
+#### M7 远程结果与边界
+
+GitHub Actions run `36971423991` 实际执行四个新数值分片和 aggregate，全部
+jobs success；数值 source SHA 为 `e6b3de025d59213e480927ebffa5f188e3e71ebd`，
+未使用 `replot_run_id`。1813 个唯一 key、分片 `490/441/441/441` 和同一
+背景/config/infinite kernel 源码 hashes 已核对。新的 route、坐标约定和 source
+hash 进入 scan/plot manifest，不把旧 finite-q CSV 伪装成外推结果。
+
+- 全域 `733 screened / 1080 gate_failed`，无 background_failed。
+- K+ 的 1073 点报 `static instability or unresolved Bose endpoint`；另 7 点
+  K± 都报 `q0 reference onset is not positive real`。不强行将这些错误唯一归因
+  于凝聚、额外根或未收敛，也不放宽门槛。
+- 同构邻域选定615点：`301 screened / 314 failed`，可显示 ratio 范围
+  `0.0221157040--0.4313014934`。固定 `[0,1.15]` 色标无超界；0.05 等高线
+  和 0.10 标签保持。agent PNG 视觉审核通过，但大片失败域使本图不能作为
+  已闭合的完整冻结线调参地图。
+- 本轮 screened 全域四通道均无负密度；全域 ratio 仍可达 `2.33762697`。
+  “screened”不等于完整门禁或模型可靠性，不能只展示正的成功值宣称近似通过。
+
+背景解不是逐字完全相同：4点的解向量最大绝对差大于 `1e-8`，为
+`(40,1100),(80,775),(85,800),(105,675) MeV`，全部在新扫描中失败；后两点
+旧图也失败。其余共同 screened 点的解向量最大绝对差 `4.32166525e-11`，
+残差最大差 `1.76973495e-13`。不能把那4点的差异算作 q0/finite-q 近似误差，
+也不能因源码相同就假定 solver 在所有多解处选择同支。
+
+新增一组纯合成 Landau profile 测试（6项），显示原 q=0 在
+`lambda=shift` 的外部静态占据零点，在 `0<q<shift` 的内部 invariant 映射后
+一般会落到 `sqrt(shift^2-q^2)`，不再自动是零点。它证明该近似不保证端点
+条件，不证明每一个真实失败点都是这一机制。单文件含新测试 `40/40` 通过，
+没有修改 gate、物理核或真实扫描数值。
+
+本轮沿用历史 q0 的**坐标近似**，但不是逐字沿用历史有限热数值密度算法：
+`causal_gbu_dense_execution.jl` 用有限热核和非零 `s.lower` 的导数积分；当前
+适配器用无限热核和当前零端点条件下的 GBU 分部积分。历史参考算法只检查
+lambda0=0 的 onset，不等价于检查外部 omega=0。故历史十点成功记录不能直接
+证明本轮全部 BQS 背景的外推闭合，不为复现旧值引入有限 Bose 截断。
+
+输出只保留于 `D:/Temp/charged-gbu-contour-q0-36971423991/`：
+
+- `inputs/`：四个原始分片（points JSON、CSV、manifest）。
+- `plots/`：全域合并 CSV、热图、等高图和 mask 图。
+- `meeting/freezeout_neighborhood_ratio.png`：本轮同构组会图，未覆盖旧图。
+- `audit_report.json`：solver-free 网格/source/背景/失败/图像 hash 对照。
+
+合并 CSV SHA-256：
+`6b98c1b4c0d26a10c73ae6347e00448a08882ebe6bfa559f4895e96c1c69d401`；
+组会 PNG SHA-256：
+`69b33eca5ef0168afafc17d158311147a3c5a223f2db699fa24c701134e1bf2c`。
+数值 bulk 不提交，未开/合并 PR、未修改 main 或 production 默认。
+后续若需要填满外推图，必须另行评审其低频/化学势坐标与详细平衡，而不是
+移除检查、静默删除 Landau 段或复制早期带积分下限的结果。
+
+最终展示图在 `meeting-review-v2/`：只将原组会图脚注的“no rescan”改成
+“no fit”，避免误解为没有新运行数值。该 solver-free 重绘的输入 CSV hash、
+selection/mask/ratio/color/contour/label 字段与远程 meeting 图一致，未重扫；
+最终 PNG SHA-256 为
+`0d86c71cf2c446e4b59e39f0777b723548eb7ad18d4b8d16f0e142c24f39fce9`。
+Python `30/30` 复测通过，agent 已完成最终 PNG 审核。Actions 从 dispatch 到完成
+约17分11秒，包含环境准备；不是新的单点 benchmark 结论。
 
 ## 7. 风险与回退
 

@@ -11,6 +11,19 @@ struct Q0SyntheticProfile{K,T}
     threshold::T
 end
 
+struct Q0SyntheticLandauProfile{K,T}
+    kernel::K
+    threshold::T
+end
+
+function Q0_REFERENCE_P.polarization(p::Q0SyntheticLandauProfile, z)
+    x = real(z); k = p.kernel
+    # A synthetic Landau cut with the exact external-static occupation zero.
+    # No real zero or negative static inverse is involved in this example.
+    rho = abs(x) < k.landau ? x * (x-k.shift) * (k.landau^2-x^2) : 0.
+    return complex(0., rho) / (4k.bg.coupling[k.ch])
+end
+
 function Q0_REFERENCE_P.polarization(p::Q0SyntheticProfile, z)
     x = real(z)
     # One root on each analytic gap, then a pi -> 0 continuum on [2,4].
@@ -78,4 +91,16 @@ end
     @test s.route == "q0_lambda_reference" && !s.production_authorized
     @test_throws ArgumentError Q0_REFERENCE_TEST.shell(ref, -1.)
     @test_throws ArgumentError Q0_REFERENCE_TEST.shell(ref, q; upper=lower)
+end
+
+@testset "Lambda extrapolation does not automatically preserve the Bose endpoint" begin
+    base = q0_synthetic_profile(shift=.4)
+    p = Q0SyntheticLandauProfile(merge(base.kernel, (landau=.8,)), base.threshold)
+    ref = Q0_REFERENCE_TEST.reference(p)
+    @test iszero(imag(Q0_REFERENCE_P.inverse(p, p.kernel.shift)))
+    @test all(isempty, ref.rootsets)
+    @test Q0_REFERENCE_Y.shell(p).static_inverse == 1.
+    @test !iszero(Q0_REFERENCE_TEST.cut_phase(ref, 0., .1))
+    @test_throws ArgumentError Q0_REFERENCE_TEST.shell(ref, .1)
+    @test Q0_REFERENCE_TEST.cut_phase(ref, 0., .5) == 0.
 end

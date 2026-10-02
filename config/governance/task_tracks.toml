@@ -948,7 +948,7 @@ status = "active"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
 reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
-next_action = "M7作者授权：在GitHub Actions新算同一1813点网格的q0_lambda_reference，复用当前无限热核/BQS/同screening设置；产出与M6 meeting-v3同构的±50MeV地图，0.05等高线/0.10无底框标签及固定[0,1.15]色标，保留新失败及overflow。先合成测试与治理，再推送dispatch/下载审计/PNG审核；不改变production默认或baseline，不合并，不额外benchmark/数值扩域。M5 finite-q run36957893472保留为冻结对照。"
+next_action = "M7已完成同网格q0新计算和PNG审核：run36971423991/e6b3de02，1813点中733 screened/1080 failed；同构±50MeV图301 screened/314 mask。外推未自动保留外部零频端点；历史有限热/非零下限导数算法与当前无限热/零端点GBU不等价，不为填图放宽gate或裁掉Landau。4个背景解不同的点均新失败，共同成功点seed差<=4.33e-11。等待作者审图；如授权再评审q0低频/详细平衡，保留finite-q默认，不改baseline/合并/额外扫描。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -959,6 +959,10 @@ evidence = [
   "run:36854992530",
   "run:36957893472",
   "run:36960810064",
+  "run:36971423991",
+  "sha:e6b3de025d59213e480927ebffa5f188e3e71ebd",
+  "file:scripts/analysis/relaxtime/charged_gbu_q0_reference.jl",
+  "file:scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py",
   "file:.github/workflows/relaxtime-charged-gbu-contour-scan.yml",
   "file:scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl",
   "file:scripts/analysis/relaxtime/plot_charged_gbu_contour_screening.py",
