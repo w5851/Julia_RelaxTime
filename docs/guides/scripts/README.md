@@ -95,11 +95,23 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 ### 论文级绘图合同工具
 
 - [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
-  - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位字段、support/mask、strict gate、DPI 和 SVG vector 标志
+  - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位、support/mask 和 strict gate；APS v2 还核验实际物理尺寸、有效 DPI、PDF 矢量内容/字体嵌入、最终字形高度、四侧刻度和文字/图例布局
 - `scripts/plotting/inventory_figure_assets.py`
   - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
 - `scripts/plotting/render_plotting_pilot.py`
-  - 代表性 pilot 生成器，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case
+  - 历史 v1 compatibility pilot，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case。新图不得以该 pilot 或 v1 profile 为默认入口
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v7.py --png-review`
+  - 历史 v7 renderer，也是 v11 的导入依赖；不再推荐生成新的 v7 审查包。完整 v6-v9 图包通过历史 ZIP/hash 索引恢复
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py --png-review`
+  - 使用同一 v5 冻结点表生成 72 张单图和两张紧凑复合 PNG；参数/端点图例分放 (a)/(c)，检查图例与曲线/marker 相交，记录 PNG-review 字形例外；不生成 PDF、不修改 v5/current、不调用 solver
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py --png-review`
+  - 当前 PNG 审查入口；保留 v10 布局，弛豫时间复合图全图 log-y 并使用普通数字刻度，输运系数复合图保持线性、统一每行小数位；`First-order` 图例左对齐，caption 限定端点适用范围；生成 72 张单图和两张复合 PNG，不覆盖 v10、不改 v5/current、不补矢量
+- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
+  - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
+- `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`
+  - 验证作者已接受的 v11 阶段结果；同时核验 v10 历史快照边界、PNG/PDF hash、完整 renderer 依赖及 current=v5。`--apply` 只创建新的验收记录，不覆盖旧记录，不运行数值 gate
+- `scripts/analysis/relaxtime/archive_phase_guided_publication_review_history.py restore --archive <zip> --destination <new-empty-directory>`
+  - 从本地历史归档逐文件校验并恢复 v6-v9 中间产物；拒绝覆盖现有目标目录。归档目前未上传远端，索引位于 phase_guided_transport 分析根目录
 - 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
 
 ### PNJL
@@ -223,6 +235,8 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
       - v5 is an author-accepted manuscript display layer: `numerical_status=author_accepted_display_only`, `manuscript_eligible=true` for the v5 display derivative only. It adds `[fm]` to the six relaxation-time axes and uses chirally restored/broken branch endpoint wording. The raw source remains `diagnostic_only` and `raw_manuscript_eligible=false`; this does not assert a high-rate convergence pass. The inherited raw/display point and adjustment tables remain part of manuscript provenance.
       - v4 remains the accepted parent display layer and is retained unchanged. To formalize a newly reviewed v5 candidate, build and mirror it, then run `python scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v5.py --apply`. This metadata-only step validates the v4 parent, all 72 v5 figures and hashes, the label map, and inherited CSV bytes; it does not run a solver or high-rate gate.
       - the v5 formalization and manuscript display eligibility records are `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json` and `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json`; the current-layer pointer is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json`. The v4 records remain retained as parent provenance.
+      - v6-v9 are superseded review snapshots, retained in a locally verified ZIP indexed by `docs/analysis/relaxtime/phase_guided_transport/publication_review_history_v6_v9_archive_v1.json`; their full figure packages and old artifact tests are not part of the current Git checkout. Their renderer dependencies remain in source for v11. Historical shared-input hash drift is recorded, not repaired by rewriting old manifests.
+      - v11 is the author-accepted stage display result. The Git checkout retains v10 parent snapshots, v11 PNG/PDF packages and the paper-size report; the additive acceptance record is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json`. Each format contains 72 singles and two composites. The PNG package and PDF companions remain immutable and non-manuscript-eligible; current=v5 and all numerical provenance are unchanged. Stage acceptance is not final APS delivery or numerical production promotion.
     - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
       - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
       - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
