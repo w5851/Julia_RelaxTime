@@ -9,7 +9,6 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\\..")
-$SysimagePath = Join-Path $RepoRoot "build\\JuliaRelaxTime.dll"
 $MetaPath = Join-Path $RepoRoot "build\\JuliaRelaxTime.sysimage.json"
 
 if ($BuildIfMissing) {
@@ -100,6 +99,13 @@ function Get-SysimageCompatibility {
 $currentVersion = Get-JuliaVersion
 $currentFamily = Get-PlatformFamily
 $currentArch = Get-PlatformArch
+$extension = switch ($currentFamily) {
+    "windows" { "dll" }
+    "linux" { "so" }
+    "macos" { "dylib" }
+    default { throw "Unsupported sysimage platform: $currentFamily" }
+}
+$SysimagePath = Join-Path $RepoRoot "build/JuliaRelaxTime.$extension"
 
 if (-not ((Test-Path $SysimagePath) -and (Test-Path $MetaPath))) {
     switch ($MismatchPolicy) {

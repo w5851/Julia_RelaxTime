@@ -92,6 +92,8 @@ def test_compatible_image_accepts_historical_commit(launcher):
     result, args, rebuilt = launcher("strict")
     assert result.returncode == 0, result.stderr
     assert "--sysimage=" in args
+    suffix = {"Windows": "dll", "Darwin": "dylib"}.get(platform.system(), "so")
+    assert f"JuliaRelaxTime.{suffix}" in args
     assert not rebuilt
 
 
