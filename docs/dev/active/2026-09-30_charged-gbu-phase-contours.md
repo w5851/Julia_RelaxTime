@@ -205,10 +205,39 @@ PNG 审查产物，不声称通过论文级字体/布局测量、公共 validato
 没有为作图迁移其他主线，也不修改生产数值配置。
 
 - [x] 新增等高线、mask 保持和原值保留的合成 profile/PNG 契约测试。
-- [ ] 在 topic branch 推送并 dispatch 四个 T-row shards；CLI 网格参数为
+- [x] 在 topic branch 推送并 dispatch 四个 T-row shards；run `36957893472`，
+      source SHA `eb77d0616be4da6597df01e6159ad69b6eb19b89`；CLI 网格参数为
       `--t-grid 40:220:5 --muB-grid 0:1200:25`（start:stop:step）。
-- [ ] 核对远程网格唯一性、点/失败数、source hashes 和输出 hashes。
+      `workflow_dispatch` 实际成功，无需添加 push 触发或合并 main。虽然当前
+      默认分支的该文件 GET 返回 404，但历史已注册的 scan workflow 本轮可派发；
+      不将此前新 full-gate workflow 的 404 限制泛化为所有 topic workflows。
+- [x] 核对远程网格唯一性、点/失败数和首版 PNG/CSV 输出 hashes：
+      run `36957893472` 全部 jobs success，`1813` 唯一网格键，`1805 screened`、
+      `8 gate_failed`；每个分片 point count 为 `490/441/441/441`。原始数据只下载
+      到 `D:/Temp/charged-gbu-contour-fine-36957893472/`，不提交数值 bulk。
 - [ ] 下载并视觉审核热图、等高线和 mask；不自动晋升正式研究/论文产物。
+
+本轮新增 mask 点为 `(T,muB)=(85,800),(95,550),(95,575),(105,675),`
+`(145,375),(145,400),(150,375),(150,400) MeV`。背景和 pi 通道成功，
+K± 均报 `static instability or unresolved Bose endpoint`；这不是凝聚的唯一诊断。
+screening 的 BQS continuation seed 会随 muB 步长改变，不能假定加密前后的 mask
+位置恒定；本轮没有为解释 mask 变化启动额外背景/端点复测。
+
+另有 `15` 个有限输出的 K+ 负值，出现在右上角 T=200--220 MeV、
+muB=1100--1200 MeV 的部分网格：最小 `n_K+=-8.6194608535e-4 fm^-3`，
+最小 `K+/pi+=-0.0281890510`。这些仍是未通过全门禁的 signed diagnostic，
+不裁零、不强行归因；绘图以叉号标记负值，而不把 `screened` 解释为 positivity
+或 production acceptance。pi± 与 K- 的本轮 screened 总密度没有负值。
+
+首版视觉检查发现 mask 标题重叠及密集等高标签。修正只涉及显示：最长有效路径
+上每级至多一个标签，按弧长错开位置，短路径不贴标签；mask 图留出标题空间。
+新增 `replot_run_id` workflow input，从旧 run 的冻结 shards 重绘，scan job 跳过。
+manifest 分开数值 source SHA/run 与 postprocess SHA/run，不能把重绘 commit
+写成数值 source commit。该入口用于本轮排版修复，不启动新的数值采样。
+
+Python 绘图/候选契约 `14/14` 通过，包括负值保留、短路径标签、replot 跳过扫描
+和 source/postprocess 分离；未改物理核、生产配置或容差。全仓数值 regression
+未运行，因为本轮没有这些数值实现改动。
 
 ## 7. 风险与回退
 

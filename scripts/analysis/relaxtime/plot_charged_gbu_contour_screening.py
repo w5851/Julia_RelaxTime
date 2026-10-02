@@ -300,6 +300,28 @@ def contour_payload(dataset: dict[str, Any], field: str) -> tuple[Any, dict[str,
     }
 
 
+def contour_label_positions(segments: list[Any], x_span: float, y_span: float) -> list[tuple[int, tuple[float, float]]]:
+    """Stagger one label per level on the longest sufficiently long path."""
+    import numpy as np
+
+    positions = []
+    for index, level_segments in enumerate(segments):
+        paths = [np.asarray(path) for path in level_segments if len(path) >= 2]
+        if not paths:
+            continue
+        def arc(path):
+            return np.r_[0.0, np.cumsum(np.linalg.norm(np.diff(path, axis=0) / [x_span, y_span], axis=1))]
+        path = max(paths, key=lambda candidate: arc(candidate)[-1])
+        distance = arc(path)
+        if distance[-1] < 0.10:
+            continue
+        fraction = 0.15 + 0.70 * index / max(1, len(segments) - 1)
+        target = fraction * distance[-1]
+        point = tuple(float(np.interp(target, distance, path[:, dimension])) for dimension in (0, 1))
+        positions.append((index, point))
+    return positions
+
+
 def _reference_points(reference_lines: dict[str, Any]) -> list[tuple[float, float]]:
     return [
         (float(point["muB_MeV"]), float(point["T_MeV"]))
@@ -482,12 +504,23 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
                 levels=contour_info["levels"], corner_mask=False,
                 colors="white", linewidths=0.7, zorder=3,
             )
-            labels = ax.clabel(lines, inline=True, fontsize=8.5, fmt=lambda value: f"{value:.2g}")
+            positions = contour_label_positions(lines.allsegs, x_limits[1] - x_limits[0], y_limits[1] - y_limits[0])
+            labels = ax.clabel(lines, manual=[point for _, point in positions],
+                               inline=True, fontsize=8.5, fmt=lambda value: f"{value:.2g}") if positions else []
             import matplotlib.patheffects as path_effects
             lines.set_path_effects([path_effects.Stroke(linewidth=1.2, foreground="black"), path_effects.Normal()])
             for label in labels:
                 label.set_path_effects([path_effects.Stroke(linewidth=1.3, foreground="black"), path_effects.Normal()])
         _plot_reference_lines(ax, reference_lines)
+        negative_rows, negative_cols = np.where(np.ma.filled(values, np.nan) < 0)
+        if len(negative_rows):
+            negative_marks = ax.scatter(
+                np.asarray(dataset["muB_grid"])[negative_cols], np.asarray(dataset["T_grid"])[negative_rows],
+                marker="x", s=15, color="white", linewidths=0.7, zorder=5,
+                label="negative screening value (retained; not clipped)",
+            )
+            import matplotlib.patheffects as path_effects
+            negative_marks.set_path_effects([path_effects.Stroke(linewidth=1.5, foreground="black"), path_effects.Normal()])
         ax.set_xlim(*x_limits)
         ax.set_ylim(*y_limits)
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
@@ -517,6 +550,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
         ("minus", mask_matrix(dataset, "minus"), ["minus channels pass", "minus channel failure", "point failure"]),
     ]
     fig, axes = plt.subplots(1, 3, figsize=(9.8, 3.6), sharex=True, sharey=True)
+    fig.subplots_adjust(top=0.77, bottom=0.18, left=0.075, right=0.91)
     mask_cmap = ListedColormap(["#2ca25f", "#de2d26", "#756bb1"])
     norm = BoundaryNorm([-0.5, 0.5, 1.5, 2.5], mask_cmap.N)
     for ax, (name, values, labels) in zip(axes, masks):
@@ -535,8 +569,8 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
         ax.set_ylim(*y_limits)
     axes[0].set_ylabel(r"$T$ (MeV)")
     cbar = fig.colorbar(image, ax=axes.ravel().tolist(), ticks=[0, 1, 2], shrink=0.88)
-    cbar.ax.set_yticklabels(["pass", "channel fail", "point fail"])
-    fig.suptitle("Charged GBU screening masks (failed points are not zero-filled)\nfixed quark-only BQS; reference phase lines are not BQS solves")
+    cbar.ax.set_yticklabels(["screened", "channel fail", "masked point"])
+    fig.suptitle("Charged GBU screening masks (failed points are not zero-filled)\nBQS density background; equal-flavor phase references", y=0.98)
     mask_path = output_dir / "screening_failure_masks.png"
     fig.savefig(mask_path)
     plt.close(fig)
@@ -563,7 +597,7 @@ def _write_merged_csv(dataset: dict[str, Any], path: Path) -> None:
             writer.writerow(output)
 
 
-def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], merged_csv: Path, source_run_id: str | None, git_sha: str | None, reference_lines: dict[str, Any]) -> dict[str, Any]:
+def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], merged_csv: Path, source_run_id: str | None, git_sha: str | None, reference_lines: dict[str, Any], postprocess_run_id: str | None = None) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -574,7 +608,9 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "current_publication_layer": False,
         "vector_delivery_pending": True,
         "source_run_id": source_run_id,
-        "source_git_sha": git_sha,
+        "source_git_sha": dataset["git_head"],
+        "postprocess_git_sha": git_sha or _repo_head(),
+        "postprocess_run_id": postprocess_run_id,
         "repository_head_at_plot": _repo_head(),
         "renderer": {"python": platform.python_version(), "matplotlib": _matplotlib_version()},
         "generator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__))},
@@ -584,6 +620,7 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
             "single_figure_size_inches": [6.75, 5.9],
             "legend_policy": "outside data axes, below figure",
             "minor_ticks": "one per adjacent linear major ticks",
+            "contour_label_policy": "at most one per level on longest path; staggered arc positions; paths below normalized length 0.10 not labeled",
         },
         "input_root": str(dataset["input_root"]),
         "input_manifests": [
@@ -606,6 +643,15 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "contour_interpolation_policy": "display-only within four-valid-corner cells; corner_mask=false; no smoothing, extrapolation, or gap bridging",
         "contour_fields": {field: contour_payload(dataset, field)[1] for field in PLOT_FIELDS},
         "missing_value_policy": "mask; never zero-fill",
+        "negative_value_policy": "retain signed values; mark negative screened nodes with crosses; not full-gate acceptance",
+        "value_summaries": {
+            field: {
+                "minimum": min(row[field] for row in dataset["rows"] if row["status"] == "screened"),
+                "maximum": max(row[field] for row in dataset["rows"] if row["status"] == "screened"),
+                "negative_count": sum(row[field] < 0 for row in dataset["rows"] if row["status"] == "screened"),
+            }
+            for field in PLOT_FIELDS
+        } if any(row["status"] == "screened" for row in dataset["rows"]) else {},
         "units": {"T": "MeV", "muB": "MeV", "density": "fm^-3"},
         "background_contract": {
             "scope": "fixed quark-only BQS GBU partial yield",
@@ -647,6 +693,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--input-root", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--source-run-id", default=None)
+    parser.add_argument("--postprocess-run-id", default=None)
     parser.add_argument("--git-sha", default=None)
     parser.add_argument("--freezeout-profile", type=Path, default=DEFAULT_FREEZEOUT_PROFILE)
     parser.add_argument("--phase-reference-root", type=Path, default=DEFAULT_PHASE_REFERENCE_ROOT)
@@ -671,7 +718,7 @@ def main(argv: list[str] | None = None) -> int:
     merged_csv = output_dir / "contour_points_merged.csv"
     _write_merged_csv(dataset, merged_csv)
     figures = _render_figures(dataset, output_dir, reference_lines)
-    manifest = _manifest(dataset, output_dir, figures, merged_csv, args.source_run_id, args.git_sha, reference_lines)
+    manifest = _manifest(dataset, output_dir, figures, merged_csv, args.source_run_id, args.git_sha, reference_lines, args.postprocess_run_id)
     manifest_path = output_dir / "plot_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": "complete", "row_count": len(dataset["rows"]), "figures": [path.name for path in figures], "manifest": str(manifest_path)}, ensure_ascii=False))

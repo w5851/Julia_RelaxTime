@@ -148,7 +148,7 @@ def test_wide_positive_density_levels_are_log_spaced_without_changing_data(tmp_p
 def test_png_render_smoke_retains_failed_mask_and_emits_contour_figures(tmp_path):
     module = _load_module()
     rows = [_row(str(T), str(muB)) for T in (40, 50) for muB in (0, 50)]
-    for row, value in zip(rows, (0.1, 0.3, 0.5, 0.7)):
+    for row, value in zip(rows, (-0.1, 0.3, 0.5, 0.7)):
         row["Kplus_over_pi_plus"] = str(value)
     _write_shard(tmp_path / "input", 0, rows)
     output = tmp_path / "figures"
@@ -158,6 +158,28 @@ def test_png_render_smoke_retains_failed_mask_and_emits_contour_figures(tmp_path
     assert len(list(output.glob("*_contours.png"))) == 3
     assert manifest["contour_fields"]["Kplus_over_pi_plus"]["corner_mask"] is False
     assert manifest["manuscript_eligible"] is False
+    assert manifest["value_summaries"]["Kplus_over_pi_plus"]["negative_count"] == 1
+    assert manifest["source_git_sha"] == "fixture"
+    assert "postprocess_git_sha" in manifest
     assert manifest["generator"]["sha256"] == module.sha256_file(PLOTTER)
     with pytest.raises(FileExistsError, match="refusing to overwrite"):
         module.main(["--input-root", str(tmp_path / "input"), "--output-dir", str(output)])
+
+
+def test_contour_labels_skip_tiny_paths_and_stagger_long_ones():
+    module = _load_module()
+    segments = [[[[0, 0], [1, 0]]], [[[0, 0], [0, 1]]], [[[0, 0], [0.001, 0]]]]
+    positions = module.contour_label_positions(segments, 1.0, 1.0)
+    assert len(positions) == 2
+    assert positions[0][0] == 0
+    assert positions[1][0] == 1
+    assert positions[0][1] == pytest.approx((0.15, 0.0))
+    assert positions[1][1] == pytest.approx((0.0, 0.5))
+
+
+def test_replot_workflow_skips_scan_and_keeps_source_and_render_runs_separate():
+    source = (ROOT / ".github" / "workflows" / "relaxtime-charged-gbu-contour-scan.yml").read_text(encoding="utf-8")
+    assert "if: ${{ inputs.replot_run_id == '' }}" in source
+    assert "run-id: ${{ inputs.replot_run_id || github.run_id }}" in source
+    assert "--postprocess-run-id" in source
+    assert "always() && needs.prepare.result == 'success'" in source

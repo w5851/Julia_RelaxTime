@@ -28,6 +28,11 @@ on:
         required: false
         default: "diagnostic"
         type: string
+      replot_run_id:
+        description: "Optional source run: replot frozen shards without any numerical scan"
+        required: false
+        default: ""
+        type: string
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -53,6 +58,7 @@ jobs:
 
   scan:
     needs: prepare
+    if: ${{ inputs.replot_run_id == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -97,11 +103,12 @@ jobs:
           retention-days: 30
 
   aggregate:
-    needs: scan
-    if: ${{ always() && needs.scan.result == 'success' }}
+    needs: [prepare, scan]
+    if: ${{ always() && needs.prepare.result == 'success' && (inputs.replot_run_id != '' || needs.scan.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -110,9 +117,11 @@ jobs:
       - name: Download diagnostic shards
         uses: actions/download-artifact@v4
         with:
-          pattern: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-shard-*
+          pattern: ${{ inputs.replot_run_id && 'charged-gbu-contour-*-shard-*' || format('charged-gbu-contour-{0}-shard-*', inputs.output_tag || format('run-{0}', github.run_id)) }}
           path: contour-shards
           merge-multiple: false
+          run-id: ${{ inputs.replot_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -121,24 +130,26 @@ jobs:
         run: python -m pip install matplotlib==3.9.2
       - name: Render screening heatmaps, labeled contours, and masks
         env:
-          SOURCE_RUN_ID: ${{ github.run_id }}
+          SOURCE_RUN_ID: ${{ inputs.replot_run_id || github.run_id }}
           SOURCE_GIT_SHA: ${{ github.sha }}
+          POSTPROCESS_RUN_ID: ${{ github.run_id }}
         run: |
           python scripts/analysis/relaxtime/plot_charged_gbu_contour_screening.py \
             --input-root contour-shards \
             --output-dir contour-plots \
             --source-run-id "$SOURCE_RUN_ID" \
+            --postprocess-run-id "$POSTPROCESS_RUN_ID" \
             --git-sha "$SOURCE_GIT_SHA"
       - name: Select sparse full-gate candidates
         env:
-          SOURCE_RUN_ID: ${{ github.run_id }}
-          SOURCE_GIT_SHA: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ inputs.replot_run_id || github.run_id }}
         run: |
+          source_sha=$(python -c "import json; print(json.load(open('contour-plots/plot_manifest.json'))['source_git_sha'])")
           python scripts/analysis/relaxtime/select_charged_gbu_contour_candidates.py \
             --input contour-plots/contour_points_merged.csv \
             --output-dir contour-candidates \
             --source-run-id "$SOURCE_RUN_ID" \
-            --git-sha "$SOURCE_GIT_SHA"
+            --git-sha "$source_sha"
       - name: Write aggregation note
         shell: bash
         run: |
