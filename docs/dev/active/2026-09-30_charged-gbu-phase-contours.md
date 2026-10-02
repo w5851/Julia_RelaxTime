@@ -215,7 +215,8 @@ PNG 审查产物，不声称通过论文级字体/布局测量、公共 validato
       run `36957893472` 全部 jobs success，`1813` 唯一网格键，`1805 screened`、
       `8 gate_failed`；每个分片 point count 为 `490/441/441/441`。原始数据只下载
       到 `D:/Temp/charged-gbu-contour-fine-36957893472/`，不提交数值 bulk。
-- [ ] 下载并视觉审核热图、等高线和 mask；不自动晋升正式研究/论文产物。
+- [x] 下载并完成 agent PNG 视觉审核、最终输出 hashes 与冻结 CSV 比对；
+      等待作者审核，不自动晋升正式研究/论文产物。
 
 本轮新增 mask 点为 `(T,muB)=(85,800),(95,550),(95,575),(105,675),`
 `(145,375),(145,400),(150,375),(150,400) MeV`。背景和 pi 通道成功，
@@ -244,6 +245,24 @@ Python 绘图/候选契约 `15/15` 通过，包括负值保留、短路径标签
 只隐藏重叠的文字，不隐藏等高线、不删数值。标签不使用 inline 路径裁切，避免
 逐次贴标签改变路径后把下一个标签吸附到邻近等高级；这是显示修正，不是物理
 phase branch 或积分方式的修正。
+
+最终 PNG-review 由冻结重绘 run `36960810064` 生成（全部执行 jobs success，
+scan 为 `skipped`），postprocess SHA
+`104d5c311e44a99883926c404a574498807a76a2`；数值 source 仍为
+run `36957893472` / `eb77d0616be4da6597df01e6159ad69b6eb19b89`。
+输出为三张原值热图、三张等高线图和一张 mask 图，7/7 PNG SHA-256 复核通过。
+最终目录为 `D:/Temp/charged-gbu-contour-fine-36957893472/final-plots/`。
+
+- 冻结数值 CSV SHA-256：
+  `3a77588502ccc9728f08ab49cf4bb59f1840d709cad229502c561b3210cd50ea`，
+  三次绘图输入/派生 CSV 字节一致，没有重跑或修改数值。
+- 最终 plot manifest SHA-256：
+  `571ae0b35bf8ec4f1a6971a1235d0d9b2ca1d4f253888536ac88884241c87622`。
+- 原始 Actions 从创建到完成约 20 分钟；四个 scan job 总墙钟为
+  `15m30s/13m42s/18m55s/13m09s`，包含环境准备，不是单点 density benchmark。
+- 候选选择器生成 44 个 solver-free 候选，只生成清单，未派发 full gates。
+- 本轮的 source/config/point/figure 都保留 provenance，数据没有进入 Git；
+  Actions artifacts 保留 30 天，不等于永久研究档案，作者接受后再治理保留。
 
 ## 7. 风险与回退
 
