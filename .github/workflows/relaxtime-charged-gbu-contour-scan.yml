@@ -41,6 +41,11 @@ on:
         required: false
         default: ""
         type: string
+      endpoint_audit:
+        description: "Audit exactly three saved backgrounds; skip all scans and plots"
+        required: false
+        default: false
+        type: boolean
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -66,7 +71,7 @@ jobs:
 
   scan:
     needs: prepare
-    if: ${{ inputs.replot_run_id == '' }}
+    if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit }}
     strategy:
       fail-fast: false
       matrix:
@@ -118,7 +123,7 @@ jobs:
 
   aggregate:
     needs: [prepare, scan]
-    if: ${{ always() && needs.prepare.result == 'success' && (inputs.replot_run_id != '' || needs.scan.result == 'success') }}
+    if: ${{ always() && !inputs.endpoint_audit && needs.prepare.result == 'success' && (inputs.replot_run_id != '' || needs.scan.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -206,5 +211,59 @@ jobs:
         with:
           name: charged-gbu-contour-${{ inputs.output_tag || format('run-{0}', github.run_id) }}-neighborhood
           path: contour-neighborhood
+          if-no-files-found: warn
+          retention-days: 30
+
+  endpoint-audit:
+    if: ${{ inputs.endpoint_audit }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout immutable diagnostic source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Download frozen backgrounds from the existing q0 scan
+        uses: actions/download-artifact@v4
+        with:
+          pattern: charged-gbu-contour-q0-reference-20261002-shard-*
+          path: endpoint-inputs
+          merge-multiple: false
+          run-id: 36971423991
+          github-token: ${{ github.token }}
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-charged-gbu-contour-scan
+      - name: Instantiate and precompile
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Verify synthetic endpoint contracts
+        env:
+          JULIA_NUM_THREADS: "1"
+          UNIT_FILES: relaxtime/test_charged_gbu_q0_endpoint_audit.jl,relaxtime/test_charged_gbu_q0_reference.jl
+        run: julia --project=. tests/unit/runtests.jl
+      - name: Probe saved kernels without background solves or gate relaxation
+        env:
+          JULIA_NUM_THREADS: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          julia --project=. scripts/analysis/relaxtime/audit_charged_gbu_q0_endpoint.jl \
+            --input-root endpoint-inputs --output endpoint-output 2>&1 | tee endpoint-audit.log
+      - name: Upload endpoint probes and input/source provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-q0-endpoint-audit-${{ github.run_id }}
+          path: |
+            endpoint-output
+            endpoint-audit.log
           if-no-files-found: warn
           retention-days: 30

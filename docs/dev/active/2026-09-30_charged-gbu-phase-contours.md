@@ -422,6 +422,41 @@ selection/mask/ratio/color/contour/label 字段与远程 meeting 图一致，未
 Python `30/30` 复测通过，agent 已完成最终 PNG 审核。Actions 从 dispatch 到完成
 约17分11秒，包含环境准备；不是新的单点 benchmark 结论。
 
+### M8：授权的小型外推端点复测（2026-10-02）
+
+用户授权在 Actions 对约三个**已有背景**进行小型只读复测；不求新背景、
+不重扫整图、不改容差。此项为本独立任务的 `research` follow-up，不替换
+accepted 主线，也不授权修复、删谱、改变外推约定或填补 mask。
+
+新增 `audit_charged_gbu_q0_endpoint.jl`，固定输入为历史十点对照中的 7.7 GeV、
+3 GeV 背景，以及 M7 run `36971423991` 的 `(145,375) MeV` onset 失败背景。
+前者读取已 hash-bound 的 `backgrounds.csv`；后者只通过保存的八维 seed
+代数恢复质量、化学势和 KMT coupling，不调用上游求解。选定输入字节及
+输入/源码哈希一同进入新 artifact；拒绝覆盖已有诊断目录。
+
+- K+ 主探针、pi+ 和 K- 对照；检查原 q0 的 `lambda=shift`、`lambda=0`，
+  以及各 q 外推的 `sqrt(shift^2-q^2)`。分别保存 Re/Im F、相位、GBU 权重和
+  原门槛的两个条件；不把合并错误文本直接译成凝聚。
+- 三档 `mesh/cut/tail=64/32/32,128/64/64,256/96/96`，并在关键点用原谱核
+  PV 128/256 阶与解析 q0 on-shell cut 核对；区分插值误差和真实非零 cut。
+- 同一坐标比较旧 `Lth=24,mesh=512` 核；在相同冻结背景上区分核更新和
+  端点门禁/积分算法变化。原有 `1e-8` 静态虚部门槛不变。
+- 对出现非零低频外推相位的壳层，记录 `omega_min=1e-3...1e-7 fm^-1`
+  的有限窗口导数、bulk 与上下边界项；仅作端点探针，不运行完整 density。
+- 保留直接有限 q 的 K+ 静态对照。此小样本不能外推全部1080个mask的原因，
+  也不能仅凭 Re F 为负认证新的平衡相或物理凝聚。
+
+scan workflow 增加默认关闭的 `endpoint_audit`。开启后 scan/aggregate 实际应
+跳过，仅下载旧分片并执行独立小型 job；普通扫描和重绘默认语义保持不变。
+本机仅运行纯代数/合成 profile 单元与工作流契约，真实核探针全部留在 Actions。
+
+- [x] 聚焦单元/工作流契约和治理验证：Julia `110/110`、Python `30/30`；
+      docs/formula-route/script/data-output/ledger 与 diff 检查通过。
+      首次测试捕获 CSV 不接受 `nothing`，改为仅在输出层明确表示 `missing`，
+      未改核或容差。全仓 active-doc 检查仍为五份既有七月文档超龄，未擅自归档。
+- [ ] 选择性提交诊断源码，dispatch 小型 audit；核对 scan/aggregate skipped。
+- [ ] 审核实虚部、原 cut、节点对照、旧核/新核与 IR 边界证据并报告结论。
+
 ## 7. 风险与回退
 
 - BQS solver 在一阶线附近可能有多支；保存 seed、残差和失败点，不拼接共存相。

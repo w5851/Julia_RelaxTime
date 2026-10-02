@@ -179,10 +179,10 @@ def test_contour_labels_skip_tiny_paths_and_stagger_long_ones():
 
 def test_replot_workflow_skips_scan_and_keeps_source_and_render_runs_separate():
     source = (ROOT / ".github" / "workflows" / "relaxtime-charged-gbu-contour-scan.yml").read_text(encoding="utf-8")
-    assert "if: ${{ inputs.replot_run_id == '' }}" in source
+    assert "if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit }}" in source
     assert "run-id: ${{ inputs.replot_run_id || github.run_id }}" in source
     assert "--postprocess-run-id" in source
-    assert "always() && needs.prepare.result == 'success'" in source
+    assert "always() && !inputs.endpoint_audit && needs.prepare.result == 'success'" in source
 
 
 def test_label_collision_suppression_changes_only_text_visibility():
