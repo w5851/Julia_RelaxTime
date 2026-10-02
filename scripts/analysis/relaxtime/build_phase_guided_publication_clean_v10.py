@@ -54,7 +54,8 @@ from scripts.plotting.plot_manifest import (
 )
 from scripts.plotting.plot_quality import export_figure
 from scripts.plotting.plot_style import configure_axis_ticks, configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.validate_plot_artifact import validate_manifest_record
+from scripts.plotting.plot_bundle import build_bundle
 
 
 V9_SCRIPT = ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v9.py"
@@ -414,7 +415,7 @@ def write_chart(
     command: str,
     *,
     composite: bool,
-) -> tuple[dict[str, Any], Path]:
+) -> dict[str, Any]:
     outputs, quality = export_figure(figure, stem, profile, formats=("png",))
     axes_records = []
     for spec in specs:
@@ -516,16 +517,13 @@ def write_chart(
             "raw_manuscript_eligible": False,
         }
     )
-    manifest_path = stem.with_suffix(".plot_manifest.json")
-    write_manifest(manifest_path, manifest)
-    violations = validate_manifest(manifest_path)
+    violations = validate_manifest_record(manifest)
     if violations:
         raise ValueError(f"{stem.name}: " + "; ".join(violations))
     plt.close(figure)
     chart = {
         "stem": relative(stem),
-        "manifest": relative(manifest_path),
-        "manifest_sha256": sha256_file(manifest_path),
+        "manifest_record": manifest,
         "kind": "composite" if composite else "single",
         "mode_key": specs[0]["mode_key"],
         "legend_policy": legend_policy,
@@ -533,7 +531,7 @@ def write_chart(
         "outputs": outputs,
         "minimum_capital_numeral_height_mm": quality["minimum_capital_numeral_height_mm"],
     }
-    return chart, manifest_path
+    return chart
 
 
 def render_single(mode: str, panel: str, observable: str, grouped: dict, gap_map: dict, profile: Any) -> tuple[Any, list[dict]]:
@@ -833,13 +831,13 @@ def main() -> None:
                 all_specs.extend(specs)
                 mode_dir = "mode_a_fixed_muB_phase_scaled" if mode == "mode_a" else "mode_b_fixed_T_sparse_muB"
                 stem = FIGURE_ROOT / mode_dir / f"plot_panel={panel}" / f"{observable}_vs_xi"
-                chart, _ = write_chart(figure, stem, specs, profile, inputs, font, command, composite=False)
+                chart = write_chart(figure, stem, specs, profile, inputs, font, command, composite=False)
                 charts.append(chart)
         print(f"[v10] {mode}: 36 single charts validated", flush=True)
     for name, observables in COMPOSITES.items():
         figure, specs = render_composite(observables, grouped, gap_map, profile)
         all_specs.extend(specs)
-        chart, _ = write_chart(figure, FIGURE_ROOT / "composites" / name, specs, profile, inputs, font, command, composite=True)
+        chart = write_chart(figure, FIGURE_ROOT / "composites" / name, specs, profile, inputs, font, command, composite=True)
         charts.append(chart)
 
     for item in inputs:
@@ -873,7 +871,7 @@ def main() -> None:
         "charts": charts,
     }
     index_path = FIGURE_ROOT / "plot_manifest.json"
-    write_manifest(index_path, index)
+    write_manifest(index_path, build_bundle(index, [chart["manifest_record"] for chart in charts]))
 
     (ANALYSIS_ROOT / "README.md").write_text(
         f"""# publication_clean_v10 PNG review layer

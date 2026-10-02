@@ -5,6 +5,7 @@
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/publication_plot_manifest_migration_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v10_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_pdf_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

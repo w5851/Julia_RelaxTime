@@ -138,9 +138,22 @@ data/outputs/figures/<domain>/<figure_family>/<case_slug>__plotv1__strict/
 
 `visualization-only closed` 不是第五种物理状态，而是 `audit` 的一个显示子模式；它只统一 Maxwell 的视觉颜色，不能改变四层语义或晋升资格。
 
-所有新图必须有 `plot_manifest.json`，至少包含：`figure_mode`、`style_profile`、输入 hash、generator/hash、Git commit、calculation/postprocess/source provenance、axes 单位和 transform、series state、support/mask 规则、interpolation/connector policy、输出 hash、DPI/vector 和 layout 记录。
+所有新图必须有 `plot_manifest.json`，完整单图记录（多图包展开后）至少包含：`figure_mode`、`style_profile`、输入 hash、generator/hash、Git commit、calculation/postprocess/source provenance、axes 单位和 transform、series state、support/mask 规则、interpolation/connector policy、输出 hash、DPI/vector 和 layout 记录。
 
-多图包可以另有 index manifest，但每张单图及复合图仍须有独立的 `*.plot_manifest.json`，由公共 validator 验证。新论文图族必须调用公共 `configure_matplotlib`、`configure_axis_ticks`、`export_figure` 和 validator；历史脚本只用于原合同复现，不因命名为 publication 而自动合规。
+每个新图包只交付一份 `plot_manifest.json`。单图可使用 `plot_manifest_v1`；
+多图使用 `plot_manifest_bundle_v1`，在 `shared` 中只记录一次共同输入、生成器、
+运行环境和 provenance，在 `figures[]` 中以唯一 `figure_id` 保存每张单图及复合图
+的轴、series、筛选/断线规则、布局、质量检查和各格式输出 hash。每条记录必须能与
+共享字段合并为完整的单图合同；不能只保留文件名/hash 索引，也不能用逐图覆盖共享字段。
+独立 sidecar 不是必要的复现信息，默认不生成 `*.plot_manifest.json` 或额外格式 index。
+公共 validator 逐记录检查，图族专用 review/preflight 继续保留其资格限制。
+新论文图族必须调用公共 `configure_matplotlib`、`configure_axis_ticks`、`export_figure`
+和 validator；历史脚本只用于原合同复现，不因命名为 publication 而自动合规。
+
+已接受图包的存储迁移须经作者授权：先保留原 manifest 图谱的逐字节归档和 hash，
+再证明总 manifest 可无损还原全部记录，图像、数值表、原验收记录、资格和 current
+指针均不改变。旧验收引用只可解析到已登记且 hash 一致的原 manifest 归档；
+图像和数值数据仍检查现存字节，不允许使用历史归档掩盖漂移。
 
 ### 两阶段交付合同
 
@@ -150,7 +163,7 @@ data/outputs/figures/<domain>/<figure_family>/<case_slug>__plotv1__strict/
 
 ## 11. Regression / Validation 验收
 
-每个新 case 验证本次输入、逐图 manifest 和实际输出，并完成适用的视觉审核：
+每个新 case 验证本次输入、总 manifest 内全部逐图记录和实际输出，并完成适用的视觉审核：
 
 ```powershell
 python scripts/plotting/validate_plot_artifact.py <path-to-plot_manifest.json>

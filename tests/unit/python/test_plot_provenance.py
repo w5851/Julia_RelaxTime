@@ -8,7 +8,7 @@ import zipfile
 import pytest
 
 from scripts.plotting.plot_manifest import generator_record, input_record
-from scripts.plotting.plot_provenance import code_ref_for_manifest, git_source, validate_hash_record, validate_snapshot
+from scripts.plotting.plot_provenance import code_ref_for_manifest, git_source, read_manifest_record, validate_hash_record, validate_snapshot
 
 
 @pytest.fixture
@@ -98,3 +98,30 @@ def test_retained_source_archive_works_without_git_history(frozen, monkeypatch):
     archive.write_bytes(b"damaged archive")
     git_source.cache_clear()
     assert validate_hash_record(record, root=root, label="generator", code_ref=commit)
+
+
+def test_retired_manifest_archive_preserves_only_explicit_manifest_references(tmp_path):
+    manifest = tmp_path / "data/outputs/figures/case/figure.plot_manifest.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text('{"status":"frozen"}\n', encoding="utf-8")
+    record = input_record(manifest, role="frozen_manifest", root=tmp_path)
+    data = tmp_path / "data/outputs/results/raw.json"
+    data.parent.mkdir(parents=True)
+    data.write_text('{"value":1}', encoding="utf-8")
+    data_record = input_record(data, role="numerical_data", root=tmp_path)
+    archive = tmp_path / "manifests.zip"
+    with zipfile.ZipFile(archive, "w") as snapshot:
+        snapshot.write(manifest, record["path"])
+        snapshot.write(data, data_record["path"])
+    registry = tmp_path / "config/plotting/historical_snapshots.toml"
+    registry.parent.mkdir(parents=True)
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    registry.write_text(f'[[manifest_archives]]\narchive="manifests.zip"\nsha256="{digest}"\n', encoding="utf-8")
+    manifest.unlink()
+    assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False) == []
+    assert read_manifest_record(record, root=tmp_path) == {"status": "frozen"}
+    assert validate_hash_record({**record, "sha256": "0" * 64}, root=tmp_path, label="outputs")
+    data.write_text('{"value":2}', encoding="utf-8")
+    assert validate_hash_record(data_record, root=tmp_path, label="inputs")
+    archive.write_bytes(b"tampered archive")
+    assert validate_hash_record(record, root=tmp_path, label="outputs")

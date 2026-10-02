@@ -25,6 +25,10 @@ already frozen CSV/JSON results. The authoritative workflow is
 - Do not call a solver, alter numerical CSV/JSON values, introduce hidden
   interpolation or smoothing, or modify the paper project as part of figure
   production.
+- Deliver one `plot_manifest.json` per case. Multi-figure cases use
+  `plot_manifest_bundle_v1`: shared provenance once, unique figure IDs and
+  complete per-figure records in `figures[]`. Separate sidecars are not
+  required. Use `scripts/plotting/plot_bundle.py` to factor and expand records.
 
 ## Two-stage delivery
 
@@ -87,7 +91,7 @@ old image, input, or manifest bytes.
 
 ## Validation
 
-Validate every new per-figure manifest and its actual output. Run public
+Validate every record in the case manifest and its actual output. Run public
 contract/quality tests when shared plotting code, profiles or validators
 change; run the affected figure-family tests when its logic changes.
 Documentation and script-entrypoint checks follow changes to those contracts.

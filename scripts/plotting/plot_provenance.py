@@ -11,6 +11,63 @@ import zipfile
 from typing import Any
 
 
+@lru_cache(maxsize=8)
+def _manifest_archive(path: str, expected: str, mtime_ns: int, size: int) -> dict[str, bytes]:
+    payload = Path(path).read_bytes()
+    if hashlib.sha256(payload).hexdigest() != expected:
+        raise ValueError(f"retired manifest archive hash mismatch: {path}")
+    with zipfile.ZipFile(Path(path)) as snapshot:
+        return {name: snapshot.read(name) for name in snapshot.namelist()}
+
+
+def record_bytes(record: dict[str, Any], *, root: Path) -> bytes:
+    """Resolve current bytes, or an explicitly archived pre-migration manifest."""
+    value = record["path"]
+    path = Path(value)
+    path = path if path.is_absolute() else root / path
+    expected = record.get("sha256")
+    current = path.read_bytes() if path.is_file() else None
+    if current is not None and (not expected or hashlib.sha256(current).hexdigest() == expected):
+        return current
+    registry = root / "config/plotting/historical_snapshots.toml"
+    if expected and registry.is_file() and path.suffix == ".json":
+        try:
+            relative = path.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            relative = ""
+        manifest_name = (path.name in {"plot_manifest.json", "pdf_review_index.json"}
+                         or path.name.endswith((".plot_manifest.json", ".pdf_review_manifest.json")))
+        if not relative.startswith("data/outputs/figures/") or not manifest_name:
+            relative = ""
+        for entry in tomllib.loads(registry.read_text(encoding="utf-8")).get("manifest_archives", []):
+            if not relative:
+                break
+            archive = root / entry["archive"]
+            stat = archive.stat()
+            contents = _manifest_archive(str(archive), entry["sha256"], stat.st_mtime_ns, stat.st_size)
+            payload = contents.get(relative)
+            if payload is not None and hashlib.sha256(payload).hexdigest() == expected:
+                return payload
+    if current is not None:
+        return current
+    raise FileNotFoundError(value)
+
+
+def read_manifest_record(record: dict[str, Any], *, root: Path) -> dict:
+    payload = record_bytes(record, root=root)
+    if record.get("sha256") and hashlib.sha256(payload).hexdigest() != record["sha256"]:
+        raise ValueError(f"manifest reference hash mismatch: {record['path']}")
+    manifest = json.loads(payload)
+    if record.get("figure_id"):
+        from scripts.plotting.plot_bundle import expand_bundle
+        matches = [item for entry, (_, item) in zip(manifest["figures"], expand_bundle(manifest))
+                   if entry["figure_id"] == record["figure_id"]]
+        if len(matches) != 1:
+            raise ValueError("source figure ID is not unique in its bundle")
+        return matches[0]
+    return manifest
+
+
 @lru_cache(maxsize=512)
 def git_source(root: str, commit: str, relative: str) -> bytes:
     if not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
@@ -77,8 +134,10 @@ def validate_hash_record(record: dict[str, Any], *, root: Path, label: str,
     if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected):
         return [f"{label}.sha256 must be a 64-character hash"]
     try:
-        payload = path.read_bytes() if path.is_file() else None
-    except OSError as exc:
+        payload = record_bytes(record, root=root)
+    except FileNotFoundError:
+        payload = None
+    except (OSError, ValueError, zipfile.BadZipFile) as exc:
         return [f"{label} cannot read {value}: {exc}"]
 
     def matches(data: bytes | None) -> bool:
@@ -117,31 +176,36 @@ def validate_snapshot(manifest_path: Path, *, root: Path, code_ref: str) -> list
     try:
         relative = path.relative_to(root.resolve()).as_posix()
         frozen = git_source(str(root.resolve()), code_ref, relative)
-        if not path.is_file() or path.read_bytes() != frozen:
+        if record_bytes({"path": relative, "sha256": hashlib.sha256(frozen).hexdigest()}, root=root) != frozen:
             return [f"snapshot manifest differs from {code_ref}:{relative}"]
-    except ValueError as exc:
+    except (ValueError, OSError, zipfile.BadZipFile) as exc:
         return [str(exc)]
     errors: list[str] = []
-    visited: set[Path] = set()
+    visited: set[tuple[Path, str | None]] = set()
+    checked: dict[tuple, bool] = {}
 
-    def read_manifest(target: Path) -> None:
+    def read_manifest(target: Path, expected: str | None = None) -> None:
         target = target.resolve()
-        if target in visited:
+        key = (target, expected)
+        if key in visited:
             return
-        visited.add(target)
+        visited.add(key)
         try:
-            walk(json.loads(target.read_text(encoding="utf-8")), target.name)
-        except (OSError, json.JSONDecodeError) as exc:
+            walk(read_manifest_record({"path": str(target), "sha256": expected}, root=root), target.name)
+        except (OSError, ValueError) as exc:
             errors.append(f"cannot read snapshot manifest {target}: {exc}")
 
     def check(record: dict, label: str, *, historical: bool = True) -> bool:
-        issues = validate_hash_record(record, root=root, label=label, code_ref=code_ref, allow_historical=historical)
-        errors.extend(issues)
+        key = (record.get("path"), record.get("sha256"), record.get("bytes"), historical)
+        if key not in checked:
+            issues = validate_hash_record(record, root=root, label=label, code_ref=code_ref, allow_historical=historical)
+            errors.extend(issues)
+            checked[key] = not issues
         value = record.get("path", "")
         follow = "outputs" in label or label.endswith(("_package", ".source_png_manifest"))
-        if not issues and follow and value.endswith(".json") and "manifest" in Path(value).name:
-            read_manifest(root / value)
-        return not issues
+        if checked[key] and follow and value.endswith(".json") and "manifest" in Path(value).name:
+            read_manifest(root / value, record.get("sha256"))
+        return checked[key]
 
     def walk(node: Any, label: str) -> None:
         if isinstance(node, list):
@@ -154,11 +218,11 @@ def validate_snapshot(manifest_path: Path, *, root: Path, code_ref: str) -> list
             if "manifest" in node and "manifest_sha256" in node:
                 chart = {"path": node["manifest"], "sha256": node["manifest_sha256"]}
                 if check(chart, label, historical=False):
-                    read_manifest(root / chart["path"])
+                    read_manifest(root / chart["path"], chart["sha256"])
             if isinstance(node.get("generator"), str) and "generator_sha256" in node:
                 check({"path": node["generator"], "sha256": node["generator_sha256"]}, f"{label}.generator")
             for key, value in node.items():
                 walk(value, f"{label}.{key}")
 
-    read_manifest(path)
+    read_manifest(path, hashlib.sha256(frozen).hexdigest())
     return errors

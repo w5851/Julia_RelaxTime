@@ -10,7 +10,8 @@ import pytest
 from scripts.plotting.plot_manifest import sha256_file
 from scripts.plotting.plot_quality import measure_figure
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.validate_plot_artifact import validate_manifest, validate_manifest_record
+from scripts.plotting.plot_bundle import load_chart_records
 from scripts.plotting.plot_provenance import validate_hash_record
 import tomllib
 
@@ -171,18 +172,16 @@ def test_v11_preserves_all_frozen_plot_coordinates_gaps_and_mode_b_scales(module
 def test_v11_review_artifacts_counts_hashes_and_geometry(module):
     path = module.FIGURE_ROOT / "plot_manifest.json"
     assert path.is_file(), "build v11 with --png-review before checking the artifact package"
-    index = json.loads(path.read_text(encoding="utf-8"))
+    index, pairs = load_chart_records(path, root=ROOT)
     assert index["schema"] == "publication_clean_v11_png_review_figure_index_v1"
     assert index["single_figure_count"] == 72
     assert index["composite_figure_count"] == 2
     assert index["mode_counts"] == {"mode_a": 36, "mode_b": 36}
-    assert len(index["charts"]) == len(list(module.FIGURE_ROOT.rglob("*.png"))) == 74
+    assert len(pairs) == len(list(module.FIGURE_ROOT.rglob("*.png"))) == 74
+    assert list(module.FIGURE_ROOT.rglob("*.json")) == [path]
+    assert validate_manifest(path, code_ref=CODE_REF) == []
     assert not list(module.FIGURE_ROOT.rglob("*.pdf"))
-    for chart in index["charts"]:
-        manifest_path = ROOT / chart["manifest"]
-        assert sha256_file(manifest_path) == chart["manifest_sha256"]
-        assert validate_manifest(manifest_path, code_ref=CODE_REF) == []
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for chart, manifest in pairs:
         assert manifest["manuscript_eligible"] is False
         assert manifest["current_publication_layer"] is False
         assert manifest["solver_called"] is False
@@ -219,7 +218,9 @@ def test_v11_package_preserves_v5_v10_raw_and_current_and_records_caption_scope(
     for item in [*package["inputs"], *package["outputs"]]:
         assert validate_hash_record(item, root=ROOT, label="package", code_ref=CODE_REF) == []
     retained = {item["path"]: item["sha256"] for item in package["inputs"] if item["role"] == "retained_v10_review_artifact"}
-    assert retained == {item["path"]: item["sha256"] for item in module.retained_v10_records()}
+    current = {item["path"]: item["sha256"] for item in module.retained_v10_records()}
+    assert {path: digest for path, digest in retained.items() if not path.endswith(".json")} == {
+        path: digest for path, digest in current.items() if not path.endswith(".json")}
     for name, expected in package["inherited_table_hashes"].items():
         assert sha256_file(module.V5_TABLE_ROOT / name) == expected
         assert sha256_file(module.TABLE_ROOT / name) == expected
