@@ -1,0 +1,184 @@
+{
+  "schema": "publication_clean_v11_manuscript_placement_review_v1",
+  "task_classification": "independent",
+  "manuscript_eligible": false,
+  "paper_project_modified": false,
+  "method": "PNG image bounding boxes in disposable manuscript; PDF companions keep the identical physical canvas",
+  "units": {
+    "PDF_point": "1/72 inch",
+    "TeX_point": "1/72.27 inch"
+  },
+  "placement": [
+    {
+      "figure": "figure1_relaxation_times_comparison",
+      "page": 6,
+      "page_size_pdf_pt": [
+        612,
+        792
+      ],
+      "page_size_mm": [
+        215.89999999999998,
+        279.4
+      ],
+      "native_size_inches": [
+        6.75,
+        7.1
+      ],
+      "placement_scale": 1.0454700000000001,
+      "placed_width_pdf_pt": 508.09842000000003,
+      "placed_width_mm": 179.2458315,
+      "placed_height_mm": 188.54005979999997,
+      "minimum_primary_glyph_height_mm": 2.5643840843359373,
+      "minimum_math_script_height_mm": 1.7700785186191408,
+      "effective_png_dpi": 573.9045596717266,
+      "image_bbox_pdf_pt": [
+        54.0,
+        52.07373600000005,
+        562.09842,
+        586.518
+      ],
+      "caption_top_pdf_pt": 599.7150816000001,
+      "caption_gap_mm": 4.655637120000016,
+      "print_scenarios": [
+        {
+          "name": "A4_fit_page",
+          "margin_mm": 0,
+          "print_scale": 0.9726725335803614,
+          "figure_width_mm": 174.34749705882356,
+          "figure_height_mm": 183.38773764705883,
+          "minimum_primary_glyph_height_mm": 2.4943059643841914,
+          "minimum_math_script_height_mm": 1.7217067573414526,
+          "effective_png_dpi": 590.0285449196464
+        },
+        {
+          "name": "A4_fit_5mm_printable_margin",
+          "margin_mm": 5,
+          "print_scale": 0.9263547938860585,
+          "figure_width_mm": 166.04523529411767,
+          "figure_height_mm": 174.6549882352941,
+          "minimum_primary_glyph_height_mm": 2.375529489889706,
+          "minimum_math_script_height_mm": 1.639720721277574,
+          "effective_png_dpi": 619.5299721656287
+        }
+      ],
+      "native_png_manifest": {
+        "path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\publication_clean_v11_png_review\\composites\\figure1_relaxation_times_comparison.plot_manifest.json",
+        "bytes": 155123,
+        "sha256": "efbbab2dc83414789a4965b932715361816ee6aef15cd64a06a884f2c31a5e8e"
+      }
+    },
+    {
+      "figure": "figure2_transport_coefficients_comparison",
+      "page": 7,
+      "page_size_pdf_pt": [
+        612,
+        792
+      ],
+      "page_size_mm": [
+        215.89999999999998,
+        279.4
+      ],
+      "native_size_inches": [
+        6.75,
+        5.9
+      ],
+      "placement_scale": 1.0454700000000001,
+      "placed_width_pdf_pt": 508.09842000000003,
+      "placed_width_mm": 179.2458315,
+      "placed_height_mm": 156.67413419999994,
+      "minimum_primary_glyph_height_mm": 2.5643840843359373,
+      "minimum_math_script_height_mm": 1.7700785186191408,
+      "effective_png_dpi": 573.9045596717266,
+      "image_bbox_pdf_pt": [
+        54.0,
+        52.07434400000011,
+        562.09842,
+        496.19
+      ],
+      "caption_top_pdf_pt": 509.3860816,
+      "caption_gap_mm": 4.6552843422222265,
+      "print_scenarios": [
+        {
+          "name": "A4_fit_page",
+          "margin_mm": 0,
+          "print_scale": 0.9726725335803614,
+          "figure_width_mm": 174.34749705882356,
+          "figure_height_mm": 152.3926270588235,
+          "minimum_primary_glyph_height_mm": 2.4943059643841914,
+          "minimum_math_script_height_mm": 1.7217067573414526,
+          "effective_png_dpi": 590.0285449196464
+        },
+        {
+          "name": "A4_fit_5mm_printable_margin",
+          "margin_mm": 5,
+          "print_scale": 0.9263547938860585,
+          "figure_width_mm": 166.04523529411767,
+          "figure_height_mm": 145.1358352941176,
+          "minimum_primary_glyph_height_mm": 2.375529489889706,
+          "minimum_math_script_height_mm": 1.639720721277574,
+          "effective_png_dpi": 619.5299721656287
+        }
+      ],
+      "native_png_manifest": {
+        "path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\publication_clean_v11_png_review\\composites\\figure2_transport_coefficients_comparison.plot_manifest.json",
+        "bytes": 140807,
+        "sha256": "226bd781fff6d28315bde10f2bf8134a414eedf0ac3582d23f8fa17085f8775f"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "path": "D:\\Temp\\phase_guided_v11_paper_review_20261002\\png_textwidth_preview.pdf",
+      "bytes": 1564705,
+      "sha256": "9de7cd9a67bad0bdb9fc464e179d3f6f5485bc113970eb380ed57e470c4b85bc"
+    },
+    {
+      "path": "D:\\Temp\\phase_guided_v11_paper_review_20261002\\main.pdf",
+      "bytes": 445659,
+      "sha256": "d06d82181085848a59d48c126a5e63668a3943da31df8a251cfd009a4db65045"
+    },
+    {
+      "path": "D:\\Temp\\phase_guided_v11_paper_review_20261002\\main.tex",
+      "bytes": 41238,
+      "sha256": "47baad163dfc914f2e4c930b8c42d347052f2618553aa73ea69c890b88ab4abf"
+    },
+    {
+      "path": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\main.tex",
+      "bytes": 40651,
+      "sha256": "d86f66a5402c117ead9eafda17bc67dcf7237352fa19b46d468816a7906ecb5b"
+    },
+    {
+      "path": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\main.pdf",
+      "bytes": 2118042,
+      "sha256": "0483b15da1d2842c8baffa775e27c9d13972823778f2d0c14ed9f66c80c0f32b"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\relaxtime\\inspect_phase_guided_publication_clean_v11_placement.py",
+      "bytes": 10629,
+      "sha256": "77d31d6e7b5a233031134374cc8162c46295c0f58eb4c0dbdb48cf6103c25ea1"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "D:\\Temp\\phase_guided_v11_paper_review_20261002\\a4_fit_page.pdf",
+      "bytes": 279847,
+      "sha256": "20ef58af286ab9c52e18bcb160561233f933d14c47bdbcb934b864e8fb0ae30b"
+    },
+    {
+      "path": "D:\\Temp\\phase_guided_v11_paper_review_20261002\\a4_fit_5mm_margin.pdf",
+      "bytes": 279861,
+      "sha256": "b19f5e1d8f3e490f7a8236f2e428eed9efdebab1cfc750f214ee29887c68f14e"
+    }
+  ],
+  "float_options": {
+    "original": "[t]",
+    "temporary_preview": "[!t]",
+    "reason": "large figure plus expanded caption exceeded top-float fraction; !t removes this restriction without shrinking"
+  },
+  "unresolved_formal_gates": [
+    "math scripts below the repository 2 mm final-size threshold",
+    "paper textwidth is approximately 7.057 in, above the candidate profile 7 in limit",
+    "600 dpi native PNG falls below 600 effective dpi when enlarged at textwidth; PDF is vector and has no raster DPI limit"
+  ],
+  "scope": "visual size and export review only; frozen data, eligibility and current=v5 unchanged"
+}

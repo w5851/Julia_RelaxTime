@@ -1,0 +1,44 @@
+name: sysimage-compatibility
+
+on:
+  pull_request:
+    paths:
+      - "scripts/dev/sysimage_inputs.jl"
+      - "scripts/dev/build_sysimage.jl"
+      - "scripts/dev/precompile_workload.jl"
+      - "scripts/dev/run_with_sysimage.*"
+      - "tests/unit/config/test_sysimage_inputs.jl"
+      - "tests/integration/python/test_sysimage_wrappers.py"
+      - ".github/workflows/sysimage-compatibility.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/dev/sysimage_inputs.jl"
+      - "scripts/dev/build_sysimage.jl"
+      - "scripts/dev/precompile_workload.jl"
+      - "scripts/dev/run_with_sysimage.*"
+      - "tests/unit/config/test_sysimage_inputs.jl"
+      - "tests/integration/python/test_sysimage_wrappers.py"
+      - ".github/workflows/sysimage-compatibility.yml"
+  workflow_dispatch:
+
+jobs:
+  compatibility:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test build input fingerprint
+        run: julia --startup-file=no tests/unit/config/test_sysimage_inputs.jl
+      - name: Install launcher test dependency
+        run: python -m pip install pytest
+      - name: Test launcher policies without compiling an image
+        run: python -m pytest -q tests/integration/python/test_sysimage_wrappers.py

@@ -75,7 +75,7 @@ verification_commands = ["julia --project=. scripts/run_fixture.jl --help"]
 schema_version = "v1"
 allowed_statuses = ["draft", "active", "deprecated"]
 stable_entrypoint_index = "docs/guides/scripts/README.md"
-required_sections = [
+recommended_sections = [
 $(required)
 ]
 forbidden_patterns = ["src/pnjl/"]
@@ -135,12 +135,14 @@ end
             joinpath(temp_root, "incomplete");
             omit_section=missing_section,
         )
+        advisories = String[]
         incomplete = Main.SopGovernance.validate_registry(
             incomplete_root;
             current_date=Date(2026, 7, 10),
+            advisories,
         )
-        @test any(item -> occursin("missing required section", item), incomplete)
-        @test any(item -> occursin(missing_section, item), incomplete)
+        @test isempty(incomplete)
+        @test any(item -> occursin(missing_section, item), advisories)
 
         overdue_root = _make_fixture(
             joinpath(temp_root, "overdue");
@@ -149,8 +151,10 @@ end
         overdue = Main.SopGovernance.validate_registry(
             overdue_root;
             current_date=Date(2026, 7, 10),
+            advisories,
         )
-        @test any(item -> occursin("review is overdue", item), overdue)
+        @test isempty(overdue)
+        @test any(item -> occursin("review is overdue", item), advisories)
 
         duplicate_root = _make_fixture(
             joinpath(temp_root, "duplicate");
@@ -161,5 +165,10 @@ end
             current_date=Date(2026, 7, 10),
         )
         @test any(item -> occursin("is claimed by both", item), duplicate)
+
+        rm(joinpath(valid_root, "scripts", "run_fixture.jl"))
+        @test any(item -> occursin("does not exist", item), Main.SopGovernance.validate_registry(
+            valid_root; current_date=Date(2026, 7, 10),
+        ))
     end
 end

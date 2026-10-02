@@ -28,19 +28,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
-
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-docs-consistency
-
-      - name: Instantiate dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
       - name: Run docs consistency check
         run: julia --project=. scripts/dev/check_docs_consistency.jl
@@ -48,5 +42,19 @@ jobs:
       - name: Run scientific SOP governance check
         run: julia --project=. scripts/dev/check_sop_governance.jl
 
+      - name: Select checker tests
+        id: checker-tests
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE_SHA" HEAD | grep -Eq '^(scripts/dev/check_sop_governance.jl|tests/unit/config/test_sop_governance.jl|.github/workflows/docs-consistency.yml)$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run SOP governance unit test
+        if: steps.checker-tests.outputs.run == 'true'
         run: julia --project=. tests/unit/config/test_sop_governance.jl

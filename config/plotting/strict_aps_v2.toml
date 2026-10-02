@@ -1,0 +1,97 @@
+schema_version = "plot_style_profile_v1"
+profile_id = "strict_aps_v2"
+status = "active"
+default_column = "single_column"
+font_family = "serif"
+font_candidates = ["Times New Roman", "Times"]
+mathtext_fontset = "stix"
+font_size_pt = 13.0
+tick_font_size_pt = 13.0
+legend_font_size_pt = 13.0
+axes_linewidth_pt = 0.7
+line_width_pt = 1.2
+marker_size_pt = 4.5
+
+[figure_size_in]
+single_column = [3.375, 2.5]
+double_column = [6.75, 4.6]
+
+[output]
+formats = ["pdf", "png"]
+optional_formats = ["svg", "eps"]
+dpi = 600
+bbox_inches = "fixed"
+
+[quality]
+contract = "final_size_v2"
+target_journal = "APS_PRD"
+unit_brackets = "parentheses"
+min_capital_numeral_height_mm = 2.0
+min_curve_linewidth_pt = 0.5
+min_landmark_diameter_mm = 1.0
+max_width_inches = 7.0
+require_vector_pdf = true
+require_embedded_fonts = true
+
+[ticks]
+direction = "in"
+sides = ["top", "bottom", "left", "right"]
+# One minor tick between adjacent linear major ticks keeps dense multi-panel
+# figures readable at the final double-column insertion width.
+linear_minor_subdivisions = 2
+log_minor_subs = [2, 3, 4, 5, 6, 7, 8, 9]
+
+[support]
+draw_points = false
+visual_policy = "line_first_landmark_only"
+
+[layout]
+legend_policy = "shared_external_then_case_review"
+max_in_axes_entries = 4
+allow_external_legend = true
+
+[semantics]
+publication_scope = "main_text_candidate"
+allow_unresolved = false
+allow_estimated_midpoint = false
+allow_connector = false
+interpolation_default = "none"
+
+[palette]
+colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000"]
+parameter_linestyles = ["-", "--", "-.", ":"]
+
+[phase_styles.first_order]
+linestyle = "-"
+marker = ""
+alpha = 1.0
+
+[phase_styles.crossover]
+linestyle = "--"
+marker = ""
+alpha = 1.0
+
+[phase_styles.spinodal]
+linestyle = ":"
+marker = ""
+alpha = 1.0
+
+[phase_styles.cep_confirmed]
+linestyle = "None"
+marker = "o"
+alpha = 1.0
+
+[phase_styles.cep_bracket]
+linestyle = "--"
+marker = "D"
+alpha = 1.0
+
+[phase_styles.estimated_midpoint]
+linestyle = "--"
+marker = "D"
+alpha = 1.0
+
+[phase_styles.unresolved]
+linestyle = "None"
+marker = "x"
+alpha = 1.0

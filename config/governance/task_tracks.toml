@@ -140,7 +140,7 @@ evidence = [
   "sha:dba1d9b8b5196bbb8993453ff7e184201dc09cf3",
   "file:scripts/analysis/relaxtime/compare_charged_rpa_ordered_fixedpoints.jl",
   "file:scripts/analysis/relaxtime/audit_charged_rpa_bu_convergence.jl",
-  "file:tests/unit/relaxtime/test_charged_rpa_bu_convergence_contract.jl",
+  "note:historical_static_contract:tests/unit/relaxtime/test_charged_rpa_bu_convergence_contract.jl@45e0a7f0b8512cbba88228ee661234015ae95fa7; removed under issue319 because it only checked source strings",
   "note:single_point_smoke_7p7GeV_four_algorithms_with_explicit_invalid_density_rows",
   "review:formula_route_audit_complete",
   "review:author_accepted_pr290_sop_closeout",

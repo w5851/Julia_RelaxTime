@@ -4,7 +4,7 @@
 
 ## 常用内部手册
 
-- [Codex高阶使用手册](D:\Desktop\Julia_RelaxTime\docs\dev\Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
+- [Codex高阶使用手册](Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
 - [Agent command reference](agent_command_reference.md)：根 `AGENTS.md` 的详细环境、测试、治理、sysimage 与 benchmark 命令清单。
 
 ## active / backlog / archived 的区别
@@ -82,9 +82,10 @@ archived_date: 2026-01-19
 - `docs/dev/backlog` 下文档建议沿用同一命名格式：`YYYY-MM-DD_描述.md`
 - 归档触发条件（满足任一）：
 	- 任务单 DoD 全部勾选完成；
-	- 文档创建后超过 60 天仍停留在 active；
+	- 任务明确取消，或退出当前执行批次；
 	- 任务被新任务单替代，旧文档仅保留历史价值。
 - 长期路线图、候选能力盘点、未进入当前执行批次的规划文档，不应继续放在 `docs/dev/active`；应迁移到 `docs/dev/backlog`。
+- 创建超过 60 天仅产生复核提醒；长期执行中的任务可以继续保留，不按文件年龄自动归档或判失败。
 - 建议校验命令：
 
 ```powershell
@@ -100,12 +101,13 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 
 ## 开发任务完成后的文档与测试补充
 
-完成开发任务后，需同步补充以下内容：
+按变化影响选择补充内容：
 
-- 必须：更新或新增 API 文档（docs/api/）
-- 可选：更新或新增公式文档（docs/reference/formula/）
-- 必须：补充单元测试（tests/unit/），或在归档说明中写明原因
-- 可选：补充性能测试或分析（benchmark/ 或 scripts/perf/ 或 scripts/analysis/）
+- 稳定公开入口或数据契约变化时更新 `docs/api/`；内部拆分和纯文档改动不产生 API 文档义务。
+- 新行为、真实缺陷或覆盖缺口需要有价值的测试；已有覆盖足够时复用，不要求每个任务、模块或文件新增一项测试。
+- 物理公式或约定变化时同步相关公式说明。
+- 性能主张使用 benchmark/profiling 证据；普通改动不附带性能验证。
+- 验证选择见 [测试治理](testing_governance.md)，只扩大到能解决具体剩余风险的层级。
 
 ## 项目结构约定（合并版）
 
@@ -132,7 +134,7 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 - web/：前端静态资源与交互页面。
 - config/：参数文件、扫描配置、模型参数集等。
 - `.github/copilot-instructions.md`：工作区级 Copilot 指令与项目级编码约束。
-- `docs/dev/testing_governance.md`：测试组织、入口与 smoke/full 治理规范。
+- `docs/dev/testing_governance.md`：测试组织、入口与 smoke/core/full 治理规范。
 - `docs/architecture/models_solver_contract.md`：`Models` 统一求解接口契约（Problem-like + solve）。
 
 ### 源码组织原则（src/）
@@ -146,7 +148,7 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 
 - 单位约定以仓库根目录 README 为准。
 - MeV 入参命名显式标注：T_MeV、mu_MeV、muB_MeV。
-- fm⁻¹ 入参命名标注：T_fm、mu_fm。
+- 新 fm⁻¹ 入参命名标注：T_inv_fm、mu_inv_fm；既有名称按稳定 API 兼容约定处理。
 
 ### 文档与源码对齐策略
 
@@ -171,7 +173,7 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 
 ### 变更流程建议
 
-- 改代码 → 补测试（或说明为何不易测）→ 更新文档（docs/api 或 docs/dev）→ 在 PR 中写清验证方式。
+- 改代码 → 运行与行为变化相关的现有验证，必要时补覆盖 → 同步受影响文档 → 在 PR 中说明验证结果。
 
 ## world-age 边界治理（迁移期）
 
