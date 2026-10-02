@@ -1,0 +1,108 @@
+{
+  "schema": "publication_clean_v10_png_review_display_style_v1",
+  "status": "author_review_required",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "delivery_stage": "png_review",
+  "vector_delivery_pending": true,
+  "solver_called": false,
+  "canonical_data_modified": false,
+  "source_parent_artifact": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5",
+  "source_parent_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
+  "source_parent_plot_manifest_sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf",
+  "source_parent_figure_layer_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/figure_layer_manifest.json",
+  "source_parent_figure_layer_manifest_sha256": "1be5424a5bb7cdb4906a82e05bac02b3c8e81f326a72278722045432e2568e87",
+  "source_calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py",
+  "generator_sha256": "1f1cd6ed4d69dbc9dab37e2b3b372fe77edead06576edbc78961f718a5aa9a90",
+  "legend": {
+    "policy": "one in-axes key per single chart; separate compact parameter and 1st-order endpoint keys per composite",
+    "font_size_pt": 13.0,
+    "composite_font_size_pt": 10.5,
+    "composite_ncol": 1,
+    "composite_endpoint_key": {
+      "title": "1st-order",
+      "quark": "restored",
+      "hadron": "broken"
+    },
+    "typography_exception": "dense_composite_review_compact_typography",
+    "typography_exception_min_glyph_mm": 1.5,
+    "endpoint_labels": {
+      "quark": "1st-order (restored)",
+      "hadron": "1st-order (broken)"
+    },
+    "endpoint_key_location": "in-axes legend and caption_handoff.md",
+    "marker_color_policy": "match endpoint data series; open circle=restored and open square=broken; first-order meaning supplied by caption"
+  },
+  "ticks": {
+    "x_major_ticks": [
+      -0.5,
+      0.0,
+      0.5
+    ],
+    "linear_y_major_locator": "MaxNLocator(nbins=4, min_n_ticks=3) for composite; nbins=5/min_n_ticks=4 for single; exact integer-milli FixedLocator for sigma_over_T",
+    "linear_minor_subdivisions": 2,
+    "log_major_locator": "LogLocator(base=10, subs=[1])",
+    "log_minor_locator": "LogLocator(base=10, subs=[2,3,4,5,6,7,8,9])",
+    "sides": [
+      "top",
+      "bottom",
+      "left",
+      "right"
+    ],
+    "direction": "in"
+  },
+  "y_axis": {
+    "rule": "Figure 1 muB900 complete column forced log-y; otherwise positive data_max/data_min >= 20 uses local log-y",
+    "threshold": 20.0,
+    "margin": 0.06,
+    "values_unchanged": true
+  },
+  "figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "formats": [
+    "png"
+  ],
+  "composite_layout": {
+    "x_tick_label_policy": "three labels at -0.5, 0, and 0.5",
+    "legend_host_panel": {
+      "figure1_relaxation_times_comparison": {
+        "parameters": "row0_col0",
+        "endpoints": "row0_col2"
+      },
+      "figure2_transport_coefficients_comparison": {
+        "parameters": "row0_col0",
+        "endpoints": "row0_col2"
+      }
+    },
+    "legend_policy": "shared_in_panel_reviewed_geometry_checked",
+    "panel_label_policy": "uniform above-frame upper-left labels; no data area occupied",
+    "font_size_pt": 11.0,
+    "figure_size_inches": {
+      "figure1_relaxation_times_comparison": [
+        6.75,
+        7.1
+      ],
+      "figure2_transport_coefficients_comparison": [
+        6.75,
+        5.9
+      ]
+    },
+    "subplot_layout": {
+      "left": 0.11,
+      "right": 0.98,
+      "bottom": 0.09,
+      "top": 0.93,
+      "hspace": 0.16,
+      "wspace": 0.26
+    },
+    "figure1_muB900_log_column": true,
+    "sigma_over_T_precision": "three decimal places with leading zero retained"
+  },
+  "profile_sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d",
+  "generated_at_utc": "2026-10-01T17:30:09.385276+00:00"
+}

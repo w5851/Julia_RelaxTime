@@ -1,0 +1,2761 @@
+{
+  "schema": "publication_clean_v10_png_review_figure_index_v1",
+  "status": "author_review_required",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "solver_called": false,
+  "canonical_data_modified": false,
+  "delivery_stage": "png_review",
+  "vector_delivery_pending": true,
+  "single_figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "composite_figure_count": 2,
+  "style_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v10_png_review/v10_display_style_manifest.json",
+  "style_manifest_sha256": "70cc202595502cc9ca942cae3cbdb105f86b8c3e7a3807287987c81225f6f017",
+  "parent_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/manifest.json",
+  "parent_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
+  "charts": [
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "55de6ccab12f98ddb2d9cae62f487b368a20382634c62b1d99122e1129b89413",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 225546,
+          "sha256": "2b568f70e99758270275cc5e13e7a48699d993a0718d6322b7d54e5eb0daf707",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "e477c017181abfd3c1d4904f5bfce2851cba4d569d81a82ce6dbb49dbb490c32",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 201193,
+          "sha256": "887a6f0b4b4a76df98fc8590e4db6fc2b5d306cd87422f869e117b7d494f6a53",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "fd77fa5424d950b61b8cb483079808ffaa453b793c25195da2dd22935ea9b773",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 301707,
+          "sha256": "e90f95bd9a9ab2d11d8834ff4e133285148724816cc8230a1d06cbdd7e88a600",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "5a7656eb9a85c885394f3febea281b0fbba64702abcf88ec57b6a28136f6897c",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205000,
+          "sha256": "e1dca466d9b5d818a601ce0759f997f1bb4cb5929fcb9e1afe3f9b2b11d05413",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "5f252a76de63a4be68b1d7c7748ae293e1c552b52fe6693e1625a8d061fd1c84",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205468,
+          "sha256": "b8d199a36f3e7b103d4cbf5f9a1d6cdf4472493558a4066e676c32cb4fe16d89",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "9c97ad47a77c396204dd46da95c233f8fcb4c68792223f67e23b06c5eaff2336",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 217855,
+          "sha256": "fd3b92d3598eb9793a54e7cce0dbfd36784f06144ee66694cd9ac0c14ba90515",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "6e6ccb1ba60a1ec59ea5a7b46c61d88af6faa27f2790ed7afc73a3c1b918b188",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205099,
+          "sha256": "738bdf53e62827495aa5b9d844cb82b9adcfe814861e20973a16883611072da5",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "f96509c68ddd24884860933cbeb8ef87f391d8c820ce15233c539458c2ad1915",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205570,
+          "sha256": "c3b5b99490180ed8eac559d47ae8805426190ee9b94614cb30835d17a137ff03",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "7fdd1fe66d14da2f13b8e478a8a17f7406be18d749c775184ebab059075930be",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 217896,
+          "sha256": "1f83f2a6a7dadb4c47f71b5efff1736f76428f54c02be42cc80c9d700df7a46e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "7fb1f7c4e04d0a4d84147d9710c3c402eb5f3b1b1961f694e220a5e091dca1f6",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 264570,
+          "sha256": "0807e32308d4cefa83cb415052dc3064a0699335c9c4417cfc171e440525a55d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "618c406e323b7441596b60a43ba396b2992c244a6c2b5d108be906a0712c0d03",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 310519,
+          "sha256": "6049118b7642dc720b46794bb499a84ef0a6b26dfc7e9156d8247c44f314abce",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "84f519768f11c67d2ebc518cafeb76a6b99b14920858afe3f81d163d4b3cbec5",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 239834,
+          "sha256": "5dbb12850a1c690039d91f0b2899323e778e929207008221d9d8acf8dfe11033",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "2a63cc8cd4dc9ec86ebc359dbc867361d8cc6c31621c40d1e2cde18da92e1d83",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 252418,
+          "sha256": "15576a0925bc45be7c5f16787a6d21ab5af19afd36d1e15cec220a7b273a6c75",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "ce3622568484d3804be346097dae88c31814b89e0b0a953957c94c49a0898455",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205340,
+          "sha256": "be9dba47566e86c5245ac41ee19e0dd9e88610a839d2c40f9340c1922bfcd03a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "312a4d616e7a3b23645552408ddb24292d4627784ca02ca35a9f615aa0f5e745",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 305786,
+          "sha256": "380dc71e49fd8b03a9745c32b46346f18c008c894fd1bde41de823d61009c40f",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "d7a892e50ab1f6859796b58d8347763f226a47ba4e46257e48912f52710c1f11",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 197071,
+          "sha256": "7759206e2e04e59e12f5b44132994275654fd258743048502befd9085974ed4b",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "1cee723226996329cea5ecd7278373eb040f3986b5e0caa2144cdd7b45c02389",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 197475,
+          "sha256": "0b5a3ed343224d5fa8a75ed4ce2961d4693c52e177586138cf3ad62e54f73d08",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "bfedfdf5aa4e2db6c42ac680d13ab4c76408092a1197e9422a2f3c9509f995a5",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 204941,
+          "sha256": "5ff55f8eca92ac4e63537672eeba7dcf0e1453f0108ce0598873bcac86d48641",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "b3753e14bba5e964fb3f8bd0a1b917ac142ff851b9b1573c3583b207aa045700",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 209476,
+          "sha256": "c6c93aa7be082e8dcc485a8dcf7d8c701114100a4bce5beb8771922e338521a8",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "9f7cd7e9aacd85ce503d3db8fee03b65ee422ee6ea3a422ce3a811ab0d38364e",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 209905,
+          "sha256": "96530891094ebfb144905be5c431b104c50037bfbac1dd1d614558962abd8a9e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "64de0501f4b4284c235300a2a88f0c5eaadaac6f6668f9ca9dd678259df0e56f",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 228453,
+          "sha256": "068d228ff95ee40291bdb747d04aabde397c41cd068f3fdc2f43cf73d7ddbf48",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "a009a980ae8dda58b65e7344b58fee88158861585ee1ceae3c110ee6e6bf428f",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 273509,
+          "sha256": "d9ae0cb74e90b413512f4731c1f6d1b774310716811b410c8c026bd1c2614734",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "6f8e1d69dee9f13b276a4f6626e0494a64c8784e0aca8a81ddb880a50acd5cc1",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 337045,
+          "sha256": "adf827d3f56b808896b32a72cc25e78860660ebd06e481ccad4fcfe3fa22e177",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "22915b304a1d23204e5eaa3319202de080b073ea876d4545b7a03ff4e8aa45fb",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 247885,
+          "sha256": "93cd06f501809a95709ed2127ca182fd33e40bc0ae318845ab6d01b15dffbfa4",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "81edc438b5cafb7f163984d49af786ed10063f14bd4b21261e56046036c0c3f2",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 235905,
+          "sha256": "d8eb206be47a0ab9d209d3a135d8cc71642c6797e1784e9862843d34141d69f5",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "d98e9263574085beb53ffd3d089160ca03580f31a9632a708c9adb1f4ecf1d20",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 255245,
+          "sha256": "cf1512629eba714c5949352b8d8859e67a12ef73b3e9a7d45f8e96b57983babc",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "c2a593e0150c02b12a7c38890f5e313ff4996af7f23bd8719273402311bb0494",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 326949,
+          "sha256": "9924231d8de91394aeaca954f7d06210c94098f093639afbf76acf312d95fed8",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "b9cffc47f83e0d7e46d2a0a7c7196bdafceeb4fbd08fba5c95d67464d707b8c4",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 238927,
+          "sha256": "a73c498e5031062337e5096a9fb7f9a461b1ef181b235192bbd62d38efa87c59",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "398f265da0026610ae37b2e562be9e2013dfc08eaf4f90874c34c97e82150a27",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 253725,
+          "sha256": "17e2883abd104d00ddebff1409e3edddb0383409a7646b7fe94adc5fbad55933",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "5c343f208c7388e1ab00131a186d3ac19fea2ebab8f64b2d54a85d62caae348c",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 248092,
+          "sha256": "17d69902ba9552f5830a23b255d204c11e90c89ba372f7221f48784360cdf7f9",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "06217f57506b48adcab21651854a9383bcc6f97dda651de5dc83ba1d0c6d8d44",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 253554,
+          "sha256": "dd7850990df77b85c5b7e09e381d5ffca81f329f012b2e93a698a6069886fdab",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "f52ae178adb01ee27f77addf1f1f869e9e01a7b3d53d89b0874c56e9658cd324",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 253990,
+          "sha256": "b6e5296e9b92f6301e10f3ea5c89ff010e209cbc14ebd70c21ed9ea3795e3d88",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "26eae8dc357a986ab1247c2636f6133ed11fbe14e7a24c23bb5fb5737af1e9b0",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 266359,
+          "sha256": "8bd753659efbcebe445bb393d6af6edacdf86c1d74b754da999edf08ba3f5bb0",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "6d146d84cc990ddaab98de0b4522bc780616b6ee733c4c5af08ef67b60b03008",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 315788,
+          "sha256": "4659b264379938d5846c56e8284cb21298c08702a6de044cc1c35402f44a9c20",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "acd679bfd87b6349febe0412ce09eb66ae78179b1a9211beb90d6775e6c133bc",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 354834,
+          "sha256": "0475d0e0af279961fc0cd6dfeab7fdb7704333e9182252731c908cf39d4bc87b",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "b77c31a8e94ae00a336e0d51653adb9ec5f4cce5adaf6952f34c9ed2dbbb40f2",
+      "kind": "single",
+      "mode_key": "mode_a",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 367638,
+          "sha256": "84571c1bf8e474aa884a908f419577f88ab1297fd1ad583557025b082b6637f1",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "3018ada31cb93bebe55e9d8c00a89464d59f2a71cefae24a754cf729fe440be8",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 223826,
+          "sha256": "1fe60f0afdbc8b2fd6781201a1a848c6fbe32d3f87b59be58b5e22289e0e5cec",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "a6cbda692ab77293f566edd46950f5af7f7a8f5fbfa5bfc45c7ad2623da40686",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 224341,
+          "sha256": "69483107a21ba0c9c08f0b6e526cf417b3d5a40d792b741608006e0b6f037ea9",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "17dd954359940514e8764e4ecf28ba6faededbc7e7abb76a3533d8522b0dc96d",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 259765,
+          "sha256": "e488ddee03772fa100a551f87170cc8454d8ba841c98b43dd4e3b12d13bbf5f5",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "1e0b23a4b9ec6340be5168632e4ad174a80525d8c8f70a874ff7bfbdeff10fa0",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 245963,
+          "sha256": "6e05621e699d59641d4ca452d25b728f3ea75589d3eefbcfd49553c536db0d05",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "fb26f424a613cfb465c6e0512792e52708199c368d5344a3c33f191e07cddc13",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 246286,
+          "sha256": "7d7c27674d77a8ee41e4f929ab04186bf83bec7db55fe4acedda9f321b02bf89",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "f1539461ab917f902f6485ec7762e39a800a1bbc235a4b70d3e657c9bd078fbe",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 240224,
+          "sha256": "8e8502cb076fb7755f81ca624211b0a18607451d13080a688d0330d633d894ae",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "fc03354ea6da68a41f44547be818c3f4227104f782496759ca55c457c67b0902",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 242386,
+          "sha256": "1bdd4d9c6263148e2cbcaa6c01401691b6546f68ae15a90cc63c6c218f73efda",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "6a5229414ff35f824833f6253c3ad45058cb75fe060c41f6486cdf4b5122055c",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 242775,
+          "sha256": "d547cb25a01708da2d4f662a267208c1cafecb957eb6c811313e388cc6c89322",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "b976b5352c89b7d8ec4abc6f83a3f27ace3e5e52785280fc299a6d4e77dd249e",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 243151,
+          "sha256": "0e4c414d75fd164da786ded7969e173a5f1833667d1d696528f78dd72d112d03",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "a8452074b68526bb6f6cee85ddd7aae386d972a495a19bc47fab06a5f5f8676f",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 286749,
+          "sha256": "2b142ca559cddf1fa79faccce46aeba928489203f0d026e2e1196088580bd487",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "7e165fbeda8f937629403f9548f6ce3e757f858441c5020c1fb0faf92484c633",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 279760,
+          "sha256": "ded7e9470c9f43f2083125b3cd7a7dfc8fc5b1e12ce2aa1fc7fe921ad2998dce",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "716621eafbb7091d3c081d8a71346bf80ac6e607a59c7be37276d74d618e9eaa",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 372769,
+          "sha256": "dabc2b6afb0dfc963156bd4d5200f9e8ade93a103c19a9fd35437f3d4d39cf83",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "823b5711743438d0890e9c16811f60779397e9bf4370b9df2da895d50f953d25",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 222746,
+          "sha256": "3ae63c670b2501f2325d7d4affb79d1af1bbcc48149db4df31e9f0ad4dd76986",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "f4a349c35140cd2a31c0f38ebf9a2e07dbed153794d51e3c154562acc502330b",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 190349,
+          "sha256": "d8f173e3d512672be5b3e3ce3858e74775ae63b00261cb0f8b413462310300b4",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "b68dc85524448bf2b02f8525d4b689c95aedfc0106a5ae3d0c3b23fabdf3a2d2",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 229191,
+          "sha256": "fd46489ef1bd8dbc6acbbd30c5f42a4afef5eef0c1a5b0adb01c2d03bbc2df1d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "7189608a1f8e893519efd58390c78a20abe1ef417f5e840549ba28996f692010",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 209164,
+          "sha256": "a9d4ed7ffaa8315b0a1cbd46640eb9cc86bfbdbd2b0b3bf179e9c6a6973fff7b",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "bba476594ee8add67cf763489dc01cd652f700a8008673eb9c24d4a7cde246aa",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 209662,
+          "sha256": "9dfbfa38d9c5a79cf00d329cac4de7656841afc166cb55499a10bdb527ed184c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "a35d47dffcd1a7c047caac4ad2a04e335b83a5e5f90199d2a4e41b6b786b1293",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 205206,
+          "sha256": "e0156f8fdd74335d10e2a1108846b182a6bf5350e6e18a9759bb93f8b6561b84",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "9c4ad0866822d637b5084ebc705d36de15f7de32d701d632d1a58057676828ca",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 192027,
+          "sha256": "fb1b75b1e734a35dfd9bb3fa6986f9f4fcb42e8b4c42f5acae3fae89a96ebc49",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "6e0abf999db7ddffb108c7cb51d638b8cc50f7b30fa401d032aeb0bb290c705c",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 192486,
+          "sha256": "e4c1145d3c0b2c3383a22c807319d0416b6e454192d5d5842c891e9ee5f6182f",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "65ee13fa029c80bc0150721b442e62c7dbffafedef52fd1a499e18ce23c17b2a",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 199179,
+          "sha256": "990cc29882ac9ace3cccb0faeca832cc178da7b93647a4916a57abe986980a72",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "eb356398f82b1b0c23827187c68df6d6ec4a5e6eb9f0903cacb72315e8b66a5f",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 233136,
+          "sha256": "7daa18c0d099c94a20f4b6fe2b6c25e10d6f2149dcbd09781a6b919fd660ea1c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "df38e5138709d0e2632419c2501862766df41dfccf7910c73a473abe0079f6bf",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 232294,
+          "sha256": "af665803a3a81b5c949b8eff5ae25b79de6f619130fe5a7044958cb44f934bab",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "7fda639459504867c9663899b3b9874da477c81d484c29c70d1cc085a6fae704",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 248088,
+          "sha256": "0ec38ba8cf5160bef0c27ba09ea2acf6750578e95b0aaf4ff46c09e53b242d40",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "ee7c451f7702f2c86f30c8a81fbf6f877c41999519b44cb5d44cc3a053e11df2",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 228610,
+          "sha256": "d8842495f67de55ece91737adabb574bff9b166f2193ca4741f24f81830e6f8b",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "8df7c9205617e77d4b16982f93df100ca08cc1469a7ecfb1665a3985271b1e88",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 257430,
+          "sha256": "953d7e18135415304f4e2e0e960368730ed13829bd8b34e38343a19943391310",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.plot_manifest.json",
+      "manifest_sha256": "31b3d05c8c44bece9ffae2956c62d43532efb0c6ae5f24eadc43a9284a5d59cb",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 226109,
+          "sha256": "3960c05b115e7a4e807d3e6e36aa93214f59d96160c67dbd0f2e6835a2095ac3",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi.plot_manifest.json",
+      "manifest_sha256": "71945dcee24c9301ada6d4979c410e917a8dda13a3a89e26c4cebc5af5190c71",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 232102,
+          "sha256": "54734401e259d5c548194defeb141f4d61671347ad8831dd94f9a743b17c89f9",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi.plot_manifest.json",
+      "manifest_sha256": "5eee109cc13cc509c3cd18152c95989ac8701d2eebc6ab628fa04402b114fe48",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 232554,
+          "sha256": "9d02838b2896d8775e142f363c3b6911a4e1c609e3f82366043f4a35d5612c85",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi.plot_manifest.json",
+      "manifest_sha256": "c3df6117c5883eba7b89b1cab987b067e7f99e05e9ae7ba82c63577a2372499d",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 248095,
+          "sha256": "3ad6fb43006937645b907645b3d114c377dd8e1bd564b0d36d1864cc978f2705",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "484e5f5690c55c0c398e977eb4ed31e415ebb96f7511e3dafea7f8ec5f03461a",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 214363,
+          "sha256": "30b134ed42875420f48ea0cad1c9e16716215e3bb9c976ebb1c37b2610479980",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "18e146777a2c1fee3ed8f70c0d7e8f595c06063c01d80a4539b8b307b05daa6f",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 214777,
+          "sha256": "db77b64d0901abfef8f65bb530bbffe2c0086c441978a436dff67d7eea2a2714",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi.plot_manifest.json",
+      "manifest_sha256": "73a8438f06696338bce4fc5fd1669951527741d1c6336f8dac3932459c2bf826",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 230737,
+          "sha256": "46c85e5ad5ea118dcff776c6ad9eab0624049ce0637cb7e1853c80e5a01db546",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "2908210b8aa2cd1b2d81fb401dc9954177d5d47534b830a21229bf66c38a6632",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 224887,
+          "sha256": "37710529a5a7df57e5921bdcb9eef9bdb145df2da565833b1078ad840b7926dc",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi.plot_manifest.json",
+      "manifest_sha256": "96cf55b098da693b70ffa7a2f7a17d632ff50c50f575753501132e5e6fa2e7be",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 223553,
+          "sha256": "afa22e014a9ad023926d30853db9fd63ff4f7ab38628249885dcbc6c0d2123c9",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi.plot_manifest.json",
+      "manifest_sha256": "591729922726f609a21b49f139979f6942fdbbd51f6a85a6ae0d8572c9df3455",
+      "kind": "single",
+      "mode_key": "mode_b",
+      "legend_policy": "best_in_axes_reviewed",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 263377,
+          "sha256": "33e8a09306c49aaefd9be5e0e77618f71b34d1df17224a535fe92638e6812d29",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure1_relaxation_times_comparison",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure1_relaxation_times_comparison.plot_manifest.json",
+      "manifest_sha256": "9ee5946a3ee5c6e938d1d88c374bf843177ad59d491ca15fdab2643c28d62494",
+      "kind": "composite",
+      "mode_key": "mode_a",
+      "legend_policy": "shared_in_panel_reviewed_geometry_checked",
+      "axis_scales": [
+        "linear",
+        "log"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure1_relaxation_times_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 684196,
+          "sha256": "78c0d47b225e650d47731156fee06a77e6f83a96c828025231daae32c228c9ff",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              4260
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              7.100014200028401
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 1.6930935546875
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure2_transport_coefficients_comparison",
+      "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure2_transport_coefficients_comparison.plot_manifest.json",
+      "manifest_sha256": "ad906f80ca66956a23b5de04195514f23095e3b88765f8b11057e46c1efb35c4",
+      "kind": "composite",
+      "mode_key": "mode_a",
+      "legend_policy": "shared_in_panel_reviewed_geometry_checked",
+      "axis_scales": [
+        "linear"
+      ],
+      "outputs": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/composites/figure2_transport_coefficients_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 715095,
+          "sha256": "1537a869b1d6f98db744e57920808979ea97cb96e90cfa0566b05813efc6f700",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3540
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              5.9000118000236
+            ]
+          }
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 1.6930935546875
+    }
+  ]
+}

@@ -1,0 +1,731 @@
+{
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-10-01T17:29:47.492004+00:00",
+  "asset_id": "relaxtime.phase_guided.v10.png_review.data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi",
+  "figure_family": "phase_guided_transport",
+  "case_slug": "tau_ubar_vs_xi",
+  "asset_kind": "figure",
+  "figure_mode": "audit",
+  "semantic_status": "author_review_display_derivative",
+  "style_profile": "candidate_aps_v2",
+  "publication_scope": "internal_review",
+  "generator": {
+    "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py",
+    "path_kind": "repository_relative",
+    "sha256": "1f1cd6ed4d69dbc9dab37e2b3b372fe77edead06576edbc78961f718a5aa9a90",
+    "command": "python scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py --png-review",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "executable": "D:\\Python313\\python.exe",
+      "matplotlib": "3.10.1",
+      "font": {
+        "requested": "Times New Roman",
+        "resolved": "Times New Roman",
+        "path": "C:\\Windows\\Fonts\\times.ttf"
+      }
+    }
+  },
+  "git_commit": "45e0a7f0b8512cbba88228ee661234015ae95fa7",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "postprocess_sha": null,
+  "source_run_id": null,
+  "inputs": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "accepted_display_parent",
+      "bytes": 36245,
+      "sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/figures/plot_manifest.json",
+      "path_kind": "repository_relative",
+      "role": "parent_plot_manifest",
+      "bytes": 51057,
+      "sha256": "ea816ebc79032ac7a222fad186d6c449d2a15cb9adec08a3b1abc5cbe0492aaf"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/figure_layer_manifest.json",
+      "path_kind": "repository_relative",
+      "role": "parent_figure_layer",
+      "bytes": 49744,
+      "sha256": "1be5424a5bb7cdb4906a82e05bac02b3c8e81f326a72278722045432e2568e87"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json",
+      "path_kind": "repository_relative",
+      "role": "retained_current_pointer",
+      "bytes": 1968,
+      "sha256": "1f2386c9b1ee25932e716f616f12e48e7e843a5b9542fa0fdc0c364758992ac8"
+    },
+    {
+      "path": "config/plotting/candidate_aps_v2.toml",
+      "path_kind": "repository_relative",
+      "role": "style_profile",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v6.py",
+      "path_kind": "repository_relative",
+      "role": "input_reader",
+      "bytes": 24994,
+      "sha256": "01437bf4033f6ffb6414237c3f08641a8f994758144a20645afeee14882dc638"
+    },
+    {
+      "path": "scripts/plotting/plot_style.py",
+      "path_kind": "repository_relative",
+      "role": "shared_style_code",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "path": "scripts/plotting/plot_manifest.py",
+      "path_kind": "repository_relative",
+      "role": "shared_manifest_code",
+      "bytes": 6350,
+      "sha256": "73ca63f2617bf89e510dbc8b03a42445451bd7f15eeb176ca9710c156e258ab4"
+    },
+    {
+      "path": "scripts/plotting/plot_quality.py",
+      "path_kind": "repository_relative",
+      "role": "shared_quality_code",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "path": "scripts/plotting/validate_plot_artifact.py",
+      "path_kind": "repository_relative",
+      "role": "shared_validator_code",
+      "bytes": 21707,
+      "sha256": "110c957b328faf100623e60c6ac910a83e48a88a541a9ebdc1119047143c64b9"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/boundary_gap_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 2100,
+      "sha256": "8e4a19439ddb01d0c8607e321d020bd4d2e41f2c9343d723c39dd850c60da784"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/cep_marker_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 785,
+      "sha256": "df41bee5cec22c12cfda0b5f2f59ced5d620eda305c8b3d7643820e568c67d7b"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/cep_marker_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 230,
+      "sha256": "d2a3da3f6dee0b71e18188d3a0543d2229eaf19d2be7ad6ee02de86847468a8c"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/claim_ledger.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 3511,
+      "sha256": "3fa47ef7f79718eeddefc75e22b011f11d3034b9d7e5e9352bfa2f09a3721f68"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/curve_index.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 12779,
+      "sha256": "e8fb9195ca76d917af90cf13498c2525b4541359e8219e2be7a8f099089520af"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/display_smoothing_window_audit_v2.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 6743,
+      "sha256": "3852c110ad5171f423e2c08aeced2a04b94c279f1c4fc0f61bfd3e659ace8d99"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/first_order_marker_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 2869,
+      "sha256": "bbdba390d2dde1694fe2405fb3ab81b6e6ff8479fba6b5e2114c6962a92515c2"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/input_inventory.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 1161,
+      "sha256": "d49e896e10da7f0efb1aca86a9a21ce5f3919786a2f8d12ee7576e3203a7cac9"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/marker_semantics_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 4232,
+      "sha256": "5cf71cdf84a0796530c3294b01b648b2843aa1ae40d396609ea68719bb0bf1f8"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/mechanism_review_summary.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 935,
+      "sha256": "59c17d77f95c2a18acc401decd5dd484480003503f0f62a1846054f45b2b8372"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/phase_switch_inventory.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 1506,
+      "sha256": "71132005903ca2a3e5d822ea35bd262bb91d6c9ae794ef60c4e81f79d1f64252"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/publication_clean_points.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 6043211,
+      "sha256": "3783e96be9a14ac7bd2cd44f3d29526fe50de5402d49624574e655cd216b3186"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/publication_marker_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 14808,
+      "sha256": "1eec92de011fac4aeef553212b515f77f5eb847790274360f60ab55413da12f2"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/replacement_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 61584,
+      "sha256": "9645f979555a1f2e7caac3d3ac13a71c113c6f760e46ac7e6e53a50c79bbf59c"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/residual_curve_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 24153,
+      "sha256": "b5e44797b8ded4a731c408e53c40e52fdfee831e0296405cb06348a9ea61ff79"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/residual_point_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 101424,
+      "sha256": "4c9befad432ac95c7999f75096372df41212c1b658e00105e276533422e5c732"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/residual_smoothing_window_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 7466,
+      "sha256": "f93f598f8baa8732a2db1ff236e5578d34d8711d71557de8b380556bbdeb8c88"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/review_adjustment_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 2386,
+      "sha256": "574789faf4a88799e4c1563586a6558611998746202240b8c8ddf0d3e1d468e1"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v3_curve_audit.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 1874,
+      "sha256": "0ccff2f7add94c39e515a4283c4d89e8f2c90beac06afb4cf8714cfa7b9e598c"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v3_tau_adjustment_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 1874,
+      "sha256": "0ccff2f7add94c39e515a4283c4d89e8f2c90beac06afb4cf8714cfa7b9e598c"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v4_display_adjustment_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 3001,
+      "sha256": "613e7c0086e940d134326c2ee6ad9a95fed5eb12d194a3962c9dae2f7d749a49"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/tables/v5_display_label_map.csv",
+      "path_kind": "repository_relative",
+      "role": "inherited_display_table",
+      "bytes": 819,
+      "sha256": "e78e9a23a0432b836d20b7c16336c3050993ce168a6e2cf137fed77b87b3b9b8"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v5.py",
+      "path_kind": "repository_relative",
+      "role": "inherited_input_or_gap_code",
+      "bytes": 16176,
+      "sha256": "7b02c3b58819460d51c4d0f3672ab9183ca7fbfcfb492af6c46ca8f100f15374"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v4.py",
+      "path_kind": "repository_relative",
+      "role": "inherited_input_or_gap_code",
+      "bytes": 43739,
+      "sha256": "b71f5ffe307a50cef148fd4fcb52cf5910da83e5827cbcf9b5481ee33be9402f"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v3.py",
+      "path_kind": "repository_relative",
+      "role": "inherited_input_or_gap_code",
+      "bytes": 31040,
+      "sha256": "ac0db380f4f300b8085152f9db1cea3c9621893d81be1e55e0a3f08473ac7902"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py",
+      "path_kind": "repository_relative",
+      "role": "inherited_input_or_gap_code",
+      "bytes": 47061,
+      "sha256": "3ddd89988c87fa44a5b6b98eb41933daf58411fb2df6b19ab17828a66ce73ea3"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py",
+      "path_kind": "repository_relative",
+      "role": "inherited_input_or_gap_code",
+      "bytes": 91011,
+      "sha256": "d3e6e372e23be87ce70cb1963ffa109b5f0de96c0b399d5fab519016a2a02213"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "gap_provenance_parent_manifest",
+      "bytes": 30476,
+      "sha256": "6ed0168cb60730da10a964ddc0f03bad08758e7dc53fd174e2fc12fa84ac4bbe"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/tables/publication_clean_points.csv",
+      "path_kind": "repository_relative",
+      "role": "gap_provenance_parent_points",
+      "bytes": 6042594,
+      "sha256": "5615b8b60ec247f2974bfccbe5cd90ddca4286de76fb23911f60434c90b6f9ed"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_scan",
+      "bytes": 1069277,
+      "sha256": "144f59dd6d74b1d13b24b793328e620e796fb645b7af9418174ba5a55e360587"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_diagnostics",
+      "bytes": 7164645,
+      "sha256": "6eaf02101e330762569d028fe1398c94184e243ea6d7e39a8db69718a6e4e246"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_failed",
+      "bytes": 210,
+      "sha256": "f95962de51e1300bec4e4cc44d09c43a38facc2c3445f9343de29fa13ebba123"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_manifest",
+      "bytes": 10213,
+      "sha256": "3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_effective_config",
+      "bytes": 3203,
+      "sha256": "426f5fd061fe217c4a2f277fb155713a0fe9599494ee54b750278e50bee75cd6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_scan",
+      "bytes": 1037127,
+      "sha256": "3b73b937f1f09cf7112b3a42219088f98b852e5ef0354174b66f71823f7bb29c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_diagnostics",
+      "bytes": 6935665,
+      "sha256": "ada5d7c204a02e705cfbb5744bedbcc68158d54cce55faa0c8b92d0ba50d0d0f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_failed",
+      "bytes": 210,
+      "sha256": "f95962de51e1300bec4e4cc44d09c43a38facc2c3445f9343de29fa13ebba123"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_manifest",
+      "bytes": 10090,
+      "sha256": "093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+      "path_kind": "repository_relative",
+      "role": "raw_provenance_effective_config",
+      "bytes": 2959,
+      "sha256": "283b7fcc1737dc5d594258d4f7ca2aaabd93f33975b9861f1fa27012e6487668"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v8.py",
+      "path_kind": "repository_relative",
+      "role": "previous_review_renderer",
+      "bytes": 33544,
+      "sha256": "7f549db0a6e9a90044cdb23b087208a4d32ca3cb0d3bbdf30680c1b4d968f11f"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v9.py",
+      "path_kind": "repository_relative",
+      "role": "v9_generator",
+      "bytes": 36719,
+      "sha256": "9eebf18b72375b0597a95134a0aff3a6dd9b32e996b85656adbc84ad3834187a"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py",
+      "path_kind": "repository_relative",
+      "role": "v10_generator",
+      "bytes": 41989,
+      "sha256": "1f1cd6ed4d69dbc9dab37e2b3b372fe77edead06576edbc78961f718a5aa9a90"
+    },
+    {
+      "path": "docs/guides/sop/workflows/figure_production.md",
+      "path_kind": "repository_relative",
+      "role": "plotting_contract",
+      "bytes": 26065,
+      "sha256": "58b3d0c9a42205fe66ad4e4d87865eea342782c08374427c99cd4b164b589550"
+    },
+    {
+      "path": ".agents/skills/plotting-sop/SKILL.md",
+      "path_kind": "repository_relative",
+      "role": "project_plotting_skill",
+      "bytes": 5173,
+      "sha256": "293cbd37ec806af52116e318b03d3bdfcbddb7811475f18678dfde6800182706"
+    }
+  ],
+  "axes": [
+    {
+      "field": "xi",
+      "source_unit": "dimensionless",
+      "display_unit": "dimensionless",
+      "label": "$\\xi$",
+      "transform": "identity",
+      "panel": "T160.0"
+    },
+    {
+      "field": "tau_ubar",
+      "source_unit": "fm",
+      "display_unit": "fm",
+      "label": "$\\tau_{\\bar u}\\;(\\mathrm{fm})$",
+      "transform": "log",
+      "panel": "T160.0"
+    }
+  ],
+  "series": [
+    {
+      "series_id": "mode_b.T160.0.tau_ubar.muB0.0",
+      "state": "author_accepted_display_derivative",
+      "label": "$\\mu_B = 0$ MeV",
+      "support_rule": "v5 frozen clean_value rows; no new values or support points",
+      "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+      "row_count": 101,
+      "segment_count": 1,
+      "color": "#0072B2",
+      "linestyle": "-"
+    },
+    {
+      "series_id": "mode_b.T160.0.tau_ubar.muB450.0",
+      "state": "author_accepted_display_derivative",
+      "label": "$\\mu_B = 450$ MeV",
+      "support_rule": "v5 frozen clean_value rows; no new values or support points",
+      "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+      "row_count": 101,
+      "segment_count": 1,
+      "color": "#D55E00",
+      "linestyle": "--"
+    },
+    {
+      "series_id": "mode_b.T160.0.tau_ubar.muB900.0",
+      "state": "author_accepted_display_derivative",
+      "label": "$\\mu_B = 900$ MeV",
+      "support_rule": "v5 frozen clean_value rows; no new values or support points",
+      "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+      "row_count": 101,
+      "segment_count": 1,
+      "color": "#009E73",
+      "linestyle": "-."
+    }
+  ],
+  "selection_rule": "render frozen v5 clean_value table in original xi order; rows/channels/phase gaps unchanged",
+  "interpolation_policy": "inherited v5 display adjustments; no new interpolation or replacement",
+  "connector_policy": "forbidden",
+  "missing_value_policy": "preserve first-order and missing-support gaps",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 192027,
+      "sha256": "fb1b75b1e734a35dfd9bb3fa6986f9f4fcb42e8b4c42f5acae3fae89a96ebc49",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    }
+  ],
+  "rendering": {
+    "column": "double_column",
+    "figure_size_inches": [
+      6.75,
+      4.6
+    ],
+    "size_override_reason": null,
+    "typography_exception": null,
+    "font_overrides_pt": null,
+    "subplot_layout": null,
+    "bbox_inches": null,
+    "quality": {
+      "figure_size_inches": [
+        6.75,
+        4.6
+      ],
+      "intended_width_inches": 6.75,
+      "placement_scale": 1.0,
+      "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+      "minimum_capital_numeral_height_mm": 2.096211067708333,
+      "minimum_primary_capital_numeral_height_mm": 3.036865451388889,
+      "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+      "smallest_glyphs": [
+        {
+          "text": "$\\mu_B = 0$ MeV",
+          "glyph": "B",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.096211067708333,
+          "role": "script"
+        },
+        {
+          "text": "$\\mu_B = 450$ MeV",
+          "glyph": "B",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.096211067708333,
+          "role": "script"
+        },
+        {
+          "text": "$\\mu_B = 900$ MeV",
+          "glyph": "B",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.096211067708333,
+          "role": "script"
+        },
+        {
+          "text": "$\\mathdefault{10^{1}}$",
+          "glyph": "1",
+          "font": "times.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.169445529513889,
+          "role": "script"
+        },
+        {
+          "text": "$\\mathdefault{10^{2}}$",
+          "glyph": "2",
+          "font": "times.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.169445529513889,
+          "role": "script"
+        },
+        {
+          "text": "$\\mathdefault{10^{0}}$",
+          "glyph": "0",
+          "font": "times.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.207065972222222,
+          "role": "script"
+        },
+        {
+          "text": "$\\mu_B = 0$ MeV",
+          "glyph": "M",
+          "font": "times.ttf",
+          "source_size_pt": 13.0,
+          "final_height_mm": 3.036865451388889,
+          "role": "primary"
+        },
+        {
+          "text": "$\\mu_B = 450$ MeV",
+          "glyph": "M",
+          "font": "times.ttf",
+          "source_size_pt": 13.0,
+          "final_height_mm": 3.036865451388889,
+          "role": "primary"
+        }
+      ],
+      "minimum_curve_linewidth_pt": 1.2,
+      "minimum_landmark_diameter_mm": null,
+      "tick_axes": [
+        {
+          "axis": "x",
+          "scale": "linear",
+          "minor_locator": "AutoMinorLocator",
+          "major_count": 3,
+          "minor_count": 2,
+          "inward": true,
+          "both_sides": true
+        },
+        {
+          "axis": "y",
+          "scale": "log",
+          "minor_locator": "LogLocator",
+          "major_count": 3,
+          "minor_count": 23,
+          "inward": true,
+          "both_sides": true
+        }
+      ],
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_axes_overlap_count": 1,
+      "legend_curve_overlap_count": 1,
+      "legend_curve_overlaps": [
+        {
+          "legend_index": 0,
+          "axis_index": 0,
+          "line_index": 1,
+          "label": "$\\mu_B = 450$ MeV"
+        }
+      ],
+      "legend_landmark_overlap_count": 0,
+      "legend_landmark_overlaps": [],
+      "legend_in_axes_overflow_count": 0,
+      "legend_in_axes_overflows": [],
+      "human_visual_review": "required"
+    },
+    "legend_policy": "best_in_axes_reviewed",
+    "legend_location": "best",
+    "legend_host_panel": null,
+    "legend_outside": false,
+    "panel_label_policy": "uniform above-frame upper-left labels; no data area occupied",
+    "legend_contents": "separate alpha_T parameter key and restored/broken endpoint marker key under the 1st-order heading",
+    "legend_marker_color_policy": "endpoint marker colors match the data series; open circles label restored and open squares label broken branches",
+    "legend_font_size_pt": 13.0,
+    "case_layout_contract": "thesis_like separate compact in-axes keys; curve and landmark geometry checked; author review pending",
+    "color_route": "undecided_review",
+    "grayscale_review": "required before author acceptance",
+    "y_axis_policy": "Figure 1 muB900 complete column forced log-y; other positive high-range panels use local log-y when dynamic range ratio >= 20; linear otherwise",
+    "tick_policy": {
+      "x_major_ticks": [
+        -0.5,
+        0.0,
+        0.5
+      ],
+      "linear_y_major_locator": "MaxNLocator(nbins=5, min_n_ticks=4, steps=[1,2,2.5,5,10])",
+      "linear_minor_subdivisions": 2,
+      "log_major_locator": "LogLocator(base=10, subs=[1])",
+      "log_minor_locator": "profile log locator subs=[2,3,4,5,6,7,8,9]",
+      "sides": [
+        "top",
+        "bottom",
+        "left",
+        "right"
+      ],
+      "direction": "in"
+    },
+    "panel_specs": [
+      {
+        "mode_key": "mode_b",
+        "plot_panel": "T160.0",
+        "observable": "tau_ubar",
+        "series": [
+          {
+            "series_id": "mode_b.T160.0.tau_ubar.muB0.0",
+            "state": "author_accepted_display_derivative",
+            "label": "$\\mu_B = 0$ MeV",
+            "support_rule": "v5 frozen clean_value rows; no new values or support points",
+            "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+            "row_count": 101,
+            "segment_count": 1,
+            "color": "#0072B2",
+            "linestyle": "-"
+          },
+          {
+            "series_id": "mode_b.T160.0.tau_ubar.muB450.0",
+            "state": "author_accepted_display_derivative",
+            "label": "$\\mu_B = 450$ MeV",
+            "support_rule": "v5 frozen clean_value rows; no new values or support points",
+            "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+            "row_count": 101,
+            "segment_count": 1,
+            "color": "#D55E00",
+            "linestyle": "--"
+          },
+          {
+            "series_id": "mode_b.T160.0.tau_ubar.muB900.0",
+            "state": "author_accepted_display_derivative",
+            "label": "$\\mu_B = 900$ MeV",
+            "support_rule": "v5 frozen clean_value rows; no new values or support points",
+            "mask_rule": "preserve audited v2 first-order gap; split each gap into separate segments",
+            "row_count": 101,
+            "segment_count": 1,
+            "color": "#009E73",
+            "linestyle": "-."
+          }
+        ],
+        "endpoints": [],
+        "data_min": 0.30509960107309336,
+        "data_max": 102.84702143223763,
+        "dynamic_range_ratio": 337.09326747889895,
+        "first_order_gap_present": false,
+        "threshold": 20.0,
+        "parent_axis_scale": "linear",
+        "parent_axis_scale_reason": "no_rendered_first_order_gap",
+        "axis_scale": "log",
+        "axis_scale_reason": "positive_range_ratio_ge_20_for_v10_local_log_readability"
+      }
+    ],
+    "x_tick_label_policy": "three labels at -0.5, 0, and 0.5",
+    "sigma_over_T_tick_policy": "exact integer-milli major ticks; three decimal places; leading zero retained",
+    "delivery_stage": "png_review",
+    "vector_delivery_pending": true,
+    "output_formats": [
+      "png"
+    ]
+  },
+  "validation": {
+    "finite": true,
+    "duplicate_keys": true,
+    "support": true,
+    "strict_gate": false
+  },
+  "external_layout": null,
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "solver_called": false,
+  "canonical_data_modified": false,
+  "new_display_values": false,
+  "delivery_stage": "png_review",
+  "vector_delivery_pending": true,
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "source_run_id_note": "multiple upstream runs; see frozen v5 per-point run_id and raw manifests",
+  "numerical_status": "inherited_author_accepted_display_only",
+  "raw_manuscript_eligible": false
+}
