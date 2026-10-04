@@ -70,30 +70,8 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
 <details>
 <summary><b>面向 LLM / Agent</b></summary>
 
-请在执行任何修改前先遵循以下规则（与“面向人类”说明分离）：
-
-1. 先读取仓库协作约束：`AGENTS.md`、`.github/copilot-instructions.md`。
-2. 统一入口优先：`Models` 与 `src/models/entrypoints.jl`。
-3. non-fixedmu 求解模式按“展平联合求解”治理，不要引入新的分层默认路径。
-4. PR76 后契约对齐：mixed-meson 治理与 non-fixedmu 联合求解语义默认保持不变；若需变更必须在任务范围内显式声明并补回归证据。
-5. 目录治理：
-   - 分析脚本放 `scripts/analysis/`
-   - 性能探针放 `scripts/perf/`
-   - 非测试脚本不要放入 `tests/`
-6. 测试执行顺序优先 smoke profile；测试分层保持 `unit/integration/regression/validation`。
-7. 可优先使用分层 wrapper 入口：`test/unit.jl`、`test/integration.jl`、`test/regression.jl`、`test/validation.jl`。
-8. 运行稳定 CLI 时，优先走 `scripts/dev/run_with_sysimage.ps1`，以便在本机存在 sysimage 时稳定复用冷启动优化。
-9. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
-10. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
-
-建议最小验证命令（agent 默认基线）：
-
-```powershell
-julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
-julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'
-julia --project=. scripts/dev/check_docs_consistency.jl
-julia --project=. scripts/dev/check_models_entry_contract.jl
-```
+协作规则以 [AGENTS.md](AGENTS.md) 与 [.github/copilot-instructions.md](.github/copilot-instructions.md) 为准。
+按变化影响选择已有验证，命令见 [Agent command reference](docs/dev/agent_command_reference.md)；稳定入口和数值语义变化时同步相应文档与回归证据。
 
 </details>
 
@@ -204,6 +182,7 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 - `docs/guides/STATUS.md`
 - `docs/guides/scripts/README.md`
 - `docs/guides/sop/README.md`
+- [PNJL benchmark 趋势与历史结果](docs/guides/benchmark_trends.md)
 
 ### 开发/治理
 

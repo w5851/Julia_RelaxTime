@@ -1,6 +1,6 @@
 # Crossover 检测
 
-本文档描述相图主题中的 crossover 支路。相关实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L1)。
+本文档描述相图主题中的 crossover 支路。相关实现位于 [src/models/phase/CrossoverLine.jl](../../../../src/models/phase/CrossoverLine.jl#L1)。
 
 ## 适用场景
 
@@ -23,7 +23,7 @@
 
 ## `CrossoverResult`
 
-结构体定义位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L1)。
+结构体定义位于 [src/models/phase/CrossoverLine.jl](../../../../src/models/phase/CrossoverLine.jl#L1)。
 
 关键字段：
 
@@ -36,7 +36,7 @@
 
 ## `detect_crossover`
 
-实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L360)。
+实现位于 [src/models/phase/CrossoverLine.jl](../../../../src/models/phase/CrossoverLine.jl#L360)。
 
 ```julia
 detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
@@ -86,7 +86,7 @@ research、production 和 full dense-reference 路径，而不是只写入 manif
 
 ## `scan_crossover_line`
 
-实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L388)。
+实现位于 [src/models/phase/CrossoverLine.jl](../../../../src/models/phase/CrossoverLine.jl#L388)。
 
 ```julia
 scan_crossover_line(mu_range, T_range; method=:peak, variable=:phi_u, kwargs...)
@@ -113,4 +113,4 @@ results = scan_crossover_line(mu_range_fm, T_range_fm; method=:inflection)
 
 - 当 `run_phase_pipeline` 启用 `compute_crossover=true` 时，会进入 crossover 支路
 - crossover 结果最终写入 `crossover_line.csv`
-- 如果你主要关注一阶相变判据，应优先阅读 [PhaseTransition.md](docs/api/models/phase/PhaseTransition.md)
+- 如果你主要关注一阶相变判据，应优先阅读 [PhaseTransition.md](PhaseTransition.md)

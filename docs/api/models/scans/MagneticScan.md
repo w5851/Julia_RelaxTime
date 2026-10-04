@@ -95,9 +95,9 @@ candidate CSV 都记录 `cutoff_policy` 与 `configured_n_max`，以便审计实
 
 磁场路线的固定阅读顺序是：
 
-1. 总账：[`implemented_capabilities.md`](../../../../reference/implemented_capabilities.md#14-路线-l外磁场-pnjl)
+1. 总账：[`implemented_capabilities.md`](../../../reference/implemented_capabilities.md#14-路线-l外磁场-pnjl)
 2. API 细账：本页与 [Magnetic 主题总览](../variants/magnetic/README.md)
-3. 公式审核表：[`PNJL_magnetic_core.md`](../../../../reference/formula/models/pnjl_magnetic/PNJL_magnetic_core.md#开发者审核表公式到实现的对应关系)
+3. 公式审核表：[`PNJL_magnetic_core.md`](../../../reference/formula/models/pnjl_magnetic/PNJL_magnetic_core.md#开发者审核表公式到实现的对应关系)
 4. 源码入口：[`MagneticScan.jl`](../../../../src/models/scans/MagneticScan.jl)、
    [`PNJLMagneticModel.jl`](../../../../src/models/pnjl_physics/PNJLMagneticModel.jl)、
    [`MagneticGapSolver.jl`](../../../../src/models/pnjl_physics/MagneticGapSolver.jl)

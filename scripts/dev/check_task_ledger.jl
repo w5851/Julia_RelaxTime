@@ -522,15 +522,16 @@ function _parse_args(args)
     return (; ledger_rel, preflight, track_id)
 end
 
-function main(args::Vector{String}=collect(String.(ARGS)))
+function main(args::Vector{String}=collect(String.(ARGS)); root::AbstractString=ROOT)
+    root = normpath(abspath(String(root)))
     options = _parse_args(args)
     options === nothing && return 0
     violations = if options.preflight
-        preflight_report(ROOT; ledger_rel=options.ledger_rel, track_id=options.track_id)
+        preflight_report(root; ledger_rel=options.ledger_rel, track_id=options.track_id)
     else
-        result = validate_ledger(ROOT; ledger_rel=options.ledger_rel)
+        result = validate_ledger(root; ledger_rel=options.ledger_rel)
         if isempty(result)
-            selection_violation = _track_selection_violation(ROOT, String(options.ledger_rel), options.track_id)
+            selection_violation = _track_selection_violation(root, String(options.ledger_rel), options.track_id)
             selection_violation === nothing || push!(result, selection_violation)
         end
         result

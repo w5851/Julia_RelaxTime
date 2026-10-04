@@ -1,3 +1,15 @@
+---
+title: 带电 K/π BU kernel 门禁与同点消融任务单
+archived: true
+original: docs/dev/active/2026-07-26_带电KPi_BU_kernel门禁与同点消融.md
+archived_date: 2026-10-03
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 带电 K/π BU kernel 门禁与同点消融任务单
 
 更新日期：2026-07-26

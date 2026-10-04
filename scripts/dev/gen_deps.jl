@@ -1,7 +1,5 @@
 #!/usr/bin/env julia
-# Minimal dependency graph generator for Julia project
-# Scans `src/` for .jl files, extracts include("..."), using .Module and import .Module
-# Produces a Mermaid `graph TD` output into `docs/architecture/dependencies.md`.
+# Static include graph plus unresolved relative-import names; never evaluates source.
 
 using Printf
 using Dates
@@ -16,19 +14,7 @@ function find_mmdc()
 end
 
 # regexes
-re_include = r"include\([\"']([^\"']+)[\"']\)"
 re_using_import = r"(?:using|import)\s+(\.*)([A-Za-z_][A-Za-z0-9_]*)"
-
-function add_edge(a,b)
-    if a == b
-        return
-    end
-    adj_a = get!(ACTIVE_ADJ[], a, Set{String}())
-    push!(adj_a, b)
-end
-
-# adjacency map (string => Set{String}) using node names as repo-relative paths or module names
-const ACTIVE_ADJ = Ref(Dict{String, Set{String}}())
 
 # helper: node id sanitize
 function id_for(node)
@@ -104,38 +90,133 @@ function relpath_for(root::String, path::String)
     return replace(relpath(path, root), "\\" => "/")
 end
 
-function collect_dependency_graph(root::String)
+function base_call_name(ex)
+    ex isa Symbol && return ex
+    if ex isa Expr && ex.head == :. && ex.args[1] == :Base && ex.args[2] isa QuoteNode
+        return ex.args[2].value
+    end
+    return nothing
+end
+
+# Deliberately limited to path construction, not a Julia interpreter.
+function static_path(ex, paths::Dict{Symbol,String}, file::String)
+    ex isa String && return ex
+    ex isa Symbol && return get(paths, ex, nothing)
+    ex isa Expr || return nothing
+    if ex.head == :macrocall
+        ex.args[1] == Symbol("@__DIR__") && return dirname(file)
+        ex.args[1] == Symbol("@__FILE__") && return file
+    elseif ex.head == :call
+        name = base_call_name(ex.args[1])
+        name in (:joinpath, :normpath, :dirname, :abspath) || return nothing
+        parts = [static_path(arg, paths, file) for arg in ex.args[2:end]]
+        any(isnothing, parts) && return nothing
+        isempty(parts) && return nothing
+        name == :joinpath && return joinpath(parts...)
+        name == :normpath && return normpath(joinpath(parts...))
+        name == :dirname && length(parts) == 1 && return dirname(only(parts))
+        # Relative abspath calls depend on the caller's working directory.
+        name == :abspath && isabspath(first(parts)) && return abspath(joinpath(parts...))
+    end
+    return nothing
+end
+
+function forget_bindings!(paths, ex)
+    if ex isa Symbol
+        delete!(paths, ex)
+    elseif ex isa Expr
+        for arg in ex.args
+            forget_bindings!(paths, arg)
+        end
+    end
+end
+
+function invalidate_assignments!(paths, ex)
+    ex isa Expr || return
+    ex.head in (:function, :module, :->, :quote, :inert) && return
+    if ex.head == :(=) && ex.args[1] isa Symbol
+        delete!(paths, ex.args[1])
+    end
+    for arg in ex.args
+        invalidate_assignments!(paths, arg)
+    end
+end
+
+function collect_includes!(targets, unresolved, ex, paths, file)
+    ex isa Expr || return
+    ex.head in (:quote, :inert) && return
+    if ex.head in (:error, :incomplete)
+        push!(unresolved, "parse error: $(first(ex.args))")
+        return
+    elseif ex.head in (:if, :elseif)
+        for arg in ex.args
+            collect_includes!(targets, unresolved, arg, copy(paths), file)
+        end
+        # A conditional assignment cannot establish a unique later path.
+        invalidate_assignments!(paths, ex)
+        return
+    end
+    if ex.head == :(=) && ex.args[1] isa Symbol
+        value = static_path(ex.args[2], paths, file)
+        if value === nothing
+            delete!(paths, ex.args[1])
+        else
+            paths[ex.args[1]] = value
+        end
+    elseif ex.head == :call && base_call_name(ex.args[1]) == :include
+        path = static_path(last(ex.args), paths, file)
+        if path === nothing
+            push!(unresolved, string(ex))
+        else
+            push!(targets, normpath(joinpath(dirname(file), path)))
+        end
+        return
+    end
+    # Modules have their own globals; function parameters can shadow file bindings.
+    if ex.head == :module
+        paths = Dict{Symbol,String}()
+    elseif ex.head in (:function, :->) ||
+           (ex.head == :(=) && ex.args[1] isa Expr)
+        paths = copy(paths)
+        forget_bindings!(paths, ex.args[1])
+    elseif ex.head in (:let, :for, :while)
+        paths = copy(paths)
+    end
+    for arg in ex.args
+        collect_includes!(targets, unresolved, arg, paths, file)
+    end
+end
+
+function collect_dependency_graph(root::String; unresolved::Vector{String}=String[])
+    root = abspath(root)
     srcdir = joinpath(root, "src")
     files = collect_source_files(srcdir)
     adj = Dict{String, Set{String}}()
-    ACTIVE_ADJ[] = adj
 
     for f in files
-        text = sanitize_source_text(read(f, String))
+        source = read(f, String)
+        text = sanitize_source_text(source)
         node = relpath_for(root, f)
-
-        for m in eachmatch(re_include, text)
-            inc = m.captures[1]
-            inc_path = normpath(joinpath(dirname(f), inc))
-            if isfile(inc_path)
-                target = relpath_for(root, inc_path)
-                add_edge(node, target)
-            else
-                add_edge(node, inc)
-            end
+        deps = get!(adj, node, Set{String}())
+        targets, dynamic = String[], String[]
+        collect_includes!(targets, dynamic, Meta.parseall(source; filename=f), Dict{Symbol,String}(), f)
+        for path in targets
+            target = relpath_for(root, path)
+            target == node || push!(deps, target)
+            isfile(path) || push!(unresolved, "$node: missing include target $target")
         end
+        append!(unresolved, ["$node: $expr" for expr in dynamic])
 
         for m in eachmatch(re_using_import, text)
             leading = m.captures[1]
             modname = m.captures[2]
             if startswith(leading, ".")
-                add_edge(node, modname)
+                push!(deps, modname)
             end
         end
     end
 
-    for k in keys(adj)
-        get!(adj, k, Set{String}())
+    for k in collect(keys(adj))
         for v in adj[k]
             get!(adj, v, Set{String}())
         end
@@ -195,8 +276,10 @@ end
 # group nodes by top-level folder under src if available
 function top_level_group(node)
     parts = split(node, '/');
-    if length(parts) >= 2 && parts[1] == "src"
+    if length(parts) >= 3 && parts[1] == "src"
         return parts[2]
+    elseif parts[1] == "scripts"
+        return "scripts"
     else
         return "root"
     end
@@ -249,20 +332,27 @@ function main()
     outfile = joinpath(outdir, "dependencies.md")
     mmdfile = joinpath(outdir, "dependencies.mmd")
     svgfile = joinpath(outdir, "dependencies.svg")
-    manualfile = joinpath(outdir, "dependencies.manual.md")
-
-    adj = collect_dependency_graph(root)
+    unresolved = String[]
+    adj = collect_dependency_graph(root; unresolved=unresolved)
     sccs = strongly_connected_components(adj)
     graph_text = render_mermaid(adj)
-    manual_content = isfile(manualfile) ? read(manualfile, String) : "## L1/L3 (manual)\n\n请在 docs/architecture/dependencies.manual.md 中补充 L1/L3 内容。\n"
 
     mermaid = IOBuffer()
     println(mermaid, "# Dependency graph generated: ", Dates.now())
     println(mermaid, "\nRun: julia --project=. scripts/dev/gen_deps.jl\n")
-    print(mermaid, manual_content)
-    println(mermaid, "\n---\n")
-    println(mermaid, "![Dependency graph](dependencies.svg)")
-    println(mermaid, "\n---\n")
+    println(mermaid, "阅读入口：[职责与调用方向](dependencies.manual.md) · [依赖规则](dependency_rules.md)。\n")
+    println(mermaid, "本图静态解析 include 的字面量、路径常量及 joinpath/normpath/dirname/@__DIR__；不执行源码。")
+    println(mermaid, "相对 using/import 只显示模块名，尚未解析完整模块身份；条件分支合并展示。无环结果仅适用于已解析的边，不能证明完整运行时依赖无环。\n")
+    println(mermaid, "## 未解析或缺失的 include\n")
+    if isempty(unresolved)
+        println(mermaid, "- 无。\n")
+    else
+        for item in sort(unique(unresolved))
+            println(mermaid, "- `", item, "`")
+        end
+        println(mermaid)
+    end
+    println(mermaid, "## 静态依赖图\n")
     println(mermaid, "```mermaid")
     print(mermaid, graph_text)
     println(mermaid, "```\n")

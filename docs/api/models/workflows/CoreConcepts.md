@@ -42,7 +42,7 @@
 
 ### 3. 参数适配层
 
-`workflow_param_adapters_module` 对应 [src/models/workflows/WorkflowParamAdapters.jl](src/models/workflows/WorkflowParamAdapters.jl#L1)。
+`workflow_param_adapters_module` 对应 [src/models/workflow_apps/WorkflowParamAdapters.jl](../../../../src/models/workflow_apps/WorkflowParamAdapters.jl#L1)。
 
 这层的职责是：
 
@@ -59,7 +59,7 @@
 
 ## transport workflow 的边界
 
-transport workflow 的实现位于 [src/models/workflows/TransportWorkflow.jl](src/models/workflows/TransportWorkflow.jl#L1)。
+transport workflow 的实现位于 [src/models/workflow_apps/TransportWorkflow.jl](../../../../src/models/workflow_apps/TransportWorkflow.jl#L1)。
 
 应重点理解三层输入：
 
@@ -90,7 +90,7 @@ transport workflow 的实现位于 [src/models/workflows/TransportWorkflow.jl](s
 
 ## meson workflow 的边界
 
-meson workflow 的实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/models/workflows/MesonMassWorkflow.jl#L1)。
+meson workflow 的实现位于 [src/models/workflow_apps/MesonMassWorkflow.jl](../../../../src/models/workflow_apps/MesonMassWorkflow.jl#L1)。
 
 其职责是把：
 

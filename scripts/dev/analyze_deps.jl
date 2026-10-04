@@ -1,148 +1,114 @@
 #!/usr/bin/env julia
-# Analyze cross-directory dependencies from Mermaid .mmd
+# Audit current source includes; generated Mermaid files are presentation only.
+module DependencyAudit
 
 using Dates
 
-root = pwd()
-indoc = joinpath(root, "docs", "architecture", "dependencies.mmd")
-outdoc = joinpath(root, "docs", "architecture", "dependency_review.md")
-strict = get(ENV, "DEPS_STRICT", "0") in ("1", "true", "TRUE", "yes", "YES")
-
-if !isfile(indoc)
-    error("Missing dependencies.mmd at: $indoc")
+module StaticGraph
+include(joinpath(@__DIR__, "gen_deps.jl"))
 end
 
-lines = readlines(indoc)
-
-# parse nodes: id[label]
-node_label = Dict{String,String}()
-node_re = r"^\s*([A-Za-z0-9_]+)\[(.+)\]\s*$"
-edge_re = r"^\s*([A-Za-z0-9_]+)\s*-->\s*([A-Za-z0-9_]+)\s*$"
-
-for line in lines
-    m = match(node_re, line)
-    if m !== nothing
-        node_label[m.captures[1]] = m.captures[2]
-    end
-end
-
-function group_of(label::String)
-    if occursin("/", label)
-        return split(label, "/")[1]
-    end
-    return "root"
-end
-
-function is_file_label(label::String)
-    return occursin("/", label)
-end
-
-# build edges
-edges = Vector{Tuple{String,String,String,String}}()
-for line in lines
-    m = match(edge_re, line)
-    if m === nothing
-        continue
-    end
-    a = m.captures[1]
-    b = m.captures[2]
-    if !haskey(node_label, a) || !haskey(node_label, b)
-        continue
-    end
-    la = node_label[a]
-    lb = node_label[b]
-    if !(is_file_label(la) && is_file_label(lb))
-        continue
-    end
-    ga = group_of(la)
-    gb = group_of(lb)
-    push!(edges, (ga, gb, la, lb))
-end
-
-# allowed matrix
-allowed = Dict(
-    "root" => Set(["root"]),
-    "utils" => Set(["root", "utils"]),
-    "integration" => Set(["root", "utils", "integration"]),
-    "simulation" => Set(["root", "utils", "integration", "simulation"]),
-    "pnjl" => Set(["root", "utils", "integration", "pnjl", "relaxtime"]),
-    "relaxtime" => Set(["root", "utils", "integration", "relaxtime"])
+# Root compatibility shims, constants, types and config form the foundation.
+const ALLOWED = Dict(
+    "base" => Set(["base"]),
+    "utils" => Set(["base", "utils"]),
+    "integration" => Set(["base", "utils", "integration"]),
+    "models" => Set(["base", "utils", "integration", "models"]),
+    "relaxtime" => Set(["base", "utils", "integration", "relaxtime"]),
+    "simulation" => Set(["base", "utils", "integration", "simulation"]),
 )
 
-function is_exception(from_label::String, to_group::String)
-    # allow pnjl/workflows -> relaxtime
-    return occursin("pnjl/workflows/", from_label) && to_group == "relaxtime"
+# Existing bridges are visible debt, not permission for new src -> scripts edges.
+const SCRIPT_BRIDGES = Dict(
+    ("src/models/workflow_apps/ChargedGBUResearchWorkflow.jl",
+     "scripts/analysis/relaxtime/causal_gbu_infinite_qgate.jl") => "charged GBU 计算内核迁移待独立验证",
+    ("src/models/workflow_apps/ChargedGBUResearchWorkflow.jl",
+     "scripts/relaxtime/workflow/charged_gbu_plot.jl") => "现有 charged GBU 绘图桥接",
+    ("src/models/workflow_engine/adapters/RelaxtimeOrchestratorAdapter.jl",
+     "scripts/relaxtime/config/WorkflowConfig.jl") => "现有 orchestrator 配置适配",
+    ("src/models/workflow_engine/adapters/RelaxtimeOrchestratorAdapter.jl",
+     "scripts/relaxtime/config/WorkflowConfigAudit.jl") => "现有 orchestrator 配置审计适配",
+    ("src/models/workflow_engine/adapters/RelaxtimeOrchestratorAdapter.jl",
+     "scripts/relaxtime/workflow/cross_section_orchestrated.jl") => "现有 orchestrator 工作流适配",
+)
+
+function dependency_group(path::String)
+    group = StaticGraph.top_level_group(path)
+    return group in ("root", "config", "constants", "types") ? "base" : group
 end
 
-# summarize
-cross = [(ga, gb, la, lb) for (ga, gb, la, lb) in edges if ga != gb]
-
-# count edges by group pair
-pair_counts = Dict{Tuple{String,String}, Int}()
-for (ga, gb, _la, _lb) in cross
-    pair_counts[(ga, gb)] = get(pair_counts, (ga, gb), 0) + 1
+function allowed_edge(from::String, to::String)
+    ga, gb = dependency_group(from), dependency_group(to)
+    gb in get(ALLOWED, ga, Set{String}()) && return true
+    startswith(from, "src/models/workflow_apps/") && gb == "relaxtime" && return true
+    # HTTP startup enters Models through its facade only.
+    startswith(from, "src/simulation/") && to == "src/models/Models.jl" && return true
+    return false
 end
 
-# violations
-violations = Vector{Tuple{String,String,String,String}}()
-for (ga, gb, la, lb) in cross
-    if !(gb in get(allowed, ga, Set{String}()))
-        if !is_exception(la, gb)
-            push!(violations, (ga, gb, la, lb))
-        end
-    end
+function audit_dependencies(root::String)
+    unresolved = String[]
+    adj = StaticGraph.collect_dependency_graph(root; unresolved)
+    edges = sort([(a, b) for (a, bs) in adj for b in bs
+                  if endswith(a, ".jl") && endswith(b, ".jl")])
+    cross = [(a, b) for (a, b) in edges if dependency_group(a) != dependency_group(b)]
+    bridges = [(a, b) for (a, b) in edges if haskey(SCRIPT_BRIDGES, (a, b))]
+    violations = [(a, b) for (a, b) in edges
+                  if !allowed_edge(a, b) && !haskey(SCRIPT_BRIDGES, (a, b))]
+    return (; edges, cross, bridges, violations, unresolved=sort(unique(unresolved)))
 end
 
-# render report
-open(outdoc, "w") do io
-    println(io, "# 依赖审计报告")
-    println(io, "生成时间：", Dates.now())
-    println(io, "\n来源：docs/architecture/dependencies.mmd\n")
-
-    println(io, "## 跨目录依赖清单（汇总）\n")
-    if isempty(pair_counts)
-        println(io, "- 无跨目录依赖\n")
-    else
-        for (pair, cnt) in sort(collect(pair_counts); by=x->x[1])
-            println(io, "- ", pair[1], " -> ", pair[2], ": ", cnt)
-        end
-        println(io)
+function write_review(io::IO, result)
+    println(io, "# 依赖审计报告\n")
+    println(io, "生成时间：", Dates.now(), "\n")
+    println(io, "来源：当前 src/ 源码；直接调用 gen_deps 的静态解析器，不读取旧 dependencies.mmd。\n")
+    println(io, "只审计可定位的 include 文件边；相对导入名、宏展开、运行时参数和被加载脚本内部的依赖不在完整覆盖范围。")
+    println(io, "解析 include 边：", length(result.edges), "；跨组边：", length(result.cross),
+            "；已知脚本桥接：", length(result.bridges), "；违规：", length(result.violations),
+            "；未解析或缺失：", length(result.unresolved), "。\n")
+    println(io, "## 跨组依赖\n")
+    for (a, b) in result.cross
+        println(io, "- ", a, " → ", b)
     end
-
-    println(io, "## 跨目录依赖明细\n")
-    if isempty(cross)
-        println(io, "- 无\n")
-    else
-        for (ga, gb, la, lb) in sort(cross)
-            println(io, "- ", la, " -> ", lb, " (", ga, " -> ", gb, ")")
-        end
-        println(io)
+    isempty(result.cross) && println(io, "- 无。")
+    println(io, "\n## 已知脚本桥接（后续独立迁移）\n")
+    for edge in result.bridges
+        println(io, "- ", edge[1], " → ", edge[2], "：", SCRIPT_BRIDGES[edge])
     end
-
-    println(io, "## 违规点（基于依赖矩阵）\n")
-    if isempty(violations)
-        println(io, "- 未发现违规\n")
-    else
-        for (ga, gb, la, lb) in sort(violations)
-            println(io, "- ", la, " -> ", lb, " (", ga, " -> ", gb, ")")
-        end
-        println(io)
+    isempty(result.bridges) && println(io, "- 无。")
+    println(io, "\n## 未解析或缺失的 include\n")
+    for item in result.unresolved
+        println(io, "- ", item)
     end
-
-    println(io, "## 调整建议\n")
-    if isempty(violations)
-        println(io, "- 当前依赖符合矩阵，建议继续保持。\n")
-    else
-        println(io, "- 若出现“底层依赖上层”，优先考虑下沉公共逻辑到 `utils/` 或 `integration/`。")
-        println(io, "- 若属于流程编排层，可集中在 `workflows/` 并作为例外记录。")
-        println(io, "- 如果仅为常量/类型共享，考虑抽离到 `src/constants/Constants_PNJL.jl` 或新增 `src/core/`。")
-        println(io)
+    isempty(result.unresolved) && println(io, "- 无。")
+    println(io, "\n## 已解析 include 的矩阵违规\n")
+    for (a, b) in result.violations
+        println(io, "- ", a, " → ", b)
     end
+    isempty(result.violations) && println(io, "- 未发现新增违规；这不是完整运行时依赖无环的证明。")
+    println(io, "\n规则与边界见 [依赖规则](dependency_rules.md)。")
 end
 
-println("Wrote dependency review to: ", outdoc)
+function main(; root::String=normpath(joinpath(@__DIR__, "..", "..")),
+              strict::Bool=get(ENV, "DEPS_STRICT", "0") in ("1", "true", "TRUE", "yes", "YES"),
+              io::IO=stdout)
+    result = audit_dependencies(root)
+    outdoc = joinpath(root, "docs", "architecture", "dependency_review.md")
+    mkpath(dirname(outdoc))
+    open(outdoc, "w") do output
+        write_review(output, result)
+    end
+    println(io, "Wrote dependency review to: ", outdoc)
+    println(io, "Resolved edges=$(length(result.edges)) violations=$(length(result.violations)) ",
+            "known_bridges=$(length(result.bridges)) unresolved=$(length(result.unresolved))")
+    !isempty(result.unresolved) && println(io, "Unresolved dynamic includes require manual review; coverage is partial.")
+    source_errors = any(x -> occursin(": missing include target ", x) || occursin(": parse error:", x),
+                        result.unresolved)
+    return strict && (!isempty(result.violations) || source_errors) ? 1 : 0
+end
 
-if strict && !isempty(violations)
-    println("Dependency violations found in strict mode. Failing.")
-    exit(1)
+end # module
+
+if abspath(PROGRAM_FILE) == @__FILE__
+    exit(DependencyAudit.main())
 end

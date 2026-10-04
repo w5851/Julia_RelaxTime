@@ -15,7 +15,7 @@
 - `src/models/Models.jl`
 - `src/models/entrypoints.jl`
 - `src/models/solver/`
-- `src/models/workflows/`
+- `src/models/workflow_apps/`
 
 本规范不要求：
 
@@ -99,7 +99,7 @@
 - 统一入口：`src/models/Models.jl`、`src/models/entrypoints.jl`
 - Problem-like：`src/models/solver/ConstraintModes.jl`
 - Solve 路径：`src/models/solver/Solver.jl`
-- Workflow 路径：`src/models/workflows/TransportWorkflow.jl`、`src/models/workflows/MesonMassWorkflow.jl`
+- Workflow 路径：`src/models/workflow_apps/TransportWorkflow.jl`、`src/models/workflow_apps/MesonMassWorkflow.jl`
 - 迁移守卫：`scripts/dev/check_pnjl_migration_guard.jl`
 
 ## 5. 与 SciML 的关系
