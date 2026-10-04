@@ -31,6 +31,16 @@ Bose 权重始终使用外部 `omega`，束缚态独立计数并保留连续谱�
 这不是改变上述 smoke production 默认，也不是完整门禁验收。
 GitHub Actions 的 `Charged GBU contour scan` 支持对应 `density_route` 选项。
 
+q0 参考的 contour 默认使用有限窗口导数积分，正下限由
+`--q0-omega-lower 1e-5` 指定（fm^-1），上下边界项均保留。外推后零频虚部非零
+保存为 `*_endpoint_warning`、`*_static_imaginary_max` 诊断，不再独立拒绝密度；
+负静态实部、原 q0 onset 异常、非正根、拓扑/阈值/UV 异常仍为失败。
+该有限窗口口径不宣称零下限收敛。`--background-input-root DIR` 从旧分片的 seed
+代数恢复完全相同的背景，校验网格/源码并把输入哈希纳入恢复身份；不调用背景求解。
+Actions 的 `q0_window_audit=true` 先在四个保存背景比较下限、omega/q 节点与谱分辨率，
+`background_run_id` 用于整图密度重算。新 q0 图使用 `--clean-contours`：数值 CSV
+保留警告和失败原因，PNG 无警告符号/失败覆盖层；失败单元仍留空，不跨空缺连线。
+
 全量 `run_*.jl` 脚本功能目录见：
 
 - [run_script_catalog.md](run_script_catalog.md)

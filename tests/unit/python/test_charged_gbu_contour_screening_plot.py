@@ -20,6 +20,23 @@ def _load_module():
     return module
 
 
+def test_merged_numerical_product_preserves_endpoint_diagnostics(tmp_path):
+    module = _load_module()
+    path = tmp_path / "merged.csv"
+    row = {"T_MeV": 140, "muB_MeV": 425, "status": "screened",
+           "K_plus_endpoint_warning": True, "K_plus_endpoint_warning_shells": 2,
+           "K_plus_static_imaginary_max": 1.2e-6,
+           "K_plus_density_prescription": "finite_window", "K_plus_failure_reason": ""}
+    module._write_merged_csv({"rows": [row]}, path)
+    with path.open(newline="", encoding="utf-8") as handle:
+        saved = list(csv.DictReader(handle))[0]
+    assert saved["status"] == "screened"
+    assert saved["K_plus_endpoint_warning"] == "True"
+    assert saved["K_plus_endpoint_warning_shells"] == "2"
+    assert float(saved["K_plus_static_imaginary_max"]) == 1.2e-6
+    assert saved["K_plus_density_prescription"] == "finite_window"
+
+
 def _write_shard(root: Path, shard: int, rows: list[dict[str, str]]) -> None:
     shard_root = root / f"shard-{shard}"
     shard_root.mkdir(parents=True)
@@ -179,10 +196,10 @@ def test_contour_labels_skip_tiny_paths_and_stagger_long_ones():
 
 def test_replot_workflow_skips_scan_and_keeps_source_and_render_runs_separate():
     source = (ROOT / ".github" / "workflows" / "relaxtime-charged-gbu-contour-scan.yml").read_text(encoding="utf-8")
-    assert "if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit }}" in source
+    assert "if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit && !inputs.q0_window_audit }}" in source
     assert "run-id: ${{ inputs.replot_run_id || github.run_id }}" in source
     assert "--postprocess-run-id" in source
-    assert "always() && !inputs.endpoint_audit && needs.prepare.result == 'success'" in source
+    assert "always() && !inputs.endpoint_audit && !inputs.q0_window_audit && needs.prepare.result == 'success'" in source
 
 
 def test_label_collision_suppression_changes_only_text_visibility():

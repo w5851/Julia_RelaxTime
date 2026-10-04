@@ -120,7 +120,8 @@ def density_route(source: dict) -> str:
 
 
 def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
-                      route: str = "direct_finite_q", color_limits=None) -> tuple:
+                      route: str = "direct_finite_q", color_limits=None,
+                      clean_contours: bool = False, prescription: str | None = None) -> tuple:
     """Large group-meeting canvas, not an APS/final-delivery qualification."""
     import matplotlib.pyplot as plt
     from matplotlib.colors import Normalize, ListedColormap
@@ -153,9 +154,10 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
     ax.set_facecolor("#eeeeee")
     mesh = ax.pcolormesh(data["muB"], data["T"], values, shading="nearest",
                          cmap=cmap, norm=Normalize(lower, upper, clip=False), alpha=.75)
-    ax.pcolormesh(data["muB"], data["T"],
-                  np.ma.masked_where(~data["failed"], np.ones(values.shape)),
-                  shading="nearest", cmap=ListedColormap(["#777777"]), vmin=0, vmax=1)
+    if not clean_contours:
+        ax.pcolormesh(data["muB"], data["T"],
+                      np.ma.masked_where(~data["failed"], np.ones(values.shape)),
+                      shading="nearest", cmap=ListedColormap(["#777777"]), vmin=0, vmax=1)
     colorbar = fig.colorbar(mesh, cax=cax, extend=extend)
     colorbar.set_label(r"$R_+=n_{K^+}/n_{\pi^+}$", fontsize=20, labelpad=12)
     colorbar.set_ticks(uniform_levels(lower, upper, .10))
@@ -184,6 +186,8 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
     ax.yaxis.set_minor_locator(AutoMinorLocator(2))
     fig.text(.47, .955, r"$K^+/\pi^+$ near chemical freeze-out", ha="center", fontsize=23)
     route_label = "q=0 extrapolated" if route == "q0_lambda_reference" else "finite-$q$"
+    if route == "q0_lambda_reference" and prescription == "finite_window":
+        route_label += "; finite window"
     fig.text(.47, .910, rf"Quark-only BQS | {route_label} GBU screening | $T_{{\rm fo}}\pm{band_MeV:g}$ MeV",
              ha="center", fontsize=16)
 
@@ -244,16 +248,20 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
     for label in labels:
         label.set_path_effects([pe.Stroke(linewidth=.7, foreground="white"), pe.Normal()])
         label.set_zorder(10)
-    fig.legend(handles=[Line2D([], [], color="#c00000", linestyle="--", linewidth=3,
-                               label="Current chemical freeze-out"),
-                        Patch(facecolor="#777777", label="Failed support")],
-               loc="lower center", bbox_to_anchor=(.47, .067), ncol=2, fontsize=16)
+    handles = [Line2D([], [], color="#c00000", linestyle="--", linewidth=3,
+                     label="Current chemical freeze-out")]
+    if not clean_contours:
+        handles.append(Patch(facecolor="#777777", label="Failed support"))
+    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(.47, .067),
+               ncol=len(handles), fontsize=16)
     fig.text(.47, .043, r"Contour spacing: $\Delta R_+=0.05$; label spacing: $0.10$.",
              ha="center", fontsize=16)
     fig.text(.47, .012, r"Band clipped to $T\geq40$ MeV input; no fit.",
              ha="center", fontsize=14)
     return fig, {"minimum": minimum, "maximum": maximum, "color_limits": [lower, upper],
                  "colorbar_extend": extend, "density_route": route,
+                 "density_prescription": prescription, "warning_annotations": False,
+                 "failure_overlay": not clean_contours,
                  "under_range_nodes": int((data["R"] < lower).sum()),
                  "over_range_nodes": int((data["R"] > upper).sum()),
                  "contour_levels": levels, "contour_step": .05,
@@ -274,7 +282,9 @@ def run_presentation(args, rows: list[dict], source: dict, coefficients: dict) -
     data = neighborhood(rows, coefficients, band_MeV=args.band_MeV, T_bounds_MeV=(40, 220))
     route = density_route(source)
     fig, display = plot_presentation(data, coefficients, args.band_MeV,
-                                     route=route, color_limits=args.comparison_color_limits)
+                                     route=route, color_limits=args.comparison_color_limits,
+                                     clean_contours=args.clean_contours,
+                                     prescription=source.get("density_prescription"))
     args.output_dir.mkdir(parents=True)
     png = args.output_dir / "freezeout_neighborhood_ratio.png"
     fig.savefig(png, dpi=220, bbox_inches=None)
@@ -292,6 +302,8 @@ def run_presentation(args, rows: list[dict], source: dict, coefficients: dict) -
                 "runtime": {"python": sys.version, "matplotlib": matplotlib.__version__},
                 "background_contract": source["background_contract"],
                 "density_route": route, "coordinate_contract": source.get("coordinate_contract"),
+                "density_prescription": source.get("density_prescription"),
+                "warning_display": "none" if args.clean_contours else "legacy failure support",
                 "selection_rule": f"0<=muB<=750 MeV; |T-Tfo(muB)|<={args.band_MeV:g} MeV; 40<=T<=220 MeV",
                 "interpolation_policy": "heatmap none; display-only contours within four valid corner cells; corner_mask=false",
                 "missing_value_policy": "mask; no zero-fill or cross-gap contours",
@@ -431,6 +443,8 @@ def main() -> int:
                         help="Read-only checkout containing the current v2 plotting layer")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--presentation", action="store_true", help="Group-meeting PNG; no paper-facing SOP qualification")
+    parser.add_argument("--clean-contours", action="store_true",
+                        help="Omit warning/failure overlays and labels; retain missing cells")
     parser.add_argument("--band-MeV", dest="band_MeV", type=float, default=20)
     parser.add_argument("--comparison-color-limits", nargs=2, type=float,
                         help="Fixed color range for a like-for-like presentation; overflow is shown explicitly")

@@ -46,6 +46,16 @@ on:
         required: false
         default: false
         type: boolean
+      q0_window_audit:
+        description: "Check finite-window sensitivity on four saved backgrounds; skip the grid scan"
+        required: false
+        default: false
+        type: boolean
+      background_run_id:
+        description: "Optional source run for exact saved-background density recomputation"
+        required: false
+        default: ""
+        type: string
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -71,7 +81,7 @@ jobs:
 
   scan:
     needs: prepare
-    if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit }}
+    if: ${{ inputs.replot_run_id == '' && !inputs.endpoint_audit && !inputs.q0_window_audit }}
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +90,7 @@ jobs:
     timeout-minutes: 360
     permissions:
       contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,6 +100,15 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
+      - name: Download exact saved backgrounds
+        if: ${{ inputs.background_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: charged-gbu-contour-*-shard-*
+          path: background-inputs
+          merge-multiple: false
+          run-id: ${{ inputs.background_run_id }}
+          github-token: ${{ github.token }}
       - name: Cache Julia artifacts
         uses: julia-actions/cache@v2
         with:
@@ -97,7 +117,7 @@ jobs:
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
       - name: Verify synthetic route and integration contracts
         env:
-          UNIT_FILES: relaxtime/test_charged_gbu_contour_scan_contract.jl,relaxtime/test_charged_gbu_q0_reference.jl
+          UNIT_FILES: relaxtime/test_charged_gbu_contour_scan_contract.jl,relaxtime/test_charged_gbu_q0_reference.jl,relaxtime/test_charged_gbu_q0_window_audit.jl
         run: julia --project=. tests/unit/runtests.jl
       - name: Run diagnostic shard
         env:
@@ -108,11 +128,14 @@ jobs:
           SHARD_INDEX: ${{ matrix.shard_index }}
           SHARD_COUNT: ${{ needs.prepare.outputs.shard_count }}
           OUTPUT: contour-output
+          BACKGROUND_RUN_ID: ${{ inputs.background_run_id }}
         run: |
+          extra=()
+          if [[ -n "$BACKGROUND_RUN_ID" ]]; then extra+=(--background-input-root background-inputs); fi
           julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl \
             --output "$OUTPUT" --t-grid "$T_GRID" --muB-grid "$MUB_GRID" \
             --channels "$CHANNELS" --density-route "$DENSITY_ROUTE" \
-            --shard-index "$SHARD_INDEX" --shard-count "$SHARD_COUNT"
+            --shard-index "$SHARD_INDEX" --shard-count "$SHARD_COUNT" "${extra[@]}"
       - name: Upload diagnostic shard
         if: always()
         uses: actions/upload-artifact@v4
@@ -123,7 +146,7 @@ jobs:
 
   aggregate:
     needs: [prepare, scan]
-    if: ${{ always() && !inputs.endpoint_audit && needs.prepare.result == 'success' && (inputs.replot_run_id != '' || needs.scan.result == 'success') }}
+    if: ${{ always() && !inputs.endpoint_audit && !inputs.q0_window_audit && needs.prepare.result == 'success' && (inputs.replot_run_id != '' || needs.scan.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -152,20 +175,27 @@ jobs:
           SOURCE_RUN_ID: ${{ inputs.replot_run_id || github.run_id }}
           SOURCE_GIT_SHA: ${{ github.sha }}
           POSTPROCESS_RUN_ID: ${{ github.run_id }}
+          DENSITY_ROUTE: ${{ inputs.density_route || 'direct_finite_q' }}
         run: |
+          extra=()
+          if [[ "$DENSITY_ROUTE" == "q0_lambda_reference" ]]; then extra+=(--clean-contours); fi
           python scripts/analysis/relaxtime/plot_charged_gbu_contour_screening.py \
             --input-root contour-shards \
             --output-dir contour-plots \
             --source-run-id "$SOURCE_RUN_ID" \
             --postprocess-run-id "$POSTPROCESS_RUN_ID" \
-            --git-sha "$SOURCE_GIT_SHA"
+            --git-sha "$SOURCE_GIT_SHA" "${extra[@]}"
       - name: Render like-for-like freeze-out neighborhood meeting map
+        env:
+          DENSITY_ROUTE: ${{ inputs.density_route || 'direct_finite_q' }}
         run: |
+          extra=()
+          if [[ "$DENSITY_ROUTE" == "q0_lambda_reference" ]]; then extra+=(--clean-contours); fi
           python scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py \
             --csv contour-plots/contour_points_merged.csv \
             --source-manifest contour-plots/plot_manifest.json \
             --presentation --band-MeV 50 --comparison-color-limits 0 1.15 \
-            --output-dir contour-neighborhood
+            --output-dir contour-neighborhood "${extra[@]}"
       - name: Select sparse full-gate candidates
         env:
           SOURCE_RUN_ID: ${{ inputs.replot_run_id || github.run_id }}
@@ -265,5 +295,54 @@ jobs:
           path: |
             endpoint-output
             endpoint-audit.log
+          if-no-files-found: warn
+          retention-days: 30
+
+  q0-window-audit:
+    if: ${{ inputs.q0_window_audit }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout immutable finite-window source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Download saved contour backgrounds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: charged-gbu-contour-*-shard-*
+          path: background-inputs
+          merge-multiple: false
+          run-id: ${{ inputs.background_run_id || '36971423991' }}
+          github-token: ${{ github.token }}
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-charged-gbu-contour-scan
+      - name: Instantiate and precompile
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Verify finite-window and saved-background contracts
+        env:
+          UNIT_FILES: relaxtime/test_charged_gbu_contour_scan_contract.jl,relaxtime/test_charged_gbu_q0_reference.jl,relaxtime/test_charged_gbu_q0_window_audit.jl
+        run: julia --project=. tests/unit/runtests.jl
+      - name: Compare cutoff and resolution without background solves
+        env:
+          JULIA_NUM_THREADS: "1"
+        run: |
+          julia --project=. scripts/analysis/relaxtime/audit_charged_gbu_q0_window.jl \
+            --input-root background-inputs --output window-output
+      - name: Upload numerical sensitivity and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charged-gbu-q0-window-audit-${{ github.run_id }}
+          path: window-output
           if-no-files-found: warn
           retention-days: 30

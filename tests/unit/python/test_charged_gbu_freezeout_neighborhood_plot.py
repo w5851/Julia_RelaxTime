@@ -142,3 +142,24 @@ def test_fixed_comparison_colors_show_overflow_without_changing_values():
     assert any("q=0 extrapolated" in text.get_text() for text in fig.texts)
     np.testing.assert_array_equal(data["R"], before)
     plt.close(fig)
+
+
+def test_clean_contours_keep_values_and_gaps_without_warning_artists():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    rows = [{"T": T, "muB": mu, "status": "screened", "R": .2 + .002*T + .001*mu}
+            for T in (80, 90, 100, 110) for mu in (0, 25, 50, 75)]
+    rows[0]["R"] = None
+    data = MODULE.neighborhood(rows, COEFFICIENTS, band_MeV=50)
+    before = data["R"].copy()
+    fig, display = MODULE.plot_presentation(data, COEFFICIENTS, 50,
+        route="q0_lambda_reference", clean_contours=True, prescription="finite_window")
+    np.testing.assert_array_equal(data["R"], before)
+    assert data["failed"].sum() == 1
+    assert not display["failure_overlay"] and not display["warning_annotations"]
+    legend_text = [text.get_text() for legend in fig.legends for text in legend.get_texts()]
+    assert legend_text == ["Current chemical freeze-out"]
+    assert any("finite window" in text.get_text() for text in fig.texts)
+    plt.close(fig)

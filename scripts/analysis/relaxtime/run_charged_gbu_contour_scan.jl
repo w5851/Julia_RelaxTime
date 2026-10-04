@@ -24,6 +24,8 @@ const ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const Workflow = Main.ChargedGBUResearchWorkflow
 include("charged_gbu_q0_reference.jl")
 const Reference = ChargedGBUQ0Reference
+include("charged_gbu_saved_backgrounds.jl")
+const SavedBackgrounds = ChargedGBUSavedBackgrounds
 const CHANNELS = Workflow.R.CHANNELS
 const DEFAULT_CONFIG = Workflow.DEFAULT_CONFIG
 const DEFAULT_T_GRID = "40:220:10"
@@ -85,10 +87,15 @@ function point(T_MeV::Real, muB_MeV::Real)
         muB_MeV=muB, T_MeV=T, muq_MeV=muB / 3, muB_fm=muB / h, T_fm=T / h)
 end
 
-function screening_settings()
+function screening_settings(; route="direct_finite_q", omega_lower_inv_fm=1e-5,
+        endpoint_policy="finite_window")
     # Deliberately diagnostic resolution; accepted production settings remain in
     # charged_gbu_infinite_v1.toml and are never lowered by this scanner.
-    return (mesh=64, cut_nodes=32, tail_nodes=32, omega_nodes=64, q_nodes=8, qmax=8.0)
+    base = (mesh=64, cut_nodes=32, tail_nodes=32, omega_nodes=64, q_nodes=8, qmax=8.0)
+    density_route(route)
+    route == "direct_finite_q" && return base
+    Reference.validate_prescription(endpoint_policy, omega_lower_inv_fm)
+    return merge(base, (endpoint_policy=String(endpoint_policy), omega_lower_inv_fm=Float64(omega_lower_inv_fm)))
 end
 
 _jsonsafe(x::AbstractFloat) = isfinite(x) ? x : nothing
@@ -125,15 +132,17 @@ function source_hashes(config_path)
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "causal_gbu_infinite_profile.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "causal_gbu_infinite_yield.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "charged_gbu_q0_reference.jl"),
+        joinpath(ROOT, "scripts", "analysis", "relaxtime", "charged_gbu_saved_backgrounds.jl"),
         joinpath(ROOT, "scripts", "analysis", "relaxtime", "run_charged_gbu_contour_scan.jl"), config_path]
     return Dict(replace(relpath(p, ROOT), '\\' => '/') => bytes2hex(sha256(read(p))) for p in paths)
 end
 
 function _scan_identity(config, T_values, muB_values, channels, settings, shard_index, shard_count, hashes;
-        route="direct_finite_q")
+        route="direct_finite_q", background_fingerprint=nothing)
     payload = JSON3.write((config=config, T_values=T_values, muB_values=muB_values,
         channels=String.(channels), settings=settings, shard_index=shard_index,
         density_route=density_route(route), coordinate_contract=coordinate_contract(route),
+        background_fingerprint=background_fingerprint,
         shard_count=shard_count, source_hashes=hashes, schema="charged_gbu_contour_scan_v2"))
     bytes2hex(sha256(payload))
 end
@@ -141,6 +150,7 @@ end
 function _channel_record(bg, channel, settings; route="direct_finite_q")
     density_route(route)
     started = Base.time_ns()
+    rows = NamedTuple[]
     try
         q_values, q_weights = Workflow.R.gauleg(0.0, settings.qmax, settings.q_nodes)
         ref = if route == "q0_lambda_reference"
@@ -150,30 +160,46 @@ function _channel_record(bg, channel, settings; route="direct_finite_q")
         else
             nothing
         end
-        rows = NamedTuple[]
         for (q, weight) in zip(q_values, q_weights)
             shell = if route == "q0_lambda_reference"
-                Reference.shell(ref, q; nodes=settings.omega_nodes)
+                Reference.shell(ref, q; nodes=settings.omega_nodes,
+                    endpoint_policy=get(settings, :endpoint_policy, "finite_window"),
+                    omega_lower_inv_fm=get(settings, :omega_lower_inv_fm, 1e-5))
             else
                 kernel = Workflow.I.kernel(bg, channel, q; cut_nodes=settings.cut_nodes,
                     split_inv_fm=max(36.0, q + 28.0 * bg.T + 2.0))
                 profile = Workflow.P.profile(kernel; mesh=settings.mesh, tail_nodes=settings.tail_nodes)
                 Workflow.Y.shell(profile; nodes=settings.omega_nodes)
             end
-            push!(rows, (q_inv_fm=q, weight=weight, density=shell.density,
-                root_count=shell.root_count, passed=isfinite(shell.density)))
+            row = (q_inv_fm=q, weight=weight, density=shell.density,
+                root_count=shell.root_count, passed=isfinite(shell.density))
+            if route == "q0_lambda_reference"
+                row = merge(row, (endpoint_warning=shell.endpoint_warning, warning_code=shell.warning_code,
+                    static_inverse=shell.static_inverse, static_inverse_imag=shell.static_inverse_imag,
+                    static_phase=shell.static_phase, static_gbu_weight=shell.static_gbu_weight,
+                    omega_lower_inv_fm=shell.omega_lower_inv_fm, omega_upper_inv_fm=shell.omega_upper_inv_fm,
+                    lower_boundary=shell.lower_boundary, upper_boundary=shell.upper_boundary,
+                    bound=shell.bound, landau=shell.landau, pair=shell.pair))
+            end
+            push!(rows, row)
         end
         density = sum(row.weight * row.density for row in rows)
         return (status=isfinite(density) && all(row.passed for row in rows) ? "screened" : "nonfinite",
             passed=isfinite(density) && all(row.passed for row in rows), density_inv_fm3=density,
             elapsed_s=_elapsed_seconds(started), rows=rows,
             density_route=route,
+            endpoint_warning_shells=count(row -> get(row, :endpoint_warning, false), rows),
+            static_imaginary_max=maximum(row -> abs(get(row, :static_inverse_imag, 0.)), rows; init=0.),
+            density_prescription=route == "q0_lambda_reference" ? get(settings, :endpoint_policy, "finite_window") : "direct_zero_limit",
             gate_scope="finite_shell_output_only;full_production_gates_omitted", reason="")
     catch err
         err isa InterruptException && rethrow()
         return (status="evaluation_failed", passed=false, density_inv_fm3=NaN,
             density_route=route,
-            elapsed_s=_elapsed_seconds(started), rows=NamedTuple[], gate_scope="screening", reason=sprint(showerror, err))
+            endpoint_warning_shells=count(row -> get(row, :endpoint_warning, false), rows),
+            static_imaginary_max=maximum(row -> abs(get(row, :static_inverse_imag, 0.)), rows; init=0.),
+            density_prescription=route == "q0_lambda_reference" ? get(settings, :endpoint_policy, "finite_window") : "direct_zero_limit",
+            elapsed_s=_elapsed_seconds(started), rows=rows, gate_scope="screening", reason=sprint(showerror, err))
     end
 end
 
@@ -212,6 +238,14 @@ function _summary_row(data)
         prefix = String(ch); row[Symbol(prefix * "_density_inv_fm3")] = record === nothing ? NaN : _as_float(record.density_inv_fm3)
         row[Symbol(prefix * "_passed")] = record !== nothing && Bool(record.passed)
         row[Symbol(prefix * "_elapsed_s")] = record === nothing ? NaN : _as_float(record.elapsed_s)
+        warnings = record === nothing ? 0 : Int(get(record, :endpoint_warning_shells, 0))
+        row[Symbol(prefix * "_endpoint_warning_shells")] = warnings
+        row[Symbol(prefix * "_endpoint_warning")] = warnings > 0
+        row[Symbol(prefix * "_static_imaginary_max")] = record === nothing ? NaN :
+            _as_float(get(record, :static_imaginary_max, 0.))
+        row[Symbol(prefix * "_density_prescription")] = record === nothing ? "" :
+            String(get(record, :density_prescription, ""))
+        row[Symbol(prefix * "_failure_reason")] = record === nothing ? "" : String(record.reason)
     end
     return (; row...)
 end
@@ -219,7 +253,8 @@ end
 function parse_args(args=ARGS)
     options = Dict{Symbol,Any}(:t_grid=>DEFAULT_T_GRID, :muB_grid=>DEFAULT_MUB_GRID,
         :channels=>join(String.(CHANNELS), ","), :output=>nothing, :shard_index=>0, :shard_count=>1,
-        :resume=>false, :config=>DEFAULT_CONFIG, :density_route=>"direct_finite_q")
+        :resume=>false, :config=>DEFAULT_CONFIG, :density_route=>"direct_finite_q",
+        :q0_omega_lower=>1e-5, :background_input_root=>nothing)
     i = 1
     while i <= length(args)
         arg = args[i]
@@ -227,12 +262,14 @@ function parse_args(args=ARGS)
             return nothing
         elseif arg == "--resume"
             options[:resume] = true
-        elseif arg in ("--t-grid", "--muB-grid", "--channels", "--output", "--shard-index", "--shard-count", "--config", "--density-route")
+        elseif arg in ("--t-grid", "--muB-grid", "--channels", "--output", "--shard-index", "--shard-count", "--config", "--density-route", "--q0-omega-lower", "--background-input-root")
             i < length(args) || throw(ArgumentError("missing value for $(arg)")); i += 1
             key = arg == "--t-grid" ? :t_grid : arg == "--muB-grid" ? :muB_grid : arg == "--channels" ? :channels :
                 arg == "--output" ? :output : arg == "--shard-index" ? :shard_index : arg == "--shard-count" ? :shard_count :
-                arg == "--density-route" ? :density_route : :config
-            options[key] = key in (:shard_index, :shard_count) ? parse(Int, args[i]) : args[i]
+                arg == "--density-route" ? :density_route : arg == "--q0-omega-lower" ? :q0_omega_lower :
+                arg == "--background-input-root" ? :background_input_root : :config
+            options[key] = key in (:shard_index, :shard_count) ? parse(Int, args[i]) :
+                key == :q0_omega_lower ? _float(args[i], "q0 omega lower") : args[i]
         else
             throw(ArgumentError("unknown option $(arg)"))
         end
@@ -240,20 +277,25 @@ function parse_args(args=ARGS)
     end
     options[:output] === nothing && throw(ArgumentError("--output is required"))
     density_route(options[:density_route])
+    Reference.validate_prescription("finite_window", options[:q0_omega_lower])
     return options
 end
 
-print_help() = println("Usage: julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl --output DIR [--t-grid 40:220:10] [--muB-grid 0:800:50] [--channels pi_plus,K_plus] [--shard-index 0] [--shard-count 4] [--density-route direct_finite_q|q0_lambda_reference] [--resume]")
+print_help() = println("Usage: julia --project=. scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl --output DIR [--t-grid 40:220:10] [--muB-grid 0:800:50] [--channels pi_plus,K_plus] [--shard-index 0] [--shard-count 4] [--density-route direct_finite_q|q0_lambda_reference] [--q0-omega-lower 1e-5] [--background-input-root DIR] [--resume]")
 
 function run_scan(options)
     config_path = abspath(String(options[:config]))
     c = Workflow.validate_config(TOML.parsefile(config_path))
     T_values = parse_grid(options[:t_grid]; label="T grid"); muB_values = parse_grid(options[:muB_grid]; label="muB grid")
-    channels = parse_channels(options[:channels]); settings = screening_settings(); output = abspath(String(options[:output]))
+    channels = parse_channels(options[:channels]); output = abspath(String(options[:output]))
     route = density_route(options[:density_route])
+    settings = screening_settings(; route=route, omega_lower_inv_fm=options[:q0_omega_lower])
+    saved = options[:background_input_root] === nothing ? nothing :
+        SavedBackgrounds.read_snapshot(options[:background_input_root], T_values, muB_values; config_path=config_path)
     options[:shard_count] <= length(T_values) || throw(ArgumentError("shard_count cannot exceed T-row count"))
     ispath(output) && !options[:resume] && throw(ArgumentError("output exists; use --resume")); mkpath(output)
-    hashes = source_hashes(config_path); identity = _scan_identity(c, T_values, muB_values, channels, settings, options[:shard_index], options[:shard_count], hashes; route=route)
+    hashes = source_hashes(config_path); identity = _scan_identity(c, T_values, muB_values, channels, settings, options[:shard_index], options[:shard_count], hashes;
+        route=route, background_fingerprint=saved === nothing ? nothing : saved.provenance.fingerprint)
     manifest_path = joinpath(output, "manifest.json")
     if options[:resume] && isfile(manifest_path)
         previous = _read_json(manifest_path)
@@ -280,7 +322,17 @@ function run_scan(options)
             end
             bg, records, elapsed_s, background_seed, failure_reason = nothing, Dict{Symbol,Any}(), NaN, nothing, ""
             try
-                started = Base.time_ns(); solved = Workflow.background(model, point(T_values[row_index], muB_MeV), c; seed=seed)
+                started = Base.time_ns()
+                solved = if saved === nothing
+                    Workflow.background(model, point(T_values[row_index], muB_MeV), c; seed=seed)
+                else
+                    old = saved.points[(row_index, col_index)]
+                    old.background === nothing && error("retained background failed: $(old.failure_reason)")
+                    restored_seed = Float64.(old.background.seed)
+                    old.background.residual <= c["gates"]["background_residual"] || error("saved background residual not accepted")
+                    (bg=SavedBackgrounds.restore_seed(model, restored_seed, T_values[row_index], muB_MeV,
+                        Float64(old.background.residual)), seed=restored_seed)
+                end
                 elapsed_s = _elapsed_seconds(started); bg = solved.bg; seed = solved.seed; background_seed = solved.seed
                 for channel in channels; records[channel] = _channel_record(bg, channel, settings; route=route); end
             catch err
@@ -297,6 +349,9 @@ function run_scan(options)
         git_head=readchomp(`git -C $ROOT rev-parse HEAD`), config=replace(relpath(config_path, ROOT), '\\'=>'/'),
         source_hashes=hashes, T_grid=T_values, muB_grid=muB_values, channels=String.(channels), settings=settings,
         density_route=route, coordinate_contract=coordinate_contract(route),
+        background_source=saved === nothing ? (mode="equilibrium_solve", solver_called=true) : saved.provenance,
+        density_prescription=route == "q0_lambda_reference" ? settings.endpoint_policy : "direct_zero_limit",
+        warning_policy="q0 static imaginary endpoint retained in numerical diagnostics; no warning mask",
         shard_index=options[:shard_index], shard_count=options[:shard_count], point_count=length(rows),
         successful_points=count(row->row.status == "screened", rows), production_default=false, diagnostic_only=true)
     _write_atomic(joinpath(output, "manifest.json"), manifest); return manifest

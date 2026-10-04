@@ -170,7 +170,8 @@ def load_dataset(input_root: str | Path) -> dict[str, Any]:
         raise ValueError("scan manifests disagree on density_route")
     if any(manifest.get("coordinate_contract") != first.get("coordinate_contract") for manifest in manifests[1:]):
         raise ValueError("scan manifests disagree on coordinate_contract")
-    invariant_fields = ("T_grid", "muB_grid", "channels", "settings", "config", "git_head")
+    invariant_fields = ("T_grid", "muB_grid", "channels", "settings", "config", "git_head",
+                        "density_prescription", "background_source")
     for field in invariant_fields:
         expected = _canonical(first.get(field))
         if any(_canonical(manifest.get(field)) != expected for manifest in manifests[1:]):
@@ -219,6 +220,7 @@ def load_dataset(input_root: str | Path) -> dict[str, Any]:
         "settings": first["settings"],
         "density_route": route,
         "coordinate_contract": first.get("coordinate_contract"),
+        "background_source": first.get("background_source"),
         "config": first["config"],
         "git_head": first["git_head"],
         "source_hashes": first["source_hashes"],
@@ -474,7 +476,7 @@ def _axis_limits(dataset: dict[str, Any], reference_lines: dict[str, Any]) -> tu
     return (min(x_values), max(x_values)), (min(y_values), max(y_values))
 
 
-def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: dict[str, Any]) -> list[Path]:
+def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: dict[str, Any], *, clean_contours: bool = False) -> list[Path]:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -509,7 +511,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
         fig, ax = plt.subplots(figsize=(6.75, 5.9))
         fig.subplots_adjust(left=0.13, right=0.88, bottom=0.29, top=0.90)
         color_map = plt.get_cmap(cmap).copy()
-        color_map.set_bad("#d9d9d9")
+        color_map.set_bad("white" if clean_contours else "#d9d9d9")
         image = ax.pcolormesh(
             x_edges,
             y_edges,
@@ -537,7 +539,7 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
                 label.set_path_effects([path_effects.Stroke(linewidth=1.3, foreground="black"), path_effects.Normal()])
         _plot_reference_lines(ax, reference_lines)
         negative_rows, negative_cols = np.where(np.ma.filled(values, np.nan) < 0)
-        if len(negative_rows):
+        if len(negative_rows) and not clean_contours:
             negative_marks = ax.scatter(
                 np.asarray(dataset["muB_grid"])[negative_cols], np.asarray(dataset["T_grid"])[negative_rows],
                 marker="x", s=15, color="white", linewidths=0.7, zorder=5,
@@ -572,6 +574,9 @@ def _render_figures(dataset: dict[str, Any], output_dir: Path, reference_lines: 
     for field, stem, label, colorbar, cmap in specifications:
         heatmap(field, f"{stem}_screening.png", f"Charged GBU screening: {label}", colorbar, cmap)
         heatmap(field, f"{stem}_screening_contours.png", f"Charged GBU labeled contours: {label}", colorbar, cmap, contours=True)
+
+    if clean_contours:
+        return figures
 
     masks = [
         ("status", mask_matrix(dataset), ["screened", "gate failed", "other failure"]),
@@ -618,6 +623,12 @@ def _write_merged_csv(dataset: dict[str, Any], path: Path) -> None:
         "pi_minus_passed",
         "K_minus_passed",
     ]
+    # Preserve diagnostics in the numeric product even when the requested
+    # presentation has no warning annotations or failure overlay.
+    suffixes = ("_endpoint_warning", "_endpoint_warning_shells", "_static_imaginary_max",
+                "_density_prescription", "_failure_reason")
+    fieldnames.extend(sorted({key for row in dataset["rows"] for key in row
+                              if key.endswith(suffixes)}))
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -666,6 +677,13 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "channels": dataset["channels"],
         "settings": dataset["settings"],
         "density_route": dataset["density_route"],
+        "density_prescription": dataset["settings"].get("endpoint_policy",
+            "strict_zero_limit" if dataset["density_route"] == "q0_lambda_reference" else "direct_zero_limit"),
+        "background_source": dataset.get("background_source"),
+        "warning_display": "none" if dataset.get("clean_contours") else "legacy diagnostics",
+        "endpoint_warning_nodes": sum(any(_bool(row.get(ch + "_endpoint_warning", False))
+                                           for ch in ("pi_plus", "K_plus", "pi_minus", "K_minus"))
+                                      for row in dataset["rows"]),
         "coordinate_contract": dataset["coordinate_contract"],
         "grid": {"T_MeV": dataset["T_grid"], "muB_MeV": dataset["muB_grid"]},
         "row_count": len(dataset["rows"]),
@@ -731,6 +749,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--phase-reference-root", type=Path, default=DEFAULT_PHASE_REFERENCE_ROOT)
     parser.add_argument("--reference-xi", type=float, default=0.0)
     parser.add_argument("--no-reference-lines", action="store_true")
+    parser.add_argument("--clean-contours", action="store_true",
+                        help="Keep numeric diagnostics; omit warning markers and the failure-mask figure")
     return parser.parse_args(argv)
 
 
@@ -741,6 +761,7 @@ def main(argv: list[str] | None = None) -> int:
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty output directory: {output_dir}")
     dataset = load_dataset(input_root)
+    dataset["clean_contours"] = args.clean_contours
     output_dir.mkdir(parents=True, exist_ok=True)
     reference_lines = {} if args.no_reference_lines else load_reference_lines(
         freezeout_profile=args.freezeout_profile.resolve(),
@@ -749,7 +770,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     merged_csv = output_dir / "contour_points_merged.csv"
     _write_merged_csv(dataset, merged_csv)
-    figures = _render_figures(dataset, output_dir, reference_lines)
+    figures = _render_figures(dataset, output_dir, reference_lines, clean_contours=args.clean_contours)
     manifest = _manifest(dataset, output_dir, figures, merged_csv, args.source_run_id, args.git_sha, reference_lines, args.postprocess_run_id)
     manifest_path = output_dir / "plot_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

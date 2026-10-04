@@ -77,6 +77,29 @@ PV 下端；不交换极限。分部积分形式必须保留两端边界项。
 4. 该参考和直接有限 q 使用同一 Bose 核、离散计数、参数及外层求积；分别报告
    bound、unitary、Landau 差异。参考的低端、跨零点或非正常域失败必须保留。
 
+### q0 contour 的有限窗口参考（2026-10-04）
+
+`charged_gbu_q0_reference.jl` 的 contour 参考改用明确的正下限
+`a=1e-5 fm^-1`（可配置），默认上限仍为 `b=max(24,q+24T) fm^-1`。
+该变更仅针对 q0 外推的诊断等高图。对每个连续 cut 使用
+
+```math
+\int_a^b g_B W'\,d\omega
+=\int_a^b(-g_B')[W(\omega)-W(a)]\,d\omega
+ +g_B(b)[W(b)-W(a)],\qquad W=\delta-\tfrac12\sin2\delta.
+```
+
+这与保留上下边界的分部积分严格等价；预先减去常量避免红外 bulk 与下边界
+分别很大造成的抵消。窗口外的离散根不计入窗口产额，根仍独立认证。
+外推 `Im F(omega=0,q)` 超过原 `1e-8` 判据仅作诊断；不把原 q0 onset、
+负/非有限静态实部、非正能根及 cut/topology/UV 失败降为警告。
+这是有限窗口参考，不把 `a->0` 的存在性或逐点收敛当作已证明。
+直接有限 q 的正常相口径和 production gate 保持原实现。
+`strict_zero_limit` 仅保留为显式历史对照；源码和正下限进入扫描身份。
+
+对应单元测试为 `test_charged_gbu_q0_reference.jl`；远程敏感性入口为
+`audit_charged_gbu_q0_window.jl`。该处方是项目选择，并非论文未写出的端点规则。
+
 ## 验收与停止条件
 
 - 根必须位于由运动学认证的开解析 gap，满足实虚部残差；加密扫描并用复平面

@@ -101,6 +101,63 @@ end
     @test all(isempty, ref.rootsets)
     @test Q0_REFERENCE_Y.shell(p).static_inverse == 1.
     @test !iszero(Q0_REFERENCE_TEST.cut_phase(ref, 0., .1))
-    @test_throws ArgumentError Q0_REFERENCE_TEST.shell(ref, .1)
+    @test_throws ArgumentError Q0_REFERENCE_TEST.shell(ref, .1; endpoint_policy="strict_zero_limit")
+    finite = Q0_REFERENCE_TEST.shell(ref, .1)
+    @test isfinite(finite.density) && finite.endpoint_warning
+    @test finite.static_inverse == 1. && abs(finite.static_inverse_imag) > 1e-8
+    @test finite.warning_code == "q0_extrapolated_static_imaginary"
+    @test finite.omega_lower_inv_fm == 1e-5 && finite.endpoint_policy == "finite_window"
     @test Q0_REFERENCE_TEST.cut_phase(ref, 0., .5) == 0.
+end
+
+@testset "Stable finite-window derivative and explicit boundary identity" begin
+    r = Q0_REFERENCE_TEST
+    for phase in (-.3, 1e-8, .3, pi), lo in (1e-3, 1e-5, 1e-7)
+        s = r.finite_window_integral(w -> phase, lo, .2, .7)
+        @test s.derivative == 0.
+        @test s.lower_boundary ≈ inv(expm1(lo/.7))*Q0_REFERENCE_Y.O.gbu_weight(phase)/pi
+    end
+    for lo in (1e-3, 1e-5, 1e-7)
+        phase(w) = .3 + .2w
+        s = r.finite_window_integral(phase, lo, .2, .7; nodes=128)
+        # Independent analytic dW/dw; do not differentiate the new implementation.
+        edges = exp.(range(log(lo), log(.2); length=33)); edges[1]=lo; edges[end]=.2
+        exact = real(Q0_REFERENCE_Y.I.C.mapped_integral(edges; nodes=128) do w
+            inv(expm1(w/.7))*.4sin(phase(w))^2/pi
+        end)
+        @test s.derivative ≈ exact rtol=1e-10 atol=1e-12
+        bulk = real(Q0_REFERENCE_Y.I.C.mapped_integral(edges; nodes=128) do w
+            g=inv(expm1(w/.7)); g*(1+g)/.7*Q0_REFERENCE_Y.O.gbu_weight(phase(w))/pi
+        end)
+        @test s.derivative ≈ bulk+s.upper_boundary-s.lower_boundary atol=2e-9
+    end
+    for anchor in (-pi, -.3, -1e-5, 0., 1e-8, .2, pi), h in (-1e-10, 0., 1e-10)
+        delta = anchor+h
+        exact = setprecision(256) do
+            d, a = BigFloat(delta), BigFloat(anchor)
+            Float64((d-sin(2d)/2)-(a-sin(2a)/2))
+        end
+        @test r.weight_difference(delta, anchor) ≈ exact rtol=1e-6 atol=1e-28
+    end
+    @test_throws ArgumentError r.finite_window_integral(identity, 0., 1., .7)
+    @test_throws ArgumentError r.finite_window_integral(identity, .1, .1, .7)
+    @test_throws ArgumentError r.shell(r.reference(q0_synthetic_profile()), 1.; omega_lower_inv_fm=0.)
+    @test_throws ArgumentError r.shell(r.reference(q0_synthetic_profile()), 1.; endpoint_policy="ignore")
+end
+
+@testset "Safe legacy parity and retained root/geometry safeguards" begin
+    r = Q0_REFERENCE_TEST
+    for shift in (-.3, 0., .2), q in (.1, 1.3, 3.)
+        ref = r.reference(q0_synthetic_profile(;shift=shift))
+        finite = r.shell(ref, q; nodes=96)
+        strict = r.shell(ref, q; nodes=96, endpoint_policy="strict_zero_limit")
+        @test finite.density ≈ strict.density rtol=1e-9 atol=1e-12
+        @test finite.bound == strict.bound
+        @test !finite.endpoint_warning
+    end
+    ref = r.reference(q0_synthetic_profile(shift=.4))
+    bad_roots = r.Reference(ref.profile, (Float64[], [.1]))
+    @test_throws ArgumentError r.shell(bad_roots, .1)
+    extra_roots = r.Reference(ref.profile, (Float64[], [.6, 1.]))
+    @test_throws ArgumentError r.shell(extra_roots, .1)
 end
