@@ -693,7 +693,9 @@ def _manifest(dataset: dict[str, Any], output_dir: Path, figures: list[Path], me
         "contour_interpolation_policy": "display-only within four-valid-corner cells; corner_mask=false; no smoothing, extrapolation, or gap bridging",
         "contour_fields": {field: contour_payload(dataset, field)[1] for field in PLOT_FIELDS},
         "missing_value_policy": "mask; never zero-fill",
-        "negative_value_policy": "retain signed values; mark negative screened nodes with crosses; not full-gate acceptance",
+        "negative_value_policy": ("retain signed values without warning markers; not full-gate acceptance"
+                                  if dataset.get("clean_contours") else
+                                  "retain signed values; mark negative screened nodes with crosses; not full-gate acceptance"),
         "value_summaries": {
             field: {
                 "minimum": min(row[field] for row in dataset["rows"] if row["status"] == "screened"),
