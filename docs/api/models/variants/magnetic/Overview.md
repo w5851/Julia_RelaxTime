@@ -14,7 +14,7 @@
 
 ## 首选公开入口
 
-主题主入口来自 [src/models/Models.jl](../../../../src/models/Models.jl#L25) 以及 [src/models/pnjl_physics/PNJLMagneticModel.jl](../../../../src/models/pnjl_physics/PNJLMagneticModel.jl#L1)。
+主题主入口来自 [src/models/Models.jl](../../../../../src/models/Models.jl#L25) 以及 [src/models/pnjl_physics/PNJLMagneticModel.jl](../../../../../src/models/pnjl_physics/PNJLMagneticModel.jl#L1)。
 
 优先关注：
 

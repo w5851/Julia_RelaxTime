@@ -576,7 +576,7 @@ Results show no measurable performance difference between struct and NamedTuple 
 
 Phase B introduces a shared workflow adapter module:
 
-- `src/models/workflows/WorkflowParamAdapters.jl`
+- `src/models/workflow_apps/WorkflowParamAdapters.jl`
 
 Provided helpers:
 
@@ -599,8 +599,8 @@ Contract:
     - `thermo_params`
 
 Used by:
-- `src/models/workflows/TransportWorkflow.jl`
-- `src/models/workflows/MesonMassWorkflow.jl`
+- `src/models/workflow_apps/TransportWorkflow.jl`
+- `src/models/workflow_apps/MesonMassWorkflow.jl`
 
 ### ScanConfig (structured scan configuration)
 

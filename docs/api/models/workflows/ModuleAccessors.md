@@ -9,7 +9,7 @@
 - `workflow_param_adapters_module`
 - `pnjl_module`
 
-这些导出位于 [src/models/entrypoints.jl](src/models/entrypoints.jl#L61)。
+这些导出位于 [src/models/entrypoints.jl](../../../../src/models/entrypoints.jl#L61)。
 
 ## `transport_workflow_module`
 
@@ -33,7 +33,7 @@
 
 ## `workflow_param_adapters_module`
 
-该访问器返回参数适配模块，对应 [src/models/workflows/WorkflowParamAdapters.jl](src/models/workflows/WorkflowParamAdapters.jl#L1)。
+该访问器返回参数适配模块，对应 [src/models/workflow_apps/WorkflowParamAdapters.jl](../../../../src/models/workflow_apps/WorkflowParamAdapters.jl#L1)。
 
 其中最核心的能力是：
 

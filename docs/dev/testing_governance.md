@@ -1,6 +1,6 @@
 # 测试组织与入口规范（Julia_RelaxTime）
 
-更新时间：2026-10-02
+更新时间：2026-10-04
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
 - 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
@@ -20,7 +20,7 @@
 | Integration | `tests/integration/` | 跨模块端到端正确性 | smoke / nightly |
 | Regression | `tests/regression/` | 内部 baseline 数值回归，对比仓库内 CSV 基线 | smoke / full |
 | Validation | `tests/validation/` | 外部参考值验证（Fortran / Mathematica / 文献） | nightly / milestone |
-| Benchmark | `benchmark/` | PkgBenchmark 性能基准，独立 `Project.toml` | on-demand |
+| Benchmark | `benchmark/` | 性能比较与隔离的可选 oracle 环境 | PNJL 每周/相关变更/手动；其他按需 |
 | 分析脚本 | `scripts/analysis/` | 一次性分析/诊断/扫描脚本（非测试入口） | — |
 | 性能脚本 | `scripts/perf/` | Profile/timing 探针脚本（非测试入口） | — |
 | 交互脚本 | `scripts/` | 调试/可视化/开发辅助脚本 | — |
@@ -59,8 +59,9 @@
 
 ### Benchmark（性能基准）
 - 使用 `BenchmarkTools.jl` / `PkgBenchmark.jl`。
-- 独立 `benchmark/Project.toml`，不污染主项目依赖。
+- 可选比较 oracle 与额外 benchmark 依赖放入独立 `benchmark/Project.toml`；环境叠加方式见命令参考。
 - 入口：`benchmark/benchmarks.jl`（PkgBenchmark 标准布局）。
+- 现有 PNJL 单点/扫描 benchmark 使用根环境已有的 BenchmarkTools；定时观测、环境记录、比较口径和历史 artifact 入口见 [benchmark 趋势观测](../guides/benchmark_trends.md)。相对波动仅作预警，不代替数值回归。
 
 ## 子系统分目录
 

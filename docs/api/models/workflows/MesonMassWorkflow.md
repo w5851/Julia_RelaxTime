@@ -1,19 +1,19 @@
 # Models Meson Workflow
 
-本文档从 `Models` 统一入口视角描述 meson workflow。底层实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/models/workflows/MesonMassWorkflow.jl#L1)，领域细节页保留在 [docs/api/pnjl/MesonMassWorkflow.md](docs/api/pnjl/MesonMassWorkflow.md)。
+本文档从 `Models` 统一入口视角描述 meson workflow。底层实现位于 [src/models/workflow_apps/MesonMassWorkflow.jl](../../../../src/models/workflow_apps/MesonMassWorkflow.jl#L1)，领域细节页保留在 [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md)。
 
 ## 首选入口
 
 - `Models.solve_gap_and_meson_point`
 - `Models.solve_meson_point_from_equilibrium`
 
-该入口通过 [src/models/entrypoints.jl](src/models/entrypoints.jl#L57) 转发到 workflow 模块。
+该入口通过 [src/models/entrypoints.jl](../../../../src/models/entrypoints.jl#L57) 转发到 workflow 模块。
 
 ## `solve_gap_and_meson_point`
 
 这是一个单点工作流入口：先求平衡态，再对若干介子通道求质量、宽度、Mott 阈值与 gap。
 
-实现签名见 [src/models/workflows/MesonMassWorkflow.jl](src/models/workflows/MesonMassWorkflow.jl#L169)。
+实现签名见 [src/models/workflow_apps/MesonMassWorkflow.jl](../../../../src/models/workflow_apps/MesonMassWorkflow.jl#L169)。
 
 它适合：
 
@@ -97,4 +97,4 @@ workflow 模块同时导出：
 - 与 Fortran 对照的历史说明
 - 扫描脚本位置与数值健壮性细节
 
-应继续阅读 [docs/api/pnjl/MesonMassWorkflow.md](docs/api/pnjl/MesonMassWorkflow.md)。本页只负责说明它在 `Models` 公开入口中的角色。
+应继续阅读 [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md)。本页只负责说明它在 `Models` 公开入口中的角色。

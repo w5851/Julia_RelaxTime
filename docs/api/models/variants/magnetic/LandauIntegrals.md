@@ -1,6 +1,6 @@
 # Landau 能级与积分接口
 
-本页说明 magnetic 主题中与 Landau 能级离散化直接相关的低层公开接口。实现位于 [src/models/pnjl_physics/core/MagneticIntegrals.jl](../../../../src/models/pnjl_physics/core/MagneticIntegrals.jl#L1)。
+本页说明 magnetic 主题中与 Landau 能级离散化直接相关的低层公开接口。实现位于 [src/models/pnjl_physics/core/MagneticIntegrals.jl](../../../../../src/models/pnjl_physics/core/MagneticIntegrals.jl#L1)。
 
 ## 主要导出
 

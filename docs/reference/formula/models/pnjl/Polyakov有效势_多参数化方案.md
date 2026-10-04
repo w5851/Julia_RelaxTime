@@ -61,7 +61,7 @@ b_2(T)=a_0+a_1\left(\frac{T_0}{T}\right)+a_2\left(\frac{T_0}{T}\right)^2+a_3\lef
 ## 4. 与当前仓库实现的对应关系
 
 当前主线热力学实现在：
-- `src/models/pnjl/core/Thermodynamics.jl`
+- `src/models/pnjl_physics/core/Thermodynamics.jl`
 
 当前常量配置在：
 - `src/Constants_PNJL.jl`

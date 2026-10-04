@@ -2,9 +2,11 @@
 
 using JSON3
 
-const ROOT = pwd()
-const SINGLE_POINT_JSON = joinpath(ROOT, "tests", "perf", "results", "pnjl", "single_point_benchmark.json")
-const SCAN_JSON = joinpath(ROOT, "tests", "perf", "results", "pnjl", "scan_benchmark.json")
+const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+const RESULTS_DIR = abspath(get(ENV, "PNJL_BENCHMARK_OUTPUT_DIR",
+    joinpath(ROOT, "tests", "perf", "results", "pnjl")))
+const SINGLE_POINT_JSON = joinpath(RESULTS_DIR, "single_point_benchmark.json")
+const SCAN_JSON = joinpath(RESULTS_DIR, "scan_benchmark.json")
 
 const DEFAULT_SINGLE_POINT_MEDIAN_MS = 2500.0
 const SINGLE_POINT_MEDIAN_LIMITS = Dict(

@@ -2,7 +2,7 @@
 
 串联：PNJL 平衡求解 → 介子质量/宽度（MesonMass）→ Mott 阈值与 gap（MottTransition）。
 
-实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/models/workflows/MesonMassWorkflow.jl)。
+实现位于 [src/models/workflow_apps/MesonMassWorkflow.jl](../../../src/models/workflow_apps/MesonMassWorkflow.jl)。
 
 ## 入口
 
@@ -73,7 +73,7 @@ solve_meson_point_from_equilibrium(equilibrium, T_fm; mesons=DEFAULT_MESONS, kwa
 ## 示例
 
 ```julia
-include("src/models/workflows/MesonMassWorkflow.jl")
+include("src/models/workflow_apps/MesonMassWorkflow.jl")
 using .MesonMassWorkflow
 
 T = 0.15  # fm^-1
@@ -99,7 +99,7 @@ res = solve_gap_and_meson_point(
 
 仓库提供了一个基于该工作流的扫描脚本：
 
-- [scripts/relaxtime/run_gap_meson_mass_scan.jl](scripts/relaxtime/run_gap_meson_mass_scan.jl)
+- [scripts/relaxtime/run_gap_meson_mass_scan.jl](../../../scripts/relaxtime/run_gap_meson_mass_scan.jl)
 
 用于扫描 `(T, μ_B, ξ)` 网格并写出 `scan_csv_v1` 格式 CSV（支持续跑与跳过已算点）。
 
@@ -113,11 +113,11 @@ res = solve_gap_and_meson_point(
 
 该对照依赖外部 Fortran 工作区（非仓库默认依赖）。相关对照脚本与结论已归档：
 
-- [docs/dev/archived/2026-01-19_MesonMass_MottTransition_Fortran_Validation.md](docs/dev/archived/2026-01-19_MesonMass_MottTransition_Fortran_Validation.md)
+- [docs/dev/archived/2026-01-19_MesonMass_MottTransition_Fortran_Validation.md](../../dev/archived/2026-01-19_MesonMass_MottTransition_Fortran_Validation.md)
 
 如需复现，对照脚本代码已归档在：
 
-- [docs/dev/archived/2026-01-22_RelaxTime_Fortran_Comparison_Scripts.md](docs/dev/archived/2026-01-22_RelaxTime_Fortran_Comparison_Scripts.md)
+- [docs/dev/archived/2026-01-22_RelaxTime_Fortran_Comparison_Scripts.md](../../dev/archived/2026-01-22_RelaxTime_Fortran_Comparison_Scripts.md)
 
 示例（PowerShell）：
 

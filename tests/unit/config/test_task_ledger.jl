@@ -305,15 +305,32 @@ end
         args == ("status", "--porcelain=v1") && return " M tracked.md\n?? new.md\n"
         error("unexpected git fixture command: $(args)")
     end
-    output = IOBuffer()
-    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=output, git_output=dirty_git))
-    report = String(take!(output))
-    @test occursin("primary_track=formula-route-closure", report)
-    @test occursin("selected_track=rs-transport", report)
-    @test occursin("branch=codex/fixture", report)
-    @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
-    @test occursin("dirty=true", report)
-    @test occursin("ATTENTION: preserve", report)
+    root = _fixture_root()
+    ledger_path = joinpath(root, "config", "governance", "task_tracks.toml")
+    fixture = TOML.parsefile(ledger_path)
+    second_track = merge(fixture["tracks"][1], Dict("id" => "track-b", "current_task" => "item-b"))
+    second_item = merge(fixture["items"][1], Dict(
+        "id" => "item-b", "track_id" => "track-b", "parent" => "track:track-b",
+        "task_file" => "docs/dev/active/second.md",
+    ))
+    push!(fixture["tracks"], second_track)
+    push!(fixture["items"], second_item)
+    write(joinpath(root, "docs", "dev", "active", "second.md"), "# Second fixture task\n")
+    for primary in ("track-a", "track-b")
+        fixture["primary_track"] = primary
+        open(io -> TOML.print(io, fixture), ledger_path, "w")
+        for selected in (nothing, "track-a")
+            output = IOBuffer()
+            @test isempty(TL.preflight_report(root; track_id=selected, io=output, git_output=dirty_git))
+            report = String(take!(output))
+            @test occursin("primary_track=$(primary)", report)
+            @test occursin("selected_track=$(something(selected, primary))", report)
+            @test occursin("branch=codex/fixture", report)
+            @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
+            @test occursin("dirty=true", report)
+            @test occursin("ATTENTION: preserve", report)
+        end
+    end
 
     clean_git = (root, args...) -> begin
         args == ("branch", "--show-current") && return ""
@@ -322,13 +339,13 @@ end
         error("unexpected git fixture command: $(args)")
     end
     clean_output = IOBuffer()
-    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=clean_output, git_output=clean_git))
+    @test isempty(TL.preflight_report(root; track_id="track-a", io=clean_output, git_output=clean_git))
     clean_report = String(take!(clean_output))
     @test occursin("dirty=false tracked=0 untracked=0", clean_report)
     @test !occursin("ATTENTION: preserve", clean_report)
 end
 
-@testset "task ledger harness routing contract" begin
+@testset "task ledger documentation references" begin
     skill = read(joinpath(PROJECT_ROOT, ".agents", "skills", "codex-task-harness", "SKILL.md"), String)
     agents = read(joinpath(PROJECT_ROOT, "AGENTS.md"), String)
     @test occursin("task_tracks.toml", skill)
@@ -338,6 +355,7 @@ end
 end
 
 @testset "task ledger CLI track selection" begin
-    @test TL.main(["--track", "rs-transport"]) == 0
-    @test TL.main(["--track", "missing-track"]) == 1
+    root = _fixture_root()
+    @test TL.main(["--track", "track-a"]; root=root) == 0
+    @test TL.main(["--track", "missing-track"]; root=root) == 1
 end

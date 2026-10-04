@@ -1,3 +1,15 @@
+---
+title: 完整 KMT 介子相互作用核 Phase 0-3
+archived: true
+original: docs/dev/active/2026-08-29_full-kmt-interaction-phase0-phase1.md
+archived_date: 2026-10-03
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 完整 KMT 介子相互作用核 Phase 0-3
 
 更新日期：2026-08-29

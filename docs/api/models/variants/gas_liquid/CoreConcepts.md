@@ -8,7 +8,7 @@ gas_liquid 代表 RMF/Walecka 路径下的一条模型变体分支：
 
 - 通过 `GasLiquidModel` 对接 `Models` 抽象接口
 - 通过 `GasLiquidWorkflow` 提供单点 workflow 封装
-- 核心方程与热力学实现在 `gas_liquid/core/`
+- 核心方程与热力学实现在 `src/models/variants/gas_liquid/core/`
 
 因此它应作为 `variants` 主题治理，而不是独立一级流程主题。
 

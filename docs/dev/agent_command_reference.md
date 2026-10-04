@@ -145,6 +145,8 @@ julia --sysimage=build/JuliaRelaxTime.dll --project=. -e 'ENV["INTEGRATION_PROFI
 
 ## Benchmark commands
 
+PNJL single-point/scan runs, scheduled trend comparisons, and result lookup: [benchmark trend guide](../guides/benchmark_trends.md).
+
 The benchmark environment is isolated from the normal root runtime/test environment. Optional comparison oracles such as QuadGK are declared only in `benchmark/Project.toml`. Instantiate that environment first. Because this repository is include-driven, benchmark scripts that also need root dependencies use an explicit per-process environment stack.
 
 ```sh

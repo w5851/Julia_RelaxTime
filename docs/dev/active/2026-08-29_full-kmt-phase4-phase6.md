@@ -2,7 +2,7 @@
 
 更新日期：2026-08-29
 
-当前状态：in progress。本文承接 `2026-08-29_full-kmt-interaction-phase0-phase1.md`，记录完整 charged KMT 耦合接回现有 BQS quark-only 平衡后的诊断实现。本文不授权修改正式 production baseline，也不把 `x_min_cut`/低节点结果当作实验拟合。
+当前状态：in progress。本文承接[已归档的 Phase 0–3](../archived/2026-08-29_full-kmt-interaction-phase0-phase1.md)，记录完整 charged KMT 耦合接回现有 BQS quark-only 平衡后的诊断实现。本文不授权修改正式 production baseline，也不把 `x_min_cut`/低节点结果当作实验拟合。
 
 ## 1. 路线与边界
 

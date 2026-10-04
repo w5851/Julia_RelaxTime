@@ -1,6 +1,6 @@
 # 介子质量计算（RPA 传播子极点）
 
-本文汇总 PNJL/RPA 框架下介子（π、K、η、η′等）质量的计算公式与步骤，并与项目中既有极化函数/传播子实现保持一致。极化函数记号与 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md) 和 [Propagator_传播子byPolarization.md](propagator/Propagator_传播子byPolarization.md) 对齐。
+本文汇总 PNJL/RPA 框架下介子（π、K、η、η′等）质量的计算公式与步骤，并与项目中既有极化函数/传播子实现保持一致。极化函数记号与 [Polarization_极化函数byB0.md](../polarization/Polarization_%E6%9E%81%E5%8C%96%E5%87%BD%E6%95%B0byB0.md) 和 [Propagator_传播子byPolarization.md](Propagator_%E4%BC%A0%E6%92%AD%E5%AD%90byPolarization.md) 对齐。
 
 ## 1. 介子传播子公式
 
@@ -14,8 +14,8 @@ $$
 $$
 
 其中：
-- $K_{3}^{\pm}, K_{4}^{\pm}$ 为有效耦合常数（参见 [EffectiveCoupling_K_FromA.md](couplings/EffectiveCoupling_K_FromA.md)）。
-- $\Pi_{f f^{\prime}}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md)）。
+- $K_{3}^{\pm}, K_{4}^{\pm}$ 为有效耦合常数（参见 [EffectiveCoupling_K_FromA.md](../couplings/EffectiveCoupling_K_FromA.md)）。
+- $\Pi_{f f^{\prime}}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [Polarization_极化函数byB0.md](../polarization/Polarization_%E6%9E%81%E5%8C%96%E5%87%BD%E6%95%B0byB0.md)）。
 
 ### 1.2 η 与 η′ 介子传播子（含混合）
 赝标量介子 η、η′（以及标量 σ、σ′）存在单态/八重态混合，其传播子结构为：
@@ -82,13 +82,13 @@ $$
 5. 输出各介子质量 $M$ 与宽度 $\Gamma$（若适用）。
 
 ## 4. 注意事项
-- 极化函数含柯西主值积分，会产生虚部；相关细节见 [../Polarization_极化函数byB0.md](../Polarization_极化函数byB0.md)。
+- 极化函数含柯西主值积分，会产生虚部；相关细节见 [../Polarization_极化函数byB0.md](../polarization/Polarization_%E6%9E%81%E5%8C%96%E5%87%BD%E6%95%B0byB0.md)。
 - Mott 点满足 $M_M = M_{q_1}+M_{q_2}$，宽度开始非零。
 - 标量介子通道与赝标量形式类似，但需使用标量耦合与标量极化函数。
 
 ### 4.1 复数能量输入的物理意义与实现现状
 介子质量方程中常用 $p_0 = M + i\frac{\Gamma}{2}$ 的复数能量形式，其物理意义与数值处理说明见：
-[../../domain-knowledge/relaxtime/介子质量计算中的复数输入与物理意义.md](../../domain-knowledge/relaxtime/%E4%BB%8B%E5%AD%90%E8%B4%A8%E9%87%8F%E8%AE%A1%E7%AE%97%E4%B8%AD%E7%9A%84%E5%A4%8D%E6%95%B0%E8%BE%93%E5%85%A5%E4%B8%8E%E7%89%A9%E7%90%86%E6%84%8F%E4%B9%89.md)。
+[../../domain-knowledge/relaxtime/介子质量计算中的复数输入与物理意义.md](../../../domain-knowledge/relaxtime/%E4%BB%8B%E5%AD%90%E8%B4%A8%E9%87%8F%E8%AE%A1%E7%AE%97%E4%B8%AD%E7%9A%84%E5%A4%8D%E6%95%B0%E8%BE%93%E5%85%A5%E4%B8%8E%E7%89%A9%E7%90%86%E6%84%8F%E4%B9%89.md)。
 
 实现检查结论：当前极化函数接口以实数能量为输入并返回实部/虚部，尚未直接支持复数 $p_0$ 作为参数。具体表现为：
 - `PolarizationAniso.polarization_aniso` 的 `k0` 参数为 `Float64`；

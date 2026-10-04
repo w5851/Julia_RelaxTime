@@ -1,6 +1,6 @@
 # 自适应 rho 加密
 
-本文档描述相图主题中用于提升 CEP 与 Maxwell 稳定性的自适应 `rho` 加密辅助层。核心实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](src/models/phase/AdaptiveRhoRefinement.jl#L3)。
+本文档描述相图主题中用于提升 CEP 与 Maxwell 稳定性的自适应 `rho` 加密辅助层。核心实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](../../../../src/models/phase/AdaptiveRhoRefinement.jl#L3)。
 
 ## 适用场景
 
@@ -16,7 +16,7 @@
 
 ## `AdaptiveRhoConfig`
 
-结构体定义位于 [src/models/phase/AdaptiveRhoRefinement.jl](src/models/phase/AdaptiveRhoRefinement.jl#L5)。构造器位于 [src/models/phase/AdaptiveRhoRefinement.jl](src/models/phase/AdaptiveRhoRefinement.jl#L12)。
+结构体定义位于 [src/models/phase/AdaptiveRhoRefinement.jl](../../../../src/models/phase/AdaptiveRhoRefinement.jl#L5)。构造器位于 [src/models/phase/AdaptiveRhoRefinement.jl](../../../../src/models/phase/AdaptiveRhoRefinement.jl#L12)。
 
 ```julia
 AdaptiveRhoConfig(; slope_tol=5.0, min_gap=0.002, max_points=64, digits=6)
@@ -31,7 +31,7 @@ AdaptiveRhoConfig(; slope_tol=5.0, min_gap=0.002, max_points=64, digits=6)
 
 ## `suggest_refinement_points`
 
-实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](src/models/phase/AdaptiveRhoRefinement.jl#L20)。
+实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](../../../../src/models/phase/AdaptiveRhoRefinement.jl#L20)。
 
 该函数根据现有 `(ρ, μ)` 样本估计需要补样的区段，并返回新的 `rho` 候选点。
 
@@ -43,7 +43,7 @@ AdaptiveRhoConfig(; slope_tol=5.0, min_gap=0.002, max_points=64, digits=6)
 
 ## `merge_rho_values`
 
-实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](src/models/phase/AdaptiveRhoRefinement.jl#L50)。
+实现位于 [src/models/phase/AdaptiveRhoRefinement.jl](../../../../src/models/phase/AdaptiveRhoRefinement.jl#L50)。
 
 该函数负责把新增 `rho` 点与原始网格合并，并按给定精度去重与排序。
 
@@ -61,7 +61,7 @@ rho_grid = merge_rho_values(rho_vals, extra_rho; digits=config.digits)
 
 ## 与主流程的关系
 
-相图 pipeline 在 CEP 直接策略下会调用该模块，集成点位于 [src/models/phase/PhasePipeline.jl](src/models/phase/PhasePipeline.jl#L181) 与 [src/models/phase/PhasePipeline.jl](src/models/phase/PhasePipeline.jl#L209)。
+相图 pipeline 在 CEP 直接策略下会调用该模块，集成点位于 [src/models/phase/PhasePipeline.jl](../../../../src/models/phase/PhasePipeline.jl#L181) 与 [src/models/phase/PhasePipeline.jl](../../../../src/models/phase/PhasePipeline.jl#L209)。
 
 因此，这一层的职责是为上层重新计算提供更好的网格，而不是直接返回相变点。
 
@@ -73,4 +73,4 @@ production 模式还会在粗网格已经判为 `valid` 或 `invalid` 时执行�
 
 粗细网格的实际误差、层数和原因写入 `phase_grid_convergence.csv`，不能通过放宽 CEP 分类阈值来掩盖网格未收敛。
 
-如果你想先理解完整主流程，应优先阅读 [Overview.md](docs/api/models/phase/Overview.md)。
+如果你想先理解完整主流程，应优先阅读 [Overview.md](Overview.md)。

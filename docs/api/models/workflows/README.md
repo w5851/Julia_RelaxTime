@@ -4,9 +4,9 @@
 
 ## 阅读顺序
 
-- 用户入口：见 [Overview.md](docs/api/models/workflows/Overview.md)
-- 职责核心：见 [CoreConcepts.md](docs/api/models/workflows/CoreConcepts.md)
-- 导出 API 全集：见 [generated/Exports.md](docs/api/models/workflows/generated/Exports.md)
+- 用户入口：见 [Overview.md](Overview.md)
+- 职责核心：见 [CoreConcepts.md](CoreConcepts.md)
+- 导出 API 全集：见 [generated/Exports.md](generated/Exports.md)
 
 ## 覆盖范围
 
@@ -29,15 +29,15 @@
 
 ## 目录职责
 
-- [Overview.md](docs/api/models/workflows/Overview.md)：给首次使用者的统一入口页
-- [CoreConcepts.md](docs/api/models/workflows/CoreConcepts.md)：解释 workflow 输入分层、职责边界与模块访问器定位
-- [generated/Exports.md](docs/api/models/workflows/generated/Exports.md)：自动生成的公开导出索引
+- [Overview.md](Overview.md)：给首次使用者的统一入口页
+- [CoreConcepts.md](CoreConcepts.md)：解释 workflow 输入分层、职责边界与模块访问器定位
+- [generated/Exports.md](generated/Exports.md)：自动生成的公开导出索引
 
 ## 旧领域文档的关系
 
-- [docs/api/relaxtime/workflow/TransportWorkflow.md](docs/api/relaxtime/workflow/TransportWorkflow.md) 保留为 transport 领域细节页
-- [docs/api/pnjl/MesonMassWorkflow.md](docs/api/pnjl/MesonMassWorkflow.md) 保留为 meson 领域细节页
-- [docs/api/relaxtime/workflow/MesonDensityWorkflow.md](docs/api/relaxtime/workflow/MesonDensityWorkflow.md) 保留为介子数密度 workflow 领域细节页
-- [MesonThermoWorkflow.md](docs/api/models/workflows/MesonThermoWorkflow.md) 说明介子热力学 workflow 与 CSV 合同
+- [docs/api/relaxtime/workflow/TransportWorkflow.md](../../relaxtime/workflow/TransportWorkflow.md) 保留为 transport 领域细节页
+- [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md) 保留为 meson 领域细节页
+- [docs/api/relaxtime/workflow/MesonDensityWorkflow.md](../../relaxtime/workflow/MesonDensityWorkflow.md) 保留为介子数密度 workflow 领域细节页
+- [MesonThermoWorkflow.md](MesonThermoWorkflow.md) 说明介子热力学 workflow 与 CSV 合同
 
 本目录不试图替代这些领域文档，而是从 `Models` 统一入口视角重新组织它们。

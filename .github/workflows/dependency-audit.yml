@@ -64,6 +64,9 @@ jobs:
             sleep $((attempt * 30))
           done
 
+      - name: Test source dependency analysis
+        run: julia --project=. -e 'include("tests/unit/config/test_gen_deps.jl"); include("tests/unit/config/test_analyze_deps.jl")'
+
       - name: Generate dependency graph
         run: julia --project=. scripts/dev/gen_deps.jl
 

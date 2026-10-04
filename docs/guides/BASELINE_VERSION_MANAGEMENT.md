@@ -355,9 +355,9 @@ end
 
 ## 参考文档
 
-- [项目全面审查与改进计划](../active/2026-03-06_项目全面审查与改进计划.md)
-- [回归测试框架](../../../tests/regression/README.md)
-- [CI 配置指南](.github/workflows/README.md)
+- [项目全面审查与改进计划（历史）](../dev/archived/2026-03-06_项目全面审查与改进计划.md)
+- [测试分层与回归治理](../dev/testing_governance.md)
+- [定期回归 workflow](../../.github/workflows/nightly-full-regression.yml)
 
 ---
 

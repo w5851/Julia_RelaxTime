@@ -42,9 +42,9 @@ flowchart LR
 
   config[config/*]
 
-  src_utils --> src_integration
+  src_integration --> src_utils
   src_models --> src_integration
-  src_integration --> src_relaxtime
+  src_relaxtime --> src_integration
   src_simulation --> src_utils
 
   scripts_server --> src_simulation
@@ -71,88 +71,41 @@ flowchart LR
   config --> scripts_relaxtime
 ```
 
-## L2 Models 模块架构（基于多重派发）
+## L2 Models 职责与调用
+
+本图按当前职责组织；每条实际文件加载边见自动依赖图。模型的 API/capabilities/adapter 锚点继续保留，目录完整性不再依靠 noop 文件。
 
 ```mermaid
 flowchart TB
-  subgraph Models[src/models/]
-    Models.jl[Models.jl<br/>统一入口]
-    abstract[abstract_model.jl<br/>类型层次]
-    factory[factory.jl<br/>模型工厂]
-
-    subgraph NJL[njl/]
-      NJLModel[NJLModel.jl]
-      NJL2Model[NJL2Model.jl]
-    end
-
-    subgraph PNJL[pnjl_physics/]
-      PNJLModel[PNJLModel.jl]
-      RPNJLModel[RPNJLModel.jl]
-      PNJLMagnetic[PNJLMagneticModel.jl]
-      PNJLCore[PNJLCore.jl]
-      PNJLIntegrals[PNJLIntegrals.jl]
-    end
-
-    subgraph Solver[solver/]
-      SolverMain[Solver.jl]
-      ImplicitSolver[ImplicitSolver.jl]
-      ConstraintModes[ConstraintModes.jl]
-      SeedStrategies[SeedStrategies.jl]
-      Conditions[Conditions.jl]
-    end
-  end
-
-  Models.jl --> abstract
-  Models.jl --> factory
-  factory --> NJLModel
-  factory --> NJL2Model
-  factory --> PNJLModel
-  factory --> RPNJLModel
-  factory --> PNJLMagnetic
-
-  PNJLModel --> PNJLCore
-  PNJLModel --> PNJLIntegrals
-  RPNJLModel --> PNJLModel
-  PNJLMagnetic --> PNJLModel
-
-  SolverMain --> ImplicitSolver
-  SolverMain --> ConstraintModes
-  SolverMain --> SeedStrategies
-  SolverMain --> Conditions
+  Models["Models.jl / entrypoints.jl"] --> Factory["factory.jl"]
+  Factory --> NJL["njl/：NJL 与 NJL2 物理实现"]
+  Factory --> PNJL["pnjl_physics/：PNJL 与磁场变体"]
+  Factory --> RPNJL["rpnjl/：RPNJL 适配"]
+  Factory --> Variants["variants/：rotation 与 gas_liquid"]
+  Models --> API["solver/api/SolverAPI.jl"]
+  API --> Runtime["solver/runtime/：约束求解"]
+  Runtime --> Spec["solver/spec/：约束与 residual"]
+  Runtime --> Seeds["solver/orchestrator/：种子策略"]
+  Models --> Workflows["workflow_apps/：介子与输运工作流"]
+  Models --> Pipeline["workflow_engine/：流程编排"]
+  Workflows --> API
+  Workflows --> Transport["relaxtime/：传播子、散射与输运"]
 ```
 
-## L3 关键链路补充（手动）
+`solver/compat/` 和 `solver/diff/` 保存适配与导数诊断接口；热力学导数的当前实现与适用后端见 [derivatives API](../api/models/derived/derivatives/README.md)。
 
-**弛豫时间链路（RTA）**
+## L3 关键计算步骤
+
+下列箭头表示计算结果的流向，不是文件 include 方向。
 
 ```mermaid
 flowchart LR
-  ScatteringAmplitude[ScatteringAmplitude]
-    --> DifferentialCrossSection[DifferentialCrossSection]
-    --> TotalCrossSection[TotalCrossSection]
-    --> AverageScatteringRate[AverageScatteringRate]
-    --> RelaxationTime[RelaxationTime]
+  Amplitude["ScatteringAmplitude"] --> Differential["DifferentialCrossSection"]
+  Differential --> Total["TotalCrossSection"]
+  Total --> Average["AverageScatteringRate"]
+  Average --> Relaxation["RelaxationTime"]
 ```
 
-**PNJL 求解链路（新架构）**
+统一求解由 `Models` 创建或接收模型，通过 `solver/api/` 进入对应约束求解器；工作流再消费平衡态和热力学量。非 FixedMu 联合求解与 mixed-meson 约定由各自 solver/workflow 合同维护，目录清理不改变这些语义。
 
-```mermaid
-flowchart LR
-  Models[Models.jl]
-    --> Factory[factory.jl]
-    --> PNJLModel[PNJLModel]
-    --> Solver[Solver]
-    --> Result[MeanFieldState]
-```
-
-**回归测试链路**
-
-```mermaid
-flowchart LR
-  Baselines[tests/baselines/*.csv]
-    --> RegressionTests[tests/regression/**/*.jl]
-    --> Models[src/models/]
-    --> Results[计算结果]
-    --> Comparison[数值对比<br/>rtol/atol]
-    --> Report[测试报告]
-```
+回归测试在 `tests/regression/` 将当前计算与 `tests/baselines/` 中的内部基线比较，按各测试既定的 `rtol/atol` 判断；外部文献/实现对照属于 `tests/validation/`。
