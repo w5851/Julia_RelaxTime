@@ -948,7 +948,7 @@ status = "active"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
 reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
-next_action = "M9计算及PNG核验完成：四背景敏感性run37172076768，同背景全网格run37172320742；1813点1806可绘制/7 onset失败，冻结线邻域609/615可绘制。1073个端点警告仅保留数值，图中不显示警告符号；原成功区比值变化<=0.000629%。保留finite-window参考语义和既有直接有限q默认/原核/baseline；后续冻结线参数调整由作者另行指定。"
+next_action = "实现、组会图和本地证据整理完成：当前图919/925有效，低ratio六级补线已交付；收尾Julia263/263、Python43/43通过，最终生成器与d4ca9db65d4829218d5e5bbe1b3aaa385ab3c5e3逐字节对应。后续PR集成需对齐主干并复核5份既有活动文档时效问题；M4研究产物晋升及冻结线参数调整由作者另行指定。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -967,6 +967,7 @@ evidence = [
   "run:37172076768",
   "run:37172320742",
   "sha:c22f5e3e267bf2dce2431cf901a9dc3508d27600",
+  "sha:d4ca9db65d4829218d5e5bbe1b3aaa385ab3c5e3",
   "file:scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py",
   "file:.github/workflows/relaxtime-charged-gbu-contour-scan.yml",
   "file:scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl",
