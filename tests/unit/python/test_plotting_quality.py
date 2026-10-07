@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 from scripts.plotting.plot_manifest import (
     build_manifest, generator_record, input_record, output_record, write_manifest,
 )
-from scripts.plotting.plot_quality import export_figure, inspect_export, measure_figure, visible_texts
+from scripts.plotting.plot_quality import export_figure, inspect_export, measure_figure, visible_texts, placement_limits
 from scripts.plotting.plot_style import configure_axis_ticks, configure_matplotlib, load_profile
-from scripts.plotting.validate_plot_artifact import validate_manifest
+from scripts.plotting.validate_plot_artifact import _check_declared_legends, validate_manifest
 
 
 @pytest.fixture(scope="module")
@@ -62,6 +62,45 @@ def test_pdf_png_actual_export_passes_final_size_gate(exported_fixture, tmp_path
     assert pdf["inspection"]["fonts_embedded"] is True
 
 
+def test_insertion_limits_reject_half_width_and_follow_actual_png_pixels(exported_fixture):
+    profile = load_profile("strict_aps_v2")
+    quality = exported_fixture["rendering"]["quality"]
+    limits = placement_limits(quality, profile, exported_fixture["outputs"])
+    assert limits["measured_width_qualified"]
+    assert limits["single_column_reuse_qualified"] is False
+    assert limits["single_column_minimum_glyph_mm"] < 2
+    assert limits["maximum_width_inches"] == 6.75
+    outputs = copy.deepcopy(exported_fixture["outputs"])
+    for output in outputs:
+        if output["format"] == "png":
+            output["inspection"]["size_pixels"][0] //= 2
+    shrunk = placement_limits(quality, profile, outputs)
+    assert shrunk["maximum_width_inches"] == 3.375
+    assert shrunk["has_usable_interval"] is False
+    vector_only = [output for output in outputs if output["format"] == "pdf"]
+    assert placement_limits(quality, profile, vector_only)["maximum_width_inches"] == 7
+
+
+def test_placement_limits_cannot_be_forged_in_manifest(exported_fixture, tmp_path):
+    payload = copy.deepcopy(exported_fixture)
+    payload["rendering"]["placement_limits"] = placement_limits(
+        payload["rendering"]["quality"], load_profile(payload["style_profile"]), payload["outputs"])
+    path = tmp_path / "plot_manifest.json"
+    write_manifest(path, payload)
+    assert validate_manifest(path) == []
+    payload["rendering"]["placement_limits"]["single_column_reuse_qualified"] = True
+    write_manifest(path, payload, overwrite=True)
+    assert any("placement limits disagree" in error for error in validate_manifest(path))
+
+
+@pytest.mark.parametrize("bad_width", [0, -1, float("nan"), float("inf")])
+def test_placement_limits_validate_measured_width(exported_fixture, bad_width):
+    quality = copy.deepcopy(exported_fixture["rendering"]["quality"])
+    quality["intended_width_inches"] = bad_width
+    with pytest.raises(ValueError, match="intended_width_inches"):
+        placement_limits(quality, load_profile("strict_aps_v2"), exported_fixture["outputs"])
+
+
 def test_measure_figure_detects_curve_under_in_axes_legend():
     profile = load_profile("candidate_aps_v2")
     with matplotlib.rc_context():
@@ -75,6 +114,70 @@ def test_measure_figure_detects_curve_under_in_axes_legend():
         plt.close(figure)
     assert quality["legend_curve_overlap_count"] == 1
     assert quality["legend_curve_overlaps"][0]["label"] == "curve"
+
+
+def test_multiple_retained_legends_are_all_measured():
+    with matplotlib.rc_context():
+        configure_matplotlib(load_profile("candidate_aps_v2"))
+        figure, axis = plt.subplots(figsize=(6.75, 4.6))
+        try:
+            axis.plot([0, 1], [0.86, 0.86], label="curve")
+            axis.set(xlim=(0, 1), ylim=(0, 1))
+            first = axis.legend(loc="upper left", title=r"$\alpha_T$")
+            axis.add_artist(first)
+            axis.legend(loc="lower right", title="First-order")
+            quality = measure_figure(figure, intended_width_inches=6.75)
+            assert quality["legend_count"] == 2
+            assert first.get_title() in visible_texts(figure)
+            assert quality["legend_curve_overlap_count"] == 1
+            assert quality["legend_curve_overlaps"][0]["legend_index"] == 0
+            first.set_bbox_to_anchor((0.9, 1))
+            quality = measure_figure(figure, intended_width_inches=6.75)
+            assert quality["legend_in_axes_overflow_count"] == 1
+        finally:
+            plt.close(figure)
+
+
+@pytest.mark.parametrize("placement", ["in_axes", "outside_axes"])
+@pytest.mark.parametrize("violation", [None, "curve", "landmark", "missing_evidence", "overflow",
+                                      "missing_legend", "wrong_host", "wrong_content", "pair"])
+def test_declared_positions_allow_clear_keys_and_reject_obstruction(placement, violation):
+    with matplotlib.rc_context():
+        configure_matplotlib(load_profile("candidate_aps_v2"))
+        figure, axis = plt.subplots(figsize=(6.75, 4.6))
+        try:
+            figure.subplots_adjust(top=0.72)
+            axis.plot([0, 1], [0.2, 0.2], label="1.0")
+            axis.set(xlim=(0, 1), ylim=(0, 1))
+            if placement == "in_axes":
+                axis.legend(loc="upper left", title=r"$\alpha_T$")
+            else:
+                figure.legend(*axis.get_legend_handles_labels(), loc="upper left", title=r"$\alpha_T$")
+            quality = measure_figure(figure, intended_width_inches=6.75)
+        finally:
+            plt.close(figure)
+    actual = quality["legend_layout"][0]
+    rendering = {"legend_policy": "declared_geometry_checked", "legend_outside": placement == "outside_axes",
+                 "legend_placements": [{"legend_index": 0, "placement": placement,
+                    "host_axes_index": actual["host_axes_index"], "location": "upper left",
+                    "title": r"$\alpha_T$", "labels": ["1.0"], "scope": "all curves"}]}
+    if violation in {"curve", "landmark", "pair"}:
+        quality[f"legend_{violation}_overlap_count"] = 1
+        quality[f"legend_{violation}_overlaps"] = [{"axis_index": 0}]
+    elif violation == "missing_evidence":
+        del quality["legend_landmark_overlaps"]
+    elif violation == "overflow":
+        quality["legend_in_axes_overflow_count"] = 1
+        quality["legend_in_axes_overflows"] = [0]
+    elif violation == "missing_legend":
+        rendering["legend_placements"] = []
+    elif violation == "wrong_host":
+        rendering["legend_placements"][0]["host_axes_index"] = 9
+    elif violation == "wrong_content":
+        rendering["legend_placements"][0]["labels"] = ["1.2"]
+    errors = []
+    _check_declared_legends(rendering, quality, errors)
+    assert bool(errors) is (violation is not None), errors
 
 
 def test_legend_geometry_preserves_nan_gaps_and_detects_endpoint_markers():
@@ -144,7 +247,7 @@ def test_png_review_stage_allows_only_png_and_marks_vector_pending(exported_fixt
     ("small_height", "below 2 mm"),
     ("missing_geometry", "measurement evidence"),
     ("outward_ticks", "inward major/minor"),
-    ("legend_overlap", "legend must be outside"),
+    ("legend_overlap", "requires a declared geometry-checked layout"),
     ("size_mismatch", "physical size differs"),
     ("print_route", "requires PS/EPS"),
     ("undecided_strict", "select its color/print route"),

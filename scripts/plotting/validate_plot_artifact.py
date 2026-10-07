@@ -16,7 +16,7 @@ if str(_SCRIPT_PROJECT_ROOT) not in sys.path:
 
 from scripts.plotting.plot_manifest import MANIFEST_SCHEMA, PROJECT_ROOT
 from scripts.plotting.plot_style import ALLOWED_PROFILES, load_profile
-from scripts.plotting.plot_quality import inspect_export
+from scripts.plotting.plot_quality import inspect_export, placement_limits
 from scripts.plotting.plot_provenance import code_ref_for_manifest, read_manifest_record, validate_hash_record, validate_snapshot
 from scripts.plotting.plot_bundle import BUNDLE_SCHEMA, expand_bundle
 
@@ -328,6 +328,53 @@ def validate_review_companion(manifest: dict[str, Any], *, repo_root: Path = PRO
     return errors
 
 
+def _check_declared_legends(rendering: dict[str, Any], quality: dict[str, Any], errors: list[str]) -> None:
+    """Check neutral in/out-of-axes declarations against every measured key."""
+    layout = quality.get("legend_layout")
+    declared = rendering.get("legend_placements")
+    count = quality.get("legend_count")
+    if (not isinstance(layout, list) or not isinstance(declared, list) or type(count) is not int
+            or count < 0 or len(layout) != count or len(declared) != count):
+        errors.append("v2 declared legend layout requires matching per-legend measurement and declaration counts")
+        return
+    for index, (actual, requested) in enumerate(zip(layout, declared)):
+        if not isinstance(actual, dict) or not isinstance(requested, dict):
+            errors.append("v2 declared legend entries must be objects")
+            continue
+        if actual.get("legend_index") != index or requested.get("legend_index") != index:
+            errors.append("v2 declared legend order disagrees with measured artists")
+        for field in ("host_axes_index", "title", "labels"):
+            if field not in requested or requested[field] != actual.get(field):
+                errors.append(f"v2 declared legend {field} disagrees with measurement")
+        if any(not isinstance(requested.get(field), str) or not requested[field].strip()
+               for field in ("scope", "location")):
+            errors.append("v2 declared legend requires a location and scientific scope")
+        placement = requested.get("placement")
+        if placement == "in_axes":
+            host = actual.get("host_axes_index")
+            if (type(host) is not int or host < 0 or actual.get("contained_in_host") is not True
+                    or actual.get("overlapped_axes") != [host]):
+                errors.append("v2 declared in-axes legend must fit wholly in its declared host")
+        elif placement == "outside_axes":
+            if actual.get("overlapped_axes") != []:
+                errors.append("v2 declared external legend intersects data axes")
+        else:
+            errors.append("v2 declared legend placement must be in_axes or outside_axes")
+    if all(isinstance(item, dict) and isinstance(item.get("overlapped_axes"), list) for item in layout):
+        if quality.get("legend_axes_overlap_count") != sum(len(item["overlapped_axes"]) for item in layout):
+            errors.append("v2 legend axes overlap count disagrees with per-legend evidence")
+        if rendering.get("legend_outside") is not all(not item["overlapped_axes"] for item in layout):
+            errors.append("v2 legend_outside disagrees with measured placement")
+    for kind in ("curve", "landmark", "in_axes_overflow", "pair"):
+        count_key = f"legend_{kind}_count" if kind == "in_axes_overflow" else f"legend_{kind}_overlap_count"
+        list_key = "legend_in_axes_overflows" if kind == "in_axes_overflow" else f"legend_{kind}_overlaps"
+        overlap_count, records = quality.get(count_key), quality.get(list_key)
+        if type(overlap_count) is not int or not isinstance(records, list) or overlap_count != len(records):
+            errors.append(f"v2 declared legend requires consistent {kind} geometry evidence")
+        elif overlap_count:
+            errors.append(f"v2 declared legend fails {kind} geometry check")
+
+
 def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Path, errors: list[str]) -> None:
     """Apply v2 display checks equally to review and strict assets.
 
@@ -422,6 +469,15 @@ def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Pat
                 errors.append("v2 chart PDF must have exactly one page")
         elif inspection["size_pixels"][0] / width + 1 < profile.dpi:
             errors.append("v2 PNG effective dpi at final placement is below profile dpi")
+    if "placement_limits" in rendering:
+        try:
+            expected_limits = placement_limits(quality, profile, outputs)
+            if rendering["placement_limits"] != expected_limits:
+                errors.append("v2 placement limits disagree with measured glyphs, marks or exported pixels")
+            if not expected_limits["measured_width_qualified"]:
+                errors.append("v2 measured placement lies outside its usable width interval")
+        except (ValueError, TypeError, KeyError) as exc:
+            errors.append(f"v2 invalid placement limits: {exc}")
     glyph_height = quality.get("minimum_capital_numeral_height_mm", 0)
     typography_exception = rendering.get("typography_exception")
     if typography_exception in {"dense_composite_review_compact_legend", "dense_composite_review_compact_typography"}:
@@ -446,9 +502,10 @@ def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Pat
             "shared_in_top_row_panel_reviewed",
             "best_in_axes_reviewed",
             "shared_in_panel_reviewed_geometry_checked",
+            "declared_geometry_checked",
         }
         if not allowed_in_axes_policy:
-            errors.append("v2 legend must be outside data axes; in-axes layout requires a separately reviewed contract")
+            errors.append("v2 in-axes legend requires a declared geometry-checked layout")
         elif rendering.get("legend_policy") == "shared_in_panel_reviewed_geometry_checked":
             if quality.get("legend_in_axes_overflow_count") != 0:
                 errors.append("v2 geometry-checked in-axes legend exceeds its host axes")
@@ -461,6 +518,8 @@ def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Pat
                     errors.append(f"v2 legend {kind} overlap count disagrees with evidence")
                 elif overlap_count != 0:
                     errors.append(f"v2 geometry-checked in-axes legend intersects a plotted {kind}")
+    if rendering.get("legend_policy") == "declared_geometry_checked":
+        _check_declared_legends(rendering, quality, errors)
     ticks = quality.get("tick_axes", [])
     if not ticks or any(not isinstance(item, dict) or not item.get("inward") or not item.get("both_sides") or not item.get("minor_count") or not item.get("major_count") for item in ticks):
         errors.append("v2 requires inward major/minor ticks on all four sides")

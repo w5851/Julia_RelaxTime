@@ -1,0 +1,37 @@
+{
+  "schema": "publication_clean_v13_png_acceptance_v1",
+  "accepted_at": "2026-10-06T03:17:32.179538+00:00",
+  "status": "author_accepted_png_layout",
+  "author_png_accepted": true,
+  "pdf_export_authorized": true,
+  "authorization": {
+    "source": "direct user message in current Codex conversation",
+    "user_statement": "这版v13效果看起来不错，我人工审阅可以通过；PNG审阅通过，可以产出v13 PDF",
+    "scope": "v13 PNG case accepted at version level; export corresponding PDFs with the same frozen renderer and inputs"
+  },
+  "png_package": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_package",
+    "bytes": 253681,
+    "sha256": "0c2cb4e7b479d209021f8d422903a90e7bf2d62444f55f8d0a8a63d8a095a0ef"
+  },
+  "png_bundle": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_bundle",
+    "bytes": 1780823,
+    "sha256": "b68def4e0dd8f7706baa1691bb4f1cdbae7f693a5e1649835b9f6bc9c2e22574"
+  },
+  "source_snapshot": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_code_snapshot_v1.zip",
+    "path_kind": "repository_relative",
+    "role": "frozen_v13_code_and_contract",
+    "bytes": 205058,
+    "sha256": "d3defeb498f9c4ed5f8cd66c79fbb0604c757f1da6f4308789397b7bad995f1b"
+  },
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "numerical_production_authorized": false,
+  "per_file_author_inspection_not_asserted": true
+}

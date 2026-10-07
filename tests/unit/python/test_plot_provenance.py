@@ -125,3 +125,34 @@ def test_retired_manifest_archive_preserves_only_explicit_manifest_references(tm
     assert validate_hash_record(data_record, root=tmp_path, label="inputs")
     archive.write_bytes(b"tampered archive")
     assert validate_hash_record(record, root=tmp_path, label="outputs")
+
+
+def test_uncommitted_source_archive_matches_exact_hash_and_preserves_artifact_checks(tmp_path):
+    originals = {
+        "scripts/draw.py": b"# uncommitted v12 renderer\n",
+        "docs/analysis/example/plotting_case_contract.md": b"v12 geometry contract\n",
+        "docs/analysis/example/input.csv": b"x,y\n1,2\n",
+        "data/outputs/figures/example/plot_manifest.json": b'{"status":"review"}',
+    }
+    records = []
+    archive = tmp_path / "source.zip"
+    with zipfile.ZipFile(archive, "w") as snapshot:
+        for relative, payload in originals.items():
+            path = tmp_path / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(payload)
+            records.append(input_record(path, role="fixture", root=tmp_path))
+            snapshot.writestr(relative, payload)
+            path.write_bytes(b"changed")
+    registry = tmp_path / "config/plotting/historical_snapshots.toml"
+    registry.parent.mkdir(parents=True)
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    registry.write_text(f'[[working_tree_source_archives]]\narchive="source.zip"\nsha256="{digest}"\n', encoding="utf-8")
+    for record in records[:2]:
+        assert validate_hash_record(record, root=tmp_path, label="inputs") == []
+        assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False)
+    for record in records[2:]:
+        assert validate_hash_record(record, root=tmp_path, label="inputs")
+    assert validate_hash_record({**records[0], "sha256": "0" * 64}, root=tmp_path, label="inputs")
+    archive.write_bytes(b"tampered source archive")
+    assert validate_hash_record(records[0], root=tmp_path, label="inputs")

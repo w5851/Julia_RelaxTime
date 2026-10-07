@@ -111,7 +111,13 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py --png-review`
   - 使用同一 v5 冻结点表生成 72 张单图和两张紧凑复合 PNG；参数/端点图例分放 (a)/(c)，检查图例与曲线/marker 相交，记录 PNG-review 字形例外；不生成 PDF、不修改 v5/current、不调用 solver
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py --png-review`
-  - 当前 PNG 审查入口；保留 v10 布局，弛豫时间复合图全图 log-y 并使用普通数字刻度，输运系数复合图保持线性、统一每行小数位；`First-order` 图例左对齐，caption 限定端点适用范围；生成 72 张单图和两张复合 PNG，不覆盖 v10、不改 v5/current、不补矢量
+  - 保留 v11 历史 PNG 审查入口：弛豫时间全 log-y、普通数字刻度和行内小数位，生成 72 张单图与两张复合图；已接受阶段的原始产物不覆盖。
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v12.py --png-review`
+  - 保留 v12 历史 PNG 审查入口：72 张双栏单图、2 张复合图、1 张低值局部图，各含彩色／灰度版本和图外 key；原始源码／合同有独立快照，不覆盖已存在的 case。
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v13.py --png-review`
+  - 当前 PNG 审查入口：同一冻结点表生成 75 对彩色／灰度图，主图把参数／端点 key 分放 (a)/(c)，单图逐份选择并检查所有图例；按 600 dpi 测量真实遮挡、最终字高和缩放区间，保留 v12 低值局部窗口。不补 PDF 或晋升资格。试排使用 `--preview <new-directory>`。
+- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v13_pdf.py`
+  - 从已接受的 v13 PNG 与冻结 renderer 导出 75 张矢量 PDF；核对全部重绘 PNG 像素、panel/legend 声明、嵌入字体、单页及无栅格包裹。`--check` 只验证已有 PDF 包和接受记录，不重绘、不更新 publication 指针。
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
   - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
 - `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`

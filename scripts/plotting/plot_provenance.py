@@ -12,10 +12,10 @@ from typing import Any
 
 
 @lru_cache(maxsize=8)
-def _manifest_archive(path: str, expected: str, mtime_ns: int, size: int) -> dict[str, bytes]:
+def _verified_archive(path: str, expected: str, mtime_ns: int, size: int) -> dict[str, bytes]:
     payload = Path(path).read_bytes()
     if hashlib.sha256(payload).hexdigest() != expected:
-        raise ValueError(f"retired manifest archive hash mismatch: {path}")
+        raise ValueError(f"historical archive hash mismatch: {path}")
     with zipfile.ZipFile(Path(path)) as snapshot:
         return {name: snapshot.read(name) for name in snapshot.namelist()}
 
@@ -44,7 +44,7 @@ def record_bytes(record: dict[str, Any], *, root: Path) -> bytes:
                 break
             archive = root / entry["archive"]
             stat = archive.stat()
-            contents = _manifest_archive(str(archive), entry["sha256"], stat.st_mtime_ns, stat.st_size)
+            contents = _verified_archive(str(archive), entry["sha256"], stat.st_mtime_ns, stat.st_size)
             payload = contents.get(relative)
             if payload is not None and hashlib.sha256(payload).hexdigest() == expected:
                 return payload
@@ -107,7 +107,24 @@ def is_code_record(path: Path, root: Path) -> bool:
     return ((rel.startswith("scripts/") and path.suffix in {".py", ".jl", ".sh", ".ps1"})
             or (rel.startswith("config/plotting/") and path.suffix == ".toml")
             or (rel.startswith("docs/guides/sop/") and path.suffix == ".md")
-            or (rel.startswith(".agents/skills/") and path.name == "SKILL.md"))
+            or (rel.startswith(".agents/skills/") and path.name == "SKILL.md")
+            or (rel.startswith("docs/analysis/") and path.name == "plotting_case_contract.md"))
+
+
+def working_tree_source(path: Path, expected: str, root: Path) -> bytes | None:
+    """Resolve exact source bytes without treating a dirty base commit as authority."""
+    registry = root / "config/plotting/historical_snapshots.toml"
+    if not registry.is_file() or not is_code_record(path, root):
+        return None
+    relative = path.resolve().relative_to(root.resolve()).as_posix()
+    for entry in tomllib.loads(registry.read_text(encoding="utf-8")).get("working_tree_source_archives", []):
+        archive = root / entry["archive"]
+        stat = archive.stat()
+        contents = _verified_archive(str(archive), entry["sha256"], stat.st_mtime_ns, stat.st_size)
+        payload = contents.get(relative)
+        if payload is not None and hashlib.sha256(payload).hexdigest() == expected.lower():
+            return payload
+    return None
 
 
 def code_ref_for_manifest(manifest_path: Path, root: Path) -> str | None:
@@ -154,11 +171,15 @@ def validate_hash_record(record: dict[str, Any], *, root: Path, label: str,
                 return errors
             snapshot_path = Path(snapshot["path"])
             payload = (snapshot_path if snapshot_path.is_absolute() else root / snapshot_path).read_bytes()
-        elif (record.get("git_commit") or code_ref) and is_code_record(path, root):
-            commit = record.get("git_commit") or code_ref
+        elif is_code_record(path, root):
             try:
-                payload = git_source(str(root.resolve()), commit, path.relative_to(root.resolve()).as_posix())
-            except ValueError as exc:
+                retained = working_tree_source(path, expected, root)
+                if retained is not None:
+                    payload = retained
+                elif record.get("git_commit") or code_ref:
+                    commit = record.get("git_commit") or code_ref
+                    payload = git_source(str(root.resolve()), commit, path.relative_to(root.resolve()).as_posix())
+            except (OSError, ValueError, zipfile.BadZipFile) as exc:
                 return [f"{label}: {exc}"]
     if payload is None:
         return [f"{label} missing file: {value}"]

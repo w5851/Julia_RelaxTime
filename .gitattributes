@@ -1,6 +1,11 @@
 # Preserve SHA256-bound publication snapshots and their exact input bytes.
 # These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
 
+# Frozen literature audit inputs referenced by the v13 figure package.
+docs/analysis/relaxtime/phase_guided_transport/literature_figure_style_audit_20261005/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve original line-end spaces in this hash-bound external text capture.
+docs/analysis/relaxtime/phase_guided_transport/literature_figure_style_audit_20261005/aps_style_basics.txt whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
 # Frozen v10 parent and v11 PNG/PDF/placement snapshots.
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
@@ -76,3 +81,11 @@ docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publicatio
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v3/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/README.md whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/figures/plot_manifest.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve exact bytes in the v12/v13 review cases, including JSON/Markdown evidence.
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_png_acceptance_v1.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v12_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "verified_utc": "2026-10-05T12:04:55.017935+00:00",
+  "source_pdf_hashes_and_page_counts": 16,
+  "crossref_doi_records": 16,
+  "complete_figure_number_coverage_papers": 16,
+  "numbered_figures": 151,
+  "eligible_figures": 148,
+  "explicit_exclusions": 3,
+  "primary_counts": {
+    "inside": 125,
+    "top_external": 2,
+    "other_external": 7,
+    "direct_or_caption": 8,
+    "no_key_needed": 6,
+    "uncertain": 0
+  },
+  "report_paper_table_rows_checked": 16,
+  "reviewed_example_images": 5,
+  "protected_v12_and_sop_hashes_unchanged": 4,
+  "script_syntax": "passed",
+  "validation_scope": "Data coverage, citation/source integrity, arithmetic, report table agreement and preservation. Not a numerical or manuscript-production acceptance."
+}

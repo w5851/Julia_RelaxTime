@@ -1,0 +1,17 @@
+﻿paper_id,stratum,journal,year,doi,numbered_figures,eligible_figures,inside,top_external,other_external,direct_or_caption,no_key_needed,uncertain,uses_top_external
+C01,core,Phys.Rev.C,2026,10.1103/yp8h-pdkr,7,7,5,0,0,2,0,0,False
+C02,core,Phys.Rev.D,2026,10.1103/wdfm-gsgg,19,19,13,0,0,0,6,0,False
+C03,core,Phys.Rev.D,2026,10.1103/fp2p-rkpp,18,18,15,0,0,3,0,0,False
+C04,core,Phys.Rev.D,2025,10.1103/PhysRevD.111.076012,7,7,5,2,0,0,0,0,True
+C05,core,Phys.Rev.C,2021,10.1103/PhysRevC.103.054901,21,18,15,0,3,0,0,0,False
+C06,core,Phys.Rev.C,2021,10.1103/PhysRevC.103.034904,7,7,7,0,0,0,0,0,False
+C07,core,Phys.Rev.D,2020,10.1103/PhysRevD.101.096006,20,20,20,0,0,0,0,0,False
+C08,core,Phys.Rev.D,2019,10.1103/PhysRevD.99.014004,6,6,3,0,0,3,0,0,False
+A01,adjacent,Phys.Rev.D,2026,10.1103/rjkc-9gdc,10,10,10,0,0,0,0,0,False
+A02,adjacent,Phys.Rev.D,2026,10.1103/phyn-xc87,11,11,11,0,0,0,0,0,False
+A03,adjacent,Phys.Rev.D,2023,10.1103/PhysRevD.108.096016,4,4,4,0,0,0,0,0,False
+A04,adjacent,Phys.Rev.C,2022,10.1103/PhysRevC.105.054903,4,4,0,0,4,0,0,0,False
+A05,adjacent,Phys.Rev.D,2021,10.1103/PhysRevD.104.094037,2,2,2,0,0,0,0,0,False
+A06,adjacent,Phys.Rev.D,2021,10.1103/PhysRevD.103.094009,4,4,4,0,0,0,0,0,False
+A07,adjacent,Phys.Rev.D,2021,10.1103/PhysRevD.103.074017,4,4,4,0,0,0,0,0,False
+A08,adjacent,Phys.Rev.D,2020,10.1103/PhysRevD.102.036011,7,7,7,0,0,0,0,0,False

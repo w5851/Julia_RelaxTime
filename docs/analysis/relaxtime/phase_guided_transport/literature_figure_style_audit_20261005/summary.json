@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-05",
+  "unit": "numbered figure; panel count counts primary coordinate regions, excluding insets",
+  "numbered_figures": 151,
+  "eligible_figures": 148,
+  "exclusions": [
+    {
+      "paper_id": "C05",
+      "figure_number": 1,
+      "pdf_page": 4,
+      "note": "Excluded: two 3D mass surfaces, no 2D line or point panel."
+    },
+    {
+      "paper_id": "C05",
+      "figure_number": 6,
+      "pdf_page": 6,
+      "note": "Excluded: Feynman diagrams."
+    },
+    {
+      "paper_id": "C05",
+      "figure_number": 7,
+      "pdf_page": 6,
+      "note": "Excluded: Feynman diagrams."
+    }
+  ],
+  "subsets": {
+    "all": {
+      "figure_count": 148,
+      "paper_count": 16,
+      "counts": {
+        "inside": 125,
+        "top_external": 2,
+        "other_external": 7,
+        "direct_or_caption": 8,
+        "no_key_needed": 6,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 84.4595,
+        "top_external": 1.3514,
+        "other_external": 4.7297,
+        "direct_or_caption": 5.4054,
+        "no_key_needed": 4.0541,
+        "uncertain": 0.0
+      }
+    },
+    "core": {
+      "figure_count": 102,
+      "paper_count": 8,
+      "counts": {
+        "inside": 83,
+        "top_external": 2,
+        "other_external": 3,
+        "direct_or_caption": 8,
+        "no_key_needed": 6,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 81.3725,
+        "top_external": 1.9608,
+        "other_external": 2.9412,
+        "direct_or_caption": 7.8431,
+        "no_key_needed": 5.8824,
+        "uncertain": 0.0
+      }
+    },
+    "adjacent": {
+      "figure_count": 46,
+      "paper_count": 8,
+      "counts": {
+        "inside": 42,
+        "top_external": 0,
+        "other_external": 4,
+        "direct_or_caption": 0,
+        "no_key_needed": 0,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 91.3043,
+        "top_external": 0.0,
+        "other_external": 8.6957,
+        "direct_or_caption": 0.0,
+        "no_key_needed": 0.0,
+        "uncertain": 0.0
+      }
+    },
+    "publisher_only": {
+      "figure_count": 117,
+      "paper_count": 13,
+      "counts": {
+        "inside": 100,
+        "top_external": 2,
+        "other_external": 4,
+        "direct_or_caption": 5,
+        "no_key_needed": 6,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 85.4701,
+        "top_external": 1.7094,
+        "other_external": 3.4188,
+        "direct_or_caption": 4.2735,
+        "no_key_needed": 5.1282,
+        "uncertain": 0.0
+      }
+    },
+    "author_versions_only": {
+      "figure_count": 31,
+      "paper_count": 3,
+      "counts": {
+        "inside": 25,
+        "top_external": 0,
+        "other_external": 3,
+        "direct_or_caption": 3,
+        "no_key_needed": 0,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 80.6452,
+        "top_external": 0.0,
+        "other_external": 9.6774,
+        "direct_or_caption": 9.6774,
+        "no_key_needed": 0.0,
+        "uncertain": 0.0
+      }
+    },
+    "prd_only": {
+      "figure_count": 112,
+      "paper_count": 12,
+      "counts": {
+        "inside": 98,
+        "top_external": 2,
+        "other_external": 0,
+        "direct_or_caption": 6,
+        "no_key_needed": 6,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 87.5,
+        "top_external": 1.7857,
+        "other_external": 0.0,
+        "direct_or_caption": 5.3571,
+        "no_key_needed": 5.3571,
+        "uncertain": 0.0
+      }
+    },
+    "multipanel": {
+      "figure_count": 68,
+      "paper_count": 14,
+      "counts": {
+        "inside": 57,
+        "top_external": 2,
+        "other_external": 6,
+        "direct_or_caption": 3,
+        "no_key_needed": 0,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 83.8235,
+        "top_external": 2.9412,
+        "other_external": 8.8235,
+        "direct_or_caption": 4.4118,
+        "no_key_needed": 0.0,
+        "uncertain": 0.0
+      }
+    },
+    "transport_specific": {
+      "figure_count": 79,
+      "paper_count": 16,
+      "counts": {
+        "inside": 66,
+        "top_external": 1,
+        "other_external": 6,
+        "direct_or_caption": 6,
+        "no_key_needed": 0,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 83.5443,
+        "top_external": 1.2658,
+        "other_external": 7.5949,
+        "direct_or_caption": 7.5949,
+        "no_key_needed": 0.0,
+        "uncertain": 0.0
+      }
+    },
+    "explicit_series_keys": {
+      "figure_count": 134,
+      "paper_count": 16,
+      "counts": {
+        "inside": 125,
+        "top_external": 2,
+        "other_external": 7,
+        "direct_or_caption": 0,
+        "no_key_needed": 0,
+        "uncertain": 0
+      },
+      "percent": {
+        "inside": 93.2836,
+        "top_external": 1.4925,
+        "other_external": 5.2239,
+        "direct_or_caption": 0.0,
+        "no_key_needed": 0.0,
+        "uncertain": 0.0
+      }
+    }
+  },
+  "paper_level_ever_used": {
+    "inside": 15,
+    "top_external": 1,
+    "other_external": 2,
+    "direct_or_caption": 3,
+    "no_key_needed": 1,
+    "uncertain": 0
+  },
+  "global_top_keys": [
+    {
+      "paper_id": "C04",
+      "figure_number": 2,
+      "pdf_page": 10,
+      "panel_count": 25,
+      "top_header_rows": 1
+    },
+    {
+      "paper_id": "C04",
+      "figure_number": 3,
+      "pdf_page": 11,
+      "panel_count": 25,
+      "top_header_rows": 1
+    }
+  ],
+  "two_row_global_top_key_count": 0,
+  "panel_count_distribution": {
+    "1": 80,
+    "2": 38,
+    "3": 14,
+    "4": 8,
+    "6": 4,
+    "8": 2,
+    "25": 2
+  },
+  "figures_with_insets": [
+    "C01 F2",
+    "A01 F6",
+    "A01 F7",
+    "A05 F2"
+  ],
+  "pdfs_verified_this_run": [
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08"
+  ],
+  "limitations": [
+    "Fixed targeted sample; not a random or exhaustive field census.",
+    "301 non-selected records lack contemporaneous per-record exclusion reasons.",
+    "Figures are clustered by paper and overlapping author groups; no population confidence interval.",
+    "13 publisher PDFs and 3 author versions; version sensitivity is reported separately.",
+    "One reviewing agent; dimensions, exact source fonts and grayscale quality are not inferred from screenshots.",
+    "No sampled figure has exactly 9 or 12 primary panels, as in the target v12 composites."
+  ]
+}

@@ -1,0 +1,2209 @@
+{
+  "schema": "publication_clean_v12_placement_report_v1",
+  "recommended_width_mm": 171.45,
+  "source": "native-size renderer measurements; not a compiled manuscript or physical-printer test",
+  "figures": [
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi",
+      "kind": "single",
+      "physical_size_inches": [
+        6.75,
+        4.6
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/composites/figure1_relaxation_times_comparison",
+      "kind": "composite",
+      "physical_size_inches": [
+        6.75,
+        7.1
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/composites/figure2_transport_coefficients_comparison",
+      "kind": "composite",
+      "physical_size_inches": [
+        6.75,
+        5.9
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "stem": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/details/figure1_low_value_details",
+      "kind": "detail",
+      "physical_size_inches": [
+        6.75,
+        5.5
+      ],
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 2.8125,
+          "landmark": 4.251968503937008
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    }
+  ]
+}

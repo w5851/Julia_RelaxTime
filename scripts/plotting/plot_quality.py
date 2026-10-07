@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+import math
 import re
 import subprocess
 from typing import Any, Iterable
@@ -86,16 +87,22 @@ def _text_glyphs(artist: Any) -> list[tuple[str, float, str]]:
     return [(font_path, float(properties.get_size_in_points()), char) for char in text]
 
 
+def visible_legends(figure: Any) -> list[Any]:
+    """Include every public Legend artist, also those retained with add_artist."""
+    from matplotlib.legend import Legend
+
+    legends = [*figure.legends, *(child for ax in figure.axes for child in ax.get_children()
+                                 if isinstance(child, Legend))]
+    return list({id(item): item for item in legends if item.get_visible()}.values())
+
+
 def visible_texts(figure: Any) -> list[Any]:
     """Skip unused/out-of-range tick objects retained by Matplotlib locators."""
     items = list(figure.texts)
-    for legend in figure.legends:
+    for legend in visible_legends(figure):
         items.extend([legend.get_title(), *legend.get_texts()])
     for ax in figure.axes:
         items.extend([ax.xaxis.label, ax.yaxis.label, ax.title, *ax.texts])
-        legend = ax.get_legend()
-        if legend is not None:
-            items.extend([legend.get_title(), *legend.get_texts()])
         for axis in (ax.xaxis, ax.yaxis):
             low, high = sorted(axis.get_view_interval())
             items.append(axis.get_offset_text())
@@ -197,7 +204,7 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
             dy = min(box.y1, other.y1) - max(box.y0, other.y0)
             if dx > 1 and dy > 1:
                 overlaps.append([text, other_text])
-    legends = [*figure.legends, *(ax.get_legend() for ax in figure.axes if ax.get_legend() is not None)]
+    legends = visible_legends(figure)
     legend_axes_overlaps = int(sum(
         legend.get_window_extent(renderer).overlaps(ax.get_window_extent(renderer))
         for legend in legends for ax in figure.axes
@@ -205,14 +212,27 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
     legend_curve_overlaps = []
     legend_landmark_overlaps = []
     legend_in_axes_overflows = []
-    for axis_index, ax in enumerate(figure.axes):
-        legend = ax.get_legend()
-        if legend is None:
-            continue
+    legend_layout = []
+    legend_pair_overlaps = []
+    for legend_index, legend in enumerate(legends):
         box = legend.get_window_extent(renderer)
-        if (box.x0 < ax.bbox.x0 or box.y0 < ax.bbox.y0
-                or box.x1 > ax.bbox.x1 or box.y1 > ax.bbox.y1):
-            legend_in_axes_overflows.append(axis_index)
+        host = legend.axes
+        host_index = figure.axes.index(host) if host in figure.axes else None
+        overlapped_axes = [index for index, ax in enumerate(figure.axes) if box.overlaps(ax.bbox)]
+        contained = bool(box.x0 >= host.bbox.x0 and box.y0 >= host.bbox.y0
+                         and box.x1 <= host.bbox.x1 and box.y1 <= host.bbox.y1) if host is not None else None
+        if host_index in overlapped_axes and not contained:
+            legend_in_axes_overflows.append(host_index)
+        legend_layout.append({
+            "legend_index": legend_index, "host_axes_index": host_index,
+            "overlapped_axes": overlapped_axes, "contained_in_host": contained,
+            "title": legend.get_title().get_text(), "labels": [text.get_text() for text in legend.get_texts()],
+            "bbox_inches": [float(value) / figure.dpi for value in box.bounds],
+        })
+        for other_index, other in enumerate(legends[:legend_index]):
+            other_box = other.get_window_extent(renderer)
+            if box.overlaps(other_box):
+                legend_pair_overlaps.append([other_index, legend_index])
     for legend_index, legend in enumerate(legends):
         legend_box = legend.get_window_extent(renderer)
         for axis_index, ax in enumerate(figure.axes):
@@ -285,6 +305,10 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
         "clipped_text": clipped,
         "text_overlap_pairs": overlaps,
         "legend_axes_overlap_count": legend_axes_overlaps,
+        "legend_count": len(legends),
+        "legend_layout": legend_layout,
+        "legend_pair_overlap_count": len(legend_pair_overlaps),
+        "legend_pair_overlaps": legend_pair_overlaps,
         "legend_curve_overlap_count": len(legend_curve_overlaps),
         "legend_curve_overlaps": legend_curve_overlaps,
         "legend_landmark_overlap_count": len(legend_landmark_overlaps),
@@ -292,6 +316,52 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
         "legend_in_axes_overflow_count": len(legend_in_axes_overflows),
         "legend_in_axes_overflows": legend_in_axes_overflows,
         "human_visual_review": "required",
+    }
+
+
+def placement_limits(quality: dict[str, Any], profile: PlotProfile,
+                     outputs: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Compute the usable insertion interval, without granting publication status.
+
+    Glyph/line/marker limits bound reduction. Actual PNG pixels and the project
+    width cap bound enlargement. The measurements must refer to one known width.
+    """
+    width = quality.get("intended_width_inches")
+    if not isinstance(width, (int, float)) or not math.isfinite(width) or width <= 0:
+        raise ValueError("intended_width_inches must be finite and positive")
+    policy = profile.data["quality"]
+    fields = {
+        "glyph": ("minimum_capital_numeral_height_mm", "min_capital_numeral_height_mm"),
+        "curve": ("minimum_curve_linewidth_pt", "min_curve_linewidth_pt"),
+        "landmark": ("minimum_landmark_diameter_mm", "min_landmark_diameter_mm"),
+    }
+    minima = {}
+    for name, (field, threshold) in fields.items():
+        value = quality.get(field)
+        if value is None and name == "landmark":
+            continue
+        if not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{field} must be finite and positive")
+        minima[name] = width * float(policy[threshold]) / value
+    maxima = {"project_profile": float(policy["max_width_inches"])}
+    for index, output in enumerate(outputs):
+        if output.get("format") == "png":
+            pixels = output.get("inspection", {}).get("size_pixels", [])
+            if len(pixels) != 2 or not all(isinstance(x, (int, float)) and math.isfinite(x) and x > 0 for x in pixels):
+                raise ValueError("PNG placement requires inspected positive pixel dimensions")
+            maxima[f"png_{index}_effective_dpi"] = pixels[0] / profile.dpi
+    low, high = max(minima.values()), min(maxima.values())
+    single_width = float(profile.data["figure_size_in"]["single_column"][0])
+    return {
+        "schema": "plot_placement_limits_v1", "measured_width_inches": width,
+        "minimum_width_inches": low, "maximum_width_inches": high,
+        "minimum_width_constraints": minima, "maximum_width_constraints": maxima,
+        "has_usable_interval": low <= high,
+        "measured_width_qualified": low <= width <= high,
+        "single_column_width_inches": single_width,
+        "single_column_reuse_qualified": low <= single_width <= high,
+        "single_column_minimum_glyph_mm": quality["minimum_capital_numeral_height_mm"] * single_width / width,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate",
     }
 
 
