@@ -4,7 +4,9 @@
 Only the displayed neighborhood and contour levels change. No fit, solver,
 zero-filling, smoothing, gap bridging, or production-default change occurs.
 Legacy review mode retains +/-10 MeV parameter probes. Presentation mode shows
-only the current freeze-out curve and explicit 0.05 contour spacing.
+only the current freeze-out curve and regular 0.05 contour spacing, with optional
+extra levels below ratio 0.05. An optional rectangle extends the displayed region
+using existing native-grid values only.
 """
 
 from __future__ import annotations
@@ -79,18 +81,31 @@ def load_frozen(csv_path: Path, manifest_path: Path, profile_path: Path) -> tupl
 
 def neighborhood(rows: list[dict], coefficients: dict, *, band_MeV: float = 20,
                  muB_max_MeV: float = 750,
-                 T_bounds_MeV: tuple[float, float] = (50, 190)) -> dict:
+                 T_bounds_MeV: tuple[float, float] = (50, 190),
+                 include_rectangle_MeV: tuple[float, float, float, float] | None = None) -> dict:
     import numpy as np
 
     Ts = sorted({row["T"] for row in rows if T_bounds_MeV[0] <= row["T"] <= T_bounds_MeV[1]})
     mus = sorted({row["muB"] for row in rows if 0 <= row["muB"] <= muB_max_MeV})
+    if include_rectangle_MeV is not None:
+        if len(include_rectangle_MeV) != 4 or not all(math.isfinite(x) for x in include_rectangle_MeV):
+            raise ValueError("include-rectangle-MeV requires four finite bounds: T_MIN T_MAX MUB_MIN MUB_MAX")
+        t_min, t_max, mu_min, mu_max = include_rectangle_MeV
+        if not Ts or not mus or not (Ts[0] <= t_min <= t_max <= Ts[-1]
+                                    and mus[0] <= mu_min <= mu_max <= mus[-1]):
+            raise ValueError("include-rectangle-MeV must be ordered and within the existing displayed grid bounds")
     lookup = {(row["T"], row["muB"]): row for row in rows}
     values = np.full((len(Ts), len(mus)), np.nan)
     selected = np.zeros(values.shape, dtype=bool)
+    band_selected = np.zeros(values.shape, dtype=bool)
+    rectangle_selected = np.zeros(values.shape, dtype=bool)
     failed = np.zeros(values.shape, dtype=bool)
     for i, T in enumerate(Ts):
         for j, mu in enumerate(mus):
-            selected[i, j] = abs(T - freezeout_T(mu, coefficients)) <= band_MeV
+            band_selected[i, j] = abs(T - freezeout_T(mu, coefficients)) <= band_MeV
+            if include_rectangle_MeV is not None:
+                rectangle_selected[i, j] = t_min <= T <= t_max and mu_min <= mu <= mu_max
+            selected[i, j] = band_selected[i, j] or rectangle_selected[i, j]
             row = lookup[(T, mu)]
             if selected[i, j]:
                 failed[i, j] = row["R"] is None
@@ -99,7 +114,39 @@ def neighborhood(rows: list[dict], coefficients: dict, *, band_MeV: float = 20,
     valid = np.isfinite(values)
     cells = valid[:-1, :-1] & valid[1:, :-1] & valid[:-1, 1:] & valid[1:, 1:]
     return {"T": np.array(Ts), "muB": np.array(mus), "R": values,
-            "selected": selected, "failed": failed, "valid_cells": cells}
+            "selected": selected, "failed": failed, "valid_cells": cells,
+            "band_selected": band_selected, "rectangle_selected": rectangle_selected,
+            "added": selected & ~band_selected,
+            "include_rectangle_MeV": include_rectangle_MeV}
+
+
+def export_selected_tables(csv_path: Path, output_dir: Path, data: dict) -> list[dict]:
+    """Copy selected CSV rows verbatim at field level, including all diagnostics."""
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = reader.fieldnames
+        raw_rows = list(reader)
+    positions = {(float(T), float(mu)): (i, j) for i, T in enumerate(data["T"])
+                 for j, mu in enumerate(data["muB"])}
+    records = []
+    for name, mask in (("display_points", data["selected"]),
+                       ("added_display_points", data["added"]),
+                       ("requested_region_points", data["rectangle_selected"])):
+        selected_rows = []
+        for row in raw_rows:
+            position = positions.get((float(row["T_MeV"]), float(row["muB_MeV"])))
+            if position is not None and mask[position]:
+                selected_rows.append(row)
+        path = output_dir / f"{name}.csv"
+        with path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(selected_rows)
+        records.append({"role": name, "path": str(path.resolve()), "sha256": digest(path),
+                        "bytes": path.stat().st_size, "row_count": len(selected_rows),
+                        "status_counts": {status: sum(row["status"] == status for row in selected_rows)
+                                          for status in sorted({row["status"] for row in selected_rows})}})
+    return records
 
 
 def uniform_levels(minimum: float, maximum: float, step: float = .05) -> list[float]:
@@ -112,6 +159,16 @@ def is_labeled_level(level: float) -> bool:
     return math.isclose(level * 10, round(level * 10), rel_tol=0, abs_tol=1e-8)
 
 
+def select_low_ratio_levels(minimum: float, maximum: float, requested) -> list[float]:
+    if requested is None:
+        return []
+    if any(not math.isfinite(level) or not 0 < level < .05 for level in requested):
+        raise ValueError("low-ratio-levels must be finite, positive and strictly below 0.05")
+    if len(set(requested)) != len(requested):
+        raise ValueError("low-ratio-levels must be unique")
+    return sorted(level for level in requested if minimum <= level <= maximum)
+
+
 def density_route(source: dict) -> str:
     route = source.get("density_route", "direct_finite_q")
     if route not in {"direct_finite_q", "q0_lambda_reference"}:
@@ -121,7 +178,8 @@ def density_route(source: dict) -> str:
 
 def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
                       route: str = "direct_finite_q", color_limits=None,
-                      clean_contours: bool = False, prescription: str | None = None) -> tuple:
+                      clean_contours: bool = False, prescription: str | None = None,
+                      low_ratio_levels=None) -> tuple:
     """Large group-meeting canvas, not an APS/final-delivery qualification."""
     import matplotlib.pyplot as plt
     from matplotlib.colors import Normalize, ListedColormap
@@ -139,6 +197,7 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
     cax = fig.add_axes([.88, .19, .025, .70])
     values = np.ma.masked_invalid(data["R"])
     minimum, maximum = float(values.min()), float(values.max())
+    low_levels = select_low_ratio_levels(minimum, maximum, low_ratio_levels)
     lower = math.floor(minimum / .05) * .05
     upper = math.ceil(maximum / .05) * .05
     if color_limits is not None:
@@ -184,7 +243,10 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
     ax.tick_params(which="both", direction="in", top=True, right=True)
     ax.xaxis.set_minor_locator(AutoMinorLocator(2))
     ax.yaxis.set_minor_locator(AutoMinorLocator(2))
-    fig.text(.47, .955, r"$K^+/\pi^+$ near chemical freeze-out", ha="center", fontsize=23)
+    rectangle = data.get("include_rectangle_MeV")
+    title = (r"$K^+/\pi^+$: freeze-out band and low-$T$ region" if rectangle is not None
+             else r"$K^+/\pi^+$ near chemical freeze-out")
+    fig.text(.47, .955, title, ha="center", fontsize=23)
     route_label = "q=0 extrapolated" if route == "q0_lambda_reference" else "finite-$q$"
     if route == "q0_lambda_reference" and prescription == "finite_window":
         route_label += "; finite window"
@@ -245,6 +307,35 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
                         fmt="%.2f", fontsize=15, rightside_up=True)
     if [label.get_text() for label in labels] != expected_labels:
         raise ValueError("contour labels do not match their selected source-level paths")
+    low_labels = []
+    if low_levels:
+        # A separate contour set keeps the regular paths and label positions intact.
+        low_contour = ax.contour(data["muB"], data["T"], values, levels=low_levels,
+                                 colors="black", linewidths=1.15, corner_mask=False, zorder=5)
+        low_positions, expected_low_labels = [], []
+        for index, (level, paths) in enumerate(zip(low_contour.levels, low_contour.allsegs)):
+            candidates = []
+            for path in paths:
+                if len(path) < 4:
+                    continue
+                for fraction in np.linspace(.1, .9, 41):
+                    x, y = path[int(fraction * (len(path) - 1))]
+                    pixel = ax.transData.transform((x, y))
+                    if (25 < x < 715 and max(45, float(data["T"].min()) + 4) < y < 214
+                            and abs(y - freezeout_T(float(x), coefficients)) > 3):
+                        distance = min((np.linalg.norm(pixel - other) for other in accepted_pixels), default=1e6)
+                        preference = abs(fraction - (.25 if index % 2 == 0 else .70))
+                        candidates.append((distance - 35 * preference, (float(x), float(y)), pixel))
+            if candidates:
+                _, position, pixel = max(candidates, key=lambda item: item[0])
+                low_positions.append(position)
+                expected_low_labels.append(f"{level:g}")
+                accepted_pixels.append(pixel)
+        low_labels = ax.clabel(low_contour, manual=low_positions, inline=True, inline_spacing=6,
+                                fmt=lambda level: f"{level:g}", fontsize=15, rightside_up=True)
+        if [label.get_text() for label in low_labels] != expected_low_labels:
+            raise ValueError("low-ratio labels do not match their selected source-level paths")
+        labels = [*labels, *low_labels]
     for label in labels:
         label.set_path_effects([pe.Stroke(linewidth=.7, foreground="white"), pe.Normal()])
         label.set_zorder(10)
@@ -252,23 +343,37 @@ def plot_presentation(data: dict, coefficients: dict, band_MeV: float, *,
                      label="Current chemical freeze-out")]
     if not clean_contours:
         handles.append(Patch(facecolor="#777777", label="Failed support"))
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(.47, .067),
+    legend_y = .058 if rectangle is not None else .067
+    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(.47, legend_y),
                ncol=len(handles), fontsize=16)
-    fig.text(.47, .043, r"Contour spacing: $\Delta R_+=0.05$; label spacing: $0.10$.",
-             ha="center", fontsize=16)
-    fig.text(.47, .012, r"Band clipped to $T\geq40$ MeV input; no fit.",
-             ha="center", fontsize=14)
+    contour_caption = r"Contour spacing: $\Delta R_+=0.05$; label spacing: $0.10$."
+    if low_levels:
+        contour_caption = r"Contour spacing: $\Delta R_+=0.05$ for $R_+\geq0.05$; finer below."
+    fig.text(.47, .043, contour_caption, ha="center", fontsize=16)
+    footer = r"Band clipped to $T\geq40$ MeV input; no fit."
+    if rectangle is not None:
+        t_min, t_max, mu_min, mu_max = rectangle
+        footer = (rf"Included region: ${t_min:g}\leq T\leq{t_max:g}$ MeV, "
+                  rf"${mu_min:g}\leq\mu_B\leq{mu_max:g}$ MeV.")
+    fig.text(.47, .012, footer, ha="center", fontsize=14)
     return fig, {"minimum": minimum, "maximum": maximum, "color_limits": [lower, upper],
                  "colorbar_extend": extend, "density_route": route,
                  "density_prescription": prescription, "warning_annotations": False,
                  "failure_overlay": not clean_contours,
+                 "legend_anchor_y": legend_y,
                  "under_range_nodes": int((data["R"] < lower).sum()),
                  "over_range_nodes": int((data["R"] > upper).sum()),
-                 "contour_levels": levels, "contour_step": .05,
-                 "label_step": .10, "label_white_background": False,
+                 "contour_levels": sorted(levels + low_levels),
+                 "contour_step": .05 if not low_levels else None,
+                 "label_step": .10 if not low_levels else None, "label_white_background": False,
+                 "regular_contour_levels": levels, "regular_contour_step": .05,
+                 "regular_label_step": .10, "low_ratio_levels": low_levels,
+                 "requested_low_ratio_levels": list(low_ratio_levels or []),
+                 "visible_low_ratio_labels": [label.get_text() for label in low_labels],
+                 "contour_policy": "regular levels plus explicitly selected levels below 0.05" if low_levels else "uniform",
                  "label_outline_width_pt": .7,
                  "visible_contour_labels": [label.get_text() for label in labels],
-                 "label_policy": "single inline-clabel call; every label verified against selected exact-level path",
+                 "label_policy": "one inline-clabel call per contour set; every label verified against selected exact-level path",
                  "candidate_curves": False, "energy_labels": False}
 
 
@@ -279,16 +384,53 @@ def run_presentation(args, rows: list[dict], source: dict, coefficients: dict) -
 
     paths = [args.csv, args.source_manifest, args.freezeout_profile, Path(__file__)]
     before = [digest(path) for path in paths]
-    data = neighborhood(rows, coefficients, band_MeV=args.band_MeV, T_bounds_MeV=(40, 220))
+    data = neighborhood(rows, coefficients, band_MeV=args.band_MeV, T_bounds_MeV=(40, 220),
+                        include_rectangle_MeV=args.include_rectangle_MeV)
     route = density_route(source)
     fig, display = plot_presentation(data, coefficients, args.band_MeV,
                                      route=route, color_limits=args.comparison_color_limits,
                                      clean_contours=args.clean_contours,
-                                     prescription=source.get("density_prescription"))
+                                     prescription=source.get("density_prescription"),
+                                     low_ratio_levels=args.low_ratio_levels)
     args.output_dir.mkdir(parents=True)
     png = args.output_dir / "freezeout_neighborhood_ratio.png"
     fig.savefig(png, dpi=220, bbox_inches=None)
     plt.close(fig)
+    extension = {}
+    selection_rule = f"0<=muB<=750 MeV; |T-Tfo(muB)|<={args.band_MeV:g} MeV; 40<=T<=220 MeV"
+    if args.include_rectangle_MeV is not None:
+        t_min, t_max, mu_min, mu_max = args.include_rectangle_MeV
+        selection_rule = (f"0<=muB<=750 MeV; 40<=T<=220 MeV; "
+                          f"(|T-Tfo(muB)|<={args.band_MeV:g} MeV OR "
+                          f"({t_min:g}<=T<={t_max:g} MeV AND {mu_min:g}<=muB<={mu_max:g} MeV))")
+        tables = export_selected_tables(args.csv, args.output_dir, data)
+        snapshot_dir = args.output_dir / "source"
+        snapshot_dir.mkdir()
+        snapshots = []
+        for path, expected_hash in zip(paths, before):
+            snapshot = snapshot_dir / path.name
+            snapshot.write_bytes(path.read_bytes())
+            if digest(snapshot) != expected_hash:
+                raise ValueError("frozen input changed while preserving source snapshot")
+            snapshots.append({"path": str(snapshot.resolve()), "source_path": str(path.resolve()),
+                              "sha256": expected_hash, "bytes": snapshot.stat().st_size})
+        git = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+        extension = {
+            "postprocess_git_sha": git.stdout.strip() if git.returncode == 0 else None,
+            "source_snapshots": snapshots, "data_tables": tables,
+            "table_policy": "native rows only; every original CSV field retained without numeric reformatting",
+            "coverage_extension": {
+                "rectangle_MeV": {"T": [t_min, t_max], "muB": [mu_min, mu_max]},
+                "requested_nodes": int(data["rectangle_selected"].sum()),
+                "requested_screened_nodes": int((data["rectangle_selected"] & ~data["failed"]).sum()),
+                "requested_failed_nodes": int((data["rectangle_selected"] & data["failed"]).sum()),
+                "missing_native_grid_nodes": 0, "newly_computed_nodes": 0,
+                "previous_selected_nodes": int(data["band_selected"].sum()),
+                "previous_screened_nodes": int((data["band_selected"] & ~data["failed"]).sum()),
+                "added_display_nodes": int(data["added"].sum()),
+                "added_screened_nodes": int((data["added"] & ~data["failed"]).sum()),
+                "added_failed_nodes": int((data["added"] & data["failed"]).sum()),
+                "selection_operation": "union with original freeze-out band; inclusive native-node bounds"}}
     if [digest(path) for path in paths] != before:
         raise ValueError("frozen input changed during presentation rendering")
     manifest = {"schema_version": "charged_gbu_freezeout_guidance_presentation_v1",
@@ -304,13 +446,13 @@ def run_presentation(args, rows: list[dict], source: dict, coefficients: dict) -
                 "density_route": route, "coordinate_contract": source.get("coordinate_contract"),
                 "density_prescription": source.get("density_prescription"),
                 "warning_display": "none" if args.clean_contours else "legacy failure support",
-                "selection_rule": f"0<=muB<=750 MeV; |T-Tfo(muB)|<={args.band_MeV:g} MeV; 40<=T<=220 MeV",
+                "selection_rule": selection_rule,
                 "interpolation_policy": "heatmap none; display-only contours within four valid corner cells; corner_mask=false",
                 "missing_value_policy": "mask; no zero-fill or cross-gap contours",
                 "normalization": "linear; explicit comparison range or native min/max rounded outward; overflow colors; no numerical clipping",
                 "selected_nodes": int(data["selected"].sum()), "screened_nodes": int((data["selected"] & ~data["failed"]).sum()),
                 "failed_nodes": int(data["failed"].sum()), "valid_cells": int(data["valid_cells"].sum()),
-                "band_MeV": args.band_MeV, "rendering": display,
+                "band_MeV": args.band_MeV, "rendering": display, **extension,
                 "output": {"path": str(png.resolve()), "sha256": digest(png), "bytes": png.stat().st_size,
                            "dpi": 220, "figure_size_inches": [12.2, 8.8]}}
     (args.output_dir / "plot_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -446,13 +588,24 @@ def main() -> int:
     parser.add_argument("--clean-contours", action="store_true",
                         help="Omit warning/failure overlays and labels; retain missing cells")
     parser.add_argument("--band-MeV", dest="band_MeV", type=float, default=20)
+    parser.add_argument("--include-rectangle-MeV", dest="include_rectangle_MeV", nargs=4, type=float,
+                        metavar=("T_MIN", "T_MAX", "MUB_MIN", "MUB_MAX"),
+                        help="Presentation only: include this existing-grid rectangle in addition to the freeze-out band")
     parser.add_argument("--comparison-color-limits", nargs=2, type=float,
                         help="Fixed color range for a like-for-like presentation; overflow is shown explicitly")
+    parser.add_argument("--low-ratio-levels", nargs="+", type=float,
+                        help="Presentation only: extra positive contour levels strictly below ratio 0.05")
     args = parser.parse_args()
     if args.output_dir.exists():
         raise FileExistsError(f"refusing to overwrite existing case: {args.output_dir}")
     if not math.isfinite(args.band_MeV) or args.band_MeV <= 0:
         raise ValueError("band-MeV must be finite and positive")
+    if args.include_rectangle_MeV is not None and not args.presentation:
+        raise ValueError("include-rectangle-MeV requires presentation mode")
+    if args.low_ratio_levels is not None:
+        if not args.presentation:
+            raise ValueError("low-ratio-levels requires presentation mode")
+        select_low_ratio_levels(0, .05, args.low_ratio_levels)
     rows, source, coefficients = load_frozen(args.csv, args.source_manifest, args.freezeout_profile)
     if args.presentation:
         return run_presentation(args, rows, source, coefficients)
