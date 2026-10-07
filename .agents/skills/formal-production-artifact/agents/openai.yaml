@@ -1,4 +1,4 @@
 interface:
   display_name: "Formal Production Artifact"
-  short_description: "Produce audited high-precision numerical artifacts."
-  default_prompt: "Use $formal-production-artifact to run convergence gates and produce an audited production-grade numerical artifact."
+  short_description: "Produce or promote numerical artifacts using scoped evidence."
+  default_prompt: "Use $formal-production-artifact to assess reusable evidence, fill relevant gaps, and produce or promote this numerical artifact."

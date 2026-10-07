@@ -1,77 +1,44 @@
 ---
 name: literature-reproduction-spike
-description: Use only for an isolated, reproducible comparison to a specified paper figure, formula, table, threshold, or claim; sandbox and audit conventions before any verdict. Do not use for repository production or ordinary regression work.
+description: 隔离复现指定论文的图、表、公式或阈值，审查约定与数值差异，并按任务需要留存实验依据和分析结论。不用于正式生产、普通回归或与文献复现无关的结果整理。
 ---
 
-# Literature Reproduction Spike
+# 隔离文献复现与证据留存
 
-## Outcome model
+围绕指定文献目标完成独立计算、差异审查和有边界的结论；需要项目复用时再保存分析依据。续接已有复现先复用仍有效的输入和运行证据，单纯整理结论不自动触发重跑。
 
-Track an operational status throughout the work:
+## 目标与隔离
 
-- `in_progress`: implementation or evidence collection is incomplete.
-- `blocked`: a concrete dependency, access issue, or technical blocker prevents completion.
-- `verdict_ready`: the independent implementation and ambiguity audit satisfy the verdict gate.
+- 明确论文版本、图/表/公式位置、比较条件和目标特征。编码前记录来源、符号、单位、参数及正则化/分支约定，区分 `explicit in paper`（文献明示）、`directly derived`（直接推导）和 `unstated choice`（未说明的选择）。小任务可合并写入一份说明，无需固定的多文件模板。
+- 复用任务指定的隔离目录；新建时使用 `tempN/<paper-or-topic>_reproduction_spike/` 或任务明确的仓库外目录。计算脚本、配置与输出留在该目录，避免覆盖已有实验。
+- 根据文献独立实现目标物理公式、求解路径和后处理，不调用项目现有高层实现生成复现结果。可复用通用数值库与工具，但说明共享依赖和独立性边界；项目结果可作为后续比较的一方。
+- 项目 `src/`、`tests/`、`config/`、根依赖环境及正式产物不属于默认修改范围。任务已包含结论留存时，可写入指定或同主题的 `docs/analysis/` 入口，写回沿用已明确的任务范围。
 
-Only `verdict_ready` work may end with one of these scientific verdicts:
+## 比较与实验记录
 
-- `与文献对齐`
-- `文献信息不足以复现`
+1. 按待验证行为选择少量目标点、阈值或特征区间，并在比较前确定选点原则和误差依据。只有整体形状、积分或窄结构需要时才提取密集曲线；论文没有原始数据时可直接读图。
+2. 需要数值读图、坐标校准或背景叠加时使用可用的 `paper-figure-digitize`；不可用时采用显式校准的等效方法。保留来源图定位、校准信息、读图范围和复核图；读图范围不当作统计置信区间，也不直接决定项目验收容差。
+3. 先运行最忠实于文献明确表述的约定，保存首次结果与关键诊断。按问题核对单位、归一化、网格、积分精度、初值、相位展开和选根；进程成功或输出有限不能代替这些检查。
+4. 对影响目标结果的未说明约定作有依据的受控比较，记录变动项及其影响。不得为吻合曲线隐藏调参，也不因一次偏差自动扩大整个扫描范围。
+5. 对照同一目标报告定量差异、读图精度和数值收敛证据。保留有信息增量的运行、重要失败和有依据的变体；同一次运行不重复建条目。
 
-Do not convert implementation failure, unavailable source material, or an unfinished audit into either scientific verdict.
+## 执行状态与科学结论
 
-## Isolation rules
+执行状态和科学结论分开说明。`in_progress` 表示约定工作尚未完成；`blocked` 表示有具体依赖或技术阻碍；`completed` 表示已完成约定范围内的实现与必要核验，并不保证数值吻合。
 
-- Work under a dedicated `tempN/<paper-or-topic>_reproduction_spike/` sandbox.
-- Keep `src/`, `tests/`, `docs/`, and `config/` read-only unless the user separately authorizes mainline implementation.
-- Do not call an existing high-level project implementation to generate the target result.
-- Reimplement the target formula, solver path, and post-processing from the cited literature.
-- Separate `explicit in paper`, `directly derived`, and `unstated choice` evidence.
-- Never tune hidden parameters merely to make a curve look similar.
+| 科学结论 | 证据要求 |
+| --- | --- |
+| 与文献对齐 | 约定由论文或必要的上游参考确定；目标的关键定性特征与定量值在有依据的误差范围内一致，且无隐藏调参 |
+| 部分对齐 | 明确列出已核验且吻合的目标、未对齐的目标和仍不可判断的部分；不把局部结果扩展为整篇论文已复现 |
+| 存在未解释偏差 | 已完成目标实现与必要的口径、数值核验，仍有超出比较误差的差异；保留具体偏差和未排除的解释，不据此断言论文错误 |
+| 文献信息不足以复现 | 目标实现已完成；经测试，多种合理的未说明约定产生实质不同结果，而论文及必要上游参考无法确定实际采用的约定 |
 
-## Sandbox contract
+实现失败、源材料不可用或核验未完成时，报告具体执行障碍；不能据此判为文献信息不足或论文有误。局部已有结论可以单独报告，剩余工作仍保留未完成状态。历史记录中的状态标签保留原样，不为采用新词汇而改写旧证据。
 
-Include:
+## 按需留存与交付
 
-- `README.md` with target, scope, non-goals, and acceptance criteria;
-- `literature_facts.md` with page/equation/figure provenance;
-- minimal reproduction and plotting scripts;
-- `output/` containing CSV, figures, diagnostics, and configuration summaries;
-- a status/verdict note with evidence and remaining blockers.
+需要保存或更新分析结论时，读取[科研分析与实验记录治理](../../../docs/analysis/governance/research_evidence.md)。优先复用同主题入口，保存足以恢复来源、代码/环境、配置、运行结果和判断的材料；图表、独立日志和 manifest 按实际需要组织。
 
-Use `paper-figure-digitize` when curve extraction, coordinate calibration, or paper-background overlays are required, and keep those artifacts inside the sandbox.
+临时目录不能成为长期结论的唯一证据来源。留存时一并保存必要的独立脚本或可恢复版本、输入/读图证据及关键输出；已有持久证据可以直接引用。历史实验按运行保留，未冻结的当前结论原位更新。记录偏差与失败同样可以是有效交付，无需先获得“对齐”判定。
 
-## Workflow
-
-1. Lock the paper, target figure/table/equation, numerical feature, and error criterion.
-2. Build the literature fact table before coding.
-3. Implement the smallest independent loop and retain paper-symbol-to-code-variable mapping.
-4. Run the most literal stated convention first and save intermediate diagnostics.
-5. If results disagree, parameterize only unstated choices capable of changing topology, thresholds, scale, or branch selection.
-6. Exclude false causes such as units, signs, grids, integration precision, initial values, phase unwrapping, or root selection.
-7. Compare the target, first pass, and justified variants with quantitative error measures where possible.
-8. Update operational status; evaluate the verdict gate only when the implementation and audit are complete.
-
-## Verdict gate
-
-Use `与文献对齐` only when:
-
-- the key qualitative features align;
-- important locations, thresholds, peaks, jumps, or shapes agree within a stated error;
-- the necessary convention is determined by the paper or required upstream references;
-- the result does not depend on hidden tuning.
-
-Use `文献信息不足以复现` only when:
-
-- the independent implementation is complete;
-- key unstated conventions were tested;
-- multiple reasonable conventions produce materially different results;
-- the paper and required upstream references cannot identify the actual convention.
-
-Otherwise retain `in_progress` or `blocked` and report the missing work or dependency.
-
-## Final report
-
-Report the operational status, scientific verdict if available, sandbox path, key files, tested variants, stated facts, result-sensitive unstated choices, quantitative comparison, and residual blockers. If the verdict is `文献信息不足以复现`, list the specific missing conventions rather than imposing an arbitrary minimum count.
-
-After a successful verdict, enter mainline implementation only through a separate authorized task using the relevant Julia, regression, API-documentation, or paper-writing skills.
+最终说明比较目标、执行状态、各目标结论、依据位置、已检查的关键约定及剩余问题。若需要引入项目验收目标，另按[validation 准入规则](../../../tests/validation/README.md)处理；源码合入、基线变更、正式数值晋升和论文交付不由复现结论自动授权。

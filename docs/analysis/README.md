@@ -2,6 +2,8 @@
 
 `docs/analysis` 保存可追溯的诊断分析、历史比较、研究过程和证据包。这里的文件不是统一的 production result root；每个带 `manifest.json`、`decision.json` 或 `AUDIT.md` 的目录都应按自身 provenance 和 verdict 解读。
 
+整理已有结果、更新实验记录或留存文献复现结论时，遵循[科研分析与实验记录](governance/research_evidence.md)。
+
 本索引先建立逻辑分组；已完成迁移的条目使用当前 canonical path，尚未迁移的条目仍保留原路径。脚本、任务单、manifest 和 figure registry 的路径更新必须与对应的物理迁移在同一批次完成。
 
 ## Status Vocabulary
@@ -68,7 +70,7 @@
 - 版本化 evidence package 保持自包含；同 hash 只说明部分派生表或图相同，不自动说明整个 case 可以删除。
 - 汇总包和输入包分开：`pnjl/phase_reference/` 下的 phase-reference 包可以指向下游证据，但不能吞并或改写其 manifest/hash。
 - 历史图和治理快照只做逻辑归类，不批量重命名或重绘。
-- 新增分析包优先使用 `<domain>/<case>_analysis/README.md + manifest.json + figures/ + tables/` 结构，并在本索引登记。
+- 新增分析包优先使用 `<domain>/<case>_analysis/README.md` 作为入口，关联已有 manifest 或必要复现信息；`figures/`、`tables/` 和独立日志按需创建，并在本索引登记。
 
 ## Safe Follow-up Order
 

@@ -130,11 +130,16 @@ julia --project=. scripts/dev/sync_claude_skills.jl --check
 julia --project=. scripts/dev/check_task_ledger.jl
 julia --project=. scripts/dev/check_task_ledger.jl --preflight
 julia --project=. scripts/dev/check_task_ledger.jl --preflight --track rs-transport
+julia --project=. scripts/dev/check_task_ledger.jl --preflight --full-paths
 ```
 
-Task ledger preflight is read-only. It reports the selected primary track, current task,
-branch, HEAD and dirty paths; it never changes the ledger or worktree. `--track ID` selects
-an existing track and is also checked during the default validation.
+Task ledger preflight is read-only. It reports branch, HEAD, the dirty-path count and up
+to 10 paths; `--full-paths` prints every path. A valid ledger also supplies the selected
+track/current task, task file, blockers, next actions and up to 5 evidence entries.
+Invalid ledgers still produce Git context and a failing exit status, without a trusted
+task selection. `--track ID` selects an existing track and is also checked during default
+validation. Recover explicit chat/file/issue targets first; use preflight for unresolved
+track selection or coordination. It never changes the ledger or worktree.
 
 Build and use a persistent sysimage:
 
