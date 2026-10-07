@@ -1,0 +1,18 @@
+[
+  {
+    "path": "D:\\w\\publication-v12-prd\\Julia_RelaxTime\\docs\\guides\\sop\\workflows\\figure_production.md",
+    "sha256": "9ddaf5760d7bf95cdf817b3357ece8df74e9ed1127bf8bee09f2d7b44aa391d7"
+  },
+  {
+    "path": "D:\\w\\publication-v12-prd\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\publication_clean_v12_png_review\\plot_manifest.json",
+    "sha256": "d28fad59c25cf2a2c4fa181b7bd876e08b8bc41bd3a621473e6dae5bbc68b20a"
+  },
+  {
+    "path": "D:\\w\\publication-v12-prd\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\publication_clean_v12_png_review\\composites\\figure1_relaxation_times_comparison.png",
+    "sha256": "fbed33feb4afafebcaef3af994ce0420a721210b6c4add6eef7104d4239eb8f5"
+  },
+  {
+    "path": "D:\\w\\publication-v12-prd\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\publication_clean_v12_png_review\\composites\\figure2_transport_coefficients_comparison.png",
+    "sha256": "06727acf8999ed9bea708cd47996a5ce857c6d8fe598bee3508614e12d4b4279"
+  }
+]

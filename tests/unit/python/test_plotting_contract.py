@@ -86,6 +86,13 @@ def test_profiles_freeze_current_aps_like_baseline():
     assert strict.allow_external_legend is True
 
 
+def test_v2_profiles_use_declared_geometry_for_both_normal_legend_locations():
+    for name in ("candidate_aps_v2", "strict_aps_v2"):
+        profile = load_profile(name)
+        assert profile.legend_policy == "declared_geometry_checked"
+        assert profile.allow_external_legend is True
+
+
 def test_v1_profiles_remain_historical_compatibility_only():
     for profile_id in ("audit_v1", "candidate_origin_like_v1", "strict_origin_like_v1"):
         profile = load_profile(profile_id)

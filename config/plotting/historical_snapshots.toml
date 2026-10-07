@@ -1,5 +1,17 @@
 # Code/contract snapshot for retained evidence; inputs/outputs still use current artifact bytes.
 # The full SHA is intentionally explicit so a moving branch never becomes the authority.
+[[working_tree_source_archives]]
+archive = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_code_snapshot_v1.zip"
+sha256 = "d3defeb498f9c4ed5f8cd66c79fbb0604c757f1da6f4308789397b7bad995f1b"
+# Exact approved-v13 source bytes; base commit is context only.
+base_commit = "d6282e456cbda0d406809b239a4f2e62b35ca6cd"
+
+[[working_tree_source_archives]]
+archive = "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v12_code_snapshot_v1.zip"
+sha256 = "8d823e7489457846800ba8f9daf5b594f382c06bed828af61844ea4ad2cd3a08"
+# Context only: these exact source bytes include uncommitted v12 changes.
+base_commit = "d6282e456cbda0d406809b239a4f2e62b35ca6cd"
+
 [[manifest_archives]]
 archive = "docs/analysis/relaxtime/phase_guided_transport/publication_plot_manifest_migration_v1/original_manifest_graph.zip"
 sha256 = "e7e7345bc5455c0ff3e0bcae664a2ade7617ae8ff13acbb10e6a9ba7059d106b"

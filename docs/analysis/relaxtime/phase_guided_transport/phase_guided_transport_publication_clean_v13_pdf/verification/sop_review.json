@@ -1,0 +1,35 @@
+{
+  "schema": "v13_sop_document_review_v1",
+  "before_lines": 379,
+  "after_lines": 132,
+  "before_characters": 17835,
+  "after_characters": 5185,
+  "reduction_percent": 70.9,
+  "source_archive": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_code_snapshot_v1.zip",
+    "path_kind": "repository_relative",
+    "role": "retained_original_sop",
+    "bytes": 205058,
+    "sha256": "d3defeb498f9c4ed5f8cd66c79fbb0604c757f1da6f4308789397b7bad995f1b"
+  },
+  "revised_sop": {
+    "path": "docs/guides/sop/workflows/figure_production.md",
+    "path_kind": "repository_relative",
+    "role": "concise_active_sop",
+    "bytes": 9886,
+    "sha256": "8c2920fac437cdc4d1a778a88210c6b56868b2ecb10353d6218db9c11b845eb3"
+  },
+  "case_contract": {
+    "path": "docs/analysis/pnjl/phase_surface_series/plotting_case_contract.md",
+    "path_kind": "repository_relative",
+    "role": "relocated_figure_family_rules",
+    "bytes": 1948,
+    "sha256": "f1c0971900647d1e680708bdc6c35de07b4ac398d821a701c07a9338eecd4ed2"
+  },
+  "review_scope": [
+    "remove pilot results and version/PR operation narratives",
+    "consolidate repeated execution rules",
+    "retain source, geometry, quality and two-stage delivery requirements",
+    "keep case-specific physics in case documentation"
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "schema": "publication_clean_v13_pdf_review_checks_v1",
+  "status": "passed",
+  "checked_at_utc": "2026-10-06T11:29:38.396720+00:00",
+  "pdf_package": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/manifest.json",
+    "path_kind": "repository_relative",
+    "role": "verified_vector_delivery_package",
+    "bytes": 9098,
+    "sha256": "956c5344da000d8b6ba83609ea35da12f523bc7804d42e685e52561545d4c513"
+  },
+  "figure_bundle": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "verified_vector_delivery_bundle",
+    "bytes": 2058738,
+    "sha256": "8c363043909c7b40557d43d1174d9e5566cefe7519a0b7daec0b369cadb7306f"
+  },
+  "png_author_acceptance": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_png_acceptance_v1.json",
+    "path_kind": "repository_relative",
+    "role": "author_version_level_acceptance",
+    "bytes": 1735,
+    "sha256": "fb3bf85f4ce3a2a146a51ae4fb3320378451c50b944cd4f628b70a757aacad71"
+  },
+  "pdf_count": 75,
+  "png_pixel_identical_count": 75,
+  "single_page_pdf_count": 75,
+  "embedded_font_pdf_count": 75,
+  "type3_font_count": 0,
+  "embedded_raster_image_count": 0,
+  "minimum_glyph_height_mm": 2.096211067708333,
+  "pdf_only_width_interval_mm": [
+    163.58085561244212,
+    177.79999999999998
+  ],
+  "recommended_width_mm": 171.45,
+  "protected_files_verified_unchanged": 802,
+  "tests": {
+    "passed": 11,
+    "seconds": 126.58,
+    "command": "python -m pytest tests/unit/python/test_phase_guided_publication_clean_v13_pdf.py tests/unit/python/test_phase_guided_publication_clean_v13.py::test_artifact_bundle_has_verified_color_gray_pairs_and_unchanged_sources -q"
+  },
+  "docs_consistency": "passed",
+  "sop_governance": {
+    "status": "passed",
+    "advisory_count": 16,
+    "explanation": "The generic sixteen-section numerical SOP template is recommended, not required. The figure SOP intentionally uses six concise execution sections."
+  },
+  "script_entrypoints": {
+    "status": "passed",
+    "checked_julia_files": 287,
+    "scope": "repository Julia include paths; Python exporter behavior is covered by the actual run and focused tests"
+  },
+  "visual_review": {
+    "actual_pdf_samples": 5,
+    "status": "passed",
+    "scope": "two main composites, local detail, mode-B endpoint key, mode-A top legends; not physical print or all-file author acceptance"
+  },
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "solver_called": false,
+  "not_performed": [
+    "new numerical convergence runs",
+    "manuscript assembly or figure-layer promotion",
+    "physical printing"
+  ],
+  "evidence": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/docs_consistency.log",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 67,
+      "sha256": "5affa1c546336c6847ccfd98866e161def73c99716990631bb9e4d41c93d5601"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_export.log",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 1034,
+      "sha256": "eedfc805c294749b58a9b3be43116e4d304f094e298fe72dfbe84364b5e15095"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/01_figure1_relaxation_times_comparison.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 151130,
+      "sha256": "7dc23d19a673c847a3624c48c016fc50e2413b652f1ed3895387ee065a4e43c0"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/01_figure1_relaxation_times_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 122496,
+      "sha256": "5fcf3a02b130cc60149a6969ef7bc665f72a0d6d16ec53fb751f35897dcf23c3"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/02_figure2_transport_coefficients_comparison.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 137973,
+      "sha256": "354732cf792c3b4e2bc23866270da981cf44b1e88317e009f7114046f6977659"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/02_figure2_transport_coefficients_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 128089,
+      "sha256": "69f80c28ea1dfe34255214476f5337a7a79367cccb3daa6fa010d02e4af54d96"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/03_figure1_low_value_details.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 81028,
+      "sha256": "1b6db95ffc15b0bea1389e36e5addb155373f636137beca8378f65fb00e23fb4"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/03_figure1_low_value_details.png",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 80500,
+      "sha256": "07c9cc9b0867bc0281d49aceeace18e3eaaa14da57f6486ca3e57a6dff14b3d8"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/04_eta_over_s_vs_xi.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 43710,
+      "sha256": "9dee8da8df582d6594d3b472d46687c0c790d0a7e29af954c3b3059d5deedf12"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/04_eta_over_s_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 39436,
+      "sha256": "003bbd4d1d060095c7d227e51ceccde35bcd378b8f7f096005c559c84bbdbee0"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/05_eta_over_s_vs_xi.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 40229,
+      "sha256": "15c640b2e5dd0b2e4102258e340c9782777c473399776c39fa067a0e981d461e"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/05_eta_over_s_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 32153,
+      "sha256": "15ace01f887db8f24612b1b98294284c8d2cbf8b7ed452d17a3e44efd8541d4f"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/contact_sheet.jpg",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 174406,
+      "sha256": "cc0bb41610904473ee32320becb913762fda2db648a64a2a5e3ace355b84a406"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_render_review.json",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 16338,
+      "sha256": "d29645d7a801879d62ca42fadf9c17b26048cf20d5d47e1379105170882b182c"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/protected_files_check.json",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 868,
+      "sha256": "449348b55115704ffbfe0665cc00fa8378bd1f30cf28cd2ba177ab223f1391f5"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/protected_sha256_before.json",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 178379,
+      "sha256": "3369260397faa80f2855ca8980891243f5741f764ca382841c2383ba5753fa12"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/README.md",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 2289,
+      "sha256": "c6c674efe0c911bba5e6e43f9a5c345b730e1c92632c40ccfc93817467c7d98e"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/sop_governance.log",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 1844,
+      "sha256": "0d589a9f9ccb3dcdd27b7199b9ef899fff33a8dda5f146936bcc86edca194d92"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/sop_review.json",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 1339,
+      "sha256": "57309c117f37fbfcf38dabd2ae9f88defb6bb571165b987dd1d9e2d7e48e6fb1"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/tests.log",
+      "path_kind": "repository_relative",
+      "role": "delivery_verification_evidence",
+      "bytes": 113,
+      "sha256": "cff6375dd70167f8330ed5e571c79ca6bf9a5340fc050dba29ff47c544e84255"
+    }
+  ]
+}

@@ -1,0 +1,849 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-05",
+  "unit": "numbered figure; panel count counts primary coordinate regions, excluding insets",
+  "default": {
+    "eligible": true,
+    "panel_count": 1,
+    "legend_location": "inside",
+    "legend_scope": "single_axis",
+    "global_top_header": false,
+    "transport_specific": false,
+    "border": "four_sided",
+    "ticks": "visible; exact major/minor lengths and directions not measured",
+    "grid": "none_visible",
+    "scale": "linear",
+    "detail_view": "none",
+    "encoding": "color; additional encodings recorded in note",
+    "parameter_annotation": "legend and/or caption",
+    "note": "",
+    "top_header_rows": 0
+  },
+  "papers": {
+    "C01": {
+      "reviewed_sheets": [
+        "C01_01"
+      ],
+      "defaults": {
+        "transport_specific": true
+      },
+      "figures": {
+        "1": {
+          "scale": "log_y",
+          "note": "Upper-right inside parameter key; phase landmarks also use markers/caption."
+        },
+        "2": {
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "scale": "log_y",
+          "detail_view": "inset",
+          "parameter_annotation": "colored curve labels and caption",
+          "note": "Temperature labels directly at curve ends; inset resolves low-temperature branch region."
+        },
+        "3": {
+          "note": "Upper-right inside key distinguishes crossover and first-order phase boundaries."
+        },
+        "4": {
+          "scale": "log_y",
+          "note": "Upper-right inside key for isentropic trajectories."
+        },
+        "5": {
+          "note": "Upper-right inside parameter key."
+        },
+        "6": {
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "colored curve labels and caption",
+          "note": "Temperature labels on curves; CEP is a landmark label, not a series key."
+        },
+        "7": {
+          "panel_count": 3,
+          "legend_scope": "shared_inside_across_contiguous_panels",
+          "note": "One key starts in left panel and extends across divider into middle panel; all text remains within the contiguous plot region. Classified inside, but not a clean single-panel legend template."
+        }
+      }
+    },
+    "C02": {
+      "reviewed_sheets": [
+        "C02_01",
+        "C02_02"
+      ],
+      "defaults": {},
+      "figures": {
+        "1": {
+          "note": "Inside key; two colored solid model curves."
+        },
+        "2": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "3": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "4": {
+          "encoding": "color and line style",
+          "note": "Inside key in free right-hand region."
+        },
+        "5": {
+          "encoding": "color and line style",
+          "note": "Inside key in free right-hand region."
+        },
+        "6": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "7": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "8": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "9": {
+          "legend_location": "no_key_needed",
+          "legend_scope": "none",
+          "encoding": "single black curve"
+        },
+        "10": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style",
+          "note": "Inside lower-right gamma key."
+        },
+        "11": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style",
+          "note": "Inside lower-right gamma key."
+        },
+        "12": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "13": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "14": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "15": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "16": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "17": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "18": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        },
+        "19": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color and line style"
+        }
+      }
+    },
+    "C03": {
+      "reviewed_sheets": [
+        "C03_01",
+        "C03_02",
+        "C03_03"
+      ],
+      "defaults": {},
+      "figures": {
+        "1": {
+          "panel_count": 2,
+          "legend_scope": "shared_inside_lower_panel",
+          "encoding": "color and line style",
+          "note": "Stacked mass/width panels with common key inside lower panel."
+        },
+        "2": {
+          "encoding": "color and line style; phase landmarks",
+          "note": "Phase-diagram key inside lower-left; additional isentrope labels directly on curves."
+        },
+        "3": {
+          "encoding": "color and line style; phase landmarks",
+          "note": "Phase-diagram key inside upper-left; additional isentrope labels directly on curves."
+        },
+        "4": {
+          "panel_count": 8,
+          "legend_scope": "shared_within_labeled_groups",
+          "scale": "mixed_linear_log_y",
+          "note": "Four labeled rows (a)-(d), each divided into two process coordinate regions; temperature key in left region of each row. Cross sections, not a transport coefficient."
+        },
+        "5": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color, line style and landmark markers",
+          "note": "Two-column key remains inside the axes, not a figure-top header."
+        },
+        "6": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "7": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "8": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "9": {
+          "note": "Entropy plot is supporting thermodynamics."
+        },
+        "10": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "11": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "colored curve-end labels and caption"
+        },
+        "12": {
+          "transport_specific": true,
+          "panel_count": 3,
+          "legend_scope": "shared_inside_first_panel",
+          "scale": "log_y",
+          "note": "Three stacked panels; only first carries the crossover/first-order boundary key."
+        },
+        "13": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "colored curve labels and caption"
+        },
+        "14": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "15": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "colored curve labels and caption"
+        },
+        "16": {
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "17": {
+          "transport_specific": true,
+          "panel_count": 3,
+          "legend_scope": "repeated_inside_panels",
+          "scale": "log_y",
+          "note": "Crossover and first-order boundary key repeated in each panel."
+        },
+        "18": {
+          "transport_specific": true
+        }
+      },
+      "reviewed_crops": [
+        "C03_F04",
+        "C03_F12"
+      ]
+    },
+    "C04": {
+      "reviewed_sheets": [
+        "C04_01",
+        "C04_02"
+      ],
+      "defaults": {
+        "encoding": "color and line style",
+        "legend_scope": "repeated_inside_panels"
+      },
+      "figures": {
+        "1": {
+          "panel_count": 2,
+          "note": "Inside keys; phase-region words in right panel are direct annotations."
+        },
+        "2": {
+          "panel_count": 25,
+          "legend_location": "top_external",
+          "legend_scope": "global_shared_above_axes",
+          "global_top_header": true,
+          "top_header_rows": 1,
+          "note": "5 by 5 cross-section array; one compact row of line keys above all axes. T and mu5 scan directions at left and bottom."
+        },
+        "3": {
+          "panel_count": 25,
+          "legend_location": "top_external",
+          "legend_scope": "global_shared_above_axes",
+          "global_top_header": true,
+          "top_header_rows": 1,
+          "transport_specific": true,
+          "scale": "log_y",
+          "note": "5 by 5 relaxation-time array; one compact left/right chirality key above all axes. A real counterexample to a blanket ban on top legends."
+        },
+        "4": {
+          "panel_count": 4,
+          "note": "Thermodynamic quantities; each panel carries inside mu5 key."
+        },
+        "5": {
+          "panel_count": 2,
+          "note": "Thermodynamic quantities; repeated inside key."
+        },
+        "6": {
+          "panel_count": 4,
+          "transport_specific": true,
+          "note": "Inside parameter keys; cyan formula boxes are calculation-condition labels, not legends."
+        },
+        "7": {
+          "panel_count": 4,
+          "transport_specific": true,
+          "note": "Inside parameter keys and reference-bound explanation; colored formula boxes are conditions."
+        }
+      },
+      "reviewed_crops": [
+        "C04_F02",
+        "C04_F03"
+      ]
+    },
+    "C05": {
+      "reviewed_sheets": [
+        "C05_01",
+        "C05_02",
+        "C05_03",
+        "C05_04"
+      ],
+      "defaults": {
+        "encoding": "color and line style"
+      },
+      "figures": {
+        "1": {
+          "eligible": false,
+          "panel_count": 2,
+          "legend_location": "not_applicable",
+          "legend_scope": "not_applicable",
+          "border": "3d_axes",
+          "scale": "3d_surface",
+          "note": "Excluded: two 3D mass surfaces, no 2D line or point panel."
+        },
+        "2": {
+          "note": "Inside meson key; doubled curves convey real and imaginary pole information in caption."
+        },
+        "3": {},
+        "4": {
+          "encoding": "color, line style and filled comparison bands"
+        },
+        "5": {
+          "encoding": "color/line and filled comparison band"
+        },
+        "6": {
+          "eligible": false,
+          "panel_count": 0,
+          "legend_location": "not_applicable",
+          "legend_scope": "not_applicable",
+          "border": "none",
+          "scale": "not_applicable",
+          "note": "Excluded: Feynman diagrams."
+        },
+        "7": {
+          "eligible": false,
+          "panel_count": 0,
+          "legend_location": "not_applicable",
+          "legend_scope": "not_applicable",
+          "border": "none",
+          "scale": "not_applicable",
+          "note": "Excluded: Feynman diagrams."
+        },
+        "8": {
+          "panel_count": 2,
+          "legend_scope": "repeated_inside_panels"
+        },
+        "9": {
+          "panel_count": 2,
+          "legend_scope": "repeated_inside_panels"
+        },
+        "10": {
+          "panel_count": 2,
+          "legend_scope": "repeated_inside_panels"
+        },
+        "11": {},
+        "12": {
+          "note": "Averaged scattering transition rate (area), treated as supporting calculation rather than a transport-coefficient figure."
+        },
+        "13": {
+          "panel_count": 2,
+          "legend_scope": "shared_inside_first_panel",
+          "note": "Averaged transition rates; key inside upper panel and fixed conditions annotated in each."
+        },
+        "14": {
+          "panel_count": 2,
+          "legend_scope": "shared_inside_first_panel",
+          "scale": "log_y",
+          "note": "Quark densities; species key inside upper panel."
+        },
+        "15": {
+          "panel_count": 2,
+          "legend_scope": "shared_inside_first_panel",
+          "note": "Weighted averaged cross sections; species/channel key inside upper panel."
+        },
+        "16": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel_different_mapping",
+          "transport_specific": true,
+          "note": "Relaxation times; compact table-like keys remain inside both axes."
+        },
+        "17": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color, line style, point markers and error bars",
+          "note": "Many model/data comparisons; all keys inside axes."
+        },
+        "18": {
+          "panel_count": 2,
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "other_external",
+          "legend_scope": "right_external_plus_inside",
+          "note": "Lower-panel chemical-potential/phase key extends to the right of axes; other keys inside."
+        },
+        "19": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "encoding": "color, line style, point markers and error bars"
+        },
+        "20": {
+          "panel_count": 2,
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "other_external",
+          "legend_scope": "right_external_plus_inside",
+          "note": "Lower-panel chemical-potential/phase key outside right; other keys inside."
+        },
+        "21": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "legend_location": "other_external",
+          "legend_scope": "right_external_plus_inside",
+          "note": "Phase/chemical-potential key outside right; model keys inside."
+        }
+      }
+    },
+    "C06": {
+      "reviewed_sheets": [
+        "C06_01",
+        "C06_02"
+      ],
+      "defaults": {
+        "encoding": "color and line style",
+        "note": "Older author PDF; Poppler warned about unavailable Symbol/ArialUnicode display fonts. Axis borders and key positions remain visible; exact glyph shape not assessed."
+      },
+      "figures": {
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {
+          "panel_count": 3,
+          "legend_scope": "repeated_inside_panels",
+          "transport_specific": true
+        },
+        "5": {
+          "panel_count": 2,
+          "legend_scope": "repeated_inside_panels",
+          "transport_specific": true
+        },
+        "6": {
+          "panel_count": 3,
+          "legend_scope": "repeated_inside_panels",
+          "transport_specific": true
+        },
+        "7": {
+          "note": "Appendix ratio of approximate and exact phase-space integrals; inside key."
+        }
+      }
+    },
+    "C07": {
+      "reviewed_sheets": [
+        "C07_01",
+        "C07_02"
+      ],
+      "defaults": {
+        "encoding": "color and line style",
+        "note": "Single-axis plot; compact inside key. Most keys have a visible enclosing box."
+      },
+      "figures": {
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {},
+        "5": {},
+        "6": {},
+        "7": {},
+        "8": {},
+        "9": {},
+        "10": {},
+        "11": {},
+        "12": {},
+        "13": {},
+        "14": {
+          "transport_specific": true
+        },
+        "15": {
+          "transport_specific": true
+        },
+        "16": {
+          "transport_specific": true
+        },
+        "17": {
+          "transport_specific": true
+        },
+        "18": {
+          "transport_specific": true
+        },
+        "19": {},
+        "20": {}
+      }
+    },
+    "C08": {
+      "reviewed_sheets": [
+        "C08_01"
+      ],
+      "reviewed_crops": [
+        "C08_F02",
+        "C08_F03"
+      ],
+      "defaults": {
+        "encoding": "color and line style",
+        "note": "Older author PDF: Greek symbols are substituted in some Poppler renderings. Legend-position judgment uses borders, swatches and captions, not substituted glyph appearance."
+      },
+      "figures": {
+        "1": {
+          "panel_count": 3,
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "curve labels plus fixed-condition labels"
+        },
+        "2": {
+          "panel_count": 8,
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "column conditions plus caption mapping",
+          "note": "Header says mu=0 and 0.150 GeV / T=0.150 GeV. No colored swatch or line sample in header: conditions, not a top legend. Caption maps green dashed, black solid and red dotted lines."
+        },
+        "3": {
+          "panel_count": 6,
+          "transport_specific": true,
+          "legend_location": "direct_or_caption",
+          "legend_scope": "none",
+          "parameter_annotation": "column conditions plus caption mapping",
+          "note": "Header gives mu, T and tau conditions without series samples. Not a top legend."
+        },
+        "4": {
+          "panel_count": 6,
+          "transport_specific": true,
+          "legend_scope": "shared_inside_first_panel",
+          "scale": "panel_specific_linear_and_log",
+          "note": "Sc/LD/total series samples in upper-left panel; column conditions above axes are not legends."
+        },
+        "5": {
+          "panel_count": 3,
+          "transport_specific": true,
+          "legend_scope": "inside_multiple_panels",
+          "scale": "panel_specific; see page",
+          "encoding": "color, line style and point markers"
+        },
+        "6": {
+          "panel_count": 4,
+          "transport_specific": true,
+          "legend_scope": "shared_inside_top_panels",
+          "scale": "panel_specific; see page",
+          "encoding": "color, line style and point markers"
+        }
+      }
+    },
+    "A01": {
+      "reviewed_sheets": [
+        "A01_01",
+        "A01_02"
+      ],
+      "defaults": {
+        "panel_count": 2,
+        "legend_scope": "inside_each_panel",
+        "encoding": "color and line style",
+        "parameter_annotation": "inside key plus conditions above individual axes"
+      },
+      "figures": {
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {},
+        "5": {},
+        "6": {
+          "transport_specific": true,
+          "detail_view": "two_insets_per_panel",
+          "note": "Four small insets resolve close Seebeck curves; insets excluded from panel count."
+        },
+        "7": {
+          "transport_specific": true,
+          "detail_view": "two_insets_in_first_panel",
+          "note": "Insets resolve near-degenerate curves."
+        },
+        "8": {
+          "transport_specific": true
+        },
+        "9": {
+          "transport_specific": true
+        },
+        "10": {
+          "transport_specific": true
+        }
+      }
+    },
+    "A02": {
+      "reviewed_sheets": [
+        "A02_01",
+        "A02_02"
+      ],
+      "defaults": {
+        "legend_scope": "repeated_inside_panels",
+        "encoding": "color and line style; comparison bands or data where present",
+        "parameter_annotation": "inside key plus conditions above individual axes",
+        "note": "Boxed parameter keys inside axes; panel letters outside are not legends."
+      },
+      "figures": {
+        "1": {
+          "panel_count": 6,
+          "transport_specific": false
+        },
+        "2": {
+          "panel_count": 4,
+          "transport_specific": false
+        },
+        "3": {
+          "panel_count": 2,
+          "transport_specific": false
+        },
+        "4": {
+          "panel_count": 2,
+          "transport_specific": false
+        },
+        "5": {
+          "panel_count": 1,
+          "transport_specific": false,
+          "legend_scope": "single_axis"
+        },
+        "6": {
+          "panel_count": 6,
+          "transport_specific": false
+        },
+        "7": {
+          "panel_count": 4,
+          "transport_specific": false
+        },
+        "8": {
+          "panel_count": 1,
+          "transport_specific": true,
+          "legend_scope": "single_axis"
+        },
+        "9": {
+          "panel_count": 4,
+          "transport_specific": true
+        },
+        "10": {
+          "panel_count": 2,
+          "transport_specific": true
+        },
+        "11": {
+          "panel_count": 4,
+          "transport_specific": true
+        }
+      }
+    },
+    "A03": {
+      "reviewed_sheets": [
+        "A03_01"
+      ],
+      "defaults": {
+        "legend_scope": "inside_each_panel",
+        "encoding": "color and line style"
+      },
+      "figures": {
+        "1": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "2": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "3": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "4": {
+          "panel_count": 2,
+          "note": "Nuclear suppression R_AA: included in all figures, excluded from direct transport subset."
+        }
+      }
+    },
+    "A04": {
+      "reviewed_sheets": [
+        "A04_01"
+      ],
+      "defaults": {
+        "legend_location": "other_external",
+        "legend_scope": "axis_local_right_external",
+        "encoding": "color and line style",
+        "note": "Each parameter key sits outside its own axes on the right, not above the whole figure."
+      },
+      "figures": {
+        "1": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "2": {
+          "panel_count": 2,
+          "transport_specific": true
+        },
+        "3": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "4": {
+          "panel_count": 2,
+          "note": "Energy loss; right-external keys. Excluded from direct transport-coefficient sensitivity subset."
+        }
+      }
+    },
+    "A05": {
+      "reviewed_sheets": [
+        "A05_01"
+      ],
+      "defaults": {
+        "panel_count": 2,
+        "legend_scope": "inside_each_panel",
+        "transport_specific": true,
+        "encoding": "color and line style; reference data markers where shown"
+      },
+      "figures": {
+        "1": {},
+        "2": {
+          "detail_view": "one_inset_per_panel",
+          "note": "Two insets show related electrical-response quantities."
+        }
+      }
+    },
+    "A06": {
+      "reviewed_sheets": [
+        "A06_01"
+      ],
+      "defaults": {
+        "legend_scope": "inside_each_panel",
+        "encoding": "color and line style"
+      },
+      "figures": {
+        "1": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "2": {
+          "panel_count": 3,
+          "transport_specific": true
+        },
+        "3": {
+          "panel_count": 2,
+          "note": "Energy loss; not in direct transport-coefficient subset."
+        },
+        "4": {
+          "panel_count": 2,
+          "note": "Nuclear suppression R_AA; not in direct transport-coefficient subset."
+        }
+      }
+    },
+    "A07": {
+      "reviewed_sheets": [
+        "A07_01"
+      ],
+      "defaults": {
+        "transport_specific": true,
+        "encoding": "color and line style; reference data markers where shown"
+      },
+      "figures": {
+        "1": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel"
+        },
+        "2": {},
+        "3": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel"
+        },
+        "4": {}
+      }
+    },
+    "A08": {
+      "reviewed_sheets": [
+        "A08_01",
+        "A08_02"
+      ],
+      "defaults": {
+        "encoding": "color and line style"
+      },
+      "figures": {
+        "1": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel",
+          "scale": "log_y",
+          "note": "Distribution-function ratios, supporting context."
+        },
+        "2": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel",
+          "transport_specific": true,
+          "scale": "mixed_linear_log_y"
+        },
+        "3": {
+          "note": "Entropy, supporting thermodynamics."
+        },
+        "4": {
+          "panel_count": 2,
+          "legend_scope": "inside_each_panel",
+          "transport_specific": true,
+          "scale": "log_y"
+        },
+        "5": {
+          "transport_specific": true,
+          "note": "Prandtl number: dimensionless combination of transport quantities."
+        },
+        "6": {
+          "transport_specific": true,
+          "note": "Reynolds number: dimensionless transport combination."
+        },
+        "7": {
+          "transport_specific": true,
+          "scale": "log_y",
+          "note": "Ratio of momentum and charge transport combinations."
+        }
+      }
+    }
+  }
+}

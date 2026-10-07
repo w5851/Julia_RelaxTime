@@ -1,0 +1,80 @@
+{
+  "schema": "publication_clean_v12_agent_visual_review_v1",
+  "review_date": "2026-10-05",
+  "reviewer": "Codex",
+  "author_acceptance": null,
+  "status": "author_review_required",
+  "artifact_index": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "reviewed_v12_bundle",
+    "bytes": 1502247,
+    "sha256": "d28fad59c25cf2a2c4fa181b7bd876e08b8bc41bd3a621473e6dae5bbc68b20a"
+  },
+  "visually_inspected_outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/composites/figure1_relaxation_times_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "color_review",
+      "bytes": 721931,
+      "sha256": "fbed33feb4afafebcaef3af994ce0420a721210b6c4add6eef7104d4239eb8f5"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/grayscale_review/composites/figure1_relaxation_times_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "grayscale_review",
+      "bytes": 320341,
+      "sha256": "877070f1a0989cd009e901f96311753e5ea25359711f17f640d12853e48bc7e0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/composites/figure2_transport_coefficients_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "color_review",
+      "bytes": 731563,
+      "sha256": "06727acf8999ed9bea708cd47996a5ce857c6d8fe598bee3508614e12d4b4279"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/grayscale_review/composites/figure2_transport_coefficients_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "grayscale_review",
+      "bytes": 333133,
+      "sha256": "1ed12143e65d5946be161124a6429876afe972eda21c82850febdbcd737da67d"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/details/figure1_low_value_details.png",
+      "path_kind": "repository_relative",
+      "role": "color_review",
+      "bytes": 412613,
+      "sha256": "ed3f2305716c6d43b123a83aba6785a4c10e35e63e29ca71d689127d844cd720"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/grayscale_review/details/figure1_low_value_details.png",
+      "path_kind": "repository_relative",
+      "role": "grayscale_review",
+      "bytes": 185289,
+      "sha256": "f056d5c8765c9a207b09fbca745dc4cf0062c7eb51d4d5c2aba221a78cce94e1"
+    }
+  ],
+  "visual_scope": "The two main composites and the four-panel detail, in color and grayscale; on-screen inspection, with native physical-size metrics checked separately.",
+  "findings": [
+    "Larger mathematical labels and external shared keys remain readable; no clipping or overlap seen in the inspected views.",
+    "Main Figure 1 retains visually close low-value curves; the companion linear detail makes their differences easier to trace.",
+    "First-order gaps and open circle/square endpoints remain distinct on the complete main figures.",
+    "Gray previews preserve the solid/dashed/dash-dotted identification; near-coincident curves still require the detail view.",
+    "Fine kinks in the detail remain inherited source features; no smoothing or new physics inference was introduced."
+  ],
+  "automated_scope": "75 figures / 150 PNGs; all original vertices and branch segmentation checked; all output hashes and grayscale pixel conversions validated.",
+  "automated_tests_passed": 59,
+  "governance_checks": [
+    "docs_consistency",
+    "sop_governance",
+    "script_entrypoints",
+    "v11_stage_snapshot"
+  ],
+  "not_performed": [
+    "physical printer test",
+    "current whole-manuscript placement",
+    "numerical convergence rerun"
+  ],
+  "next_stage": "Author visual acceptance, then same-input same-renderer PDF delivery; no manuscript promotion is implied."
+}

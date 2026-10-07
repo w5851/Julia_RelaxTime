@@ -1,0 +1,440 @@
+{
+  "schema": "v13_actual_pdf_render_review_v1",
+  "samples": [
+    {
+      "kind": "composite",
+      "mode_key": "mode_a",
+      "pdf": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/composites/figure1_relaxation_times_comparison.pdf",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_visually_reviewed",
+        "bytes": 71441,
+        "sha256": "f982c50c2f21c2af65b5a09796614cfbe0b4eb3adb71f123523c4e60387dd3bd"
+      },
+      "preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/01_figure1_relaxation_times_comparison.png",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_render",
+        "bytes": 122496,
+        "sha256": "5fcf3a02b130cc60149a6969ef7bc665f72a0d6d16ec53fb751f35897dcf23c3"
+      },
+      "compact_preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/01_figure1_relaxation_times_comparison.jpg",
+        "path_kind": "repository_relative",
+        "role": "compact_pdf_preview",
+        "bytes": 151130,
+        "sha256": "7dc23d19a673c847a3624c48c016fc50e2413b652f1ed3895387ee065a4e43c0"
+      },
+      "dpi": 160,
+      "size_pixels": [
+        1080,
+        1136
+      ],
+      "content_bbox_pixels": [
+        53,
+        36,
+        1067,
+        1109
+      ],
+      "normalized_mean_absolute_difference_to_downsampled_png": 0.012736685180070985,
+      "difference_scope": "diagnostic only; PDF/PNG rasterizers and antialiasing differ",
+      "legend_placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves in this figure",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 13.0,
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        },
+        {
+          "role": "endpoints",
+          "placement": "in_axes",
+          "host_axes_index": 2,
+          "location": "upper left",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "actual first-order markers in the explicitly listed applies_to curves only",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 11.0,
+          "applies_to": [
+            {
+              "mode_key": "mode_a",
+              "plot_panel": "muB900.0",
+              "plot_series": "alpha1.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "visual_review": "passed",
+      "observations": [
+        "labels and mathematical subscripts visible",
+        "no page clipping or legend obstruction observed",
+        "parameter titles, branch gaps and endpoint symbols match accepted layout"
+      ]
+    },
+    {
+      "kind": "composite",
+      "mode_key": "mode_a",
+      "pdf": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/composites/figure2_transport_coefficients_comparison.pdf",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_visually_reviewed",
+        "bytes": 62079,
+        "sha256": "4c7a2bbf210229feac8ff26039f98e43dba293009148e7b05da0a78ab9a4f32a"
+      },
+      "preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/02_figure2_transport_coefficients_comparison.png",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_render",
+        "bytes": 128089,
+        "sha256": "69f80c28ea1dfe34255214476f5337a7a79367cccb3daa6fa010d02e4af54d96"
+      },
+      "compact_preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/02_figure2_transport_coefficients_comparison.jpg",
+        "path_kind": "repository_relative",
+        "role": "compact_pdf_preview",
+        "bytes": 137973,
+        "sha256": "354732cf792c3b4e2bc23866270da981cf44b1e88317e009f7114046f6977659"
+      },
+      "dpi": 160,
+      "size_pixels": [
+        1080,
+        944
+      ],
+      "content_bbox_pixels": [
+        29,
+        25,
+        1067,
+        933
+      ],
+      "normalized_mean_absolute_difference_to_downsampled_png": 0.01321255369693389,
+      "difference_scope": "diagnostic only; PDF/PNG rasterizers and antialiasing differ",
+      "legend_placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves in this figure",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 13.0,
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        },
+        {
+          "role": "endpoints",
+          "placement": "in_axes",
+          "host_axes_index": 2,
+          "location": "upper left",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "actual first-order markers in the explicitly listed applies_to curves only",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 11.0,
+          "applies_to": [
+            {
+              "mode_key": "mode_a",
+              "plot_panel": "muB900.0",
+              "plot_series": "alpha1.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "visual_review": "passed",
+      "observations": [
+        "labels and mathematical subscripts visible",
+        "no page clipping or legend obstruction observed",
+        "parameter titles, branch gaps and endpoint symbols match accepted layout"
+      ]
+    },
+    {
+      "kind": "detail",
+      "mode_key": "mode_a",
+      "pdf": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/details/figure1_low_value_details.pdf",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_visually_reviewed",
+        "bytes": 37320,
+        "sha256": "fa248adf08bfd72ac1492af6d0d833a1e1587d30f788b8f3c1adc07442086ea8"
+      },
+      "preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/03_figure1_low_value_details.png",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_render",
+        "bytes": 80500,
+        "sha256": "07c9cc9b0867bc0281d49aceeace18e3eaaa14da57f6486ca3e57a6dff14b3d8"
+      },
+      "compact_preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/03_figure1_low_value_details.jpg",
+        "path_kind": "repository_relative",
+        "role": "compact_pdf_preview",
+        "bytes": 81028,
+        "sha256": "1b6db95ffc15b0bea1389e36e5addb155373f636137beca8378f65fb00e23fb4"
+      },
+      "dpi": 160,
+      "size_pixels": [
+        1080,
+        880
+      ],
+      "content_bbox_pixels": [
+        46,
+        38,
+        1054,
+        844
+      ],
+      "normalized_mean_absolute_difference_to_downsampled_png": 0.010340979236812571,
+      "difference_scope": "diagnostic only; PDF/PNG rasterizers and antialiasing differ",
+      "legend_placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves in this figure",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 13.0,
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "visual_review": "passed",
+      "observations": [
+        "labels and mathematical subscripts visible",
+        "no page clipping or legend obstruction observed",
+        "parameter titles, branch gaps and endpoint symbols match accepted layout"
+      ]
+    },
+    {
+      "kind": "single",
+      "mode_key": "mode_b",
+      "pdf": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.pdf",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_visually_reviewed",
+        "bytes": 33360,
+        "sha256": "c2382e2429c04acf6e1b3812ffd04aca29f6380ed58299976b3f4748b8510edc"
+      },
+      "preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/04_eta_over_s_vs_xi.png",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_render",
+        "bytes": 39436,
+        "sha256": "003bbd4d1d060095c7d227e51ceccde35bcd378b8f7f096005c559c84bbdbee0"
+      },
+      "compact_preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/04_eta_over_s_vs_xi.jpg",
+        "path_kind": "repository_relative",
+        "role": "compact_pdf_preview",
+        "bytes": 43710,
+        "sha256": "9dee8da8df582d6594d3b472d46687c0c790d0a7e29af954c3b3059d5deedf12"
+      },
+      "dpi": 160,
+      "size_pixels": [
+        1080,
+        736
+      ],
+      "content_bbox_pixels": [
+        88,
+        7,
+        1048,
+        707
+      ],
+      "normalized_mean_absolute_difference_to_downsampled_png": 0.005116086088219507,
+      "difference_scope": "diagnostic only; PDF/PNG rasterizers and antialiasing differ",
+      "legend_placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "lower right",
+          "title": "$\\mu_B\\;(\\mathrm{MeV})$",
+          "labels": [
+            "0",
+            "450",
+            "900"
+          ],
+          "scope": "all parameter curves in this figure",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 13.0,
+          "series_keys": [
+            "muB0.0",
+            "muB450.0",
+            "muB900.0"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        },
+        {
+          "role": "endpoints",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "actual first-order markers in the explicitly listed applies_to curves only",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 11.0,
+          "applies_to": [
+            {
+              "mode_key": "mode_b",
+              "plot_panel": "T120.0",
+              "plot_series": "muB900.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "visual_review": "passed",
+      "observations": [
+        "labels and mathematical subscripts visible",
+        "no page clipping or legend obstruction observed",
+        "parameter titles, branch gaps and endpoint symbols match accepted layout"
+      ]
+    },
+    {
+      "kind": "single",
+      "mode_key": "mode_a",
+      "pdf": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.pdf",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_visually_reviewed",
+        "bytes": 32691,
+        "sha256": "2260dfb32e9c996132ddf20fccbf679a86eb389e2834322098abf7aab3dd5091"
+      },
+      "preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/05_eta_over_s_vs_xi.png",
+        "path_kind": "repository_relative",
+        "role": "actual_pdf_render",
+        "bytes": 32153,
+        "sha256": "15ace01f887db8f24612b1b98294284c8d2cbf8b7ed452d17a3e44efd8541d4f"
+      },
+      "compact_preview": {
+        "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/pdf_previews/05_eta_over_s_vs_xi.jpg",
+        "path_kind": "repository_relative",
+        "role": "compact_pdf_preview",
+        "bytes": 40229,
+        "sha256": "15c640b2e5dd0b2e4102258e340c9782777c473399776c39fa067a0e981d461e"
+      },
+      "dpi": 160,
+      "size_pixels": [
+        1080,
+        736
+      ],
+      "content_bbox_pixels": [
+        117,
+        7,
+        1048,
+        707
+      ],
+      "normalized_mean_absolute_difference_to_downsampled_png": 0.004930040823361014,
+      "difference_scope": "diagnostic only; PDF/PNG rasterizers and antialiasing differ",
+      "legend_placements": [
+        {
+          "role": "parameters",
+          "placement": "outside_axes",
+          "host_axes_index": null,
+          "location": "upper center",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves in this figure",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 13.0,
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "declared corner combinations obstruct curves or labels; compact top fallback"
+        },
+        {
+          "role": "endpoints",
+          "placement": "outside_axes",
+          "host_axes_index": null,
+          "location": "upper center",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "actual first-order markers in the explicitly listed applies_to curves only",
+          "font_size_pt": 11.0,
+          "title_font_size_pt": 11.0,
+          "applies_to": [
+            {
+              "mode_key": "mode_a",
+              "plot_panel": "muB900.0",
+              "plot_series": "alpha1.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "declared corner combinations obstruct curves or labels; compact top fallback"
+        }
+      ],
+      "visual_review": "passed",
+      "observations": [
+        "labels and mathematical subscripts visible",
+        "no page clipping or legend obstruction observed",
+        "parameter titles, branch gaps and endpoint symbols match accepted layout"
+      ]
+    }
+  ],
+  "reviewer": "assistant visual inspection of actual PDF renders",
+  "coverage": "two main composites, one low-value detail, one mode-B figure with first-order endpoints, one mode-A figure with declared top legends",
+  "not_assessed": "physical printout, compiled manuscript placement, per-file author review of all 75 PDFs"
+}

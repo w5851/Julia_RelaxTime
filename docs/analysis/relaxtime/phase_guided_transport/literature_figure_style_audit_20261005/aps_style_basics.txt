@@ -1,0 +1,405 @@
+
+APS Journals - Style Basics
+Skip to Main Content
+All Journals
+Physics Magazine
+search icon
+Article Lookup
+user icon
+Sign in
+search icon
+Article Lookup
+user icon
+Sign in
+user icon
+Sign in
+All Journals
+Physics Magazine
+Home
+Journals
+Authors
+Referees
+Editorial Policies
+APS Journals
+Home
+Journals
+Authors
+Referees
+Editorial Policies
+Style Basics
+See the 
+APS Journals Style Guide
+ for more detailed information on the sections below and other areas.
+Titles
+Titles should be self-contained, concise, and informative, clearly stating the main findings of the manuscript. Avoid the following:
+New terminology
+Assessing the quality of the work with words such as “precise,” “important,” or “accurate,”
+Proper nouns and brand names (naming equipment, people, or places)
+Newly created words
+See also memo on 
+Titles
+Affiliations
+Ensure that all listed authors approve the inclusion of their names and the name format used.
+Authors with 
+Chinese, Japanese, or Korean names
+ can display their names in their own language alongside the English versions of their names.
+Each address can be listed directly below the author(s) at that address (groupedaddress in REVTeX, this is the default option). 
+Note that this option will order authors by shared institution 
+not
+ in the order names are entered
+.
+Or a superscript number can be set after each author name in the author list and, correspondingly, before that author’s address (superscriptaddress option in REVTeX).  The addresses are collected in a list below the authors; each address is listed separately.  This format is recommended for collaborations and in cases 
+where a particular author order is desired
+.
+For Collaboration author lists, see 
+Guidelines for Collaboration Submissions
+.
+Place group or collaboration names in parentheses after the list of authors and before the list of institutions.
+Addresses should consist of department or division, institution, city, state (if relevant), and country, in this order. Street addresses, post office boxes, ZIP or postal codes, etc., are not required but may be included.
+Institutions given should be those where the research was performed. Footnotes to author names can be used to indicate addresses not associated with the research, e.g., Present address: …
+Note that papers submitted under an 
+Institutional Open Access Agreement
+ require the submitting author to list the member institution as their affiliation in the byline.
+Byline Footnotes
+Footnotes can be used facilitate locating or communicating with an author, for example,
+*Contact author: author@email.com, they/them/theirs.
+†PHENIX Spokesperson.
+‡Present address: …
+Footnotes giving email addresses of one or more post-publication contact authors are strongly encouraged, e.g.,
+*Contact author:  author1@email.com
+†Contact author:  author2@email.com
+Emails provided on the published paper without a prefix will be given the prefix “Contact author.”
+“These authors contributed equally to this work.” may be set as a footnote for the relevant authors. (More detailed information about the division of responsibilities should be placed in a separate paragraph after the Acknowledgment section.)
+Abstracts
+They should consist of one paragraph and be completely self-contained.
+They should concisely summarize the subjects, conclusions, and results of the manuscript.
+For experimental papers, specify the quantities measured and objects studied and clearly describe the experimental conditions.
+Avoid coined words and unexplained acronyms.
+They should have no displayed equations or tables.
+Do not use numbered references (incorporate source listings directly into the abstract text itself—see 
+APS Journals Style Guide
+)
+Length should be about 5% of the article and less than 500 words.
+Main text
+Direct the manuscript text at a general readership so as to make it understandable to a broad spectrum of researchers.
+Ensure the text is well organized—use headings as needed, according to the style for the journal (see a recent issue and/or refer to the 
+APS Journals Style Guide
+)
+Write clearly in scientific English and in a style consistent with that of the Physical Review journals.
+If your first language is not English, consider seeking help from a native English speaker or using our 
+language editing service
+.
+Limit specialized jargon, as it can hinder communication.
+Avoid excessive use of acronyms.
+If jargon and acronyms are necessary, please define them in the text.
+Only introduce new terminology when needed to convey a unique or nuanced meaning. Ensure it is not frivolous or difficult to pronounce.
+Be consistent in your use of hyphens.
+Format figures and tables such that their content and details are readable when they are sized for the journal page. The size of the smallest capital letters and numerals should be at least 2 mm.
+Proofread papers prior to submission to eliminate grammatical errors, misspellings, and omission of symbols.
+Length
+If your paper is determined to be overlength at submission, you will be asked to shorten it. For a more detailed explanation of length limits, consult the journals’ 
+Length Limit Guide
+.
+Data Availability Statement
+The Physical Review journals strongly encourage authors to share relevant data, code, software, and other materials that support their reported results by depositing them in open data repositories at the time of publication. Authors should follow requirements for sharing data and code set by their funding agencies.
+Authors will be asked to provide a data availability statement during submission. This statement will be automatically added to the published article as a separate paragraph after the Acknowledgments. Authors may make appropriate amendments to the statement at the proofing stage if the article is accepted for publication. If any data referred to in the article (including the authors’ original data) is publicly available at the time of publication, the authors will be asked to provide a reference or references giving further details, including a DOI or URL, which will be cited in the statement. The reference should include
+authors (creators) of the data,
+year
+any version number
+name of the repository (if applicable)
+a persistent identifier, preferably a DOI
+If the data have a corresponding article published in a data journal, then the reference to the journal data should be included as well.
+Example statement and reference:
+The data that support the findings of this article are openly available [47].
+[47] A. Smith and J. Brown, 2015, [Archive Name], [URL or DOI].
+See APS policy on 
+Data Availability Statements
+ for more examples.
+Acknowledgments
+The acknowledgments section should be used for the recognition of those contributing individuals and institutions who might otherwise go unnoticed.
+Acknowledgments may be used to
+Recognize named individuals who contributed scientifically to the research of the paper
+Cite the funding agencies that provided financial support for the work
+Acknowledge positions, titles, and awards 
+only if
+ they provided funding for the research
+State the source of financial funding; do not include the date associated with an award
+Acknowledge the use of AI in the writing of the paper
+Acknowledgments to people precede those of financial support.
+Acknowledgments 
+may not
+ be used to
+Recognize those who helped in preparing the paper (e.g., administrative assistants)
+Mention editors who handled the peer review of the paper
+Thank those who contributed general encouragement (e.g., family, friends)
+Thank those who provided services that were not directly part of the research
+Include a dedication or a memorial
+Author Contributions
+Information concerning author contributions should be placed in a separate paragraph after the Acknowledgment section. For example,
+“A.B. and C.D. contributed equally to this work. A.Z. and B.Y. conceptualized the work; C.X. conducted the experiments.”
+For guidance on contributor roles, see the 
+CRediT taxonomy
+.
+(As an option, the statement “These authors contributed equally to this work” may be set as a byline footnote to the relevant authors.)
+Appendixes
+Appendixes are placed after the acknowledgments section and before the listing of references.
+References and subsidiary remarks
+Combine references (citations of other work) and endnotes (subsidiary remarks) in a single list at the end of the paper.
+Number the items consecutively in the order in which they are cited.
+All sources should appear in the reference list, including URLs, which should not appear in the body of the paper.
+Designate references and endnotes consecutively throughout the text with inline numerals in square brackets.
+Provide all author names for references with up to ten authors.
+For more than ten, up to 20 names can be listed followed by et al. as appropriate.
+Provide sufficient information to enable the reader to locate cited items not available in the published literature, e.g., internal reports, unpublished work.
+Citations to e-prints should not be used in place of primary references (papers published in peer-reviewed journals).
+Citations to classified reports or other documents with restricted circulation should be avoided.
+All citations, including those cited in figure and table captions, should be listed in the reference section.
+Check the accuracy of the bibliographic information in the references. If it is incorrect or incomplete (e.g., missing author name or an incorrect volume number or page), the added links may fail.
+Mathematics
+Keep notation clear, compact, and consistent with standard usage.
+Neatly format, punctuate, and align equations to bring out their structure.
+Number equations on the right.
+Punctuate mathematical expressions and displayed equations as part of the sentence.
+Use single-letter symbols for mathematical quantities in equations and expressions, with subscript or superscript indices or labels, if necessary.
+Replace a frequently repeated mathematical equation with a symbol.
+Use bracketing as necessary to ensure clarity.
+Note that the solidus (/) in fractions, for example 1/2a, means 1/(2a) and not (1/2)a.
+Do not use a center dot to indicate multiplication except for products of vectors, dyadics, and the like.
+In general, three-vectors are set in roman boldface.
+Four or more vectors are usually set in lightface italic, but boldface is acceptable.
+Ordinary type is preferable when using Greek letters.
+Typographically distinguish matrices, operators, and other general quantities only to avoid confusion; in such cases use boldface or a caret.
+Tables
+Number with roman numerals in the order in which they appear in text.
+Supply a caption that explains the contents of the table and includes definitions of symbols.
+Keep column headings simple and include units in these headings.
+Very simple and brief tabular material may appear in the text without a number or caption.
+Use a single horizontal rule to separate the column headings from the entries in the table.
+Use horizontal space within the body of the table to separate broad groups of entries.
+Extra vertical space may be used between columns.
+Avoid vertical rules in tables.
+Use lower-case roman letters for footnotes placed at the bottom of a table.
+Figures
+Number figures with arabic numbers in the order in which they are referred to in the text.
+Supply a single caption that clearly summarizes the contents of the figure.
+Define figure symbols and curves either in a legend in the figure itself or in the caption.
+Label subfigures (a), (b), etc., and include in the caption a description of each panel. If possible, submit figures with multiple panels as one file.
+Size to the width of a single manuscript column (8.5 cm or 3 3/8 in) or 1.5 or 2 columns for more detailed figures. Ensure that content and details are readable at this size.
+Make the height of the smallest capital letters and numerals at least 2 mm and make the diameter of each data point at least 1 mm. Make a curve’s linewidth at least 0.18 mm (0.5 point). Avoid small open symbols, shading, and cross-hatching in figures.
+Label figure axes with the quantities plotted and place units in parentheses (not square brackets) after the quantity. See  
+Axis Labels and Scales on Graphs
+ for more information on how to style figure axes.
+Use the Greek letter itself rather than spelling out the name (e.g., use θ not \theta).
+Figures should accurately present the scientific results. If adjustments to images, such as changing its brightness, are made, state the adjustment in the figure caption.
+Please use accessible color palettes for color figures.
+File format
+Preferred formats are .ps, .eps .jpg, and .png
+Photographic images should be submitted as high-resolution .jpg or .png files.
+Avoid scanned images, but if they must be used, make scans with as high a resolution as possible (preferably 600 dpi or higher) and then scale the figure to its final size.
+Color figures
+Authors may choose either color figures in print and online or color online only with grayscale in print.
+Color figures in print and online
+For journals with a print version, if colored figures are desired in the print version of the journal as well as in the online version, clearly indicate which figures are intended to be 
+printed in color
+ when the manuscript is submitted.
+Color-online-only figures with grayscale in print
+There is no charge for color-online-only figures. Take care to ensure that captions and text references to the figures are appropriate for both the online color and print grayscale versions, and that the figure will be sufficiently clear in both versions. (The same figure file is used for both the print and the online versions.) To achieve this goal, use colors that have clearly distinguished grayscale values. To assist in differentiating colored curves, use different line styles (dashed, solid, etc.) and give a description of the lines in the caption. See 
+Guide to Acceptable use of Color in Color Online Figures
+ for more information. For color-online-only figures, a .ps or .eps file is required for production.
+Reproducing previously published figures/tables
+In order to reproduce previously published figures, tables, etc., authors must show that they have complied with the requirements of the publisher of that material. See 
+Policies and Practices
+.
+Supplemental Material
+Supplemental Material (SM) is useful information that is not essential to understanding an article’s main results, such as
+Multimedia files
+Parameters used in or produced by calculations
+Details of sample preparation
+Derivations of equations
+The paper must stand on its own; it must be understandable and convincing without the Supplemental Material.
+Short papers
+SM should not be used to avoid a length limit; often, a short paper accompanied by a lengthy supplement is not appropriate. Editors use their judgment to decide if a longer manuscript with all material integrated into the main text is required. The editors may seek guidance in this decision from the referees who review the manuscript and SM.
+Long papers
+In a longer format manuscript, it may be best to present additional material as an appendix to the main article, rather than as SM.
+Comments, Replies, and Errata
+In general, SM should not accompany these article types.
+References
+All files related to a published paper are stored as a single deposit and assigned a Supplemental Material URL. This URL appears in the citation for the SM in the article’s reference list. Add a cite to the SM in the reference list as follows:
+See Supplemental Material at [URL will be inserted by publisher] for [give brief description of material].
+and cite the reference in the text at the appropriate place(s).
+All references cited in the SM must also be listed in the reference section of the main text.
+For editorial policies and more details about preparing and depositing Supplemental Material, see  
+Supplemental Material Instructions
+.
+open icon
+close icon
+News
+Join APS
+ Authors
+open icon
+close icon
+General Information
+Submit a Manuscript
+Publication Rights
+Open Science
+Tips for Authors
+Professional Conduct
+ Reviewers
+open icon
+close icon
+General Information
+Submit a Report
+Update Your Information
+Reviewer FAQ
+Outstanding Reviewers
+ Librarians
+open icon
+close icon
+General Information
+Subscriptions
+Online License Agreement
+Usage Statistics
+Your Account
+ Students
+open icon
+close icon
+Physics
+PhysicsCentral
+Student Membership
+ Connect
+open icon
+close icon
+Privacy
+Policies
+Contact Information
+Feedback
+News
+Join APS
+Authors
+General Information
+Submit a Manuscript
+Publication Rights
+Open Science
+Tips for Authors
+Professional Conduct
+Reviewers
+General Information
+Submit a Report
+Update Your Information
+Reviewer FAQ
+Outstanding Reviewers
+Librarians
+General Information
+Subscriptions
+Online License Agreement
+Usage Statistics
+Your Account
+Students
+Physics
+PhysicsCentral
+Student Membership
+Connect
+Privacy
+Policies
+Contact Information
+Feedback
+©2026 
+American Physical Society.
+ All rights reserved. 
+APS Open Science™
+, 
+Physical Review™
+, 
+Physical Review A™
+, 
+Physical Review Accelerators and Beams™
+, 
+Physical Review Applied™
+, 
+Physical Review B™
+, 
+Physical Review C™
+, 
+Physical Review D™
+, 
+Physical Review E™
+, 
+Physical Review Fluids™
+, 
+Physical Review Letters™
+, 
+Physical Review Materials™
+, 
+Physical Review Physics Education Research™
+, 
+Physical Review Research™
+, 
+Physical Review X™
+, 
+PRX Energy™
+, 
+PRX Intelligence™
+, 
+PRX Life™
+, 
+PRX Quantum™
+, 
+Reviews of Modern Physics™
+, 
+APS Physics logo
+, and 
+Physics logo
+ are trademarks of the American Physical Society. Information about registration may be found 
+here
+.
+    Use of the American Physical Society websites and journals implies that
+    the user has read and agrees to our 
+Terms and
+    Conditions
+ and any applicable
+Subscription
+    Agreement
+.
+Sign In to Your Journals Account
+Username
+Password
+Forgot your username/password?
+Create an account
+Sign in to your APS Member Account
+Sign in via your Institution
+Sign In
+Filter
+Filter
+Article Lookup
+Enter a citation
+Paste a citation or DOI
+Lookup Article
+Journal
+APS Open Sci.
+Phys. Rev. Lett.
+Phys. Rev. X
+PRX Energy
+PRX Intelligence
+PRX Life
+PRX Quantum
+Rev. Mod. Phys.
+Phys. Rev. A
+Phys. Rev. B
+Phys. Rev. C
+Phys. Rev. D
+Phys. Rev. E
+Phys. Rev. Research
+Phys. Rev. Accel. Beams
+Phys. Rev. ST Accel. Beams
+Phys. Rev. Applied
+Phys. Rev. Fluids
+Phys. Rev. Materials
+Phys. Rev. Phys. Educ. Res.
+Phys. Rev. ST Phys. Educ. Res.
+Physics
+Phys. Rev.
+Phys. Rev. (Series I)
+Physics Physique Fizika
+Volume
+Article ID / page number
+Lookup Article

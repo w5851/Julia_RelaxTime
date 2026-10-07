@@ -46,7 +46,7 @@ draw_points = false
 visual_policy = "line_first_landmark_only"
 
 [layout]
-legend_policy = "shared_external_then_case_review"
+legend_policy = "declared_geometry_checked"
 max_in_axes_entries = 4
 allow_external_legend = true
 

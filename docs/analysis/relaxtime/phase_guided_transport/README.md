@@ -2,10 +2,16 @@
 
 本目录收纳 phase-guided relaxation-time transport 的连续诊断证据包。它们都位于 `docs/analysis` 的 diagnostic 边界内，不是新的 production result root，也不改变 `data/outputs` 中的正式 CSV、figure 或 registry。
 
+最新已接受排版为 **v13**：从[PDF 图件索引](phase_guided_transport_publication_clean_v13_pdf/pdf_index.md)查看 75 份矢量图，从[案例合同](plotting_case_contract.md)查看版式与物理标签规则。当前正式文稿图层仍为 **v5**；v13 的 PNG 接受和 PDF 交付记录不自动更改 current 或论文资格。
+
 ## Stages
 
 | 阶段 | 当前路径 | 角色 |
 | --- | --- | --- |
+| publication-clean v13 accepted layout | [`publication_clean_v13_png_acceptance_v1.json`](publication_clean_v13_png_acceptance_v1.json) | 作者版本级 PNG 接受及对应 PDF 导出授权；不声称逐文件人工审查或数值生产晋升 |
+| publication-clean v13 PDF delivery | [`phase_guided_transport_publication_clean_v13_pdf/`](phase_guided_transport_publication_clean_v13_pdf/) | 72 单图、2 主复合图、1 局部图，共 75 份单页矢量 PDF；完成 vector_delivery，manuscript_eligible=false |
+| publication-clean v13 PNG snapshot | [`phase_guided_transport_publication_clean_v13_png_review/`](phase_guided_transport_publication_clean_v13_png_review/) | 75 对彩色／灰度 PNG、冻结 renderer、点表和图例声明；原生成时 manifest 与审查记录保持不变，接受状态见独立记录 |
+| publication-clean v12 PNG snapshot | [`phase_guided_transport_publication_clean_v12_png_review/`](phase_guided_transport_publication_clean_v12_png_review/) | 75 对彩色／灰度 PNG；保留作历史对比及 v13 核验依赖，无 PDF，不作为当前图层 |
 | v1 tau-first analysis | [`phase_guided_transport_p128_xi001_analysis/`](phase_guided_transport_p128_xi001_analysis/) | 从 tau/channel-rate 突变出发，记录下游输运响应、denominator-chain 候选和 claim ledger |
 | v2 pole-sensitive rendering | [`phase_guided_transport_v2_pole_sensitive_rendering/`](phase_guided_transport_v2_pole_sensitive_rendering/) | 在 v2 on-shell-kernel production 上迁移 v1 机制窗口，加入 v2 定点诊断、pole-sensitive mask、论文候选显示和一阶分支保护 |
 | publication-clean v6-v9 history | [`publication_review_history_v6_v9_archive_v1.json`](publication_review_history_v6_v9_archive_v1.json) | 已核验可恢复的本地历史归档；完整中间图包不进入当前 Git 主线，生成器依赖保留；不宣称历史公共合同仍有效 |
@@ -17,6 +23,8 @@
 | publication-clean current | [`phase_guided_transport_publication_clean_v5/`](phase_guided_transport_publication_clean_v5/) | 正式文稿采用的当前 publication figure layer；只更新图内单位和分支端点措辞，不改变 raw/production 数值 |
 | publication-clean accepted parent | [`phase_guided_transport_publication_clean_v4/`](phase_guided_transport_publication_clean_v4/) | v5 的已接受显示父级；保留 v4 的局部显示调整与 raw/display provenance |
 | publication-clean intermediate | [`phase_guided_transport_publication_clean_v3/`](phase_guided_transport_publication_clean_v3/) | v4 的不可变父级和中间版本，仅保留 provenance，不作为当前 publication layer |
+
+版本共存按用途区分：v13 是最新已接受排版，v5 是 current，v10–v12 是保留快照，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，renderer 也保留历史生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。
 
 v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_window_summary.csv`；v2 是连续审计阶段，不覆盖、不合并、也不重写 v1。
 
@@ -102,10 +110,10 @@ log 标签；匹配的 mode-A tau 单图也采用 log-y。Figure 2（三行输�
 和 numerical qualification 的未通过/未运行边界继续保留。
 `manuscript_eligible=false`，`publication_clean_current.json` 仍为 v5。
 
-当前 Git 保留完整 v10 父级和 v11 PNG/PDF/版面审计，以及 v6-v11 生成器
-导入依赖。v10 原 SOP/skill hash 与当前合同存在两处已知漂移；历史快照
+v11 阶段保留了完整 v10 父级和 v11 PNG/PDF/版面审计，以及 v6-v11 生成器
+导入依赖。当时记录的 v10 原 SOP/skill hash 与活动合同存在两处漂移；历史快照
 检查要求 v11 锁定的 v10 文件字节完全不变，并精确记录该漂移，不把它当作
-当前合同通过，也不改旧 hash。v11 的当前输入合同必须全部通过。
+当前合同通过，也不改旧 hash。v11 阶段的输入合同按登记快照核验。
 
 v6-v9 中间图包、旧 artifact tests 和 v6 镜像脚本已做 ZIP 逐文件 SHA-256
 归档及恢复核验，归档索引保留在本目录。当前归档只在本机可用，

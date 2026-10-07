@@ -1,0 +1,72 @@
+[
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\protocol.md",
+    "bytes": 5512,
+    "sha256": "4d8c3daed048929f95c202ca3b12075b6e22783b6d64f0b4274db2f236da000b"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\selected_records.json",
+    "bytes": 2839022,
+    "sha256": "2c93bdf433518d1dbd80ed2440a862ba295cc97c77b3d0425ed797f5a83fe651"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\screening_pool.json",
+    "bytes": 60299446,
+    "sha256": "d31ab83586176909301ce2e13c9ca3d8673c0353cc51b47ab7d65f5306051422"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\search_log.json",
+    "bytes": 1754,
+    "sha256": "d2fb6cde79c819f067b05a96af03fe1644e68726617a5c408a99ff8d3d02b601"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\search_pnjl.json",
+    "bytes": 10372216,
+    "sha256": "91235756496d3669d7e96250286667d3bbf0e9a1d8a33450ef4ce6c3e6304a4c"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\search_njl.json",
+    "bytes": 24123642,
+    "sha256": "c2749ba5a7f310befb777bf4583702a28b85b0d040bdd3bb353c0369a62f0e2e"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\search_anisotropic_aps.json",
+    "bytes": 39069650,
+    "sha256": "7f6ea7c29753d3e8229f96368e1642e451f556073d68494caec67ea3718cf9a2"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\audit_sources.json",
+    "bytes": 13336,
+    "sha256": "202534d2f702ecd2095db1f7a680b584f5db50184856581590cf7f6c9723c476"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\page_inventory.json",
+    "bytes": 95538,
+    "sha256": "aa04e4b319b85b0fb5c19194e44442322a00ae08e5d5dc5f356aca57cc8163a3"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\crossref_checks.json",
+    "bytes": 12554,
+    "sha256": "fcb85a7bff77e806803a0d07b097bae3e7b5e668a6204bd004e9415992cf140d"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\published_download_log.json",
+    "bytes": 10667,
+    "sha256": "e9a6eb3624a6f1bccc928bd4f55201bcf1e8fd583f4312d4d07d3db812a4349d"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\download_log.json",
+    "bytes": 11878,
+    "sha256": "7ba8401bcce327b1198bf20b840b50ace1f91797b3c0c02e7987a80090b45e2e"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\aps_style_basics.html",
+    "bytes": 65569,
+    "sha256": "83e99c39714d5359fb553ad199a6e23e4399c5ae06874bc28c7aa801a5ab95f1"
+  },
+  {
+    "path": "D:\\Temp\\pnjl_figure_style_audit_20261005\\render_audit_pages.py",
+    "bytes": 3701,
+    "sha256": "a308fd64926f9102f50eecf9312daedc607cd8ee59c0dcb5a8464843f4c1ea9b"
+  }
+]

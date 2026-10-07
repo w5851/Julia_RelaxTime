@@ -1,10 +1,76 @@
 # Phase-guided transport 绘图案例合同
 
-本页保存 v11 图族的已审查布局规则，移自 figure_production_v2 SOP。公共 APS v2 规则见
+本页保存 v13 的当前审查布局，以及 v11/v12 的历史布局。公共 APS v2 规则见
 [绘图 SOP](../../../guides/sop/workflows/figure_production.md)，逐图 panel specs、caption 与
-冻结输入仍以各版本 manifest 为准。本次迁移不改变 renderer、产物字节或审核资格。
+冻结输入仍以各版本 manifest 为准。历史产物字节和审核资格不随新布局改变。
 
-## 图例与端点语义
+## v13 图内共享／分置图例布局
+
+v13 从 v12 同一冻结点表生成独立 PNG 审查 case。布局入口为
+`scripts/analysis/relaxtime/build_phase_guided_publication_clean_v13.py --png-review`。
+
+- 两张主图的参数 key 放在 (a) 左上空白区，标题 `α_T`，条目仅
+  `1.0 / 1.1 / 1.2`；端点 key 放在 (c) 左上空白区，标题 `First-order`，
+  圆圈为 `restored`、方块为 `broken`。前者全图通用，后者仅解释
+  `mu_B=900 MeV, alpha_T=1.0` 的实际一阶分支端点。
+- 参数数学标题 13 pt；三个数字条目及一阶 key 的标题／条目 11 pt。
+  列标题和行标签 13 pt，复合图刻度和 panel 编号 11 pt。参数标题的
+  数学下标仍须实测达到 2 mm；不使用 1.5 mm 紧凑字形例外。
+- 保留 171.45 mm 宽度和 Figure 1/2 的 7.1/5.9 in 高度，回收顶部公共
+  图例占用的空间。Figure 1 全 log-y、Figure 2 全 linear-y；独立 y 范围、
+  行内精度、三个 x 数字标签、全部源曲线顶点及 gap 均保留。
+- 四面板局部图沿用 v12 的 (a)/(g)/(h)/(i) 和全部线性 y 窗口，参数 key
+  在 (a)；端点在窗口外，不添加端点 key，也不把 viewport 当成曲线终点。
+- 72 张单图按原生双栏尺寸绘制。确定性地尝试声明的四角组合，按真实
+  曲线／端点几何选择无挡位置；同一 axes 可保留两份独立 key，必须逐份
+  检查。全部组合不合适时允许简短顶部备选，理由和实际位置写入 manifest。
+  mode-A 使用 α_T key；固定 T 的 mode-B 使用 `μ_B (MeV)` 标题与
+  `0 / 450 / 900` 条目。颜色／线型仍绑定各自原 series，不混淆两种参数。
+  端点 key 的适用曲线在 `legend_placements[].applies_to` 逐项登记。
+- 新 policy 为 `declared_geometry_checked`。每份 key 的数量、host、标题、
+  条目和位置声明与实测逐项一致；图例和 axes 相交本身允许，曲线／端点
+  遮挡、图例互相覆盖、图内溢出、文字裁切／重叠均不允许。
+- 75 对彩色／灰度 PNG 先交付审查；同尺寸灰度转换、逐图缩放区间、
+  最终 600 dpi 几何、线型追踪和端点检查保留。单图也不能默认缩成单栏。
+  PNG 已由作者接受，见 [接受记录](publication_clean_v13_png_acceptance_v1.json)；
+  对应 75 份矢量 PDF 已使用冻结 renderer 导出，见 [PDF 图包](phase_guided_transport_publication_clean_v13_pdf/README.md)。
+  论文资格及 current-layer 晋升分别处理。
+
+v12 更新前的 27 份源码／合同字节保存在
+`publication_clean_v12_code_snapshot_v1.zip`，archive hash 登记于
+`config/plotting/historical_snapshots.toml`。其中 base commit 仅作上下文，
+不把未提交字节伪装成提交内容；原 v12 manifest 和图像保持不变。
+文献样本的 [调查报告](literature_figure_style_audit_20261005/README.md) 也作为
+冻结输入保留；其比例用于选择试排顺序，不用于禁止顶部或其他图外布局。
+
+## v12 最终尺寸审查布局（历史）
+
+v12 是新 sibling 审查 case，v11 的下面各节继续作为历史布局合同保存。
+当前 v12 使用 `build_phase_guided_publication_clean_v12.py --png-review`：
+
+- 原生推荐宽度 171.45 mm；Figure 1/2 保留 v11 的 7.1/5.9 in 高度。
+  图例和列标题 13 pt，主刻度与 panel 编号 11 pt，行轴标签 13 pt。
+  这些字号需逐图实测，不使用 1.5 mm 紧凑字形例外。
+- 两组公共图例置于图外顶部：参数 key 在第一行，第二行用
+  `First-order (restored)`／`First-order (broken)`。端点语义只适用于
+  `mu_B=900 MeV, alpha_T=1.0`，不能说全部 panel 都具有一阶端点。
+- Figure 1 仍为全 log-y、Figure 2 为全线性轴；保留独立 y 范围、
+  三个 x 数字标签、行内小数位、原曲线顶点和分支 gap。
+- 另给四面板低值视图，对应 Figure 1 的 (a)/(g)/(h)/(i)，使用线性
+  y 轴和明确范围：前两幅 0.58--0.66 fm，(h) 0.375--0.43 fm，
+  (i) 0.27--0.41 fm。离开窗口的曲线仍保留在完整主图；一阶端点
+  在这些窗口外。局部图不能用于确认新增物理结构或数值收敛。
+- 所有 72 张单图仍按 6.75 x 4.6 in 绘制，改用图外 key，避免自动
+  `best` 图例在个别 mode-B 曲线／端点上遮挡。逐图报告缩放区间及单栏
+  复用资格；不允许将原生双栏字高的通过结论用于半宽插图。
+- 每张图给出同尺寸彩色及灰度 PNG，共 75 对；一个总 manifest 保留
+  逐图记录。灰度转换不改变数据。作者视觉接受、PDF 与论文资格待后续阶段。
+
+图注见 v12 case 的 `caption_handoff.md`，其中明确图外 key、局部图与
+原图 panel 的对应关系，以及继承的 display-only 数值边界。机器检查
+和人工审查范围分别留证，不能用总 manifest 或测试通过替代人工审图。
+
+## v11 图例与端点语义（历史）
 
 对于论文/组内博士论文风格的密集输运复合图，图例可以采用一次性的
 case-level in-panel key，但必须遵守以下收缩规则：参数曲线只保留
@@ -29,7 +95,7 @@ endpoints。分开的端点 key 使用共同标题 `First-order`，其下分别�
 本输运图族的端点对应 `mu_B=900 MeV, alpha_T=1.0`，不能笼统写两个 key
 均适用于所有 panel。
 
-## 坐标轴与数字显示
+## v11 坐标轴与数字显示（后续版本沿用）
 
 输运 v7--v10 保留历史 `1st-order` 措辞；新 v11 审查层使用 `First-order`。
 完整的 chirally restored/broken、endpoint、温度及分支断线解释在 caption handoff。
@@ -65,7 +131,7 @@ host、legend 字号和 `legend_curve_overlap_count`。
 
 ## 入口与历史核验
 
-- 新审查运行使用 `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py --png-review`，输出新 case，保留原产物。
+- 当前审查入口为上述 v13 builder；v11/v12 入口用于历史追溯，已存在的 case 均拒绝覆盖。
 - 已接受阶段用 `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check` 按登记的历史 commit 核验。
 - `publication_clean_v11_code_snapshot_v1.zip` 保存该提交的 21 份代码/合同文件与原阶段验收记录；registry 记录 archive hash。浅克隆或 squash 后不依赖旧 Git object 可用性；现存数据/图像仍直接验证，不从源码 archive 替代。
 - 阶段验收、正式矢量交付、数值生产与 current-layer 晋升分别依赖各自的作者授权。

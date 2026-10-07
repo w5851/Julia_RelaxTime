@@ -1,0 +1,18 @@
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 1. 目的与适用范围
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 2. 非适用范围
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 3. 权威入口
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 4. 物理口径、单位与参数约束
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 5. 输入配置及优先级
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 6. 环境与版本冻结
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 7. Smoke 预检
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 8. 收敛性验证
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 9. 正式计算命令
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 10. 输出目录与产物合同
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 11. Regression / Validation 验收
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 12. 失败点、断点续算与重跑
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 13. Diagnostic 与 Formal Production 的边界
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 14. 后处理与作图
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 15. 关联公式、API 和测试
+[sop-governance] advisory: sop[figure_production] missing recommended section: ## 16. 最后验证记录
+[sop-governance] OK
+  registry=config/governance/docs_authority_map.toml

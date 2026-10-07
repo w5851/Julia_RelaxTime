@@ -69,15 +69,19 @@ already frozen CSV/JSON results. The authoritative workflow is
   explicitly documented review typography exception, with measured scripts
   at least 1.5 mm. This is not APS submission compliance and cannot promote
   the artifact or authorize vector delivery.
-- Keep legends outside data axes unless a documented case layout and visual
-  review justify a registered in-axes exception. Verify curve/landmark
-  visibility, panel labels and clipping. Use color plus line style where
-  curves must remain distinguishable in grayscale.
+- Try a shared or split compact key in unused in-axes space first. Use common
+  titles to avoid repeated labels. Short top, side or dedicated legend areas
+  remain valid when the measured geometry requires them. For new v2 cases use
+  `declared_geometry_checked` and declare every legend's host, content and
+  scope. Measure all legends, including multiple keys retained on one axes;
+  reject curve/landmark obstruction, host overflow and text/legend overlap.
+  Axes intersection alone is not failure; geometry passing is not author
+  acceptance. Use color plus line style for grayscale readability.
 - Choose axis scales, ranges, legend hosts and precision for the scientific
   case. Tick labels must identify the actual values; display formatting does
   not establish numerical uncertainty.
 - Keep figure-family layout details in its case documentation and renderer.
-  The reviewed phase-guided v11 layout is documented in
+  The versioned phase-guided layouts are documented in
   `docs/analysis/relaxtime/phase_guided_transport/plotting_case_contract.md`.
 - Keep scientific phase labels and branch gaps tied to the input semantics;
   a plotting style change must not relabel a hadron/quark result or reconnect
