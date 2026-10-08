@@ -1,0 +1,39 @@
+{
+  "schema": "phase_prd_delivery_review_v1",
+  "reviewed_on": "2026-10-08",
+  "author_visual_acceptance": "provenance/png_acceptance.json",
+  "agent_visual_review": "color PNG, same-size grayscale, and freshly rendered PDF inspected; no clipped labels or legend/data overlap observed",
+  "pdf_sha256": "39033387a1312499ef18325725ac6897be92ebd0db697927d110d622dc2aaaf5",
+  "pdf_technical_checks": {
+    "physical_size_inches": [
+      6.75,
+      4.6
+    ],
+    "page_count": 1,
+    "raster_image_count": 0,
+    "font_count": 4,
+    "fonts_embedded": true,
+    "type3_font_count": 0,
+    "inspection_tools": [
+      "pdfinfo",
+      "pdfimages -list",
+      "pdffonts"
+    ]
+  },
+  "minimum_glyph_height_mm": 2.096211067708333,
+  "minimum_curve_background_contrast": 3.8671837898669135,
+  "native_series_count": 25,
+  "density_estimate_count": 5,
+  "explicit_closure_count": 15,
+  "validation": {
+    "phase_and_contract_suite": "40 passed; initial v13 PDF live-profile failure repaired and covered by the targeted rerun",
+    "v13_pdf_targeted_rerun": "11 passed",
+    "shared_quality_provenance_bundle_inventory": "67 passed",
+    "docs_consistency": "passed",
+    "script_entrypoints": "passed",
+    "skill_governance": "passed",
+    "claude_adapter_sync": "passed",
+    "final_manifest": "passed"
+  },
+  "scope": "No solver call, no numerical source replacement, no current-layer promotion; paper-local adoption authorized separately."
+}

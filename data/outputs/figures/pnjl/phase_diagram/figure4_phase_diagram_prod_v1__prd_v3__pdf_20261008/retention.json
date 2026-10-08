@@ -1,0 +1,105 @@
+{
+  "schema": "phase_figure_final_delivery_retention_v1",
+  "policy": "commit only the final PDF delivery directory; retain the author-accepted PNG case inside its provenance archive",
+  "accepted_case_archive": {
+    "path": "provenance/accepted_png_case.zip",
+    "bytes": 833521,
+    "sha256": "a7f78c26d9b89ebadd2a1652295a1dec2dd52ee86334c0b132c89c930f91476e"
+  },
+  "archived_files": [
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/caption.tex",
+      "bytes": 833,
+      "sha256": "604ebcfc418a340306ace28df3a57e9396a81c58d184f609cf44c1fca857449c"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/caption_handoff.md",
+      "bytes": 472,
+      "sha256": "7447f5e18a9f9b7f88ecc242a34616b8a4ca5d816fb698b1f61c1c34f3582090"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/phase_diagram_TmuB_Trho.png",
+      "bytes": 575081,
+      "sha256": "767560cab354303531eebb8b46c347458f9bb1fac8eaa2fb4b0bcd6c3609f5dd"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/phase_diagram_TmuB_Trho_gray.png",
+      "bytes": 255451,
+      "sha256": "8c0529273b55adfc74bda122318cad3a7d4a7beb28b1ebb8cb9327340171c8f6"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/plot_manifest.json",
+      "bytes": 73426,
+      "sha256": "d9db935dba6e27718e15d4dabfe63c9d1cec7e372406a81ee77f5bf903f7d176"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/build_phase_diagram_prd.py",
+      "bytes": 22474,
+      "sha256": "77956cbda90f07439bdd48415f5eb7fa9ac32e2d0066e71dbb9d20e7a73933d1"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/config/plotting/candidate_aps_v2.toml",
+      "bytes": 2171,
+      "sha256": "94e9f7c4c24eacbc79ae2f16582c6a93b38213295cb71fa21cc09b9e2f5890ac"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/docs/guides/sop/workflows/figure_production.md",
+      "bytes": 12844,
+      "sha256": "908805d7c3df26d16e1edfae1d72e930a3cc3c9c8c04d19a4cefb6dc669f7e56"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_accessibility.py",
+      "bytes": 3536,
+      "sha256": "11da33b4fbc0393983bf1775e98607fbc6ff5a1472515c6674d400a8701f9102"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_bundle.py",
+      "bytes": 3527,
+      "sha256": "6bcc0104c2e15455dbe0ef9a70a2ded9d27ab71eb5bf7348e18fffb591194775"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_delivery.py",
+      "bytes": 5333,
+      "sha256": "9cc55b0a92168eaf8750758cc347ab5d8bba6da6908a30368daa8af95310d53f"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_provenance.py",
+      "bytes": 12204,
+      "sha256": "001a8bb92a8fee46157830d008b486d074e084e5c6a49fa35cf03f6f63f3f321"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_quality.py",
+      "bytes": 19247,
+      "sha256": "43bfe56040d936a4e88f69de99b4d2c3711ebaf0ab57db65ff65ddf93738d5ae"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/provenance/source_snapshot/scripts/plotting/validate_plot_artifact.py",
+      "bytes": 33243,
+      "sha256": "c85d2dbb3e34be0ba35a697220fe9e98730f68941ab1e0b9510e710128fd7208"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/README.md",
+      "bytes": 373,
+      "sha256": "a9d7119cdd5ec791ae574bbada14a5ad181d977b2559587c3866a946d561ec43"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__png_review_20261008/validation.json",
+      "bytes": 105,
+      "sha256": "4fda5ab8b80be92c427606b857b6822f265f553c698197852cf99ea79561c4d9"
+    }
+  ],
+  "original_case_paths_are_historical": true,
+  "restore_rule": "Archive members are repository-relative paths; restore within a chosen checkout to recover the exact PNG-stage graph.",
+  "raw_numerical_sources": "Existing tracked result tables are unchanged; referenced by plot_manifest.json.",
+  "superseded_local_trials": "Earlier r1/r2 trials remain local in the main checkout and are not part of this commit."
+}

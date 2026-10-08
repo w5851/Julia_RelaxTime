@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import zipfile
 
 import matplotlib.pyplot as plt
 import pytest
@@ -36,6 +37,32 @@ def test_live_renderer_guard_rejects_drift_even_with_an_available_snapshot(tmp_p
     source.write_bytes(b"changed source\n")
     with pytest.raises(ValueError, match="frozen live file changed"):
         pdf.require_current(frozen, root=tmp_path)
+
+
+def test_historical_snapshot_checks_do_not_authorize_a_drifted_live_renderer(monkeypatch, tmp_path):
+    monkeypatch.setattr(pdf, "ROOT", tmp_path)
+    require_current = pdf.require_current
+    monkeypatch.setattr(pdf, "require_current", lambda record: require_current(record, root=tmp_path))
+    source = tmp_path / "scripts/renderer.py"
+    source.parent.mkdir()
+    source.write_bytes(b"accepted source\n")
+    frozen = input_record(source, role="renderer", root=tmp_path)
+    archive_path = tmp_path / "snapshot.zip"
+    package_hash = "a" * 64
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr("snapshot_manifest.json", json.dumps({
+            "source_package_sha256": package_hash, "files": [frozen]}))
+        archive.writestr(frozen["path"], source.read_bytes())
+    acceptance = {"source_snapshot": input_record(archive_path, role="source_snapshot", root=tmp_path),
+                  "png_package": {"sha256": package_hash}}
+    package = {"inputs": [], "generator": frozen}
+    source.write_bytes(b"changed source\n")
+    assert pdf.verify_source_snapshot(acceptance, package, require_live=False) == ["scripts/renderer.py"]
+    with pytest.raises(ValueError, match="frozen live file changed"):
+        pdf.verify_source_snapshot(acceptance, package)
+    archive_path.write_bytes(b"corrupt retained archive")
+    with pytest.raises(ValueError, match="frozen live file changed"):
+        pdf.verify_source_snapshot(acceptance, package, require_live=False)
 
 
 def test_pixel_guard_ignores_png_metadata_but_rejects_changed_curve(tmp_path):

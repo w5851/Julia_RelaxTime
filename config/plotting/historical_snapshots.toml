@@ -38,3 +38,7 @@ manifest_prefix = "publication_clean_v10_"
 [publication_clean_v11]
 code_commit = "0725c0c4f87bbcbced4b7641c0a086e65c6fe42b"
 manifest_prefix = "publication_clean_v11_"
+
+[publication_clean_v13_pdf]
+code_commit = "c2621a8360519e20830065efdc1de12b12cdd0f0"
+manifest_prefix = "publication_clean_v13_pdf/"
