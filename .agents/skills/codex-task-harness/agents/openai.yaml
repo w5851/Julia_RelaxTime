@@ -1,4 +1,4 @@
 interface:
-  display_name: "Codex Task Harness"
-  short_description: "Restore multi-track scope and triage state."
-  default_prompt: "Use $codex-task-harness to recover the task ledger, classify new work, and bound a multi-track request."
+  display_name: "Task Track Recovery"
+  short_description: "Recover task tracks and triage dependencies."
+  default_prompt: "Use $codex-task-harness to recover the requested task, consult the ledger when track selection remains unclear, and identify blockers and the next action."

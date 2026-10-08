@@ -1,6 +1,6 @@
 ---
 name: formal-production-artifact
-description: "仅用于正式高精度数值产物晋升：收敛性 gate、正式重跑、manifest 与图表追踪；不用于 baseline 治理、日常漂移诊断、实验日志或文献复现。"
+description: "组织 Julia_RelaxTime 正式数值产物的生产、既有候选产物的晋升或正式产物交付，选择专题 SOP、复核已有精度证据并完成本批结果验收。"
 disable-model-invocation: true
 ---
 

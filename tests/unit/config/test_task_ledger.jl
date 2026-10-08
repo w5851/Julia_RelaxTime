@@ -350,7 +350,6 @@ end
     agents = read(joinpath(PROJECT_ROOT, "AGENTS.md"), String)
     @test occursin("task_tracks.toml", skill)
     @test occursin("blocker", skill)
-    @test occursin("doc-implementation", skill)
     @test occursin("task_tracks.toml", agents)
 end
 
@@ -358,4 +357,29 @@ end
     root = _fixture_root()
     @test TL.main(["--track", "track-a"]; root=root) == 0
     @test TL.main(["--track", "missing-track"]; root=root) == 1
+end
+
+@testset "preflight recovery details and bounded dirty output" begin
+    root = _fixture_root()
+    dirty_git = (root, args...) -> args == ("status", "--porcelain=v1") ?
+        join([" M changed_$i.md" for i in 1:25], "\n") : "fixture-git-value"
+    output = IOBuffer()
+    @test isempty(TL.preflight_report(root; io=output, git_output=dirty_git))
+    report = String(take!(output))
+    @test occursin("task_file=docs/dev/active/task.md", report)
+    @test occursin("item_next_action=Continue the fixture task", report)
+    @test occursin("file:docs/dev/active/task.md", report)
+    @test occursin("15 more", report)
+    @test !occursin("changed_25.md", report)
+    @test isempty(TL.preflight_report(root; io=output, git_output=dirty_git, full_paths=true))
+    @test occursin("changed_25.md", String(take!(output)))
+
+    path = joinpath(root, "config", "governance", "task_tracks.toml")
+    write(path, "not valid TOML = [")
+    @test !isempty(TL.preflight_report(root; io=output, git_output=dirty_git))
+    invalid_report = String(take!(output))
+    @test occursin("branch=fixture-git-value", invalid_report)
+    @test occursin("dirty=true", invalid_report)
+    @test !occursin("selected_track=", invalid_report)
+    @test_throws ErrorException TL.main(["--full-paths"]; root)
 end

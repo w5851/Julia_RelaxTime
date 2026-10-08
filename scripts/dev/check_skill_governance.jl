@@ -86,7 +86,7 @@ function unquote_yaml_scalar(value::AbstractString)
     length(value) >= 2 || return String(value)
     if (startswith(value, '"') && endswith(value, '"')) ||
        (startswith(value, '\'') && endswith(value, '\''))
-        return String(value[2:end-1])
+        return String(chop(value; head=1, tail=1))
     end
     return String(value)
 end

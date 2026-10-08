@@ -1,379 +1,265 @@
 #!/usr/bin/env julia
-# Archive development documents from docs/dev/active to docs/dev/archived
-# Adds metadata header and renames with date prefix
+
+module ArchiveDocs
 
 using Dates
-using Printf
+using JSON3
 
-const ROOT = pwd()
-const ACTIVE_DIR = joinpath(ROOT, "docs", "dev", "active")
-const ARCHIVED_DIR = joinpath(ROOT, "docs", "dev", "archived")
+const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+const STATUSES = ("completed", "cancelled", "superseded")
+const REQUIRED_FIELDS = ("title", "archived", "original", "archived_date")
 
-# Ensure archived directory exists
-mkpath(ARCHIVED_DIR)
+path_key(path) = Sys.iswindows() ? lowercase(normpath(path)) : normpath(path)
+same_path(a, b) = path_key(a) == path_key(b)
+exists(path) = ispath(path) || islink(path)
 
-"""
-    extract_title(content::String) -> String
+function valid_date(value::AbstractString)
+    occursin(r"^\d{4}-\d{2}-\d{2}$", value) || return false
+    try
+        return Dates.format(Date(value, dateformat"yyyy-mm-dd"), "yyyy-mm-dd") == value
+    catch
+        return false
+    end
+end
 
-Extract title from markdown content (first # heading or filename-based fallback)
-"""
-function extract_title(content::String, filename::String)
-    # Try to find first # heading
+function document_dir(root, kind)
+    base = realpath(root)
+    for part in ("docs", "dev", kind)
+        base = joinpath(base, part)
+        if exists(base)
+            isdir(base) && same_path(realpath(base), base) || throw(ArgumentError("document directory must not redirect through a link: $base"))
+        end
+    end
+    return base
+end
+
+function resolve_document(root, kind, input)
+    directory = document_dir(root, kind)
+    path = if isabspath(input)
+        normpath(input)
+    elseif basename(input) == input
+        joinpath(directory, input)
+    else
+        normpath(joinpath(realpath(root), input))
+    end
+    same_path(dirname(path), directory) || throw(ArgumentError("file must be directly under docs/dev/$kind: $input"))
+    endswith(lowercase(path), ".md") || throw(ArgumentError("expected a Markdown file: $input"))
+    isfile(path) && same_path(realpath(path), path) || throw(ArgumentError("file missing or redirected through a link: $input"))
+    return path
+end
+
+function extract_title(content, filename)
     for line in split(content, '\n')
-        m = match(r"^#\s+(.+)$", strip(line))
-        if m !== nothing
-            return strip(m.captures[1])
-        end
+        heading = match(r"^#\s+(.+)$", strip(line))
+        heading === nothing || return String(strip(heading.captures[1]))
     end
-    # Fallback: use filename without extension and date prefix
-    base = replace(filename, r"^\d{4}[-_]\d{2}[-_]\d{2}[-_]" => "")
-    base = replace(base, r"\.md$" => "")
-    return replace(base, "_" => " ")
+    return replace(replace(filename, r"^\d{4}[-_]\d{2}[-_]\d{2}[-_]" => ""), r"\.md$" => "")
 end
 
-"""
-    generate_metadata(title::String, original_path::String, archive_date::String) -> String
-
-Generate YAML frontmatter for archived document
-"""
-function generate_metadata(title::String, original_path::String, archive_date::String)
-    return """---
-title: $title
-archived: true
-original: $original_path
-archived_date: $archive_date
----
-
-"""
-end
-
-"""
-    archive_file(filepath::String; date::String=today_str(), dry_run::Bool=false) -> Bool
-
-Archive a single file from active to archived directory
-"""
-function archive_file(filepath::String; date::String=Dates.format(today(), "yyyy-mm-dd"), dry_run::Bool=false)
-    if !isfile(filepath)
-        @error "File not found: $filepath"
-        return false
-    end
-    
-    # Read original content
-    content = read(filepath, String)
-    filename = basename(filepath)
-    
-    # Extract title
-    title = String(extract_title(content, filename))
-    
-    # Generate relative path for metadata
-    rel_path = "docs/dev/active/$filename"
-    
-    # Generate metadata
-    metadata = generate_metadata(title, rel_path, date)
-    
-    # Generate archived filename and normalize to YYYY-MM-DD_...
-    if !occursin(r"^\d{4}[-_]\d{2}[-_]\d{2}[-_]", filename)
-        archived_filename = "$(date)_$filename"
-    else
-        m = match(r"^(\d{4})[-_](\d{2})[-_](\d{2})[-_](.+)$", filename)
-        if m === nothing
-            archived_filename = filename
-        else
-            yyyy, mm, dd, rest = m.captures
-            archived_filename = "$(yyyy)-$(mm)-$(dd)_$(rest)"
-        end
-    end
-    
-    archived_path = joinpath(ARCHIVED_DIR, archived_filename)
-    
-    # Check if archived file already exists
-    if isfile(archived_path) && !dry_run
-        print("File already exists: $archived_path. Overwrite? (y/N): ")
-        response = readline()
-        if lowercase(strip(response)) != "y"
-            println("Skipped: $filename")
-            return false
-        end
-    end
-    
-    # Prepare archived content
-    archived_content = metadata * "\n以下为原始内容（保留，以便审阅与历史参考）：\n\n---\n\n" * content
-    
-    if dry_run
-        println("\n[DRY RUN] Would archive:")
-        println("  From: $filepath")
-        println("  To:   $archived_path")
-        println("  Title: $title")
+# This format is a flat scalar mapping, not a general YAML document.
+# JSON strings are valid YAML scalars and preserve punctuation and Unicode.
+function read_scalar(value)
+    value = strip(value)
+    isempty(value) && throw(ArgumentError("empty metadata scalar"))
+    if startswith(value, '"')
+        parsed = JSON3.read(value)
+        parsed isa AbstractString || throw(ArgumentError("expected a quoted string"))
+        return String(parsed)
+    elseif startswith(value, '\'')
+        occursin(r"^'(?:[^']|'')*'$", value) || throw(ArgumentError("invalid single-quoted scalar"))
+        return replace(chop(value; head=1, tail=1), "''" => "'")
+    elseif lowercase(value) == "true"
         return true
+    elseif lowercase(value) == "false"
+        return false
+    elseif lowercase(value) in ("null", "~")
+        return nothing
     end
-    
-    # Write archived file
-    open(archived_path, "w") do io
-        write(io, archived_content)
-    end
-    
-    # Delete original file
-    rm(filepath)
-    
-    println("✓ Archived: $filename -> $archived_filename")
-    return true
+    number = tryparse(Float64, value)
+    number === nothing || return number
+    (occursin(r"[:#](?:\s|$)|\s#", value) || occursin(r"^[\[\]{}&*!|>@\x60%?]", value)) &&
+        throw(ArgumentError("unsupported plain scalar; quote this metadata value"))
+    return String(value)
 end
 
-"""
-    list_active_files() -> Vector{String}
-
-List all markdown files in active directory
-"""
-function list_active_files()
-    if !isdir(ACTIVE_DIR)
-        return String[]
+function metadata_fields(content)
+    lines = split(replace(content, "\r\n" => "\n"), '\n')
+    !isempty(lines) && first(lines) == "---" || throw(ArgumentError("missing frontmatter"))
+    closing = findnext(==("---"), lines, 2)
+    closing === nothing && throw(ArgumentError("unclosed frontmatter"))
+    fields = Dict{String,Any}()
+    for line in lines[2:closing-1]
+        isempty(strip(line)) && continue
+        startswith(strip(line), '#') && continue
+        entry = match(r"^([A-Za-z_][A-Za-z0-9_-]*):\s*(.+)$", line)
+        entry === nothing && throw(ArgumentError("expected flat scalar frontmatter"))
+        key = String(entry.captures[1])
+        haskey(fields, key) && throw(ArgumentError("duplicate metadata field: $key"))
+        fields[key] = read_scalar(entry.captures[2])
     end
-    files = String[]
-    for f in readdir(ACTIVE_DIR)
-        if endswith(f, ".md")
-            push!(files, joinpath(ACTIVE_DIR, f))
+    all(key -> haskey(fields, key), REQUIRED_FIELDS) || throw(ArgumentError("missing required metadata fields"))
+    fields["archived"] === true || throw(ArgumentError("archived must be true"))
+    for key in ("title", "original", "archived_date")
+        fields[key] isa AbstractString && !isempty(strip(fields[key])) || throw(ArgumentError("$key must be a nonempty string"))
+    end
+    valid_date(fields["archived_date"]) || throw(ArgumentError("invalid archived_date"))
+    occursin(r"^docs/dev/active/[^/\\]+(?i:\.md)$", fields["original"]) || throw(ArgumentError("invalid original path"))
+    if haskey(fields, "task_status")
+        fields["task_status"] in STATUSES || throw(ArgumentError("invalid task_status"))
+        if fields["task_status"] != "completed"
+            reason = get(fields, "archive_reason", "")
+            reason isa AbstractString && !isempty(strip(reason)) || throw(ArgumentError("cancelled/superseded tasks require archive_reason"))
         end
     end
-    return sort(files)
+    return fields
 end
 
-"""
-    check_archived_format(filepath::String) -> Bool
-
-Check if an archived file has proper metadata format
-"""
-function check_archived_format(filepath::String)
-    content = read(filepath, String)
-    
-    # Check for YAML frontmatter
-    if match(r"^---\r?\n", content) === nothing
+function check_archived_format(path)
+    try
+        metadata_fields(read(path, String))
+        return true
+    catch
         return false
     end
-    
-    # Check for required fields
-    required_fields = ["title:", "archived:", "original:", "archived_date:"]
-    for field in required_fields
-        if !occursin(field, content)
-            return false
-        end
-    end
-    
-    return true
 end
 
-"""
-    validate_archived_files()
-
-Validate all files in archived directory
-"""
-function validate_archived_files()
-    if !isdir(ARCHIVED_DIR)
-        println("Archived directory not found: $ARCHIVED_DIR")
-        return
-    end
-    
-    files = [f for f in readdir(ARCHIVED_DIR) if endswith(f, ".md")]
-    
-    if isempty(files)
-        println("No archived files found.")
-        return
-    end
-    
-    println("Validating $(length(files)) archived files...\n")
-    
-    valid_count = 0
-    invalid_files = String[]
-    
-    for f in files
-        filepath = joinpath(ARCHIVED_DIR, f)
-        if check_archived_format(filepath)
-            valid_count += 1
-        else
-            push!(invalid_files, f)
-        end
-    end
-    
-    println("Valid: $valid_count / $(length(files))")
-    
-    if !isempty(invalid_files)
-        println("\nInvalid files (missing metadata):")
-        for f in invalid_files
-            println("  - $f")
-        end
-    end
+function prepare_archive(input; root=ROOT, date=Dates.format(today(), "yyyy-mm-dd"), status="completed", reason="")
+    valid_date(date) || throw(ArgumentError("--date must be a valid YYYY-MM-DD date"))
+    status in STATUSES || throw(ArgumentError("--status must be completed, cancelled or superseded"))
+    status == "completed" || !isempty(strip(reason)) || throw(ArgumentError("--reason is required for $status"))
+    source = resolve_document(root, "active", input)
+    filename = basename(source)
+    match_date = match(r"^(\d{4})[-_](\d{2})[-_](\d{2})[-_](.+)$", filename)
+    target_name = match_date === nothing ? "$(date)_$filename" : join(match_date.captures[1:3], "-") * "_" * match_date.captures[4]
+    target = joinpath(document_dir(root, "archived"), target_name)
+    exists(target) && throw(ArgumentError("archive destination already exists: $target"))
+    original = read(source)
+    title = extract_title(String(copy(original)), filename)
+    header = "---\ntitle: $(JSON3.write(title))\narchived: true\noriginal: $(JSON3.write("docs/dev/active/$filename"))\narchived_date: $(JSON3.write(date))\ntask_status: $(JSON3.write(status))\n"
+    isempty(reason) || (header *= "archive_reason: $(JSON3.write(reason))\n")
+    header *= "---\n\n以下为原始内容（保留，以便审阅与历史参考）：\n\n---\n\n"
+    archived = vcat(Vector{UInt8}(codeunits(header)), original)
+    metadata_fields(String(copy(archived)))
+    return (; root=realpath(root), source, target, original, archived)
 end
 
-"""
-    interactive_mode()
-
-Interactive mode for archiving files
-"""
-function interactive_mode()
-    files = list_active_files()
-    
-    if isempty(files)
-        println("No markdown files found in $ACTIVE_DIR")
-        return
+function execute_archive(plan)
+    resolve_document(plan.root, "active", plan.source)
+    same_path(dirname(plan.target), document_dir(plan.root, "archived")) ||
+        throw(ArgumentError("archive directory changed after preflight"))
+    exists(plan.target) && throw(ArgumentError("archive destination already exists: $(plan.target)"))
+    read(plan.source) == plan.original || throw(ArgumentError("source changed after archive preflight"))
+    mkpath(dirname(plan.target))
+    temporary, stream = mktemp(dirname(plan.target))
+    try
+        write(stream, plan.archived)
+        close(stream)
+        read(temporary) == plan.archived || error("archive write verification failed")
+        # Publish a complete file without replacing a concurrently created target.
+        # Unsupported filesystems fail closed, retaining the source.
+        hardlink(temporary, plan.target)
+        read(plan.target) == plan.archived || error("published archive verification failed; source retained")
+        resolve_document(plan.root, "active", plan.source)
+        read(plan.source) == plan.original || error("source changed during archive; both files retained")
+        rm(plan.source)
+    finally
+        isopen(stream) && close(stream)
+        isfile(temporary) && rm(temporary)
     end
-    
-    println("Active files:")
-    for (i, f) in enumerate(files)
-        println("  $i. $(basename(f))")
-    end
-    
-    print("\nEnter file numbers to archive (comma-separated, or 'all'): ")
-    input = readline()
-    
-    if lowercase(strip(input)) == "all"
-        indices = 1:length(files)
-    else
-        try
-            indices = [parse(Int, strip(s)) for s in split(input, ',')]
-        catch
-            println("Invalid input")
-            return
-        end
-    end
-    
-    print("Archive date (YYYY-MM-DD, default: today): ")
-    date_input = strip(readline())
-    archive_date = isempty(date_input) ? Dates.format(today(), "yyyy-mm-dd") : date_input
-    
-    println("\nArchiving $(length(indices)) file(s)...\n")
-    
-    success_count = 0
-    for i in indices
-        if i < 1 || i > length(files)
-            println("Skipping invalid index: $i")
-            continue
-        end
-        if archive_file(files[i]; date=archive_date)
-            success_count += 1
-        end
-    end
-    
-    println("\n✓ Successfully archived $success_count file(s)")
+    return plan.target
 end
 
-"""
-    print_usage()
-
-Print usage information
-"""
-function print_usage()
-    println("""
-Usage: julia scripts/dev/archive_docs.jl [OPTIONS] [FILES...]
-
-Archive development documents from docs/dev/active to docs/dev/archived.
-
-Options:
-  -h, --help              Show this help message
-  -i, --interactive       Interactive mode (select files to archive)
-  -c, --check             Validate archived files format
-  -d, --date DATE         Archive date (YYYY-MM-DD, default: today)
-  --dry-run               Show what would be done without making changes
-  -b, --batch FILES...    Batch archive specified files
-
-Examples:
-  # Interactive mode
-  julia scripts/dev/archive_docs.jl -i
-
-  # Batch archive specific files
-  julia scripts/dev/archive_docs.jl file1.md file2.md
-
-  # Batch archive with custom date
-  julia scripts/dev/archive_docs.jl -d 2026-01-15 file1.md
-
-  # Validate archived files
-  julia scripts/dev/archive_docs.jl -c
-
-  # Dry run
-  julia scripts/dev/archive_docs.jl --dry-run file1.md
-""")
+function print_usage(io=stdout)
+    println(io, "Usage: julia --project=. scripts/dev/archive_docs.jl [OPTIONS] [FILES...]")
+    println(io, "  --dry-run             Validate and show the exact move; write nothing")
+    println(io, "  -c, --check [FILES...] Check selected archived files, or all when omitted")
+    println(io, "  -d, --date DATE       Valid YYYY-MM-DD date (default: today)")
+    println(io, "  --status STATUS       completed (default), cancelled, superseded")
+    println(io, "  --reason TEXT         Required for cancelled/superseded tasks")
+    println(io, "  -b, --batch           Archive explicitly listed files")
+    println(io, "  -i, --interactive     Select active files interactively")
+    println(io, "  -h, --help            Show help")
+    println(io, "Only direct children of active/ may be archived. Existing targets are never overwritten.")
 end
 
-# Main execution
-function main()
-    args = ARGS
-    
-    if isempty(args) || "-h" in args || "--help" in args
-        print_usage()
-        return
-    end
-    
-    if "-c" in args || "--check" in args
-        validate_archived_files()
-        return
-    end
-    
-    if "-i" in args || "--interactive" in args
-        interactive_mode()
-        return
-    end
-    
-    # Parse options
-    archive_date = Dates.format(today(), "yyyy-mm-dd")
-    dry_run = false
-    files_to_archive = String[]
-    
-    i = 1
-    while i <= length(args)
-        arg = args[i]
-        if arg == "-d" || arg == "--date"
-            if i + 1 <= length(args)
-                archive_date = args[i + 1]
-                i += 2
+function main(args=collect(String.(ARGS)); root=ROOT, io=stdout, input=stdin)
+    try
+        isempty(args) && (print_usage(io); return 0)
+        date = Dates.format(today(), "yyyy-mm-dd")
+        status, reason = "completed", ""
+        dry_run, check, interactive = false, false, false
+        files = String[]
+        index = 1
+        while index <= length(args)
+            arg = args[index]
+            if arg in ("-h", "--help")
+                print_usage(io)
+                return 0
+            elseif arg in ("-d", "--date", "--status", "--reason")
+                index == length(args) && throw(ArgumentError("missing value for $arg"))
+                index += 1
+                value = args[index]
+                arg in ("-d", "--date") ? (date = value) : arg == "--status" ? (status = value) : (reason = value)
+            elseif arg == "--dry-run"
+                dry_run = true
+            elseif arg in ("-c", "--check")
+                check = true
+            elseif arg in ("-i", "--interactive")
+                interactive = true
+            elseif arg in ("-b", "--batch")
+                nothing
+            elseif startswith(arg, "-")
+                throw(ArgumentError("unknown option: $arg"))
             else
-                println("Error: --date requires a value")
-                return
+                push!(files, arg)
             end
-        elseif arg == "--dry-run"
-            dry_run = true
-            i += 1
-        elseif arg == "-b" || arg == "--batch"
-            # Remaining args are files
-            files_to_archive = args[i+1:end]
-            break
-        elseif !startswith(arg, "-")
-            push!(files_to_archive, arg)
-            i += 1
-        else
-            println("Unknown option: $arg")
-            print_usage()
-            return
+            index += 1
         end
-    end
-    
-    if isempty(files_to_archive)
-        println("No files specified. Use -i for interactive mode or specify files.")
-        print_usage()
-        return
-    end
-    
-    # Archive specified files
-    success_count = 0
-    for filename in files_to_archive
-        # Handle both full paths and just filenames
-        filepath = if isfile(filename)
-            filename
-        elseif isfile(joinpath(ACTIVE_DIR, filename))
-            joinpath(ACTIVE_DIR, filename)
-        else
-            println("File not found: $filename")
-            continue
+        check && (dry_run || interactive) && throw(ArgumentError("--check cannot be combined with --dry-run or --interactive"))
+        if check
+            directory = document_dir(root, "archived")
+            targets = isempty(files) ? (isdir(directory) ? sort(filter(f -> endswith(lowercase(f), ".md"), readdir(directory))) : String[]) : files
+            invalid = String[]
+            for file in targets
+                try
+                    path = resolve_document(root, "archived", file)
+                    metadata_fields(read(path, String))
+                catch err
+                    push!(invalid, "$file: $(sprint(showerror, err))")
+                end
+            end
+            println(io, "[archive-check] checked=$(length(targets)) invalid=$(length(invalid))")
+            foreach(message -> println(io, "  ", message), invalid)
+            return isempty(invalid) ? 0 : 1
         end
-        
-        if archive_file(filepath; date=archive_date, dry_run=dry_run)
-            success_count += 1
+        if interactive
+            isempty(files) || throw(ArgumentError("--interactive cannot be combined with explicit files"))
+            directory = document_dir(root, "active")
+            choices = isdir(directory) ? sort(filter(f -> endswith(lowercase(f), ".md"), readdir(directory))) : String[]
+            isempty(choices) && (println(io, "No active documents"); return 0)
+            foreach(pair -> println(io, "$(pair[1]). $(pair[2])"), enumerate(choices))
+            println(io, "Select file numbers (comma-separated, or all):")
+            selection = strip(readline(input))
+            indices = selection == "all" ? collect(eachindex(choices)) : parse.(Int, strip.(split(selection, ',')))
+            all(i -> i in eachindex(choices), indices) || throw(ArgumentError("invalid file selection"))
+            files = choices[indices]
         end
-    end
-    
-    if !dry_run
-        println("\n✓ Successfully archived $success_count file(s)")
+        isempty(files) && throw(ArgumentError("no files specified"))
+        plans = [prepare_archive(file; root, date, status, reason) for file in files]
+        length(unique(path_key(plan.target) for plan in plans)) == length(plans) || throw(ArgumentError("duplicate archive destination in batch"))
+        for plan in plans
+            println(io, "$(dry_run ? "[dry-run]" : "[archive]") $(plan.source) -> $(plan.target)")
+            dry_run || execute_archive(plan)
+        end
+        return 0
+    catch err
+        println(io, "[archive] FAILED: ", sprint(showerror, err))
+        return 1
     end
 end
 
-# Run main if executed as script
+end # module
+
 if abspath(PROGRAM_FILE) == @__FILE__
-    main()
+    exit(ArchiveDocs.main())
 end

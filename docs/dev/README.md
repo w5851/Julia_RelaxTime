@@ -1,192 +1,68 @@
 # 开发文档总览
 
-本目录用于记录开发过程中的计划、约定与变更说明。以下约定用于保持任务追踪与文档结构一致。
+本目录保存需要跨对话共享的设计、开发约定与历史依据。普通工作使用对话计划或已有 issue/PR，不默认创建任务单、执行台账或归档副本。
 
-## 常用内部手册
+## 维护入口
 
-- [Codex高阶使用手册](Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
-- [Agent command reference](agent_command_reference.md)：根 `AGENTS.md` 的详细环境、测试、治理、sysimage 与 benchmark 命令清单。
+| 需要解决的问题 | 权威入口 |
+| --- | --- |
+| 项目约束、目录职责与编码约定 | [AGENTS.md](../../AGENTS.md) |
+| 计划、任务恢复与跨主线状态 | [任务跟踪治理](task_tracking_governance.md) |
+| Codex 与 skill 的使用边界 | [Codex 协作手册](Codex高阶使用手册.md) |
+| 环境、测试、治理与 benchmark 命令 | [命令参考](agent_command_reference.md) |
+| 验证层级与测试选择 | [测试治理](testing_governance.md) |
+| 产物位置与来源记录 | [交付物管理](项目交付物定位与管理规范.md) |
+| 科研分析、实验事实与结论留存 | [科研证据治理](../analysis/governance/research_evidence.md) |
+| Julia 模块加载与依赖 | [模块规范](Julia模块引用规范准则.md)、[架构规则](../architecture/dependency_rules.md) |
 
-## active / backlog / archived 的区别
+## 临时文档的使用
 
-- active：进行中的任务与临时草案。
-	- 只保留当前仍需推进的内容。
-	- 应当是近期会继续执行的任务单，而不是长期路线图。
-	- 任务完成后必须移出。
-- backlog：长期路线图、候选需求、分阶段能力盘点。
-	- 适用于“尚未进入当前执行批次、但仍需保留并滚动维护”的文档。
-	- 不作为 active 治理检查对象。
-	- 当 backlog 条目被正式拉起执行时，应拆成新的 active 任务单。
-- archived：已完成任务的归档区。
-	- 按统一格式记录“做了什么、验证了什么、对应了哪些文档”。
-	- 保持可追溯，便于后续审计与复盘。
+仅在用户要求交付文档、需要共享设计/验收依据，或现有 ledger 合同要求文件时使用任务文档。是否保留文档取决于信息的用途，不取决于任务是否复杂或执行轮数。
 
-### 归档规则
+- `active/`：当前仍需维护的任务合同、设计草案或恢复说明。保持当前范围、未完成项、验收条件与证据链接清楚。
+- `backlog/`：尚未执行的候选需求和研究方向。启动时可直接用对话计划或 issue；只有存在上述文件需求时才新建 active 文档。
+- `archived/`：已完成、取消或被替代工作的历史记录，明确其终止原因。普通续接不读取该目录；需要历史依据时再定向查找。
 
-完成的需求必须从 active 移出，放入 archived，并遵循以下格式：
+当前状态摘要可原位更新，详细实验/验收事实放在相应证据位置并链接，避免在任务单末尾逐轮追加。不要为了缩短摘要重写原始实验记录、作者决策或哈希绑定文档；具体保留边界见[任务跟踪治理](task_tracking_governance.md)。
 
-#### 归档格式模板
+active 和 backlog 文档使用 `YYYY-MM-DD_描述.md`。超过 60 天只触发复核提醒，不自动表示任务完成或失效。未完成工作退出当前批次时转入 backlog，并保留剩余工作与依赖；不要以完成归档的方式清掉待办。
 
-归档文件需在头部使用统一的元信息格式，示例如下：
+## 已有任务文档的归档
 
----
-title: 任务名称
-archived: true
-original: docs/dev/active/原始任务文件.md
-archived_date: 2026-01-19
----
+已完成或已明确取消/被替代、且需要保留历史的文档通过[归档脚本](../../scripts/dev/archive_docs.jl)迁移。没有创建任务文档的普通工作无需补建文档再归档。
 
-归档内容规则：
-
-- 头部元信息之后，直接原封不动复制开发文档内容，便于追溯。
-- 当开发文档中包含多个需求时，应拆分为多个归档文档，并从 active 中移除对应需求点。
-
-#### 归档示例
-
-以下示例格式参考 [docs/dev/archived/2026-01-19_Dependency_Analysis_Recommendations.md](docs/dev/archived/2026-01-19_Dependency_Analysis_Recommendations.md)：
-
----
-title: Dependency Analysis & Recommendations
-archived: true
-original: docs/dev/任务2.md
-archived_date: 2026-01-19
----
-
-以下为原始内容（保留，以便审阅与历史参考）：
-
-***
-
-（此处为原始开发文档内容原样粘贴）
-
-## archived 文件命名规则
-
-推荐命名格式：
-
-- `[日期]_[描述]_[版本可选].扩展名`
-- 日期格式：`YYYY-MM-DD`（ISO 8601），用于自然排序
-
-示例：
-
-- `2026-01-19_PNJL_Solver_Refactoring_Notes.md`
-- `2026-01-19_Dependency_Analysis_Recommendations.md`
-
-命名要点：
-
-- 描述需明确，包含模块名/任务名/文档类型
-- 可选追加版本号（如 `v1.2`）或状态（如 `deprecated`）
-- 保留原扩展名
-
-## active 命名与归档触发规则（新增）
-
-- `docs/dev/active` 下任务文档命名统一为：`YYYY-MM-DD_描述.md`
-- `docs/dev/backlog` 下文档建议沿用同一命名格式：`YYYY-MM-DD_描述.md`
-- 归档触发条件（满足任一）：
-	- 任务单 DoD 全部勾选完成；
-	- 任务明确取消，或退出当前执行批次；
-	- 任务被新任务单替代，旧文档仅保留历史价值。
-- 长期路线图、候选能力盘点、未进入当前执行批次的规划文档，不应继续放在 `docs/dev/active`；应迁移到 `docs/dev/backlog`。
-- 创建超过 60 天仅产生复核提醒；长期执行中的任务可以继续保留，不按文件年龄自动归档或判失败。
-- 建议校验命令：
+归档使用显式文件名，先预览，再执行并检查：
 
 ```powershell
-julia --project=. scripts/dev/check_active_docs_governance.jl
-julia --project=. scripts/dev/check_pnjl_migration_guard.jl
-```
-
-- 归档命令：
-
-```powershell
+julia --project=. scripts/dev/archive_docs.jl --dry-run <filename.md>
 julia --project=. scripts/dev/archive_docs.jl <filename.md>
+julia --project=. scripts/dev/archive_docs.jl --check <archived-filename.md>
 ```
 
-## 开发任务完成后的文档与测试补充
+默认终态是 `completed`。取消或被替代使用 `--status cancelled` 或 `--status superseded`，并传入 `--reason "终止原因"`；预览和执行使用同一组参数。`--date YYYY-MM-DD` 可指定归档日期。
 
-按变化影响选择补充内容：
+元信息由脚本生成，正文按原始字节保留：
 
-- 稳定公开入口或数据契约变化时更新 `docs/api/`；内部拆分和纯文档改动不产生 API 文档义务。
-- 新行为、真实缺陷或覆盖缺口需要有价值的测试；已有覆盖足够时复用，不要求每个任务、模块或文件新增一项测试。
-- 物理公式或约定变化时同步相关公式说明。
-- 性能主张使用 benchmark/profiling 证据；普通改动不附带性能验证。
-- 验证选择见 [测试治理](testing_governance.md)，只扩大到能解决具体剩余风险的层级。
+```yaml
+---
+title: "任务名称"
+archived: true
+original: "docs/dev/active/原始任务文件.md"
+archived_date: "2026-10-07"
+task_status: "completed"
+---
+```
 
-## 项目结构约定（合并版）
+脚本以自身位置定位仓库，只接收 `active/` 的直接 Markdown 子文件，拒绝链接重定向和已有目标。帮助、检查和预览不写文件；批量操作先完成整批参数与路径检查，但执行期间失败不自动回滚已经归档的文件。
 
-### 顶层目录职责
+写入时先校验同目录临时文件，通过硬链接发布完整目标，再核对原文未变后移除源文件。目标文件系统必须支持硬链接；发布失败会保留源文件，目标已发布后的校验失败会保留两份文件供核对。
 
-- src/：核心可复用 Julia 源码（避免把一次性脚本放进来）。
-- scripts/：可执行脚本、批处理与实验入口。
-- tests/：测试与诊断。
-	- tests/unit/：可自动化的单元测试。
-	- tests/integration/：跨模块集成测试。
-	- tests/regression/：数值回归测试。
-	- tests/validation/：外部参考验证测试。
-- scripts/analysis/：分析/诊断脚本与报告（非测试入口）。
-- scripts/perf/：性能探针与 profiling 脚本（非测试入口）。
-- docs/：文档中心。
-	- docs/api/：面向使用者的 API 文档。
-	- docs/dev/：开发者文档。
-	- docs/guides/：使用指南、排错与 Quickstart。
-	- docs/reference/：公式、推导、理论背景材料。
-- data/：数据与输出。
-	- data/raw/：原始数据（只读/不做手改）。
-	- data/processed/：处理后的数据。
-	- data/outputs/：运行产物、结果与缓存输出。
-- web/：前端静态资源与交互页面。
-- config/：参数文件、扫描配置、模型参数集等。
-- `.github/copilot-instructions.md`：工作区级 Copilot 指令与项目级编码约束。
-- `docs/dev/testing_governance.md`：测试组织、入口与 smoke/core/full 治理规范。
-- `docs/architecture/models_solver_contract.md`：`Models` 统一求解接口契约（Problem-like + solve）。
+`--check <文件...>` 只验证本批目标；省略文件名才检查全部归档。检查器支持平面的标量 frontmatter，核对必需字段、类型、日期及终止原因，拒绝重复字段；不解析任意嵌套 YAML。错误返回非零退出码。旧文件没有 `task_status` 仍可检查，不因此批量重写历史。
 
-### 源码组织原则（src/）
+迁移前核对状态与验收证据，迁移后由调用者更新仍有效的引用和 ledger 路径，脚本不推断这些关系。取消或被替代不能标为验收完成；不要破坏冻结来源。已有历史可通过 Git 和归档路径恢复，不因减少上下文而批量删除。
 
-- 以模块边界组织，而不是以功能碎片随意拆文件。
-- 新增模块前先确认：是通用逻辑还是一次性实验。
-	- 通用逻辑 → src/
-	- 实验/临时对比 → scripts/ 或 scripts/analysis/
+## 文档和验证随变更维护
 
-### 单位与命名
+稳定入口或数据契约变化时更新 `docs/api/` 或 `docs/guides/`；公式、方法和单位变化时维护 `docs/reference/`。内部拆分不要求 API 文档逐文件镜像，也不要求为每轮工作新增过程文档。
 
-- 单位约定以仓库根目录 README 为准。
-- MeV 入参命名显式标注：T_MeV、mu_MeV、muB_MeV。
-- 新 fm⁻¹ 入参命名标注：T_inv_fm、mu_inv_fm；既有名称按稳定 API 兼容约定处理。
-
-### 文档与源码对齐策略
-
-不强制 docs/api 与 src 逐文件 1:1 镜像：
-- src 内部文件拆分会因重构而变化；逐文件镜像会带来路径震荡。
-- API 文档应按稳定概念与入口组织。
-
-推荐策略：
-- docs/api/<domain>/ 与 src/<domain>/ 模块层级大致对齐。
-- 每个稳定子模块/概念面提供一个页面。
-- 当 src 重构但公共 API 不变时，仅更新文档链接即可。
-
-### .github 规范
-
-- .github/：协作相关文件统一管理。
-
-### 允许/不允许提交的内容
-
-- 建议：提交可复现脚本、小体积测试数据、关键结果摘要。
-- 谨慎：大体积输出文件、重复生成的缓存、临时日志。
-- 若必须提交大文件，请在 PR 说明来源、生成命令、用途与体积，并确认不会频繁变动。
-
-### 变更流程建议
-
-- 改代码 → 运行与行为变化相关的现有验证，必要时补覆盖 → 同步受影响文档 → 在 PR 中说明验证结果。
-
-## world-age 边界治理（迁移期）
-
-- `src/models` 中 `Base.invokelatest(...)` 仅允许出现在已登记边界点，禁止新增散点调用。
-- 当前登记基线为 7 处，详见 `docs/architecture/dependency_rules.md` 的 “world-age 动态调用边界” 小节。
-- 边界登记的机读单一来源为 `config/ci/models_invokelatest_allowlist.toml`。
-- 若确需新增，必须同时完成：
-	- 更新 `scripts/dev/check_pnjl_migration_guard.jl` 白名单；
-	- 在迁移任务单补充必要性与回归证据；
-	- 提供 `models-invokelatest-audit` 输出（observed/baseline/allowlisted）。
-
-## 运行时入口迁移现状（2026-02-24）
-
-- `src/simulation/fullserver` 的扫描与单点求解主路径已切到 `Models` 统一入口。
-- `src/pnjl/PNJL.jl` 仅保留为迁移历史说明，不作为当前新增调用入口。
-- 新增调用方默认应优先使用 `src/models/entrypoints.jl` 暴露的入口；仅在兼容需求下使用 `PNJL` 导出。
+按[测试治理](testing_governance.md)选择能验证本次行为的覆盖。数值漂移、性能主张和生产晋升分别遵循其专项证据要求。

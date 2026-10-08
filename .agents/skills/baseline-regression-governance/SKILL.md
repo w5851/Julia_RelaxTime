@@ -1,67 +1,26 @@
 ---
 name: baseline-regression-governance
-description: "Manage repository-wide numerical baseline governance: baseline generation, storage, regression assertions, CI tiers, tolerance evidence, and baseline-change admission. Use for cross-domain policy or new baseline systems; use transport-regression-keeper instead for day-to-day transport/relaxtime drift diagnosis."
+description: 新增或修改 Julia_RelaxTime 内部数值基线及其读取/格式契约，按新基线、既有数值承诺变化或读取器兼容性任务选择候选生成、差异审查和回归覆盖路径。
 ---
 
-# Baseline Regression Governance
+# 基线变更与回归契约
 
-## Invariants
+按[基线管理指南](../../../docs/guides/BASELINE_VERSION_MANAGEMENT.md)确定命名、存放位置和变更准入要求，按[测试治理](../../../docs/dev/testing_governance.md)选择验证层级。
 
-- Treat a baseline as a versioned numerical contract, not a convenient output snapshot.
-- Never refresh a baseline merely to make a failing test pass.
-- Explain every tolerance through numerical error, physical meaning, or validation evidence.
-- Keep baseline data deterministic and free of timestamps, machine paths, and random ordering.
-- Preserve the repository's `Models` entrypoint and solver semantics unless the task explicitly changes them.
+## 选择工作路径
 
-## Test-layer decision
+| 场景 | 工作重点 |
+| --- | --- |
+| 新增基线 | 定义保护的行为、代表点、观测量、单位、来源、精度和消费测试，再生成独立候选 |
+| 改变既有数值承诺 | 先对旧基线运行受影响回归并保留差异；解释预期变化后生成新候选，逐点审查 |
+| 读取器、序列化或索引变更 | 用现有数据与小型夹具验证结构、兼容性和错误处理；无数值语义变化时不重算基线 |
+| 普通回归失败 | 使用对应测试诊断代码、环境与输入；只有证据表明预期数值承诺应改变，才进入候选更新 |
 
-- Put fixed-point or sampled numerical promises in `tests/regression/<domain>/`.
-- Use `tests/unit/<domain>/` only for baseline readers, serializers, validators, or local numerical helpers.
-- Use `tests/integration/<domain>/` for cross-module workflow assembly without a long-lived numerical target.
-- Use `tests/validation/<domain>/` for external references, literature mappings, or acceptance criteria.
-- Keep a small deterministic regression set in smoke; place broad grids or expensive matrices in core/full/nightly coverage.
+## 候选与验收
 
-## Repository layout
-
-- Baselines: `tests/baselines/<domain>/baseline_<feature>_<scope>_vN.csv`
-- Regression assertions: `tests/regression/<domain>/test_<feature>_regression.jl`
-- Baseline export or comparison scripts: `scripts/dev/export_<feature>_baseline.jl`
-
-Keep point identifiers, compared observables, units, and column order explicit. Use stable numeric formatting and avoid volatile metadata in CSV files.
-
-## Workflow
-
-1. Define the protected behavior, fixed points, observables, units, and expected precision.
-2. Select the test layer with the decision rules above.
-3. Generate candidate values through a reproducible script and record the source commit/configuration.
-4. Compare the candidate with the current baseline point by point.
-5. Diagnose drift before deciding whether code, expectations, or the baseline is wrong.
-6. Add or update the narrowest sufficient regression coverage.
-7. Run the focused selector first, then expand to the appropriate profile and governance checks.
-8. Record the reason, impact, numerical delta, commands, and residual risk for every accepted baseline change.
-
-## Change admission
-
-An accepted baseline change must include:
-
-- the semantic or numerical reason;
-- affected modules, points, and observables;
-- an old/new difference summary;
-- unchanged constraints that were rechecked;
-- validation commands and results;
-- relevant documentation or active-task updates.
-
-Reject unexplained drift, tolerance-only fixes, and baseline-only commits without evidence.
-
-## Current transport example
-
-- Baseline: `tests/baselines/relaxtime/baseline_transport_fixedpoints_v1.csv`
-- Export script: `scripts/dev/export_transport_fixedpoint_baseline.jl`
-- Regression test: `tests/regression/relaxtime/test_transport_fixedpoint_regression.jl`
-- Focused run:
-
-```powershell
-julia --project=. -e 'ENV["REGRESSION_FILES"]="relaxtime/test_transport_fixedpoint_regression.jl"; include("tests/regression/runtests.jl")'
-```
-
-Use `transport-regression-keeper` to interpret transport-specific drift and choose any additional integration or validation coverage.
+- 根据目标领域的基线说明定位生成入口，核对输入、输出契约、覆盖行为和失败处理，再生成到新的候选路径。
+- 比较时按稳定点位标识对齐，说明新增/删除点、观测量变化、绝对/相对差异、失败与不适用值；不能靠整体相关系数代替逐点回归。
+- 容差来自误差来源、物理意义和验证证据。不得以放宽容差或刷新 CSV 掩盖未解释漂移。
+- 验证本次变更及应保持不变的约束，先运行受影响选择器；结构变更用夹具，数值承诺变化运行对应 regression，外部参考准入遵循 validation。
+- 在已有 issue/PR、基线说明或证据入口记录原因、范围、源代码/配置、差异、验证和残余风险；不为每次基线操作强制新建任务文档。
+- 候选生成不等于接受。审核后才修改消费者引用；旧版本仍被引用或绑定来源时保留，清理按明确范围处理。

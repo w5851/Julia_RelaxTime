@@ -1,4 +1,0 @@
-interface:
-  display_name: "Transport Regression Keeper"
-  short_description: "Guard transport regressions in Julia_RelaxTime."
-  default_prompt: "Use $transport-regression-keeper to choose transport regression coverage, judge numerical drift, and summarize the evidence."
