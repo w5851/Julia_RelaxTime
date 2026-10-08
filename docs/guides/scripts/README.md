@@ -21,6 +21,62 @@ quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不
 通用 legacy MesonDensity 兼容 API。方法、参数、输出和失败语义见
 [研究入口合同](../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)。
 
+### 二维 screening 与组会图（诊断工具）
+
+二维 screening 入口 `scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl`
+默认仍为 `--density-route direct_finite_q`；显式指定
+`--density-route q0_lambda_reference` 可用同一个无限热 q=0 核进行 timelike
+内部坐标外推：`lambda=omega+(mu1-mu2)`、
+`lambda0=sqrt(lambda^2-q^2)`（仅 `lambda>=q`，其余区域参考相位为零）。
+Bose 权重始终使用外部 `omega`，束缚态独立计数并保留连续谱边界项。
+两种路线的网格、背景、screening 设置相同，manifest/resume 身份区分算法；
+这不是改变上述 smoke production 默认，也不是完整门禁验收。
+GitHub Actions 的 `Charged GBU contour scan` 支持对应 `density_route` 选项。
+
+q0 参考的 contour 默认使用有限窗口导数积分，正下限由
+`--q0-omega-lower 1e-5` 指定（fm^-1），上下边界项均保留。外推后零频虚部非零
+保存为 `*_endpoint_warning`、`*_static_imaginary_max` 诊断，不再独立拒绝密度；
+负静态实部、原 q0 onset 异常、非正根、拓扑/阈值/UV 异常仍为失败。
+该有限窗口口径不宣称零下限收敛。`--background-input-root DIR` 从旧分片的 seed
+代数恢复完全相同的背景，校验网格/源码并把输入哈希纳入恢复身份；不调用背景求解。
+背景源码哈希须逐字节一致；即使只是入口文件整理，哈希不同也会拒绝恢复。
+重放已保存批次时使用该批记录的计算版本；run `37172320742` 的同背景有限窗口重算版本为
+`c22f5e3e267bf2dce2431cf901a9dc3508d27600`。仅重绘冻结 CSV 不受此源码约束。
+Actions 的 `q0_window_audit=true` 先在四个保存背景比较下限、omega/q 节点与谱分辨率，
+`background_run_id` 用于整图密度重算。新 q0 图使用 `--clean-contours`：数值 CSV
+保留警告和失败原因，PNG 无警告符号/失败覆盖层；失败单元仍留空，不跨空缺连线。
+
+组会比值图使用 `scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py`，
+从合并 CSV 与其 `plot_manifest.json` 重绘，不调用求解器。示例中的输入路径需替换
+为实际冻结文件，输出目录必须尚不存在：
+
+```powershell
+python scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py `
+  --csv path/to/contour_points_merged.csv `
+  --source-manifest path/to/plot_manifest.json `
+  --presentation --band-MeV 50 --clean-contours `
+  --include-rectangle-MeV 40 130 0 750 `
+  --low-ratio-levels 0.002 0.005 0.01 0.02 0.03 0.04 `
+  --comparison-color-limits 0 1.15 --output-dir path/to/new-case
+```
+
+- `--include-rectangle-MeV T_MIN T_MAX MUB_MIN MUB_MAX` 将指定矩形与冻结线邻域
+  取并集；单位为 MeV、边界包含端点，且必须位于已有显示网格内。它只选择原生
+  点，不补算或生成插值数值。未传此参数时保留原邻域选择。
+- `--low-ratio-levels` 接受有限、正值、不重复且严格小于 0.05 的等高值；实际
+  数值范围外的等级不绘制，申请值与实际等级均记录在 manifest 中。低值标签保留
+  小数精度，原有等高线路径与标签位置不变；未传时沿用 0.05 等高线间隔。
+- 两个新增参数仅适用于 `--presentation`。采用非均匀等级时，manifest 的
+  `rendering.contour_step`、`label_step` 为 `null`，常规间隔由
+  `regular_contour_step`、`regular_label_step` 表达，额外等级列在 `low_ratio_levels`。
+- 指定矩形时额外导出 `display_points.csv`（显示并集）、`added_display_points.csv`
+  （相对原邻域新增显示的点）、`requested_region_points.csv`（整个指定矩形）。
+  三表复制所有原始字段，保留警告、失败状态及空值；`added` 不表示新增计算。
+  `source/` 保存输入和实际生成器的字节快照，便于按 manifest 的 hash 复现。
+- 冻结线参数默认来自 `config/physics/freezeout/default.toml`；需要复现历史 case 时
+  可用 `--freezeout-profile` 指向其冻结参数副本。输入 CSV、参数 hash 和完整网格
+  必须通过来源检查。`--presentation` 交付组会 PNG，不声明论文级图像资格。
+
 全量 `run_*.jl` 脚本功能目录见：
 
 - [run_script_catalog.md](run_script_catalog.md)

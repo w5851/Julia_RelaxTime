@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "formula-route-closure"
-updated_at = "2026-09-07"
+updated_at = "2026-10-08"
 
 [[tracks]]
 id = "issue130-phase"
@@ -938,4 +938,58 @@ backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuati
 evidence = [
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
+]
+
+[[items]]
+id = "charged-gbu-phase-contours"
+track_id = "formula-route-closure"
+classification = "independent"
+status = "active"
+parent = "track:formula-route-closure"
+task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
+reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
+next_action = "代码、计算证据与组会图交付已完成，PR #325 跟踪集成和最终CI；Julia常规聚焦263/263、模块重载顺序复测287/287、Python43/43及相关治理检查通过。当前图919/925有效，低ratio六级补线已交付，生成器与d4ca9db65d4829218d5e5bbe1b3aaa385ab3c5e3逐字节对应。代码PR收尾之外，M4研究产物晋升、背景稳定性复核及冻结线参数调整由作者另行指定。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-09-30_charged-gbu-phase-contours.md",
+  "file:benchmark/relaxtime/bench_charged_gbu_contour_point.jl",
+  "file:.github/workflows/relaxtime-charged-gbu-contour-benchmark.yml",
+  "run:36849353973",
+  "run:36854992530",
+  "run:36957893472",
+  "run:36960810064",
+  "run:36971423991",
+  "sha:e6b3de025d59213e480927ebffa5f188e3e71ebd",
+  "file:scripts/analysis/relaxtime/charged_gbu_q0_reference.jl",
+  "file:scripts/analysis/relaxtime/charged_gbu_saved_backgrounds.jl",
+  "file:scripts/analysis/relaxtime/audit_charged_gbu_q0_window.jl",
+  "run:37172076768",
+  "run:37172320742",
+  "run:37197839588",
+  "sha:c22f5e3e267bf2dce2431cf901a9dc3508d27600",
+  "sha:d4ca9db65d4829218d5e5bbe1b3aaa385ab3c5e3",
+  "file:scripts/analysis/relaxtime/plot_charged_gbu_freezeout_neighborhood.py",
+  "file:.github/workflows/relaxtime-charged-gbu-contour-scan.yml",
+  "file:scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl",
+  "file:scripts/analysis/relaxtime/plot_charged_gbu_contour_screening.py",
+  "file:scripts/analysis/relaxtime/select_charged_gbu_contour_candidates.py",
+  "file:.github/workflows/relaxtime-charged-gbu-contour-full-gate.yml",
+  "file:tests/unit/python/test_charged_gbu_contour_screening_plot.py",
+  "file:tests/unit/python/test_charged_gbu_contour_candidates.py",
+  "run:36862279055",
+  "note:candidate_manifest_sha256_1562a6fc32d8aa48531749db874a36e3316eb5ab0fa391362481de6687f68ffe",
+  "run:36863447044",
+  "run:36863456109",
+  "run:36863466376",
+  "run:36863474205",
+  "run:36863484426",
+  "run:36863494390",
+  "run:36863503078",
+  "run:36863513408",
+  "run:36863524728",
+  "run:36863533978",
+  "run:36863547938",
+  "run:36863558667",
+  "note:12_sparse_full_gate_points_48_channels_accepted_screening_full_ratio_max_abs_relative_difference_2.91_percent",
 ]
