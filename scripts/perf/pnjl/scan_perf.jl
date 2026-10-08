@@ -6,8 +6,8 @@ PNJL T-μ 和 T-ρ 扫描性能测试。
 排除 JIT 编译影响，使用 BenchmarkTools 进行严谨测试。
 
 输出：
-- JSON 格式结果：output/perf/pnjl_scan.json
-- Markdown 报告：output/perf/pnjl_scan.md
+- JSON/Markdown：tests/perf/results/pnjl/scan_benchmark.*
+- PNJL_BENCHMARK_OUTPUT_DIR 可覆盖报告目录。
 """
 
 using Printf
@@ -17,9 +17,11 @@ using JSON3
 using Dates
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-const PERF_OUTPUT_DIR = joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl")
+const PERF_OUTPUT_DIR = abspath(get(ENV, "PNJL_BENCHMARK_OUTPUT_DIR",
+    joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl")))
 const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.md")
+include(joinpath(PROJECT_ROOT, "benchmark", "pnjl", "benchmark_metadata.jl"))
 
 # 加载 PNJL 模块
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
@@ -45,6 +47,8 @@ const TMU_CONFIG = (
     T_range = 50.0:25.0:200.0,   # 7 个温度点
     μ_range = 0.0:50.0:300.0,    # 7 个化学势点
     xi = 0.0,
+    p_num = Models.default_momentum_count(),
+    t_num = Models.default_theta_count(),
 )
 
 # T-ρ 扫描配置
@@ -52,6 +56,13 @@ const TRHO_CONFIG = (
     T_values = [80.0, 100.0, 120.0, 140.0, 160.0],  # 5 个温度点
     ρ_range = collect(0.0:0.2:3.0),                  # 16 个密度点
     xi = 0.0,
+    p_num = 24,
+    t_num = 8,
+    reverse_rho = true,
+    seed_policy = :hybrid_continuity,
+    constraint_mode = :fixed_rho,
+    solver_backend = :auto,
+    semantic_mode = :ground_state,
 )
 
 const DEFAULT_SAMPLES = 10  # BenchmarkTools 采样次数
@@ -72,7 +83,8 @@ function run_tmu_scan_benchmark()
         for μ_MeV in TMU_CONFIG.μ_range
             T_fm = T_MeV / ħc_MeV_fm
             μ_fm = μ_MeV / ħc_MeV_fm
-            result = solve(mode, T_fm, μ_fm; xi=xi, seed_strategy=seed)
+            result = solve(mode, T_fm, μ_fm; xi=xi, seed_strategy=seed,
+                p_num=TMU_CONFIG.p_num, t_num=TMU_CONFIG.t_num)
             if result.converged
                 n_success += 1
                 update_seed!(seed, result.solution)
@@ -97,7 +109,13 @@ function run_trho_scan_benchmark()
         xi_values = [TRHO_CONFIG.xi],
         output_path = output_path,
         overwrite = true,
-        reverse_rho = true
+        reverse_rho = TRHO_CONFIG.reverse_rho,
+        seed_policy = TRHO_CONFIG.seed_policy,
+        constraint_mode = TRHO_CONFIG.constraint_mode,
+        solver_backend = TRHO_CONFIG.solver_backend,
+        semantic_mode = TRHO_CONFIG.semantic_mode,
+        p_num = TRHO_CONFIG.p_num,
+        t_num = TRHO_CONFIG.t_num,
     )
     
     isfile(output_path) && rm(output_path)
@@ -137,11 +155,14 @@ end
 
 function write_reports(results::Vector{ScanBenchResult})
     mkpath(PERF_OUTPUT_DIR)
-    timestamp = Dates.format(Dates.now(), Dates.ISODateTimeFormat)
+    timestamp = Dates.format(Dates.now(Dates.UTC), Dates.ISODateTimeFormat) * "Z"
     
     # JSON 输出
     json_payload = (
+        schema_version = "pnjl_benchmark_raw_v1",
         generated_at = timestamp,
+        metadata = PNJLBenchmarkMetadata.metadata(PROJECT_ROOT),
+        methodology = (phase="warm", evals=1, seconds=BenchmarkTools.DEFAULT_PARAMETERS.seconds),
         samples = DEFAULT_SAMPLES,
         tmu_config = TMU_CONFIG,
         trho_config = TRHO_CONFIG,

@@ -1,0 +1,165 @@
+{
+  "schema": "publication_clean_v13_pdf_package_v1",
+  "task_classification": "independent",
+  "generated_at_utc": "2026-10-06T11:20:43.951576+00:00",
+  "status": "vector_delivery_complete",
+  "delivery_stage": "vector_delivery",
+  "vector_delivery_pending": false,
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "solver_called": false,
+  "canonical_data_modified": false,
+  "new_display_values": false,
+  "vector_export": {
+    "exporter": {
+      "path": "scripts/analysis/relaxtime/export_phase_guided_publication_clean_v13_pdf.py",
+      "path_kind": "repository_relative",
+      "sha256": "894fb18f2234020ad6122030e1dac4b83dcaf4a2cf8baee8d0b753f874c8d127",
+      "command": "python scripts/analysis/relaxtime/export_phase_guided_publication_clean_v13_pdf.py",
+      "runtime": {
+        "python": "3.13.2",
+        "platform": "Windows-11-10.0.26300-SP0",
+        "executable": "D:\\Python313\\python.exe",
+        "matplotlib": "3.10.1",
+        "font": {
+          "requested": "Times New Roman",
+          "resolved": "Times New Roman",
+          "path": "C:\\Windows\\Fonts\\times.ttf"
+        }
+      }
+    },
+    "author_acceptance": {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_png_acceptance_v1.json",
+      "path_kind": "repository_relative",
+      "role": "version_level_png_acceptance",
+      "bytes": 1735,
+      "sha256": "fb3bf85f4ce3a2a146a51ae4fb3320378451c50b944cd4f628b70a757aacad71"
+    },
+    "source_package": {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "accepted_png_package",
+      "bytes": 253681,
+      "sha256": "0c2cb4e7b479d209021f8d422903a90e7bf2d62444f55f8d0a8a63d8a095a0ef"
+    },
+    "source_bundle": {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/plot_manifest.json",
+      "path_kind": "repository_relative",
+      "role": "accepted_png_bundle",
+      "bytes": 1780823,
+      "sha256": "b68def4e0dd8f7706baa1691bb4f1cdbae7f693a5e1649835b9f6bc9c2e22574"
+    },
+    "source_snapshot": {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_v13_code_snapshot_v1.zip",
+      "path_kind": "repository_relative",
+      "role": "frozen_v13_code_and_contract",
+      "bytes": 205058,
+      "sha256": "d3defeb498f9c4ed5f8cd66c79fbb0604c757f1da6f4308789397b7bad995f1b"
+    },
+    "export_contract": {
+      "path": "docs/guides/sop/workflows/figure_production.md",
+      "path_kind": "repository_relative",
+      "role": "active_vector_export_contract",
+      "bytes": 9886,
+      "sha256": "8c2920fac437cdc4d1a778a88210c6b56868b2ecb10353d6218db9c11b845eb3"
+    },
+    "live_renderer_dependencies_verified": [
+      "config/plotting/candidate_aps_v2.toml",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v12.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v13.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2_residual_smoothed.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v3.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v4.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v5.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v6.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v7.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v8.py",
+      "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v9.py",
+      "scripts/plotting/plot_bundle.py",
+      "scripts/plotting/plot_manifest.py",
+      "scripts/plotting/plot_provenance.py",
+      "scripts/plotting/plot_quality.py",
+      "scripts/plotting/plot_style.py",
+      "scripts/plotting/validate_plot_artifact.py"
+    ],
+    "acceptance_scope": "version-level acceptance; per-file author inspection is not asserted",
+    "source_authority": "exact PNG-bound source archive plus matching live renderer and profile bytes"
+  },
+  "point_row_count": 21828,
+  "inherited_table_hashes": {
+    "boundary_gap_map.csv": "8e4a19439ddb01d0c8607e321d020bd4d2e41f2c9343d723c39dd850c60da784",
+    "cep_marker_audit.csv": "df41bee5cec22c12cfda0b5f2f59ced5d620eda305c8b3d7643820e568c67d7b",
+    "cep_marker_map.csv": "d2a3da3f6dee0b71e18188d3a0543d2229eaf19d2be7ad6ee02de86847468a8c",
+    "claim_ledger.csv": "3fa47ef7f79718eeddefc75e22b011f11d3034b9d7e5e9352bfa2f09a3721f68",
+    "curve_index.csv": "e8fb9195ca76d917af90cf13498c2525b4541359e8219e2be7a8f099089520af",
+    "display_smoothing_window_audit_v2.csv": "3852c110ad5171f423e2c08aeced2a04b94c279f1c4fc0f61bfd3e659ace8d99",
+    "first_order_marker_map.csv": "bbdba390d2dde1694fe2405fb3ab81b6e6ff8479fba6b5e2114c6962a92515c2",
+    "input_inventory.csv": "d49e896e10da7f0efb1aca86a9a21ce5f3919786a2f8d12ee7576e3203a7cac9",
+    "marker_semantics_audit.csv": "5cf71cdf84a0796530c3294b01b648b2843aa1ae40d396609ea68719bb0bf1f8",
+    "mechanism_review_summary.csv": "59c17d77f95c2a18acc401decd5dd484480003503f0f62a1846054f45b2b8372",
+    "phase_switch_inventory.csv": "71132005903ca2a3e5d822ea35bd262bb91d6c9ae794ef60c4e81f79d1f64252",
+    "publication_clean_points.csv": "3783e96be9a14ac7bd2cd44f3d29526fe50de5402d49624574e655cd216b3186",
+    "publication_marker_map.csv": "1eec92de011fac4aeef553212b515f77f5eb847790274360f60ab55413da12f2",
+    "replacement_map.csv": "9645f979555a1f2e7caac3d3ac13a71c113c6f760e46ac7e6e53a50c79bbf59c",
+    "residual_curve_audit.csv": "b5e44797b8ded4a731c408e53c40e52fdfee831e0296405cb06348a9ea61ff79",
+    "residual_point_audit.csv": "4c9befad432ac95c7999f75096372df41212c1b658e00105e276533422e5c732",
+    "residual_smoothing_window_audit.csv": "f93f598f8baa8732a2db1ff236e5578d34d8711d71557de8b380556bbdeb8c88",
+    "review_adjustment_map.csv": "574789faf4a88799e4c1563586a6558611998746202240b8c8ddf0d3e1d468e1",
+    "v3_curve_audit.csv": "0ccff2f7add94c39e515a4283c4d89e8f2c90beac06afb4cf8714cfa7b9e598c",
+    "v3_tau_adjustment_map.csv": "0ccff2f7add94c39e515a4283c4d89e8f2c90beac06afb4cf8714cfa7b9e598c",
+    "v4_display_adjustment_map.csv": "613e7c0086e940d134326c2ee6ad9a95fed5eb12d194a3962c9dae2f7d749a49",
+    "v5_display_label_map.csv": "e78e9a23a0432b836d20b7c16336c3050993ce168a6e2cf137fed77b87b3b9b8"
+  },
+  "figure_index": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/plot_manifest.json",
+  "figure_index_sha256": "8c363043909c7b40557d43d1174d9e5566cefe7519a0b7daec0b369cadb7306f",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/plot_manifest.json",
+      "path_kind": "repository_relative",
+      "role": "v13_pdf_delivery",
+      "bytes": 2058738,
+      "sha256": "8c363043909c7b40557d43d1174d9e5566cefe7519a0b7daec0b369cadb7306f"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/README.md",
+      "path_kind": "repository_relative",
+      "role": "v13_pdf_delivery",
+      "bytes": 1600,
+      "sha256": "412c3c6313322b7ce9b81ff801b3dfaa02513c51fd9cb32973ff134041822ee6"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/caption_handoff.md",
+      "path_kind": "repository_relative",
+      "role": "v13_pdf_delivery",
+      "bytes": 3047,
+      "sha256": "3f78b0f1a18c32332d85a0d26be2ccbf2f1d9d4508143c3013e51265835bca18"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/pdf_index.md",
+      "path_kind": "repository_relative",
+      "role": "v13_pdf_delivery",
+      "bytes": 18232,
+      "sha256": "9b800a34a9a8cfaf9fb8f5018917eb77ed57a9492f99efda10fac1eefc15b500"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/placement_report.json",
+      "path_kind": "repository_relative",
+      "role": "v13_pdf_delivery",
+      "bytes": 216771,
+      "sha256": "0ae6d593b70f3abfdd5b4f27059ff178f7d56c55bcbc88ee9a1dcf473bd10ac5"
+    }
+  ],
+  "validation_summary": {
+    "pdf_count": 75,
+    "pixel_identical_count": 75,
+    "minimum_glyph_height_mm": 2.096211067708333,
+    "all_single_page": true,
+    "all_fonts_embedded_non_type3": true,
+    "embedded_raster_image_count": 0,
+    "scope": "measured figures and inspected PDFs; separate from numerical and manuscript qualification"
+  }
+}

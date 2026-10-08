@@ -9,17 +9,9 @@
 - 不同散射过程（如uu→uu和dd→dd）共享Π_uu
 - 相同(k0, k_norm)但不同通道(:P vs :S)需分别缓存
 
-## 性能优势
-- 极化函数计算成本：~0.1-1ms（包含高斯积分）
-- 哈希表查询成本：~1ns
-- 单次输运系数计算可能需要10⁴-10⁶次极化函数调用
-- 缓存命中率可达30%-70%（取决于计算网格密度）
-
-## 设计原则
-1. 使用浮点数容差比较（避免舍入误差导致缓存失效）
-2. 线程安全（如需并行计算）
-3. 单次计算会话内有效（不跨计算任务持久化）
-4. 提供缓存统计功能（命中率、节省时间）
+缓存键对 Float64 参数做 mantissa 量化；收益取决于实际命中率。
+字典与计数器为进程内共享状态，没有并发锁；不能由多个线程同时读写。
+接口、单位和完整示例见 `docs/api/relaxtime/polarization/PolarizationCache.md`。
 """
 module PolarizationCache
 
@@ -65,18 +57,18 @@ end
 
 # 字段
 - `channel`: 通道类型（:P或:S）
-- `k0`: 能量分量（MeV）
-- `k_norm`: 三动量大小（MeV）
-- `m1, m2`: 两个夸克质量（MeV）
-- `μ1, μ2`: 两个夸克化学势（MeV）
-- `T`: 温度（MeV）
+- `k0`: 能量分量（fm⁻¹）
+- `k_norm`: 三动量大小（fm⁻¹）
+- `m1, m2`: 两个夸克质量（fm⁻¹）
+- `μ1, μ2`: 两个夸克化学势（fm⁻¹）
+- `T`: 温度（fm⁻¹）
 - `Φ, Φbar`: Polyakov环期望值
 - `ξ`: 各向异性参数
-- `A1, A2`: 预计算的A函数值
+- `A1, A2`: 预计算的A函数值（fm⁻²）
 - `num_s_quark`: 奇异夸克数量（0或1）
 
 # 注意
-使用hash和==运算符时会考虑浮点数容差（EPS_CACHE）
+hash/isequal 比较量化后的键；同桶复用不等于任意两值的近似相等判断。
 """
 struct PolarizationKey
     channel_code::UInt8
@@ -180,24 +172,8 @@ const CACHE_HIT_CALLS = Ref(0)
 # 返回值
 返回元组 `(Π_real, Π_imag)`
 
-# 性能
-- 缓存命中：~1ns（哈希表查询）
-- 缓存未命中：~0.1-1ms（调用polarization_aniso计算并缓存结果）
-
-# 示例
-```julia
-using PolarizationCache
-
-# 第一次调用：计算并缓存
-Π_real, Π_imag = polarization_aniso_cached(:P, 100.0, 50.0, 5.0, 5.0, 300.0, 300.0, 150.0, 0.5, 0.5, 0.0, -50.0, -50.0, 0)
-
-# 第二次调用相同参数：从缓存读取（快~10⁵倍）
-Π_real, Π_imag = polarization_aniso_cached(:P, 100.0, 50.0, 5.0, 5.0, 300.0, 300.0, 150.0, 0.5, 0.5, 0.0, -50.0, -50.0, 0)
-
-# 查看缓存统计
-stats = get_cache_stats()
-println("缓存命中率: \$(stats.hit_rate * 100)%")
-```
+能量、动量、质量、化学势和温度使用 fm⁻¹，A 函数与返回分量使用 fm⁻²。
+本层不做单位转换。缓存命中复用同一量化桶的结果；没有线程同步。
 """
 function polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64, 
                                   m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, 
@@ -233,7 +209,7 @@ end
 
 # 使用场景
 - 开始新的输运系数计算任务
-- 改变物理参数（温度、化学势等）后
+- 需要重新统计命中率时（全部物理参数已包含在缓存键中）
 - 内存不足需要释放缓存
 
 # 注意

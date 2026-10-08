@@ -61,34 +61,7 @@ function _fixture_root(; kwargs...)
 end
 
 @testset "task ledger real state" begin
-    violations = TL.validate_ledger(PROJECT_ROOT)
-    @test isempty(violations)
-    parsed = TOML.parsefile(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"))
-    tracks = Dict(String(t["id"]) => t for t in parsed["tracks"])
-    @test parsed["primary_track"] == "formula-route-closure"
-    @test tracks["issue130-phase"]["status"] == "archived"
-    @test tracks["issue130-phase"]["current_task"] == "issue130-full-hybrid-author-review"
-    @test tracks["formula-route-closure"]["status"] == "accepted"
-    @test tracks["formula-route-closure"]["current_branch"] == "codex/charged-phase-coordinate-cut-fix"
-    @test tracks["formula-route-closure"]["current_sha"] == "c0a09912c9551da39b1e2dd30f7c0489d6c0a6d3"
-    @test tracks["rs-transport"]["status"] == "archived"
-    @test isempty(tracks["rs-transport"]["blocked_by"])
-    @test tracks["plot-sop"]["status"] == "promoted"
-    @test tracks["analysis-docs-cleanup"]["status"] == "archived"
-    @test isempty(tracks["analysis-docs-cleanup"]["next_action"])
-    items = Dict(String(item["id"]) => item for item in parsed["items"])
-    @test items["rs-production-after-phase-reference"]["status"] == "archived"
-    @test startswith(items["rs-production-after-phase-reference"]["task_file"], "docs/dev/archived/")
-    @test items["issue130-phase-reference-retirement"]["status"] == "archived"
-    @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
-    @test isempty(items["issue130-phase-reference-retirement"]["blocked_by"])
-    @test items["issue130-full-hybrid-author-review"]["status"] == "archived"
-    @test isempty(items["issue130-full-hybrid-author-review"]["next_action"])
-    @test items["docs-analysis-logical-group-migration"]["status"] == "archived"
-    @test startswith(items["docs-analysis-logical-group-migration"]["task_file"], "docs/dev/archived/")
-    @test isempty(items["docs-analysis-metadata-repair"]["next_action"])
-    @test occursin("full_hybrid_candidate", read(joinpath(PROJECT_ROOT, "docs", "dev", "task_tracking_governance.md"), String))
-    @test !occursin("status = \"full_hybrid_candidate\"", read(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"), String))
+    @test isempty(TL.validate_ledger(PROJECT_ROOT))
 end
 
 @testset "task ledger state transitions" begin
@@ -332,15 +305,32 @@ end
         args == ("status", "--porcelain=v1") && return " M tracked.md\n?? new.md\n"
         error("unexpected git fixture command: $(args)")
     end
-    output = IOBuffer()
-    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=output, git_output=dirty_git))
-    report = String(take!(output))
-    @test occursin("primary_track=formula-route-closure", report)
-    @test occursin("selected_track=rs-transport", report)
-    @test occursin("branch=codex/fixture", report)
-    @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
-    @test occursin("dirty=true", report)
-    @test occursin("ATTENTION: preserve", report)
+    root = _fixture_root()
+    ledger_path = joinpath(root, "config", "governance", "task_tracks.toml")
+    fixture = TOML.parsefile(ledger_path)
+    second_track = merge(fixture["tracks"][1], Dict("id" => "track-b", "current_task" => "item-b"))
+    second_item = merge(fixture["items"][1], Dict(
+        "id" => "item-b", "track_id" => "track-b", "parent" => "track:track-b",
+        "task_file" => "docs/dev/active/second.md",
+    ))
+    push!(fixture["tracks"], second_track)
+    push!(fixture["items"], second_item)
+    write(joinpath(root, "docs", "dev", "active", "second.md"), "# Second fixture task\n")
+    for primary in ("track-a", "track-b")
+        fixture["primary_track"] = primary
+        open(io -> TOML.print(io, fixture), ledger_path, "w")
+        for selected in (nothing, "track-a")
+            output = IOBuffer()
+            @test isempty(TL.preflight_report(root; track_id=selected, io=output, git_output=dirty_git))
+            report = String(take!(output))
+            @test occursin("primary_track=$(primary)", report)
+            @test occursin("selected_track=$(something(selected, primary))", report)
+            @test occursin("branch=codex/fixture", report)
+            @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
+            @test occursin("dirty=true", report)
+            @test occursin("ATTENTION: preserve", report)
+        end
+    end
 
     clean_git = (root, args...) -> begin
         args == ("branch", "--show-current") && return ""
@@ -349,22 +339,47 @@ end
         error("unexpected git fixture command: $(args)")
     end
     clean_output = IOBuffer()
-    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=clean_output, git_output=clean_git))
+    @test isempty(TL.preflight_report(root; track_id="track-a", io=clean_output, git_output=clean_git))
     clean_report = String(take!(clean_output))
     @test occursin("dirty=false tracked=0 untracked=0", clean_report)
     @test !occursin("ATTENTION: preserve", clean_report)
 end
 
-@testset "task ledger harness routing contract" begin
+@testset "task ledger documentation references" begin
     skill = read(joinpath(PROJECT_ROOT, ".agents", "skills", "codex-task-harness", "SKILL.md"), String)
     agents = read(joinpath(PROJECT_ROOT, "AGENTS.md"), String)
     @test occursin("task_tracks.toml", skill)
     @test occursin("blocker", skill)
-    @test occursin("doc-implementation", skill)
     @test occursin("task_tracks.toml", agents)
 end
 
 @testset "task ledger CLI track selection" begin
-    @test TL.main(["--track", "rs-transport"]) == 0
-    @test TL.main(["--track", "missing-track"]) == 1
+    root = _fixture_root()
+    @test TL.main(["--track", "track-a"]; root=root) == 0
+    @test TL.main(["--track", "missing-track"]; root=root) == 1
+end
+
+@testset "preflight recovery details and bounded dirty output" begin
+    root = _fixture_root()
+    dirty_git = (root, args...) -> args == ("status", "--porcelain=v1") ?
+        join([" M changed_$i.md" for i in 1:25], "\n") : "fixture-git-value"
+    output = IOBuffer()
+    @test isempty(TL.preflight_report(root; io=output, git_output=dirty_git))
+    report = String(take!(output))
+    @test occursin("task_file=docs/dev/active/task.md", report)
+    @test occursin("item_next_action=Continue the fixture task", report)
+    @test occursin("file:docs/dev/active/task.md", report)
+    @test occursin("15 more", report)
+    @test !occursin("changed_25.md", report)
+    @test isempty(TL.preflight_report(root; io=output, git_output=dirty_git, full_paths=true))
+    @test occursin("changed_25.md", String(take!(output)))
+
+    path = joinpath(root, "config", "governance", "task_tracks.toml")
+    write(path, "not valid TOML = [")
+    @test !isempty(TL.preflight_report(root; io=output, git_output=dirty_git))
+    invalid_report = String(take!(output))
+    @test occursin("branch=fixture-git-value", invalid_report)
+    @test occursin("dirty=true", invalid_report)
+    @test !occursin("selected_track=", invalid_report)
+    @test_throws ErrorException TL.main(["--full-paths"]; root)
 end

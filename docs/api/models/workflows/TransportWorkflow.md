@@ -1,19 +1,19 @@
 # Models Transport Workflow
 
-本文档从 `Models` 统一入口视角描述 transport workflow。底层实现位于 [src/models/workflows/TransportWorkflow.jl](src/models/workflows/TransportWorkflow.jl#L1)，领域细节页保留在 [docs/api/relaxtime/workflow/TransportWorkflow.md](docs/api/relaxtime/workflow/TransportWorkflow.md)。
+本文档从 `Models` 统一入口视角描述 transport workflow。底层实现位于 [src/models/workflow_apps/TransportWorkflow.jl](../../../../src/models/workflow_apps/TransportWorkflow.jl#L1)，领域细节页保留在 [docs/api/relaxtime/workflow/TransportWorkflow.md](../../relaxtime/workflow/TransportWorkflow.md)。
 
 ## 首选入口
 
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 
-这两个入口都通过 [src/models/entrypoints.jl](src/models/entrypoints.jl#L49) 转发到 workflow 模块。
+这两个入口都通过 [src/models/entrypoints.jl](../../../../src/models/entrypoints.jl#L49) 转发到 workflow 模块。
 
 ## `solve_gap_and_transport`
 
 这是完整闭环入口：先求平衡态，再进入 τ、bulk 与输运系数计算。
 
-实现签名见 [src/models/workflows/TransportWorkflow.jl](src/models/workflows/TransportWorkflow.jl#L453)。
+实现签名见 [src/models/workflow_apps/TransportWorkflow.jl](../../../../src/models/workflow_apps/TransportWorkflow.jl#L453)。
 
 它适合以下场景：
 
@@ -36,7 +36,7 @@
 
 这是后处理入口：在你已经拥有平衡态结果的前提下，只执行输运侧计算。
 
-实现签名见 [src/models/workflows/TransportWorkflow.jl](src/models/workflows/TransportWorkflow.jl#L522)。
+实现签名见 [src/models/workflow_apps/TransportWorkflow.jl](../../../../src/models/workflow_apps/TransportWorkflow.jl#L522)。
 
 它适合：
 
@@ -67,7 +67,7 @@
 
 应继续阅读：
 
-- [docs/api/relaxtime/workflow/TransportWorkflow.md](docs/api/relaxtime/workflow/TransportWorkflow.md)
-- [docs/api/relaxtime/transport/CoreConcepts.md](docs/api/relaxtime/transport/CoreConcepts.md)
+- [docs/api/relaxtime/workflow/TransportWorkflow.md](../../relaxtime/workflow/TransportWorkflow.md)
+- [docs/api/relaxtime/transport/CoreConcepts.md](../../relaxtime/transport/CoreConcepts.md)
 
 本页只负责说明它在 `Models` 公开入口中的定位。

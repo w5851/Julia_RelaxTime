@@ -1,0 +1,178 @@
+{
+  "schema": "publication_clean_v11_stage_acceptance_v1",
+  "status": "author_accepted_stage_result",
+  "acceptance_date": "2026-10-02",
+  "task_classification": "independent",
+  "stage_accepted": true,
+  "author_authorization": "v11 passed the current review and may be retained as a stage result; manage only v10/v11 necessary artifacts",
+  "accepted_scope": "frozen v11 PNG layout and same-renderer PDF companions; display-only stage result",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "final_aps_delivery_complete": false,
+  "solver_called": false,
+  "canonical_data_modified": false,
+  "new_display_values": false,
+  "raw_manuscript_eligible": false,
+  "numerical_status": "inherited_author_accepted_display_only",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "png_package": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_png_review/manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_v11_png_package",
+    "bytes": 127073,
+    "sha256": "e32a10d2cfba1913ee1eca7e5d696d2ef10c25e2d4852d4414848946af59ecfd"
+  },
+  "pdf_package": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_pdf_review/manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_v11_pdf_companions",
+    "bytes": 155173,
+    "sha256": "5faf84170df0ea3c60b9e501cb1a3f3de847cb3d116a06744b88e54459a80e80"
+  },
+  "png_index": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_v11_png_index",
+    "bytes": 102234,
+    "sha256": "cf3036f7391fe6a9768b2ea952bff48305db67645d1dc03aa1adb15a08fe0713"
+  },
+  "pdf_index": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/pdf_review_index.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_v11_pdf_index",
+    "bytes": 97588,
+    "sha256": "c7f89ea347d35ce3b8d6ecb885095a18b9ed2fa24bf823115e400f7b9cf3b779"
+  },
+  "placement_report": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v11_paper_size_review/placement_report.json",
+    "path_kind": "repository_relative",
+    "role": "measured_paper_placement_report",
+    "bytes": 6991,
+    "sha256": "ab38ebf594ccde50c35307ec157dd5cd4abb24a79374b5ddc986b08455863aa9"
+  },
+  "historical_archive_index": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_review_history_v6_v9_archive_v1.json",
+    "path_kind": "repository_relative",
+    "role": "local_restorable_history_index",
+    "bytes": 282808,
+    "sha256": "874e43a91434a6f80b8a1b8cbd46bd964646c16fd110498af63cacd427d2e848"
+  },
+  "renderer_dependency_closure": [
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v6.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 24994,
+      "sha256": "01437bf4033f6ffb6414237c3f08641a8f994758144a20645afeee14882dc638"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v7.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 26860,
+      "sha256": "0c52cf8c57c41b8b3d86451f37d976ad60d488f3129724d551664cbf0b24425e"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v8.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 33544,
+      "sha256": "7f549db0a6e9a90044cdb23b087208a4d32ca3cb0d3bbdf30680c1b4d968f11f"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v9.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 36719,
+      "sha256": "9eebf18b72375b0597a95134a0aff3a6dd9b32e996b85656adbc84ad3834187a"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 41989,
+      "sha256": "1f1cd6ed4d69dbc9dab37e2b3b372fe77edead06576edbc78961f718a5aa9a90"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 32146,
+      "sha256": "82fd401810a5695db8354c0fcdfa79c0a5099d27d7b8ba48b85b9331ed160b1c"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 14216,
+      "sha256": "b9e188266a3b0137bb7d853ca076af955539c7336bb23147be5a08c7eec2619e"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/inspect_phase_guided_publication_clean_v11_placement.py",
+      "path_kind": "repository_relative",
+      "role": "retained_frozen_renderer_dependency",
+      "bytes": 10629,
+      "sha256": "77d31d6e7b5a233031134374cc8162c46295c0f58eb4c0dbdb48cf6103c25ea1"
+    }
+  ],
+  "current_pointer_retained": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json",
+    "path_kind": "repository_relative",
+    "role": "unchanged_current_v5_pointer",
+    "bytes": 1968,
+    "sha256": "1f2386c9b1ee25932e716f616f12e48e7e843a5b9542fa0fdc0c364758992ac8"
+  },
+  "retained_v10_snapshot": {
+    "status": "immutable_historical_parent_not_current_contract_pass",
+    "expected_contract_drift": [
+      {
+        "path": "docs/guides/sop/workflows/figure_production.md",
+        "recorded_sha256": "58b3d0c9a42205fe66ad4e4d87865eea342782c08374427c99cd4b164b589550",
+        "current_sha256": "0ef1045c1e5a373b8908d8f4d576069a101ce3909110b28e8e169db49046e72a"
+      },
+      {
+        "path": ".agents/skills/plotting-sop/SKILL.md",
+        "recorded_sha256": "293cbd37ec806af52116e318b03d3bdfcbddb7811475f18678dfde6800182706",
+        "current_sha256": "28951ed0bb64b0c80d494c6a554329846d46c0cc69d55b747d30d5331b142d64"
+      }
+    ]
+  },
+  "counts": {
+    "single_charts": 72,
+    "composite_charts": 2,
+    "png": 74,
+    "pdf": 74,
+    "mode_a_singles": 36,
+    "mode_b_singles": 36
+  },
+  "unresolved_formal_gates": {
+    "native_pdf_submission_preflight": [
+      {
+        "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/composites/figure1_relaxation_times_comparison.pdf_review_manifest.json",
+        "violations": [
+          "v2 final capital/numeral glyph height is below 2 mm"
+        ]
+      },
+      {
+        "manifest": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/composites/figure2_transport_coefficients_comparison.pdf_review_manifest.json",
+        "violations": [
+          "v2 final capital/numeral glyph height is below 2 mm"
+        ]
+      }
+    ],
+    "paper_placement": [
+      "math scripts below the repository 2 mm final-size threshold",
+      "paper textwidth is approximately 7.057 in, above the candidate profile 7 in limit",
+      "600 dpi native PNG falls below 600 effective dpi when enlarged at textwidth; PDF is vector and has no raster DPI limit"
+    ],
+    "numerical_qualification": "unchanged; no new convergence gate or production promotion"
+  },
+  "generator": {
+    "path": "scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py",
+    "path_kind": "repository_relative",
+    "sha256": "f6f6db35d9ef2247caff649e5dbdab610a27844c6639b8c53fd6b10dcb507fd4",
+    "command": "python scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --apply",
+    "runtime": {}
+  }
+}

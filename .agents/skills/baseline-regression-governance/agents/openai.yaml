@@ -1,4 +1,4 @@
 interface:
   display_name: "Baseline Regression Governance"
-  short_description: "Govern versioned numerical baseline contracts."
-  default_prompt: "Use $baseline-regression-governance to design or update this numerical baseline and its regression gate."
+  short_description: "Review numerical baselines and their reader contracts."
+  default_prompt: "Use $baseline-regression-governance to select the validation path for this baseline or reader change and review any numerical commitment changes."

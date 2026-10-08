@@ -2,7 +2,7 @@
 
 本指南对应统一入口脚本：
 
-- [scripts/pnjl/run_conserved_charge_susceptibilities.jl](scripts/pnjl/run_conserved_charge_susceptibilities.jl)
+- [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
 
 目标是给用户一个稳定入口，统一输出：
 
@@ -88,5 +88,5 @@ julia --project=. scripts/pnjl/run_conserved_charge_susceptibilities.jl --T=150 
 
 当前这条守恒荷广义磁化率线已经按这个方向落地：
 
-- 正式推荐入口是 [scripts/pnjl/run_conserved_charge_susceptibilities.jl](scripts/pnjl/run_conserved_charge_susceptibilities.jl)
+- 正式推荐入口是 [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
 - 底层 API 是 `chi_BQS / cumulant_BQS / baryon_Ssigma / baryon_kappa_sigma2`

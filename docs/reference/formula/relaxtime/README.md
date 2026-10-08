@@ -9,7 +9,8 @@
 - `propagator/`：RPA 传播子、介子极点、Mott 阈值
 - `meson_density/`：稳定粒子、BW、BU 相移数密度主线
 - `meson_thermo/`：BU / off-shell / LD 介子压强与 EOS 主线
-- `ChargedRPA_BU_ProductionRoute.md`：固定 BQS quark-only 背景上的 charged-RPA/BU candidate 公式闭合包
+- [ChargedGBU_InfiniteThermal.md](ChargedGBU_InfiniteThermal.md)：当前 charged smoke production 采用的无限热 GBU 方法与数值验收
+- [ChargedRPA_BU_ProductionRoute.md](ChargedRPA_BU_ProductionRoute.md)：旧 provider 规范、公式审查过程及其与当前方法的关系
 - `scattering/`：振幅、截面、平均散射率
 - `transport/`：弛豫时间与输运系数
 
@@ -23,9 +24,11 @@
 4. `meson_thermo/MesonThermo_QP_LD_Cutoff_Governance.md`
 5. `../models/shared/OmegaTotal_并入介子压强后的统一AD热力学流程.md`
 
-若要审阅带电 `pi^\pm/K^\pm` 路线，先读
-[ChargedRPA_BU_ProductionRoute.md](ChargedRPA_BU_ProductionRoute.md)，再回到
-`couplings/`、`polarization/`、`propagator/` 和 `meson_density/` 的分层公式。
+带电 `pi^\pm/K^\pm` 的当前计算先读
+[无限热 GBU 方法](ChargedGBU_InfiniteThermal.md)和
+[调用入口](../../../api/relaxtime/meson_density/ChargedGBUResearchWorkflow.md)。
+需要核对历史 provider、归一化裁决或文献转换时，再查阅
+[路线审查记录](ChargedRPA_BU_ProductionRoute.md)及相应的分层公式。
 
 ## 当前重点提醒
 

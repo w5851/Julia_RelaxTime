@@ -1,6 +1,6 @@
 ---
 name: doc-archive
-description: "Archive completed docs/dev/active task documents into docs/dev/archived with required metadata by using scripts/dev/archive_docs.jl and validating the result. Do not use for unfinished tasks, ordinary content edits, or custom nonstandard moves."
+description: "使用 scripts/dev/archive_docs.jl，将已完成、明确取消或被替代且已有终止依据的活动任务文档归档，保留正文并核对元数据与引用。"
 disable-model-invocation: true
 ---
 

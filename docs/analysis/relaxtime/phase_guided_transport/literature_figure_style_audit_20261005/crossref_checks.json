@@ -1,0 +1,562 @@
+[
+  {
+    "paper_id": "C01",
+    "doi": "10.1103/yp8h-pdkr",
+    "url": "https://api.crossref.org/works/10.1103%2Fyp8h-pdkr",
+    "status": "verified",
+    "title": [
+      "Bulk viscosity of quark matter across the QCD phase transitions"
+    ],
+    "container_title": [
+      "Physical Review C"
+    ],
+    "volume": "113",
+    "issue": "4",
+    "article_number": "045213",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          4,
+          28
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2026,
+          4,
+          28
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:11.392010+00:00"
+  },
+  {
+    "paper_id": "C02",
+    "doi": "10.1103/wdfm-gsgg",
+    "url": "https://api.crossref.org/works/10.1103%2Fwdfm-gsgg",
+    "status": "verified",
+    "title": [
+      "Transport coefficients of chiral fluid dynamics using low-energy effective models"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "113",
+    "issue": "3",
+    "article_number": "034016",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          13
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          13
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:18.494234+00:00"
+  },
+  {
+    "paper_id": "C03",
+    "doi": "10.1103/fp2p-rkpp",
+    "url": "https://api.crossref.org/works/10.1103%2Ffp2p-rkpp",
+    "status": "verified",
+    "title": [
+      "Shear viscosity and electric conductivity of quark matter at finite temperature and chemical potential with QCD phase transitions"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "113",
+    "issue": "1",
+    "article_number": "014036",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          1,
+          29
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2026,
+          1,
+          29
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:25.884975+00:00"
+  },
+  {
+    "paper_id": "C04",
+    "doi": "10.1103/PhysRevD.111.076012",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.111.076012",
+    "status": "verified",
+    "title": [
+      "Shear and bulk viscous coefficients of a hot and chirally imbalanced quark matter using NJL model"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "111",
+    "issue": "7",
+    "article_number": "076012",
+    "published": {
+      "date-parts": [
+        [
+          2025,
+          4,
+          15
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2025,
+          4,
+          15
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:38.061667+00:00"
+  },
+  {
+    "paper_id": "C05",
+    "doi": "10.1103/PhysRevC.103.054901",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevC.103.054901",
+    "status": "verified",
+    "title": [
+      "Shear viscosity and electric conductivity of a hot and dense QGP with a chiral phase transition"
+    ],
+    "container_title": [
+      "Physical Review C"
+    ],
+    "volume": "103",
+    "issue": "5",
+    "article_number": "054901",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          5,
+          4
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2021,
+          5,
+          4
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:42.555191+00:00"
+  },
+  {
+    "paper_id": "C06",
+    "doi": "10.1103/PhysRevC.103.034904",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevC.103.034904",
+    "status": "verified",
+    "title": [
+      "Impact of different extended components of mean-field models on transport coefficients of quark matter and their causal aspects"
+    ],
+    "container_title": [
+      "Physical Review C"
+    ],
+    "volume": "103",
+    "issue": "3",
+    "article_number": "034904",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          3,
+          15
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2021,
+          3,
+          15
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:46.578417+00:00"
+  },
+  {
+    "paper_id": "C07",
+    "doi": "10.1103/PhysRevD.101.096006",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.101.096006",
+    "status": "verified",
+    "title": [
+      "Thermodynamic properties and transport coefficients of QCD matter within the nonextensive Polyakov–Nambu–Jona-Lasinio model"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "101",
+    "issue": "9",
+    "article_number": "096006",
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          5,
+          11
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2020,
+          5,
+          11
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:49.531633+00:00"
+  },
+  {
+    "paper_id": "C08",
+    "doi": "10.1103/PhysRevD.99.014004",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.99.014004",
+    "status": "verified",
+    "title": [
+      "Transport responses from rate of decay and scattering processes in the Nambu–Jona-Lasinio model"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "99",
+    "issue": "1",
+    "article_number": "014004",
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          1,
+          4
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2019,
+          1,
+          4
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:08:53.579468+00:00"
+  },
+  {
+    "paper_id": "A01",
+    "doi": "10.1103/rjkc-9gdc",
+    "url": "https://api.crossref.org/works/10.1103%2Frjkc-9gdc",
+    "status": "verified",
+    "title": [
+      "Studying the thermoelectric properties of an anisotropic QGP medium"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "113",
+    "issue": "7",
+    "article_number": "076004",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          4,
+          3
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2026,
+          4,
+          3
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:01.317248+00:00"
+  },
+  {
+    "paper_id": "A02",
+    "doi": "10.1103/phyn-xc87",
+    "url": "https://api.crossref.org/works/10.1103%2Fphyn-xc87",
+    "status": "verified",
+    "title": [
+      "Impact of anisotropy on the QCD phase structure and transport coefficients of quark matter"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "113",
+    "issue": "5",
+    "article_number": "054005",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          3
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          3
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:15.644143+00:00"
+  },
+  {
+    "paper_id": "A03",
+    "doi": "10.1103/PhysRevD.108.096016",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.108.096016",
+    "status": "verified",
+    "title": [
+      "Heavy quark radiation in an anisotropic hot QCD medium"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "108",
+    "issue": "9",
+    "article_number": "096016",
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          11,
+          16
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2023,
+          11,
+          16
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:29.030393+00:00"
+  },
+  {
+    "paper_id": "A04",
+    "doi": "10.1103/PhysRevC.105.054903",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevC.105.054903",
+    "status": "verified",
+    "title": [
+      "Drag of heavy quarks in an anisotropic QCD medium beyond the static limit"
+    ],
+    "container_title": [
+      "Physical Review C"
+    ],
+    "volume": "105",
+    "issue": "5",
+    "article_number": "054903",
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          5,
+          6
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2022,
+          5,
+          6
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:36.829841+00:00"
+  },
+  {
+    "paper_id": "A05",
+    "doi": "10.1103/PhysRevD.104.094037",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.104.094037",
+    "status": "verified",
+    "title": [
+      "Electromagnetic response of hot QCD medium in the presence of background time-varying fields"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "104",
+    "issue": "9",
+    "article_number": "094037",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          11,
+          29
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2021,
+          11,
+          29
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:43.207952+00:00"
+  },
+  {
+    "paper_id": "A06",
+    "doi": "10.1103/PhysRevD.103.094009",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.103.094009",
+    "status": "verified",
+    "title": [
+      "Heavy quark transport in an anisotropic hot QCD medium: Collisional and radiative processes"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "103",
+    "issue": "9",
+    "article_number": "094009",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          5,
+          12
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2021,
+          5,
+          12
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:45.766231+00:00"
+  },
+  {
+    "paper_id": "A07",
+    "doi": "10.1103/PhysRevD.103.074017",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.103.074017",
+    "status": "verified",
+    "title": [
+      "Response of a weakly magnetized hot QCD medium to an inhomogeneous electric field"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "103",
+    "issue": "7",
+    "article_number": "074017",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          4,
+          22
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2021,
+          4,
+          22
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:50.013064+00:00"
+  },
+  {
+    "paper_id": "A08",
+    "doi": "10.1103/PhysRevD.102.036011",
+    "url": "https://api.crossref.org/works/10.1103%2FPhysRevD.102.036011",
+    "status": "verified",
+    "title": [
+      "Momentum and its affiliated transport coefficients for hot QCD matter in a strong magnetic field"
+    ],
+    "container_title": [
+      "Physical Review D"
+    ],
+    "volume": "102",
+    "issue": "3",
+    "article_number": "036011",
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          8,
+          11
+        ]
+      ]
+    },
+    "published_online": {
+      "date-parts": [
+        [
+          2020,
+          8,
+          11
+        ]
+      ]
+    },
+    "type": "journal-article",
+    "retrieved_utc": "2026-10-05T11:09:53.768023+00:00"
+  }
+]

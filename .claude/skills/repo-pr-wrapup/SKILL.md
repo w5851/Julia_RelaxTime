@@ -1,6 +1,6 @@
 ---
 name: repo-pr-wrapup
-description: "Complete Julia_RelaxTime branch, selective staging, validation, commit, push, PR creation or PR update after implementation is ready. Use for repository wrap-up and merge preparation; unresolved GitHub review comments must first be handled by gh-address-comments or an equivalent review workflow."
+description: "收尾 Julia_RelaxTime 已完成的改动，包括范围核对、选择性暂存、验证、已获授权的提交与 PR 合并，以及合并后对应分支和隔离 worktree 的清理。"
 disable-model-invocation: true
 ---
 

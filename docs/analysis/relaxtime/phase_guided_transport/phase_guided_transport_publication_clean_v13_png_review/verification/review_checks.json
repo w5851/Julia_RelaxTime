@@ -1,0 +1,475 @@
+{
+  "schema": "publication_clean_v13_review_checks_v1",
+  "created_at": "2026-10-06T02:51:37.544554+00:00",
+  "status": "machine_checks_passed_assistant_preview_complete_author_acceptance_pending",
+  "author_acceptance": null,
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "pdf_generated": false,
+  "inputs": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_png_package",
+      "bytes": 253681,
+      "sha256": "0c2cb4e7b479d209021f8d422903a90e7bf2d62444f55f8d0a8a63d8a095a0ef"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/plot_manifest.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_plot_bundle",
+      "bytes": 1780823,
+      "sha256": "b68def4e0dd8f7706baa1691bb4f1cdbae7f693a5e1649835b9f6bc9c2e22574"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/verification/README.md",
+      "path_kind": "repository_relative",
+      "role": "review_report",
+      "bytes": 3427,
+      "sha256": "80a32893e8edb753cf356b54329ec3bfdc1030fee3d21de6178825352048cfbb"
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_png_review/verification/protected_prior_files.json",
+      "path_kind": "repository_relative",
+      "role": "pre_edit_protection_baseline",
+      "bytes": 141607,
+      "sha256": "1bfada1e80849092ece46f8d8eb4d2388d71dd6290005277d2ff6a8eabc28676"
+    }
+  ],
+  "protected_prior_files": {
+    "count": 643,
+    "changed": []
+  },
+  "visual_review": {
+    "reviewer": "Codex assistant",
+    "source_png_count": 14,
+    "viewing_scope": "760-pixel whole-figure previews for composites/detail; 540-pixel chart thumbnails in contact previews for selected singles; not physical-print certification",
+    "sources": [
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/composites/figure1_relaxation_times_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 732444,
+          "sha256": "a9cb36a652ba7f52530385a43ef73c5ba432320200f6241cc08a3a8e10464363",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              4260
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              7.100014200028401
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/composites/figure1_relaxation_times_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 324800,
+          "sha256": "540bebc6a2eeab32095322ff620f0dd58721b6664df4436f1af13788ecceb61f",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              4260
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              7.100014200028401
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "a9cb36a652ba7f52530385a43ef73c5ba432320200f6241cc08a3a8e10464363",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/composites/figure2_transport_coefficients_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 747606,
+          "sha256": "a3f6cb4642ea6ed68f152b96de1c24adc51381ecfcf55deb7a02c1134392ac1e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3540
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              5.9000118000236
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/composites/figure2_transport_coefficients_comparison.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 339597,
+          "sha256": "515f000df75e5eb2616e6ad5ee1ea24255fb5f8eb1be802917133e4c9e6eaa85",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3540
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              5.9000118000236
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "a3f6cb4642ea6ed68f152b96de1c24adc51381ecfcf55deb7a02c1134392ac1e",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/details/figure1_low_value_details.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 420740,
+          "sha256": "c104a0826e56cbf81e5eeeb2eeba4ab3d7f92b0a995e53d67830cf7724afd543",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3300
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              5.500011000022001
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/details/figure1_low_value_details.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 189275,
+          "sha256": "066a6b19eced0a12bc19bfc28595242d5d7cd950e42eede8af7f2de8b8315111",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3300
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              5.500011000022001
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "c104a0826e56cbf81e5eeeb2eeba4ab3d7f92b0a995e53d67830cf7724afd543",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "whole-figure preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 213622,
+          "sha256": "8ae569155229ec19405b2ad5b8216a61e3cb9c18688eabaab75f183399654d4a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 239044,
+          "sha256": "d4d2d30a437295ca8a2c2da941eabddd74d3d5a066ac32426c634cfddbe13471",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 194645,
+          "sha256": "f1df13d00b8af03100e23b449eeef2fea6d1adcafce8a6c226aafa0ca291da12",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 304562,
+          "sha256": "f7847ca598f0c501c3af7d577e7727e59bc88260a90bfa2270b07aa3e6eb0e55",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "color_review"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 94851,
+          "sha256": "8837ba51d7fdac745be9ebe7eb1c61fc7a09cb8a5b8a7fac18f30a7a13e51152",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "8ae569155229ec19405b2ad5b8216a61e3cb9c18688eabaab75f183399654d4a",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 108733,
+          "sha256": "8245fc357b84bcc6748e0076aaf25e0d52a46227ee2377d8293a1aff2ca88013",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "d4d2d30a437295ca8a2c2da941eabddd74d3d5a066ac32426c634cfddbe13471",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 86769,
+          "sha256": "0b31060b1a28f45ecead87ab3862535f0c39989c841e5034bd0c209cef0ab0fe",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "f1df13d00b8af03100e23b449eeef2fea6d1adcafce8a6c226aafa0ca291da12",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "four-chart contact preview"
+      },
+      {
+        "record": {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 132961,
+          "sha256": "face24c8e64e2a3669bce6359f8325012c4019ba3e9ad2c4418d58dae0e2f23c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              2760
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              4.6000092000184
+            ]
+          },
+          "role": "grayscale_review",
+          "source_color_sha256": "f7847ca598f0c501c3af7d577e7727e59bc88260a90bfa2270b07aa3e6eb0e55",
+          "conversion": "Pillow RGB to L; 0.299 R + 0.587 G + 0.114 B"
+        },
+        "scope": "four-chart contact preview"
+      }
+    ],
+    "not_claimed": [
+      "author acceptance",
+      "physical print legibility",
+      "complete manuscript page assembly",
+      "visual review of every single-chart PNG"
+    ]
+  },
+  "python_checks": [
+    {
+      "suite": "test_plotting_quality.py + test_plot_provenance.py",
+      "passed": 58
+    },
+    {
+      "suite": "test_plotting_contract.py + test_plot_bundle.py",
+      "passed": 16
+    },
+    {
+      "suite": "test_phase_guided_publication_clean_v13.py: geometry/semantics + artifact + overwrite protection",
+      "passed": 6
+    },
+    {
+      "suite": "test_phase_guided_publication_clean_v12.py: artifact bundle",
+      "passed": 1
+    }
+  ],
+  "governance_checks": {
+    "check_docs_consistency.jl": "passed",
+    "check_sop_governance.jl": "passed",
+    "check_script_entrypoints.jl": "passed",
+    "sync_claude_skills.jl --check": "passed",
+    "formalize_phase_guided_publication_clean_v11_stage.py --check": "passed"
+  }
+}

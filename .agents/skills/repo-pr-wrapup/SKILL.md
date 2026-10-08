@@ -1,63 +1,39 @@
 ---
 name: repo-pr-wrapup
-description: Complete Julia_RelaxTime branch, selective staging, validation, commit, push, PR creation or PR update after implementation is ready. Use for repository wrap-up and merge preparation; unresolved GitHub review comments must first be handled by gh-address-comments or an equivalent review workflow.
+description: 收尾 Julia_RelaxTime 已完成的改动，包括范围核对、选择性暂存、验证、已获授权的提交与 PR 合并，以及合并后对应分支和隔离 worktree 的清理。
 ---
 
-# Repository PR Wrap-up
+# 仓库提交与 PR 收尾
 
-## Core rules
+按用户已授权的阶段推进；准备、发布、合并和清理各自对应实际请求，已有完整收尾授权时不逐步重复询问。验证规则沿用 `AGENTS.md` 和[命令参考](../../../docs/dev/agent_command_reference.md)。
 
-1. Determine whether the target is an existing PR or a new PR.
-2. If unresolved review comments require code changes, hand off to `gh-address-comments` before wrap-up.
-3. Use `codex/{topic}` only when a task branch is needed and the user did not specify another name.
-4. Inspect `git status --short` and stage only files belonging to the requested scope.
-5. Read `git log -10 --oneline` and match an existing commit prefix and recent category style.
-6. Run tests and governance checks proportional to changed behavior.
-7. Treat the PR title as the intended squash-merge subject.
-8. Check active-document completion and archive obligations when `docs/dev/active/` is in scope.
+## 范围与验证
 
-## Workflow
+- 核对分支、HEAD、worktree、暂存区和目标 PR；区分本轮改动与既有脏文件、生成产物。
+- 存在未解决的 review 意见时，使用用户级 `pr-workflow` 的评论处理部分；该技能不可用时用 `gh` 获取目标 PR 的评论并按已授权范围处理。单独修复评论不自动进入发布、合并或清理。
+- 只在需要新任务分支时使用 `codex/<topic>`，遵循用户指定的分支名。
+- 按明确文件或逻辑块暂存，检查暂存差异；根据实际行为变化选择验证，记录当前改动的结果与限制。
+- 涉及 `docs/dev/active/` 时核对任务是否完整完成；满足归档条件才调用 `doc-archive`。
 
-### Inspect state
+## 提交与 PR
 
-- Check the branch, worktree, staged diff, open PR, and unresolved reviews.
-- Preserve unrelated user changes and generated artifacts outside scope.
-- Route review-comment implementation before continuing wrap-up.
+提交标题使用与暂存范围一致的简短单行说明；前缀沿用仓库惯例。更新已有 PR，避免重复创建。
 
-### Select and validate
+PR 标题描述最终改动；正文先说明具体问题和改变后的行为，再提供审阅所需的实现、验证与剩余限制。篇幅随复杂度调整，已有仓库模板优先。多行正文通过结构化参数或正文文件传入。
 
-- Stage explicit files or tightly scoped path groups; do not default to `git add -A`.
-- Review `git diff --cached --stat` and the cached diff.
-- Choose focused unit, integration, regression, validation, and governance checks.
-- Record skipped checks and risk; never loosen numerical tolerances to pass.
+本项目默认使用 **squash merge**。执行合并前核实仓库允许的合并方式、目标分支生效规则、PR 当前 head 和必要检查；默认选择不代表远端只启用了这一种方式。已获授权时使用 squash 合并，随后确认 GitHub 的实际合并状态与 merge commit。
 
-### Match history
+## 合并后清理
 
-- Sample the latest ten commits.
-- Prefer the nearest existing prefix for the same change category.
-- Use repository fallback prefixes only when history is genuinely inconclusive.
-- Keep the subject concise, intent-driven, and single-line.
+清理范围限定为该 PR 对应且已获授权的本地分支、远程分支和隔离 worktree。创建 PR 或关闭未合并 PR 本身不构成清理依据；放弃未合并工作需要相应授权。
 
-### Prepare the PR
+1. 记录 PR、base/head 仓库与分支、合并时的 PR head SHA 和 merge commit，并列出对应 worktree 的绝对路径。核对本地与远端当前分支是否有未纳入该 PR 的新增或分叉提交。
+2. squash 会生成新的提交，原分支通常不会出现在 `git branch --merged` 中。以 GitHub 已合并记录及提交对应关系确认工作已纳入，不能只依赖祖先关系或与最新主干的文件差异。
+3. 检查目标 worktree 的暂存、未暂存、未跟踪及被忽略文件，特别是科研输出；确认需要保留的内容已有可验证去向。主工作区、其他活跃任务占用的 checkout 和未处理的新工作不纳入自动回收。
+4. 先离开待回收目录并解除 worktree 占用，再删除对应本地分支。Codex 管理的 worktree 优先使用应用归档工具；普通 Git worktree 使用 Git 移除机制。不要直接递归删除 checkout 代替这些操作。
+5. 若本地 `git branch -d` 仅因 squash 的祖先关系拒绝删除，只有前述合并及无新增工作检查通过后才使用 `-D`。删除远程分支前重新核对精确仓库、ref 和 tip；已自动删除的远程分支视为完成。
+6. 核验 worktree 列表、本地 refs 和远端 refs；不要为清理而重置脏主工作区。仍需保留或无法回收的目录，给出准确路径和原因。
 
-Use a merge-ready title and keep these body sections:
+## 交付
 
-1. `变更范围`
-2. `用户影响`
-3. `实现方式`
-4. `验证项`
-5. `已知非目标`
-
-Update an existing PR instead of creating a duplicate.
-
-### Active documents
-
-- Archive a completed task through `doc-archive` when appropriate.
-- Keep unfinished documents active and align status with evidence.
-- Never mark unverified work complete.
-
-## Final report
-
-Report the branch, staged scope, commit subject and style evidence, validation results, PR title/body summary, active-document decision, and the exact step reached if commit, push, or PR creation was not executed.
-
-Do not commit, push, or create a PR when the user requested review or preparation only.
+简述改动、验证和实际完成的 Git 阶段，附 PR 链接；执行清理时列明已回收的分支/worktree，以及保留项的路径与原因。

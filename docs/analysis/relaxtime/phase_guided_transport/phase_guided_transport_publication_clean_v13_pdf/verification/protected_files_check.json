@@ -1,0 +1,21 @@
+{
+  "schema": "v13_protected_artifacts_check_v1",
+  "checked_at_utc": "2026-10-06T11:24:10.073440+00:00",
+  "baseline": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v13_pdf/verification/protected_sha256_before.json",
+    "path_kind": "repository_relative",
+    "role": "before_task_sha256_inventory",
+    "bytes": 178379,
+    "sha256": "3369260397faa80f2855ca8980891243f5741f764ca382841c2383ba5753fa12"
+  },
+  "checked_file_count": 802,
+  "unchanged_count": 802,
+  "mismatches": [],
+  "current_pointer": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json",
+    "path_kind": "repository_relative",
+    "role": "unchanged_current_v5_pointer",
+    "bytes": 1968,
+    "sha256": "1f2386c9b1ee25932e716f616f12e48e7e843a5b9542fa0fdc0c364758992ac8"
+  }
+}

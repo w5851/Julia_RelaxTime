@@ -95,7 +95,7 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
 ## 示例
 
 ```julia
-include("src/models/workflows/TransportWorkflow.jl")
+include("src/models/workflow_apps/TransportWorkflow.jl")
 using .TransportWorkflow
 
 T = 0.15

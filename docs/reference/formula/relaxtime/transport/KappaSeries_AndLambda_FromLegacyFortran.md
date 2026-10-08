@@ -264,7 +264,7 @@ $$
 
 Das 2022 本身聚焦扩散矩阵，没有直接把 $\lambda$ 作为主结果展开，因此 $\lambda$ 当前仍主要依赖 legacy 关系式作为工程实现锚点。
 
-不过，结合 [docs/reference/DAS_kappa_formula_temp.md](docs/reference/DAS_kappa_formula_temp.md) 中整理的说明，可以把这条关系的框架语义再说清楚：
+以下为项目对这一 legacy 关系的框架解释：
 
 - Das 2022 处理的是 Landau-Lifshitz 框架下的守恒荷扩散矩阵，而不是独立热流方程
 - 在这一框架下，热流与重子扩散流并不是完全独立的 dissipative 自由度
@@ -427,7 +427,7 @@ $$
 
 静态涨落请见：
 
-- [docs/reference/formula/models/pnjl/守恒荷广义磁化率与累积量.md](docs/reference/formula/models/pnjl/守恒荷广义磁化率与累积量.md)
+- [docs/reference/formula/models/pnjl/守恒荷广义磁化率与累积量.md](../../models/pnjl/%E5%AE%88%E6%81%92%E8%8D%B7%E5%B9%BF%E4%B9%89%E7%A3%81%E5%8C%96%E7%8E%87%E4%B8%8E%E7%B4%AF%E7%A7%AF%E9%87%8F.md)
 
 ---
 

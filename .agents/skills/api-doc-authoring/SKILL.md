@@ -1,65 +1,50 @@
 ---
 name: api-doc-authoring
-description: "Author or restructure Julia_RelaxTime public API documentation under docs/api using three views: user entrypoints, responsibility core, and an automatically generated complete export index. Use for stable public APIs and export coverage; do not use for general design documents, paper prose, or implementation-task execution."
+description: 编写或重组 Julia_RelaxTime 计算 API、稳定脚本及前后端数据契约文档，说明计算路线、字段与单位、实际错误语义和完整示例，并维护相关导出索引。
 ---
 
-# API Documentation Authoring
+# 计算工作流与 API 文档
 
-## Core contract
+围绕目标计算任务说明已有 API 的实际契约；发现接口设计缺口时提出具体建议，不由文档任务自动改变公开接口。
 
-- Organize documentation by user need, not source-file order.
-- Put stable façades and complete workflows before internal numerical helpers.
-- Maintain user entrypoints and responsibility-core explanations manually.
-- Generate the complete export index with `scripts/dev/generate_api_export_index.jl`; never maintain it by hand.
-- Update `docs/api/` whenever a stable public entrypoint changes.
-- Preserve units, stability labels, compatibility notes, and repository terminology.
+## 选择本次文档范围
 
-## Evidence sources
+| 任务 | 阅读与验证范围 |
+| --- | --- |
+| 局部接口或字段修订 | 受影响接口、直接调用处和现有契约；不追溯无关 helper 或重组整个主题 |
+| 新增计算示例 | 示例涉及的输入准备、调用和结果消费，运行最小必要案例 |
+| 主题重组或迁移 | 主题覆盖、推荐入口、导航及适用的导出索引，按需读取分类约定 |
 
-Inspect the target export surface and its authoritative callers before drafting:
+## 从计算问题组织内容
 
-- `src/models/Models.jl` and `src/models/entrypoints.jl`;
-- target module `export` lists and aggregation modules;
-- `README.md`, existing `docs/api/`, guides, scripts, HTTP routes, and tests.
+1. 从目标观测量或用户任务确定输入准备、核心计算和结果消费的路线；小主题只展开相关阶段并链接上下游。
+2. 从 `src/models/Models.jl`、`src/models/entrypoints.jl`、稳定脚本及对应测试确认推荐入口，说明完整工作流与直接调用 helper 各适合什么需要。
+3. 对需要解释的 helper，说明它解决哪一步问题、输入由谁产生、输出交给谁，以及与相邻接口的选择关系；必要的公式和适用条件链接到权威公式文档。
+4. 提供能完成目标任务的最小示例。参数对象在示例中构造，或明确衔接准备示例；再按下述契约补齐接口参考。
+5. 文档涉及 Julia 公开符号时，最后核对目标模块及聚合模块的 export 以发现遗漏；导出清单负责覆盖率，不决定正文顺序。仅说明 HTTP 或脚本数据契约时核对相应路由或参数解析，不扩展为整个计算库的文档重组。
 
-Treat an exported symbol as a public candidate, not automatically as a recommended user entrypoint.
+## 精确接口参考
 
-## Workflow
+按目标接口的实际行为说明：
 
-1. Build a deduplicated export inventory from the target module and its aggregators.
-2. Identify stable user entrypoints from the unified façade, README, scripts, server routes, and existing API docs.
-3. Identify responsibility-core material: algorithms, criteria, data flow, and module boundaries needed by maintainers.
-4. Choose a single-page layout for small topics or a topic directory for larger surfaces.
-5. Draft the user view with positioning, units, input contract, stability, and the shortest runnable example.
-6. Draft the responsibility-core view without copying implementation files in source order.
-7. Run the export-index generator and treat its output as the completeness baseline.
-8. Mark exported-but-discouraged or experimental symbols explicitly instead of omitting them.
-9. Verify links, symbol coverage, terminology, units, and migration notes.
+- 推荐方法的完整签名、位置/关键字参数、类型、必填性、默认值、单位和值域；Julia 多重派发中有使用语义差异的方法分别解释，共享参数类型链接到统一说明。
+- 返回类型、字段或元组顺序、数组维度与坐标对应、单位，以及缺失值或部分结果的表示。
+- 参数错误、求解失败等情况下的异常或返回状态；存在输入修改、缓存复用条件或其他可观察副作用时明确说明。
+- 稳定性、适用条件和必要的兼容说明；核对代码、测试与现有文档的差异，不把建议行为写成已实现的契约。
 
-## Classification heuristics
+涉及前端消费、HTTP 请求/响应或脚本结果对接时，读取[前后端契约检查](references/frontend-contract.md)。目录与服务职责由[API 导航](../../../docs/api/README.md)维护；不要将计算函数的存在写成 HTTP 服务已可用。
 
-A symbol is likely a user entrypoint when it is re-exported by a top-level aggregator, documented in quickstarts, called by stable scripts or HTTP routes, and completes a workflow rather than a local calculation.
+## 文档组织
 
-A topic belongs in the responsibility core when it implements a key physical/numerical criterion, controls branching or data flow, or is reused by multiple public workflows.
+任务指南侧重入口选择和完整算例；函数参考侧重精确契约；职责核心按计算阶段解释物理/数值判据与数据转换，调用关系作为辅助。各页按读者需要选择内容，相互链接，不要求每页重复完整工作流。
 
-When confidence is low, use the conservative default: promote only entrypoints explicitly recommended by the unified façade or README; place the rest in the generated export index until evidence supports a stronger classification.
+完整导出索引由 `scripts/dev/generate_api_export_index.jl` 自动生成，不手工维护。它收录符号及人工文档关联，不能替代接口参考；推荐、内部或实验性质在人工文档中说明。
 
-## Output structure
+正文优先解释当前用法。详细兼容别名、迁移计划和历史提交说明放在后部或链接页。涉及 Models 主题重组、旧页迁移、模型变体或输运归属时，读取 [Models 分类约定](references/models-taxonomy.md)。
 
-Include:
+## 验收
 
-- module purpose and stability;
-- units, inputs, outputs, and dependencies;
-- recommended user entrypoints and examples;
-- responsibility-core concepts and boundaries;
-- generated complete export index;
-- compatibility and migration notes.
-
-For `Models` topic reorganization, old PNJL/relaxtime page migration, magnetic variants, derived quantities, or transport placement, read [references/models-taxonomy.md](references/models-taxonomy.md).
-
-## Validation
-
-- Run `scripts/dev/generate_api_export_index.jl` for the target surface.
-- Run `scripts/dev/check_docs_consistency.jl` and relevant entry-contract checks.
-- Confirm the generated index contains every export and records whether human-authored docs mention it.
-- Confirm examples use current `Models` entrypoints rather than removed implementation paths.
+- 从示例起点走到目标结果，确认准备步骤、入口选择和输出消费连贯；复用已验证示例，新增或改变的示例做最小本地执行验证。
+- 抽查关键 helper，确认读者能回答何时需要它、输入来自哪里、输出如何使用。
+- 按“精确接口参考”核对本次变化；导出索引中的字符串提及只用于发现遗漏，不作为语义正确的证据。
+- 使用当前推荐入口；Julia 导出范围变化时生成索引并检查人工说明关联，HTTP/脚本契约按受影响的路由或入口检查。运行 `scripts/dev/check_docs_consistency.jl`；纯文字小改只做相应检查，不要求启动服务或运行无关数值计算。

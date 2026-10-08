@@ -1,6 +1,6 @@
 # 测试组织与入口规范（Julia_RelaxTime）
 
-更新时间：2026-03-09
+更新时间：2026-10-04
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
 - 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
@@ -20,7 +20,7 @@
 | Integration | `tests/integration/` | 跨模块端到端正确性 | smoke / nightly |
 | Regression | `tests/regression/` | 内部 baseline 数值回归，对比仓库内 CSV 基线 | smoke / full |
 | Validation | `tests/validation/` | 外部参考值验证（Fortran / Mathematica / 文献） | nightly / milestone |
-| Benchmark | `benchmark/` | PkgBenchmark 性能基准，独立 `Project.toml` | on-demand |
+| Benchmark | `benchmark/` | 性能比较与隔离的可选 oracle 环境 | PNJL 每周/相关变更/手动；其他按需 |
 | 分析脚本 | `scripts/analysis/` | 一次性分析/诊断/扫描脚本（非测试入口） | — |
 | 性能脚本 | `scripts/perf/` | Profile/timing 探针脚本（非测试入口） | — |
 | 交互脚本 | `scripts/` | 调试/可视化/开发辅助脚本 | — |
@@ -34,9 +34,9 @@
 ## 五层分类标准
 
 ### Unit（单元测试）
-准入条件——必须全部满足：
+选择原则：
 1. **确定性**：固定随机种子；结果不依赖运行时机/线程调度/浮点噪声放大。
-2. **快速**：默认配置下单文件 < 1–2s，整套 smoke < 1min。
+2. **快速**：smoke 以热缓存下约 1 min 为目标；初始化和机器差异单独记录，不把单文件 1–2 s 当准入门槛。
 3. **无外部依赖**：不依赖网络、不依赖大数据文件、不依赖用户本地环境（除 `--project=.` 之外）。
 4. **不混杂**：不把脚本、性能探针、交互诊断代码放进 `tests/unit`。
 
@@ -49,7 +49,7 @@
 - 入口统一为 `tests/regression/runtests.jl`。
 - smoke 运行小规模固定点；full 运行更大覆盖面或 nightly 基线。
 - 导出脚本保留在 `scripts/dev/`，但门禁逻辑必须落到 `@testset`。
-- 若默认 solver 策略、AD 路径或核心数值内核发生变更，必须通过对应 `scripts/dev/export_*_baseline.jl` 重生受影响基线，并在提交说明中交代原因与验证命令。
+- 默认 solver 策略、AD 路径或数值内核变化时，先对旧基线运行受影响回归并解释差异；只有预期数值承诺改变时才通过对应 export 脚本更新基线。算法升级或内部重构本身不要求重生 baseline。
 
 ### Validation（验证测试）
 - Fortran / Mathematica 参考值对照。
@@ -59,8 +59,9 @@
 
 ### Benchmark（性能基准）
 - 使用 `BenchmarkTools.jl` / `PkgBenchmark.jl`。
-- 独立 `benchmark/Project.toml`，不污染主项目依赖。
+- 可选比较 oracle 与额外 benchmark 依赖放入独立 `benchmark/Project.toml`；环境叠加方式见命令参考。
 - 入口：`benchmark/benchmarks.jl`（PkgBenchmark 标准布局）。
+- 现有 PNJL 单点/扫描 benchmark 使用根环境已有的 BenchmarkTools；定时观测、环境记录、比较口径和历史 artifact 入口见 [benchmark 趋势观测](../guides/benchmark_trends.md)。相对波动仅作预警，不代替数值回归。
 
 ## 子系统分目录
 
@@ -87,13 +88,14 @@
 
 运行档：
 - `UNIT_PROFILE=smoke`（默认）：精选、稳定、确定性的测试集合，长期保持绿色。
+- `UNIT_PROFILE=core`：CI 与合并前的较广行为覆盖；与 smoke 的职责不同。
 - `UNIT_PROFILE=full`：更大范围 include，逐步修复；允许短期不全绿。
 
 环境变量（以入口实现为准）：
-- `UNIT_PROFILE=smoke|full`
+- `UNIT_PROFILE=smoke|core|full`
 - `UNIT_INCLUDE_PERF=1`：full 下允许 include performance 相关测试（默认关闭）。
-- `UNIT_INCLUDE_SLOW=1`：允许 include 标记为 slow 的测试。
-- `UNIT_INCLUDE_WIP=1`：允许 include 标记为 WIP 的测试。
+- `UNIT_INCLUDE_WIP=1`：允许 include `DEFAULT_SKIP` 中的迁移测试。
+- `UNIT_FILES=path1,path2,...`：仅运行指定单元测试文件。
 - `UNIT_FILES=path1,path2,...`：仅运行指定文件。
 
 ## 回归测试入口策略
@@ -101,7 +103,7 @@
 入口文件：`tests/regression/runtests.jl`
 
 环境变量（以入口实现为准）：
-- `REGRESSION_PROFILE=smoke|full`
+- `REGRESSION_PROFILE=smoke|core|full`
 - `REGRESSION_FILES=path1,path2,...`：仅运行指定回归文件
 - `REGRESSION_MAGNETIC_SCOPE=smoke|nightly`：切换 PNJL magnetic baseline 口径
 
@@ -140,7 +142,16 @@
 - 触发后动作：
   - 在 `runtests.jl` 分组注释中说明迁移原因；
   - 在 `docs/dev/active` 记录回归影响；
-  - 补一条替代 smoke 维持覆盖。
+  - 只有迁出后留下重要行为覆盖缺口时才补替代 smoke，不按迁出文件数量新增测试。
+
+## 测试价值与触发范围
+
+- 测试应捕获实际行为错误：公式/极限、单位、分支、稳定接口、失败语义或数值漂移。
+- 不按源码文件 1:1 配置测试；不固定当前任务、分支、SHA 或内部调用措辞。
+- 架构禁用规则使用静态检查；源码中出现函数名或字符串不构成该行为已执行的证明。
+- 文档或任务治理的 fixture 测试由对应 CI 维护，不重复纳入 unit core；full 仍可覆盖这些测试。
+- 每次生成新数据/图件只验证该次输入与产物；公共框架测试随公共代码变化触发。
+- 纯文档修改检查受影响链接和契约即可；不要求 numerical regression。数值语义变化按受影响的 unit/integration/regression/validation 层验证。
 
 ### 慢 CLI smoke 的替代策略
 

@@ -83,4 +83,4 @@ julia --project=. scripts/pnjl/diagnose_pm_phase.jl --T_values=130.9 --mu_start=
 
 ## 导出 API 全集
 
-完整导出索引见 [generated/PMPhaseDiagnosticExports.md](docs/api/models/phase/generated/PMPhaseDiagnosticExports.md)。
+完整导出索引见 [generated/PMPhaseDiagnosticExports.md](generated/PMPhaseDiagnosticExports.md)。

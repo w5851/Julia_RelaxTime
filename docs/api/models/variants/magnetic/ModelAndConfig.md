@@ -4,7 +4,7 @@
 
 ## `PNJLMagneticModel`
 
-定义位于 [src/models/pnjl_physics/PNJLMagneticModel.jl](../../../../src/models/pnjl_physics/PNJLMagneticModel.jl#L1)。
+定义位于 [src/models/pnjl_physics/PNJLMagneticModel.jl](../../../../../src/models/pnjl_physics/PNJLMagneticModel.jl#L1)。
 
 结构：
 
@@ -18,7 +18,7 @@
 
 ## `MagneticIMCParams`
 
-定义位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L45)。
+定义位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L45)。
 
 字段：
 
@@ -34,7 +34,7 @@
 
 ## `MagneticConfig`
 
-定义位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L53)。
+定义位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L53)。
 
 关键字段：
 
@@ -91,7 +91,7 @@ primary/fallback residual、Jacobian、收敛后复核和分支候选中复用�
 `finite_difference_step` 只属于可选 Hessian 稳定性诊断的外层差分，不再参与
 stationarity residual 或 NLsolve Jacobian。五维状态、branch candidate 和
 “Hessian 不是默认生产筛选条件”的合同保持不变。稳态诊断入口见
-[`scripts/perf/pnjl/magnetic_autodiff_probe.jl`](../../../../scripts/perf/pnjl/magnetic_autodiff_probe.jl)。
+[`scripts/perf/pnjl/magnetic_autodiff_probe.jl`](../../../../../scripts/perf/pnjl/magnetic_autodiff_probe.jl)。
 
 磁场模型的 `model_capabilities(model).supports_number_densities` 恒为 `false`：通用
 模型接口要求独立的 `quark`/`antiquark` 密度，而磁场适配器只提供
@@ -99,7 +99,7 @@ stationarity residual 或 NLsolve Jacobian。五维状态、branch candidate 和
 
 ## 配置模板
 
-推荐配置模板： [config/models/pnjl/magnetic_default.toml](../../../../config/models/pnjl/magnetic_default.toml)
+推荐配置模板： [config/models/pnjl/magnetic_default.toml](../../../../../config/models/pnjl/magnetic_default.toml)
 
 关键段落：
 

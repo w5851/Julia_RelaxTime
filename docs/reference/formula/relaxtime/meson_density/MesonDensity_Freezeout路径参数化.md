@@ -6,7 +6,7 @@
 
 - [MesonDensity_稳定粒子与KPi比值.md](./MesonDensity_%E7%A8%B3%E5%AE%9A%E7%B2%92%E5%AD%90%E4%B8%8EKPi%E6%AF%94%E5%80%BC.md)
 - [MesonDensity_BU相移公式.md](./MesonDensity_BU%E7%9B%B8%E7%A7%BB%E5%85%AC%E5%BC%8F.md)
-- [2026-05-03_charged_freezeout_validation最小契约设计.md](../../../../dev/active/2026-05-03_charged_freezeout_validation%E6%9C%80%E5%B0%8F%E5%A5%91%E7%BA%A6%E8%AE%BE%E8%AE%A1.md)
+- [2026-05-03_charged_freezeout_validation最小契约设计.md](../../../../dev/archived/2026-05-03_charged_freezeout_validation%E6%9C%80%E5%B0%8F%E5%A5%91%E7%BA%A6%E8%AE%BE%E8%AE%A1.md)
 
 ## 1. 结论先行
 

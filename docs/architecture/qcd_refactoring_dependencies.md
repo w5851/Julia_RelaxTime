@@ -11,7 +11,7 @@
 
 ## 2026-02-20 迁移状态补充（执行对齐）
 
-- 已明确边界：`src/models/*` 作为模型层，`src/models/scans/*`、`src/models/workflows/*`、`src/simulation/*` 作为流程层。
+- 已明确边界：`src/models/*` 作为模型层，`src/models/scans/*`、`src/models/workflow_apps/*`、`src/simulation/*` 作为流程层。
 - `src/models/pnjl/` 已删除，相关实现已迁移至 `src/models/pnjl_physics/` 与 `src/models/{solver,scans,workflows,derivatives}`。
 - 已保留双后端策略（`:legacy | :models`）作为回归与回退手段。
 - 后续删除 legacy 实体文件前，先完成“裁剪候选清单 + 定向回归 + smoke 全绿”的门槛校验。
@@ -75,7 +75,7 @@ src/models/scans/
 ├── TrhoScan.jl           # 更新为使用model实例
 └── DualBranchScan.jl     # 更新为使用model实例
 
-src/models/workflows/
+src/models/workflow_apps/
 ├── MesonMassWorkflow.jl  # 更新为使用model实例
 └── TransportWorkflow.jl  # 更新为使用model实例
 ```
@@ -113,8 +113,8 @@ U = calculate_U(T, Φ, Φbar)
 - `src/models/scans/TrhoScan.jl` - T-ρ扫描
 - `src/models/scans/DualBranchScan.jl` - 双分支扫描
 - `src/models/derivatives/ThermoDerivatives.jl` - 热力学导数
-- `src/models/workflows/MesonMassWorkflow.jl` - 介子质量工作流
-- `src/models/workflows/TransportWorkflow.jl` - 输运工作流
+- `src/models/workflow_apps/MesonMassWorkflow.jl` - 介子质量工作流
+- `src/models/workflow_apps/TransportWorkflow.jl` - 输运工作流
 
 **迁移策略**：
 1. 阶段1：添加兼容层，保持旧调用方式工作
@@ -327,7 +327,7 @@ graph TD
 #### 阶段4：扫描器和工作流更新（3-4天）
 **开发内容**：
 - 更新`src/models/scans/`
-- 更新`src/models/workflows/`
+- 更新`src/models/workflow_apps/`
 - 更新脚本文件
 - 集成测试
 

@@ -47,7 +47,7 @@ SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历�
 
 ## 新增或修改 SOP
 
-1. 从 [_template.md](_template.md) 开始。
+1. 参考 [_template.md](_template.md)，按工作流需要组织章节，不要求固定标题逐项占位。
 2. 在 `config/governance/docs_authority_map.toml` 登记唯一 ID 和 `authoritative_for`。
 3. 确认稳定脚本已进入 [脚本白名单](../scripts/README.md)。
 4. 运行：
@@ -57,6 +57,8 @@ julia --project=. scripts/dev/check_sop_governance.jl
 ```
 
 5. 实际执行登记的最小验证命令，再更新 `last_verified`。
+
+固定章节和复核超期只产生建议；不存在的入口/配置、权威范围冲突和误导性旧路径仍是错误。修改 checker 或其测试时才运行对应 fixture 测试，普通 SOP 内容更新只运行适用的文档与引用检查。
 
 ## 边界
 

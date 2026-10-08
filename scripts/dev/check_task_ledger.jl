@@ -444,11 +444,30 @@ function preflight_report(
     root::AbstractString=ROOT;
     ledger_rel::AbstractString=DEFAULT_LEDGER_REL,
     track_id=nothing,
+    full_paths::Bool=false,
     io::IO=stdout,
     git_output=_git_output,
 )
     root = normpath(abspath(String(root)))
     violations = validate_ledger(root; ledger_rel=ledger_rel)
+    branch = git_output(root, "branch", "--show-current")
+    head = git_output(root, "rev-parse", "HEAD")
+    porcelain = git_output(root, "status", "--porcelain=v1")
+    summary = summarize_porcelain(porcelain)
+    println(io, "[task-ledger-preflight]")
+    println(io, "  branch=$(branch)")
+    println(io, "  head=$(head)")
+    println(io, "  dirty=$(summary.dirty) tracked=$(summary.tracked) untracked=$(summary.untracked)")
+    if summary.dirty
+        println(io, "  ATTENTION: preserve these paths before changing track state:")
+        shown_paths = full_paths ? summary.paths : first(summary.paths, min(10, length(summary.paths)))
+        for path in shown_paths
+            println(io, "    - $(path)")
+        end
+        if length(shown_paths) < length(summary.paths)
+            println(io, "    ... $(length(summary.paths) - length(shown_paths)) more; use --full-paths or git status --short")
+        end
+    end
     isempty(violations) || return violations
     parsed = TOML.parsefile(isabspath(ledger_rel) ? String(ledger_rel) : joinpath(root, ledger_rel))
     primary_track = String(parsed["primary_track"])
@@ -457,26 +476,22 @@ function preflight_report(
     selected_index = findfirst(table -> String(get(table, "id", "")) == selected, tracks)
     selected_index === nothing && return ["preflight track not found: $(selected)"]
     selected_table = tracks[selected_index]
-    branch = git_output(root, "branch", "--show-current")
-    head = git_output(root, "rev-parse", "HEAD")
-    porcelain = git_output(root, "status", "--porcelain=v1")
-    summary = summarize_porcelain(porcelain)
-    selected_status = String(get(selected_table, "status", ""))
     selected_task = String(get(selected_table, "current_task", ""))
-    println(io, "[task-ledger-preflight] track=$(selected)")
+    items = get(parsed, "items", Any[])
+    item_index = findfirst(table -> get(table, "id", "") == selected_task, items)
+    item = item_index === nothing ? Dict{String,Any}() : items[item_index]
     println(io, "  primary_track=$(primary_track)")
     println(io, "  selected_track=$(selected)")
-    println(io, "  status=$(selected_status)")
+    println(io, "  status=$(get(selected_table, "status", ""))")
     println(io, "  current_task=$(selected_task)")
-    println(io, "  branch=$(branch)")
-    println(io, "  head=$(head)")
-    println(io, "  dirty=$(summary.dirty) tracked=$(summary.tracked) untracked=$(summary.untracked)")
-    if summary.dirty
-        println(io, "  ATTENTION: preserve these paths before changing track state:")
-        for path in summary.paths
-            println(io, "    - $(path)")
-        end
+    println(io, "  task_file=$(get(item, "task_file", ""))")
+    for (label, table) in (("track", selected_table), ("item", item))
+        println(io, "  $(label)_blocked_by=$(join(get(table, "blocked_by", String[]), ", "))")
+        println(io, "  $(label)_next_action=$(get(table, "next_action", ""))")
     end
+    evidence = unique(vcat(get(selected_table, "evidence", String[]), get(item, "evidence", String[])))
+    println(io, "  evidence_total=$(length(evidence)); last up to 5 entries (full list in ledger):")
+    foreach(ref -> println(io, "    - ", ref), last(evidence, min(5, length(evidence))))
     return String[]
 end
 
@@ -493,6 +508,7 @@ end
 function _parse_args(args)
     ledger_rel = DEFAULT_LEDGER_REL
     preflight = false
+    full_paths = false
     track_id = nothing
     i = 1
     while i <= length(args)
@@ -505,6 +521,8 @@ function _parse_args(args)
             ledger_rel = split(arg, '='; limit=2)[2]
         elseif arg == "--preflight"
             preflight = true
+        elseif arg == "--full-paths"
+            full_paths = true
         elseif arg == "--track"
             i == length(args) && error("--track requires an id")
             i += 1
@@ -512,25 +530,27 @@ function _parse_args(args)
         elseif startswith(arg, "--track=")
             track_id = split(arg, '='; limit=2)[2]
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/dev/check_task_ledger.jl [--ledger PATH] [--preflight] [--track ID]")
+            println("Usage: julia --project=. scripts/dev/check_task_ledger.jl [--ledger PATH] [--preflight [--full-paths]] [--track ID]")
             return nothing
         else
             error("unknown option: $(arg)")
         end
         i += 1
     end
-    return (; ledger_rel, preflight, track_id)
+    full_paths && !preflight && error("--full-paths requires --preflight")
+    return (; ledger_rel, preflight, track_id, full_paths)
 end
 
-function main(args::Vector{String}=collect(String.(ARGS)))
+function main(args::Vector{String}=collect(String.(ARGS)); root::AbstractString=ROOT)
+    root = normpath(abspath(String(root)))
     options = _parse_args(args)
     options === nothing && return 0
     violations = if options.preflight
-        preflight_report(ROOT; ledger_rel=options.ledger_rel, track_id=options.track_id)
+        preflight_report(root; ledger_rel=options.ledger_rel, track_id=options.track_id, full_paths=options.full_paths)
     else
-        result = validate_ledger(ROOT; ledger_rel=options.ledger_rel)
+        result = validate_ledger(root; ledger_rel=options.ledger_rel)
         if isempty(result)
-            selection_violation = _track_selection_violation(ROOT, String(options.ledger_rel), options.track_id)
+            selection_violation = _track_selection_violation(root, String(options.ledger_rel), options.track_id)
             selection_violation === nothing || push!(result, selection_violation)
         end
         result

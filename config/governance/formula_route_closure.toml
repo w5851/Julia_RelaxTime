@@ -53,7 +53,6 @@ formula_tests = [
   "tests/unit/relaxtime/test_polarization_aniso.jl",
   "tests/unit/relaxtime/test_meson_density.jl",
   "tests/unit/relaxtime/test_charged_phase_backend.jl",
-  "tests/unit/relaxtime/test_charged_phase_backend_script_contract.jl",
   "tests/unit/models/test_fixed_mub_conserved_charges.jl",
   "tests/regression/relaxtime/test_meson_mass_regression.jl",
   "tests/validation/relaxtime/test_literature_digitized_meson_mass_targets.jl",

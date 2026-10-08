@@ -2,6 +2,8 @@ name: benchmarks
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 1"
   push:
     branches: ["main"]
     paths:
@@ -14,6 +16,9 @@ on:
       - "scripts/plot_scan_csv.py"
       - "scripts/dev/check_script_entrypoints.jl"
       - "scripts/dev/check_python_script_syntax.py"
+      - "scripts/dev/check_benchmark_thresholds.jl"
+      - "scripts/dev/benchmark_trends.py"
+      - "tests/unit/python/test_benchmark_trends.py"
       - ".github/workflows/pnjl-benchmarks.yml"
   pull_request:
     paths:
@@ -26,11 +31,23 @@ on:
       - "scripts/plot_scan_csv.py"
       - "scripts/dev/check_script_entrypoints.jl"
       - "scripts/dev/check_python_script_syntax.py"
+      - "scripts/dev/check_benchmark_thresholds.jl"
+      - "scripts/dev/benchmark_trends.py"
+      - "tests/unit/python/test_benchmark_trends.py"
       - ".github/workflows/pnjl-benchmarks.yml"
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   pnjl-benchmark:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      JULIA_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      PNJL_BENCHMARK_OUTPUT_DIR: temp_benchmark_reports
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +60,14 @@ jobs:
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test benchmark trend reporting
+        run: python -m unittest discover -s tests/unit/python -p test_benchmark_trends.py
+
       - name: Run PNJL single-point benchmark
         run: julia --project=. benchmark/pnjl/single_point_solver_perf.jl
 
@@ -50,19 +75,26 @@ jobs:
         run: julia --project=. scripts/perf/pnjl/scan_perf.jl
 
       - name: Check benchmark thresholds
+        id: thresholds
         run: julia --project=. scripts/dev/check_benchmark_thresholds.jl
 
+      - name: Compare with the latest compatible main benchmark
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/dev/benchmark_trends.py --github-baseline --threshold-status '${{ steps.thresholds.outcome }}'
+
       - name: Upload benchmark reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pnjl-benchmark
-          path: |
-            tests/perf/results/pnjl/single_point_benchmark.json
-            tests/perf/results/pnjl/single_point_benchmark.md
-            tests/perf/results/pnjl/scan_benchmark.json
-            tests/perf/results/pnjl/scan_benchmark.md
+          path: ${{ env.PNJL_BENCHMARK_OUTPUT_DIR }}
+          retention-days: 90
+          if-no-files-found: warn
 
   julia-script-smoke:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -80,6 +112,7 @@ jobs:
         run: julia --project=. scripts/dev/check_script_entrypoints.jl
 
   python-script-smoke:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

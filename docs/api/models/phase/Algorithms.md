@@ -14,7 +14,7 @@
 6. 将结果封装为 `PhasePipelineResult`
 7. 通过 `build_phase_artifacts` 写出工件，并可选调用 `promote_phase_artifacts` 晋升
 
-上层编排主要位于 [src/models/phase/PhasePipeline.jl](src/models/phase/PhasePipeline.jl) 与 [src/models/phase/ProductionPhasePipeline.jl](src/models/phase/ProductionPhasePipeline.jl)，结果类型定义位于 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl)。
+上层编排主要位于 [src/models/phase/PhasePipeline.jl](../../../../src/models/phase/PhasePipeline.jl) 与 [src/models/phase/ProductionPhasePipeline.jl](../../../../src/models/phase/ProductionPhasePipeline.jl)，结果类型定义位于 [src/models/phase/PhaseTypes.jl](../../../../src/models/phase/PhaseTypes.jl)。
 
 ## 双入口分工
 
@@ -41,7 +41,7 @@
 - 强子侧与夸克侧 spinodal 位置
 - 导数符号变化的诊断信息
 
-该步骤是 Maxwell 构造与 CEP 搜索的前置条件。细节见 [PhaseTransition.md](docs/api/models/phase/PhaseTransition.md)。
+该步骤是 Maxwell 构造与 CEP 搜索的前置条件。细节见 [PhaseTransition.md](PhaseTransition.md)。
 
 ### Maxwell 等面积构造
 
@@ -77,7 +77,7 @@
 
 ## CEP 搜索
 
-`find_cep` 基于温度切片上的 Maxwell 有效性变化来定位 CEP 证据边界，并输出 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。它不再把 ambiguous midpoint 当作 CEP 单点。
+`find_cep` 基于温度切片上的 Maxwell 有效性变化来定位 CEP 证据边界，并输出 [src/models/phase/PhaseTypes.jl](../../../../src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。它不再把 ambiguous midpoint 当作 CEP 单点。
 
 当前应重点理解的不是函数签名，而是两类策略边界：
 
@@ -183,7 +183,7 @@ Maxwell 面积门限，新的 dense boundary CSV 以附加列记录 `area_residu
 - `:peak`
 - `:inflection`
 
-它们的职责是从序参量导数结构中给出 crossover 温度，而不是替代一阶相变的 Maxwell 判据。细节见 [Crossover.md](docs/api/models/phase/Crossover.md)。
+它们的职责是从序参量导数结构中给出 crossover 温度，而不是替代一阶相变的 Maxwell 判据。细节见 [Crossover.md](Crossover.md)。
 
 crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继承主 phase 的 `T_end` 或
 `T_grid` 最大值。实现不再隐藏截断到 `220 MeV`。crossover 基态和导数路径使用调用方实际传入的
@@ -206,7 +206,7 @@ crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继�
 - 生成新的 `rho` 候选点
 - 与现有网格做受控合并与去重
 
-更详细的使用背景见 [AdaptiveRhoRefinement.md](docs/api/models/phase/AdaptiveRhoRefinement.md)。
+更详细的使用背景见 [AdaptiveRhoRefinement.md](AdaptiveRhoRefinement.md)。
 
 ### rho-support cascade（显式 opt-in）
 
@@ -279,5 +279,5 @@ production 入口同样复用这套工件治理，但会在 `diagnostics` 和 `c
 ## 当前边界
 
 - 本页解释的是算法关系与职责分工，不承诺所有底层函数都作为长期稳定公开入口
-- 面向外部调用时，仍应优先回到 [Overview.md](docs/api/models/phase/Overview.md) 中列出的 `Models.*` 入口
+- 面向外部调用时，仍应优先回到 [Overview.md](Overview.md) 中列出的 `Models.*` 入口
 - 旧路径算法页已降级为兼容跳转说明；当前新目录页已成为算法细节的主版本

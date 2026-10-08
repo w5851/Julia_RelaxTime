@@ -8,6 +8,8 @@ using Libdl
 using Dates
 using JSON3
 
+include(joinpath(@__DIR__, "sysimage_inputs.jl"))
+
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PRECOMPILE_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "dev", "precompile_workload.jl")
 const SYSIMAGE_PATH = joinpath(PROJECT_ROOT, "build", "JuliaRelaxTime." * Libdl.dlext)
@@ -33,6 +35,9 @@ end
 end
 
 mkpath(dirname(SYSIMAGE_PATH))
+build_inputs_fingerprint = SysimageInputs.fingerprint(PROJECT_ROOT)
+# A failed build must not leave metadata describing the replaced image.
+rm(SYSIMAGE_META_PATH; force=true)
 
 create_sysimage(
     ["CSV", "ForwardDiff", "JSON3", "NLsolve", "StaticArrays", "TaylorDiff", "Test", "TestItemRunner"],
@@ -43,6 +48,8 @@ create_sysimage(
 )
 
 println("Built sysimage: " * SYSIMAGE_PATH)
+SysimageInputs.fingerprint(PROJECT_ROOT) == build_inputs_fingerprint ||
+    error("Sysimage inputs changed during the build; rerun with stable inputs")
 
 git_commit = try
     readchomp(`git -C $(PROJECT_ROOT) rev-parse HEAD`)
@@ -60,6 +67,7 @@ open(SYSIMAGE_META_PATH, "w") do io
         julia_version = string(VERSION),
         sysimage_path = SYSIMAGE_PATH,
         git_commit = git_commit,
+        build_inputs_fingerprint = build_inputs_fingerprint,
         precompile_script = PRECOMPILE_SCRIPT,
         platform_family = family,
         platform_os = lowercase(String(Sys.KERNEL)),

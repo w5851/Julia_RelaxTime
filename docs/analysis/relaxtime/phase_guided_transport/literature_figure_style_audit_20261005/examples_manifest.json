@@ -1,0 +1,82 @@
+[
+  {
+    "file": "examples\\C01_F07_shared_inside.jpg",
+    "paper_id": "C01",
+    "figure": 7,
+    "pdf_page": 7,
+    "pdf_sha256": "602189ea39fced0c0915c08cd686cc329c2e19cab84b3362f6daad7acd2c9bcb",
+    "normalized_page_crop_ltrb": [
+      0.08,
+      0.075,
+      0.96,
+      0.35
+    ],
+    "purpose": "Shared key inside contiguous plot region, crossing a panel divider; observation, not an unqualified design recommendation",
+    "scale_note": "Display crop for layout comparison; not a print-size assessment",
+    "output_sha256": "03d5771c0eec93e05b91c3d0344e8205c57557f13cc3d4cd4a121bb20dbda1ae"
+  },
+  {
+    "file": "examples\\C03_F12_shared_inside.jpg",
+    "paper_id": "C03",
+    "figure": 12,
+    "pdf_page": 11,
+    "pdf_sha256": "d04f1b8c790450a48dae5f1b0ce4491257e4a52f796fd98a12a41a3f163760d9",
+    "normalized_page_crop_ltrb": [
+      0.5,
+      0.05,
+      0.96,
+      0.82
+    ],
+    "purpose": "Shared transition key inside first of three stacked panels",
+    "scale_note": "Display crop for layout comparison; not a print-size assessment",
+    "output_sha256": "03453264590cafb4bb284a93fa21d7d2cd82aeec21234d8adb325da6c720d7ec"
+  },
+  {
+    "file": "examples\\C04_F03_top_external.jpg",
+    "paper_id": "C04",
+    "figure": 3,
+    "pdf_page": 11,
+    "pdf_sha256": "923e96a4e555a4459c974053e31845e83e02345db73fb27b08a8108336d71911",
+    "normalized_page_crop_ltrb": [
+      0.055,
+      0.055,
+      0.95,
+      0.56
+    ],
+    "purpose": "One-line shared key above 25 panels",
+    "scale_note": "Display crop for layout comparison; not a print-size assessment",
+    "output_sha256": "e31127ace2f2d934d2ceec4ed3ba888ad4b8a17cf0c2ceac261038910a424f74"
+  },
+  {
+    "file": "examples\\A04_F03_right_external.jpg",
+    "paper_id": "A04",
+    "figure": 3,
+    "pdf_page": 6,
+    "pdf_sha256": "354e72d866aef19ceb786d9dbbb4b1602b536ff3bd21fa39da69330a1c4a68bc",
+    "normalized_page_crop_ltrb": [
+      0.025,
+      0.04,
+      0.515,
+      0.515
+    ],
+    "purpose": "Axis-local keys outside the right edges",
+    "scale_note": "Display crop for layout comparison; not a print-size assessment",
+    "output_sha256": "7cb46a5d070e91d0d64bdf13810f1124d3f8f5770f686c0758bde0e6122ccb3b"
+  },
+  {
+    "file": "examples\\A01_F06_insets.jpg",
+    "paper_id": "A01",
+    "figure": 6,
+    "pdf_page": 11,
+    "pdf_sha256": "55812ce0dc651e9c8ef59fec9551c7825c337aa1a9efdfda11e0f3d245febab4",
+    "normalized_page_crop_ltrb": [
+      0.065,
+      0.045,
+      0.955,
+      0.345
+    ],
+    "purpose": "Inside keys plus insets for close curves",
+    "scale_note": "Display crop for layout comparison; not a print-size assessment",
+    "output_sha256": "072febbfc4bcbab585bfadcc75ff1f21f05207f130b43303950cb4053628a7e3"
+  }
+]

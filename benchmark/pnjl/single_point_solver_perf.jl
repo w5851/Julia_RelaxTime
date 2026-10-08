@@ -7,9 +7,11 @@ using Dates
 using NLsolve: LineSearches
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const PERF_OUTPUT_DIR = joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl")
+const PERF_OUTPUT_DIR = abspath(get(ENV, "PNJL_BENCHMARK_OUTPUT_DIR",
+    joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl")))
 const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.md")
+include(joinpath(@__DIR__, "benchmark_metadata.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
@@ -86,9 +88,12 @@ end
 
 function write_reports(results::Vector{BenchResult})
     mkpath(PERF_OUTPUT_DIR)
-    timestamp = Dates.format(Dates.now(), Dates.ISODateTimeFormat)
+    timestamp = Dates.format(Dates.now(Dates.UTC), Dates.ISODateTimeFormat) * "Z"
     json_payload = (
+        schema_version = "pnjl_benchmark_raw_v1",
         generated_at = timestamp,
+        metadata = PNJLBenchmarkMetadata.metadata(PROJECT_ROOT),
+        methodology = (phase="warm", evals=1, seconds=BenchmarkTools.DEFAULT_PARAMETERS.seconds),
         samples = DEFAULT_SAMPLES,
         config = BENCH_CONFIG,
         benchmarks = [

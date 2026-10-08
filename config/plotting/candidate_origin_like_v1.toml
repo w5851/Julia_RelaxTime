@@ -1,6 +1,7 @@
 schema_version = "plot_style_profile_v1"
 profile_id = "candidate_origin_like_v1"
-status = "active"
+status = "deprecated"
+deprecation_note = "Historical compatibility profile only; new plotting cases use candidate_aps_v2 or strict_aps_v2."
 default_column = "single_column"
 font_family = "serif"
 font_candidates = ["Times New Roman", "Times"]

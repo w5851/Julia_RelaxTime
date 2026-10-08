@@ -1,6 +1,6 @@
 # Magnetic 热力学接口
 
-本页说明 magnetic 主题中真正面向业务计算的热力学主接口。实现位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L1)。
+本页说明 magnetic 主题中真正面向业务计算的热力学主接口。实现位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L1)。
 
 ## 主要导出
 

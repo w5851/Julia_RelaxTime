@@ -1,0 +1,34 @@
+[
+  {
+    "name": "pnjl",
+    "query": "(PNJL or \"Polyakov Nambu Jona\") and (transport or viscosity or relaxation)",
+    "url": "https://inspirehep.net/api/literature?q=%28PNJL+or+%22Polyakov+Nambu+Jona%22%29+and+%28transport+or+viscosity+or+relaxation%29&size=250&sort=mostrecent",
+    "retrieved_utc": "2026-10-05T03:10:41.270944+00:00",
+    "total": 39,
+    "returned": 39
+  },
+  {
+    "name": "njl",
+    "query": "(NJL or \"Nambu Jona-Lasinio\") and (transport or viscosity or relaxation)",
+    "url": "https://inspirehep.net/api/literature?q=%28NJL+or+%22Nambu+Jona-Lasinio%22%29+and+%28transport+or+viscosity+or+relaxation%29&size=250&sort=mostrecent",
+    "retrieved_utc": "2026-10-05T03:10:49.588738+00:00",
+    "total": 165,
+    "returned": 165
+  },
+  {
+    "name": "anisotropic",
+    "query": "(anisotropic or anisotropy) and (transport or viscosity or viscosities) and (quark or QCD)",
+    "url": "https://inspirehep.net/api/literature?q=%28anisotropic+or+anisotropy%29+and+%28transport+or+viscosity+or+viscosities%29+and+%28quark+or+QCD%29&size=250&sort=mostrecent",
+    "retrieved_utc": "2026-10-05T03:11:17.064385+00:00",
+    "total": 880,
+    "returned": 250
+  },
+  {
+    "name": "anisotropic_aps",
+    "query": "(anisotropic or anisotropy) and (transport or viscosity or viscosities) and (quark or QCD) and date 2015->2026 and (j Phys.Rev.D or j Phys.Rev.C)",
+    "url": "https://inspirehep.net/api/literature?q=%28anisotropic+or+anisotropy%29+and+%28transport+or+viscosity+or+viscosities%29+and+%28quark+or+QCD%29+and+date+2015-%3E2026+and+%28j+Phys.Rev.D+or+j+Phys.Rev.C%29&size=250&sort=mostrecent",
+    "retrieved_utc": "2026-10-05T03:12:13.583082+00:00",
+    "total": 148,
+    "returned": 148
+  }
+]

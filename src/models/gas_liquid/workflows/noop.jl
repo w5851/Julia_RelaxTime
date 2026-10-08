@@ -1,1 +1,0 @@
-const GAS_LIQUID_WORKFLOW_NOOP = :gas_liquid_workflow_noop

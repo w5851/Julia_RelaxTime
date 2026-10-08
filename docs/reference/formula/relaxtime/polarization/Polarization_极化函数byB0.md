@@ -49,8 +49,8 @@ end
 在 NJL 与 PNJL 两种模型下，都存在常用恒等式将 `1-f^{-}(E,\mu)` 等价改写为 `f^{+}(-E,\mu)`，从而在实现中统一使用 `f^{+}(pm\,E,\mu)`（`pm=±1`）的形式。
 
 详细说明与推导见：
-- [B0.md](B0.md) 的 “3.2.1 NJL vs PNJL：分布函数导致的等价改写”
-- [PNJL_夸克有效分布函数.md](PNJL_夸克有效分布函数.md)
+- [B0.md](../integrals/OneLoopIntegral_B0.md) 的 “3.2.1 NJL vs PNJL：分布函数导致的等价改写”
+- [PNJL_夸克有效分布函数.md](../../models/pnjl/distribution/PNJL_%E5%A4%B8%E5%85%8B%E6%9C%89%E6%95%88%E5%88%86%E5%B8%83%E5%87%BD%E6%95%B0.md)
 - [B0与文献I2的归一化映射说明.md](../../../domain-knowledge/relaxtime/B0%E4%B8%8E%E6%96%87%E7%8C%AEI2%E7%9A%84%E5%BD%92%E4%B8%80%E5%8C%96%E6%98%A0%E5%B0%84%E8%AF%B4%E6%98%8E.md)
 
 ### 3.4 与文献记号的最小结论

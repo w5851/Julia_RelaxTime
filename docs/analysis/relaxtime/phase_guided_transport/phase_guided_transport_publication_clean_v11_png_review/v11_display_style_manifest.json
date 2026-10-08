@@ -1,0 +1,110 @@
+{
+  "schema": "publication_clean_v11_png_review_display_style_v1",
+  "task_classification": "independent",
+  "delivery_stage": "png_review",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true,
+  "values_unchanged": true,
+  "parent_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/manifest.json",
+  "parent_manifest_sha256": "6f31a534bff0f75701091dbf1565614eb2e17290faa6cc2e0451c4703dc8fcc8",
+  "previous_review_manifest": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v10_png_review/manifest.json",
+  "previous_review_manifest_sha256": "04466a34bd1d4211e7957d18f6c09aa075494db286f39ca7ab61ab3e159df9b3",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py",
+  "generator_sha256": "82fd401810a5695db8354c0fcdfa79c0a5099d27d7b8ba48b85b9331ed160b1c",
+  "legend": {
+    "title": "First-order",
+    "alignment": "left",
+    "weight": "normal",
+    "endpoint_labels": {
+      "quark": "First-order (restored)",
+      "hadron": "First-order (broken)"
+    },
+    "hosts": {
+      "figure1_relaxation_times_comparison": {
+        "parameters": "row0_col0",
+        "endpoints": "row0_col2"
+      },
+      "figure2_transport_coefficients_comparison": {
+        "parameters": "row0_col0",
+        "endpoints": "row0_col2"
+      }
+    },
+    "composite_font_size_pt": 10.5,
+    "title_font_size_pt": 10.5,
+    "composite_anchor": [
+      -0.02,
+      1.04
+    ],
+    "composite_parameters_scope": "all panels",
+    "composite_endpoints_scope": "muB900.0 alpha1.0 first-order endpoint curves",
+    "single_endpoints_scope": "actual endpoints listed in each panel_specs record"
+  },
+  "axes": {
+    "relaxation_composite": "all 12 panels log-y",
+    "transport_composite": "all 9 panels linear",
+    "matching_mode_a_tau_singles": "all log-y",
+    "mode_b_scales": "retained from v10",
+    "independent_y_ranges": true,
+    "x_major_ticks": [
+      -0.5,
+      0.0,
+      0.5
+    ],
+    "linear_minor_subdivisions": 2,
+    "log_major_subs": [
+      1.0,
+      2.0,
+      5.0
+    ],
+    "log_minor_subs": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "log_minimum_label_separation_fraction": 0.12,
+    "log_label_policy": "ordinary numeric 1-2-5; neat supplements for narrow views; no redundant zeros",
+    "linear_row_decimal_places": {
+      "eta_over_s": 2,
+      "zeta_over_s": 2,
+      "sigma_over_T": 3
+    }
+  },
+  "composite_layout": {
+    "figure_sizes_inches": {
+      "figure1_relaxation_times_comparison": [
+        6.75,
+        7.1
+      ],
+      "figure2_transport_coefficients_comparison": [
+        6.75,
+        5.9
+      ]
+    },
+    "subplot_layout": {
+      "left": 0.11,
+      "right": 0.98,
+      "bottom": 0.09,
+      "top": 0.93,
+      "hspace": 0.16,
+      "wspace": 0.26
+    },
+    "labels_titles_ticks_pt": 11.0,
+    "typography_exception": "dense_composite_review_compact_typography"
+  },
+  "figure_count": 72,
+  "mode_counts": {
+    "mode_a": 36,
+    "mode_b": 36
+  },
+  "composite_count": 2,
+  "formats": [
+    "png"
+  ],
+  "generated_at_utc": "2026-10-02T03:04:27.246156+00:00"
+}

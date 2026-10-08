@@ -5,12 +5,14 @@ on:
     paths:
       - "docs/dev/active/**"
       - "scripts/dev/check_active_docs_governance.jl"
+      - "tests/unit/config/test_active_docs_governance.jl"
       - ".github/workflows/active-docs-governance.yml"
   push:
     branches: ["main"]
     paths:
       - "docs/dev/active/**"
       - "scripts/dev/check_active_docs_governance.jl"
+      - "tests/unit/config/test_active_docs_governance.jl"
       - ".github/workflows/active-docs-governance.yml"
   workflow_dispatch:
 
@@ -28,3 +30,6 @@ jobs:
 
       - name: Check active docs governance
         run: julia scripts/dev/check_active_docs_governance.jl
+
+      - name: Test active document review
+        run: julia tests/unit/config/test_active_docs_governance.jl

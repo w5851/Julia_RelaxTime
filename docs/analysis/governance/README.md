@@ -2,6 +2,10 @@
 
 本目录收纳 `docs/analysis` 分析产物的治理、清理和 provenance 记录，不承载新的科学结果。
 
+## Research evidence
+
+[`research_evidence.md`](research_evidence.md) 维护已有结果分析、实验事实、当前摘要和持久证据的共同规则。隔离文献复现通过 `literature-reproduction-spike` 执行；与文献无关的结果整理直接遵循本治理，不要求另建技能或实验日志。
+
 ## Figure asset registry
 
 [`figure_asset_registry_v1/`](figure_asset_registry_v1/) 是历史 PNG/PDF/SVG 资产 inventory、作者审核和 allowlist 执行快照。其 registry、preflight、retirement 和 relocation JSON 保留生成时的路径、hash 和状态，不因本次 namespace 迁移重写。

@@ -35,11 +35,13 @@ julia --project=. scripts/dev/check_sop_governance.jl
 julia --project=. scripts/dev/check_task_ledger.jl
 julia --project=. scripts/dev/check_task_ledger.jl --preflight
 julia --project=. scripts/dev/check_task_ledger.jl --preflight --track rs-transport
+julia --project=. scripts/dev/check_task_ledger.jl --preflight --full-paths
 ```
 
 该检查只读校验 `config/governance/task_tracks.toml` 的状态、依赖、任务文件、evidence
-和分支/SHA/run 格式；`--preflight` 额外报告当前 worktree 的 dirty paths，`--track ID`
-选择并校验已有主线。
+和分支/SHA/run 格式；`--preflight` 报告分支、HEAD、变更路径总数和前 10 项，
+`--full-paths` 展开全部路径。有效 ledger 还报告任务文件、阻塞、下一步及最多 5 条
+evidence 入口；无效 ledger 仍保留 Git 上下文并失败退出。`--track ID` 选择并校验已有主线。
 
 导出 API 全集索引生成：
 
@@ -349,24 +351,7 @@ julia --project=. scripts/dev/generate_pnjl_decommission_checklist.jl --base HEA
 产物路径：
 - `outputs/results/pnjl_decommission_checklist_<timestamp>.md`
 
-执行台账追加（append-only，不回读历史正文）：
-
-```powershell
-julia --project=. scripts/dev/append_exec_log.jl \
-	--task-file docs/dev/active/2026-02-26_多重派发重构与PNJL迁移下线开发任务单.md \
-	--batch "Batch N2" \
-	--goal "移除旧入口并完成冒烟校验" \
-	--code-change "删除 src/pnjl 兼容路径调用点" \
-	--cmd "julia --project=. scripts/dev/run_prune_wave_gate.jl --base HEAD --head HEAD" \
-	--artifact "outputs/results/pnjl_prune_wave_snapshot_20260226_101500.txt" \
-	--result "通过" \
-	--mainline "N2"
-```
-
-说明：
-- 若未提供 `--log-file`，脚本会优先根据 `--task-file` 自动推导同目录“执行台账”；
-- 若台账不存在会自动创建标准骨架后再追加；
-- 仅做末尾追加（append-only），默认不读取台账历史正文。
+开发执行记录仅在任务明确要求时按指定文件的现有格式补充，不需要专用追加脚本，也不自动创建台账。记录与历史保留规则见[任务跟踪治理](../../docs/dev/task_tracking_governance.md)。
 
 检查表新增内容：
 - `PNJL` 顶层 `scans/*` 默认 include 审计（排除白名单）
@@ -441,7 +426,7 @@ npm run deps:render
 
 ## 归档开发文档
 
-自动归档 `docs/dev/active` 中的文档到 `docs/dev/archived`，并添加元信息头部。
+将已完成或明确取消/被替代的 `docs/dev/active` 直接 Markdown 子文件迁移到 `docs/dev/archived`，添加元信息并保留原文字节。状态与引用责任见[开发文档治理](../../docs/dev/README.md)。
 
 ### 交互式归档
 
@@ -464,7 +449,7 @@ julia --project=. scripts/dev/archive_docs.jl -d 2026-01-15 file1.md
 ### 验证已归档文件格式
 
 ```powershell
-julia --project=. scripts/dev/archive_docs.jl -c
+julia --project=. scripts/dev/archive_docs.jl --check 2026-01-15_file1.md
 ```
 
 ### 预览归档操作（不实际执行）
@@ -473,9 +458,48 @@ julia --project=. scripts/dev/archive_docs.jl -c
 julia --project=. scripts/dev/archive_docs.jl --dry-run file1.md
 ```
 
-**功能说明**：
-- 自动添加 YAML 元信息头部（title、archived、original、archived_date）
-- 自动提取文档标题（从第一个 # 标题）
-- 自动添加日期前缀到文件名（如果尚未存在）
-- 从 active 目录移动到 archived 目录
-- 支持批量操作和交互式选择
+默认 `--status completed`；取消或被替代须指定 `--status cancelled` / `--status superseded` 和 `--reason "终止原因"`，预览与执行参数保持一致。
+
+- 帮助、预览和检查不创建目录或文件；路径以脚本所在仓库为准。
+- 预览和执行都拒绝已有目标、范围外路径及链接重定向；批量先检查所有计划，执行失败不回滚已完成项。
+- 写入临时文件并验证后，通过硬链接发布目标，再核对源文件未变后删除源文件；文件系统不支持硬链接时安全失败。
+- `--check <文件...>` 检查本批元数据；省略文件名检查全目录。只解析平面标量 frontmatter，核对字段类型、日期和终止原因，错误返回非零退出码。
+- 迁移后由调用者更新有效引用和 ledger 路径；脚本不自动修复历史文档。
+
+## 输运固定点基线候选
+
+[export_transport_fixedpoint_baseline.jl](export_transport_fixedpoint_baseline.jl) 为[输运固定点回归](../../tests/regression/relaxtime/test_transport_fixedpoint_regression.jl)生成候选 CSV。已接受的数据位于 [baseline_transport_fixedpoints_v1.csv](../../tests/baselines/relaxtime/baseline_transport_fixedpoints_v1.csv)；候选的比较与接受遵循[基线管理指南](../../docs/guides/BASELINE_VERSION_MANAGEMENT.md)。
+
+### 计算与输出契约
+
+- 计算脚本预设的 13 个 `(T, mu, xi)` 点，固定各味 `tau=1`、`compute_tau=false`，求得平衡态后计算剪切黏度、电导率和体黏度。这组固定弛豫时间结果用于内部回归，不承担完整弛豫时间计算或正式数值生产。
+- CSV 列为 `T,mu,xi,eta,sigma,zeta`。T/mu 使用内部自然单位 fm^-1，xi 无量纲；输运量含义见[输运 API](../../docs/api/relaxtime/transport/README.md)。点位、求解器及积分设置以脚本为准。
+- 必须传 `--output <new-candidate.csv>`；既有文件、目录或链接均被拒绝，没有覆盖选项。
+- `--backend` 仅支持 `models`。缺失参数、已有目标和 `--help` 在加载数值模型前处理。
+- 导出器保留显式 `HADRON_SEED_5` 初值；当前固定点回归使用 `seed_state=nothing`。两者的初值策略并不相同，回归通过不能证明候选一定可以导出。求解失败会报告具体点位；调整初值策略属于数值语义变更，需单独验证。
+- 先生成同目录临时文件，检查每点收敛、有限性以及完整列/点位顺序，再通过硬链接发布完整新文件。目标文件系统需支持硬链接；不支持时返回失败，不改用可能覆盖目标的退路。
+- 计算或校验失败不会留下目标候选 CSV。临时文件会清理；并发出现同名目标时保留对方文件并失败退出。生成成功仍只是候选，不修改基线消费者。
+- 这些文件保护属于本导出器；其他历史导出器的参数、覆盖行为和失败处理需分别核对。
+
+### 生成与验证
+
+生成一次新的临时候选：
+
+```powershell
+$candidatePath = Join-Path $env:TEMP ('transport_candidate_' + [guid]::NewGuid().ToString('N') + '.csv')
+julia --project=. scripts/dev/export_transport_fixedpoint_baseline.jl --output $candidatePath
+```
+
+旧基线的针对性回归：
+
+```powershell
+julia --project=. -e 'ENV["REGRESSION_FILES"]="relaxtime/test_transport_fixedpoint_regression.jl"; include("tests/regression/runtests.jl")'
+```
+
+文件操作与失败处理的轻量检查：
+
+```powershell
+julia --project=. tests/unit/config/test_transport_baseline_export.jl
+```
+
+夹具检查不加载物理模型；修改计算参数或真实调用路径时还应运行实际候选导出与对应回归，保持既有数值基线不变。

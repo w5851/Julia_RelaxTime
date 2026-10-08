@@ -1,6 +1,6 @@
 # 相变判据与 Maxwell 构造
 
-本文档描述相图主题中用于识别一阶相变的核心算法，主要实现位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L9) 与 [src/models/phase/PhaseIO.jl](src/models/phase/PhaseIO.jl#L1)。
+本文档描述相图主题中用于识别一阶相变的核心算法，主要实现位于 [src/models/phase/PhaseCore.jl](../../../../src/models/phase/PhaseCore.jl#L9) 与 [src/models/phase/PhaseIO.jl](../../../../src/models/phase/PhaseIO.jl#L1)。
 
 ## 涉及能力
 
@@ -16,7 +16,7 @@
 
 ### `SShapeResult`
 
-`SShapeResult` 定义位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L9)。它用于表达单条 `μ(ρ)` 曲线是否存在一阶相变特征。
+`SShapeResult` 定义位于 [src/models/phase/PhaseCore.jl](../../../../src/models/phase/PhaseCore.jl#L9)。它用于表达单条 `μ(ρ)` 曲线是否存在一阶相变特征。
 
 关键字段：
 
@@ -29,7 +29,7 @@
 
 ### `detect_s_shape(mu_vals, rho_vals; eps=0.0, min_points=5)`
 
-实现位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L85)。
+实现位于 [src/models/phase/PhaseCore.jl](../../../../src/models/phase/PhaseCore.jl#L85)。
 
 该函数对离散的 `μ(ρ)` 数据进行排序、求导与符号变化分析，检查是否存在 `正 → 负 → 正` 的导数序列。若成立，则认为该温度切片存在一阶相变区间。
 
@@ -73,7 +73,7 @@ end
 
 ### `maxwell_construction(mu_vals, rho_vals; kwargs...)`
 
-实现位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L300)。
+实现位于 [src/models/phase/PhaseCore.jl](../../../../src/models/phase/PhaseCore.jl#L300)。
 
 该函数在检测到 S-shape 后，搜索满足等面积条件的相变化学势与两侧相共存点。
 
@@ -121,7 +121,7 @@ end
 
 ### `group_curves_by_temperature(rows; xi=0.0, tol=1e-6)`
 
-实现位于 [src/models/phase/PhaseIO.jl](src/models/phase/PhaseIO.jl#L1)。
+实现位于 [src/models/phase/PhaseIO.jl](../../../../src/models/phase/PhaseIO.jl#L1)。
 
 该函数负责从 CSV 行记录中提取指定 `xi` 的样本，并按温度重组为后续相图算法可消费的曲线字典。
 
@@ -138,4 +138,4 @@ grouped = group_curves_by_temperature(rows; xi=0.0)
 
 - `detect_s_shape` 与 `maxwell_construction` 共同决定 `first_order_boundary` 和 `spinodal` 的质量
 - `group_curves_by_temperature` 负责把扫描结果整理成可供 `find_cep` 消费的输入结构
-- 如果你只是想跑通完整流程，应优先返回 [Overview.md](docs/api/models/phase/Overview.md)
+- 如果你只是想跑通完整流程，应优先返回 [Overview.md](Overview.md)

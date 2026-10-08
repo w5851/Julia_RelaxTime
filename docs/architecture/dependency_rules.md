@@ -1,45 +1,35 @@
 # 依赖规则（目录级）
 
-本规则用于限制 `src/` 目录内模块之间的依赖方向，避免出现“底层依赖上层”。
+本页约束当前源码的文件加载方向。`scripts/dev/analyze_deps.jl` 直接扫描 `src/`，生成的 Mermaid 图只用于阅读，不作为审计输入。
 
-## 规则形式
+## 分组与方向
 
-- **文档位置**：`docs/architecture/dependency_rules.md`
-- **规则粒度**：目录级（`src/<group>/`）
-- **核心原则**：允许跨目录，但必须**单向**；违反时需要重构或加入明确的例外说明。
+`base` 合并 `src/` 根部兼容文件及 `config/`、`constants/`、`types/`；这些目录存在受控的常量/类型转发。其余分组保留实际目录名。
 
-## 分层与允许依赖矩阵
+| 来源 | 允许依赖 |
+| --- | --- |
+| `base` | `base` |
+| `utils` | `base`、`utils` |
+| `integration` | `base`、`utils`、`integration` |
+| `models` | `base`、`utils`、`integration`、`models` |
+| `relaxtime` | `base`、`utils`、`integration`、`relaxtime` |
+| `simulation` | `base`、`utils`、`integration`、`simulation` |
 
-分组说明：
-- `root`：`src/` 根目录下的文件（如 `Constants_PNJL.jl`、`QuarkDistribution*.jl`）
-- `utils`：通用工具与常量
-- `integration`：数值积分相关
-- `simulation`：运动学与服务接口
-- `models`：QCD 模型实现与求解/扫描/工作流入口（含 `pnjl_physics`）
-- `relaxtime`：弛豫时间与散射链路
+两项按职责限定的跨层入口：
 
-允许依赖（✅ 允许 / ❌ 不允许）：
+- `src/models/workflow_apps/` 可依赖 `relaxtime`，用于工作流编排。
+- `src/simulation/` 的服务启动可加载 `src/models/Models.jl`；业务调用经统一入口，不直接加载 solver 内部文件。
 
-| From \ To | root | utils | integration | simulation | models | relaxtime |
-|---|---|---|---|---|---|---|
-| root | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| utils | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| integration | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| simulation | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| models | ✅ | ✅ | ✅ | ❌ | ✅ | ⚠️ 仅 workflows |
-| relaxtime | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+现存五条 `src → scripts` 桥接在审计器 `SCRIPT_BRIDGES` 中逐文件列明，报告单列为待迁移依赖：charged GBU 内核与绘图两条、orchestrator 配置和流程三条。它们不构成对其他反向依赖的许可；后续内核迁移需要独立验证数值和产物合同。
 
-**例外约定**：
-- `src/models/workflows/` 允许依赖 `src/relaxtime/`（用于输运流程编排）。
+## 静态检查的范围
 
-迁移期补充约束（2026-02-24）：
-- `src/simulation/fullserver` 新增调用应优先经 `src/models/entrypoints.jl` 进入扫描/工作流，不再新增对 `PNJL.run_*` 的运行时依赖。
-- `src/models/pnjl_module()` 仅作兼容别名入口，允许存量调用逐步迁移，但不作为新功能默认入口。
+- 支持字面量 include、路径变量、`joinpath`/`normpath`/`dirname`、`@__DIR__`/`@__FILE__` 及绝对路径的 `abspath`。
+- 条件分支中的 include 合并展示；无法唯一确定的路径留作未解析项，不执行待分析源码。
+- 相对 `using`/`import` 只显示名称，没有解析完整模块身份；宏展开、调用链及被加载脚本内部的依赖仍需人工核查。
+- `DEPS_STRICT=1` 拒绝已定位的违规边、缺失文件和解析错误；动态 include 明列并提示覆盖不完整。通过检查不代表完整运行时依赖无环。
 
-## 变更流程
-
-- 如需新增例外或调整矩阵，请在本文件记录理由与影响范围。
-- 依赖图更新后，请运行 `scripts/dev/analyze_deps.jl` 生成依赖审计报告。
+规则变更同步修改本页与审计器，并运行 `tests/unit/config/test_gen_deps.jl`、`tests/unit/config/test_analyze_deps.jl`。更新阅读图用 `scripts/dev/gen_deps.jl`；检查当前源码只需 `scripts/dev/analyze_deps.jl`。
 
 ## 第三方数值 oracle 的环境边界
 
@@ -66,7 +56,7 @@
 - `src/models/entrypoints.jl`：workflow bridge 边界
 
 Phase5-8 结论（2026-03-03）：
-- `src/models/pnjl/` 已下线删除。
+- 旧 PNJL 物理实现已迁移；`src/models/pnjl/` 仅保留 capabilities、API 和 adapter 锚点。
 - 物理实现迁移到 `src/models/pnjl_physics/`，不再保留 `module PNJL` 运行时入口。
 
 单一来源：

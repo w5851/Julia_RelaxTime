@@ -13,7 +13,9 @@ from scripts.plotting.plot_manifest import (
     output_record,
     write_manifest,
 )
-from scripts.plotting.plot_style import figure_size_inches, load_profile
+from scripts.plotting.plot_style import (
+    ACTIVE_PROFILE_IDS, configure_axis_ticks, figure_size_inches, load_profile,
+)
 from scripts.plotting.validate_plot_artifact import validate_manifest
 
 
@@ -82,6 +84,53 @@ def test_profiles_freeze_current_aps_like_baseline():
     assert strict.legend_policy == "dense_aware_best_then_external"
     assert strict.max_in_axes_legend_entries == 4
     assert strict.allow_external_legend is True
+
+
+def test_v2_profiles_use_declared_geometry_for_both_normal_legend_locations():
+    for name in ("candidate_aps_v2", "strict_aps_v2"):
+        profile = load_profile(name)
+        assert profile.legend_policy == "declared_geometry_checked"
+        assert profile.allow_external_legend is True
+
+
+def test_v1_profiles_remain_historical_compatibility_only():
+    for profile_id in ("audit_v1", "candidate_origin_like_v1", "strict_origin_like_v1"):
+        profile = load_profile(profile_id)
+        assert profile.lifecycle_status == "deprecated"
+        assert profile.is_legacy is True
+    assert ACTIVE_PROFILE_IDS == {"candidate_aps_v2", "strict_aps_v2"}
+
+
+def test_aps_v2_profile_requires_fixed_pdf_png_and_parentheses():
+    profile = load_profile("strict_aps_v2")
+    assert profile.formats == ("pdf", "png")
+    assert profile.optional_formats == ("svg", "eps")
+    assert profile.data["quality"]["unit_brackets"] == "parentheses"
+    assert profile.data["quality"]["min_capital_numeral_height_mm"] == 2.0
+    assert profile.data["ticks"]["sides"] == ["top", "bottom", "left", "right"]
+
+
+def test_aps_v2_axis_tick_contract_is_scale_aware():
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import AutoMinorLocator, LogLocator
+
+    profile = load_profile("strict_aps_v2")
+    figure, axes = plt.subplots(1, 2)
+    axes[0].set_yscale("linear")
+    axes[1].set_yscale("log")
+    configure_axis_ticks(axes[0], profile)
+    configure_axis_ticks(axes[1], profile)
+    assert isinstance(axes[0].xaxis.get_minor_locator(), AutoMinorLocator)
+    assert isinstance(axes[0].yaxis.get_minor_locator(), AutoMinorLocator)
+    assert axes[0].xaxis.get_minor_locator().ndivs == 2
+    assert axes[0].yaxis.get_minor_locator().ndivs == 2
+    assert isinstance(axes[1].yaxis.get_minor_locator(), LogLocator)
+    assert all(tick._tickdir == "in" for axis in axes for tick in axis.xaxis.get_major_ticks())
+    assert all(tick.tick1line.get_visible() and tick.tick2line.get_visible() for axis in axes for tick in axis.yaxis.get_major_ticks())
+    plt.close(figure)
 
 
 def test_strict_png_svg_manifest_passes(tmp_path):

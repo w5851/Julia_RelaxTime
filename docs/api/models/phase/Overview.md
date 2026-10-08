@@ -22,7 +22,7 @@
 
 ## 首选公开入口
 
-相图主题当前推荐的统一入口位于 [src/models/Models.jl](src/models/Models.jl#L82) 与 [src/models/entrypoints.jl](src/models/entrypoints.jl#L15)。
+相图主题当前推荐的统一入口位于 [src/models/Models.jl](../../../../src/models/Models.jl#L82) 与 [src/models/entrypoints.jl](../../../../src/models/entrypoints.jl#L15)。
 
 优先使用的 API：
 
@@ -43,7 +43,7 @@
 - `ProductionPipelineConfig`
 - `PromotionResult`
 
-完整导出基线见 [generated/Exports.md](docs/api/models/phase/generated/Exports.md)。
+完整导出基线见 [generated/Exports.md](generated/Exports.md)。
 
 ## 最短工作流
 
@@ -74,7 +74,7 @@ result = Models.run_phase_pipeline(
 )
 ```
 
-这条链路与 [tests/integration/models/test_phase_pipeline_smoke.jl](tests/integration/models/test_phase_pipeline_smoke.jl) 对齐，适合先验证接口、参数与工件写出是否正常。
+这条链路与 [tests/integration/models/test_phase_pipeline_smoke.jl](../../../../tests/integration/models/test_phase_pipeline_smoke.jl) 对齐，适合先验证接口、参数与工件写出是否正常。
 
 ### production / baseline 入口
 
@@ -183,7 +183,7 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 
 ### 3. 先解析输出路径，再运行与晋升
 
-如果你需要把产物写入受控目录，再决定是否晋升参考数据，先调用 `Models.resolve_phase_output_target`，完成主流程后再调用 `Models.promote_phase_artifacts`。对应的最小验证路径可参考 [tests/integration/models/test_phase_artifacts_promotion_smoke.jl](tests/integration/models/test_phase_artifacts_promotion_smoke.jl)。
+如果你需要把产物写入受控目录，再决定是否晋升参考数据，先调用 `Models.resolve_phase_output_target`，完成主流程后再调用 `Models.promote_phase_artifacts`。对应的最小验证路径可参考 [tests/integration/models/test_phase_artifacts_promotion_smoke.jl](../../../../tests/integration/models/test_phase_artifacts_promotion_smoke.jl)。
 
 ### 4. 在 production 模式下查看温度扫掠诊断
 
@@ -207,7 +207,7 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
   - `pm_phase_summary.json`
   - `pm_vs_maxwell.csv`
 
-最小示例见 [PMPhaseDiagnostic.md](docs/api/models/phase/PMPhaseDiagnostic.md)。
+最小示例见 [PMPhaseDiagnostic.md](PMPhaseDiagnostic.md)。
 
 ## 非首选入口
 
@@ -222,7 +222,7 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 - `merge_rho_values`
 - `analyze_pm_branch_competition` 的内部 branch helper 与 artifact helper
 
-这些能力属于算法核心层，关系说明见 [Algorithms.md](docs/api/models/phase/Algorithms.md)。
+这些能力属于算法核心层，关系说明见 [Algorithms.md](Algorithms.md)。
 
 ## 迁移期说明
 

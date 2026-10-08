@@ -144,7 +144,7 @@ workflow、`transport_kwargs` 与 provider 默认值之间的优先级细节，�
 
 ## 它在 workflow 中如何被消费
 
-在 `src/models/workflows/TransportWorkflow.jl` 中，provider 的典型生命周期是：
+在 `src/models/workflow_apps/TransportWorkflow.jl` 中，provider 的典型生命周期是：
 
 1. 若调用方未显式传 provider，workflow 优先尝试 `Models.transport_provider(model)`。
 2. 根据 keyword、`transport_kwargs` 和 toml 默认值，确定有效的 `prefer_energy_aniso`。

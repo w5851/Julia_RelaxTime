@@ -9,7 +9,6 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\\..")
-$SysimagePath = Join-Path $RepoRoot "build\\JuliaRelaxTime.dll"
 $MetaPath = Join-Path $RepoRoot "build\\JuliaRelaxTime.sysimage.json"
 
 if ($BuildIfMissing) {
@@ -59,15 +58,12 @@ function Build-LocalSysimage {
     }
 }
 
-function Get-HeadCommit {
-    try {
-        $head = (& git -C $RepoRoot rev-parse HEAD 2>$null)
-        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($head)) {
-            return $head.Trim()
-        }
-    } catch {
+function Get-BuildInputsFingerprint {
+    $fingerprint = & julia --startup-file=no --project="$RepoRoot" (Join-Path $RepoRoot "scripts/dev/sysimage_inputs.jl") --fingerprint
+    if ($LASTEXITCODE -ne 0 -or $fingerprint -notmatch '^[0-9a-f]{64}$') {
+        throw "Failed to fingerprint sysimage build inputs"
     }
-    return $null
+    return $fingerprint.Trim()
 }
 
 function Get-SysimageCompatibility {
@@ -76,7 +72,7 @@ function Get-SysimageCompatibility {
         [string]$CurrentVersion,
         [string]$CurrentFamily,
         [string]$CurrentArch,
-        [string]$HeadCommit
+        [string]$BuildInputsFingerprint
     )
 
     if (-not $Meta.julia_version) {
@@ -91,13 +87,11 @@ function Get-SysimageCompatibility {
     if ($Meta.platform_arch -and $Meta.platform_arch -ne $CurrentArch) {
         return @{ Compatible = $false; Reason = "platform arch $($Meta.platform_arch) does not match current arch $CurrentArch" }
     }
-    if (-not [string]::IsNullOrWhiteSpace($HeadCommit)) {
-        if (-not $Meta.git_commit) {
-            return @{ Compatible = $false; Reason = "metadata missing git_commit" }
-        }
-        if ($Meta.git_commit -ne $HeadCommit) {
-            return @{ Compatible = $false; Reason = "sysimage git commit $($Meta.git_commit) does not match current HEAD $HeadCommit" }
-        }
+    if (-not $Meta.build_inputs_fingerprint) {
+        return @{ Compatible = $false; Reason = "metadata missing build_inputs_fingerprint; rebuild once to migrate legacy metadata" }
+    }
+    if ($Meta.build_inputs_fingerprint -ne $BuildInputsFingerprint) {
+        return @{ Compatible = $false; Reason = "sysimage build inputs have changed" }
     }
     return @{ Compatible = $true; Reason = "ok" }
 }
@@ -105,7 +99,13 @@ function Get-SysimageCompatibility {
 $currentVersion = Get-JuliaVersion
 $currentFamily = Get-PlatformFamily
 $currentArch = Get-PlatformArch
-$headCommit = Get-HeadCommit
+$extension = switch ($currentFamily) {
+    "windows" { "dll" }
+    "linux" { "so" }
+    "macos" { "dylib" }
+    default { throw "Unsupported sysimage platform: $currentFamily" }
+}
+$SysimagePath = Join-Path $RepoRoot "build/JuliaRelaxTime.$extension"
 
 if (-not ((Test-Path $SysimagePath) -and (Test-Path $MetaPath))) {
     switch ($MismatchPolicy) {
@@ -124,7 +124,7 @@ if (-not ((Test-Path $SysimagePath) -and (Test-Path $MetaPath))) {
 $UseSysimage = $false
 if ((Test-Path $SysimagePath) -and (Test-Path $MetaPath)) {
     $meta = Get-Content $MetaPath | ConvertFrom-Json
-    $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -HeadCommit $headCommit
+    $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -BuildInputsFingerprint (Get-BuildInputsFingerprint)
     if ($compat.Compatible) {
         $UseSysimage = $true
     } else {
@@ -136,7 +136,7 @@ if ((Test-Path $SysimagePath) -and (Test-Path $MetaPath)) {
                 Write-Warning "Incompatible sysimage detected; rebuilding local sysimage. Reason: $($compat.Reason)"
                 Build-LocalSysimage
                 $meta = Get-Content $MetaPath | ConvertFrom-Json
-                $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -HeadCommit $headCommit
+                $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -BuildInputsFingerprint (Get-BuildInputsFingerprint)
                 if (-not $compat.Compatible) {
                     throw "Rebuilt sysimage is still incompatible: $($compat.Reason)"
                 }

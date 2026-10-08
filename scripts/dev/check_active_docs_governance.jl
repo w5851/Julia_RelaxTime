@@ -1,50 +1,51 @@
 #!/usr/bin/env julia
 
+module ActiveDocsGovernance
+
 using Dates
 
-const ROOT = pwd()
-const ACTIVE_DIR = joinpath(ROOT, "docs", "dev", "active")
-
+const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const NAME_RE = r"^\d{4}-\d{2}-\d{2}_.+\.md$"
-const MAX_ACTIVE_AGE_DAYS = 60
+const REVIEW_AGE_DAYS = 60
 
-function is_stale(date_str)
-    created = Date(String(date_str), dateformat"yyyy-mm-dd")
-    return Dates.value(today() - created) > MAX_ACTIVE_AGE_DAYS
-end
-
-function main()
-    isdir(ACTIVE_DIR) || error("Active docs dir not found: $(ACTIVE_DIR)")
-
+function review_documents(root::AbstractString=ROOT; current_date::Date=today())
+    active_dir = joinpath(root, "docs", "dev", "active")
     violations = String[]
-    files = sort(readdir(ACTIVE_DIR))
-    for file in files
-        path = joinpath(ACTIVE_DIR, file)
-        isfile(path) || continue
-        endswith(file, ".md") || continue
-
+    advisories = String[]
+    isdir(active_dir) || return (; violations=["active docs directory not found: $(active_dir)"], advisories)
+    for file in sort(readdir(active_dir))
+        isfile(joinpath(active_dir, file)) && endswith(file, ".md") || continue
         if !occursin(NAME_RE, file)
             push!(violations, "invalid name format: $(file) (expected YYYY-MM-DD_*.md)")
             continue
         end
-
-        date_str = first(split(file, '_'))
-        if is_stale(date_str)
-            push!(violations, "stale active doc (>$(MAX_ACTIVE_AGE_DAYS)d): $(file)")
+        created = try
+            Date(first(split(file, '_')), dateformat"yyyy-mm-dd")
+        catch
+            push!(violations, "invalid date in active document filename: $(file)")
+            continue
+        end
+        if Dates.value(current_date - created) > REVIEW_AGE_DAYS
+            push!(advisories, "review active doc (>$(REVIEW_AGE_DAYS)d): $(file); archive by task status, not age")
         end
     end
-
-    if !isempty(violations)
-        println("[active-docs-governance] FAILED")
-        for v in violations
-            println(" - " * v)
-        end
-        println("hint: completed tasks should be archived via scripts/dev/archive_docs.jl")
-        exit(1)
-    end
-
-    println("[active-docs-governance] OK")
-    println("  rule: filename=YYYY-MM-DD_*.md, max_age_days=$(MAX_ACTIVE_AGE_DAYS)")
+    return (; violations, advisories)
 end
 
-main()
+function main()
+    result = review_documents()
+    foreach(item -> println("[active-docs-governance] advisory: " * item), result.advisories)
+    if !isempty(result.violations)
+        println("[active-docs-governance] FAILED")
+        foreach(item -> println(" - " * item), result.violations)
+        return 1
+    end
+    println("[active-docs-governance] OK")
+    return 0
+end
+
+end # module
+
+if abspath(PROGRAM_FILE) == @__FILE__
+    exit(ActiveDocsGovernance.main())
+end

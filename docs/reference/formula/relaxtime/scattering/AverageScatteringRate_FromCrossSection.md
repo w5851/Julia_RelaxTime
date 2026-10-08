@@ -159,8 +159,7 @@ $T\in(10,350)$ MeV、$\mu_B\in(0,1500)$ MeV、$\xi\in(0,1)$ 上随机抽取 **8 
 - 插值：`linear` 与 `pchip`
 - 参考口径：用相同参数点下的 dense σ-cache（仅重算 3 个过程）生成参考 importance，再用“synthetic sparse cache”复现生产模式下的插值误差。
 
-结果汇总 CSV：
-- [data/processed/results/relaxtime/w0cdf_random_params_N120_240_summary.csv](data/processed/results/relaxtime/w0cdf_random_params_N120_240_summary.csv)
+历史记录中的汇总文件为 `data/processed/results/relaxtime/w0cdf_random_params_N120_240_summary.csv`，当前仓库未保留该文件。下表保留当时记录，不作为本轮重新核验的结果。
 
 按 8 个点统计（指标为 `max_abs_rel`；越小越好）：
 
