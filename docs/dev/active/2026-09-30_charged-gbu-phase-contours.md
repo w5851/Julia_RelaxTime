@@ -4,6 +4,7 @@
 M9；前面各批次的数值、门禁判断和运行 SHA 保留为历史证据。绘图参数和复现方法
 统一维护在[脚本入口说明](../../guides/scripts/README.md)。分支整理保留与远程
 证据绑定的既有提交；M4 的研究产物晋升仍是独立事项，本文继续保留在 active。
+代码集成与最终 CI 状态见 [PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325)。
 
 2026-10-08 PR 集成验证：已合入主干 `fcbb3befafcdc1a50df248346e60095035be953e`，
 五个 Julia 合成/契约测试文件 `263/263`、三个 Python 绘图/候选测试文件 `43/43`
@@ -12,6 +13,12 @@ task ledger、active 文档、relaxtime 脚本及 SOP 治理检查均通过。ac
 中已改为按任务状态归档、年龄仅提示复核，当前保留两份旧任务的年龄提示；本轮没有
 修改该规则或归档其他任务。最终图包 12 条 hash 记录和三份派生 CSV 的逐字段核验
 通过，绘图生成器仍与冻结快照一致；没有重跑真实数值核。
+
+首轮完整 core CI（run `37717718162`）发现测试模块重载导致 q0 合成 profile 的
+`polarization` 扩展与被测函数分属不同模块，单独执行的五文件检查未触发该顺序。
+测试现直接绑定 q0 reference 持有的 profile/yield 模块；按 endpoint、production
+重载、benchmark、scan、reference、window 的六文件顺序复测 `287/287` 通过。
+修复仅涉及测试夹具绑定，计算源码、数值容差与冻结产物不变。
 
 主干整理只改变了 M9 数值来源清单中的 `src/models/Models.jl` 字节。保存背景恢复
 继续严格检查源码哈希；历史 M9 批次须使用计算版本 `c22f5e3e267bf2dce2431cf901a9dc3508d27600`

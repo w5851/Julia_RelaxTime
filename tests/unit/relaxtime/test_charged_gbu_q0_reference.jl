@@ -3,8 +3,10 @@ using Test
 isdefined(Main, :ChargedGBUContourScan) || include(joinpath(@__DIR__, "..", "..", "..",
     "scripts", "analysis", "relaxtime", "run_charged_gbu_contour_scan.jl"))
 const Q0_REFERENCE_TEST = Main.ChargedGBUContourScan.Reference
-const Q0_REFERENCE_P = Main.ChargedGBUResearchWorkflow.P
-const Q0_REFERENCE_Y = Main.ChargedGBUResearchWorkflow.Y
+# Other contract tests can reload Main.ChargedGBUResearchWorkflow. Extend the
+# profile module captured by the reference under test, even after that reload.
+const Q0_REFERENCE_P = Q0_REFERENCE_TEST.P
+const Q0_REFERENCE_Y = Q0_REFERENCE_TEST.Y
 
 struct Q0SyntheticProfile{K,T}
     kernel::K
