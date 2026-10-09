@@ -3,6 +3,7 @@
 
 # Accepted PRD phase-map delivery and its hash-bound source/acceptance evidence.
 data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 # Frozen literature audit inputs referenced by the v13 figure package.
 docs/analysis/relaxtime/phase_guided_transport/literature_figure_style_audit_20261005/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

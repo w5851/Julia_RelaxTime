@@ -36,6 +36,10 @@
 ## 2. 冻结输入与预检
 
 1. 选择新的 sibling case 目录，图像位于 `data/outputs/figures/<domain>/<figure_family>/`。
+   figures case 只保留 PNG/SVG/PDF 和唯一的 `plot_manifest.json`；caption、验收记录、
+   源码快照、归档及校验结果放在 `data/outputs/results/<domain>/<figure_family>/` 下
+   同名 case，由图像 manifest 引用。迁移已接受包时先保留完整原始字节及 hash，
+   再记录路径映射；不得重新渲染图像或把存储迁移解释为新的作者接受。
    已有目录不覆盖；失败重试也使用新目录。
 2. 核对字段、有限值、重复键、排序、support、失败状态及来源资格。冻结输入路径、
    bytes、SHA-256、生成器与依赖源码／profile、Git 上下文、实际运行环境和解析字体。

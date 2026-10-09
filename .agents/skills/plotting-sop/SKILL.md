@@ -17,7 +17,7 @@ description: 将仓库当前的 figure_production_v2 契约应用于新科研图
 
 ## 两阶段交付
 
-1. 创建新的同级输出目录。拒绝覆盖已有 case。记录每个输入路径、字节数、SHA-256、生成器 hash、Git 提交、运行环境、单位、变换、数据系列状态，以及掩码/插值规则。对保留的历史 case，使用所记录的完整提交或源码快照验证代码与绘图契约的 hash；按记录的字节数/hash 验证当前数据、图像和 manifest。
+1. 创建新的同级输出目录。拒绝覆盖已有 case。figures case 只保存图像和 `plot_manifest.json`；图注、验收、源码快照和归档放入 results 下的同名 case，并由 manifest 引用。记录每个输入路径、字节数、SHA-256、生成器 hash、Git 提交、运行环境、单位、变换、数据系列状态，以及掩码/插值规则。对保留的历史 case，使用所记录的完整提交或源码快照验证代码与绘图契约的 hash；按记录的字节数/hash 验证当前数据、图像和 manifest。
 2. 先生成 `png_review` 阶段。图像格式必须仅为 PNG，并在 manifest 中记录 `delivery_stage=png_review`、`manuscript_eligible=false`、`current_publication_layer=false` 和 `vector_delivery_pending=true`。运行全部非 PDF 质量检查：物理尺寸、有效分辨率、实测字形高度、线宽、四边向内的主/次刻度、裁切、重叠、单位和输出 hash。
 3. 停下来等待作者进行视觉审阅。将 PNG 与其 manifest 一同审阅；不得晋升产物或更新 `publication_clean_current.json`。
 4. 获得明确接受后，使用相同的冻结输入和绘图逻辑生成 PDF。用 `plot_delivery.py` 校验 `plot_png_acceptance_v1` 接受记录、PNG/manifest hash、冻结输入和两阶段显示语义；公共模块不生成或推断作者批准。运行 PDF 专属检查：单页、嵌入的非 Type-3 字体、曲线未被封装成栅格图、固定物理尺寸和 hash 匹配。只有所选期刊交付路径要求时，才添加 EPS/PS。

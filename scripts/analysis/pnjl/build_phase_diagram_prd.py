@@ -191,10 +191,24 @@ def make_figure(rows: dict, profile):
     return figure, series, closures, access
 
 
+def metadata_directory(out: Path, *, root: Path = ROOT) -> Path:
+    """Keep captions and provenance outside the image-only figures tree."""
+    root, out = root.resolve(), out.resolve()
+    try:
+        relative = out.relative_to(root / "data/outputs/figures")
+    except ValueError:
+        if out.is_relative_to(root / "data/outputs"):
+            raise ValueError("repository image output must be under data/outputs/figures")
+        return out.with_name(out.name + "__metadata")
+    return root / "data/outputs/results" / relative
+
+
 def build_case(out: Path, *, root: Path = ROOT, acceptance_path: Path | None = None) -> dict:
     root, out = root.resolve(), out.resolve()
-    if out.exists():
-        raise FileExistsError(f"refusing to overwrite case: {out}")
+    metadata = metadata_directory(out, root=root)
+    for directory in (out, metadata):
+        if directory.exists():
+            raise FileExistsError(f"refusing to overwrite case: {directory}")
     accepted = acceptance = None
     if acceptance_path is not None:
         acceptance = read_json(acceptance_path)
@@ -230,7 +244,7 @@ def build_case(out: Path, *, root: Path = ROOT, acceptance_path: Path | None = N
     gray.update(role="grayscale_review", inspection=inspect_export(gray_path),
                 source_color_sha256=outputs[0]["sha256"], conversion="Pillow ImageOps.grayscale, ITU-R 601 luminance")
     outputs.append(gray)
-    snapshot = out / "provenance/source_snapshot"
+    snapshot = metadata / "provenance/source_snapshot"
     inputs = [input_record(path, role="calculation_result" if path.suffix == ".csv" else "calculation_source_manifest", root=root) for path in input_paths]
     for relative in CONTRACTS:
         target = snapshot / relative
@@ -266,28 +280,30 @@ def build_case(out: Path, *, root: Path = ROOT, acceptance_path: Path | None = N
             "parameter_encoding": "color and distinct CEP shape; filled (a), open density estimate (b); phase uses solid/dashed",
             "coexistence_fill": "none; all native branches and explicitly declared CEP closure are retained"},
         calculation_sha=source["source_head_sha"], source_run_id=source["source_run_url"], root=root)
+    metadata_path = metadata.relative_to(root).as_posix() if metadata.is_relative_to(root) else str(metadata)
     manifest.update(manuscript_eligible=False, current_publication_layer=False, frozen_render_signature=signature,
+        metadata_directory=metadata_path,
         derived_display_geometry=closures, caption_parameters={"caption_latex": CAPTION, "rho0_fm3inv": 0.16,
             "xi_values": list(XI_VALUES), "xi_markers": list(MARKERS), "estimate": "density only; nearest subcritical coexistence mean",
             "closure": "explicit display guide", "filled_region": "none"},
         placement_limits=placement_limits(quality, profile, outputs), source_qualification={"status": "inherited_without_promotion",
             "verdict": source["verdict"], "residual_risks": source["residual_risks"], "new_numerical_computation": False})
     if accepted is not None:
-        accepted_copy = out / "provenance/png_review_manifest.json"
+        accepted_copy = metadata / "provenance/png_review_manifest.json"
         shutil.copyfile(resolve(acceptance["accepted_manifest"], root), accepted_copy)
         acceptance = {**acceptance, "accepted_manifest": input_record(accepted_copy, role="accepted_png_manifest", root=root),
                       "accepted_png": input_record(out / "phase_diagram_TmuB_Trho.png", role="accepted_png", root=root)}
-        receipt = out / "provenance/png_acceptance.json"
+        receipt = metadata / "provenance/png_acceptance.json"
         receipt.write_text(json.dumps(acceptance, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         manifest["author_review"] = {"status": "author_accepted_png", "record": input_record(receipt, role="author_png_acceptance", root=root)}
         manifest["inputs"].extend([manifest["author_review"]["record"], acceptance["accepted_manifest"]])
-    (out / "caption.tex").write_text(CAPTION + "\n", encoding="utf-8")
+    (metadata / "caption.tex").write_text(CAPTION + "\n", encoding="utf-8")
     limits = manifest["placement_limits"]
-    (out / "caption_handoff.md").write_text(
+    (metadata / "caption_handoff.md").write_text(
         "# PNJL 相图交接\n\n" + f"阶段：{stage}。画布 171.45 × 116.84 mm；最低插入宽度 {limits['minimum_width_inches'] * 25.4:.3f} mm。\n\n"
         "图注见 caption.tex。实心符号为源表 CEP 坐标；空心符号只估计 CEP 密度。两支共存密度来自更低温度，不是 CEP 密度 bracket。闭合线段仅用于显示；无共存区叠加填色。\n\n"
         "相图来源资格保持不变；正文采用依据作者另行授权。数值表、输运图和 current 指针不由本生成器修改。\n", encoding="utf-8")
-    (out / "README.md").write_text(f"# PNJL 相结构图 PRD 修订\n\n阶段：{stage}。\n\n单图合同见 plot_manifest.json；图注和插入限制见 caption_handoff.md。"
+    (metadata / "README.md").write_text(f"# PNJL 相结构图 PRD 修订\n\n阶段：{stage}。\n\n单图合同见对应 figures case 的 plot_manifest.json；图注和插入限制见 caption_handoff.md。"
         "彩色和灰度图保持相同尺寸。15 条显示闭合段与经验密度估计单独记录，原生顶点与 gap 保留。"
         "provenance 保存冻结绘图源码；矢量阶段还保存已接受的 PNG manifest 和接受记录。\n", encoding="utf-8")
     for path in input_paths:
@@ -295,7 +311,7 @@ def build_case(out: Path, *, root: Path = ROOT, acceptance_path: Path | None = N
             raise ValueError("numerical source changed during plotting")
     write_manifest(out / "plot_manifest.json", manifest)
     errors = validate_manifest(out / "plot_manifest.json", repo_root=root)
-    (out / "validation.json").write_text(json.dumps({"passed": not errors, "errors": errors,
+    (metadata / "validation.json").write_text(json.dumps({"passed": not errors, "errors": errors,
         "author_visual_review": "accepted_png" if accepted else "pending", "stage": stage}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if errors:
         raise ValueError(errors)
@@ -310,6 +326,7 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     result = build_case(args.output_dir, root=args.repo_root, acceptance_path=args.acceptance)
     print(json.dumps({"case": str(args.output_dir), "stage": result["rendering"]["delivery_stage"],
+                      "metadata_directory": result["metadata_directory"],
                       "minimum_glyph_mm": result["rendering"]["quality"]["minimum_capital_numeral_height_mm"]}))
     return 0
 

@@ -9,7 +9,7 @@
   "timezone": "Asia/Shanghai",
   "acceptance_scope": "Current revised PNG and its PDF export; retain density estimate, explicit closure and 60 MeV lower bound; paper adoption separately authorized in the same response.",
   "accepted_manifest": {
-    "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/png_review_manifest.json",
+    "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/png_review_manifest.json",
     "path_kind": "repository_relative",
     "role": "accepted_png_manifest",
     "bytes": 73426,

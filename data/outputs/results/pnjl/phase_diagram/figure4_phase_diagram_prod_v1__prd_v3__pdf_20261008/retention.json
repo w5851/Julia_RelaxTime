@@ -1,6 +1,6 @@
 {
   "schema": "phase_figure_final_delivery_retention_v1",
-  "policy": "commit only the final PDF delivery directory; retain the author-accepted PNG case inside its provenance archive",
+  "policy": "retain final images and plot_manifest in figures; retain captions, acceptance, source snapshots and archives in the same-named results case",
   "accepted_case_archive": {
     "path": "provenance/accepted_png_case.zip",
     "bytes": 833521,
@@ -101,5 +101,13 @@
   "original_case_paths_are_historical": true,
   "restore_rule": "Archive members are repository-relative paths; restore within a chosen checkout to recover the exact PNG-stage graph.",
   "raw_numerical_sources": "Existing tracked result tables are unchanged; referenced by plot_manifest.json.",
-  "superseded_local_trials": "Earlier r1/r2 trials remain local in the main checkout and are not part of this commit."
+  "superseded_local_trials": "Earlier r1/r2 trials remain local in the main checkout and are not part of this commit.",
+  "original_delivery_archive": {
+    "path": "provenance/accepted_delivery_before_relocation.zip",
+    "bytes": 1725622,
+    "sha256": "c6d8ee6a18fd270e77cd4b8fd9772b6d80a0fbed568194273115d4a2bcdb8994"
+  },
+  "figure_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008",
+  "metadata_directory": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008",
+  "storage_migration": "storage_relocation.json records the byte-preserving mapping; original delivery and accepted PNG graphs can be restored from their archives"
 }
