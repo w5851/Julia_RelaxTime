@@ -1,0 +1,25 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "采用当前版，继续完成",
+  "author_question": "我的建议是保留当前下方共享图例。按绘图 SOP，仍需你确认新 PNG 的视觉接受：是否采用这一版并继续完成 PDF、计算侧提交和论文更新？",
+  "source_thread_id": "01a11b2f-52ac-7561-b478-d459f3c1db6d",
+  "accepted_on": "2026-10-08",
+  "timezone": "Asia/Shanghai",
+  "acceptance_scope": "Current revised PNG and its PDF export; retain density estimate, explicit closure and 60 MeV lower bound; paper adoption separately authorized in the same response.",
+  "accepted_manifest": {
+    "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/png_review_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 73426,
+    "sha256": "d9db935dba6e27718e15d4dabfe63c9d1cec7e372406a81ee77f5bf903f7d176"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/phase_diagram_TmuB_Trho.png",
+    "path_kind": "repository_relative",
+    "role": "accepted_png",
+    "bytes": 575081,
+    "sha256": "767560cab354303531eebb8b46c347458f9bb1fac8eaa2fb4b0bcd6c3609f5dd"
+  }
+}

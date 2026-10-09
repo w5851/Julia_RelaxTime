@@ -153,6 +153,15 @@ def test_strict_rejects_estimated_or_connector_series(tmp_path):
     assert any("forbidden state" in error for error in errors)
 
 
+def test_strict_rejects_density_estimates_and_plain_connector_alias(tmp_path):
+    manifest_path = _make_manifest(tmp_path)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for state in ("estimated_density", "connector"):
+        payload["series"][0]["state"] = state
+        manifest_path.write_text(json.dumps(payload), encoding="utf-8")
+        assert any("forbidden state" in error for error in validate_manifest(manifest_path))
+
+
 def test_input_hash_mismatch_is_rejected(tmp_path):
     manifest_path = _make_manifest(tmp_path)
     input_path = tmp_path / "input.csv"

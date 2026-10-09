@@ -54,11 +54,12 @@ allow_external_legend = true
 publication_scope = "main_text_candidate"
 allow_unresolved = false
 allow_estimated_midpoint = false
+allow_estimated_density = false
 allow_connector = false
 interpolation_default = "none"
 
 [palette]
-colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000"]
+colors = ["#0072B2", "#D55E00", "#008565", "#AD5E8D", "#A86F00", "#007DA5", "#000000"]
 parameter_linestyles = ["-", "--", "-.", ":"]
 
 [phase_styles.first_order]

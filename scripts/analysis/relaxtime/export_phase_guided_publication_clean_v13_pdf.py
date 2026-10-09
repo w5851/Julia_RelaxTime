@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -29,7 +30,7 @@ from scripts.plotting.plot_bundle import build_bundle, load_chart_records
 from scripts.plotting.plot_manifest import (
     generator_record, input_record, runtime_record, sha256_file, write_manifest,
 )
-from scripts.plotting.plot_provenance import validate_hash_record
+from scripts.plotting.plot_provenance import code_ref_for_manifest, validate_hash_record, validate_snapshot
 from scripts.plotting.plot_quality import export_figure, placement_limits
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
 from scripts.plotting.validate_plot_artifact import validate_manifest, validate_manifest_record
@@ -71,7 +72,7 @@ def require_acceptance(acceptance):
         raise ValueError("v13 PDF export requires explicit PNG acceptance and unchanged eligibility")
 
 
-def verify_source_snapshot(acceptance, package):
+def verify_source_snapshot(acceptance, package, *, require_live=True):
     snapshot = acceptance["source_snapshot"]
     require_current(snapshot)
     with zipfile.ZipFile(ROOT / snapshot["path"]) as archive:
@@ -91,12 +92,15 @@ def verify_source_snapshot(acceptance, package):
             if runs:
                 if path not in archived or archived[path]["sha256"] != record["sha256"]:
                     raise ValueError(f"renderer dependency missing from accepted snapshot: {path}")
-                require_current(record)
+                if require_live:
+                    require_current(record)
                 executable.append(path)
     return sorted(set(executable))
 
 
-def load_accepted_case():
+def load_accepted_case(*, require_live=True, code_ref=None):
+    if not require_live and code_ref is None:
+        raise ValueError("historical verification requires a frozen delivery commit")
     acceptance = read_json(ACCEPTANCE)
     require_acceptance(acceptance)
     for key, expected in (("png_package", PNG_PACKAGE), ("png_bundle", PNG_INDEX)):
@@ -104,13 +108,15 @@ def load_accepted_case():
             raise ValueError(f"acceptance references a different {key}")
         require_current(acceptance[key])
     package = read_json(PNG_PACKAGE)
-    live_sources = verify_source_snapshot(acceptance, package)
+    live_sources = verify_source_snapshot(acceptance, package, require_live=require_live)
     for record in package["inputs"]:
-        if errors := validate_hash_record(record, root=ROOT, label="accepted inputs"):
+        if errors := validate_hash_record(record, root=ROOT, label="accepted inputs", code_ref=code_ref):
             raise ValueError(f"accepted input changed: {errors}")
     for record in package["outputs"]:
         require_current(record)
-    if errors := validate_manifest(PNG_INDEX, repo_root=ROOT):
+    errors = (validate_manifest(PNG_INDEX, repo_root=ROOT) if require_live else
+              validate_snapshot(PNG_INDEX, root=ROOT, code_ref=code_ref))
+    if errors:
         raise ValueError(f"invalid accepted PNG bundle: {errors}")
     index, pairs = load_chart_records(PNG_INDEX, root=ROOT)
     if {kind: sum(chart["kind"] == kind for chart, _ in pairs) for kind in COUNTS} != COUNTS or len(pairs) != 75:
@@ -120,6 +126,17 @@ def load_accepted_case():
                 or record["rendering"]["typography_exception"] is not None):
             raise ValueError("accepted PNG record has inconsistent source or typography")
     return acceptance, package, index, pairs, live_sources
+
+
+def load_accepted_profile(acceptance):
+    """Read a verified profile as data; never execute an archived renderer."""
+    require_current(acceptance["source_snapshot"])
+    with zipfile.ZipFile(ROOT / acceptance["source_snapshot"]["path"]) as archive:
+        payload = archive.read("config/plotting/candidate_aps_v2.toml")
+    with tempfile.TemporaryDirectory(prefix="v13-frozen-profile-") as directory:
+        path = Path(directory) / "candidate_aps_v2.toml"
+        path.write_bytes(payload)
+        return load_profile(path)
 
 
 def rgba_digest(image):
@@ -342,24 +359,32 @@ def build_delivery():
 
 
 def check_delivery():
-    _, _, _, accepted, _ = load_accepted_case()
-    package = read_json(ANALYSIS_ROOT / "manifest.json")
+    package_path = ANALYSIS_ROOT / "manifest.json"
+    code_ref = code_ref_for_manifest(package_path, ROOT)
+    if code_ref is None:
+        raise ValueError("retained v13 PDF verification requires a registered delivery commit")
+    if errors := validate_snapshot(package_path, root=ROOT, code_ref=code_ref):
+        raise ValueError(f"retained PDF package integrity failed: {errors}")
+    acceptance, _, _, accepted, _ = load_accepted_case(require_live=False, code_ref=code_ref)
+    package = read_json(package_path)
     for record in package["outputs"]:
         require_current(record)
     provenance = package["vector_export"]
     for key in ("exporter", "author_acceptance", "source_package", "source_bundle", "source_snapshot", "export_contract"):
-        require_current(provenance[key])
+        if errors := validate_hash_record(provenance[key], root=ROOT, label=f"vector_export.{key}",
+                                         code_ref=code_ref, allow_historical=key in {"exporter", "export_contract"}):
+            raise ValueError(f"retained export provenance changed: {errors}")
     index_path = FIGURE_ROOT / "plot_manifest.json"
     if package["figure_index_sha256"] != sha256_file(index_path):
         raise ValueError("PDF bundle hash changed")
     index, delivered = load_chart_records(index_path, root=ROOT)
     if len(delivered) != 75 or {kind: sum(chart["kind"] == kind for chart, _ in delivered) for kind in COUNTS} != COUNTS:
         raise ValueError("PDF bundle figure counts differ from accepted PNG")
-    if errors := validate_manifest(index_path, repo_root=ROOT):
+    if errors := validate_snapshot(index_path, root=ROOT, code_ref=code_ref):
         raise ValueError(f"PDF contract validation failed: {errors}")
     source_by_id = {record["asset_id"]: record for _, record in accepted}
     seen = set()
-    profile = load_profile("candidate_aps_v2")
+    profile = load_accepted_profile(acceptance)
     for chart, record in delivered:
         source_id = record["source_png_manifest"]["figure_id"]
         if source_id in seen or source_id not in source_by_id:

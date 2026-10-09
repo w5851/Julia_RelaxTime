@@ -156,6 +156,8 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 
 ### 论文级绘图合同工具
 
+- [scripts/analysis/pnjl/build_phase_diagram_prd.py](../../../scripts/analysis/pnjl/build_phase_diagram_prd.py)
+  - 从冻结相图表生成 PRD 双联图；先以 `--output-dir <new-case>` 生成彩色/灰度 PNG，作者接受后以 `--acceptance <receipt.json>` 在新目录交付同版 PDF。经验密度估计和 15 条显示闭合段独立记账，不调用 solver。figures case 只保存图像和 `plot_manifest.json`；图注、插入尺寸、验收和源码快照保存到 results 下的同名 case。仓库输出树外的临时 case 使用同级 `<case>__metadata` 目录。
 - [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
   - 单图或多图总 `plot_manifest.json` 的稳定验证入口；多图包展开 `shared + figures[].record` 后逐记录检查输入/输出 hash、单位、support/mask 和 strict gate；APS v2 还核验实际物理尺寸、有效 DPI、PDF 矢量内容/字体嵌入、最终字形高度、四侧刻度和文字/图例布局
 - `scripts/plotting/inventory_figure_assets.py`
