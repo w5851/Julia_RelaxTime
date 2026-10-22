@@ -68,6 +68,10 @@ Julia 环境文件、`src/`、完整配置、`scripts/relaxtime/` 桥接依赖�
 有限 q 扫描脚本、原始分析说明和历史测试，以及三组已复用中心输入。
 未提交的 q0 扫描脚本也在快照中。413 个文件的逐项 hash 与压缩包 hash 见 manifest。
 
+历史 Git checkout 由已推送的 annotated tag
+[`archive/charged-gbu-mub-sensitivity-20260912`](https://github.com/w5851/Julia_RelaxTime/tree/archive/charged-gbu-mub-sensitivity-20260912)
+保存，指向上述 capture HEAD。tag 记录提交历史；未提交的 q0 脚本和原始结果仍以两个留存包为准。
+
 有限 q 原 manifest 的 `source_git_head=b3922e5fc2e1f70150c812859c2464a8685a26f6`
 是当时基点，扫描脚本当时尚未提交；已记录的源码 hash 才用于确认 v3/refinement
 对应字节。q0 manifest 记录 capture HEAD，但缺少脚本 hash。
@@ -88,8 +92,10 @@ python -m zipfile -e data/outputs/results/relaxtime/analysis/charged_rpa_phase_b
 快照用于历史恢复，不注册新的稳定 CLI 或测试。
 
 解压目录不含 `.git`，原扫描脚本在生成运行 manifest 时会读取 Git HEAD；
-若后续授权重放，应在 manifest 的 capture HEAD 建立独立历史 checkout，
-再叠加归档中的未提交脚本与结果。不能把单纯解压目录当作完整 Git checkout。
+若后续授权重放，可使用上述历史 tag 建立独立 checkout（例如
+`git worktree add --detach D:/Temp/charged-gbu-mub-replay archive/charged-gbu-mub-sensitivity-20260912`），
+核对 HEAD 等于 manifest 的 capture HEAD，再叠加两个留存包并校验文件 hash。
+不能把单纯解压目录当作完整 Git checkout。
 
 [validation.json](validation.json) 记录本次压缩包 CRC、477 个成员的字节/hash、
 原报告三个 hash、九点背景对应和失败保留检查。已在空目录解压并实际加载 q0/有限 q
@@ -102,5 +108,9 @@ merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；合并 PR 的十�
 [等高图任务](../../../dev/active/2026-09-30_charged-gbu-phase-contours.md) 的代码集成已收口，
 M4 的作者研究产物审阅仍单独保留；不因代码合并或本次留存而标记 accepted/promoted。
 
-原 sensitivity 分支/worktree 继续保留。本次保存覆盖已发现的原始结果和源码，
-完成留存包的主干集成与持久校验后，原 worktree 的回收仍按单独授权执行。
+留存包已随 [PR #328](https://github.com/w5851/Julia_RelaxTime/pull/328) 合入主干。
+2026-10-22 经作者授权，历史 tag 已推送，原 `D:/w/charged-gbu-mub-sensitivity`
+worktree 和 `codex/charged-gbu-mub-sensitivity` 分支已回收。
+回收前，64 个原结果文件和未提交的 q0 脚本均与主干归档逐字节/hash 一致；
+额外的 620 字节 `test/SuppositionDB/README.md` 为通用示例说明，无科研结果。
+历史实现按 tag 与留存包恢复，M4 作者审阅和原有来源缺口维持上述状态。
