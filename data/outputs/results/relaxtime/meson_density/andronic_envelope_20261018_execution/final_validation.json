@@ -1,0 +1,409 @@
+{
+  "schema": "andronic_envelope_final_validation_v1",
+  "status": "passed",
+  "checked_utc": "2026-10-18T06:47:01.914669+00:00",
+  "git_head": "698feaf8fada670fde81c93bab6093b50093935f",
+  "evidence_status": "diagnostic_only",
+  "author_review": "pending",
+  "commands": [
+    {
+      "name": "focused_python_tests",
+      "cmd": "& 'D:/Python313/python.exe' -m unittest tests.unit.python.test_andronic_parameter_envelope tests.unit.python.test_freezeout_parameter_envelope tests.unit.python.test_freezeout_thermodynamic_envelope tests.unit.python.test_freezeout_comparison",
+      "chunk_id": "04bbed",
+      "wall_time_seconds": 4.4834692,
+      "exit_code": 0,
+      "original_token_count": 33,
+      "output": ".........................\r\n----------------------------------------------------------------------\r\nRan 25 tests in 0.381s\r\n\r\nOK\r\n"
+    },
+    {
+      "name": "task_ledger",
+      "cmd": "& 'D:/DevTools/Julia-1.12.5/bin/julia.exe' --project=. scripts/dev/check_task_ledger.jl",
+      "chunk_id": "2ec353",
+      "wall_time_seconds": 1.58e-05,
+      "original_token_count": 15,
+      "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml\n",
+      "exit_code": 0
+    },
+    {
+      "name": "docs_consistency",
+      "cmd": "& 'D:/DevTools/Julia-1.12.5/bin/julia.exe' --project=. scripts/dev/check_docs_consistency.jl",
+      "chunk_id": "c4ebc1",
+      "wall_time_seconds": 9.2e-06,
+      "original_token_count": 17,
+      "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突\n",
+      "exit_code": 0
+    },
+    {
+      "name": "diff_check",
+      "cmd": "git diff --check",
+      "chunk_id": "ae3d79",
+      "wall_time_seconds": 2.9450498,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "name": "pipeline_syntax",
+      "cmd": "& 'D:/Python313/python.exe' -m py_compile scripts/analysis/relaxtime/run_andronic_envelope_pipeline.py scripts/analysis/relaxtime/andronic_parameter_envelope.py",
+      "chunk_id": "7b81a9",
+      "wall_time_seconds": 3.4559356,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  ],
+  "worker_processes": [
+    {
+      "id": 66871,
+      "chunk_id": "3d1902",
+      "wall_time_seconds": 2.22e-05,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "id": 58770,
+      "chunk_id": "a2ce78",
+      "wall_time_seconds": 2.13e-05,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  ],
+  "pipeline": {
+    "original_exit_code": 1,
+    "postprocessing_recovered": true,
+    "recovery": {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\postprocessing_recovery.json",
+      "bytes": 3536,
+      "sha256": "1db5bcb24034ac14c33d2b1639c22575d175ba2cddec4578189854817bd9cbea"
+    },
+    "corrected_pipeline_syntax_checked": true
+  },
+  "numerical_runs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_screen_0",
+      "scan_identity": "94e8f61f9fd1ee83f6f392d09862bd3d05aef68a451321980492f13602f6c70f",
+      "manifest_sha256": "023c80def442f849e9ba6b203aa50a54e12562fb71fbf6e8b03d07ae25326dd6",
+      "point_count": 391,
+      "successful_points": 372,
+      "warning_points": 207,
+      "snapshot_hashes_checked": 39
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_screen_1",
+      "scan_identity": "70c6cd9ddeec7e7f2695223921a413e902ceed16c6f65a39eb51696fae3c6ff3",
+      "manifest_sha256": "c28082337babb263291e31231a38ffc35092a5e11d08e9c9c3e897283668ba57",
+      "point_count": 391,
+      "successful_points": 378,
+      "warning_points": 203,
+      "snapshot_hashes_checked": 39
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_local_screen_0",
+      "scan_identity": "112758d13fbcbebc0f631c85e94d70ca04ec0efff2b4f32ece29f3dff27e13f3",
+      "manifest_sha256": "56c629048ca7cf8a159246e57baa0e81f6da6bb810ddc0bec14333ab0f78a34c",
+      "point_count": 85,
+      "successful_points": 85,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 21
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_local_screen_1",
+      "scan_identity": "bbc3cae5f6b5194769004586bbbfd29e7a90e93d5cf3930cbbe5ad970a5d49d3",
+      "manifest_sha256": "7825806a3c38c3193e07a45077c93b826a79a6c9c7c1e3fb97f868542dd59ce7",
+      "point_count": 85,
+      "successful_points": 84,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 21
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_mapping_screen_0",
+      "scan_identity": "9404f4ff2d6f880b293e61dede6ec4872916cfa6016d909764b642b4458c29bd",
+      "manifest_sha256": "31a409752ecfd92046ead175ec0137a08ea9a9b505f030e33634054c6eb02b46",
+      "point_count": 34,
+      "successful_points": 31,
+      "warning_points": 18,
+      "snapshot_hashes_checked": 18
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_mapping_screen_1",
+      "scan_identity": "ad4b4af641f507d2fa578a34469094687e516cfb30479a99c718172fb5c788ac",
+      "manifest_sha256": "0661f58d348b4a03d2ca516a73198e52bd711173936fec4cdaf37ebc60d11ccf",
+      "point_count": 17,
+      "successful_points": 17,
+      "warning_points": 11,
+      "snapshot_hashes_checked": 17
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_standard",
+      "scan_identity": "ac49dc4d84cca2bb69ca171c6c79c34e230b1f1c526b7f6299e5e3cdf7401c0f",
+      "manifest_sha256": "aa8f37a02e9ca9ddee6d20cf5948167a9a39b3155b25a6bbbf4e17cf3163899c",
+      "point_count": 66,
+      "successful_points": 66,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 19
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_fine_0",
+      "scan_identity": "000cc88876d02c8dc7722d94d78dc2799061de53f6bdc813d8617da433550fb3",
+      "manifest_sha256": "bde8f30987bd367017788c889697830763bcc1d56f3d555f463a53193c22f3e1",
+      "point_count": 40,
+      "successful_points": 40,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 17
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_fine_1",
+      "scan_identity": "22682c82831fbf31577b425595527ed9f2ba7f89c26542da0497ae1123d59a7c",
+      "manifest_sha256": "49a1262fbc3c093b69ea1473108b8e4445e08b264ec2d7d1bffc7c732535a1ec",
+      "point_count": 80,
+      "successful_points": 80,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 18
+    }
+  ],
+  "numerical_run_count": 9,
+  "new_points": 1189,
+  "successful_new_points": 1153,
+  "snapshot_hashes_checked": 209,
+  "analysis_checksums_verified": 33,
+  "screening": {
+    "candidates": 59,
+    "points": 1003,
+    "successful_points": 967,
+    "rankable_primary": 43,
+    "complete_members": 42,
+    "near_best_members": 10
+  },
+  "design_and_coordinate_checks": {
+    "profile_count": 62,
+    "numerical_coordinate_points": 1189,
+    "maximum_error_MeV": 2.842170943040401e-14
+  },
+  "worker_requests": [
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_001.json",
+        "bytes": 835,
+        "sha256": "79c3df31583d00e36dc30c0c9348828a0405809041966f1e66077f612536106d"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_001_done.json",
+        "bytes": 395,
+        "sha256": "8dd078dd0e0f0acf297ae656fb99f5cf2e2f4b07f244e25981f2b36690bb1956"
+      },
+      "scan_identity": "112758d13fbcbebc0f631c85e94d70ca04ec0efff2b4f32ece29f3dff27e13f3"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_002.json",
+        "bytes": 704,
+        "sha256": "569689e83c7bac527d6f9f3c24aabd7ada533a601c8e56b8be0b4750803f70c2"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_002_done.json",
+        "bytes": 397,
+        "sha256": "5ebc0ae90b4787a146b4ef7743ac44a80ed3cd5a4965f119323c6679303fae0a"
+      },
+      "scan_identity": "9404f4ff2d6f880b293e61dede6ec4872916cfa6016d909764b642b4458c29bd"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_003.json",
+        "bytes": 801,
+        "sha256": "489c779134d7fb4c248be9ee77ed25fb4f27b916e191266d344c9fb63a913e54"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_003_done.json",
+        "bytes": 389,
+        "sha256": "c72f9918e431008e1e9a08dcb26d358032086c27580a6c02d020ccaeb7f2218e"
+      },
+      "scan_identity": "ac49dc4d84cca2bb69ca171c6c79c34e230b1f1c526b7f6299e5e3cdf7401c0f"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_004.json",
+        "bytes": 916,
+        "sha256": "b9c1a3b3931de3937a7c6538345e0ce9ba552e8792bc736720e25d1b85f2a23e"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_004_done.json",
+        "bytes": 387,
+        "sha256": "ff96194003bca6a9d11d4264b446f860f1a215fbbacb38c0a6388bb0b5319ee6"
+      },
+      "scan_identity": "000cc88876d02c8dc7722d94d78dc2799061de53f6bdc813d8617da433550fb3"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_001.json",
+        "bytes": 830,
+        "sha256": "406df3136350968016d6e4776f1fedccff72a8ac682aad2d117d05548a68ecbc"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_001_done.json",
+        "bytes": 395,
+        "sha256": "62c5a7efb1072b0f43a6bd2cd547bb31212f5e20a0090e3e57c543e2a982c0a6"
+      },
+      "scan_identity": "bbc3cae5f6b5194769004586bbbfd29e7a90e93d5cf3930cbbe5ad970a5d49d3"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_002.json",
+        "bytes": 675,
+        "sha256": "1e7106fa443796fc4276b88b14679ad78de6e9849d1f706967545acbf9c3a260"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_002_done.json",
+        "bytes": 397,
+        "sha256": "665a9ddd16e8df98d8fec81534eefab049609171bfdd71c7e802d91cb8e126b6"
+      },
+      "scan_identity": "ad4b4af641f507d2fa578a34469094687e516cfb30479a99c718172fb5c788ac"
+    },
+    {
+      "request": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_003.json",
+        "bytes": 951,
+        "sha256": "0982548185dce11182530c43c1bdb20509243fe837e69e11b38bd2e61147d6c9"
+      },
+      "completion": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_003_done.json",
+        "bytes": 387,
+        "sha256": "d36615478ee3a85ddcb9ee4a33a53c2c1fdaa891b277bc91d9d6ddc66663aedf"
+      },
+      "scan_identity": "22682c82831fbf31577b425595527ed9f2ba7f89c26542da0497ae1123d59a7c"
+    }
+  ],
+  "stop_requests": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_0_005.json",
+      "bytes": 79,
+      "sha256": "a1eedab37de530431bda380e0a5b98fa38f0bd4f9bf144d10ba022be3c442156"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\worker_1_004.json",
+      "bytes": 79,
+      "sha256": "a1eedab37de530431bda380e0a5b98fa38f0bd4f9bf144d10ba022be3c442156"
+    }
+  ],
+  "source_pdfs_checked": 6,
+  "preserved_polynomial_artifact_count": 8,
+  "preserved_polynomial_artifacts_unchanged": true,
+  "thermodynamic_projection": {
+    "grid_points": 508,
+    "coordinate_check": {
+      "points": 156,
+      "maximum_error_MeV": 5.684341886080802e-14
+    },
+    "members": 42,
+    "near_members": 10,
+    "distinct_near_curves": 10
+  },
+  "plots": [
+    {
+      "manifest": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_png_review_r1\\plot_manifest.json",
+        "bytes": 19659,
+        "sha256": "74c7db6adb1e3e1a1a0b245c155eb0b82188dc7105633f4cb76e6895924b194b"
+      },
+      "review": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_png_review_r1\\review.json",
+        "bytes": 1536,
+        "sha256": "7b0f9b8bbe311ed361f00ae6093234f45be7c87cbc1327a8e12a08bd45273eb1"
+      },
+      "status": "passed",
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.2955693291375034,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.2955693291375034,
+          "curve": 1.9852941176470589
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0721826171874997,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    },
+    {
+      "manifest": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_png_review_r1\\plot_manifest.json",
+        "bytes": 22014,
+        "sha256": "a2dd8fb9fd49eb96ca6bb2d345b0528cb587d19af388e8084f8092aa4b3c1df9"
+      },
+      "review": {
+        "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_png_review_r1\\review.json",
+        "bytes": 1544,
+        "sha256": "c593ed0aa128dc0a0db33858511f13435222c71914c3678621e3e3d11b694c12"
+      },
+      "status": "passed",
+      "placement_limits": {
+        "schema": "plot_placement_limits_v1",
+        "measured_width_inches": 6.75,
+        "minimum_width_inches": 6.440191165844179,
+        "maximum_width_inches": 6.75,
+        "minimum_width_constraints": {
+          "glyph": 6.440191165844179,
+          "curve": 1.9852941176470589
+        },
+        "maximum_width_constraints": {
+          "project_profile": 7.0,
+          "png_0_effective_dpi": 6.75,
+          "png_1_effective_dpi": 6.75
+        },
+        "has_usable_interval": true,
+        "measured_width_qualified": true,
+        "single_column_width_inches": 3.375,
+        "single_column_reuse_qualified": false,
+        "single_column_minimum_glyph_mm": 1.0481055338541665,
+        "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+      }
+    }
+  ],
+  "best_parameters": {
+    "T_lim_GeV": 0.15450868637489545,
+    "log_offset": 2.718417742065884,
+    "log_width": 0.47150281506186065,
+    "d_GeV": 1.1184781730770237,
+    "e_GeV_inv1": 0.31049824162389916
+  },
+  "best_nine_point_rmse": 0.10403104254885334,
+  "best_full_fine_sampled_peak": {
+    "energy_GeV": 15.0,
+    "ratio": 0.3070181410285297
+  },
+  "plateau_14p5_to_15_ratio_difference": 4.594247507427873e-07,
+  "ranking_stable": true,
+  "maximum_standard_fine_relative_difference": 5.930043745662205e-05,
+  "matched_polynomial_rmse": 0.0691043230271594,
+  "limitations": [
+    "best among sampled/selected curves; no global optimum guarantee",
+    "screening band has not been uniformly recomputed at fine resolution",
+    "source-specific covariance relaxed by author-approved exploration; no confidence level",
+    "low-energy extensions do not reproduce each source paper's validity range",
+    "fixed finite integration window; no endpoint/tail limit certification",
+    "no final-state decay or rapidity-acceptance model"
+  ],
+  "testing_scope": "Focused formula/design/selection/projection tests and all-batch source/data checks; numerical kernels and solver semantics unchanged, so full Julia solver regression was not rerun.",
+  "retained_artifacts": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_summary\\summary.json",
+      "bytes": 27390,
+      "sha256": "8ea288556cfd8512697c191ac3b74aa6e0fb8b1336a6f29aeeb09e1cd4fb55a7"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_prepared\\preparation.json",
+      "bytes": 6295,
+      "sha256": "b09a6c0c5173bb52f1cb22d28fc510f6b825843d7e0f86d185d5cf5eb0e6e355"
+    }
+  ]
+}

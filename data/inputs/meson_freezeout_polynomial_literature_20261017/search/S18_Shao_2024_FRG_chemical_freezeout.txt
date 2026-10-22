@@ -1,0 +1,1283 @@
+                                                  Chemical freeze-out parameters via functional renormalization group approach
+                                                                           Jun-xiang Shao,1, 2, ∗ Wei-jie Fu,3, † and Yu-xin Liu1, 2, 4, ‡
+                                          1
+                                              Department of Physics and State Key Laboratory of Nuclear Physics and Technology, Peking University, Beijing 100871, China
+                                                                   2
+                                                                     Collaborative Innovation Center of Quantum Matter, Beijing 100871, China
+                                                                    3
+                                                                      School of Physics, Dalian University of Technology, Dalian, 116024, China
+                                                                    4
+                                                                      Center for High Energy Physics, Peking University, Beijing 100871, China
+                                                             We study the freeze-out parameters in a QCD-assisted effective theory that accurately captures
+                                                          the quantum and in-medium effects of QCD at low energies. Functional renormalization group
+                                                          approach is implemented in our work to incorporate the non-perturbative quantum, thermal and
+                                                          density fluctuations. By analyzing the calculated baryon number susceptibility ratios χB       B
+                                                                                                                                                     2 /χ1 and
+                                                           B     B
+                                                          χ3 /χ2 , we determine the chemical freeze-out temperatures and baryon chemical potentials in cases
+arXiv:2305.16763v2 [hep-ph] 30 May 2023
+
+
+
+
+                                                          of hard thermal or dense loop improved µ-dependent glue potential and µ-independent glue potential.
+                                                          We calculate the χB     B    2       B    B
+                                                                              4 /χ2 (κσ ) and χ6 /χ2 along the freeze-out line for both cases. It’s found that
+                                                             2
+                                                          κσ exhibits a nonmonotonic behavior in low collision energy region and approach to one for lower
+                                                          collision energy. χB    B
+                                                                             6 /χ2 shows a similar complicated behavior in our calculation.
+
+
+
+
+                                                              I.   INTRODUCTION                               connecting different freeze-out points in the plane. It has
+                                                                                                              been shown that a nonmonotonic behavior of conserved
+                                             The study of QCD phase transitions is a very active              charge fluctuations can arise as the chemical freeze-out
+                                          field of research. The transitions include both the chiral          line approaches to the CEP [22–24]. The Beam Energy
+                                          phase transition and the deconfinement phase transition.            Scan (BES) program at the Relativistic Heavy Ion Col-
+                                          The chiral phase transition is signaled by the dynamical            lider (RHIC), the Facility for Antiproton and Ion Re-
+                                          chiral symmetry breaking and responsible for the mass               search (FAIR) in Darmstadt, the Nuclotron-based Ion
+                                          of visible matter in the universe, while the deconfine-             Collider Facility (NICA) in Dubna and the high-intensity
+                                          ment phase transition is signaled by the center symmetry            heavy-ion accerator facility (HIAF) in Huizhou all take
+                                          breaking and related to hadron formulation. A thorough              the search of the CEP as one of their most important
+                                          understanding of QCD phase transitions may shed light               scientific objectives [18, 19, 25], and some important re-
+                                          on the process and the nature of the early universe evo-            sults have been found by the RHIC collaboration [21, 26–
+                                          lution [1]. The first principle lattice QCD simulations             30]. In theoretical aspects, the freeze-out conditions have
+                                          indicate that the phase transition is a smooth crossover            been studied in Dyson-Schwinger equations (DSE) ap-
+                                          in the low baryon chemical potential [2, 3]. Although its           proach [14, 31], functional renormalization group (FRG)
+                                          predictive capability is hampered due to the notorious              approach [7, 32], lattice QCD simulations [33–35], statis-
+                                          sign problem region [4, 5] when the finite baryon chemi-            tical hadronization models [36–40] and other models [41–
+                                          cal potential is considered, other first principle methods          43]. However, the position of the chemical freeze-out line,
+                                          as well as low energy effective theories, such as the func-         the existence and the location (if exsists) of the CEP, the
+                                          tional renormalization group (FRG) [6–13] and Dyson-                conservation charge fluctuations, and some other prob-
+                                          Schwinger equations (DSE) [14–17] have come to play a               lems are still unclear and further investigations are neces-
+                                          complementary role, and some evidence has been found                sary, especially when the high baryon chemical potential
+                                          that there might be a critical end point (CEP) in the tem-          is involved. We then take the FRG approach combin-
+                                          perature T –baryon chemical potential µB plane. The ex-             ing with a QCD-assisted effective field theory model to
+                                          istence of CEP still needs confirmation in experiments,             study the position of the chemical freeze-out line, the
+                                          and its exact position if it exists, have become one of             higher order baryon number fluctuations and related is-
+                                          the most significant topics in both theories and experi-            sues in finite temperature and baryon chemical potential
+                                          ments [18–21].                                                      system in this paper.
+                                             In experiments, however, one can not measure the                    The QCD-assisted low-energy effective theory natu-
+                                          phase transitions directly but only the hadron states after         rally emerges from QCD by integrating out the high en-
+                                          hadronization, to wit, the chemical freeze-out state which          ergy degrees of freedom at the low energy scale. We
+                                          is defined as the set of particle states ceasing the inelastic      choose the Polyakov-quark-meson (PQM) model as an
+                                          collisions between hadrons. For different collision ener-           effective realization of QCD in this work, and make use
+                                          gies one obtains different chemical freeze-out states corre-        of the FRG approach to deal with the effect of the fluctu-
+                                          sponding to different chemical freeze-out points in the T –         ations of the fields and other nonperturbative properties
+                                          µB plane, and thus one observes a chemical freeze-out line          of the QCD system. The PQM model has extended the
+                                                                                                              traditional quark-meson model that describes chiral dy-
+                                                                                                              namics of QCD quite well to include the description of the
+                                          ∗ junxiangshao@pku.edu.cn                                           deconfinement aspects of QCD phase structures [44–47],
+                                          † wjfu@dlut.edu.cn
+                                                                                                              and it is also well-suited for the study of thermodynam-
+                                          ‡ Corresponding author: yxliu@pku.edu.cn
+                                                                                                              ical properties and baryon number fluctuations in QCD
+                                                                                                                          2
+
+system. It has also been known that the low-energy ef-          tively, while the fourth is the mesonic loop introduced
+fective models can be related to full QCD systematically        via the dynamical hadronization [50, 64].
+within the FRG approach [48–50], see also the discussion
+in Sec. II.
+   The one vital component of the PQM model is the con-
+struction of the glue potential of full QCD, which encodes        ∂t Γk [φ] = 21          −      −          + 12
+the glue dynamics in the presence of matter fields and is
+represented effectively by a Polyakov-loop potential. The
+potential is fixed by fitting the lattice QCD data of the
+                                                                FIG. 1: Partially hadronized version of the FRG flow
+pure Yang-Mills system without quarks [45, 51, 52], and
+                                                                for the effective action in QCD. The loops denote the
+thus the coupling of the matter sector to the gauge sec-
+                                                                gluon, ghost, quark and meson contributions,
+tor is lost. There have been many attempts on recover-
+                                                                respectively. The crosses mark the regulator term.
+ing this unquenched effect and some significant progress
+has been made at least for small µB [46, 53–56]. In this
+work we simply take two kinds of Polyakov-loop poten-              In the QM model, only the contributions from the last
+tials. One is µ-dependent through µ-dependent pseudo-           two loops in Fig. 1 are taken into account, accounting
+critical deconfinement phase transition temperature T0 ,        only for the chiral aspect of QCD phase transitions with-
+which is based on hard thermal or dense loop considera-         out the deconfinement. As a better imitation of full QCD,
+tion and first put forward in Ref. [46] for a better treat-     the PQM model keeps all these four loops but implements
+ment of the phase structures in the finite density situa-       an effective glue potential to represent the contributions
+tions, see Eqs. (18) and (19) for the specific form used in     from the first two loops.
+this work. The γ̂ in Eq. (19) has been chosen to be one
+in Refs. [13, 57], and the calculated results have found
+a good agreement with the results of lattice QCD and
+                                                                               ∂t Γk [φ] = 21        −
+the HRG model. The other is µ-independent simply by
+choosing T0 as a constant with no hard thermal or dense
+loop improvements incorporated. The results based on
+these two different potentials are compared and discussed       FIG. 2: Flow equation of the effective action in the pure
+in the main text. The influence of other different values       Yang-Mills theory.
+of γ̂ is also explored and discussed in Appendix C.
+   Compared with previous works on QCD system of two
+                                                                   The glue potentials are commonly phenomenologically
+flavors [7, 32, 58, 59], the inclusion of the strange quark
+                                                                constructed on the basis of considering the fundamental
+brings more mesons into the system so that the system
+                                                                symmetries and only finite order terms of polynomials
+is closer to the real one. To include non-perturbative
+                                                                satisfying the symmetries are kept in their ansatz for sim-
+quantum, thermal and density fluctuations, the FRG ap-
+                                                                plicity. The parameters in the potentials are determined
+proach is implemented at finite temperature and density.
+                                                                by fitting the lattice QCD results for the pressure, the en-
+As a nonperturbative continuum field approach, FRG
+                                                                tropy density, the energy density and the evolution of the
+has been successfully applied in first principle QCD and
+                                                                expectation value of the Polyakov-loop with temperature
+model calculations [7, 8, 60–63]. It shows a powerful per-
+                                                                in the pure gauge theory, see Refs. [45, 51, 52, 65, 66] for
+formance on non-perturbative problems.
+                                                                their specific forms and further details. Note that the
+   This paper is organized as follows. After this introduc-     construction is done in the pure gauge theory, which cor-
+tion, we briefly describe the PQM model from the FRG            responds to Fig. 2 in the formulation of FRG.
+perspective in Sec. II. In Sec. III we describe our theo-          In Fig. 1 the gluon propagator can receive a contribu-
+retical framework and present our numerical setup. In           tion from quarks by quark polarization. However, the
+Sec. IV we give our numerical results on low-order sus-         contribution is missing in Fig. 2 due to the lack of quark
+ceptibility ratios, freeze-out parameters and high-order        freedoms in the pure gauge theory. The simplification to
+susceptibility ratios. We put a discussion of the influence     the contributions of the first two loops in Fig. 1 by the
+of other different values of γ̂ in Appendix C. In Sec. V        effective action in Fig. 2 means the neglect of the backre-
+we give a brief summary of our obtained results.                action of the matter sector to the gauge sector. Moreover,
+                                                                the above arguments also show that it is a formally ad-
+                                                                ditive structure for the different contributions, and thus
+   II. FUNCTIONAL RENORMALIZATION                               allows us to systematically improve the low-energy effec-
+  GROUP APPROACH TO THE PQM MODEL                               tive models towards full QCD within the FRG approach.
+                                                                   One important effect of the inclusion of the dynamical
+  FRG is a functional continuum field approach of QCD.          quarks in full QCD is the change of the scale ΛQCD , to
+A pictorial representation of the flow of QCD is shown in       which the transition temperature T0 of the Polyakov-loop
+Fig. 1, in which the first three loops in the right hand side   potential is related. Based on the hard thermal or dense
+denote the gluon, ghost and quark contributions respec-         loop resumation results, a relation is proposed in Ref. [46]
+                                                                                                                               3
+
+to estimate the flavor and the quark chemical potential             where jl σL and js σS are explicit symmetry break-
+dependence of T0 (Nf , µ). This accounts partially for the          ing terms, which reduce the SUV (3) symmetry to the
+backreaction effect. Furthermore, the µ dependence of               SUV (2). σL and σS are related to meson fields via the
+T0 is modified to account for the Silver-Blaze property of          chiral rotation
+QCD in [54]. Another important observation comes from                                    √          
+Ref. [53] that, although the QCD glue potential is differ-                        σL    1     2 √ 1     σ0
+                                                                                     = √                     .         (6)
+ent from the Yang-Mills potential their shapes are simi-                          σS     3 1 − 2        σ8
+lar, and the difference between them can be significantly
+decreased by a rescale of the temperature, see Eq. (17)             U (ρ1 , ρ2 ) is symmetric under the UV (3) × UA (3) trans-
+for the specific form. Based on this observation, a better          formations with two chiral invariants ρ1 and ρ2 ,
+agreement with lattice QCD results is achieved [53, 55].
+                                                                                       ρ1 =Tr Σ · Σ† ,
+                                                                                                   
+
+                                                                                                       1
+                                                                                       ρ2 =Tr (Σ · Σ† − ρ1 )2 .
+                                                                                                            
+ III.   2+1 FLAVOR LOW ENERGY EFFECTIVE                                                                                    (7)
+                                                                                                       3
+                   MODEL
+                                                                    ξ is the Kobayashi–Maskawa–’t Hooft determinant which
+                A.    Theoretical framework                         originates from the UA (1) anomaly effect [68, 69] and
+                                                                    reads
+  The PQM model is an effective realization of QCD
+system [45, 46, 67]. The Lagrangian of the 2+1 flavor                                 ξ = det(Σ) + det(Σ† ) .                 (8)
+PQM in the Euclidean space is given as
+                                                                      The temporal gluon background field A0 in Eq. (1) can
+  L =q̄[γµ ∂µ − γ0 (µ̂ + igA0 )]q + hq̄Σ5 q                         be formulated into the Polyakov loops, to wit,
+        + Tr(D̄µ Σ · D̄µ Σ† ) + Ũ (Σ, Σ† ) + Vglue (L, L̄) , (1)                   1                        1
+                                                                           L(x) =      Tr P(x) ,   L̄(x) =      Tr P † (x)    (9)
+where q is the quark field with three flavors (u, d, s) and                         Nc                       Nc
+three colors. µ̂ is the matrix form of the quark chemical
+potential in the flavor space, i.e. µ̂ = diag(µu , µd , µs ).       with
+The quark potentials are related to the baryon, isospin                                     Z β              
+and strangeness chemical potentials as follows                                 P(x) = P exp ig   dτ A0 (x, τ ) ,             (10)
+                   1                                                                            0
+                                    1
+                                         
+                   µu        3 µB + 2 µI
+                   1                                             where P is the path ordering operator.
+                 µd  =  3 µB − 12 µI  .              (2)
+                                         
+                                                                       Once the Lagrangian is given, there are several meth-
+                                   1
+                     µs            3 µB − µS                        ods to calculate the effective action of the system. Mean-
+                                                                    field approximation is one of the widely used method,
+For the time being, we use µI = 0 and do not consider               which treats meson fields as background fields and ne-
+the strangeness neutrality requirement in experiments, to           glect their fluctuations. However, it is shown that
+wit, µS = 0 is used. It is found that the constraint of             mesonic fluctuations are important for physics at low
+strangeness neutrality begins to make a sizable difference          temperature [67]. By contrast, the FRG approach can
+only when µB is significantly large [13].                           incorporate the fluctuations of mesons as well as quarks.
+   Meson fields are combined into the matrix forms which            It implements the procedure by introducing the regu-
+read                                                                lator term Rk (p), which suppresses the fluctuations for
+                          8
+                          X                                         momenta p < k, and leaves the fluctuations unchanged
+                     Σ=         (σa + iπa )T a ,                    for p > k. So when k is near the cutoff Λ, no fluctuations
+                          a=0                                       are included, i.e. Γk=Λ = Sbare . When k approaches to
+                          X8                                        zero, all fluctuations are included and we obtain the full
+                  Σ5 =          (σa + iγ5 πa )T a ,           (3)   effective action Γk=0 = ΓFull . The ideas are formulated
+                          a=0                                       in the Wetterich equation [70], which reads
+where σa and πa are the scalar and pseudo-scalar meson
+                                                                                      1
+nonets, T a is the SU(3) generator in the flavor space, and                 ∂t Γk =     Tr Gφφ    φ      qq̄   q
+                                                                                            k ∂t Rk − Tr Gk ∂t Rk ,          (11)
+T 0 = √16 I3×3 . The covariant derivative of meson fields is                          2
+defined as                                                          where t = ln(k/Λ), φ represents the mesonic degrees of
+                   D̄µ Σ = ∂µ Σ + δµ0 [µ̂, Σ] .               (4)   freedom; Gφφ          qq̄
+                                                                                k and Gk are the meson and quark propa-
+                                                                    gators, respectively; Rkφ and Rkq are the regulators for the
+The meson potential Ũ (Σ, Σ† ) reads                               meson and quark fields.
+                                                                       Similar with the DSE approach, FRG equations are
+        Ũ (Σ, Σ† ) = U (ρ1 , ρ2 ) − jl σL − js σS − cA ξ ,   (5)   infinitely coupled, so that truncations have to be taken
+                                                                                                                                  4
+
+to solve them. We truncate Γk as follows and make use                   it to account for the unquenched effect when quarks are
+of the local potential approximation (LPA),                             included [53]
+           Z 
+                                                                                           T − TYM      T − T0
+      Γk =      q̄[γµ ∂µ − γ0 (µ̂ + igA0 )]q                                          t=           =⇒ α        .               (17)
+              x                                                                              TYM          T0
+             + hq̄Σ5 q + Tr(D̄µ Σ · D̄µ Σ† ) + Uk (ρ1 , ρ2 )            The values of the α and T0 are explored and discussed
+                                                   
+                                                                        in Ref. [53]. Since they have some dependence on the
+             − jl σL − js σS − cA ξ + Vglue (L, L̄) ,        (12)
+                                                                        number of quark flavors and the parameterization of the
+                                                                        Polyakov loop potential, we treat them as free param-
+where only Uk (ρ1 , ρ2 ) flows with the RG scale k. The                 eters and determine them by fitting the pressure, trace
+wave function renormalizations of the fields and the                    anomaly with the lattice results. We choose the same
+Yukawa coupling do not run with the flow in this ap-                    values as those in Ref. [13], which are also presented in
+proximation.                                                            Table I.
+  Substituting Eq. (12) into Eq. (11) and implementing                     As mentioned in Sec. II, µ-dependent T0 is put for-
+the optimized regulators in Ref. [71], one obtains an an-               ward to account further for the unquenched effect of the
+alytic flow equation for Uk (ρ1 , ρ2 ) [13, 72],                        Polyakov-loop potential. Based on the identification of
+                                                                        ΛQCD in the one-loop beta function of QCD at large den-
+∂t Uk (ρ1 , ρ2 )
+                                                                        sity with the modification of the critical temperature, a
+     k4
+         
+              (B)                     (B)                               modification of T0 is suggested as Ref. [46]
+ =          3l0 (m̄2a0 ,k , T, 0) + 4l0 (m̄2κ,k , T, 0)
+    4π 2
+    (B)                   (B)                       (B)                                 T0 (Nf , µ) = Tτ e−1/(α0 bµ ) ,        (18)
+ + l0 (m̄2σ,k , T, 0) + l0 (m̄2f0 ,k , T, 0) + 3l0 (m̄2π,k , T, 0)
+      (B)                   (B)                     (B)
+ + 4l0 (m̄2K,k , T, 0) + l0 (m̄2η,k , T, 0) + l0 (m̄2η′ ,k , T, 0)      where the renormalization scale is given by Tτ =
+                                                       i               1.77 GeV with the strong coupling α0 = 0.304. The µ
+       h
+         (F )           1         (F )           1                      dependence is encoded in bµ as [13],
+ − 4Nc 2l0 (m̄l,k , T, µB ) + l0 (m̄s,k , T, µB ) ,
+                        3                        3
+                                                              (13)                              µ2             µ2
+                                                                                                                       
+                                                                                       16
+                                                                             bµ = b0 −     2          ∆nl +          ∆ns . (19)
+                                                                                       π     (γ̂Tτ )2       (γ̂Tτ )2
+with m̄2i,k ≡ m2i,k /k 2 . The quark masses are given by
+                                                                        In Ref. [46], b0 is chosen as one-loop QCD beta function
+                         h               h
+                  ml =     σL ,     ms = √ σS ,                 (14)    coefficient with b0 = (11Nc − 2Nf )/(6π), and the second
+                         2                2                             part in Eq. (19) with γ̂ = 1 and ∆nl/s = 1 is constructed
+while the meson masses are obtained through diagonal-                   such that the deconfinement phase transition and the chi-
+izing the Hessian matrix Hij ,                                          ral phase transition coincide for finite density at mean
+                                                                        field level. In this work, we treat b0 as free parameters in
+                                ∂ 2 Ũ (Σ, Σ† )                         the same way as T0 , and choose ∆nl/s as follows in order
+                      Hij =                     ,               (15)    to account for the Silver-Blaze property of QCD [13, 54],
+                                   ∂φi ∂φj
+
+with φi = (σ1 , σ2 , ..., σ8 , π1 , π2 , ..., π8 ). The explicit ex-                        1                1
+                                                                              ∆nl/s = 3(m −µ)/T      +
+pressions of meson masses can be found in Refs. [63, 73],                            e l/s      + 1 e3(ml/s +µ)/T + 1
+for example. The threshold functions l0
+                                                   (B/F )
+                                                          in Eq. (13)                        2
+                                                                                     − 3m /T       ,                  (20)
+are collected in Appendix A.                                                            e l/s  +1
+  The Polyakov-loop potential Vglue needs to be specified
+for the equations above. We take the parametrization in                 where ml/s is the vacuum mass of the light/strange
+Ref. [51]                                                               quark, and ∆nl/s reduces to the step function θ(µ−ml/s )
+                                                                        at vanishing temperature.
+    Vglue (L, L̄)    a(T )                                                 The γ̂ in Eq. (19) controls the curvature of the decon-
+                  =−       L̄L + b(T ) ln MH (L, L̄)                    finement phase transition. For γ̂ = ∞, bµ in Eq. (19)
+        T4             2
+                     c(T ) 3                                            is a constant which means no dependence on µ, and the
+                   +       (L + L̄3 ) + d(T )(L̄L)2 ,           (16)    Polyakov-loop potential becomes µ-independent. For fi-
+                       2
+                                                                        nite values of γ̂ the Polyakov-loop potential will develop
+which has the advantage of reproducing the Ployakov-                    a direct dependence on µ, which can be viewed as the
+loop susceptibilities as well as the usual thermal quanti-              hard thermal or dense loop improved Polyakov-loop po-
+ties of SU(3) Yang-Mills theory obtained in lattice QCD                 tential when the finite density is involved. In Ref. [13]
+simulations. The specific form and coefficients of Eq. (16)             γ̂ is chosen to be one and the obtained results show a
+are collected in Appendix A, see Eq. (A2) to (A5) and                   good agreement with the lattice results for the equation
+Table V. The t in Eq. (A2) to (A5) is the reduced tem-                  of state. With the same setup, the baryon-strangeness
+perature in the pure gauge theory, one needs to rescale                 correlation is calculated in Ref. [57], and the obtained
+                                                                                                                                     5
+
+results are in agreement with those of the HRG model.                 With the full effective potential Ωk as
+Thus in this work we show and compare the results cal-
+                                                                      Ωk (T, µ, σL , σS , L, L̄) = Ũk (Σ, Σ† ) + Vglue (L, L̄) , (24)
+culated with γ̂ = ∞ and γ̂ = 1, and denote the latter
+case as the µ-dependent case. In Appendix C we also                 the minimum of the effective potential satisfies
+discuss the influence of other different values of γ̂.
+                                                                                            ∂Ωk=0
+                                                                                                   = 0,                            (25)
+                                                                                             ∂ψ ψp
+                     B.   Numerical setup
+                                                                    where ψ represents (σL , σS , L, L̄) and ψp represents the
+                                                                    physical solution of ψ.
+   There are several methods to solve the flow equation in
+Eq. (13). The most commonly used method is the Taylor               TABLE I: Values of parameters for the initial
+expansion around the scale dependent minimum of the ef-             conditions and the Polyakov-loop potential.
+fective potential (the so-called running Taylor method),
+which is numerically labour-saving but has some draw-                      Λ/MeV           h       a10 /MeV2        a20      a01
+backs. Its convergence property is suspicious [11] and                      900           6.5         8302          10       54
+it may not allow for the value of the σ meson mass
+                                                                          jl /MeV3 js /MeV3        cA /MeV        α          b0
+below 500 MeV due to numerical instabilities [72]. See
+                                                                           120.732  336.413        4807.84       0.47        1.6
+also Ref. [74] for more discussions about the properties
+of convergence for this method. Another used approach
+is the grid method, which discretizes the fields (ρ1 , ρ2 )            In Table I we show our used parameters for the initial
+on the multi-dimensional grid and replace the deriva-               conditions and the Polyakov-loop potential. The last two
+tives of Uk with respect to the fields with appropriate             are related to the Polyakov-loop potential, see for exam-
+numerical diffenences, and then the flow equation can               ple Eqs. (17), (19), while the other parameters are related
+be transformed into a set of coupled ordinary differen-             to the effective action of the matter sector. Λ sets our
+tial equations [63, 75]. The grid method can capture the            cutoff scale, below which the gluon has developed a mass
+global properities of the effective potential but requires          gap and decoupled from the low energy physics [60]. The
+more numerical efforts. A fixed-point Taylor expansion              h, jl , js are fixed by the Goldberger-Treiman relation and
+has been developed in Refs. [11, 12]. In contradistinction          the PCAC theorem [76]. The cA represents the strength
+to the running Taylor method whose convergence prop-                of the UA (1) anomaly and it depends generally on the
+erty is hampered by the linear feedback from the high-              external parameters, such as the temperature or chem-
+order expansion coefficients to the lower ones [11, 74], the        ical potential. For the time being we take it as a con-
+potential is expanded around a scale-independent point              stant for simplicity. Then one should tune the parameters
+and a better convergence is obtained. More specifically,            a10 , a20 , a01 to produce the vacuum hadronic observables.
+we expand the Uk in Eq. (13) as                                     The produced vacuum hadronic observables are listed in
+                                                                    Table II, in which fπ , fK can be related to the quark
+                    N
+                    X    ωnm,k (T, µ)                               masses via mu,d = h2 fπ , ms = h2 (2fK −fπ ). The other im-
+Uk (ρ1 , ρ2 ) =                       (ρ1 − κ1 )n (ρ2 − κ2 )m ,     portant constrains on the parameters come from the pion
+                  n+2m=0
+                            n!m!                                    mass mπ = 138 MeV, the kaon mass mK = 496 MeV, the
+                                                             (21)   sum m2η + m2η′ = 1.219 GeV2 , and the σ meson mass
+                                                                    mσ = 463 MeV. In experiments σ meson mass shows a
+where expansion point κ1 and κ2 are scale-independent               large uncertainty, and its value from the latest PDG is
+and should be the IR minimum of the effective potential.            400–550 MeV. The parameters used here are the same as
+Setting N = 5 has been shown to be sufficient for nu-               those used in Refs. [13, 57].
+merical convergence [12, 13, 57]. The equations for the
+coefficients are                                                    TABLE II: Calculated hadronic observables (in MeV).
+                           ∂ n+m ∂k Uk (ρ1 , ρ2 )
+     ∂k ωnm,k (T, µ) =                                   ,   (22)           fπ      fK      mu,d     ms      ma0           mκ
+                                ∂ρn1 ∂ρm2         κ1 ,κ2                    93     113      302      433     1040         1139
+                                                                            mσ     m f0     mπ       mK       mη          mη ′
+where ∂k Uk (ρ1 , ρ2 ) is given in Eq. (13) and initial condi-              463    1157     138      496     538          964
+tions for Eq. (22) can be transformed from
+
+                           1                                           In Fig. 3, we show the calculated results of the pres-
+ Uk=Λ (ρ1 , ρ2 ) = a10 ρ1 + a20 ρ21 + a01 ρ2 + ∆UΛ [T, µ] ,         sure p, the trace anomaly I ≡ ε − 3p and the speed
+                           2
+                                                        (23)        of sound squared c2s ≡ s/(∂ε/∂T ) with ε = −p +
+                                                                    T ∂p/∂T + µq nq at varnishing density. Since the in-
+where ∆UΛ [T, µ] is the modification of initial conditions.         trinsic scale of the model is different from that in lat-
+Its form is given in Eq. (B2), and more detailed descrip-           tice QCD, Tχlattice ∼ 155 MeV in lattice QCD simula-
+tions are put in Appendix B.                                        tions [77] whereas Tχmodel ∼ 176 MeV in this model, we
+                                                                                                                                             6
+
+          2.0
+                                                          4
+                                                                                                         0.3
+          1.5
+                                                          3
+                                                                                                         0.2
+  p/T 4
+
+
+
+
+                                                                                                2
+                                                  I/T 4
+          1.0                                             2                                          c
+
+          0.5                                                                                            0.1
+                                                          1
+
+           0                                              0                                               0
+                -0.4      -0.2     0     0.2                  -0.4    -0.2     0      0.2                      -0.4   -0.2     0     0.2
+                             (T-T )/T                                    (T-Tχ)/Tχ                                       (T-Tχ)/Tχ
+
+FIG. 3: Calculated pressure p, trace anomaly I and the speed of sound c2s as functions of the reduced temperature
+at varnishing density in comparison to the lattice QCD results [77].
+
+
+compare the results as a function of reduced tempera-                        charges in experiments by
+ture t = (T − Tχ )/Tχ . One observes a good agreement
+with the lattice QCD results for the pressure p and the                              χB                   χB             χB
+                                                                                      2                    3              4
+trace anomaly I, which is not a surprise since we have                                  = σ 2 /M ,           = Sσ ,         = κσ 2 ,       (26)
+                                                                                     χB
+                                                                                      1                   χB
+                                                                                                           2             χB
+                                                                                                                          2
+made use of them to determine the parameters α, b0 in
+the Polyakov-loop potential. However it’s remarkable
+that the speed of sound c2s which entails the second order                   where σ 2 , M, S and κ are the invariance, mean, skew-
+derivatives of the thermodynamical function, also shows                      ness and kurtosis of the multiplicity distributions, respec-
+a good agreement.                                                            tively. The first susceptibility χB
+                                                                                                               1 is related to the baryon
+                                                                             number density by χB               3
+                                                                                                    1 = nB /T . The particle number
+                                                                             density can be obtained via
+                    IV.    NUMERICAL RESULTS
+                                                                                     dΩk=0   ∂Ωk=0   ∂Ωk=0 ∂ψ   ∂Ωk=0
+                                                                                           =       +          =       ,                    (27)
+          A.        low-order fluctuations and freeze-out                             dµ      ∂µ      ∂ψ ∂µ      ∂µ
+                               parameters
+                                                                             where the equations of motion, Eq. (25), are used in
+                                                                             the last equality. Therefore, we partially differentiate
+                3                                                            Eqs. (21), (22) to compute χB1 . Subsequently, the higher
+                                                          μB=30MeV
+                                                                             order susceptibilities can be obtained by numerical dif-
+                                                          μB420MeV
+                2                                                            ferentiation of χB
+                                                                                              1 ,
+                                                          μB510MeV
+                                                          μB600MeV
+  B B
+  4/ 2
+
+
+
+
+                1                                                                                                1 ∂ i χB
+                                                                                                                        1
+                                                                                                     χB
+                                                                                                      i+1 =               ,                (28)
+                                                                                                                 β i ∂µiB
+                0
+           -1                                                                where β = 1/T, i = 1, 2, 3 · · · .
+                                                                                Then by comparing the theoretically calculated ratios
+           -2                                                                χB    B        B    B
+                                                                               2 /χ1 and χ3 /χ2 with the experimental data we can
+                    50           100        150               200            determine the freeze-out points (µfB , T f ) [33, 34, 39, 78].
+                                        T[MeV]                               In Fig. 5, we illustrate the obtained µB dependence of
+                                                                             χB    B        B    B
+                                                                               1 /χ2 and χ3 /χ2 at different temperatures in the case
+FIG. 4: Calculated Ratio of baryon number                                    of µ-dependent glue potential, and show our assigned
+susceptibilities χB   B
+                  4 /χ2 at several values of µB in the                       freeze-out points for center values of the experimental
+case of the µ-independent glue potential.                                    data [26] at different collision energies. Note that the er-
+                                                                             ror bars in the figure represent the experimental error of
+   The baryon number fluctuations are proportional to                        χB    B        B    B
+                                                                               1 /χ2 and χ3 /χ2 at different collision energies. As the
+the powers of the correlation length ξ in the phase tran-                    experimental data contains systematic and statistical er-
+sitions, which becomes more prominent when it comes                          rors, we use the statistical error to change the experimen-
+close to the CEP [23, 24]. We can see in Fig. 4 that                         tal data and then estimate the influence on the change of
+fluctuations becomes more and more significant with the                      the freeze-out points. In this way we obtain the freeze-
+increase of µB . Thus one can investigate the phase tran-                    out points (µfB , T f ) with errors stemming from the the
+sitions by studying the baryon number susceptibilities.                      experimental errors at different collision energies. The
+The theoretical susceptibility ratios are related to mo-                     obtained results are listed in Table III.
+ments of the multiplicity distributions of the conserved                        With the obtained freeze-out points, the freeze-out line
+                                                                                                                                                                     7
+
+             
+                                                                                               1.25           T=160MeV
+                                                                          ★
+                                                                                                              T=156MeV
+                                                            ★
+                                                                     ★                         1.00           T=152MeV
+                                                      ★
+     / 2B
+
+                                                                                                              T=148MeV
+
+
+
+
+                                                                                        B B
+                                                                                        3/ 2
+                                                                                                                                                    ★   ★   ★
+                                                ★                                              0.75
+         
+     B
+
+
+
+
+                                                                                                                                         ★
+                                          ★                     T 160MeV                                                          ★
+             0                   ★
+                                     ★                          T 156MeV                       0.50                        ★
+                                                                T 152MeV                                             ★★
+
+                                                                T 1                       0.25
+                       ★                                                                                  ★
+
+                 0                                                                                   0
+                  0                                  200                  300                         0                   100        200                     300
+                                               μB[M]                                                                          μB[MeV]
+FIG. 5: Calculated baryon chemical potential dependence of the susceptibility ratios χB          B                   B   B
+                                                                                             1 /χ2 (left panel) and χ3 /χ2
+(right panel) at different temperatures in the case of µ-dependent glue potential. The red stars stand for our
+assigned
+√        freeze-out points for the center values of the experimental data [26] at collision energies
+  SN N = 200, 62.4, 54.4, 39, 27, 19.6, 14.5, 11.5, 7.7 GeV. Error bars in the red stars represent the experimental errors
+of χB   B        B    B
+    1 /χ2 and χ3 /χ2 at different collision energies.
+
+
+TABLE III: Obtained
+            √       freeze-out points (µfB , T f ) for µ-dependent and µ-independent glue potentials ((µfB , T f ) are in
+unit MeV and SN N in GeV).
+             √
+                 SNN                     200        62.4           54.4           39            27            19.6             14.5          11.5           7.7
+                           µfB  23.2+0.6
+                                    −0.6         68.9+0.8
+                                                     −0.8      77.1+0.2
+                                                                   −0.2       102.6+0.4
+                                                                                   −0.4     143.9+0.3
+                                                                                                 −0.2     185.2+1.1
+                                                                                                               −0.7        231.+6.1
+                                                                                                                               −5.3
+                                                                                                                                             +14.2
+                                                                                                                                        260.0−9.9            +37.5
+                                                                                                                                                        282.9−19.6
+     µ-dependent             f
+                           T 152.5+4.2
+                                    −4.2        154.3+2.3
+                                                     −2.2     155.5+0.5
+                                                                   −0.5       155.3+1.1
+                                                                                   −1.0     156.1+1.6
+                                                                                                 −1.4     156.2+2.2
+                                                                                                               −2.0       150.1+2.0
+                                                                                                                               −1.9     153.3+3.1
+                                                                                                                                             −2.9       154.6+5.2
+                                                                                                                                                             −4.3
+                           µfB 23.1+0.6
+                                    −0.6         68.6+0.8
+                                                     −0.7      76.7+0.2
+                                                                   −0.2       102.0+0.3
+                                                                                   −0.3     142.8+0.1
+                                                                                                 −0.0     183.8+1.4
+                                                                                                               −1.1       231.2+6.4
+                                                                                                                               −5.4
+                                                                                                                                             +16.9
+                                                                                                                                        262.9−12.4           +50.2
+                                                                                                                                                        288.4−26.5
+    µ-independent
+                           T f 151.9+4.0
+                                    −4.2 ,      153.6+2.2
+                                                     −2.1 ,   154.6+0.5
+                                                                   −0.5 ,     154.3+1.0
+                                                                                   −1.0 ,   154.6+1.4
+                                                                                                 −1.3 ,   154.1+1.9
+                                                                                                               −1.7 ,     147.9+1.8
+                                                                                                                               −1.8 ,   149.8+3.0
+                                                                                                                                             −2.8 ,     150.3+5.3
+                                                                                                                                                             −4.7
+
+
+
+
+TABLE IV: Parameters T0 , a, b in Eq. (29) and c, d in                                  can see a good agreement with√the experimental data ex-
+Eq. (30) for both µ- dependent and independent T0                                       cept for the collision energy SN N ∼ 7.7 GeV. On one
+cases (c, T0f are in unit MeV and d in GeV−1 ).                                         hand we do not√ include the last experimental data corre-
+                                                                                        sponding to SN N = 7.7 GeV in the fitting process due
+        T0        c      d    T0f       a         b                                     to its large uncertainty,
+                                                                                                             √      on the other hand the plateau
+   µ-dependent 708.96 0.147 154.8 4.05 × 10−7 0.0022                                    of χB     B
+                                                                                             3 /χ2 below        SN N ∼ 14.5 GeV may indicate the
+  µ-independent 751.31 0.159 153.9 7.35 × 10−7 0.0040                                   unaccounted effects in our work, for example the identi-
+                                                                                        fication of baryon number fluctuations with the proton
+                                                                                        number fluctuations, volume fluctuations, global baryon
+                                                                                        number conservation at low collision energy [79], and so
+is fitted as                                                                            forth. It should also be noted that, since we take the
+                          h      µf 2     µf  4 i                                   χB     B        B     B
+                                                                                          2 /χ1 and χ3 /χ2 to determine our freeze-out points
+                 T f = T0f 1 − a Bf     − b Bf                                (29)      listed in Table III, and then these points are used to pro-
+                                  T0         T0                                         duce the freeze-out line by fitting Eqs. (29), (30), the
+                  f          c                                                          obtained parameters are listed in Table IV. The degree
+                 µB =        p       .                                        (30)
+                       1 + d SN N                                                       of the agreement between theoretical calculation results
+                                                                                        and experimental data shown in Fig. 6 can also be viewed
+                                             √
+Since the last data corresponding to SN N = 7.7 GeV                                     as a test of our fitting process. Moreover, we can see that
+in Table III shows large uncertainty, we do not use it                                  the lines for both µ-dependent and independent
+                                                                                                                               √          T0 cases
+for fitting the parameters. The best-fitted parameters                                  coincide almost with each other for SN N > 7.7 GeV.
+are listed in Table IV. With the obtained parameters we                                 This is due to the slight difference in low order suscep-
+can use Eqs. (29), (30) to predict the freeze-out points                                tibilities between two T0 cases in the region of µB being
+(µfB , T f ) of the system at any collision energy.                                     not high. However, because of the direct µ dependence
+   We illustrate the calculated χB         B   B    B                                   in the glue potential, the difference in the higher order
+                                      2 /χ1 , χ3 /χ2 along the
+respective    freeze-out lines as a function of collision energy                        fluctuations between the two cases will be more apparent,
+√                                                                                       see for example Fig. 9.
+  SN N for µ-dependent and independent cases, and the
+comparison with the experimental data in Fig. 6. One                                        The parameter a describes the curvature of the freeze-
+                                                                                                                                              8
+
+                  7
+                                         μ-dependent T0 case
+                                                                          
+                                                                                     1.2                        μ-dependent T0 case
+                  6                      μ-independent T0 case                                                  μ-independent T0 case
+                                                                                     1.0
+                                        STAR data 0 5%)                                                       STAR data (0-5%)
+                  5
+                                                                                     0.8         
+        χ2B/χ1B
+
+
+
+
+                                                                              B B
+                                                                                                         
+
+
+
+
+                                                                              3/ 2
+                  4                                                                                           
+                                                                                                               
+                  3                                                                                                   
+                                                      
+                                                                                    0.4                                    
+                  2                             
+                                       
+                                                                                    0.2
+                  1                                                                                                                  
+
+                      5       10                    50        100                          5         10                   50     100
+                                       SNN [GeV]                                                              SN [G]
+FIG. 6: Comparison of the calculated χB   B    B   B
+                                      2 /χ1 , χ3 /χ2 for both T0 cases along the respective freeze-out line with the
+experimental data [26].
+
+
+out line at large collision energy, and its small value in our                given in the lattice QCD simulations [33], and other
+fitting process is closely related to the slightly increasing                 model calculations [36, 37, 39] in Fig. 7. We see that the
+trend of the √temperature of the freeze-out points with                       freeze-out chemical potential matches the lattice QCD
+µB at large SN N , see the freeze-out points plotted in                       and other model results well for µB . 300 MeV, while
+Fig. 8 at small µB . The trend also appears in Ref. [39],                     for µB & 300 MeV it begins to deviate from the HRG
+and small values of the parameter a are consistent with                       results.
+the conclusions in Ref. [80].                                                    We also depict the freeze-out lines and that from An-
+                                                                              dronic et al. [37] in Fig. 8, as well as the phase transition
+                                                                              lines and the obtained freeze-out points in the two T0
+    B.       Freeze-out lines and high-order fluctuations                     cases. The background in Fig. 8 is the density plot of
+                                                                                                          B
+                                                                              the susceptibility ratio R42   ≡ χB     B
+                                                                                                                 4 /χ2 . The chiral phase
+                                                                              transition point is defined as the inflection point of the
+                                                                              subtracted chiral condensate ∆LS ,
+            500
+                                               ■ Lattice QCD
+                                                                                                      σL − jjsl σS T
+                                                                                                                   
+                                               ▲ HRG (Alba et al.)                             ∆LS =                   ,                    (31)
+            400           ●
+                                                                                                     σL − jjsl σS T =0
+                                                                                                                 
+                                               ● HRG Andronic et al.
+μBf [MeV]
+
+
+
+
+                               ▲                    μ-dependent T0 case
+            300                ●
+                                                    μ-independent T0 case
+                                   ●                                          while the deconfinement phase transition point is defined
+            200                        ●
+                                       ▲                                      as the inflection point of the Polyakov-loop L. Their
+                                           ●
+                                           ▲
+                                           ■                                  respective values at vanishing density are T d ∼ 155 MeV
+            100                                 ●
+                                                ■
+                                                ▲
+                                                      ●●
+                                                                              and T χ ∼ 176 MeV. The position of CEP is not resolved
+                                                       ■
+                                                       ▲
+                                                                          ▲
+                                                                          ■
+                                                                          ●
+                                                                              in the model since our expansion is not fully convergent
+                  0                                                           for µB > 700 MeV. One can see that the freeze-out line
+                      5       10                    50        100             in the µ-dependent case tends to larger µB for the low
+                                                                              temperature, and is overall closer to that from Andronic
+                                       SNN [GeV]
+                                                                              et al. [37] when compared to the µ-independent case.
+FIG. 7: Comparison of the collision energy                                       Then we calculate the χB     B
+                                                                                                          4 /χ2 along√the freeze-out line
+                                          √ dependence                        as a function of the collision energy SN N for both T0
+of the freeze-out chemical potential µfB ( SN N ) with
+                                                                              cases. They are depicted
+                                                                                                  √      in the left panel of Fig. 9. The
+those given in the lattice QCD simulations [33], HRG
+                                                                              inlay zooms in at SN N ∼ 20 GeV and indeed shows
+model (Alba et al.) [39] and HRG model (Andronic et
+                                                                              a nonmonotonicity of χB       B
+                                                                                                       4 /χ2 , which is somehow √   rather
+al.) [36, 37].
+                                                                              weak compared to the STAR data (0−5%). When SN N
+                                                                              comes to lower, χB     B
+                                                                                                4 /χ2 in Fig. 9 shows a peak and then
+   With the obtained parameters in Eqs. (29) and (30),                        approaches to one in both T0 cases. The peak positions
+one can predict the higher order fluctuations along √ the                                                  √ for the two cases.
+                                                                              and their heights are different
+freeze-out line as a function of collision energy SN N .                         We further calculate the SN N dependence of χB         B
+                                                                                                                                    6 /χ2
+To this end, we first illustrate the calculated dependence                    along the obtained freeze-out lines. The obtained re-
+of the freeze-out√baryon chemical potential µfB on the                        sults are depicted in the right panel of Fig. 9. We
+collision energy SN N , and the comparison with those                         take bands to represent our numerical errors for χB       B
+                                                                                                                                   6 /χ2 .
+                                                                                                                                                                                                        9
+
+               250                                                                                  7.200
+                                                                                                                         250                                                              7.150
+
+                                                     freeze-out points                                                                             freeze-out points
+                                                     freeze-out line                                5.607                                          freeze-out line                        5.300
+                                                     chiral                                                                                        chiral
+               200                                                                                                       200
+                                                     deconfinement                                                                                 deconfinement
+                                                                                                    4.014                                                                                 3.450
+                                                     freeze-out:Andronic et al.                                                                    freeze-out:Andronic et al.
+
+                                                                                                    2.421                                                                                 1.600
+      T[MeV]
+
+
+
+
+                                                                                                                T[MeV]
+               150                                                                                                       150
+
+                                                                                                    0.8286                                                                                -0.2500
+
+
+
+               100                                                                                  -0.7643              100                                                              -2.100
+
+
+
+                                                                                                    -2.357                                                                                -3.950
+
+
+                50                                                                                                        50                                                              -5.800
+                                                                                                    -3.950
+
+                     0         100        200        300        400       500       600       700                              0   100       200   300   400    500   600       700
+
+
+
+FIG. 8: Calculated phase diagrams for µ-dependent and µ-independent T0 cases. The left panel is for the
+µ-dependent case, while the right panel is for the µ-independent case. The background is the density plot of the
+                        B
+susceptibilities ratio R42 ≡ χB     B
+                               4 /χ2 . Red stars are the obtained freeze-out points in the respective cases, see Table III
+for their specific values. Solid blue, solid black and dashed black curves represent the freeze-out, the chiral phase
+transition and the deconfinement phase transition lines, respectively. Solid red curve is the freeze-out line from
+Andronic et al. [37].
+
+                         1.0
+                                                                                                                               101                 ●
+                                                                                                                                                                                      ●
+                3 !                                                    μ-dependent T0 case
+                                                                                                                                             ●
+                                                                        μ-independent T0 case
+                         0.8
+                                                                       STAR data (0-5%)                                   100                                              ■         ■
+                                                                                                                                                                                                    ●
+                         0.7
+                                                                                                                             0
+                                                                                                              χ6B/χ2B
+
+
+                2
+                                                                                                                          -100
+     B B
+
+
+
+
+                               10    20         50    100
+     4/ 2
+
+
+
+
+                                                            
+                                                                                                                                                                                                    ■
+                                                                      
+                                                                                                                                   1     ● μ-dependent T0 case
+                1                                                                                     
+                                                                                                                          -10            ● μ-independent T0 case            ●
+                                                                                                                                                                                                    ●
+
+                                                                                             
+                                                                                         
+                                                                                                                                         ● STAR "0-10%)
+                                                                               
+                                                                                                                          -102           ■ STAR #30$40%)
+                0
+                          1                          5          10                       50 100                                    0.5 1                   5 10                   50 100
+                                                            SNN [GeV]                                                                                          SNN [GeV]
+FIG. 9: Left panel: Calculated collision energy dependence of κσ 2 = χB     B
+                                                                        4 /χ2 along the√freeze-out line. The blue
+circles are the experimental values [26] for 0% − 5% centrality. The inlay zooms in at SN N ∼ 20 GeV.
+Right panel: Calculated collision energy dependence of χB     B
+                                                         6 /χ2 (in logarithmic scale) along the freeze-out line. The
+shadowed regions represent our numerical uncertainties. The black circles and gray squares are the experimental
+values [81] for 0% − 10% and 30% − 40% centralities, respectively.
+
+
+For the µ-dependent case, with the decreasing colli-                                                             conservation should be considered for a more realistic
+sion energy, χB
+√
+                   B
+               6 /χ2 begins to have a minimum around                                                             setting of the experimental situation, which may play a
+√SN N ∼ 5 − 10 GeV, and then have a maximum around                                                               important role especially at large density. Also the fi-
+  SN N ∼ 2 GeV, and approaches to one for the lower                                                              nite volume effects can make a sizable difference on the
+collision energy. The µ-independent case shows a similar                                                         baryon number susceptibilities [31, 83, 84]. Last but not
+behavior, except that the minimum becomes very flat.                                                             least, by the inclusion of the gluon and ghost fields via
+                                                                                                                 the dynamical hadronization one can advance the low en-
+   It should also be mentioned that there are lots of things                                                     ergy effective model towards full QCD further, and the
+to be included for an improvement on the current calcula-                                                        progress has been made in Ref. [8]. With all these im-
+tions and results. The LPA approximation is employed in                                                          provements one may obtain a better freeze-out line in
+the present calculation, while it is shown that the baryon                                                       Fig. 8, and the agreement of collision energy dependence
+number fluctuations calculated beyond the LPA approx-                                                            of the freeze-out chemical potential with other models in
+imation could be more prominent [82]. Constrains from                                                            Fig. 7 would be improved especially at low collision en-
+charge conservation such as the baryon number conser-                                                            ergy. The weak nonmonotonicity shown in Fig. 9 may
+vation, the strangeness neutrality and the electric charge
+                                                                                                                              10
+
+also be overcomed. The relevant improvements will be             with the Haar measure MH (L, L̄)
+done in the future.
+                                                                    MH (L, L̄) = 1 − 6L̄L + 4(L3 + L̄3 ) − 3(L̄L)2 .        (A2)
+                                                                 The coefficients in Eq. (16) is of the form
+                     V.   SUMMARY
+                                                                                     x1 + x2 /(t + 1) + x3 /(t + 1)2
+                                                                           x(T ) =                                          (A3)
+   In summary, we have calculated the baryon number                                  1 + x4 /(t + 1) + x5 /(t + 1)2
+susceptibilities with the FRG approach which incorpo-            for x ∈ {a, c, d}, and
+rates the non-perturbative quantum, thermal and den-
+sity fluctuations. For a better treatment of finite density
+                                                                                                               b3
+                                                                                                                   
+                                                                           b(T ) = b1 (t + 1)−b4 1 − eb2 /(t+1)      ,      (A4)
+situations we use the hard thermal or density loop im-
+proved µ-dependent Polyakov-loop potential, and com-             with
+pare the results with those obtained from µ-independent
+Polyakov-loop potential in the main text. We calculate                               t = (T − TYM )/TYM ,                   (A5)
+the ratios χB      B        B   B
+             2 /χ1 and χ3 /χ2 at different baryon chemi-
+cal potentials and temperatures, and by comparing them           where TYM is the critical temperature for the deconfine-
+with the experimental data we determine the freeze-out           ment phase transition in the pure gauge theory. Values
+points (µfB , T f ) at different collision energies. The ob-     of parameters in Eqs. (A3) and (A4) are collected in Ta-
+tained collision energy dependence of χB         B       B
+                                            2 /χ1 and χ3 /χ2
+                                                            B    ble V.
+are in good agreement with the experiment, see for exam-
+ple Fig. 6. With the obtained freeze-out points we fit the       TABLE V: Values of parameters in Eqs. (A3) and (A4).
+freeze-out line via fitting model Eqs. (29) and (30), and
+the collision energy dependence of the freeze-out chemical                     1        2       3       4       5
+potentials agrees well with the lattice     QCD simulations             ai -44.14     151.4 -90.0677 2.77173 3.56403
+                                      √                                 bi -0.32665 -82.9823   3.0   5.85559
+and other model calculations for SN N > 7.7 GeV. The
+                                                                        ci -50.7961 114.038 -89.4596 3.08718 6.72812
+freeze-out line obtained with the hard thermal or den-                  di 27.0885 -56.0859 71.2225 2.9715 6.61433
+sity loop improved µ-dependent Polyakov-loop potential
+is closer to that from Andronic et al. [37] when com-
+                                                                                                (B/F )
+pared to that with µ-independent Polyakov-loop poten-              The threshold functions l0            in Eq. (13) read
+tial. Then we calculate the χB        B        B   B
+                                 4 /χ2 and χ6 /χ2 along the
+                                                                     (B)                 1       
+respective freeze-out lines. The √  obtained χ4 /χB
+                                                 B
+                                                     2 shows a      l0 (m̄2 , T, µ) = √            1 + nB (m̄2 , T, µ)
+weak nonmonotonicity around SN N ∼ 20 GeV in both                                    3 1 + m̄2
+                                                                                                        
+µ-dependent and independent T0 cases, which then de-                                 + nB (m̄2 , T, −µ) ,
+velops a maximum and approaches to one with the de-
+creasing collision energy. The obtained χB          B                                    1       
+                                                6 /χ2 shows a
+                                                                     (F )
+                                                                    l0 (m̄2 , T, µ) = √            1 − nF (m̄2 , T, µ, L, L̄)
+similar complicated behavior, which develops a minimum                               3 1 + m̄2
+and then a maximum with the decreasing collision energy,
+                                                                                                              
+                                                                                     − nF (m̄2 , T, −µ, L̄, L) ,           (A6)
+and approaches to one for the lower collision energy.
+                                                                 with
+                                                                                                          1
+               ACKNOWLEDGMENTS                                                  nB (m̄2 ; T, µ) =                  ,        (A7)
+                                                                                                    e(E−µ)/T − 1
+  The work was supported by the National Natural Sci-
+ence Foundation of China under Grant Nos. 12175007,               nF (m̄2 ; T, µ, L, L̄)
+12175030, and 12247107.                                                       1 + 2L̄ e(E−µ)/T + L e2(E−µ)/T
+                                                                   =                                               , (A8)
+                                                                      1 + 3L̄ e(E−µ)/T + 3L e2(E−µ)/T + e3(E−µ)/T
+                                                                                √
+   Appendix A: The Polyakov-loop potential and                   where E = k 1 + m̄2 is the particle energy. Eq. (A8)
+               threshold functions                               is the Polyakov-loop modified fermion distribution func-
+                                                                 tion, which has an intuitive interpretation. With L, L̄ =
+                                                                 0, one has nF ∼ 1/(1 + e3(E−µ)/T ), which is distribu-
+  The Polyakov-loop potential Vglue in Eq. (16) is
+                                                                 tion function for a qqq-state. At low temperature, the
+                                                                 modified fermion distribution function can be related to
+   Vglue (L, L̄)    a(T )                                        the correct counting of baryonic degrees of freedom in
+          4
+                 =−       L̄L + b(T ) ln MH (L, L̄)
+       T              2                                          a subtle manner, see Ref. [82] for a detailed discussion.
+                    c(T ) 3                                      At high temperature L, L̄ ∼ 1, one recovers the ordinary
+                  +       (L + L̄3 ) + d(T )(L̄L)2 ,    (A1)
+                      2                                          fermion distribution function nF ∼ 1/(1 + e(E−µ)/T ).
+                                                                                                                                 11
+
+    Appendix B: Modification of initial conditions                     range of γ̂ to be γ̂ ∈ (0.35, ∞). The lower bound corre-
+                                                                       sponds to an unphysical value, at which T0 (µ) in Eq. (18)
+   When the external parameters of the temperature and                 already tends to be zero at µ ∼ 300MeV.
+chemical potential, such as 2πT and 2πµ, that represent                   We illustrate the phase structures corresponding to
+additional energy scales, are comparable to the cutoff                 γ̂ = ∞, 1, 0.7, 0.5 and 0.35 in Fig. 10. We observe that
+scale Λ of the model, the initial conditions Γk=Λ would                the phase structures are not sensitive to large values of
+develop a dependence on these parameters. We follow                    γ̂, and are mildly changed for small µB , while for larger
+the procedure proposed in Refs. [13, 72], and for more                 µB a smaller value of γ̂ will result in lower transition
+detailed discussions see also Refs. [85, 86]. The basic idea           lines in the T − µB plane. The sensitivity of the phase
+is to start the flow from a high enough scale in which the             structures to γ̂ shown here is less than that in Ref. [54].
+dependence of the external parameters can be neglected,                This has some relevance with the parametrization of the
+and flow down to the cutoff scale, and then the modifi-                Polyakov-loop potential. The fractional polynomial de-
+cation of initial conditions is                                        pendence on T0 is encoded in Eq. (A3), while it is poly-
+                                                                       nomial dependence in Eq. (5) in Ref. [54]. Also the cur-
+      ∆ΓΛ [s] = ΓΛ (s) − ΓΛ (0)                                        rently used Polyakov-loop potential has more subtle re-
+              = [ΓΛ (s) − Γ∞ (s)] − [ΓΛ (0) − Γ∞ (0)]                  finements compared to the one used there, such as the
+                Z Λ                                                    inclusion of the Haar measure and rescaling of the decon-
+              =      dk [∂k Γk (s) − ∂k Γk (0)] ,     (B1)             finement critical temperature, see for example Eqs. (A2)
+                    ∞                                                  and (17).
+                                                                          Since there is a direct contribution from µ-dependent
+with s denotes all the external parameters (T , µ in the               Polyakov-loop potential to the baryon number suscepti-
+present case). Since quark fluctuations dominate over                  bilities, the influence of γ̂ on the freeze-out line will be
+meson fluctuations at high energy scale, we could ap-                  more apparent than that on the phase structures. We
+proximate the flow in Eq. (B1) by fermionic parts, to                  collect the obtained freeze-out points for γ̂ = 0.7 and
+wit,                                                                   γ̂ = 0.5 cases in Table VI and depict the freeze-out line
+              Z Λ                                                      for γ̂ = 0.7 case in Fig. 10. One observes that the freeze-
+                      Nc k 4                      m2l
+                             
+                                   2      h
+                                                                       out temperatures are overall higher when compared to
+∆UΛ [T, µ] =      dk      2
+                                            n F (     , T, µ, L, L̄)
+                                                  k2
+                               p
+               ∞       3π       k 2 + m2l                              the results obtained in the cases of γ̂ = ∞ and γ̂ = 1,
+       m2                i         1      h       m2                   and the freeze-out line extends to larger µB in the low
++ nF ( 2l , T, −µ, L̄, L) + p              nF ( 2s , T, µ, L, L̄)      temperature region.
+       k                        k 2 + m2s         k
+                                                                          We do not explore the lower values of γ̂. As one can see
+         2
+                           
+       m                 i                                             from Fig. 10, the freeze-out temperatures show a slowly
++ nF ( 2s , T, −µ, L̄, L) .                                   (B2)     increasing trend with the decreasing collision energy for
+       k
+                                                                       the first sixth freeze-out points already in γ̂ = 0.7 case.
+Generally speaking, ml and ms depend on the ρ1 and ρ2 .                The trend is much more apparent with lower values of
+It is a good approximation to set the values to their re-              γ̂, see for example the obtained freeze-out points in the
+spective vacuum constituent quark masses [13]. Thus we                 case of γ̂ = 0.5 in Table VI. The trend continues to large
+set ml ∼ 300MeV and ms ∼ 430MeV in our calculation.                    µB and thus is not physical, and we think the value
+                                                                       γ̂ = 0.7 has already come close to the unphysical one
+                                                                       in the present settings. Therefore we refrain ourselves
+    Appendix C: The influence of parameter γ̂ in                       from lower values of γ̂.
+                  equation (19)                                           We collect the fitting parameters in Eqs. (29) and (30)
+                                                                       in the case of γ̂ = 0.7 in Table VII. Then we calculate
+   In the main text we do the calculation and compare                  χB     B
+                                                                         4 /χ2 and
+                                                                                       B    B
+                                                                                   √ χ6 /χ2 along the freeze-out     line and illus-
+the results in both µ-dependent and µ-independent T0                   trate the SN N dependence of χB      4 /χ B
+                                                                                                                 2  and  χB    B
+                                                                                                                           6 /χ2 in
+cases. The former case corresponds to γ̂ = 1 in Eq. (19),              Fig. 11. We observe from Fig. 11 that although the over-
+which has been used in Refs. [13, 57] and the obtained                 all shapes of χB     B        B   B
+                                                                                       4 /χ2 and χ6 /χ2 are similar to those ob-
+results have found a good agreement with those of the                  tained in the cases of γ̂ = ∞ and γ̂ = 1, the nonmono-
+lattice QCD and the HRG model. The latter case cor-                    tonicity of χB     B
+                                                                                     4 /χ2 shown in the inlay of the left panel of
+responds to γ̂ = ∞ with no hard thermal or dense loop                  Fig. 11 is much weaker, and the minimum or maximum of
+improvements incorporated. For completeness, we also                   χB     B
+                                                                         6 /χ2 tends to lower collision energy with larger depth
+explore the influence of other values of γ̂. We choose the             or height.
+
+
+
+
+ [1] D.    J.    Schwarz,      Annalen Phys. 12, 220 (2003),                arXiv:1812.08235 [hep-lat].
+     arXiv:0303574 [astro-ph].                                          [3] H.         T.         Ding         and          Others,
+ [2] A. Bazavov and Others, Phys. Lett. B 795, 15 (2019),                   Phys. Rev. Lett. 123, 062002 (2019),
+                                                                                                                                                                                                       12
+
+
+                                                         chiral                deconfinement                                             chiral: γ=0.7                  deconfinement: γ=0.7
+                                                         γ=∞              γ=1         γ=0.7                                           freeze%out: γ=∞            freeze&out: γ=1
+                                                                                                                       200               freeze'out: γ =0.7         freeze*out: Andronic et al.
+               200                                                          
+                                                                           γ =0.5       γ=0.35
+                                                                                                                                                                 +   freeze,out points: γ=0.7
+
+
+                                                                                                                                  ★★ ★     ★   ★        ★ ★
+                                                                                                                       150 ★
+      T[MeV]
+
+
+
+
+                                                                                                              T[MeV]
+                                                                                                                                                    ★
+               150
+                        120
+
+
+                        110
+               100                                                                                                     100
+                        100
+
+
+                           90
+
+                50              640        660     680      700
+                                                                                                                        50
+                  0                         200              400                         600                              0                    200            400                   600
+                                                         μB[MeV]                                                                                          μB[MeV]
+FIG. 10: Left panel: The black, blue, green, red and cyan colors correspond to γ̂ = ∞, 1, 0.7, 0.5 and 0.35,
+respectively. The dashed lines represent the deconfinement phase transitions while the solid lines represent the chiral
+phase transitions. The inlay zooms in at large µB . Right panel: The obtained freeze-out points and line in the case
+of γ̂ = 0.7 (the orange stars and curve). For the convenience of comparison, we also depict the freeze-out lines of
+γ̂ = ∞ and γ̂ = 1 in the figure (black and blue curves). Red curve is the freeze-out line from Andronic et al. [37].
+The solid and dashed green lines represent the chiral and deconfinement phase transitions in the case of γ̂ = 0.7,
+respectively.
+
+                                                                                                                        102
+                                                                       STAR data (0-5%)                                                  ●
+               3                                                           γ=∞          γ=1                           101 ●                                                       ●
+                                                                                         γ=0.7
+                                                                                                                        100
+                                                                                                           χ6B/χ2B
+
+
+
+
+               2                                                                                                                                                              ■      ■
+     B B
+
+
+
+
+                                                                                                                                                                                                   ●
+     4/ 2
+
+
+
+
+                                                                                                                                                                                                   ●
+                                                           
+                                                                      
+                                                                                                                          0
+                                                                                                                       -100
+               1                                                                
+                                                                                                  
+                                                                                                                                                         ●
+                                                                                                                                                                                                   ■
+                                                                                                                             1      γ=∞
+                   0.775
+                                                                           
+                                                                                                                       -10        ●
+                                                                                                                                     =1 ● STAR (0.10%)                       ●
+                                                                                                                                                                                                   ●
+                                                                                                                                  ● γ
+               0   0.725
+                                                                                                                                     =0.7 / STAR (30240%)
+                   0.675
+                            10        20    50   100
+                                                                                                                       -102       ● γ
+
+
+
+                        0.5 1                            5 10                     50 100                                          0.5 1                        5 10               50 100
+                                                       SNN [GeV]                                                                                              SNN [GeV]
+FIG. 11: Left panel: Calculated collision energy dependence of χB      B
+                                                                   4 /χ2 along the freeze-out line in the case of γ̂ = 0.7
+(the green curve). The blue circles are the experimental values [26] for 0% − 5% centrality. The inlay zooms in at
+√
+  SN N ∼ 20 GeV. Right panel: Calculated collision energy dependence of χB        B
+                                                                             6 /χ2 (in logarithmic scale) along the
+freeze-out line in the case of γ̂ = 0.7 (the green curve). The shadowed region represents our numerical uncertainties.
+The black circles and gray squares are the experimental values [81] for 0% − 10% and 30% − 40% centralities,
+respectively. For the convenience of comparison, we also depict the results of γ̂ = ∞ and γ̂ = 1 in the figure.
+                                                                                                                                                                                         √
+TABLE VI: Obtained freeze-out points (µfB , T f ) for γ̂ = 0.7 and 0.5 cases (µfB , T f are in unit MeV and                                                                               SN N in
+GeV).
+                   √
+                       SNN                  200             62.4                  54.4                39        27               19.6           14.5              11.5            7.7
+                                µfB  23.3+0.7
+                                         −0.6             69.3+0.9
+                                                              −0.8          77.6+0.2
+                                                                                 −0.2       103.3+0.5
+                                                                                                 −0.5      145.3+0.5
+                                                                                                                −0.4         187.3+0.6
+                                                                                                                                  −0.0        230.7+5.7
+                                                                                                                                                   −4.5
+                                                                                                                                                                    +10.5
+                                                                                                                                                               259.9−7.0          +29.1
+                                                                                                                                                                             284.0−15.6
+               γ̂ = 0.7           f
+                                T 153.1+4.5
+                                         −4.3            155.2+2.5
+                                                              −2.3          156.5+0.6
+                                                                                 −0.5       156.5+1.2
+                                                                                                 −1.2      158.0+1.9
+                                                                                                                −1.7         159.1+2.7
+                                                                                                                                  −2.4        152.9+2.3
+                                                                                                                                                   −2.1        157.8+3.2
+                                                                                                                                                                    −3.0      159.4+4.6
+                                                                                                                                                                                   −4.1
+                                µfB 23.5+0.8
+                                         −0.7             70.2+1.2
+                                                              −1.0          78.8+0.3
+                                                                                 −0.3       105.2+0.9
+                                                                                                 −0.7      149.9+1.7
+                                                                                                                −1.4         195.6+0.9
+                                                                                                                                  −1.0        235.3+2.6
+                                                                                                                                                   −1.6        271.9+7.8
+                                                                                                                                                                    −6.1
+                                                                                                                                                                                  +35.7
+                                                                                                                                                                             299.9−17.8
+               γ̂ = 0.5
+                                T f 154.4+5.3
+                                         −4.5            157.1+3.3
+                                                              −2.7          158.9+0.7
+                                                                                 −0.7       159.5+1.8
+                                                                                                 −1.6      163.7+3.0
+                                                                                                                −2.8         167.6+2.9
+                                                                                                                                  −3.2        161.5+2.8
+                                                                                                                                                   −2.9        167.1+2.8
+                                                                                                                                                                    −2.6      168.0+5.0
+                                                                                                                                                                                   −4.1
+
+
+
+    arXiv:1903.04801 [hep-lat].                                                                                [4] S.        Muroya,           A.       Nakamura,           C.     Nonaka,             and
+                                                                                                                             13
+
+TABLE VII: Parameters T0 , a, b in Eq. (29) and c, d in             [24] M. A. Stephanov, Phys. Rev. Lett. 107, 052301 (2011),
+Eq. (30) for the case of γ̂ = 0.7 (c, T0f are in unit MeV                arXiv:1104.1627 [hep-ph].
+                                                                    [25] X. Zhou and J. Yang (HIAF project Team),
+and d in GeV−1 ).
+                                                                         AAPPS Bull. 32, 35 (2022).
+                                                                    [26] J. Adam and Others, Phys. Rev. Lett. 126, 092301 (2021),
+        T0       c      d    T0f       a         b                       arXiv:2001.02852 [nucl-ex].
+      γ̂ = 0.7 690.76 0.141 156.6 4.06 × 10−8 0.0017                [27] (2022), arXiv:2207.09837 [nucl-ex].
+                                                                    [28] (2022), arXiv:2209.08058 [nucl-ex].
+                                                                    [29] J. Adam and Others, Phys. Rev. C 100, 014902 (2019),
+                                                                         arXiv:1903.05370 [nucl-ex].
+     T.     Takaishi,      Prog. Theor. Phys. 110, 615 (2003),      [30] L.            Adamczyk              and           Others,
+     arXiv:0306031 [hep-lat].                                            Phys. Lett. B 785, 551 (2018),
+ [5] K.       Splittorff     and        J.     J.     M.     Ver-        arXiv:1709.00773 [nucl-ex].
+     baarschot,                Phys. Rev. D 75, 116003 (2007),      [31] Y. Lu, M. Chen, Z. Bai, F. Gao,                      and
+     arXiv:0702011 [hep-lat].                                            Y.-x.       Liu,       Phys. Rev. D 105, 034012 (2022),
+ [6] W.-j. Fu, Commun. Theor. Phys. 74, 097304 (2022),                   arXiv:2109.09912 [hep-ph].
+     arXiv:2205.00468 [hep-ph].                                     [32] W.-j.       Fu      and        J.     M.      Pawlowski,
+ [7] W.-j. Fu, X. Luo, J. M. Pawlowski, F. Rennecke,                     Phys. Rev. D 93, 091501 (2016),
+     R. Wen, and S. Yin, Phys. Rev. D 104, 094047 (2021),                arXiv:1512.08461 [hep-ph].
+     arXiv:2101.06035 [hep-ph].                                     [33] S. Borsanyi, Z. Fodor, S. D. Katz, S. Krieg, C. Ratti,
+ [8] W.-j. Fu, J. M. Pawlowski,                   and F. Ren-            and K. K. Szabo, Phys. Rev. Lett. 113, 052301 (2014),
+     necke,                   Phys. Rev. D 101, 054032 (2020),           arXiv:1403.4576 [hep-lat].
+     arXiv:1909.02991 [hep-ph].                                     [34] A.             Bazavov             and            Others,
+ [9] W.-j. Fu, J. M. Pawlowski, F. Rennecke,                 and         Phys. Rev. Lett. 109, 192302 (2012),
+     B.-J.      Schaefer,      Phys. Rev. D 94, 116020 (2016),           arXiv:1208.1220 [hep-lat].
+     arXiv:1608.04302 [hep-ph].                                     [35] R.       V.        Gavai        and       S.      Gupta,
+[10] Y.-r.      Chen,       R.       Wen,             and    W.-         Phys. Lett. B 696, 459 (2011),
+     j.         Fu,           Phys. Rev. D 104, 054009 (2021),           arXiv:1001.3796 [hep-lat].
+     arXiv:2101.08484 [hep-ph].                                     [36] A. Andronic, P. Braun-Munzinger, and J. Stachel,
+[11] J.       M.         Pawlowski         and       F.     Ren-         Nucl. Phys. A 772, 167 (2006), arXiv:0511071 [nucl-th].
+     necke,                    Phys. Rev. D 90, 076002 (2014),      [37] A. Andronic, P. Braun-Munzinger, K. Redlich,
+     arXiv:1403.1179 [hep-ph].                                           and       J.       Stachel,       Nature 561, 321 (2018),
+[12] F.         Rennecke           and         B.-J.       Schae-        arXiv:1710.09425 [nucl-th].
+     fer,                      Phys. Rev. D 96, 016009 (2017),      [38] F. Becattini, J. Manninen,             and M. Gazdz-
+     arXiv:1610.08748 [hep-ph].                                          icki,                    Phys. Rev. C 73, 044905 (2006),
+[13] W.-j. Fu, J. M. Pawlowski,                   and F. Ren-            arXiv:0511092 [hep-ph].
+     necke,                      SciPost Phys. Core 2, 2 (2020),    [39] P. Alba, W. Alberico, R. Bellwied, M. Bluhm,
+     arXiv:1808.00410 [hep-ph].                                          V. Mantovani Sarti,            M. Nahrgang,          and
+[14] P. Isserstedt, M. Buballa, C. S. Fischer,               and         C.         Ratti,          Phys. Lett. B 738, 305 (2014),
+     P.    J.    Gunkel,      Phys. Rev. D 100, 074011 (2019),           arXiv:1403.4903 [hep-ph].
+     arXiv:1906.11644 [hep-ph].                                     [40] F.         Karsch          and         K.        Redlich,
+[15] C. S. Fischer,          J. Luecker,            and J. A.            Phys. Lett. B 695, 136 (2011),
+     Mueller,                     Phys. Lett. B 702, 438 (2011),         arXiv:1007.2581 [hep-ph].
+     arXiv:1104.1564 [hep-ph].                                      [41] J.-W. Chen, J. Deng, H. Kohyama,                     and
+[16] X.-y.      Xin,       S.-x.      Qin,            and     Y.-        L.        Labun,        Phys. Rev. D 93, 034037 (2016),
+     x.          Liu,          Phys. Rev. D 90, 076006 (2014),           arXiv:1509.04968 [hep-ph].
+     arXiv:2109.09935 [hep-ph].                                     [42] K.      Fukushima,         Phys. Lett. B 695, 387 (2011),
+[17] F.        Gao        and        J.       M.       Pawlowski,        arXiv:1006.2596 [hep-ph].
+     Phys. Rev. D 102, 034027 (2020),                               [43] Z.    Li,      K.     Xu,       X.    Wang,          and
+     arXiv:2002.07500 [hep-ph].                                          M.         Huang,         Eur. Phys. J. C 79, 245 (2019),
+[18] N.    Davis,      Acta Phys. Polon. Supp. 13, 637 (2020),           arXiv:1801.09215 [hep-ph].
+     arXiv:2002.06636 [nucl-ex].                                    [44] K.      Fukushima,         Phys. Lett. B 591, 277 (2004),
+[19] G. Odyniec, J. Phys. G 37, 94028 (2010).                            arXiv:0310121 [hep-ph].
+[20] L.             Adamczyk                and           Others,   [45] K.        Fukushima           and       V.       Skokov,
+     Phys. Rev. Lett. 112, 32302 (2014),                                 Prog. Part. Nucl. Phys. 96, 154 (2017),
+     arXiv:1309.5681 [nucl-ex].                                          arXiv:1705.00718 [hep-ph].
+[21] X.            Luo,             PoS CPOD2014, 19 (2015),        [46] B.-J.    Schaefer,    J.    M.     Pawlowski,        and
+     arXiv:1503.02558 [nucl-ex].                                         J.     Wambach,         Phys. Rev. D 76, 074023 (2007),
+[22] M. A. Stephanov, K. Rajagopal,                  and E. V.           arXiv:0704.3234 [hep-ph].
+     Shuryak,                  Phys. Rev. D 60, 114028 (1999),      [47] T. K. Herbst, J. M. Pawlowski, and B.-J. Schaefer,
+     arXiv:9903292 [hep-ph].                                             Phys. Lett. B 696, 58 (2011), arXiv:1008.0081 [hep-ph].
+[23] Y.       Hatta        and       M.        A.      Stephanov,   [48] J.          Braun,           J. Phys. G 39, 33001 (2012),
+     Phys. Rev. Lett. 91, 102003 (2003),                                 arXiv:1108.4449 [hep-ph].
+     arXiv:0302002 [hep-ph].                                        [49] J.    M.     Pawlowski,     Ann. Phys. 322, 2831 (2007),
+                                                                                                                                14
+
+     arXiv:0512261 [hep-th].                                            arXiv:1004.2665 [hep-ph].
+[50] J. Berges, N. Tetradis,              and C. Wetterich,        [68] M.        Kobayashi          and         T.       Maskawa,
+     Phys. Rept. 363, 223 (2002), arXiv:0005122 [hep-ph].               Prog. Theor. Phys. 44, 1422 (1970).
+[51] P. M. Lo, B. Friman, O. Kaczmarek, K. Redlich,                [69] G. ’t Hooft, Phys. Rev. Lett. 37, 8 (1976).
+     and    C.     Sasaki,   Phys. Rev. D 88, 074502 (2013),       [70] C. Wetterich, Int. J. Mod. Phys. A 16, 1951 (2001),
+     arXiv:1307.5958 [hep-lat].                                         arXiv:0101178 [hep-ph].
+[52] S.      Roessner,         C.       Ratti,              and    [71] D.     F.     Litim,     Phys. Rev. D 64, 105007 (2001),
+     W.        Weise,        Phys. Rev. D 75, 034007 (2007),            arXiv:0103195 [hep-th].
+     arXiv:0609281 [hep-ph].                                       [72] R.      Wen,       C.       Huang,            and      W.-
+[53] L. M. Haas, R. Stiele, J. Braun, J. M. Pawlowski, and              J.          Fu,          Phys. Rev. D 99, 094019 (2019),
+     J. Schaffner-Bielich, Phys. Rev. D 87, 076004 (2013),              arXiv:1809.04233 [hep-ph].
+     arXiv:1302.1993 [hep-ph].                                     [73] K. Kamikado and T. Kanazawa, JHEP 01, 129 (2015),
+[54] T. K. Herbst, J. M. Pawlowski,                    and B.-          arXiv:1410.6253 [hep-ph].
+     J.      Schaefer,       Phys. Rev. D 88, 014007 (2013),       [74] S.      Yin,       R.      Wen,              and      W.-j.
+     arXiv:1302.1426 [hep-ph].                                          Fu,                    Phys. Rev. D 100, 094029 (2019),
+[55] T. K. Herbst, M. Mitter, J. M. Pawlowski, B.-J.                    arXiv:1907.10262 [hep-ph].
+     Schaefer, and R. Stiele, Phys. Lett. B 731, 248 (2014),       [75] S.     Resch,      F.     Rennecke,           and     B.-J.
+     arXiv:1308.3621 [hep-ph].                                          Schaefer,                Phys. Rev. D 99, 076005 (2019),
+[56] R.       Stiele       and       J.       Schaffner-Bielich,        arXiv:1712.07961 [hep-ph].
+     Phys. Rev. D 93, 094014 (2016),                               [76] J.    T.    Lenaghan,      D.     H.    Rischke,       and
+     arXiv:1601.05731 [hep-ph].                                         J. Schaffner-Bielich, Phys. Rev. D 62, 085008 (2000),
+[57] W.-j. Fu, J. M. Pawlowski,                 and F. Ren-             arXiv:0004006 [nucl-th].
+     necke,                 Phys. Rev. D 100, 111501 (2019),       [77] S. Borsanyi, Z. Fodor, C. Hoelbling, S. D. Katz, S. Krieg,
+     arXiv:1809.01594 [hep-ph].                                         and K. K. Szabo, Phys. Lett. B 730, 99 (2014),
+[58] B. Friman,       F. Karsch,        K. Redlich,         and         arXiv:1309.5258 [hep-lat].
+     V.       Skokov,        Eur. Phys. J. C 71, 1694 (2011),      [78] F.     Karsch,     Central Eur. J. Phys. 10, 1234 (2012),
+     arXiv:1103.3511 [hep-ph].                                          arXiv:1202.4173 [hep-lat].
+[59] G.     A.      Almasi,       B.     Friman,            and    [79] P.         Braun-Munzinger,              B.        Friman,
+     K.       Redlich,       Phys. Rev. D 96, 014027 (2017),            K.       Redlich,      A.       Rustamov,              and
+     arXiv:1703.05947 [hep-ph].                                         J.      Stachel,      Nucl. Phys. A 1008, 122141 (2021),
+[60] J. Braun, L. Fister, J. M. Pawlowski,                  and         arXiv:2007.02463 [nucl-th].
+     F.      Rennecke,       Phys. Rev. D 94, 034016 (2016),       [80] A.             Bazavov               and            Others,
+     arXiv:1412.1045 [hep-ph].                                          Phys. Rev. D 93, 014512 (2016),
+[61] A. K. Cyrol, M. Mitter, J. M. Pawlowski,               and         arXiv:1509.05786 [hep-lat].
+     N.     Strodthoff,      Phys. Rev. D 97, 054015 (2018),       [81] M.             Abdallah              and            Others,
+     arXiv:1708.03482 [hep-ph].                                         Phys. Rev. Lett. 127, 262301 (2021),
+[62] M.     Mitter,      J.    M.      Pawlowski,           and         arXiv:2105.14698 [nucl-ex].
+     N.     Strodthoff,      Phys. Rev. D 91, 054035 (2015),       [82] W.-j.       Fu       and       J.       M.       Pawlowski,
+     arXiv:1411.7978 [hep-ph].                                          Phys. Rev. D 92, 116006 (2015),
+[63] M.         Mitter         and          B.-J.         Schae-        arXiv:1508.06504 [hep-ph].
+     fer,                    Phys. Rev. D 89, 054027 (2014),       [83] G.       Almasi,        R.        Pisarski,            and
+     arXiv:1308.3176 [hep-ph].                                          V.        Skokov,        Phys. Rev. D 95, 056015 (2017),
+[64] S.       D.        Glazek,         PoS LC2008, 4 (2008),           arXiv:1612.04416 [hep-ph].
+     arXiv:0810.4467 [hep-th].                                     [84] V.       Skokov,         B.       Friman,              and
+[65] X.-y.   Xin,     S.-x.    Qin,         and     Y.-x.   Liu,        K.        Redlich,       Phys. Rev. C 88, 034911 (2013),
+     Phys. Rev. D 89, 094012 (2014).                                    arXiv:1205.4756 [hep-ph].
+[66] O. Scavenius,        A. Dumitru,             and J. T.        [85] J.    Braun,      K.    Schwenzer,          and    H.    J.
+     Lenaghan,               Phys. Rev. C 66, 034903 (2002),            Pirner,                  Phys. Rev. D 70, 085016 (2004),
+     arXiv:0201079 [hep-ph].                                            arXiv:0312277 [hep-ph].
+[67] V. Skokov,       B. Stokic,        B. Friman,          and    [86] J. Braun, M. Leonhardt,           and J. M. Pawlowski,
+     K.       Redlich,       Phys. Rev. C 82, 015206 (2010),            SciPost Phys. 6, 56 (2019), arXiv:1806.04432 [hep-ph].
+

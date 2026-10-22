@@ -1,0 +1,10 @@
+profile_name = "local_d_plus"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cross_literature_exploration:local_d_plus"
+
+[coefficients]
+a_GeV = 0.14689421970002192
+b_GeV_inv1 = 0.10364148726030518
+c_GeV_inv3 = 0.5463741671473763
+d_GeV = 0.8716232694332657
+e_GeV_inv1 = 0.2233322518914494

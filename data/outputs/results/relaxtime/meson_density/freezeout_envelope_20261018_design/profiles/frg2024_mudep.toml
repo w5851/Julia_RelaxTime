@@ -1,0 +1,10 @@
+profile_name = "frg2024_mudep"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "literature_anchor:frg2024_mudep"
+
+[coefficients]
+a_GeV = 0.1548
+b_GeV_inv1 = 2.616279069767442e-06
+c_GeV_inv3 = 0.5930752652797626
+d_GeV = 0.70896
+e_GeV_inv1 = 0.147

@@ -1,0 +1,64 @@
+{
+  "schema": "freezeout_experimental_sources_v1",
+  "retrieved_at_utc": "2026-10-17T03:05:02.004930+00:00",
+  "user_figure": "D:\\Desktop\\PNJL论文\\03_报告与研究笔记\\会议报告\\2026-介子数密度比.png",
+  "compilation_source": "Universe 9 (2023) 106, arXiv:2205.06726v5, Figure 1 left",
+  "sources": [
+    {
+      "path": "raw/star2017_kpi_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/76977/657509/1/",
+      "citation": "STAR 2017, Figure 24",
+      "sha256": "109388be00a2fa7906a04c5a41ac71b5d0574e35c62b04e412ff26f54dd56bba"
+    },
+    {
+      "path": "raw/na492008_kpi_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/25169/22530/1/",
+      "citation": "NA49 2008, Table 10 (midrapidity, includes AGS compilation)",
+      "sha256": "721df72deac9a1f1370dd594147d571bb5b707642ef9f74240874d1597fff05d"
+    },
+    {
+      "path": "raw/star145_piplus_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/103857/1141755/1/",
+      "citation": "STAR 2020, pion dN/dy at 14.5 GeV",
+      "sha256": "a42641860d5409b07e64858f39df9c0d40732dc874295e06880fd1af6c00f2a4"
+    },
+    {
+      "path": "raw/star145_kplus_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/103857/1141757/1/",
+      "citation": "STAR 2020, kaon dN/dy at 14.5 GeV",
+      "sha256": "fa892b28a8e7c0fde7d84e4b986a5fd16906cde01b142eb43b17fb7410c6c441"
+    },
+    {
+      "path": "raw/alice2013_kpi_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/61925/319682/1/",
+      "citation": "ALICE 2013, Table 37",
+      "sha256": "50989446ad60f0b3c7ebd9b301cfbb4d6355c13359d80e197f1ff49af8bf56d1"
+    },
+    {
+      "path": "raw/alice2020_kpi_hepdata.json",
+      "url": "https://www.hepdata.net/record/data/104923/1038204/1/",
+      "citation": "ALICE 2020, Table 11",
+      "sha256": "2174394b0a0e4c3bcbfc526af0088a8f12f138c6f8eaf52238fb5865f48219b4"
+    },
+    {
+      "path": "raw/star2009_table_ix.json",
+      "url": "https://arxiv.org/abs/0808.2041",
+      "citation": "STAR 2009, Table IX",
+      "sha256": "192a53fee118b577c3f7abefed89b76f80729af8cb87ea7b895813cf8a20034f"
+    }
+  ],
+  "star2009_pdf": {
+    "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S13_STAR_2009_identified_particle_spectra.pdf",
+    "sha256": "341319c5f326981ca74a846250fd3843959ebd4afb0cb00b45d8d1902c3b2772"
+  },
+  "digitization": "hades_digitized/metadata.json",
+  "selection_notes": [
+    "NA49 Table 10: use K+/pi+ group 0 only. The five rows below 6 GeV are Au+Au AGS, not Pb+Pb despite global reaction qualifiers. Retain the published 2.35 GeV energy; do not silently recalculate it.",
+    "NA49 Table 10: use the five SPS points 6.27,7.62,8.77,12.32,17.27 GeV; exclude its historical RHIC rows at 125/195 GeV in favor of STAR Table IX.",
+    "STAR 2009 HEPData Figure30a has only K-/pi- despite its two-charge caption; do not use it for K+/pi+.",
+    "STAR 14.5 GeV ratio is derived from the largest-Npart yields 26.7/141. No covariance is supplied, so the displayed propagated uncertainty assumes zero covariance.",
+    "ALICE points are (K+ + K-)/(pi+ + pi-), |y|<0.5, 0-5%; show as auxiliary charge-summed high-energy observations, excluded from charged AuAu ranking.",
+    "HADES 2.4 GeV SIS point is digitized from the supplied-figure source; its interval is pixel reading uncertainty, not experimental error, and it is excluded from ranking.",
+    "No pp points or PHSD/SMASH model curves are used."
+  ]
+}

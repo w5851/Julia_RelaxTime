@@ -1,0 +1,162 @@
+{
+  "schema": "chemical_freezeout_Tmu_envelope_v1",
+  "best_selected": "andronic_local_T_lim_GeV_minus",
+  "band_members": [
+    "andronic2009",
+    "andronic_axis_d_GeV_low",
+    "andronic_sample_001",
+    "andronic_sample_003",
+    "andronic_sample_005",
+    "andronic_sample_007",
+    "andronic_sample_009",
+    "andronic_sample_011",
+    "andronic_sample_013",
+    "andronic_sample_017",
+    "andronic_sample_023",
+    "andronic_sample_029",
+    "andronic_sample_031",
+    "du2024",
+    "andronic2026_v2",
+    "andronic_axis_d_GeV_high",
+    "andronic_axis_e_GeV_inv1_high",
+    "andronic_axis_log_offset_high",
+    "andronic_axis_log_width_high",
+    "andronic_sample_004",
+    "andronic_sample_008",
+    "andronic_sample_010",
+    "andronic_sample_012",
+    "andronic_sample_014",
+    "andronic_sample_018",
+    "andronic_sample_020",
+    "andronic_sample_022",
+    "andronic_sample_024",
+    "andronic_sample_028",
+    "andronic_sample_032",
+    "yu2025_set_ii",
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_e_GeV_inv1_minus",
+    "andronic_local_log_offset_minus",
+    "andronic_local_log_width_minus",
+    "andronic_local_T_lim_GeV_plus",
+    "andronic_local_d_GeV_plus",
+    "andronic_local_e_GeV_inv1_plus",
+    "andronic_local_log_offset_plus",
+    "andronic_hornmap_003",
+    "andronic_hornmap_002"
+  ],
+  "near_best_members": [
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_log_offset_plus",
+    "andronic_local_e_GeV_inv1_plus",
+    "andronic_sample_022",
+    "andronic_local_e_GeV_inv1_minus",
+    "andronic_local_log_offset_minus",
+    "andronic_local_d_GeV_plus",
+    "andronic_local_log_width_minus",
+    "andronic_local_T_lim_GeV_plus"
+  ],
+  "near_best_distinct_Tmu_curves": 10,
+  "selected_parameters": {
+    "T_lim_GeV": 0.15450868637489545,
+    "log_offset": 2.718417742065884,
+    "log_width": 0.47150281506186065,
+    "d_GeV": 1.1184781730770237,
+    "e_GeV_inv1": 0.31049824162389916
+  },
+  "andronic_default": {
+    "T_lim_GeV": 0.1584,
+    "log_offset": 2.6,
+    "log_width": 0.45,
+    "d_GeV": 1.3075,
+    "e_GeV_inv1": 0.288
+  },
+  "optimized_family": "andronic_logistic_rational_v1",
+  "andronic_optimized": true,
+  "muB_range_MeV": [
+    0,
+    500.0
+  ],
+  "original_energy_range_GeV": [
+    4.87,
+    200.0
+  ],
+  "base_grid_points": 501,
+  "grid_points": 508,
+  "definition": "At fixed muB take T minima/maxima over the same frozen full and near-best sets as the ratio figure; no new selection",
+  "coordinate_validation": {
+    "points": 156,
+    "maximum_error_MeV": 5.684341886080802e-14
+  },
+  "support_semantics": "Analytic parameterizations on the declared muB domain, including continuations outside each member's original finite energy window; no new density solutions",
+  "projection_semantics": "Tlim,w,D and A+ln(E)/w determine Andronic T(muB); joint A,E rescaling can preserve geometry",
+  "failure_semantics": "Earlier ratio failures remain unchanged; analytic chemical-freezeout geometry itself has no K+ integration gate",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "source_run_id": "000cc88876d02c8dc7722d94d78dc2799061de53f6bdc813d8617da433550fb3",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/summary.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 27390,
+      "sha256": "8ea288556cfd8512697c191ac3b74aa6e0fb8b1336a6f29aeeb09e1cd4fb55a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/checksums.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 1196,
+      "sha256": "900f88d5fb364213b2e6e54aa952b562b12590a5921414b10ef0e95b23b7fb99"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/fine_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 11713,
+      "sha256": "7c5402072123e99619a99d43f894f3a983029b6328ba341488214f34f996c416"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/baseline_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/assessment.json",
+      "path_kind": "repository_relative",
+      "role": "fixed_band_membership",
+      "bytes": 61295,
+      "sha256": "c39ba64514c9bb451ff97c5e133402941e6f02fd8c2bcdd753d57f04061f20f7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/source_snapshot/config/physics/freezeout/andronic2018.toml",
+      "path_kind": "repository_relative",
+      "role": "frozen_Andronic_default",
+      "bytes": 535,
+      "sha256": "2bc25d501a9c04af292aa272ec8cddde17d5f1aee526d20ce3d9e9f2793c4843"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 27808,
+      "sha256": "76d960045c2679fe2ea98a673b480063df8af4258af4e0bad1a618b835f7aad0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 10313,
+      "sha256": "3fbb57d9cf720502ebb18d77b74441f70fe4820afa0189e0772c125b5f272308"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 17299,
+      "sha256": "35473252108b0f58670e602fa787c46da3045b9596ab0cc5d11d1a19ad39c5cd"
+    }
+  ]
+}

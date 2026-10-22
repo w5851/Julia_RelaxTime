@@ -1,0 +1,19 @@
+schema = "andronic_finite_exploration_v1"
+domain = "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml"
+domain_sha256 = "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+
+[design]
+seed = 20261018
+interior_trim_fraction = 0.10
+interior_sample_count = 32
+minimum_energy_GeV = 4.87
+maximum_energy_GeV = 200.0
+primary_energies_GeV = [7.7, 11.5, 14.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+screening_energies_GeV = [4.87, 6.27, 7.62, 7.7, 8.77, 9.25, 10.0, 11.5, 12.32, 14.5, 17.27, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+near_best_rmse_factor = 1.10
+local_step_fraction = 0.05
+local_rounds = 1
+boundary_axis_samples = true
+maximum_mapping_candidates = 3
+refined_curve_count = 3
+description = "Four distinct nonbaseline complete source anchors, 32 stratified interior samples and 10 axis-boundary probes; one axial refinement round and up to three admissible geometry-preserving energy rescalings. Reuse Andronic 2018 as the frozen baseline; Elfner duplicates it and JHEP is temperature-only. Fixed nine-point scoring and complete-curve envelopes match the polynomial exploration."

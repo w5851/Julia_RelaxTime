@@ -1,0 +1,704 @@
+                                                      Extracting freeze-out conditions in beam energy scan via functional QCD
+
+                                                            Yi Lu,1 Christian S. Fischer,2, 3 Fei Gao,4 Yu-xin Liu,1, 5, 6 and Jan M. Pawlowski7, 8
+                                          1
+                                              Department of Physics and State Key Laboratory of Nuclear Physics and Technology, Peking University, Beijing 100871, China
+                                                             2
+                                                               Institut für Theoretische Physik, Justus-Liebig-Universität Gießen, 35392 Gießen, Germany
+                                                                                3
+                                                                                  Helmholtz Forschungsakademie Hessen für FAIR (HFHF),
+                                                             GSI Helmholtzzentrum für Schwerionenforschung, Campus Gießen, 35392 Gießen, Germany
+                                                                        4
+                                                                          School of Physics, Beijing Institute of Technology, 100081 Beijing, China
+                                                                       5
+                                                                         Center for High Energy Physics, Peking University, 100871 Beijing, China
+                                                                      6
+                                                                        Collaborative Innovation Center of Quantum Matter, Beijing 100871, China
+                                                     7
+                                                       Institut für Theoretische Physik, Universität Heidelberg, Philosophenweg 16, 69120 Heidelberg, Germany
+                                                                   8
+                                                                     ExtreMe Matter Institute EMMI, GSI, Planckstr. 1, 64291 Darmstadt, Germany
+                                                             Fluctuations of conserved charges provide a link between high quality theoretical results and preci-
+                                                          sion measurements of heavy ion collisions. We compare results for ratios of the lowest order baryon
+                                                          number susceptibilities from functional QCD approaches to proton number cumulants extracted
+arXiv:2603.09336v1 [hep-ph] 10 Mar 2026
+
+
+
+
+                                                          from experiments. We find that they meet at a specific temperature and chemical potential for
+                                                          each collision energy. This is indicative of the respective freeze-out point. From this self-consistent
+                                                          determination of the freeze-out parameters we extract a prediction for the kurtosis on the freeze-out
+                                                          line. We find quantitative agreement with experimental data where available, despite comparing
+                                                          apples (baryons) with oranges (protons). At a collision energy around 5 GeV, our kurtosis exhibits
+                                                          a peak structure indicative of the critical end point of QCD.
+
+
+                                             Introduction.— The search for possible signatures for             parison accommodates the differences between ratios of
+                                          the critical end point (CEP) and the associated first                proton and baryon number fluctuations as well as the
+                                          order transition region in the phase diagram of quantum              non-equilibrium part of the time evolution of heavy ion
+                                          chromodynamics (QCD) is a primary goal of heavy ion                  collisions into the map from net-baryon number fluctu-
+                                          collision experiments. For decades, great efforts have               ations in equilibrium to net-proton number fluctuations
+                                          been made on measuring conserved charge fluctuations                 at freeze-out. This implicitly assumes that both effects
+                                          on an event by event basis, since these quantities have              approximately cancel out in ratios of fluctuations of con-
+                                          been suggested as probes to characterise the CEP of                  served charges. Despite this caveat we consider this type
+                                          QCD, see e.g. [1, 2] for overviews. Recent high-precision            of analysis an important stepping stone towards the com-
+                                          extractions of net-proton number cumulants from beam                 plete picture including all effects.
+                                          energy scan (BES-II) experiments carried out by the                     The functional approach to QCD offers the tantalis-
+                                          STAR-collaboration at the Relativistic Heavy Ion Col-                ing possibility to extend this approach to large baryon
+                                          lider (RHIC) [3] together with older data from BES-I                 chemical potential. This includes the region of a poten-
+                                          [4] emphasise the need for corresponding quantitative                tial critical end point (CEP) and/or the onset of new
+                                          theoretical calculations from first principles. In our               phases (ONP), such as the moat regime [10–12] or inho-
+                                          opinion, the way forward is to provide equilibrium QCD               mogeneous phases [12–14]. With full access to the first
+                                          results for thermodynamical observables and fluctuations             three susceptibilities in the whole temperature–chemical-
+                                          of conserved charges as a baseline, and then build upon              potential plane, a complete mapping between freeze-out
+                                          this in non-equilibrium studies. The goal is to deliver a            parameters and collision energies can be built [15]. In
+                                          quantitative theoretical description of the experimental             fact, one might argue that functional QCD methods are
+                                          data that leads to a comprehensive understanding of the              the only ones to date that allow for a direct computa-
+                                          thermodynamic properties of QCD matter during the                    tion of QCD thermodynamic quantities for large chem-
+                                          collisions.                                                          ical potentials, see [16]. For µB /T ≲ 4.5, state of the
+                                             Functional freeze-out curve.— This programme re-                  art computations with the functional approach to QCD
+                                          quires as a first key milestone the determination of the             have quantitative reliability, [12, 17–19], and this border
+                                          freeze-out curve in the phase structure. The freeze-                 is continuously pushed towards larger chemical poten-
+                                          out condition has been widely investigated in statistical            tials.
+                                          models through matching particle yields and their ra-                   In the present work, we report on the extraction of
+                                          tios, see e.g. [5]. Alternatively, one can map out the               a self-consistent functional freeze-out condition in the
+                                          freeze-out curve by comparing theoretical predictions for            context of STAR-data, which incorporates our current
+                                          the ratios of susceptibilities of fluctuations of conserved          best knowledge on QCD thermodynamics at finite den-
+                                          charges with the experimental data. This strategy has                sity. The resulting freeze-out curve allows us to estimate
+                                          been put forward at small chemical potential, compar-                higher-order fluctuations of proton-number fluctuations
+                                          ing lattice results for ratios of net-baryon number fluc-            with narrowed error bars, and in particular within the
+                                                                                                                               √
+                                          tuations with the experimental data for ratios of net-               range of 3 < sNN < 7.7 GeV. To our knowledge, we
+                                          proton number fluctuations, [6–9]. Note that such a com-             deliver for the first time a prediction for the kurtosis
+                                                                                                                                                                                                                                                                            2
+
+at freeze-out in equilibrium QCD. This provides an                             1 8 0                                                                                      E x tra c te d fre e z e o u t fro m :
+                                                                                                                                                                                      B E S -I               B E S -II             fitte d fr e e z e - o u t b o u n d
+important step towards isolating a smoking gun signal                                                                                                                      F r e e z e o u t fr o m p a r tic le y ie ld s :
+                                                                                                                                                                                       S a g u n e t a l.           A n d r o n ic e t a l.           A n d r o n ic fit
+for the existence and the location of a QCD critical end                       1 6 0                     5 4 .4                                                             C h ir a l c r o s s o v e r s :
+                                                                                                                                                                                        T h is w o r k                     fR G , F u e t a l.
+point or more generally the onset of new phases.                                                   6 2 .4 3 9              2 7 1 9 .6
+                                                                                                                                                                                         D S E , G a o e t a l.            D S E , G u n k e l e t a l.
+
+                                                                                           2 0 0                                             1 4 .5
+   Determination of the freeze-out parameters.— The                            1 4 0                                                                  1 1 .5
+                                                                                                                                                               7 .7
+                                                                                                                                                                                              6 .3
+
+freeze-out temperature and chemical potential at the re-
+
+
+
+
+                                                                  T [M e V ]
+                                                                                                                                                                                                                       4 .9
+spective collision energy can be determined by compar-
+
+
+
+
+                                                                                           1 6 0
+                                                                               1 2 0               2 7
+ing theoretical and experimental results on fluctuations                                                          1 9 .6
+                                                                                                                            1 7 .3
+                                                                                                                                      1 4 .6
+of conserved charges. This requires the first two lowest-
+
+
+
+
+                                                                                           1 5 0
+                                                                                                                                                      1 1 .5
+                                                                                                                                                               9 .2
+order ratios of baryon number susceptibilities χB         B
+                                                      2 /χ1
+                                                                               1 0 0                                                                                   7 .7
+                                                                                                                                                                                                                                    4 .3
+and χB3 /χ B
+           1 . They are compared    with the  corresponding
+
+
+
+
+                                                                                           1 4 0
+                                                                                                                                                                                                                                             3 .8
+cumulants of proton number that have been measured                               8 0
+with relatively high statistics in BES-I [4], and with even                                        1 5 0             2 0 0            2 5 0           3 0 0       3 5 0            4 0 0                                                              3 .3
+
+higher precision in BES-II [3]. The freeze-out temper-                                 0                                             2 0 0                                    4 0 0                                      6 0 0                                      8 0 0
+ature Tf and chemical potential µB,f at different colli-                                                                                                              µB [ M e V ]
+               √
+sion energies sNN are determined by the following set
+of equations,                                                   FIG. 1. Freeze-out points extracted from (1) and (2) in the T -
+                                                                µB plane, using the cumulant data C1,2,3 from BES-I [4] and
+              χB
+               2                C2 √                            BES-II [3], with the collision energies labeled as the black
+                 (Tf , µB,f ) =    ( sNN ) ,             (1)
+              χB
+               1                C1                              numbers in GeV unit. Also shown are the locations of the
+                                                                CEP extracted in [17–19] and the corresponding result [16]
+              χB                C3 √                            obtained with the scheme used in this work. The prediction
+               3                                                                                           √
+               B
+                 (Tf , µB,f ) =    ( sNN ) ,             (2)    on the freeze-out condition towards lower sNN or higher µB
+              χ1                C1                              is shown as the blue band, which is determined by fitting
+                                                                our freeze-out points with (3) and (5). We also compare the
+with the left hand side provided by theory and the right        freeze-out points with the chiral phase transition line, and the
+hand side by experiment. This method is inspired by             freeze-out points extracted from particle yields [5, 21] whose
+previous studies in [6, 7, 15], which offer a systematic        collision energies are indicated by the grey numbers in GeV
+and simultaneous extraction of the freeze-out temper-           unit. The peak position of the kurtosis along the freeze-out
+ature and baryon chemical potential. All technical              lines within the band is indicated by the blue-dashed curve,
+details of this procedure are given in the Supplemental         with its peak width indicated by the purple region, in match
+Materials. Here, we only discuss the key points of              with Figure 2 and Figure 3.
+this method. On the one hand, it has been shown in
+lattice QCD calculations [6, 7] that the ratio χB        B
+                                                    1 /χ2 is              √
+insensitive to temperature (even) in the vicinity of the        mediate sNN ≳ 10 GeV, the extracted freeze-out points
+chiral phase transition. Thus, it can be used to estimate       agree with the chiral crossover line within error bars. De-
+the freeze-out chemical potential µB,f of high energy           tails on the latter are explained in the Supplemental Ma-
+collisions. This is also verified in our calculations for the   terial. We take into account both the statistical and sys-
+case of net-baryon charge, see the left panel of Figure 4       tematic errors of the experimental data. Furthermore,
+in the Supplemental Material for µB ∈ (0, 150) MeV.             we take into account errors from the extraction scheme
+On the other hand, it is also understood [15] that the          (1) and (2). For smaller collision energies, our combined
+ratio χB     B                                                  error bars become larger.
+         3 /χ1 is more sensitive to temperature.        This
+makes it a good candidate for estimating Tf , see the             The consistency between the extracted freeze-out
+right panel of Figure 4. The lattice QCD analysis has           points and the phase transition line at small chemical
+been performed up to µB ∼ 150 MeV which includes                potentials suggests that one can parametrise the freeze-
+                            √                                   out line similar to the chiral phase transition line. This
+the three data points at sNN = 200, 62.4, 39 GeV [8].
+For large chemical potential, the equilibrium net-baryon        reads [22],
+number cumulants and their ratios are available from                       "              2             4        #
+                                                                                  f   µB,f        f   µB,f
+continuum QCD approaches via correlation functions,               Tf = T0 1 − κ2               − κ4           + · · · , (3)
+i.e. functional QCD [16, 20]. In this work, we adopt                                    T0             T0
+the approximation scheme developed in the latter work.
+It includes important aspects of confinement and chiral         with T0 the freeze-out temperature at zero chemical po-
+dynamics on a self-consistent basis and leads to quan-          tential. The curvature coefficients κf2 , κf4 , · · · accommo-
+titative agreement with lattice QCD benchmarks for              date the µB,f /T0 -dependence of the freeze-out tempera-
+thermodynamic quantities at small chemical potential.           ture. These parameters of the freeze-out line are in fact
+                                                                strongly constrained by mainly two aspects:
+   An optimised estimate on the freeze-out line.— We
+compare the susceptibility ratios χB         B         B
+                                         2 /χ1 and χ3 /χ1
+                                                            B
+                                                                   (i) The direct extraction results in a freeze-out line
+with the data from both BES-I and BES-II experiments.                  which is consistent with the chiral phase transition
+As depicted in Figure 1, we find that for high and inter-              line. It exhibits a milder µB dependence though,
+                                                                                                                                                                                                                                                 3
+
+         a [MeV] b [GeV−1 ] T0 [MeV]         κf2      κf4                                          3 .3
+                                                                                      6 0 0               4 .3                                                                                                   B E S -I
+ lower     913.9     0.1977       Tcχ (0)    κχ
+                                              2    1.47×10−3                                                     4 .9                                                                                             B E S -II
+                                                                                      5 0 0                                                                                                                        P a d é [0 ,1 ] fit
+ upper    1027.0     0.2143       Tcχ (0)    κχ
+                                              2    0.73×10−3                                                             6 .3
+                                                                                                                                7 .6                                                                             A n d r o n ic e t a l.
+ mean      953.7     0.2026       Tcχ (0)    κχ
+                                              2    0.96×10−3                          4 0 0                                               8 .8                                                                    S a g u n e t a l.
+
+
+
+
+                                                                   µB , f [ M e V ]
+                                                                                                                                                  1 1 .5
+                                                                                                                        7 .7
+TABLE I. Fit parameters for the upper and lower freeze-out                            3 0 0                                        9 .2
+                                                                                                                                                           1 4 .5
+bounds and the best fit from mean freeze-out data. Tcχ (0) =                                                                                 1 2 .3
+                                                                                                                                                                      1 9 .6
+157 MeV and κχ    2 = 0.0153 are the pseudo-critical tempera-
+                                                                                      2 0 0
+                                                                                                                                                       1 7 .3
+ture at zero µB and the curvature of the chiral crossover line,                                                                                                                          3 9
+                                                                                      1 0 0                                                                                    2 7                      6 2 .4
+respectively, following the functional QCD calculation in [16].
+                                                                                                                                                                                                                             1 3 0       2 0 0
+                                                                                                                                                                                               5 4 .4
+                                                                                           0
+                                                                                               3           5                              1 0                       2 0                        5 0                   1 0 0               2 0 0
+      yielding the relations T0 = Tcχ (µB = 0) and κf2 ≤
+      κχ2 with the corresponding parameters Tcχ and κχ2                                                                                                                              [G e V ]
+      of the chiral phase transition line.
+                                                                  FIG. 2. Freeze-out chemical potential µB,f as a function of
+ (ii) It is a natural physical assumption that the chemi-                          √                                  √
+                                                                  collision energy sNN . Our result for the µB,f - sNN rela-
+      cal freeze-out takes place after the relatively sharp       tion is displayed as the blue band, which is compared with
+      chiral crossover. In the vicinity of small µB and           the freeze-out points predicted from statistical models [5, 21].
+      with T0 = Tcχ (0), this requires κf2 ≥ κχ2 .                The collision energies in STAR BES-I and BES-II are marked
+                                                                  in black, and those collision energies covered in other experi-
+The combination of the two constraints entails that the           ments are marked in gray, all in GeV units.
+two parameters of the freeze-out line are tightly con-
+strained:
+      T0 = Tcχ (0) = 157 MeV;       κf2 = κχ2 = 0.0153,     (4)   as the blue bands in Figure 1 for Tf (µB,f ) and in Fig-
+                                                                                  √
+                                                                  ure 2 for µB,f ( sNN ). Our results confirm the validity of
+with small negligible errors. In turn, the extrapolation
+                                                                  the Tf (µB,f ) freeze-out extrapolation for AGS collision
+of the fit beyond µB ≥ 350 MeV is not well constrained                                √
+                                                                  energies down to sNN ≈ 3 GeV: our freeze-out bound
+by our freeze-out data even with the physics constraint
+                                                                  covers precisely the freeze-out points predicted by the
+mentioned above. Consequently, the higher-order terms
+                                                                  particle yields from the statistical models [5, 21], the lat-
+in the µB expansion (3) are less constrained. A minimal
+                                                                  ter marked out in Figure 1 with the collision energies by
+parametrisation in the high µB region is given by one
+                                                                  the grey numbers in units of GeV. In particular, the up-
+additional expansion parameter, κf4 . Its deviation from          per bound is already close to the freeze-out line from a
+κχ4 ≈ 0 [23, 24] determines the deviation between the             global fit analysis in [5].
+freeze-out and the phase transition line. It will be fixed                       √
+                                                                     Our µB,f ( sNN )-curve also agrees well with the
+mainly by the freeze-out points at lower collision ener-                                                   √
+                                                                  predictions from statistical models for sNN ≤ 7.7 GeV.
+gies. We take into account the 6.3 GeV freeze-out point,                                √
+extracted from particle yields in the SPS experiment [5],         Note that the µB,f ( sNN ) error band is correlated with
+which is discussed as a reliable reference in the inter-          the Tf (µB,f ) band, as both their upper/lower bounds
+mediate µB region, together with our freeze-out points            reflect the minimally/maximally possible freeze-out
+from BES-I 200 to 27 GeV and BES-II 27 to 7.7 GeV in              chemical potential at a given collision energy. Consid-
+Figure 1.                                                         ering our extrapolation down to even lower collision
+                                                                            √
+   To connect our results with the experimental landscape         energies sNN ≲ 5 GeV, we find a slightly lower µB,f
+in terms of collision energy, we also exploit knowledge on        compared to those of statistical models. This discrep-
+           √                                                      ancy is interesting and warrants further studies, both on
+the µB,f - sNN -dependence. A commonly used fit is the
+Padé[0,1] fit [5, 22],                                           the experimental and theoretical side. Even taking into
+                                                                  account the large error bars of the freeze-out predictions
+                                   a                              from different statistical models, it might indicate that
+                    µB,f =         √    ,                   (5)
+                              1 + b sNN                           5 GeV marks the onset of new dynamics.
+which describes our extracted freeze-out data well as de-            Prediction for the kurtosis.— The freeze-out estimate
+picted in Figure 2.                                               further allows an improved prediction of the kurtosis
+                                                                                                                    √
+   The error bars of the freeze-out points are included           baseline, which is shown in Figure 3. The sNN -
+in the fit of (3) and (5), which provide upper and                dependence of the kurtosis along the upper/lower bound
+lower bounds on the freeze-out parameters. Specifi-               of the freeze-out band is marked by the solid blue line,
+cally, the upper/lower bound is determined by fitting             and the kurtosis along the upper bound has a higher peak
+the upper/lower bounds of both Tf and µB,f , respec-              compared to that along the lower ones. We also consider
+tively. The results are collected in Table I, and the up-         a linear interpolation between the upper and lower fit pa-
+per and lower bounds of the freeze-out line are visualised        rameters in Table I, which defines a continuous change of
+                                                                                                                                                                       4
+
+                    5                                                                                            Summary.— The current situation regarding the QCD
+                                      1 .0                                                                    phase diagram and the potential identification of a crit-
+                    4                                                                                         ical end point is complex. On the theory side, the esti-
+                                                                                                              mates for the location of a possible critical end point or
+                    3                 0 .5
+                                                                                                              the onset of new phase from functional QCD, [12, 17–19],
+                                                                                                              or model computations such as in holographic models for
+                    2                 0 .0
+  K u r to s is
+
+
+
+
+                                               5     1 0       2 0            5 0        1 0 0
+                                                                                                              QCD [25] and extrapolations of the positions of Lee–Yang
+                                                                                                              zeros and thermodynamic quantities in lattice QCD [26–
+                    1
+                                                                                                              28], converge rather impressively. On the experimental
+                    0                                           D S E -Q C D (G C E )                         side, recent BESII fluctuation data [3] reveal no criti-
+                                                           s e lf- c o n s is t. fr e e z e o u t             cal information. In this work we demonstrate that both
+                                                                S T A R B E S -II 0 -5 %
+                  − 1                                                                                         findings are not in disagreement with each other.
+                                                                 S T A R fix - ta r g e t 0 - 5 %
+                                                                  H A D E S 0 -1 0 %                             Systematically comparing experimental data on ra-
+                  − 2                                                                                         tios of net-proton cumulants with results for rations of
+                        3   5   1 0          2 0               5 0              1 0 0               2 0 0     baryon susceptibilities from functional methods, we have
+                                                   [G e V ]                                                   mapped out the freeze-out curve in the QCD phase dia-
+                                                                                                              gram. We find consistent overlap with extractions using
+                              √                                                                                                                               √
+FIG. 3. Collision energy ( sNN ) dependence of the net-                                                       statistical models for collision energies above sNN ≥ 7
+baryon number kurtosis along the fitted freeze-out band in                                                    GeV, i.e. in the ‘base-line’ region of the kurtosis. We
+Figure 1. The error estimate of the kurtosis is marked by the                                                 also find interesting discrepancies at small collision en-
+                                                                                                                      √
+blue band, which corresponds to its variation along all possi-                                                ergies sNN ≤ 5 GeV. They warrant further investiga-
+ble freeze-out lines within the freeze-out band in Figure 1.                                                  tion, since this might signal the onset of new phases such
+                                                                                                              as a moat regime and/or regions with spatial inhomo-
+                                                                                                              geneities not yet covered by our study. For temperatures
+the freeze-out line within the band. The error estimate                                                       in the vicinity of our CEP, we find a distinct deviation
+of the kurtosis corresponds to its variation along all pos-                                                   of the freeze-out line from the chiral transition line as
+sible freeze-out lines in between. This is shown as the                                                       envisaged e.g. in Ref. [29]. Moreover, we find a peak in
+blue band.                                                                                                    the kurtosis in the region (Tf , µB,f ) = (120, 506) MeV,
+                                                                                                              √
+   The agreement on the experimental data further sup-                                                          sNN = 5 GeV for the upper bound of our error bar
+                                                                                                                                                  √
+ports that chemical freeze-out occurs close to the chiral                                                     and (Tf , µB,f ) = (125, 432) MeV, sNN = 6 GeV for the
+                       √                       √                                                              lower bound. To our knowledge, this is the first time
+phase transition for sNN ≳ 10 GeV. For sNN from
+7.7 down to 3 GeV, our improved freeze-out analysis pre-                                                      that an equilibrium baseline on the freeze-out line and
+                                   √                                                                          the kurtosis at freeze-out is available, which reflects the
+dicts a peak of the kurtosis at sNN ≈ 5 to 6 GeV.
+This location agrees with previous estimates from func-                                                       phase structure and thermodynamics within direct com-
+tional QCD [16, 20], however the peak height is lower.                                                        putations from functional QCD.
+The freeze-out temperature and chemical potential at the                                                         However, we wish to emphasise again that our results
+peak of kurtosis are also extracted within the upper and                                                      only provide a first step towards the full picture. In
+lower bounds given by Table I, which are displayed as the                                                     order to compare oranges with oranges, we need to find a
+purple dashed curve in Figure 1. In particular, we find                                                       way to extract proton susceptibilities in our framework.
+                                                                                                              This is work in progress. Furthermore, non-equilibrium
+                                                           √                                                  effects at the critical point, see e.g. [30–32] may affect
+          (Tf , µB,f ) = (120, 506) MeV ,                      sNN = 5 GeV                              (6)
+                                                                                                              the shape of the kurtosis significantly even at a sizeable
+for the upper bound, and                                                                                      distance from the CEP. They need to be taken into
+                                                                                                              account to further reduce the gap between theory and
+                                                           √                                                  experiment.
+          (Tf , µB,f ) = (125, 432) MeV ,                      sNN = 6 GeV                              (7)
+                                                                                                                 Acknowledgements.— We thank Szabolcs Borsányi,
+for the lower bound. We also provide an estimate                                                              Wei-jie Fu, Xiaofeng Luo, Nu Xu and the members of
+on the width of the kurtosis peak, which is evaluated                                                         the fQCD collaboration [33] for discussions. This work is
+from a Breit-Wigner fit along the upper or lower                                                              funded by the National Science Foundation of China un-
+bound of freeze-out. The overall width spread in the                                                          der the grants No. 12305134, 12247107 and 12175007, the
+√
+  sNN -direction is shown as the purple area in Figure 3.                                                     Deutsche Forschungsgemeinschaft (DFG, German Re-
+The kurtosis peak yields a potential “smoking-gun”                                                            search Foundation) under Germany’s Excellence Strat-
+area in the experimental landscape, and its projec-                                                           egy EXC 2181/1 - 390900948 (the Heidelberg STRUC-
+tion in the (T, µB ) plane is marked out in Figure 1                                                          TURES Excellence Cluster), the Collaborative Research
+as the purple region. Notably, this region is also                                                            Centre SFB 1225 - 273811115 (ISOQUANT). CSF has
+located at the onset position µB ≳ 450 MeV where                                                              been supported by the Deutsche Forschungsgemeinschaft
+the freeze-out bound starts to drop much quicker than                                                         (DFG, German Research Foundation) through the Col-
+the chiral crossover line toward larger chemical potential.                                                   laborative Research Center TransRegio CRC-TR 211
+                                                                                                              ‘Strong-interaction matter under extreme conditions’ and
+                                                                                                              the individual grant FI 970/16-1.
+                                                                                                                                  5
+
+
+
+
+ [1] X. Luo and N. Xu, Search for the QCD Critical Point            [17] W.-j. Fu, J. M. Pawlowski, and F. Rennecke, QCD phase
+     with Fluctuations of Conserved Quantities in Relativistic           structure at finite temperature and density, Phys. Rev.
+     Heavy-Ion Collisions at RHIC : An Overview, Nucl. Sci.              D 101, 054032 (2020), arXiv:1909.02991 [hep-ph].
+     Tech. 28, 112 (2017), arXiv:1701.02105 [nucl-ex].              [18] F. Gao and J. M. Pawlowski, Chiral phase structure and
+ [2] Y. Zhang, Z. Wang, X. Luo, and N. Xu, Search for the                critical end point in QCD, Phys. Lett. B 820, 136584
+     QCD Critical Point in High Energy Nuclear Collisions:               (2021), arXiv:2010.13705 [hep-ph].
+     A Status Report (2026) arXiv:2602.08356 [nucl-ex].             [19] P. J. Gunkel and C. S. Fischer, Locating the critical end-
+ [3] B. E. Aboona et al. (STAR), Precision Measurement                   point of QCD: Mesonic backcoupling effects, Phys. Rev.
+     of Net-Proton-Number Fluctuations in Au+Au Colli-                   D 104, 054022 (2021), arXiv:2106.08356 [hep-ph].
+     sions at RHIC, Phys. Rev. Lett. 135, 142301 (2025),            [20] W.-j. Fu, X. Luo, J. M. Pawlowski, F. Rennecke, and
+     arXiv:2504.00817 [nucl-ex].                                         S. Yin, Ripples of the QCD critical point, Phys. Rev. D
+ [4] M. Abdallah et al. (STAR), Cumulants and correlation                111, L031502 (2025), arXiv:2308.15508 [hep-ph].
+     functions of net-proton, proton, and antiproton multi-         [21] V. V. Sagun, K. A. Bugaev, A. I. Ivanytskyi, I. P. Yaki-
+     plicity distributions in Au+Au collisions at energies avail-        menko, E. G. Nikonov, A. V. Taranenko, C. Greiner,
+     able at the BNL Relativistic Heavy Ion Collider, Phys.              D. B. Blaschke, and G. M. Zinovjev, Hadron Resonance
+     Rev. C 104, 024902 (2021), [Erratum: Phys.Rev.C 111,                Gas Model with Induced Surface Tension, Eur. Phys. J.
+     029902 (2025)], arXiv:2101.12413 [nucl-ex].                         A 54, 100 (2018), arXiv:1703.00049 [hep-ph].
+ [5] A. Andronic, P. Braun-Munzinger, K. Redlich, and               [22] J. Cleymans, H. Oeschler, K. Redlich, and S. Wheaton,
+     J. Stachel, Decoding the phase structure of QCD via par-            Comparison of chemical freeze-out criteria in heavy-ion
+     ticle production at high energy, Nature 561, 321 (2018),            collisions, Phys. Rev. C 73, 034905 (2006), arXiv:hep-
+     arXiv:1710.09425 [nucl-th].                                         ph/0511094.
+ [6] A. Bazavov et al., Freeze-out Conditions in Heavy Ion          [23] A. Bazavov et al. (HotQCD), Chiral crossover in qcd at
+     Collisions from QCD Thermodynamics, Phys. Rev. Lett.                zero and non-zero chemical potentials, Phys. Lett. B 795,
+     109, 192302 (2012), arXiv:1208.1220 [hep-lat].                      15 (2019), arXiv:1812.08235 [hep-lat].
+ [7] S. Borsanyi, Z. Fodor, S. D. Katz, S. Krieg, C. Ratti,         [24] S. Borsanyi, Z. Fodor, J. N. Guenther, R. Kara, S. D.
+     and K. K. Szabo, Freeze-out parameters: lattice meets               Katz, P. Parotto, A. Pasztor, C. Ratti, and K. K. Sz-
+     experiment, Phys. Rev. Lett. 111, 062005 (2013),                    abo, Qcd crossover at finite chemical potential from lat-
+     arXiv:1305.5161 [hep-lat].                                          tice simulations, Phys. Rev. Lett. 125, 052001 (2020),
+ [8] S. Borsanyi, Z. Fodor, S. D. Katz, S. Krieg, C. Ratti, and          arXiv:2002.02821 [hep-lat].
+     K. K. Szabo, Freeze-out parameters from electric charge        [25] M. Hippert, J. Grefa, T. A. Manning, J. Noronha,
+     and baryon number fluctuations: is there consistency?,              J. Noronha-Hostler, I. Portillo Vazquez, C. Ratti,
+     Phys. Rev. Lett. 113, 052301 (2014), arXiv:1403.4576                R. Rougemont, and M. Trujillo, Bayesian location of the
+     [hep-lat].                                                          qcd critical point from a holographic perspective, Phys.
+ [9] A. Bazavov et al., Curvature of the freeze-out line in              Rev. D 110, 094006 (2024), arXiv:2309.00579 [nucl-th].
+     heavy ion collisions, Phys. Rev. D 93, 014512 (2016),          [26] G. Basar, Qcd critical point, lee-yang edge singulari-
+     arXiv:1509.05786 [hep-lat].                                         ties, and padé resummations, Phys. Rev. C 110, 015203
+[10] R. D. Pisarski and F. Rennecke, Signatures of Moat                  (2024), arXiv:2312.06952 [hep-th].
+     Regimes in Heavy-Ion Collisions, Phys. Rev. Lett. 127,         [27] D. A. Clarke, P. Dimopoulos, F. Di Renzo, J. Goswami,
+     152302 (2021), arXiv:2103.06890 [hep-ph].                           C. Schmidt, S. Singh, and K. Zambello, Searching
+[11] W.-j. Fu, J. M. Pawlowski, R. D. Pisarski, F. Ren-                  for the qcd critical end point using multipoint padé
+     necke, R. Wen, and S. Yin, Qcd moat regime and its                  approximations, Phys. Rev. D 112, L091504 (2025),
+     real-time properties, Phys. Rev. D 111, 094026 (2025),              arXiv:2405.10196 [hep-lat].
+     arXiv:2412.15949 [hep-ph].                                     [28] H. Shah, M. Hippert, J. Noronha, C. Ratti, and
+[12] J. M. Pawlowski, F. Rennecke, and F. R. Sattler, In-                V. Vovchenko, Locating the qcd critical point through
+     homogeneous instabilities in high-density QCD, (2025),              contours of constant entropy density, Phys. Rev. C 113,
+     arXiv:2512.20510 [hep-ph].                                          L012201 (2026), arXiv:2410.16206 [hep-ph].
+[13] M. Buballa and S. Carignano, Inhomogeneous chiral              [29] M. A. Stephanov, Non-Gaussian fluctuations near the
+     condensates, Prog. Part. Nucl. Phys. 81, 39 (2015),                 QCD critical point, Phys. Rev. Lett. 102, 032301 (2009),
+     arXiv:1406.1367 [hep-ph].                                           arXiv:0809.3450 [hep-ph].
+[14] T. F. Motta, J. Bernhardt, M. Buballa, and C. S.               [30] M. A. Stephanov, On the sign of kurtosis near the
+     Fischer, New tool to detect inhomogeneous chiral-                   QCD critical point, Phys. Rev. Lett. 107, 052301 (2011),
+     symmetry breaking, Phys. Rev. D 111, 074030 (2025),                 arXiv:1104.1627 [hep-ph].
+     arXiv:2411.02285 [hep-ph].                                     [31] S. Mukherjee, R. Venugopalan, and Y. Yin, Real
+[15] Y. Lu, M. Chen, Z. Bai, F. Gao, and Y.-x. Liu,                      time evolution of non-Gaussian cumulants in the QCD
+     Chemical freeze-out parameters via a nonperturbative                critical regime, Phys. Rev. C 92, 034912 (2015),
+     QCD approach, Phys. Rev. D 105, 034012 (2022),                      arXiv:1506.00645 [hep-ph].
+     arXiv:2109.09912 [hep-ph].                                     [32] L. J. Sieke, M. Harhoff, S. Schlichting, and L. von Smekal,
+[16] Y. Lu, F. Gao, Y.-x. Liu, and J. M. Pawlowski, Fi-                  Universal non-equilibrium scaling of cumulants across
+     nite density signatures of confining and chiral dynamics            a critical point, Nucl. Phys. B 1011, 116808 (2025),
+     in QCD thermodynamics and fluctuations of conserved                 arXiv:2411.10266 [hep-ph].
+     charges, (2025), arXiv:2504.05099 [hep-ph].                    [33] J. Braun, Y.-r. Chen, W.-j. Fu, F. Gao, A. Geissel,
+                                                                6
+
+     C. Huang, F. Ihssen, K. Kockler, Y. Lu, J. M. Pawlowski,
+     F. Rennecke, F. R. Sattler, B. Schallmo, J. Stoll, Y.-
+     y. Tan, S. Töpfel, Z.-n. Wang, R. Wen, J. Wessely,
+     S. Yin, H.-w. Zheng, and N. Zorbach, fQCD collabora-
+     tion, (2026).
+[34] W.-j. Fu, X. Luo, J. M. Pawlowski, F. Rennecke, R. Wen,
+     and S. Yin, Hyper-order baryon number fluctuations at
+     finite temperature and density, Phys. Rev. D 104, 094047
+     (2021), arXiv:2101.06035 [hep-ph].
+[35] A. Bazavov et al., Skewness, kurtosis, and the fifth and
+     sixth order cumulants of net baryon-number distributions
+     from lattice QCD confront high-statistics STAR data,
+     Phys. Rev. D 101, 074502 (2020), arXiv:2001.08530 [hep-
+     lat].
+[36] P. Braun-Munzinger, B. Friman, K. Redlich, A. Rus-
+     tamov, and J. Stachel, Relativistic nuclear collisions:
+     Establishing a non-critical baseline for fluctuation
+     measurements, Nucl. Phys. A 1008, 122141 (2021),
+     arXiv:2007.02463 [nucl-th].
+[37] V. Vovchenko, V. Koch, and C. Shen, Proton number
+     cumulants and correlation functions in Au-Au collisions
+     at sNN=7.7–200 GeV from hydrodynamics, Phys. Rev.
+     C 105, 014904 (2022), arXiv:2107.00163 [hep-ph].
+[38] J. Adam et al. (STAR), Nonmonotonic Energy Depen-
+     dence of Net-Proton Number Fluctuations, Phys. Rev.
+     Lett. 126, 092301 (2021), arXiv:2001.02852 [nucl-ex].
+[39] M. S. Abdallah et al. (STAR), Measurements of Proton
+                                √
+     High Order Cumulants in sNN = 3 GeV Au+Au Colli-
+     sions and Implications for the QCD Critical Point, Phys.
+     Rev. Lett. 128, 202303 (2022), arXiv:2112.00240 [nucl-
+     ex].
+[40] J. Adamczewski-Musch et al. (HADES), Proton-number
+                     √
+     fluctuations in sN N =2.4 GeV Au + Au collisions
+     studied with the High-Acceptance DiElectron Spec-
+     trometer (HADES), Phys. Rev. C 102, 024914 (2020),
+     arXiv:2002.08701 [nucl-ex].
+                                                                                                                                                                                                                                                 7
+
+                                                                                                   SUPPLEMENTAL MATERIALS
+
+  The Supplemental Material provides some details of our theoretical set-up. In Section S.1, we explain the details
+of extracting the freeze-out parameters from the cumulants measured in BES experiment together with the error
+estimates. In Section S.2, we summarise the predictions of baryon or proton number kurtosis from different studies
+on the market, and discuss the possible indications.
+
+
+  S.1.          Methodology and systematic error estimate for the systematic extraction of freeze-out temperature
+                             and chemical potential from the cumulants in BES experiments
+
+   Our extraction of the freeze-out parameters can be visualised in the (T, µB ) plane. Specifically, the cumulant ratios
+  B
+R12  = χB     B        B     B   B
+         1 /χ2 and R31 = χ3 /χ1 at a given temperature correspond to two types of isothermal curves respectively,
+see Figure 4. As discussed in the main text, it is clear from Figure 4 that these two types of isotherms are sensitive to
+                                                                                 B
+different thermodynamic parameters in the small µB -region. Specifically, the R12  -curve depends almost exclusively on
+                 B
+µB , while the R31 curve is more sensitive more to temperature changes for µB ≲ 150 MeV. Towards larger µB , such
+a distinction is no longer possible, as both ratios show T - and µB -dependences. Still, the two cumulant ratios offer
+a systematic way to extract the freeze-out temperature and chemical potential when contrasted with the respective
+experimental measurement.
+   In Figure 4 we show our results compared with the STAR BES-I data of the net-proton cumuant ratios C1 /C2
+                            √
+and C3 /C1 measured from sNN = 200 GeV to 7.7 GeV. The error bars of the experimental data are marked by the
+height of the shaded rectangles, which are the combined statistical and systematic errors with the root of their sum
+square (RSS):
+                                                          q
+                                                             2
+                                                 σtot. = σstat.     2
+                                                                 + σsys. .                                            (8)
+                                                                                   √
+Similar comparisons with the STAR BES-II data are provided in Figure 5 from sNN = 27 GeV to 7.7 GeV. In this
+regime, the experimental data have improved statistics and narrowed errors.
+   The systematic extraction of the freeze-out temperature and chemical potential is done as follows: For a fixed
+experimental cumulant ratio of C2 /C1 or C3 /C1 , (1) and (2) define trajectories within the (T, µB ) plane in QCD
+phase diagram. Then, the freeze-out condition (Tf , µB,f ) at each collision energy is determined by the intersection
+                                                                                                           √
+between the C2 /C1 trajectory and the C3 /C1 trajectory, which is illustrated in Figure 6. For most sNN , the two
+trajectories intersect each other, and the intersection point is defined as the mean value of the freeze-out (T, µB ) in
+                                                                           √
+our extraction. As an illustrative example, we show the situation for sNN = 14.6 GeV from BES-II data in the left
+panel of Figure 6.
+
+         2 .0
+                            T = 1 3 5           M e V
+                                                                                                                             1 .2
+                             T = 1 4 0           M e V
+                              T = 1 4 5           M e V
+                               T = 1 5 0           M e V                                                                     1 .0
+         1 .5                   T = 1 5 5           M e V
+                                 T = 1 6 0           M e V                                                                              2 0 0                                                           1 4 .5
+                                                                                                                                                      6 2 .4                                                                  7 .7
+                                  T = 1 6 5           M e V                                                                  0 .8
+                                                                                                   1 1 .5    7 .7                                                                                                  1 1 .5
+                                                                                                                                                        5 4 .4      3 9     2 7        1 9 .6
+         1 .0                                                                                                                0 .6
+                                                                                      1 4 .5
+                                                                             1 9 .6
+                                                                       2 7
+                                                                                                                             0 .4
+                                                              3 9
+         0 .5
+                                              5 4 .4                                                                                            T = 1 3 5        M e V              T = 1 5 5 M e V
+                                 6 2 .4                                                                                      0 .2                T = 1 4 0        M e V              T = 1 6 0 M e V
+                                                                                                                                                  T = 1 4 5        M e V              T = 1 6 5 M e V
+                    2 0 0                                                                                                                          T = 1 5 0        M e V
+         0 .0                                                                                                                0 .0
+                0       5 0                   1 0 0                 1 5 0     2 0 0        2 5 0     3 0 0   3 5 0   4 0 0          0           5 0              1 0 0      1 5 0         2 0 0            2 5 0      3 0 0      3 5 0   4 0 0
+                                                                                [M e V ]                                                                                                    [M e V ]
+
+FIG. 4. Net-baryon number susceptibility ratios χB         B       B   B
+                                                       1 /χ2 and χ3 /χ1 , compared with the experimental data of net-proton
+                                                √
+cumulant ratios C1 /C2 and C3 /C1 from BES-I sNN = 200 to 7.7 GeV, whose mean values are denoted by the dashed horizontal
+lines with the collision energies in GeV unit marked by the numbers alongside. The extracted freeze-out temperature Tf and
+µB,f are denoted by stars, with the error bars denoted by the shaded rectangles. The vertical height of the rectangle corresponds
+                                    √
+to the experimental error at each sNN .
+                                                                                                                                                                                                                                                                                         8
+
+                1 .4
+                                                                                                                                                        1 .2
+
+                                                                                                                                                        1 .0
+                1 .2
+                                                                                                           7 .7
+                                                                                                                                                        0 .8
+                                                                                                        9 .2                                                                                         1 9 .6                                                       9 .2
+                                                                                      1 1 .5
+                                                                             1 4 .6                                                                                            2 7                            1 7 .3         1 4 .6                    1 1 .5            7 .7
+                1 .0                                                                                                                                    0 .6
+                                                                1 7 .3
+
+                                                       1 9 .6                                      T = 1 3 5         M e V
+                                                                                                    T = 1 4 0         M e V                             0 .4
+                0 .8                                                                                 T = 1 4 5         M e V
+                                         2 7                                                          T = 1 5 0         M e V
+                                                                                                                                                                           T = 1 3 5      M e V                        T = 1 5 5 M e V
+                                                                                                       T = 1 5 5         M e V                          0 .2                T = 1 4 0      M e V                        T = 1 6 0 M e V
+                                                                                                        T = 1 6 0         M e V
+                                                                                                         T = 1 6 5         M e V                                             T = 1 4 5      M e V                        T = 1 6 5 M e V
+                                                                                                                                                                              T = 1 5 0      M e V
+                0 .6                                                                                                                                    0 .0
+                       1 0 0          1 5 0            2 0 0             2 5 0        3 0 0             3 5 0                      4 0 0                        1 0 0          1 5 0                     2 0 0                2 5 0                3 0 0            3 5 0        4 0 0
+                                                                          [M e V ]                                                                                                                                              [M e V ]
+
+FIG. 5. Net-baryon number susceptibility ratios χB   B       B   B
+                                                 1 /χ2 and χ3 /χ1 , compared with the experimental data of net-proton
+                                            √
+cumulant ratios C1 /C2 and C3 /C1 from BES-I sNN = 27 to 7.7 GeV. All symbols have the same meaning as those illustrated
+in Figure 4.
+
+
+                1 6 5                                                                                                                                   1 6 5
+
+                                                                                                                                                        1 6 0
+                1 6 0
+
+                                                                                                                                                        1 5 5
+                1 5 5
+   T [M e V ]
+
+
+
+
+                                                                                                                                           T [M e V ]
+
+
+
+
+                                                                                                                                                        1 5 0
+                1 5 0
+                                                                                                                                                        1 4 5
+
+                1 4 5
+                                                                                                                                                        1 4 0
+                                 1 4 .6 G e V , B E S -II                                                                                                               7 .7 G e V , B E S -II
+                1 4 0                                                                                                                                   1 3 5
+                         1 5 0                 2 0 0                     2 5 0                 3 0 0                               3 5 0                        2 0 0                2 5 0                       3 0 0                     3 5 0                4 0 0           4 5 0
+                                                                           [M e V ]                                                                                                                                             [M e V ]
+
+FIG. 6. Illustration of the freeze-out extraction and its error estimate using the T -µB trajectories of R21 = χB   B
+                                                                                                                2 /χ1 and
+        B   B                                                             √
+R31 = χ3 /χ1 that match the BES-II cumulant data C2 /C1 and C3 /C1 at sNN = 14.6 GeV and 7.7 GeV. For 7.7 GeV the
+optimised µB,f is marked out as the dot where the Tf difference between the two trajectories is minimised.
+
+
+
+   We proceed with a discussion of impact of the experimental errors on the extraction. This error induces shifts of
+the trajectories around those determined by the mean cumulant ratios. For C2 /C1 and C3 /C1 the error is visualized
+as the gray band and blue band in Figure 6 respectively. The experimental error is accommodated by the overlap
+region of the gray band and blue band in the (T, µB ) plane, i.e. the overlapped region for the two trajectory bands
+in the left panel of Figure 6. Correspondingly, the upper and lower bounds of this region are taken as the extraction
+errors of the freeze-out points. In Figure 4 the error bars shown are combination of the experimental and extraction
+errors.
+   However, going down to quite low collision energies, the C2 /C1 trajectory and C3 /C1 trajectory do not necessarily
+intersect with each other. This indicates a mismatch between the equilibrium QCD fluctuations and the experimental
+data, which is found for BES-I 7.7 GeV and for BES-II 9.2 and 7.7 GeV. We show the case of BES-II 7.7 GeV in
+the right panel of Figure 6, where a maximal gap is found between the C2 /C1 and C3 /C1 trajectories. To our
+understanding, this mismatch potentially comes from the difference between net-baryon and net-proton cumulants, as
+                                                                                                             √
+well as from the deviation of the final state after freeze-out from thermodynamic equilibrium at such a low sNN in
+the experiment. Still, there exists an optimised µB,f where the gap between the two freeze-out temperatures Tf from
+                                           √
+(1) and (2) is minimised. For the lowest sNN = 7.7 GeV in BES-I and BES-II, the minimal gap is ∆Tf ≈ 2 MeV.
+                                                                                                                                       9
+
+We consider the mean pair (Tf , µB,f ) from (1) and (2) and the optimised µB,f as an estimate of the mean freeze-
+out temperature and chemical potential. The uncertainty in the T - and µB -directions between the gap of the two
+trajectories defines the extraction error. This is visualised as the short-dashed lines in the right panel of Figure 6. The
+experimental error can be included as the error band of the two trajectories, which is summed up with the extraction
+error to define the total error for BES-I 7.7 GeV and BES-II 9.2 and 7.7 GeV.
+
+
+                S.2.   Baselines of net-baryon and (net-)proton kurtosis in the beam energy scan
+
+   In this Supplement, we briefly summarise the baselines of net-baryon and (net-)proton number kurtosis obtained
+from previous studies in Figure 7, which are also compared with the result in the present work. On the theoretical
+side, several baselines have been obtained from QCD computations for the net-baryon number kurtosis, including
+functional approaches, the QCD-assisted fRG-low energy effective theory (LEFT) (canonical ensemble) [20, 34], and
+                                                         √
+lattice QCD extrapolation results at relatively high sNN [35]. We also show net-proton number kurtosis baselines
+from the hadron resonance gas (HRG) model [36], UrQMD [4] and hydrodynamic simulations [37]. The experimental
+data includes the net-proton and proton number kurtosis from the STAR beam energy scan for Au+Au collisions
+(phase-II [3] and phase-I [38]), as well as the proton number kurtosis from the STAR fixed target experiment at
+3 GeV [39] and from the HADES experiment at 2.4 GeV [40].
+   In the range of 3 to 7.7 GeV, the results for the kurtosis may indicate potential new phases in the QCD phase
+structure. At present, the theoretical baseline predictions within this range are only available from the present work
+and from the QCD-assisted fRG-LEFT, and it is remarkable that both of them qualitatively agree on a peak structure
+of kurtosis and its location. Note that this is in line with the small difference between the upper bound of our freeze-
+out line and the fitted freeze-out line in [5] (which is the input of fRG-LEFT baseline), as indicated in Figure 1 in the
+main text.
+   We envisage, that a combined analysis from different QCD computations in equilibrium and their systematic
+extension towards proton number cumulants, will finally lead to a robust quantitative constraint on the proton
+number kurtosis baseline in equilibrium. As discussed in the main text, this is a crucial first step before mapping out
+oranges (protons) with oranges (protons) between the quantitative theoretical description and precision measurements
+in experiment. Finally, of course, the theoretical studies have to be extended towards non-equilibrium QCD.
+
+                                                                                            D S E -Q C D        (G C E )
+                                                   5                                  s e lf- c o n s is t. fr e e z e o u t
+                                                                                            fR G -L E F T (C E )
+                                                   4                                        L a ttic e Q C D ( G C E )
+                                                                                             H y d ro .
+                                                                                              H R G , C E
+                                                   3                                           U rQ M D , 0 -5 %
+                                                                                            S T A R B E S -I 0 -5 %
+                                 K u r to s is
+
+
+
+
+                                                   2                                         S T A R B E S -II 0 -5 %
+                                                                                              S T A R fix - ta r g e t 0 - 5 %
+                                                                                               H A D E S 0 -1 0 %
+                                                   1
+                                                   0
+                                                 − 1
+
+
+                                                 − 2
+                                                       3   5   1 0   2 0              5 0               1 0 0                  2 0 0
+                                                                           [G e V ]
+                                                                                              √
+FIG. 7. Collection of net-baryon and (net-)proton number kurtosis baseline predictions from sNN = 200 GeV to 3 GeV,
+compared with the experimental data from STAR 0-5% central collisions in BES-I [38], BES-II [3], STAR fixed-target (−0.5 <
+y < 0 rapidity window) [39] and HADES (0-10% centrality and |y| < 0.5) [40]. The theoretical baselines include the results
+from the present work, QCD-assisted fRG-LEFT (canonical ensemble) [20], lattice QCD [35], HRG [36], UrQMD [4] and
+hydrodynamic simulations [37].
+

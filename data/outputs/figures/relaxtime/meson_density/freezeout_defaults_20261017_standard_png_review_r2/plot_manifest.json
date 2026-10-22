@@ -1,0 +1,496 @@
+{
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-10-17T03:28:55.426750+00:00",
+  "asset_id": "meson_freezeout_defaults_20261017",
+  "figure_family": "charged_meson_freezeout",
+  "case_slug": "freezeout_defaults_20261017_standard_png_review_r2",
+  "asset_kind": "figure",
+  "figure_mode": "audit",
+  "semantic_status": "default_parameter_comparison",
+  "style_profile": "candidate_aps_v2",
+  "publication_scope": "internal_review",
+  "generator": {
+    "path": "scripts/analysis/relaxtime/plot_freezeout_comparison.py",
+    "path_kind": "repository_relative",
+    "sha256": "7fbe60046af4635155c7b2a50ae44794bdaa16d7307ecb914d50db887d69c400",
+    "command": "scripts/analysis/relaxtime/plot_freezeout_comparison.py --run-dir data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard --output-dir data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "executable": "D:\\Python313\\python.exe",
+      "matplotlib": "3.10.1"
+    },
+    "source_snapshot": {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+      "path_kind": "repository_relative",
+      "role": "generator_source_snapshot",
+      "bytes": 17961,
+      "sha256": "7fbe60046af4635155c7b2a50ae44794bdaa16d7307ecb914d50db887d69c400"
+    }
+  },
+  "git_commit": "698feaf8fada670fde81c93bab6093b50093935f",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "postprocess_sha": null,
+  "source_run_id": "8a7592d2119128dd9a20a4a3e9af50af5d912a9855882957b334a30d83fa1801",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/freezeout_ratios.csv",
+      "path_kind": "repository_relative",
+      "role": "direct_q0_calculations",
+      "bytes": 25541,
+      "sha256": "51fb12cdaaad9a8a1acdc16d80498906939af504f30020388ac7ff175add3a2f",
+      "units": {
+        "T": "MeV",
+        "muB": "MeV",
+        "sqrt_s_NN": "GeV",
+        "density": "fm^-3",
+        "ratio": "dimensionless"
+      }
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/run.json",
+      "path_kind": "repository_relative",
+      "role": "calculation_identity",
+      "bytes": 39635,
+      "sha256": "38a8bf45d4d37883dba3c86b59ad6e687f9f437f80c3a5797eead902c74e45d2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "calculation_manifest",
+      "bytes": 11038,
+      "sha256": "e5f576fbd039cce34a9cd2e9270bbe76123aaa19af9804c7fd148877fc184eb1"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/experimental_ratios.csv",
+      "path_kind": "repository_relative",
+      "role": "experimental_observations",
+      "bytes": 5095,
+      "sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/sources.json",
+      "path_kind": "repository_relative",
+      "role": "experimental_provenance",
+      "bytes": 3586,
+      "sha256": "cb8052edeaf23439f8299b444bb555463ae7f10efb0e00225a4648c15421c7d6"
+    },
+    {
+      "path": "config/plotting/candidate_aps_v2.toml",
+      "path_kind": "repository_relative",
+      "role": "plot_style_contract",
+      "bytes": 2171,
+      "sha256": "94e9f7c4c24eacbc79ae2f16582c6a93b38213295cb71fa21cc09b9e2f5890ac"
+    },
+    {
+      "path": "scripts/plotting/plot_style.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "path": "scripts/plotting/plot_manifest.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "path": "scripts/plotting/plot_quality.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 19247,
+      "sha256": "43bfe56040d936a4e88f69de99b4d2c3711ebaf0ab57db65ff65ddf93738d5ae"
+    },
+    {
+      "path": "scripts/plotting/plot_accessibility.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 3536,
+      "sha256": "11da33b4fbc0393983bf1775e98607fbc6ff5a1472515c6674d400a8701f9102"
+    }
+  ],
+  "axes": [
+    {
+      "field": "sqrt_s_NN_GeV",
+      "source_unit": "GeV",
+      "display_unit": "GeV",
+      "scale": "log",
+      "label": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$"
+    },
+    {
+      "field": "Kplus_over_pi_plus",
+      "source_unit": "dimensionless",
+      "display_unit": "dimensionless",
+      "scale": "linear",
+      "label": "$K^+/\\pi^+$"
+    }
+  ],
+  "series": [
+    {
+      "series_id": "cleymans2006",
+      "state": "q0_reference_diagnostic",
+      "support_rule": "direct energy solves",
+      "mask_rule": "failed=NaN; disconnect at every failed support point",
+      "point_count": 48,
+      "failure_count": 0,
+      "endpoint_warning_points": 31
+    },
+    {
+      "series_id": "andronic2018",
+      "state": "q0_reference_diagnostic",
+      "support_rule": "direct energy solves",
+      "mask_rule": "failed=NaN; disconnect at every failed support point",
+      "point_count": 48,
+      "failure_count": 1,
+      "endpoint_warning_points": 25
+    },
+    {
+      "series_id": "AuAu",
+      "state": "experimental",
+      "support_rule": "retained source observations; separate systems/charges",
+      "mask_rule": "none",
+      "point_count": 14,
+      "ids": [
+        "AGS_2.35",
+        "AGS_3.32",
+        "AGS_3.83",
+        "AGS_4.29",
+        "AGS_4.87",
+        "STAR_BES_7.7",
+        "STAR_BES_11.5",
+        "STAR_14.5",
+        "STAR_BES_19.6",
+        "STAR_BES_27",
+        "STAR_BES_39",
+        "STAR_62.4",
+        "STAR_130",
+        "STAR_200"
+      ]
+    },
+    {
+      "series_id": "NA49",
+      "state": "experimental",
+      "support_rule": "retained source observations; separate systems/charges",
+      "mask_rule": "none",
+      "point_count": 5,
+      "ids": [
+        "NA49_6.27",
+        "NA49_7.62",
+        "NA49_8.77",
+        "NA49_12.32",
+        "NA49_17.27"
+      ]
+    },
+    {
+      "series_id": "ALICE",
+      "state": "experimental",
+      "support_rule": "retained source observations; separate systems/charges",
+      "mask_rule": "none",
+      "point_count": 2,
+      "ids": [
+        "ALICE_2760",
+        "ALICE_5020"
+      ]
+    },
+    {
+      "series_id": "HADES",
+      "state": "digitized_reference",
+      "support_rule": "retained source observations; separate systems/charges",
+      "mask_rule": "none",
+      "point_count": 1,
+      "ids": [
+        "HADES_2.4"
+      ]
+    }
+  ],
+  "selection_rule": "all directly calculated energies and the retained experimental table",
+  "interpolation_policy": "none",
+  "connector_policy": "forbidden",
+  "missing_value_policy": "NaN breaks; no zero-fill, smoothing, or gap bridge",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/kplus_piplus_freezeout_defaults.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 365356,
+      "sha256": "a3026a3f5105897904a2bfd98cbd3d1aad91fba482579df1494e75cb335d2953",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/kplus_piplus_freezeout_defaults_gray.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 345843,
+      "sha256": "1303271acc5bccc2a22c4f4c50b425784a8213001507a5a141ce88e09d476dca",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    }
+  ],
+  "rendering": {
+    "delivery_stage": "png_review",
+    "vector_delivery_pending": true,
+    "figure_size_inches": [
+      6.75,
+      4.6
+    ],
+    "column": "double_column",
+    "font": {
+      "requested": "Times New Roman",
+      "resolved": "Times New Roman",
+      "path": "C:\\Windows\\Fonts\\times.ttf"
+    },
+    "legend_policy": "shared_in_panel_reviewed_geometry_checked",
+    "legend_layout_reason": "author preference for legends inside the same panel; geometry and curves checked",
+    "color_route": "undecided_review",
+    "quality": {
+      "figure_size_inches": [
+        6.75,
+        4.6
+      ],
+      "intended_width_inches": 6.75,
+      "placement_scale": 1.0,
+      "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+      "minimum_capital_numeral_height_mm": 2.1443652343749995,
+      "minimum_primary_capital_numeral_height_mm": 2.8032604166666664,
+      "minimum_script_capital_numeral_height_mm": 2.1443652343749995,
+      "smallest_glyphs": [
+        {
+          "text": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "Au+Au: AGS, STAR",
+          "glyph": "T",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Au+Au: AGS, STAR",
+          "glyph": "R",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: NA49",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: NA49",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: ALICE (charge sum)",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: ALICE (charge sum)",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        }
+      ],
+      "minimum_curve_linewidth_pt": 1.6,
+      "minimum_landmark_diameter_mm": null,
+      "tick_axes": [
+        {
+          "axis": "x",
+          "scale": "log",
+          "minor_locator": "LogLocator",
+          "major_count": 4,
+          "minor_count": 28,
+          "inward": true,
+          "both_sides": true
+        },
+        {
+          "axis": "y",
+          "scale": "linear",
+          "minor_locator": "AutoMinorLocator",
+          "major_count": 6,
+          "minor_count": 6,
+          "inward": true,
+          "both_sides": true
+        }
+      ],
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_axes_overlap_count": 1,
+      "legend_count": 1,
+      "legend_layout": [
+        {
+          "legend_index": 0,
+          "host_axes_index": 0,
+          "overlapped_axes": [
+            0
+          ],
+          "contained_in_host": true,
+          "title": "",
+          "labels": [
+            "Cleymans (2006)",
+            "Andronic (2018)",
+            "Au+Au: AGS, STAR",
+            "Pb+Pb: NA49",
+            "Pb+Pb: ALICE (charge sum)",
+            "Au+Au: HADES (digitized)"
+          ],
+          "bbox_inches": [
+            3.8275000000000006,
+            2.854124999999999,
+            2.6620833333333342,
+            1.4702083333333331
+          ]
+        }
+      ],
+      "legend_pair_overlap_count": 0,
+      "legend_pair_overlaps": [],
+      "legend_curve_overlap_count": 0,
+      "legend_curve_overlaps": [],
+      "legend_landmark_overlap_count": 0,
+      "legend_landmark_overlaps": [],
+      "legend_in_axes_overflow_count": 0,
+      "legend_in_axes_overflows": [],
+      "human_visual_review": "required"
+    },
+    "placement_limits": {
+      "schema": "plot_placement_limits_v1",
+      "measured_width_inches": 6.75,
+      "minimum_width_inches": 6.2955693291375034,
+      "maximum_width_inches": 6.75,
+      "minimum_width_constraints": {
+        "glyph": 6.2955693291375034,
+        "curve": 2.109375
+      },
+      "maximum_width_constraints": {
+        "project_profile": 7.0,
+        "png_0_effective_dpi": 6.75,
+        "png_1_effective_dpi": 6.75
+      },
+      "has_usable_interval": true,
+      "measured_width_qualified": true,
+      "single_column_width_inches": 3.375,
+      "single_column_reuse_qualified": false,
+      "single_column_minimum_glyph_mm": 1.0721826171874997,
+      "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+    },
+    "accessibility": {
+      "schema": "plot_accessibility_v1",
+      "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+      "minimum_contrast": 3.0,
+      "backgrounds": [
+        "#FFFFFF"
+      ],
+      "background_scope": "white axes; no fill",
+      "parameters": [
+        {
+          "value": "cleymans2006",
+          "color": "#0072B2",
+          "noncolor_encoding": "-",
+          "contrasts": [
+            5.185446345779855
+          ]
+        },
+        {
+          "value": "andronic2018",
+          "color": "#D55E00",
+          "noncolor_encoding": "--",
+          "contrasts": [
+            3.8671837898669135
+          ]
+        }
+      ]
+    },
+    "connections": "straight segments between adjacent valid direct support only",
+    "HADES_error_display": "marker only; pixel uncertainty is not an experimental error bar"
+  },
+  "validation": {
+    "finite": true,
+    "duplicate_keys": true,
+    "support": true,
+    "solver_called": false,
+    "canonical_data_modified": false,
+    "checks": "hashes, ratio finiteness, experiment energy coverage, measured rendering",
+    "author_review": "pending"
+  },
+  "external_layout": null,
+  "delivery_stage": "png_review",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true,
+  "observable_note": "Local quark-only meson densities compared with final midrapidity hadron yields; no decay or acceptance model. ALICE is a charge sum.",
+  "analysis_outputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+      "path_kind": "repository_relative",
+      "role": "derived_comparison",
+      "bytes": 3196,
+      "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+      "path_kind": "repository_relative",
+      "role": "derived_comparison",
+      "bytes": 4575,
+      "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
+    }
+  ]
+}

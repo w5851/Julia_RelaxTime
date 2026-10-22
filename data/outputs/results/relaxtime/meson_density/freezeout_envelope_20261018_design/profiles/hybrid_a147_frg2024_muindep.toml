@@ -1,0 +1,10 @@
+profile_name = "hybrid_a147_frg2024_muindep"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cross_literature_exploration:hybrid_a147_frg2024_muindep"
+
+[coefficients]
+a_GeV = 0.147
+b_GeV_inv1 = 4.775828460038986e-06
+c_GeV_inv3 = 1.0973473819267652
+d_GeV = 0.75131
+e_GeV_inv1 = 0.159

@@ -1,0 +1,729 @@
+                                                       Chemical Freeze-out Parameters via a Non-perturbative QCD Approach
+
+                                                                   Yi Lu,1, 2, ∗ Muyang Chen,3 Zhan Bai,1, 2, † Fei Gao,4 and Yu-xin Liu1, 2, 5, ‡
+                                          1
+                                              Department of Physics and State Key Laboratory of Nuclear Physics and Technology, Peking University, Beijing 100871, China
+                                                                     2
+                                                                       Collaborative Innovation Center of Quantum Matter, Beijing 100871, China
+                                                                     3
+                                                                       Department of Physics, Hunan Normal University, Changsha 410081, China
+                                                     4
+                                                       Institut für Theoretische Physik, Universität Heidelberg, Philosophenweg 16, 69120 Heidelberg, Germany
+                                                                      5
+                                                                        Center for High Energy Physics, Peking University, Beijing 100871, China
+                                                             By analyzing the calculated baryon number susceptibility ratios χB     B     B   B
+                                                                                                                               1 /χ2 and χ3 /χ1 in two-flavor
+                                                          system via the Dyson-Schwinger equation approach of QCD, we determine the chemical freeze-out
+                                                          temperature and baryon chemical potential in cases of both thermodynamic limit and finite size.
+                                                          We calculate the center-of-mass energy dependence of the χB      B      2
+                                                                                                                       4 /χ2 (κσ ) at the freeze-out line and
+                                                          find an excellent agreement with experimental data when taking into account the finite size effect.
+                                                          Our calculations indicate that the κσ 2 exhibits a nonmonotonic behavior in lower collision energy
+arXiv:2109.09912v1 [hep-ph] 21 Sep 2021
+
+
+
+
+                                                          region. We also predict that the collision energy dependence of χB     B
+                                                                                                                            6 /χ2 is nonmonotonic.
+
+
+
+
+                                                              I.   INTRODUCTION                              newly formed hadrons plays the essential role. Especially,
+                                                                                                             as the chemical freeze-out line approaches to the CEP,
+                                             Phase transitions of strong interaction matter have             nonmonotonic behavior of conserved charge fluctuations
+                                          been explored for more than forty years since the re-              could be observed [9, 27–32]. The freeze–out tempera-
+                                          search may reveal the nature of the early universe mat-            ture and chemical potential have then been studied in
+                                          ter evolution [1–3]. The transitions include chiral phase          statistical hadronization model (SHM) [33–37], hadron
+                                          transition (from dynamical chiral symmetry to dynami-              resonance gas (HRG) model [38, 39], lattice QCD sim-
+                                          cal chiral symmetry breaking) which generates more than            ulations [40–43] and other models [44, 45]. In fact, the
+                                          98% of the mass of visible matter and the confinement              matter system generated in relativistic heavy ion colli-
+                                          transition (hadronization) which slaves the quarks and             sion (RHIC) experiment has a finite size and cools in a
+                                          gluons to hadrons. They are driven by the temperature              finite time [30, 31, 46, 47]. The finite size and finite time
+                                          (T ) and the baryon density (ρB ) or chemical potential            prevent the correlation length ξ from diverging near the
+                                          (µB ). Since the strong interaction can be well described          CEP, and smoothen the fluctuations [46]. Model calcula-
+                                          by Quantum Chromodynamics (QCD), the above men-                    tions have shown that the finite size influences both the
+                                          tioned phase transitions are usually referred to as QCD            phase diagram and the thermodynamical properties dras-
+                                          phase transitions. Moreover, many calculations (see, e.g.,         tically [48–53], the surface of the system may also play
+                                          Refs. [2–19]) have shown that the chiral phase transition          the role [54–59]. The effects of the finite size and the
+                                          at low chemical potential is a crossover at physical quark         surface on the chemical freeze-out parameters will then
+                                          mass. Theoretical calculations (see, e.g., Refs. [3, 6, 8–         complement the information for searching the CEP in ex-
+                                          19]) also indicate that the chiral phase transition at high        periments. However, different models give contradictory
+                                          chemical potential is first order. Therefore, there would          results. It is therefore imperative to investigate the finite
+                                          exist a critical end-point (CEP) in the T –µB plane at             size and the surface effects on the chemical freeze-out
+                                          which the first order phase transition turns to crossover.         parameters with sophisticated QCD approaches.
+                                          The position of the CEP or even its existence becomes                 It has been known that Dyson-Schwinger equations
+                                          thus one of the most significant topic in both theories and        (DSE), a nonperturbative approach of QCD [60–68],
+                                          experiments. Besides the efforts in theories, the Beam             have been successful in describing QCD phase transitions
+                                          Energy Scan (BES) program at RHIC, the FAIR at GSI                 (see, e.g., Refs. [8–13, 64, 69–74]) and hadron properties
+                                          and the NICA at DUBNA all take the search of the CEP               (For recent reviews, see Refs. [64, 65]). We then, in this
+                                          as their investigation focus (see, e.g., Refs. [20–22]) and        paper, take the DSE approach to investigate the chemi-
+                                          some meaningful information has been provided by the               cal freeze-out parameters with the finite size and surface
+                                          RHIC experiments [23–26].                                          effects being taken into account. We calculate the baryon
+                                             In experiments, one can measure only the states after           number susceptibilities in two light-flavor quark system.
+                                          the hadronization but not the phase transition directly,           By comparing the obtained baryon number susceptibility
+                                          and thus the chemical freeze-out line which is defined             ratios χB     B        B   B
+                                                                                                                      1 /χ2 and χ3 /χ1 with the experimental data of
+                                          as the set of states ceasing the inelastic collision of the        the net-proton distribution cumulant ratios C1 /C2 and
+                                                                                                             C3 /C1 at different collision energies, we determine the
+                                                                                                             freeze-out parameters. We observe that with the finite
+                                                                                                             size and surface effects being included, the calculated
+                                          ∗ qwertylou@pku.edu.cn                                             collision energy dependence of the χB         B
+                                                                                                                                                       4 /χ2 agrees with
+                                          † Present address: Institute of Theoretical Physics, Chinese       the experimental data excellently, and the calculated κσ 2
+                                               Academy of Science, Beijing 100081, China                     shows a nonmonotonic behavior in lower collision energy
+                                          ‡ Corresponding author: yxliu@pku.edu.cn
+                                                                                                             region. Moreover, we propose that hyper-order cumulant
+                                                                                                                                                  2
+
+ratio such as χB     B
+                6 /χ2 also shows a nonmonotonic depen-                     the coupling constant g and the renormalization constant
+dence on the collision energy.                                             Z1 has been absorbed into the effective interaction.
+   The remainder of this paper is organized as follows:                      In this paper, we adopt the infrared constant model
+In Sec. II, we describe briefly the Dyson-Schwinger equa-                  (QC model) [9, 13, 68], which reads:
+tion approach and its relation to the chemical freeze-out
+                                                                                                         D −s/ω2
+parameters. In Sec. III, we calculate the freeze-out pa-                                 D(s) =8π 2         e    + αpQCD (s),                    (5)
+rameters by adopting the DSE approach as well as the                                                     ω4
+experimental data. In Sec. IV, we give the phase diagram                   where D and ω are the parameters of the model. αpQCD
+in the vicinity of CEP and reveal the effect of finite size                is the ultraviolet perturbation term and reads:
+and surface. In Sec. V, we give a summary and discus-
+sion.                                                                                                         8π 2 γm
+                                                                                  αpQCD (s) =                         2  F(s),               (6)
+                                                                                                                      2
+                                                                                                      ln τ + 1 + s/ΛQCD
+        II.    THEORETICAL FRAMEWORK.                                                                      
+                                                                           where F(s) = 1 − exp −s/4m2t , τ = e2 − 1, mt =
+       A.     Dyson-Schwinger Equation Approach                            0.5 GeV, ΛQCD = 0.234 GeV, and γm = 12/(33 − Nf )
+                                                                           with Nf = 4.
+                                                                             The gluon screening mass mg is also considered in the
+    The Dyson-Schwinger equations are inifinite number of
+                                                                           longitudinal part of gluon model [13, 75]:
+coupled equations. In this paper, we focus on the DSE for
+quark propagator S(ω̃j , p~). The corresponding equation                                DT (Ω2nl , ~k 2 ) = D(Ω2nl + ~k 2 ),
+is:                                                                                                                                              (7)
+                                                                                        DL (Ω2 , ~k 2 ) = D(Ω2 + ~k 2 + m2 ),
+                                                                                                 nl                  nl               g
+  S −1 (ω̃j , p~) = Z2 i~γ · p~ + iγ4 ω̃j + Z4 m0 + Z1 Σ (ω̃j , p~) ,
+                                         
+                                                                  (1)      whose value is determined by leading-order perturbative
+where Z1 , Z2 and Z4 are renormalization constants. m0                     QCD [76]:
+is the current quark mass. ω̃j = ωj + iµq , with µq be-                                         16
+                                                                                                   
+                                                                                                           6
+                                                                                                                
+ing the quark chemical potential, and ωj = (2j + 1)πT                                     m2g =     T 2 + 2 µ2q .              (8)
+                                                                                                 5        5π
+the Matsubara frequency for quarks. Σ(ω̃j , p~) is the self-
+energy of quark, and reads:                                                  In order to fix the renormalization constant Z2 and Z4 ,
+                        ∞ Z                                                we need to specify the renormalization condition. In this
+                   4 X            d3 ~q 2                                  paper, the renormalization condition is:
+    Σ (ω̃j , p~) = T                     g Dµν (~k, Ωjl ; T, µq )
+                   3             (2π)3                            (2)
+                      l=−∞
+                                                                                   S −1 (p2 )                  = i (~γ · p~ + γ4 ω̃0 ) + m0 ,    (9)
+                 × γµ S(ω̃l , ~q)Γν (~
+                                     p, ω̃j , ~q, ω̃l ; T, µq ) ,                               ω02 +~
+                                                                                                     p2 =ζ 2
+
+where Dµν is the dressed-gluon propagator, Γν is the                       where ζ is the renormalization point. We choose ζ =
+dressed quark-gluon vertex, Ωjl = ωj − ωl is the Matsub-                   19 GeV, m0 = 3.4 MeV, D = 1.024 GeV2 and ω = 0.5 GeV
+ara frequency for gluon.                                                   as in Ref. [68].
+   In principle, the gluon propagator Dµν and the quark-                     The quark propagator can be decomposed according
+gluon vertex Γν should be solved by corresponding DSEs,                    to its Lorentz structure. At finite temperature, the de-
+which depend on higher order correlation functions. And                    composition is:
+a truncation must be applied in order for numerical solu-
+tion. In this paper, for the quark-gluon vertex, we adopt                      S(ω̃j , p~)−1 =i~γ · p~A(ω̃j2 , p~ 2 )
+at first stage the rainbow approximation for the vertex                                                                                         (10)
+                                                                                                 + iγ4 ω̃j C(ω̃j2 , p~ 2 ) + B(ω̃j2 , p~ 2 ).
+    p, ω̃m , ~q, ω̃l ; T, µq ) = γν .
+Γν (~
+   The gluon propagator has the general form                               There should be, in principle, a fourth term in this de-
+                                                                           composition. However, its contribution to order parame-
+ g 2 Dµν (Ωnl , ~k) = Pµν
+                       T
+                          DT (Ω2nl , ~k 2 ) + Pµν
+                                               L
+                                                  DL (Ω2nl , ~k 2 ), (3)   ter is extremely small and is usually omitted in practical
+         T,L
+                                                                           calculations [61, 77].
+where Pµν     are the transverse and longitudinal projec-                    The mass function of the quark propagator can then
+tion operators, respectively:                                              be defined as:
+                                              
+          T                              kµ kν                                          M (ω̃j2 , p~ 2 ) = B(ω̃j2 , p~ 2 )/A(ω̃j2 , p~ 2 ).     (11)
+        Pµν = (1 − δµ4 )(1 − δν4 ) δµν − 2       ,
+                                           k
+                                                    (4)                  In vacuum, the physical solution to the quark DSE has a
+          L             kµ kν      T
+        Pµν = δµν − 2           − Pµν ,                                    non-zero mass function even if the current quark mass is
+                         k                                                 zero. At high temperature, the mass function gradually
+                                                                         approaches the current quark mass. Therefore, the mass
+where k = Ωnl , ~k . DT and DL are the effective inter-                    function at zero momentum, M (ω̃02 , 0), is often used as
+actions and can be represented using models. Note that                     the order parameter of the QCD crossover.
+                                                                                                                                                  3
+
+       B.   Number Density and susceptibilities                            agator:
+
+                                                                                                 N
+  Experimental observations indicate that the yields of                                        T X
+pion and proton are much larger than that of kaon [36],                            f1 =            trD [−γ4 S(ω̃j , p~)]
+                                                                                               2
+we can then simplify the matter generated in RHIC                                                  j=−N
+                                                                                                                                              (16)
+experiments as that including mainly two light flavor                                                       N
+                                                                                                          T X
+                                                                                               + f free −     trD −γ4 S free (ω̃j , p~) .
+                                                                                                                                      
+quarks. In the system of u and d quarks, baryon number
+                                                                                                          2
+density nB and electric charge density nQ can be fixed                                                      j=−N
+with quark number density nu,d as:
+                                                                              Using this technique, the calculated quark number den-
+         1    1                         2    1                             sity has better convergence at moderate and high tem-
+     nB = nu + nd ,                 nQ = nu − nd .                  (12)   perature, whose chemical potential dependence is shown
+         3    3                         3    3
+                                                                           in Fig. 1.
+From Eq. (12) we notice that the u and d quarks are
+in exact isospin symmetry, if only the baryon number is                                  0.6
+considered. In this sense, both the u quark and d quark                                             T = 140 MeV
+hold the same quark chemical potential µq = µB /3, and                                              T = 145 MeV
+the quark number density nq = 3nB .                                                                 T = 150 MeV
+                                                                                         0.4        T = 155 MeV
+
+
+
+
+                                                                            nq [fm-3 ]
+  In view of statistical physics, the quark number density
+                                                                                                    T = 160 MeV
+can be determined as
+
+                                    d3 p~                                                0.2
+                               Z
+   nq (µq , T ) = 2Nc Nf Z2                    p|; µq , T ) ,
+                                          f1 (|~                    (13)
+                                   (2π)3
+
+                                                                                          0
+                              ∞                                                                0          0.1          0.2        0.3       0.4
+                           T  X                    
+          p|; µq , T ) =
+     f1 (|~                      trD −γ4 S(ω̃j , p~) ,              (14)                                              μB [GeV]
+                           2 j=−∞
+                                                                           FIG. 1. Calculated baryon chemical potential dependence of
+where Z2 is the quark wave-function renormalization con-                   the quark number density at some values of given tempera-
+stant, Nc = 3 the color number, and Nf = 2 the flavor                      ture, in case of thermodynamical limit using Eq. (16).
+number. Notice that the flavor number here represents
+the flavor degeneracy, and is different from the one we                       After calculating the quark number density, we can cal-
+used in the ultraviolet perturbation term in the gluon                     culate the susceptibility by taking derivatives. The kth
+model.                                                                     order baryon number density susceptibility (fluctuation)
+   In Eq. (14), the summation runs over an infinite num-                   is obtained as
+ber of Matsubara frequencies. In practice, we can only
+carry out the calculation with a finite number of Matsub-                                             χB
+                                                                                                       1 = nB ,
+ara frequency, and the summation must have a cut-off,                                                                                         (17)
+                                                                                                                  1     ∂ (k−1) nB
+N . However, the convergence of summation Eq. (14) is                                                 χB
+                                                                                                       k =                         ,
+slow, especially at low temperature. On the other hand,                                                         β (k−1) ∂ (k−1) µB
+we observe that the scalar functions A, B and C defined
+in Eq. (10) converge quickly to the free-quark-propagator                  where β = 1/T and k = 2, 3, 4, · · · . The susceptibilities
+scalar functions A = C = 1, B = m0 , as the Matsubara                      are related to the moments of the multiplicity distribu-
+frequency grows large. For free propagator, the distribu-                  tions of the corresponding conserved charges as
+tion function is:
+                                                                                                   χ1                   χ3
+                             ∞                                                                        = M/σ 2 ,            = Sσ 3 /M ,
+                         T X                                                                       χ2                   χ1
+ f free (|~                     trD −γ4 S free (ω̃j , p~)
+                                                        
+          p|; µq , T ) =                                                                           χ3                   χ4
+                         2 j=−∞                                                                       = Sσ ,               = κσ 2 ,           (18)
+                                                                    (15)                           χ2                   χ2
+                               1                       1
+                   =                       −                    ,
+                       e(E−µq )/T + 1          e(E+µq )/T + 1              where M , σ 2 , S and κ are the mean, the variance, the
+           p                                                               skewness and the kurtosis of the multiplicity distribution,
+where E = p~ 2 + m20 .                                                     respectively. By comparing the theoretical net-baryon
+  Therefore, the contribution of missing Matsubara fre-                    number fluctuations in terms of temperature and chem-
+quencies that exceed the cut-off N in Eq. (14), can be ap-                 ical potential with the experimental data one can deter-
+proximated using the distribution function of free prop-                   mine the freeze–out parameters [43].
+                                                                                                                                                                       4
+
+          C.       Finite Size and Surface Effect                                      III.      FREEZE-OUT PARAMETERS
+
+
+   The system created in RHIC exists in finite size, rather             We have carried out calculations with L = ∞ (thermo-
+than thermodynamical limit. To determine the freeze–                 dynamical limit) and various finite values of L. The cal-
+out parameters in experiment one has to take the finite              culations manifest that the fluctuations (skewness, kur-
+size and the surface effects into account. Assuming the              tosis, etc.) in the T –µB plane behave qualitatively the
+system as a cube of size L, and adopting the anti-periodic           same as those given in Ref. [9], respectively. The obtained
+condition, the momentum of a fermion should be pj =                  µB dependence of the baryon number susceptibility ra-
+(2j + 1)π/L. In principle, one should sum over discrete              tios χB    B        B   B
+                                                                            1 /χ2 and χ3 /χ1 in case of L = 2.2 fm at several
+momentum values. For simplicity, the finite size effect              values of temperature are shown in Fig. 2. It is evident
+is roughly incorporated by a non-zero momentum cut-                  that our results agree with the lattice QCD results [43]
+off |p|min = π/L [51, 52]. It corresponds to an infrared             qualitatively very well. In order to extract the freeze-
+momentum cut-off in Eqs. (1) and (13). This can also be              out parameters, we plot the experimental values of the
+understood by the quantum uncertainty principle, that                cumulant ratios C1 /C2 = M/σ 2 and C3 /C1 = Sσ 3 /M
+L−1 is the energy scale for a system of finite size L. It is         of net-proton multiplicity distributions in central colli-
+remarkable that such an L is not exactly the same as the             sions [26] as horizontal lines.
+size of fireball, but an effective scale that the ingredients           By fitting our calculated χB      B         B   B
+                                                                                                      1 /χ2 and χ3 /χ1 values
+of the quark matter can interact.                                    in terms of T and µB with the experimental data we
+   We also incorporate the effect of the surface through             get the freeze-out parameters (µfB , T f ). The obtained
+the multiple reflection expansion (MRE) approximation.               results when L = ∞, 3.5 fm, 2.8 fm, 2.5 fm and 2.2 fm are
+In the MRE approximation, the thermodynamical quan-
+tities of a droplet composed of quarks can be derived
+from a density of states in the form [54–56, 78, 79]                             1.5
+        2                                      
+ dN     p V        p           p 
+    =6       + fs       pS + fc       C + · · ·   , (19)                                                                         ★★                        7.7
+ dp     2π 2       M             M                                               1.0                                            ★            14.5
+                                                                                                                                                    11.5
+                                                                                                                     ★                19.6
+                                                                       χ1B/χ2B
+
+
+
+                                                                                                            ★            27
+where V is the volume of the droplet, S = 4πL2 and
+                                                                                                        ★       39
+C = 8πL are the area, the extrinsic curvature of the                             0.5                     54.4                                  T = 120 MeV
+                                                                                                 ★★     62.4
+surface of the droplet, respectively. The fs and fc are                                                                                        T = 125 MeV
+the contributions to the density of states from the surface                                                                                    T = 130 MeV
+                                                                                           ★     200
+and curvature, given explicitly as [50, 78]:                                                                                                   T = 135 MeV
+                                                                                  0
+
+      p       1
+                 
+                       2        p                                                   0                0.1                   0.2             0.3                0.4
+  fs (  )=−        1 − arctan          ,                                         1.0
+      M      8π        π         M
+                                        p                (20)                                                            14.5
+      p      1          3p  π                                                   0.8       ★     62.4
+                                                                                                                                ★            11.5
+  fc ( ) =        1  −         − arctan         ,                                          200   ★★ ★                            ★★
+      M    12π 2       2M 2              M                                                       54.4 39    ★        ★                              7.7
+                                                                                                            27       19.6
+                                                                                 0.6
+                                                                       χ3B/χ1B
+
+
+
+
+with p being the momentum and M the constituent quark
+mass.                                                                            0.4
+  Rigorously, one should solve the coupled equations for
+the constituent mass M [50]. For simplicity we set M in                          0.2
+Eq. (19) to be M = Re M (ω̃02 , 0) from the mass function
+defined in Eq. (11), calculated from Eq. (1) with a finite
+                                                                                  0
+system size L.                                                                         0                0.1               0.2                 0.3                0.4
+  The modified density of states is then [50, 79]:                                                                     μB [GeV]
+
+                                    6π 2      12π 2                  FIG. 2. (color online) Calculated baryon chemical potential
+         ρMRE (p, M, L) = 1 +            fs +       fc .      (21)   dependence of the fluctuation ratios χB       B
+                                                                                                               1 /χ2 (upper panel)
+                                    pL        (pL)2                        B    B
+                                                                     and χ3 /χ1 (lower panel) of the system with L = 2.2 fm at
+                                                                     several values of temperature near the Tc . The dashed hori-
+  After taking into account the finite-size as well as the           zontal lines stand for the experimental values of the efficiency-
+surface effect, the momentum integration in Sec. II A                corrected C1 /C2 = M/σ 2 and C3 /C1 = Sσ 3 /M of net-
+should be converted as follows:                                      proton
+                                                                     p        multiplicity distributions in the central collisions at
+            Z ∞                  Z Λ                                   SN N = 200, 62.4, 54.4, 39, 27, 19.6, 14.5, 11.5, 7.7 GeV
+                    p~ 2 dp                       p~ 2 dp            given in Ref. [26]. The stars label our assigned freeze-out
+                            −→             ρMRE           .   (22)   points.
+               0      2π 2        |p|min            2π 2
+                                                                                                                                          5
+
+
+TABLE I. Calculated freeze-out points (µfB , T f ) in case of different values of L (T f and µfB are in unit MeV and
+                                                                                                                                 p
+                                                                                                                                  SN N in
+GeV).
+
+                        √          L = infinity       L = 3.5 fm         L = 2.8 fm  L = 2.5 fm  L = 2.2 fm
+                         SN N     µfB      Tf         µfB    Tf         µfB     Tf   µfB    Tf   µfB    Tf
+                         200      23.7   155.5       22.8 150.0         21.9 144.1 21.1 138.8 19.4 127.5
+                         62.4     69.9   155.1       67.1 150.0         64.4 144.0 62.1 138.9 57.2 128.0
+                         54.4     77.2   155.1       74.6 150.0         70.2 144.3 69.1 139.1 63.8 128.4
+                          39     103.3 154.2         99.5 149.2         95.5 143.5 92.0 138.5 84.8 128.1
+                          27     154.7 150.7         143.0 147.1       135.4 141.8 129.6 137.3 118.8 127.5
+                         19.6    189.1 148.0         191.7 143.1       195.2 137.5 178.7 134.1 155.7 126.0
+                                 ±15.7 ±1.9          ±10.9 ±1.2        ±2.5 ±0.2
+                         14.5      —       —          —      —         241.5 132.0 203.3 131.6 217.0 121.9
+                                                                       ±21.1 ±2.7 ±23.8 ±2.2 ±5.3 ±0.4
+                         11.5     —        —            —          —     —      —   255.0 127.7 229.9 121.4
+                                                                                    ±34.3 ±2.3 ±18.0 ±1.4
+                         7.7      —        —            —          —     —      —   257.4 127.5 233.7 121.2
+                                                                                    ±39.9 ±2.9 ±27.0 ±2.1
+
+
+listed in Table I. It appears that our theoretical results
+                                                                          TABLE II. Fitted freeze-out parameters c, d in Eq. 23 and
+in the thermodynamical limit (L = ∞) do not fit the
+                                                                          T 0 , a, b in Eq. 24, in case of different finite size parameter L
+experimental values well at low collision energy, whereas                 (c and T 0 are in unit MeV and d in GeV−1 ).
+the deviations are smaller if the finite size parameter L
+changes.                                                                           L       c      d          T0        a         b
+                                                                                infinity 1642.8 0.373       155.7   0.0162    0.0166
+   We illustrate the presently calculated relation between
+the baryon chemical potential   µfB and the center-of-mass                       3.5 fm 1236.1 0.285        150.3   0.0130    0.0103
+                        p
+energy of the collision, SN N , and the comparison with                          2.8 fm 1066.9 0.256        144.6   0.0184    0.0043
+those given in lattice QCD simulations (e.g., Ref. [43])                         2.5 fm 840.9 0.205         139.2   0.0137    0.0051
+and model calculations (e.g., Refs. [34, 39]) in Fig. 3.                         2.2 fm 818.4 0.218         128.4   0.0106    0.0022
+We see from Fig. 3 that our freeze-out baryon chemical
+potential in case of L = ∞ and that when L = 2.2 fm
+match the lattice QCD result and model calculation re-
+sults well in the region µB < 100 MeV, while those in                     µB > 100 MeV range. With the obtained freeze-out
+case of L = 2.2 fm deviate from previous results in the                   points, the freeze-out conditions are fitted as:
+
+
+
+              0.4                                 SHM                                             c
+                                                                                      µfB =              ,                             (23)
+                                             ▲ HRG
+                                                                                                  p
+                                                                                            1 + d SN N
+                           ▲                 ■ lattice QCD
+              0.3                                                                                     µf 2  µf 4 i
+                                             ★ DSE L=∞
+                                                                                               h
+                                                                                      T f = T 0 1 − a B0 − b B0
+  μBf [GeV]
+
+
+
+
+                                                                                                                       .               (24)
+                                             ✶ DSE L=2.2fm                                             T       T
+                           ✶ ✶                    fit of L=2.2fm
+              0.2                ▲
+                                 ★
+                                 ✶ ★
+                                   ▲
+                                   ■
+                                   ✶                                      Only the freeze-out points with small deviation between
+              0.1                        ★
+                                         ■
+                                         ▲
+                                         ✶ ★★
+                                            ■
+                                            ▲
+                                           ✶✶                             theory and experiment in Table I are used for fitting the
+                                                                   ▲
+                                                                   ★
+                                                                   ■
+                                                                   ✶                                                       p pa-
+                                                                          freeze-out conditions, and the obtained best-fitted
+               0                                                          rameters are listed in Table II. The fitted µfB ( SN N )
+                    5    10                50         100
+                                                                          curve is also displayed in Fig. 3.
+                                 SNN [GeV]
+                                                                             With the parametrization, one can predict the freeze-
+FIG. 3.    (color online) Comparison of presently obtained                out parameters (µfB , T f ) of the system generated
+                                                                                                                           p in any
+p
+  SN N dependence of the baryon chemical potential in cases               collision energy. For example, with L = 2.2 fm, SN N =
+of L = ∞ and L = 2.2 fm with those given in lattice QCD                   5.8 GeV, 7.7 GeV, 11.5 GeV, 14.5 GeV correspond to
+simulation [43], HRG model [39] and the parameterized one                 (µfB , T f ) = (361.7, 99.6) MeV, (305.8, 111.5) MeV,
+in SHM model [34].                                                        (233.6, 120.8) MeV, (196.9, 123.6) MeV, respectively.
+                                                                                                                                                                   6
+
+            IV.    PHASE DIAGRAM AND FURTHER                               where the constituent quark mass is defined as the real
+                         PREDICTION                                        part of M (ω̃02 , 0) in Eq. (11), the same as in Sec. II C.
+                                                                              The obtained crossover regions in cases of L = ∞,
+  With the quark propagator obtained by solving the                        2.5 fm and 2.2 fm are shown as the shadowed regions in
+DSE, we can get the temperature and chemical potential                     Fig. 4. With the chiral susceptibility criterion [8, 75]
+dependence of the quark condensate and the quark dy-                       or the fluctuation criterion [9], we determine the bound-
+namical mass, which are commonly regarded as appropri-                     aries of the first order transition region and the location
+ate order parameters of chiral phase transition. Taking                    of the CEP. The obtained results in the two cases are
+the chiral susceptibility criterion [8, 75] we determine the               displayed in Fig. 4. We illustrate also the presently ob-
+upper and lower boundary of the chiral phase crossover                     tained chemical freeze-out lines in these cases in Fig. 4.
+region by the full width at half maxima (FWHM) of the                      The figure manifests that the chemical freeze-out hap-
+susceptibility. The chiral susceptibility is defined as:                   pens in the obtained chiral crossover region. Quanti-
+                                                                           tatively, the freeze-out temperature T f = 155.7 MeV is
+                           χT = −∂M (ω̃02 , 0)/∂T ,                 (25)   higher than the Tc = 144.0 MeV in the thermodynamical
+                                                                           limit (i.e., with L = ∞) at µB = 0, but the deviation
+                                                                           is smaller in case of L = 2.2 fm where T f = 128.4 MeV,
+            0.20                                                           Tc = 121.6 MeV at µB = 0. We also notice that the fi-
+                                                                           nite size effect shifts the location of the CEP to higher
+                       ★    ★★ ★
+            0.15                    ★   ★             CEP                  baryon chemical potential and lower temperature dras-
+                                                       ●                   tically: in case of L = ∞, 3.5 fm, 2.8 fm, 2.5 fm and
+  T [GeV]
+
+
+
+
+            0.10
+                                                                           2.2 fm, (µCEP
+                                                                                      B    , T CEP ) = (296,132), (360,121), (426,111),
+                                                                           (510,101), (711,77.5) MeV, respectively. This is consis-
+                                                                           tent with the behavior given in phenomenological model
+            0.05                                            ★ DSE          calculations [48, 51]. Compared with the location of CEP
+                       L=∞                                    fit          calculated from functional renormalization group (FRG)
+              0                                                            approach [80, 81], it indicates that the inclusion of the
+                   0          0.1       0.2           0.3           0.4    finite size effect is reasonable for 2.2 fm ≤ L ≤ 2.8 fm.
+                                                                                                             ●
+            0.15                                                                                ●
+                     ★★ ★ ★
+                   ★ ★
+                           ★ ★                                                          5       ●
+                                                                                                              ●
+                                                                                                               ●
+                                               CEP                                               ●
+                                                                                                              ●
+            0.10                               ●                                                    ●
+  T [GeV]
+
+
+
+
+                                                                                                     ●●       ●         ●
+                                                                                                        ●                                                      ●
+                                                                                                                   ●
+                                                                                                                          ●   ●● ● ●● ● ●
+                                                                                                                                        ●●▲
+                                                                                                                                 ●●▲ ●● ▲
+                                                                                                                                          ● ●●   ●●   ●●   ●
+                                                                                                                                                           ●   ▲
+                                                                                                                                                               ●
+                                                                             χ4B/χ2B
+
+
+
+
+            0.05                                                                        0                   ●
+                                                                                                             ●● ● ●
+                                                                                                                      ● ●
+                                                                                                                        ● ●
+                                                                                                                            ● ●●
+                                                                                                               ●
+                                                                                                                    ● ●
+                                                                                                                               ▲
+                                                            ★ DSE                                               ●
+                                                                                                                 ●                               L=∞
+                                                                                                                                            ▲
+                       L = 2.5 fm                             fit
+                                                                                                                                            ●    L = 2.8 fm
+              0                                                                                                   ● ●                       ●    L = 2.5 fm
+                   0          0.2       0.4           0.6           0.8                -5                                                   ●    L = 2.2 fm
+                                                                                                                   ●                        ●    experiment
+                                                                                                                  ●
+            0.15                                            ★ DSE
+                    ★★★ ★
+                   ★★                                         fit                           5                 10                     50          100
+                              ★★
+
+            0.10                                                                                                            SNN [GeV]
+  T [GeV]
+
+
+
+
+                                                   ●                                                                             √
+                                                  CEP                      FIG. 5.     (color online) Calculated collision energy SN N
+            0.05                                                           dependence of κσ 2 = χB       B
+                                                                                                     4 /χ2 at the freeze-out line. The
+                                                                           black circles are the experimental values [26], the gray tri-
+                       L = 2.2 fm                                          angles stand for our results in case of infinite volume, the
+              0                                                            blue, green and red points denote our results in the case of
+                   0        0.2     0.4     0.6         0.8         1.0    L = 2.8 fm, 2.5 fm and 2.2 fm respectively. The shadowed
+                                                                           region(s) displays the numerical uncertainties.
+                                      μB [GeV]
+
+FIG. 4.     (color online) Calculated QCD phase diagram in                   It is known that the κσ 2 = χ4 /χ2 is a direct observ-
+case of L = ∞, 2.5 fm and 2.2 fm. The red-dashed curves                    able in experiment and may demonstrate the property of
+are the phase boundaries defined with the maximum of chiral                the states around the CEP well. We calculate χB     B
+                                                                                                                           4 /χ2 in
+susceptibility, the red-colored areas are the obtained crossover           the T –µB plane andppick out the value along the freeze-
+regions, and the black-soild curves are the fitted freeze-out              out line to get the SN N dependence of χB        B
+                                                                                                                       4 /χ2 . The
+lines.                                                                     obtained results in case of thermodynamical limit, finite
+                                                                                                                                                                7
+
+size of L = 2.8 fm, 2.5 fm and 2.2 fm are depicted in                                               χB    B
+                                                                                                      6 /χ2 = −0.97 ± 0.36, which is qualitatively consistent
+Fig. 5. In case of L = 2.2 fm, the lowest collision en-                                             with the experimental
+                                                                                                                  √          results [82–84] and lattice calcula-
+ergy calculated is 5.8 GeV. It is apparent that, without                                            tion [85]. For SN N & 10 GeV, our result shows a non-
+considering the finite size effect, our calculated χB     B
+                                                      4 /χ2                                         monotonic behavior with a shallow minimum, in agree-
+decreases  more   rapidly than   the experimental   data  as                                        ment with the FRG calculation [86]. We also show that
+                                                                                                    χB    B
+     p
+the SN N descends. With the finite size effect being                                                  6 /χ2 may have a large √   maximum along with a sharp
+taken into account, we can reproduce the experimental                                               and deep minimum when SN N . 10 GeV. As a result,
+data excellently. In the lower collision energy region, the                                         we predict a complex nonmonotonic behavior of χB           B
+                                                                                                                                                           6 /χ2
+κσ 2 exhibits apnonmonotonic behavior, whose minimum                                                as a function of collision energy.
+is reached at SN N ≈ 10 GeV, and then increases dras-
+           p
+tically as SN N further decreases.
+   Since the calculated kurtosis fit the experimental data                                                               V.   SUMMARY
+
+p in case of L = 2.2
+best                         fm, we further calculate the
+   SN N dependence of χB  6 /χ B
+                               2 from our fitted freeze-out
+                                                                                                       In summary, we have calculated in this work the
+line under this finite size parameter, depicted in Fig. 6,                                          baryon number susceptibilities in a two-flavor quark sys-
+whose numerical uncertainties are much larger than the                                              tem via the DSE approach of QCD in case of not only
+results of κσ 2 though.                                                                             thermodynamic limit but also finite size. By comparing
+                                                                                                    the calculated ratios χB         B       B   B
+                                                                                                                                1 /χ2 and χ3 /χ1 with the ex-
+                                                                                                    perimental data of the net-proton multiplicity distribu-
+            102                                                DSE (L = 2.2 fm)   ■ STAR (30-40%)
+                                                           ●
+                                                                                                    tion in BES at RHIC, we obtained the temperature and
+                        ●
+                                                                                  ● STAR (0-10%)
+            101         ●                                                                           the baryon chemical potential at the chemical freeze-out
+                                                                            ●
+                                          ● ●
+                                                                                                    states. We calculated also the collision energy depen-
+            10  0                              ●                                                    dence of the κσ 2 at the freeze-out line and observed an
+ χ6B/χ2B
+
+
+
+
+                                      ●            ●             ■          ■
+              0                                        ●
+                                                                                                    excellent agreement with experimental data when taking
+           -100                                                        ●
+                                                                             ●                 ●    into account the finite size effect. It shows that the finite
+                                                                 ●                             ■
+                                  ●
+                                                                                                    size effect is significant in studying the QCD phaseptransi-
+           -101             ●
+                                                                 ●
+                                                                                               ●
+                                                                                                    tions with RHICs. The obtained collision energy SN N
+                             ●●
+                              ●
+                                                                                                    dependence of the κσ 2 exhibits a nonmonotonic behav-
+           -102                                                                                     ior in lower collision energy region. We also predict that
+                    5                     10                               50        100            the collision energy dependence of hyper-order cumulant
+                                                               SNN [GeV]                            ratios such as χB       B
+                                                                                                                       6 /χ2 may also be nonmonotonic.
+
+                                                       √
+FIG. 6.     (color online) Calculated collision energy SN N
+                 B    B
+dependence of χ6 /χ2 (in logarithmic scale) at the freeze-out
+line. The black circles and gray squares are the experimental                                                      ACKNOWLEDGMENTS
+values [82] for 0 - 10% and 30 - 40% centralities respectively,
+and the red points denote our results in case of 2.2 fm. The
+                                                                                                      The work was supported by the National Natural Sci-
+shadowed region(s) displays the numerical uncertainties.
+                                                                                                    ence Foundation of China under Grant Nos. 11175004
+           √                                                                                        and 11435001, and the National Key Basic Research Pro-
+  At           SN N = 200 GeV, we obtain a negative value of                                        gram of China under Grant No. 2015CB856900.
+
+
+
+
+ [1] P. Braun-Munzinger and J. Wambach, Rev. Mod. Phys.                                              [8] S. X. Qin, L. Chang, H. Chen, Y. X. Liu, and
+     81, 1031 (2009), arXiv:0801.4256.                                                                   C. D. Roberts, Phys. Rev. Lett. 106, 172301 (2011),
+ [2] O. Philipsen, Prog. Part. Nucl. Phys. 70, 55 (2013),                                                arXiv:1011.2876.
+     arXiv:1207.5999.                                                                                [9] X. Y. Xin, S. X. Qin, and Y. X. Liu, Phys. Rev. D 90,
+ [3] S. Gupta, X. Luo, B. Mohanty, H. G. Ritter, and N. Xu,                                              076006 (2014).
+     Science 332, 1525 (2011), arXiv:1105.3934.                                                     [10] C. S. Fischer, J. Luecker, and J. A. Mueller, Phys. Lett.
+ [4] Y. Aoki, G. Endrődi, Z. Fodor, S. D. Katz, and K. K.                                               B 702, 438 (2011), arXiv:1104.1564.
+     Szabó, Nature 443, 675 (2006), arXiv:hep-lat/0611014.                                         [11] C. S. Fischer and J. Luecker, Phys. Lett. B 718, 1036
+ [5] Y. Aoki, S. Borsányi, S. Dürr, Z. Fodor, S. D. Katz,                                              (2013), arXiv:1206.5191.
+     S. Krieg, and K. Szabo, J. High Energy Phys. 2009, 088                                         [12] C. S. Fischer, J. Luecker, and C. A. Welzbacher, Phys.
+     (2009), arXiv:0903.4155.                                                                            Rev. D 90, 034022 (2014), arXiv:1405.4762.
+ [6] S. Ejiri, Phys. Rev. D 78, 074507 (2008),                                                      [13] F. Gao, J. Chen, Y. X. Liu, S. X. Qin, C. D. Roberts,
+     arXiv:0804.3227.                                                                                    and S. M. Schmidt, Phys. Rev. D 93, 094019 (2016),
+ [7] A. Li, A. Alexandru, and K.-F. Liu, Phys. Rev. D 84,                                                arXiv:1507.00875.
+     071503 (2011), arXiv:1103.3045.
+                                                                                                                             8
+
+[14] C. Ratti, M. A. Thaler, and W. Weise, Phys. Rev. D 73,     [45] J.-W. Chen, J. Deng, H. Kohyama, and L. Labun, Phys.
+     014019 (2006), arXiv:hep-ph/0506234.                            Rev. D 93, 034037 (2016), arXiv:1509.04968.
+[15] B.-J. Schaefer, J. M. Pawlowski, and J. Wambach, Phys.     [46] B. Berdnikov and K. Rajagopal, Phys. Rev. D 61, 105017
+     Rev. D 76, 074023 (2007), arXiv:0704.3234.                      (2000), arXiv:hep-ph/9912274.
+[16] W. J. Fu, Z. Zhang, and Y. X. Liu, Phys. Rev. D 77,        [47] B. B. Abelev et al. (ALICE), Phys. Lett. B 739, 139
+     014006 (2008), arXiv:0711.0154.                                 (2014), arXiv:1404.1194 [nucl-ex].
+[17] K. Fukushima, Phys. Rev. D 77, 114028 (2008),              [48] L. F. Palhares, E. S. Fraga, and T. Kodama, J. Phys. G
+     arXiv:0803.3318.                                                38, 085101 (2011), arXiv:0904.4830 [nucl-th].
+[18] L. J. Jiang, X. Y. Xin, K. L. Wang, S. X. Qin, and Y. X.   [49] N. Magdy, M. Csanád, and R. A. Lacey, J. Phys. G 44,
+     Liu, Phys. Rev. D 88, 016008 (2013).                            025101 (2017), arXiv:1510.04380 [nucl-th].
+[19] X. Y. Xin, S. X. Qin, and Y. X. Liu, Phys. Rev. D 89,      [50] G.Y. Shao, L. Chang, Y. X. Liu, and X. L. Wang, Phys.
+     094012 (2014).                                                  Rev. D 73, 076003 (2006), arXiv:hep-ph/0602100.
+[20] G. L. Melkumov et al. (NA49), Nucl. Phys. B Proc.          [51] A. Bhattacharyya, P. Deb, S. K. Ghosh, R. Ray, and
+     Suppl. 219-220, 102 (2011).                                     S. Sur, Phys. Rev. D 87, 054009 (2013), arXiv:1212.5893
+[21] G. L. Melkumov et al. (NA49), Phys. Atom. Nucl. 75,             [hep-ph].
+     556 (2012).                                                [52] A. Bhattacharyya, R. Ray, and S. Sur, Phys. Rev. D 91,
+[22] G. Odyniec, Phys. Atom. Nuclei 75, 602 (2012).                  051501 (2015), arXiv:1412.8316 [hep-ph].
+[23] L. Adamczyk et al. (STAR), Phys. Rev. Lett. 112,           [53] A. Bhattacharyya, S. K. Ghosh, R. Ray, K. Saha, and
+     032302 (2014), arXiv:1309.5681.                                 S. Upadhaya, EPL 116, 52001 (2016), arXiv:1507.08795
+[24] L. Adamczyk et al. (STAR), Phys. Rev. Lett. 113,                [hep-ph].
+     092301 (2014), arXiv:1402.1558 [nucl-ex].                  [54] M. S. Berger and R. L. Jaffe, Phys. Rev. C 35, 213 (1987).
+[25] X. Luo, PoS CPOD2014, 019 (2015), arXiv:1503.02558.        [55] D. Deutsch and P. Candelas, Phys. Rev. D 20, 3063
+[26] J. Adam et al. (STAR), Phys. Rev. Lett. 126, 092301             (1979).
+     (2021).                                                    [56] H. T. Elze and W. Greiner, Phys. Lett. B 179, 385 (1986).
+[27] M. Stephanov, K. Rajagopal, and E. Shuryak, Phys.          [57] W. Y. Ke and Y. X. Liu, Phys. Rev. D 89, 074041 (2014),
+     Rev. Lett. 81, 4816 (1998), arXiv:hep-ph/9806219.               arXiv:1312.2295 [hep-ph].
+[28] M. A. Stephanov, Phys. Rev. Lett. 102, 032301 (2009),      [58] F. Gao and Y. X. Liu, Phys. Rev. D 94, 094030 (2016),
+     arXiv:0809.3450.                                                arXiv:1609.08038 [hep-ph].
+[29] M. A. Stephanov, Phys. Rev. Lett. 107, 052301 (2011),      [59] Y. P. Zhao, R. R. Zhang, H. Zhang, and H. S. Zong,
+     arXiv:1104.1627.                                                Chinese Physics C 43, 063101 (2019), arXiv:1903.11243
+[30] M. Stephanov, K. Rajagopal, and E. Shuryak, Phys.               [hep-ph].
+     Rev. D 60, 114028 (1999), arXiv:hep-ph/9903292.            [60] C. D. Roberts and A. G. Williams, Prog. Part. Nucl.
+[31] M. A. Stephanov, J. Phys. G 38, 124147 (2011).                  Phys. 33, 477 (1994), arXiv:hep-ph/9403224.
+[32] Y. Hatta and M. A. Stephanov, Phys. Rev. Lett. 91,         [61] C. D. Roberts and S. M. Schmidt, Prog. Part. Nucl. Phys.
+     102003 (2003), arXiv:hep-ph/0302002.                            45, S1 (2000), arXiv:nucl-th/0005064.
+[33] F. Becattini, J. Manninen, and M. Gaździcki, Phys. Rev.   [62] P. Maris and C. D. Roberts, Int. J. Mod. Phys. E 12, 297
+     C 73, 044905 (2006), arXiv:hep-ph/0511092.                      (2003), arXiv:nucl-th/0301049.
+[34] A. Andronic, P. Braun-Munzinger, and J. Stachel, Nucl.     [63] R. Alkofer, Phys. Rept. 353, 281 (2001), arXiv:hep-
+     Phys. A 772, 167 (2006), arXiv:nucl-th/0511071.                 ph/0007355.
+[35] A. Andronic, P. Braun-Munzinger, and J. Stachel,           [64] A. Bashir, L. Chang, I. C. Cloët, B. El-Bennich, Y. X.
+     Physics Letters B 673, 142 (2009), arXiv:0812.1186.             Liu, C. D. Roberts, and P. C. Tandy, Commun. Theor.
+[36] S. Das and (the STAR collaboration), J. Phys.: Conf.            Phys. 58, 79 (2012), arXiv:1201.3366.
+     Ser. 509, 012066 (2014), arXiv:1402.0255.                  [65] I. C. Cloet and C. D. Roberts, Prog. Part. Nucl. Phys.
+[37] S. Das, EPJ Web Conf. 90, 10003 (2015),                         77, 1 (2014), arXiv:1310.2651 [nucl-th].
+     arXiv:1412.0350.                                           [66] L. Chang, Y. X. Liu, and C. D. Roberts, Phys. Rev.
+[38] F. Karsch and K. Redlich, Phys. Lett. B 695, 136 (2011),        Lett. 106, 072001 (2011), arXiv:1009.3458.
+     arXiv:1007.2581.                                           [67] S. X. Qin, L. Chang, Y. X. Liu, C. D. Roberts, and S. M.
+[39] P. Alba, W. Alberico, R. Bellwied, M. Bluhm, V. Man-            Schmidt, Phys. Lett. B 722, 384 (2013), arXiv:1302.3276
+     tovani Sarti, M. Nahrgang, and C. Ratti, Phys. Lett. B          [nucl-th].
+     738, 305 (2014), arXiv:1403.4903.                          [68] S. X. Qin, L. Chang, Y. X. Liu, C. D. Roberts,
+[40] R. V. Gavai and S. Gupta, Phys. Lett. B 696, 459 (2011),        and D. J. Wilson, Phys. Rev. C 84, 042202 (2011),
+     arXiv:1001.3796.                                                arXiv:1108.0603.
+[41] A. Bazavov, H.-T. Ding, P. Hegde, O. Kaczmarek,            [69] S. X. Qin, L. Chang, Y. X. Liu, and C. D. Roberts, Phys.
+     F. Karsch, E. Laermann, S. Mukherjee, P. Petreczky,             Rev. D 84, 014017 (2011), arXiv:1010.4231.
+     C. Schmidt, D. Smith, W. Soeldner, and M. Wagner,          [70] C. S. Fischer, Phys. Rev. Lett. 103, 052003 (2009),
+     Phys. Rev. Lett. 109, 192302 (2012), arXiv:1208.1220.           arXiv:0904.2700.
+[42] S. Borsányi, Z. Fodor, S. D. Katz, S. Krieg, C. Ratti,    [71] C. S. Fischer and J. A. Mueller, Phys. Rev. D 80, 074029
+     and K. K. Szabó, Phys. Rev. Lett. 111, 062005 (2013),          (2009), arXiv:0908.0007 [hep-ph].
+     arXiv:1305.5161.                                           [72] E. Gutierrez, A. Ahmad, A. Ayala, A. Bashir, and
+[43] S. Borsanyi, Z. Fodor, S. D. Katz, S. Krieg, C. Ratti,          A. Raya, J. Phys. G 41, 075002 (2014), arXiv:1304.8065
+     and K. K. Szabo, Phys. Rev. Lett. 113, 052301 (2014),           [hep-ph].
+     arXiv:1403.4576.                                           [73] B. Wang, Z. F. Cui, W. M. Sun, and H. S. Zong, Few
+[44] J. Cleymans, H. Oeschler, K. Redlich, and S. Wheaton,           Body Syst. 55, 47 (2014), arXiv:1404.3073 [hep-ph].
+     Phys. Rev. C 73, 034905 (2006), arXiv:hep-ph/0511094.
+                                                                                                                         9
+
+[74] K. L. Wang, Y. X. Liu, L. Chang, C. D. Roberts,           [80] F. Gao and J. M. Pawlowski, Phys. Rev. D 102, 034027
+     and S. M. Schmidt, Phys. Rev. D 87, 074038 (2013),             (2020).
+     arXiv:1301.6762 [nucl-th].                                [81] W. J. Fu, J. M. Pawlowski, and F. Rennecke, Phys. Rev.
+[75] F. Gao and Y. X. Liu, Phys. Rev. D 94, 076009 (2016).          D 101, 054032 (2020).
+[76] N. Haque, M. G. Mustafa, and M. Strickland, Phys. Rev.    [82] M. S. Abdallah et al. (STAR), (2021), arXiv:2105.14698.
+     D 87, 105007 (2013).                                      [83] A. Pandav (STAR), Nuclear Physics A 1005, 121936
+[77] R. Contant and M. Q. Huber, Phys. Rev. D 96, 074002            (2021).
+     (2017).                                                   [84] T. Nonaka (STAR), Nuclear Physics A 1005, 121882
+[78] J. Madsen, Phys. Rev. Lett. 85, 4687 (2000), arXiv:hep-        (2021).
+     ph/0008217.                                               [85] A. Bazavov et al. (HotQCD Collaboration), Phys. Rev.
+[79] G. Lugones and A. G. Grunfeld, Phys. Rev. C 103,               D 101, 074502 (2020).
+     035813 (2021), arXiv:2010.06098.                          [86] W. J. Fu, X. Luo, J. M. Pawlowski, F. Rennecke, R. Wen,
+                                                                    and S. Yin, (2021), arXiv:2101.06035 [hep-ph].
+

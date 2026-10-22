@@ -1,0 +1,37 @@
+{
+  "schema": "andronic_png_review_v1",
+  "checked_utc": "2026-10-18T06:44:57.950609+00:00",
+  "status": "agent_review_passed",
+  "author_review": "pending",
+  "delivery_stage": "png_review",
+  "manifest": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_png_review_r1\\plot_manifest.json",
+    "sha256": "74c7db6adb1e3e1a1a0b245c155eb0b82188dc7105633f4cb76e6895924b194b",
+    "bytes": 19659
+  },
+  "images": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_png_review_r1\\kplus_piplus_parameter_envelope.png",
+      "sha256": "86363d706ce6e5cbf945cc7393309232935cf4dbb44c3c5c7497e8af81364281",
+      "bytes": 389511
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_png_review_r1\\kplus_piplus_parameter_envelope_gray.png",
+      "sha256": "50201a1539e27c65127c8de2cb808b02f0d05a24f333b374a8707ea51f93d1ca",
+      "bytes": 362261
+    }
+  ],
+  "actual_visual_inspection": true,
+  "checks": {
+    "labels_readable": true,
+    "legend_inside_panel": true,
+    "no_clipping": true,
+    "no_data_occlusion": true,
+    "grayscale_line_and_marker_encodings_distinguishable": true,
+    "gray_band_members": 42,
+    "near_best_members": 10,
+    "original_2018_ratio_gap_retained": true
+  },
+  "manuscript_eligible": false,
+  "vector_delivery_pending": true
+}

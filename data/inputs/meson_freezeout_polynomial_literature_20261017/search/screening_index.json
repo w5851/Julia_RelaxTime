@@ -1,0 +1,289 @@
+{
+  "retrieved_utc": "2026-10-17T11:50:18.883769+00:00",
+  "scope": "Targeted 2019-2026 chemical freeze-out/default-parameter screening; not an exhaustive systematic review. One broad query is capped at 60 of 121 hits.",
+  "queries": [
+    {
+      "query": "title \"chemical freeze\" and date > 2018",
+      "url": "https://inspirehep.net/api/literature?q=title+%22chemical+freeze%22+and+date+%3E+2018&sort=mostrecent&size=60",
+      "retrieved_utc": "2026-10-17T11:24:13.101637+00:00",
+      "total_hits": 39,
+      "retrieved_count": 39,
+      "raw_response": "chemical_recent.json"
+    },
+    {
+      "query": "title \"freeze-out\" and fluctuations and date > 2021",
+      "url": "https://inspirehep.net/api/literature?q=title+%22freeze-out%22+and+fluctuations+and+date+%3E+2021&sort=mostrecent&size=60",
+      "retrieved_utc": "2026-10-17T11:24:10.313112+00:00",
+      "total_hits": 16,
+      "retrieved_count": 16,
+      "raw_response": "fluctuation_recent.json"
+    },
+    {
+      "query": "(\"freeze-out\" or \"freezeout\") and (parametrization or parameterization) and date > 2018",
+      "url": "https://inspirehep.net/api/literature?q=%28%22freeze-out%22+or+%22freezeout%22%29+and+%28parametrization+or+parameterization%29+and+date+%3E+2018&sort=mostrecent&size=60",
+      "retrieved_utc": "2026-10-17T11:25:32.497571+00:00",
+      "total_hits": 121,
+      "retrieved_count": 60,
+      "raw_response": "parameterization_recent.json"
+    }
+  ],
+  "downloaded_sources": [
+    {
+      "name": "S17_Lu_2022_DSE_chemical_freezeout",
+      "arxiv": "2109.09912",
+      "inspire_id": "1925299",
+      "url": "https://arxiv.org/pdf/2109.09912",
+      "resolved_url": "https://arxiv.org/pdf/2109.09912",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S17_Lu_2022_DSE_chemical_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S17_Lu_2022_DSE_chemical_freezeout.txt",
+      "sha256": "efcc7b0d6cad0abb03ec80bb28e32d56fa323a516168aa12644b4528405f7e19",
+      "bytes": 707613,
+      "retrieved_utc": "2026-10-17T11:25:14.859841+00:00",
+      "title": "Chemical freeze-out parameters via a nonperturbative QCD approach",
+      "authors": [
+        "Lu, Yi",
+        "Chen, Muyang",
+        "Bai, Zhan",
+        "Gao, Fei",
+        "Liu, Yu-xin"
+      ],
+      "doi": [
+        "10.1103/PhysRevD.105.034012",
+        "10.1103/PhysRevD.105.034012"
+      ],
+      "publication_info": [
+        {
+          "journal_volume": "105",
+          "pubinfo_freetext": "Phys. Rev. D 105, 034012 (2022)",
+          "artid": "034012",
+          "material": "publication",
+          "year": 2022,
+          "journal_record": {
+            "$ref": "https://inspirehep.net/api/journals/1613970"
+          },
+          "journal_issue": "3",
+          "journal_title": "Phys.Rev.D"
+        }
+      ],
+      "source_record": "S17_Lu_2022_DSE_chemical_freezeout.source.json"
+    },
+    {
+      "name": "S18_Shao_2024_FRG_chemical_freezeout",
+      "arxiv": "2305.16763",
+      "inspire_id": "2663012",
+      "url": "https://arxiv.org/pdf/2305.16763",
+      "resolved_url": "https://arxiv.org/pdf/2305.16763",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S18_Shao_2024_FRG_chemical_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S18_Shao_2024_FRG_chemical_freezeout.txt",
+      "sha256": "a5eedf24b35c503b07e70f4b1608bdd3a0381db95cc62d9b536bdd889b676821",
+      "bytes": 1183469,
+      "retrieved_utc": "2026-10-17T11:25:17.902268+00:00",
+      "title": "Chemical freeze-out parameters via a functional renormalization group approach",
+      "authors": [
+        "Shao, Jun-xiang",
+        "Fu, Wei-jie",
+        "Liu, Yu-xin"
+      ],
+      "doi": [
+        "10.1103/PhysRevD.109.034019"
+      ],
+      "publication_info": [
+        {
+          "journal_volume": "109",
+          "artid": "034019",
+          "material": "publication",
+          "year": 2024,
+          "journal_record": {
+            "$ref": "https://inspirehep.net/api/journals/1613970"
+          },
+          "journal_issue": "3",
+          "journal_title": "Phys.Rev.D"
+        }
+      ],
+      "source_record": "S18_Shao_2024_FRG_chemical_freezeout.source.json"
+    },
+    {
+      "source": "Crossref record for 10.1103/PhysRevD.109.034019, linked APS fulltext",
+      "url": "https://harvest.aps.org/v2/journals/articles/10.1103/PhysRevD.109.034019/fulltext",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S18b_Shao_2024_FRG_published.pdf",
+      "sha256": "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9",
+      "bytes": 1810625,
+      "title": null,
+      "authors": [],
+      "doi": [],
+      "publication_info": [],
+      "source_record": "S18b_Shao_2024_FRG_published.source.json"
+    },
+    {
+      "name": "S19_Flor_2021_flavour_freezeout",
+      "arxiv": "2009.14781",
+      "inspire_id": "1820303",
+      "url": "https://arxiv.org/pdf/2009.14781",
+      "resolved_url": "https://arxiv.org/pdf/2009.14781",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S19_Flor_2021_flavour_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S19_Flor_2021_flavour_freezeout.txt",
+      "sha256": "8bd245ab0640dbcb8bf5573ea1f87c774fce92fb6d5a3d8d294cc642139cbe72",
+      "bytes": 1102487,
+      "retrieved_utc": "2026-10-17T11:25:23.259568+00:00",
+      "title": "Flavour and Energy Dependence of Chemical Freeze-out Temperatures in Relativistic Heavy Ion Collisions from RHIC-BES to LHC Energies",
+      "authors": [
+        "Flor, Fernando Antonio",
+        "Olinger, Gabrielle",
+        "Bellwied, Rene"
+      ],
+      "doi": [
+        "10.1016/j.physletb.2021.136098"
+      ],
+      "publication_info": [
+        {
+          "journal_volume": "814",
+          "artid": "136098",
+          "year": 2021,
+          "journal_title": "Phys.Lett.B"
+        }
+      ],
+      "source_record": "S19_Flor_2021_flavour_freezeout.source.json"
+    },
+    {
+      "name": "S20_Lysenko_2025_freezeout_curve",
+      "arxiv": "2408.06473",
+      "inspire_id": "2817716",
+      "url": "https://arxiv.org/pdf/2408.06473",
+      "resolved_url": "https://arxiv.org/pdf/2408.06473",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S20_Lysenko_2025_freezeout_curve.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S20_Lysenko_2025_freezeout_curve.txt",
+      "sha256": "8ddfa17859dd1a58f8c33575d68e62a63b08eab9b4cf95978b1f0d03da80d44c",
+      "bytes": 783871,
+      "retrieved_utc": "2026-10-17T11:25:13.671023+00:00",
+      "title": "Chemical freeze-out curve in heavy-ion collisions and the QCD critical point",
+      "authors": [
+        "Lysenko, Artemiy",
+        "Gorenstein, Mark I.",
+        "Poberezhniuk, Roman",
+        "Vovchenko, Volodymyr"
+      ],
+      "doi": [
+        "10.1103/PhysRevC.111.054903",
+        "10.1103/PhysRevC.111.054903"
+      ],
+      "publication_info": [
+        {
+          "journal_volume": "111",
+          "pubinfo_freetext": "Phys. Rev. C 111, 054903 (2025)",
+          "artid": "054903",
+          "material": "publication",
+          "year": 2025,
+          "journal_record": {
+            "$ref": "https://inspirehep.net/api/journals/1613969"
+          },
+          "journal_issue": "5",
+          "journal_title": "Phys.Rev.C"
+        }
+      ],
+      "source_record": "S20_Lysenko_2025_freezeout_curve.source.json"
+    },
+    {
+      "name": "S21_Lu_2026_functional_QCD_freezeout",
+      "arxiv": "2603.09336",
+      "inspire_id": "3128060",
+      "url": "https://arxiv.org/pdf/2603.09336",
+      "resolved_url": "https://arxiv.org/pdf/2603.09336",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S21_Lu_2026_functional_QCD_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S21_Lu_2026_functional_QCD_freezeout.txt",
+      "sha256": "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027",
+      "bytes": 2011928,
+      "retrieved_utc": "2026-10-17T11:26:51.351647+00:00",
+      "title": "Extracting freeze-out conditions in beam energy scan via functional QCD",
+      "authors": [
+        "Lu, Yi",
+        "Fischer, Christian S.",
+        "Gao, Fei",
+        "Liu, Yu-xin",
+        "Pawlowski, Jan M."
+      ],
+      "doi": [],
+      "publication_info": [],
+      "source_record": "S21_Lu_2026_functional_QCD_freezeout.source.json"
+    },
+    {
+      "name": "S22_Poberezhnyuk_2019_QvdW_freezeout",
+      "arxiv": "1906.01954",
+      "inspire_id": "1738515",
+      "url": "https://arxiv.org/pdf/1906.01954",
+      "resolved_url": "https://arxiv.org/pdf/1906.01954",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S22_Poberezhnyuk_2019_QvdW_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S22_Poberezhnyuk_2019_QvdW_freezeout.txt",
+      "sha256": "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322",
+      "bytes": 2862124,
+      "retrieved_utc": "2026-10-17T11:26:37.204221+00:00",
+      "title": "Chemical freeze-out conditions and fluctuations of conserved charges in heavy-ion collisions within quantum van der Waals model",
+      "authors": [
+        "Poberezhnyuk, R.",
+        "Vovchenko, V.",
+        "Motornenko, A.",
+        "Gorenstein, M.I.",
+        "Stoecker, H."
+      ],
+      "doi": [
+        "10.1103/PhysRevC.100.054904"
+      ],
+      "publication_info": [
+        {
+          "journal_volume": "100",
+          "pubinfo_freetext": "Phys. Rev. C 100, 054904 (2019)",
+          "artid": "054904",
+          "material": "publication",
+          "year": 2019,
+          "journal_issue": "5",
+          "journal_title": "Phys.Rev.C"
+        }
+      ],
+      "source_record": "S22_Poberezhnyuk_2019_QvdW_freezeout.source.json"
+    },
+    {
+      "name": "S23_Singh_2023_repulsive_HRG_freezeout",
+      "arxiv": "2307.05930",
+      "inspire_id": "2676272",
+      "url": "https://arxiv.org/pdf/2307.05930",
+      "resolved_url": "https://arxiv.org/pdf/2307.05930",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S23_Singh_2023_repulsive_HRG_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S23_Singh_2023_repulsive_HRG_freezeout.txt",
+      "sha256": "71df5a5e9266e31c327d0ca0390969d6b7333a337ad31bcf438babd55a768463",
+      "bytes": 559987,
+      "retrieved_utc": "2026-10-17T11:26:29.815127+00:00",
+      "title": "Chemical freeze-out parametrization with mean field repulsive hadron resonance gas model",
+      "authors": [
+        "Singh, Sunny Kumar",
+        "Sarkar, Nachiketa",
+        "Biswas, Deeptak"
+      ],
+      "doi": [],
+      "publication_info": [],
+      "source_record": "S23_Singh_2023_repulsive_HRG_freezeout.source.json"
+    },
+    {
+      "name": "S24_Sarkar_2025_PCA_freezeout",
+      "arxiv": "2511.15707",
+      "inspire_id": "3084750",
+      "url": "https://arxiv.org/pdf/2511.15707",
+      "resolved_url": "https://arxiv.org/pdf/2511.15707",
+      "path": "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S24_Sarkar_2025_PCA_freezeout.pdf",
+      "text_path": "D:\\Desktop\\PNJL论文\\05_阅读笔记与复现计划\\化学冻结线与Kpi_20261017\\recent_default_candidates_20261017\\S24_Sarkar_2025_PCA_freezeout.txt",
+      "sha256": "b505afcee5ce93f34f1449bea3d9dcf7bb04fd2de83332eb26f56f8940a7c5f0",
+      "bytes": 2386538,
+      "retrieved_utc": "2026-10-17T11:26:40.458312+00:00",
+      "title": "Resolving Ratio Redundancy in Chemical Freeze-out Studies with Principal Component Analysis and Bayesian Calibration",
+      "authors": [
+        "Sarkar, Nachiketa"
+      ],
+      "doi": [],
+      "publication_info": [],
+      "source_record": "S24_Sarkar_2025_PCA_freezeout.source.json"
+    }
+  ],
+  "zotero_check": {
+    "method": "local API unavailable; SQLite mode=ro, PRAGMA query_only=ON; title and eight arXiv-ID searches",
+    "new_candidate_id_matches": [],
+    "library_modified": false
+  }
+}

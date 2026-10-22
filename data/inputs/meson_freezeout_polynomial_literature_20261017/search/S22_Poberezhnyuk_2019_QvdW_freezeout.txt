@@ -1,0 +1,980 @@
+                                                Chemical freeze-out conditions and fluctuations of conserved
+                                         charges in heavy-ion collisions within quantum van der Waals model
+
+                                                                         R. V. Poberezhnyuk,1, 2 V. Vovchenko,3, 2
+                                                               A. Motornenko,3, 2 M. I. Gorenstein,1, 2 and H. Stoecker3, 2, 4
+                                                       1
+                                                           Bogolyubov Institute for Theoretical Physics, 03680 Kiev, Ukraine
+                                                                         2
+                                                                             Frankfurt Institute for Advanced Studies,
+                                                           Giersch Science Center, D-60438 Frankfurt am Main, Germany
+                                                           3
+                                                               Institut für Theoretische Physik, Goethe Universität Frankfurt,
+arXiv:1906.01954v2 [hep-ph] 7 Oct 2019
+
+
+
+
+                                                                             D-60438 Frankfurt am Main, Germany
+                                           4
+                                               GSI Helmholtzzentrum für Schwerionenforschung GmbH, D-64291 Darmstadt, Germany
+                                                                                     (Dated: October 9, 2019)
+
+                                                                                           Abstract
+                                           The chemical freeze-out parameters in central nucleus-nucleus collisions are extracted consis-
+                                         tently from hadron yield data within the quantum van der Waals (QvdW) hadron resonance gas
+                                         model. The beam energy dependences for skewness and kurtosis of net baryon, net electric, and net
+                                         strangeness charges are predicted. The QvdW interactions in asymmetric matter, Q/B 6= 0.5, between
+                                         (anti)baryons yield a non-congruent liquid-gas phase transition, together with a nuclear critical point
+                                         (CP) with critical temperature of Tc = 19.5 MeV. The nuclear CP yields the collision energy depen-
+                                         dence of the skewness and the kurtosis to both deviate significantly from the ideal hadron resonance
+                                         gas baseline predictions even far away, in (T, µB )-plane, from the CP. These predictions can readily be
+                                         tested by STAR and NA61/SHINE Collaborations at the RHIC BNL and the SPS CERN, respectively,
+                                         and by HADES at GSI. The results presented here offer a broad opportunity for the search for signals
+                                         of phase transition in dense hadronic matter at the future NICA and FAIR high intensity facilities.
+
+                                         PACS numbers: 15.75.Ag, 24.10.Pq
+
+                                         Keywords: nuclear matter, non-congruent phase transitions, critical point, quantum van der Waals model
+
+
+
+
+                                                                                               1
+I.    INTRODUCTION
+
+
+     The structure of the phase diagram of strongly interacting matter is one of the most impor-
+tant and still open topics in nuclear and particle physics to date. The known phenomenology of
+the physics of strong interactions suggests both, short-range repulsion and intermediate-range
+attraction between nucleons in proximity of nuclear saturation density n0 = 0.16 fm−3 . This
+yields a first-order liquid-gas phase transition (LGPT) from a dilute (gaseous) to a dense (liq-
+uid) phase of nuclear matter, which smoothens out in the nuclear critical point (CP). In contrast
+to the hypothetical deconfinement-related CP, the existence of the LGPT and the nuclear CP
+is better established [1–15], see [16] for a review.
+
+     Theoretical arguments suggest the enhancement of certain fluctuations of conserved quan-
+tities in the critical region [17–22], namely, the fluctuation of the conserved charges that are
+related to the so-called order parameter. The signals of the CP in the scaled variance of the
+charge fluctuations fade-out rather quickly when moving away from the CP [23, 24]. On the
+other hand, the CP signals in fluctuation measures which are related to the higher order mo-
+ments of charge distributions, namely skewness and kurtosis of charge fluctuations, can be seen
+even far away from the location of the CP on the phase diagram [25–27]. Thus, the observed
+large deviations of the higher order charge fluctuations from the ideal hadron resonance gas
+(IHRG) baseline can be taken as a signal for the existence of a CP.
+
+     Here we study this issue by employing the quantum van der Waals hadron resonance gas
+(QvdW-HRG) model, which is the extension of the classical vdW model: The QvdW model
+was recently generalized to include the grand canonical ensemble (GCE) [28], the effects of
+relativity and quantum statistics [25], and the full known spectrum of hadrons and resonances
+[27]. The QvdW-HRG model is a minimal interaction-extension of the IHRG model. It takes
+into account both, attractive and repulsive, interactions between only baryons and between only
+anti-baryons. These interactions yield the LGPT and the nuclear CP within the model [25].
+The model includes two parameters only, which are fixed by the properties of the nuclear ground
+state.
+
+     The QvdW-HRG at low temperatures is reduced to normal nuclear matter, described by
+the QvdW model, see Refs. [23, 25, 26, 28–30]. The results for symmetric nuclear matter are
+
+                                                2
+similar to the Walecka model results [31]. The QvdW model was applied to describe asymmetric
+nuclear matter and its non-congruent LGPT in Ref. [24].
+      The skewness and the kurtosis of baryonic charge fluctuations were calculated within the
+QvdW-HRG model for central nucleus-nucleus (A+A) collisions along the chemical freeze-out
+line in Ref. [26]. The present paper extends these results in two directions. First, the chemical
+freeze-out line is derived consistently for central A+A collisions within the QvdW-HRG model.
+Second, both the baryonic and electric charge fluctuations are calculated in T − µB plane and
+along the freeze-out line. The electric charge is a more convenient quantity for experimental
+measurement, compared to baryonic charge, as it does not require the detection of the dominant
+electrically neutral baryons. The Thermal-FIST [32] package is used for the calculations within
+the QvdW-HRG model.
+      The paper is organized as follows. Section II briefly describes the QvdW-HRG model.
+Section III discusses the non-congruent LGPT in asymmetric nuclear matter within the QvdW-
+HRG model and presents chemical freeze-out lines obtained within the QvdW-HRG and IHRG
+models. Section IV presents the QvdW-HRG and IHRG results on the skewness and the
+kurtosis of charge fluctuations as functions of the collision energy and in the coordinates of
+baryochemical potential and temperature. A summary closes the article in Sec. V.
+
+
+II.     THE QUANTUM VAN DER WAALS - HADRON RESONANCE GAS MODEL
+
+
+      The total baryon (B), electric (Q), and strangeness (S) charges of the hot, dense, hadronic
+system in the GCE are regulated by the corresponding chemical potentials, µB , µQ , and µS .
+The chemical potential of the j-th type hadron is µj = bj µB + sj µS + qj µQ , where bj , sj , and qj
+are, respectively, the baryonic number, the strangeness, and the electric charge of the hadron
+of j type. The QvdW model yields the total pressure of the system as a sum of the partial
+pressures of baryons, anti-baryons, and mesons [27]:
+
+                                     p(T, µ) = pB + pB̄ + pM .                                    (1)
+
+The partial pressure of the baryons is given as
+                                          X
+                                              pid    B∗
+                                                          − an2B .
+                                                        
+                              pB (T, µ) =      j T, µj                                            (2)
+                                            j∈B
+
+
+                                                  3
+Here T is the temperature, pid                                                             B∗
+                            j is the ideal Fermi-Dirac pressure of the baryons of j type, µj
+
+and nB are, respectively, the shifted baryonic chemical potential of baryons of j type and the
+total density of all baryons:
+
+                     µB∗                   2
+                      j = µj − b pB − a b nB + 2 a nB ,                                       (3)
+                                
+                             ∂pB     X                    X
+                                                              nid    B∗
+                                                                        
+                      nB =         =      nj = (1 − bnB )      j T, µj    .                   (4)
+                             ∂µB T j∈B                    j∈B
+
+The corresponding expressions for pB̄ , µB̄∗
+                                         j , and nB̄ of the antibaryons are analogous to Eqs. (2)-
+
+(4). The QvdW interactions are assumed to exist separately between all pairs of baryons, and
+between all pairs of antibaryons, where the same parameters are used for all (anti-)baryons as
+for nucleons, a = 329 MeV fm3 and b = 3.42 fm3 [27]. These parameters a and b were obtained
+in Ref. [23] by fitting the saturation density, nGS = 0.16 fm−3 , and binding energy, EbGS = −16
+MeV, of the ground state of symmetric nuclear matter. Possible QvdW interactions for baryon-
+antibaryon, meson-meson, and meson-(anti-)baryon pairs are neglected. The partial pressure
+of all mesons is taken as a sum of the ideal Bose-Einstein gas pressures. The summation in
+Eqs. (2)-(4) is performed over all hadrons and resonances listed in the Particle Data Tables [33]
+and which have a confirmed status there.
+
+
+III.   PHASE TRANSITION AND CHEMICAL FREEZE-OUT
+
+
+   The LGPT in the QvdW-HRG model is due to an interplay of the repulsive and the attractive
+interactions. The mixed phase boundary and the location of the CP in asymmetric nuclear
+matter are found from the Gibbs equilibrium condition [24]. The QvdW-HRG model with
+Q/B = 0.4 exhibits the CP at µcB = 914.5 MeV, Tc = 19.48 MeV. The LGPT region in the
+(µB , T) coordinates is shown in Fig. 1.
+   We fix the ratio of the electric-to-baryon charge (asymmetry parameter): Q/B = 0.4. This
+approximately corresponds to the isospin asymmetry in heavy nuclei like lead (Pb) or gold (Au).
+Note that isospin asymmetry alters qualitatively the properties of the PT, rendering it as being
+a “non-congruent” PT. As a result, the mixed phase in (µB , T) coordinates can not be presented
+by a line, but is rather a region of finite width. Moreover, for a non-congruent PT, the location
+of the CP differs from the location of the temperature endpoint (TEP), the point with the
+
+                                               4
+                                     2 5
+
+
+
+
+                        T [M e V ]
+                                                        1 9 .4 8 5
+
+                                     2 0
+                                                        1 9 .4 8 0
+
+                                     1 5
+                                                        1 9 .4 7 5
+                                                                      9 1 4 .4 0   9 1 4 .4 5       9 1 4 .5 0
+                                     1 0
+
+                                        5
+                                                                              Q /B = 0 .4 , S = 0
+                                        0
+                                        9 1 0   9 2 0         9 3 0                9 4 0                  9 5 0
+                                                                                                µB [ M e V ]
+
+
+
+Figure 1. Liquid-gas phase transition for asymmetric nuclear matter with an asymmetry parameter of
+Q/B = 0.4 in the (µB , T ) coordinates. The shaded area represents the mixed phase. The ground state
+is denoted by a square. The inset shows a zoomed-in picture of the region around the critical point.
+The critical point and the temperature endpoint are shown by the star and the circle, respectively.
+
+maximum temperature at which the phase coexistence is possible. The inset in Fig. 1 zooms in
+on the region of the CP. The star and the circle represent the CP and the TEP, respectively,
+see Refs. [24, 34] for details.
+   The particle number fluctuations in A+A collisions are calculated within statistical models
+at different collision energies by using the chemical freeze-out values of the temperature and
+baryochemical potential. In the present paper we use the data on mean hadron multiplicities
+in various experiments at SchwerIonen-Synchrotron (SIS), Alternating Gradient Synchrotron
+(AGS), Super Proton Synchrotron (SPS), and Large Hadron Collider (LHC) to determine the
+chemical freeze-out values for the QvdW-HRG model.
+
+
+
+   The GCE can be used for all data sets considered, except for the lowest energies at SIS. The
+exact net strangeness conservation is enforced for the SIS data, i.e., the calculations are done for
+these low-energy Au+Au collisions within the strangeness canonical ensemble (SCE) [54, 55].
+   Finite resonance widths are treated in the present paper in the framework of energy inde-
+pendent Breit-Wigner scheme [56]. Note, that the energy dependent Breit-Wigner scheme leads
+
+                                                        5
+√
+    sN N     Refs.                    IHRG                              QvdW-HRG
+[GeV]                  µB [MeV] T [MeV] V [fm3 ]       γs   µB [MeV] T [MeV] V [fm3 ]      γs
+
+2760        [35–38]    1.4±9.7   153±3 4741±540 1.11±0.03 1.5±10.9    156±5 4148±613 1.10±0.03
+17.3        [39–46]    246±10    150±3 4885±522 0.87±0.03 314±39      160±7 3503±543 0.81±0.04
+12.3        [39–43]    289±14    151±5 3552±447 0.72±0.04 356±48      153±9 3474±474 0.69±0.04
+8.8         [39–43]    372±12    145±4 2657±304 0.80±0.04 443±46      143±7 3210±345 0.78±0.04
+7.7        [40–42, 47] 415±11    143±4 2210±268 0.84±0.05 491±57      138±8 3093±369 0.80±0.05
+6.3        [40–42, 47] 469±12    138±7 1935±404 0.82±0.05 566±106 131±10 2829±654 0.83±0.05
+4.9         [48–51]    569±16    120±4 2905±695 0.70±0.08 634±81      119±8 2896±815 0.70±0.08
+2.3         [52, 53]   808±25    48.3±2      —         —    802±23   48.3±2      —         —
+
+Table I. The results of the hadron chemical freeze-out parameters fits for the IHRG and the QvdW
+model.
+
+
+
+to a better description of hadron yields at the LHC [56]. Another possibility is to neglect finite
+widths of resonances altogether. Here we stick to the energy independent Breit-Wigner scheme
+so as to preserve consistency with our earlier works regarding the chemical freeze-out conditions
+in the IHRG model [57] or thermodynamic properties of the QvdW-HRG model [27]. We did
+verify that differences in the extracted freeze-out parameters obtained within these different
+schemes are small, with a possible exception of the strangeness saturation factor γS . A detailed
+study of finite resonance widths effects on hadron yields for intermediate collision energies will
+be presented elsewhere.
+
+    The fitted freeze-out parameters are µB , T , volume of the system V , and the strangeness
+under-saturation parameter γS (see Ref. [58]). The corresponding IHRG and QvdW-HRG fit
+results for µB , T , V , and γs are presented in Table I. In the SCE for the SIS data we set the
+strangeness correlation volume equal to the volume of the system, i.e. Vc = V . The extracted
+values of the chemical freeze-out parameters, T and µB , are plotted for all energies in Figs. 2
+(a) and (b) for the IHRG and QvdW-HRG models, respectively. The values of γs for both the
+IHRG and QvdW-HRG models are plotted in Fig. 3 (a). The Au+Au data at SIS allow to
+extract both the temperature and the baryochemical potential. They are shown in Figs. 2 (a)
+
+                                                   6
+and (b). The parameter γS however cannot be reliably determined (see Ref. [57]), Hence, γS is
+not shown in Fig. 3 (a) at SIS. We define uncertainties of the extracted µB , T , and γs values
+following the procedures given in Ref. [59], by multiplying the uncertainties inferred from the
+                                   p
+χ2 = χ2min + 1 contours by a factor χ2min /dof [33].
+
+           180                                                                                180
+ T [MeV]
+
+
+
+
+                                                                                    T [MeV]
+                                                                                                                 17.3
+                  2760
+                                                                        (a)                         2760                                                         (b)
+           160            17.3                                                                160                       12.3
+                                      8.8                                                                                      8.8
+                                            7.7                                                                                      7.7
+                                                  6.3                                                                                      6.3
+           140                 12.3                                                           140
+                                                        4.9                                                                                      4.9
+           120                                                                                120
+
+           100                                                                                100
+
+            80                                                                                80
+
+            60                                                  2.3
+                                                                                              60
+                                                                                                                                                         2.3
+
+            40                                                                                40
+
+            20                                                                                20
+                   Ideal HRG                                                                         QvdW-HRG
+
+             0                                                                                 0
+              0          200          400               600   800         1000                  0          200          400                600         800         1000
+
+                                                                        [MeV]                                                                                    [MeV]
+                                                                    B                                                                                        B
+
+
+
+
+Figure 2. Freeze-out lines according to Eq. (5) are shown in the (µB , T ) coordinates plane all the way
+                       √
+from collision energies sN N = 1.9 GeV to 2.8 TeV for the Ideal-HRG (a) and QvdW-HRG model
+(b). The shaded areas along the curves represent the uncertainties. The Ideal-HRG freeze-out line
+is represented in panel (b) by dashed line for comparison with the QvdW-HRG curve. The numbers
+                                                                 √
+on the freeze-out line give the respective center of mass energy, sN N , in GeV. The first-order phase
+transition region and the nuclear critical point are also shown in panel (b) by the dark curve and the
+dot, respectively.
+
+
+           The higher temperatures and larger uncertainties of T and µB values in the QvdW-HRG
+model are mainly due to the excluded volume interactions of (anti-)baryons which is incorpo-
+rated in this model. Such an effect has been reported before for different variants of the excluded
+volume HRG model [60, 61]. Moreover, an appearance of peculiar two-minima structures in χ2
+are possible when deviations from the IHRG model picture are considered [62], although physics
+interpretation of the 2nd minimum at higher temperatures is challenging. For the QvdW-HRG
+model used here we do observe a second minimum in the χ2 temperature profile of the ALICE
+data fit at T ∼ 200 MeV, but we do not observe any two-minima structures for all other data
+sets (SPS and SIS) used in our analysis. Figure 3 (b) depicts the temperature profile of χ2 /dof
+
+                                                                                7
+     1 .2                                                                     1 0
+            (a )                                                                         (b )
+γs
+
+
+
+
+                                                                    χ/d o f
+     1 .1
+
+
+
+
+                                                                    2
+                                                                                 8
+     1 .0
+
+     0 .9                                                                        6
+
+     0 .8                                                                        4
+     0 .7
+                                    Id e a l H R G                               2                                                       Id e a l H R G
+     0 .6
+                                   Q v d W -H R G                                        s 1N / N 2 [ G e V ] = 1 7 . 3 G e V           Q v d W -H R G
+     0 .5                                                                        0
+                   1 0   1 0 0       1 0 0 0                                     1 0 0                          1 5 0           2 0 0                    2 5 0
+                                         s 1N / N 2 [ G e V ]                                                                                   T [M e V ]
+
+
+
+Figure 3.  (a) γS is shown along chemical freeze-out line as a function of collision energy. (b) The
+                                                                       √
+temperature dependence of χ2 /dof of the fits to NA61/SHINE data at sN N = 17.3 GeV using the
+IHRG (black dashed curves) and QvdW-HRG (red solid curves) model, respectively. Note the higher
+temperature, ∆T ≈ 10 MeV, obtained from the QvdW-HRG fit.
+
+                                               √
+of the fit to the NA49 data at top SPS energy ( sN N = 17.3 GeV), the picture for all other
+energies (except LHC) is similar. This figure illustrates the broadening of the χ2 profile when
+QvdW interactions between baryons are switched on.
+   We adopt a simple thermodynamic parametrization of the chemical freeze-out line,
+                                                                                                     b1
+                         T = a1 − a2 µ2B − a3 µ4B ,                           µB =                    √      ,                                              (5)
+                                                                                                1 + b2 s N N
+
+used previously in Ref. [63]. Here we use it to parameterize the extracted T and µB values. The
+five newly fitted parameters in Eq. (5), a1 , a2 , a3 , b1 , b2 , are presented in Table II for both
+the IHRG and QvdW-HRG model. Note that the QvdW-HRG parameters a2 , a3 , b1 differ by
+about 20% from the IHRG fits, but that the b2 value of the IHRG fit exceeds the QvdW-HRG
+value by 70%. The parametrization (5) extrapolates the freeze-out line from µB ≈ 0 region
+at the highest collision energies down to the nuclear matter region of the phase diagram at
+the lowest collision energies. The chemical freeze-out line close to the region of the nuclear
+liquid-gas transition was previously considered in Refs. [64, 65] in a context of light cluster
+formation.
+
+
+
+
+                                                                8
+                                  a1 [GeV]     a2 [GeV−1 ]                       a3 [GeV−3 ]                   b1 [GeV]           b2 [GeV−1 ]
+
+                    IHRG 0.152 ± 0.001 0.026 ± 0.003                            0.219 ± 0.004 1.310 ± 0.006 0.278 ± 0.003
+                    QvdW 0.157 ± 0.002 0.0032 ± 0.0027 0.259 ± 0.004 1.094 ± 0.004 0.157 ± 0.002
+
+Table II. The freeze-out line parameters, see Eq. (5), for the Ideal-HRG and the QvdW-HRG models.
+
+
+
+      Figures 4 (a) and (b) present, respectively, the net baryon density, nB , and the entropy per
+baryon, s/nB , along the chemical freeze-out line as a function of collision energy for the two
+                √
+models. At low sN N in both QvdW-HRG and IHRG models freeze-out takes place in a diluted
+                                           √
+region. At the lowest considered energy of sN N = 1.9 GeV freeze-out in both models takes
+place at baryon density of nB = 2.17 · 10−4 fm−3 . The net baryon density exhibits a maximum
+as a function of collision energy, as first noted in Ref. [66] for the IHRG model. Within the
+QvdW-HRG model this maximum is lower in comparison to the IHRG model, this is due to
+the excluded volume repulsion between (anti-)baryons (see also Ref. [67]). The behavior of the
+entropy per baryon is very similar for both models, indicating that s/nB is a robust observable
+that depends little on the details of the HRG model [61].
+
+
+
+           0 .2 5
+ ]
+
+
+
+
+                    (a )                                                                             (b )
+ -3
+
+
+
+
+                                                     Id e a l H R G
+                                                                                    s /n B
+
+
+
+
+                                                                                             1 0 4
+ n B [fm
+
+
+
+
+           0 .2 0                                   Q v d W -H R G
+
+                                                                                             1 0 3
+           0 .1 5
+
+           0 .1 0                                                                            1 0 2
+
+
+           0 .0 5                                                                            1 0 1                                              Id e a l H R G
+                                                                                                                                               Q v d W -H R G
+           0 .0 0                                                                            1 0 0
+                                  1 0             1 0 0                                                     1 0 1         1 0 2        1 0 3                     1 0 4
+                                                              1 /2                                                                                       1 /2
+                                                          s    N N   [G e V ]                                                                        s    N N   [G e V ]
+
+
+
+Figure 4.                  (a) Net baryon density and (b) entropy per baryon are shown along chemical freeze-out
+line as a function of collision energy.
+
+
+
+
+                                                                                9
+              1 8 0
+                                                                                                                       (a )
+                                                                                                                                     S σ[ B ]                    1 8 0
+                                                                                                                                                                                                                                                                     (b )
+                                                                                                                                                                                                                                                                                  S σ[ B ]
+              1 6 0                                                                                                                          1 .0                1 6 0
+                                                                                                                                                                                                                                                                                       1 0
+              1 4 0               0 .5                                                                                                                           1 4 0
+                                                    0 .9                                                                                                                                                                                                                               2
+              1 2 0                                                                                             0 .9                                             1 2 0
+ T [M e V ]
+
+
+
+
+                                                                                                                                                    T [M e V ]
+                                                           0 .9 9
+              1 0 0                                                 1                                                                                            1 0 0                             1
+                                                                                                                                             0 .5
+                8 0                                                                                                                                                8 0                                                                                                                 1
+                                                                                                                                                                                                                                                                 0   -0 .6
+                6 0                                                                                                                                                6 0
+
+                4 0                                                                                                                                                4 0                                                                            1 .1                                 0
+                                                                                                                        0 .5
+
+                2 0                                                                                                                                                2 0           Q v d W -H R G , Q /B = 0 .4 , S = 0
+                                         ( a I) H   R G , Q /B = 0 .4 , S = 0                                                                0 .0                                 (a )                                                                                                 -1
+                      0                                                                                                                                                  0                                                                                                             -1 0
+                          0                           2 0 0             4 0 0            6 0 0          8 0 0                  1 0 0 0                                       0           2 0 0         4 0 0           6 0 0                             8 0 0              1 0 0 0
+                                                                          µB [ M e V ]                                                                                                                   µB [ M e V ]
+              1 8 0                                                                                                                      2                       1 8 0
+                                                                                                                       (c )         κσ [ B ]                                                                                                                         (d )        κσ2[ B ]
+              1 6 0                                                                                                                          1 .0                1 6 0
+                                                                                                                                                                                                                                                                                       1 0
+              1 4 0                                                                                                                                              1 4 0
+                                                                                                                                                                                                                                                                                       2
+                                                                                                 0 .9                                                                                                                                         0
+              1 2 0                                                                                                                                              1 2 0
+                                                                                                                                                                                                                                      -0 .5
+ T [M e V ]
+
+
+
+
+                                                                                                                                                    T [M e V ]
+                                                                                0 .9 9
+              1 0 0                                                                                                                                              1 0 0                                             0
+                                                                                                                                             0 .5
+                8 0                                                               1                                    0 .5                                        8 0                                         1                                                                       1
+
+                6 0                                                                                                                                                6 0
+                                                                                                                                                                                                                               1 .1
+                4 0                                                                                                                                                4 0                                                                                                1 .1             0
+
+                2 0                                                                                                                                                2 0           Q v d W -H R G , Q /B = 0 .4 , S = 0
+                                         IH R G , Q /B = 0 .4 , S = 0                                                                        0 .0                                                                                                                                      -1
+                                         (b )                                                                                                                                     (b )
+                      0                                                                                                                                                  0                                                                                                             -1 0
+                              0                       2 0 0             4 0 0            6 0 0          8 0 0                  1 0 0 0                                       0           2 0 0         4 0 0           6 0 0                             8 0 0              1 0 0 0
+                                                                          µB [ M e V ]                                                                                                                   µB [ M e V ]
+
+
+Figure 5.                                                  (a, b) Skewness, Sσ, and (c, d) kurtosis, κσ 2 , of baryonic charge fluctuations in the
+(µB , T ) coordinates obtained in the IHRG model (a, c) and the QvdW-HRG model (b, d) for strongly
+interacting matter with asymmetry parameter Q/B = 0.4. The freeze-out lines for both models are
+also shown. Note that there are large differences between the two model predictions for both skewness
+and kurtosis.
+
+
+IV.                               FLUCTUATIONS
+
+
+          The skewness, Sσ, and the kurtosis, κσ 2 , of the baryonic, ch = B, and the electric, ch = Q,
+charge fluctuations are expressed as ratios of normalized cumulants (susceptibilities):
+
+                                                                                                                                  χch
+                                                                                                                                   3                                                      χch
+                                                                                                                                                                                           4
+                                                                                                  Sσ[ch] =                         ch
+                                                                                                                                      ,               κσ 2 [ch] =                             .                                                                                        (6)
+                                                                                                                                  χ2                                                      χch
+                                                                                                                                                                                           2
+
+
+Susceptibilities, χch
+                   i , are calculated in the GCE from the scaled total pressure by taking the
+
+derivatives with respect to the corresponding powers of the chemical potentials over the tem-
+
+                                                                                                                                              10
+              1 8 0
+                                                                                               (a )          S σ[ Q ]                      1 8 0
+                                                                                                                                                                                                                                       (b )          S σ[ Q ]
+              1 6 0                                                                                                  1 .0                  1 6 0
+                                                                                                                                                                                                                                                          1 0
+              1 4 0                                                                                                                        1 4 0
+                                                                                                                                                                                                                                                          2
+                                                                                       0 .9
+              1 2 0                                                                                                                        1 2 0
+ T [M e V ]
+
+
+
+
+                                                                                                                              T [M e V ]
+              1 0 0                              0 .1                                                                                      1 0 0                                 0 .1
+                                                                                                                     0 .5
+                8 0                                                  0 .5                                                                    8 0                                                              0 .5                                        1
+
+                6 0                                                                                                                          6 0
+                                                                                                                                                                                                                               1 .1                       0
+                4 0                                                                                                                          4 0                                                                                            0
+                                                                                                0 .5
+                                                                                0 .9
+                2 0               IH R G , Q /B = 0 .4 , S = 0                                                                               2 0
+                                                                                                      0 .1           0 .0                                  Q v d W -H R G , Q /B = 0 .4 , S = 0                                                           -1
+                      0                                                                                                                            0                                                                                                      -1 0
+                          0              2 0 0          4 0 0         6 0 0     8 0 0                  1 0 0 0                                         0                 2 0 0                    4 0 0        6 0 0   8 0 0                    1 0 0 0
+                                                            µB [ M e V ]                                                                                                                            µB [ M e V ]
+              1 8 0                                                                                              2                         1 8 0
+                                                                                              (c )           κσ [ Q ]                                                                      1 .3
+                                                                                                                                                                                                            1 .1                      (d )           κσ2[ Q ]
+              1 6 0                                                                                                                        1 6 0
+                                                                            2                                        2                                                                                                                                    1 0
+              1 4 0                                                                                                                        1 4 0
+                                                                                                                                                                                                                                                          2
+              1 2 0                                     1 .6                                                                               1 2 0
+ T [M e V ]
+
+
+
+
+                                                                                                                              T [M e V ]
+                                                                                                                                                                                        1 .6
+              1 0 0                                                                                                                        1 0 0
+
+                8 0                                                                                                                          8 0                                                                                                          1
+                                                                                                                                                                  1 .3
+                6 0                                                                                                  1                       6 0
+                                         1 .1                                                  0 .5                                                                                                                                     0
+
+                4 0                                                                                                                          4 0                 1 .1                                                                                     0
+
+                2 0                                                                                                                          2 0
+                                  IH R G , Q /B = 0 .4 , S = 0                                                                                             Q ( bv ) d W - H R G , Q / B = 0 . 4 , S = 0                                                   -1
+                                  (b )                                                                               0
+                      0                                                                                                                            0                                                                                                      -1 0
+                              0          2 0 0          4 0 0         6 0 0      8 0 0                 1 0 0 0                                         0                 2 0 0                    4 0 0        6 0 0   8 0 0                    1 0 0 0
+                                                            µB [ M e V ]                                                                                                                            µB [ M e V ]
+
+
+                                                 Figure 6. The same as in Fig. 5 but for electric charge fluctuations.
+
+
+perature:
+
+                                                                                                                     ∂ n (p/T 4 )
+                                                                                              χch
+                                                                                               n =                                .                                                                                                                       (7)
+                                                                                                                     ∂ (µch /T )n
+
+          Figures 5 and 6 show the skewness and the kurtosis of, respectively, the baryonic and the
+electric charge fluctuations in the (µB , T ) coordinate plane as calculated in the IHRG and
+the QvdW-HRG models. White coloring corresponds to Sσ = κσ 2 = 1. The third order
+susceptibility is anti-symmetric with respect to hadrons and anti-hadrons, χch   h    h̄
+                                                                            3 = χ3 − χ3 . At
+
+µB = 0 the numbers of hadrons and anti-hadrons are equal. Therefore, at µB = 0 the skewness
+of both charge fluctuations in both models equals zero, Sσ = 0. In contrast, the fourth order
+susceptibility is symmetric with respect to hadrons and anti-hadrons, χch   h   h̄
+                                                                       4 = χ4 +χ4 . Therefore,
+
+χ4 ’s of particle and anti-particle fluctuations do not cancel out each other at µB = 0. At high
+temperatures, the contribution of the pions, which are Bose particles, to χQ
+                                                                           4 is substantial. This
+
+
+                                                                                                                         11
+brings to the large positive values of κσ 2 [Q] ≈ 1.6 at high temperatures.
+   The fluctuations exhibit a singular behavior at the CP: both the skewness and the kurtosis
+of charge fluctuations can approach the values +∞, −∞, or 0, depending on the path with
+which the CP is approached in the phase diagram. The strong influence of the CP on the higher
+moments of the distributions is apparent even far away from the CP. This is particularly true
+along the freeze-out lines.
+   We have checked that the strangeness suppression effect due to γs < 1 is rather small in
+the skewness and kurtosis of the net strangeness fluctuations. Therefore, in calculations of
+charge fluctuations, γs is fixed to unity and the GCE is used. Figure 7 shows the skewness
+                                                                                     √
+and the kurtosis of the charge fluctuations as functions of the center of mass energy sN N as
+calculated in the IHRG and QvdW-HRG models, along the corresponding fitted chemical freeze-
+out lines (5). The non-trivial behavior of higher order fluctuations measures superimposed
+on the shape of the freeze-out line leads to the complex, non-monotonic behaviour of these
+quantities as functions of the collision energy. A pure asymmetric nuclear matter (the only
+constituents are nucleons) models both Sσ[B] and κσ 2 [B] rather well at moderate and low
+                   √
+collision energies, sN N . 2.4 GeV. This energy corresponds to temperatures of T . 60 MeV.
+However, for quantitative description of the Sσ[Q] and the κσ 2 [Q] values this approximation
+is not good enough, as, even at the lower energies, the contribution of the direct pions to
+the electric charge is quite substantial. Accounting for both, nucleons and direct pions, does
+allow for a reasonable description of the skewness of the electric charge fluctuations, up to GSI
+          √
+energies, sN N . 2.4 GeV. The deviations of the strangeness fluctuations at the intermediate
+beam energies from the IHRG baseline are mostly due to the contributions of strange baryons,
+mainly Λ and Σ, which take part in the QvdW interactions.
+   The results of the QvdW-HRG model for κσ 2 [Q] and κσ 2 [S] at high collision energies are close
+to the IHRG baseline. This is due to the large contributions of pions and kaons, respectively,
+which are treated as non-interacting particles within QvdW-HRG approach. In contrast, κσ 2 [B]
+at high energies substantially deviates from the IHRG baseline due to interactions between
+(anti-)baryons.
+   Figures 5 and 6 demonstrate that the values of high-order charge fluctuations are highly
+sensitive to the location on the phase diagram. This sensitivity is strongest in proximity to
+
+                                               12
+           1 .5                                                                                                 3
+
+
+
+
+                                                                                              κσ [Β]
+ S σ[Β]
+                         n e t-b a ry o n                                      (a )                                 n e t-b a ry o n                                  (b )
+
+
+
+
+                                                                                              2
+                                                           Id e a l H R G                                       2
+           1 .0
+                                                          Q v d W -H R G
+                                                                                                                1
+           0 .5
+                                                                                                                0
+
+           0 .0
+                                                                                                           -1                                      Id e a l H R G
+                                                                                                                                                  Q v d W -H R G
+       -0 .5                                                                                               -2
+                          1 0                          1 0 0                                                        1 0                          1 0 0
+                                                                      1 /2
+                                                                 s N N [G e V ]                                                                           s 1N / N 2 [ G e V ]
+
+           1 .2                                                                                          2 .5
+ S σ[Q ]
+
+
+
+
+                                                                                              κσ [Q ]
+                         n e t-c h a rg e                                      (c )                                 n e t-c h a rg e                                  (d )
+
+
+
+
+                                                                                              2
+           1 .0
+                                                          Id e a l H R G
+                                                                                                         2 .0
+           0 .8                                          Q v d W -H R G
+
+           0 .6
+                                                                                                         1 .5
+           0 .4
+
+           0 .2                                                                                          1 .0
+                                                                                                                                                    Id e a l H R G
+           0 .0                                                                                                                                    Q v d W -H R G
+                                                                                                         0 .5
+                          1 0                          1 0 0                                                        1 0                          1 0 0
+                                                                       1 /2                                                                                  1 /2
+                                                                 s            [G e V ]                                                                     s N N [G e V ]
+                                                                        N N
+
+            0 .2                                                                                          2 .5
+S σ[S ]
+
+
+
+
+                                                                                 (e )
+                                                                                              κσ2[ S ]
+
+
+
+
+            0 .0           n e t-s tra n g e n e s s                                                                 n e t-s tra n g e n e s s                           (f)
+           -0 .2                                                                                          2 .0
+           -0 .4
+           -0 .6
+                                                                                                          1 .5
+           -0 .8
+           -1 .0
+           -1 .2                                                                                          1 .0
+                                                            Id e a l H R G                                                                            Id e a l H R G
+           -1 .4                                           Q v d W -H R G                                                                            Q v d W -H R G
+           -1 .6                                                                                          0 .5
+                            1 0                         1 0 0                                                         1 0                         1 0 0
+                                                                     1 /2                                                                                   1 /2
+                                                                S N N [G e V ]                                                                            S N N [G e V ]
+
+
+
+Figure 7.          Skewness (lhs) and kurtosis (rhs) of baryonic (a, b), electric (c, d), and strangeness (e, f )
+charge fluctuations within the IHRG- (dashed black curves) and QvdW-HRG- (solid red curves) mod-
+els, along the respective freeze-out lines of the models. The shaded areas along the curves represent
+the uncertainties of the predicted results due to the uncertainties of the fitted freeze-out line parame-
+ters. Note that the predicted large differences of the fluctuation measures at BES II, GSI and FAIR
+energies, fully accessible experimentally to date.
+                                                                                         13
+the CP. In the QvdW-HRG model the fluctuations of the conserved charges in the system of
+nucleons at small temperatures are rather different in the dilute gaseous and dense liquid phases
+of interacting nucleons. Within the QvdW-HRG model, the chemical freeze-out at the lowest
+√
+  sN N takes place in the gaseous phase where the effects of the interactions are rather small.
+Thus, strong deviations of the QvdW-HRG model fluctuations from the IHRG baseline appear
+mostly at intermediate beam energies where the baryonic density is the highest, see Fig. 4 (a).
+Note that at present there is a lack of hadron multiplicity data in nucleus-nucleus collisions at
+low collision energies. Our analysis show a strong sensitivity of high-order charge fluctuations
+to the position of the chemical freeze-out line relative to the nuclear CP. More data for hadron
+multiplicities in nucleus-nucleus reactions at low collision energies are required to clarify the
+production of new hadrons as well as the final fractions of the light and intermediate nuclear
+fragments.
+   A quantitative comparison with the data in heavy-ion collisions requires the appropriately
+chosen acceptance region. This region is defined by the cuts in rapidity, transverse momentum,
+azimuthal angle, and other experimental limitations of measurements. For the event-by-event
+measurements in nucleus-nucleus reactions the required acceptance region should satisfy certain
+requirements. It should be a small part of the whole phase space, thus, the global charge
+conservation effects can be disregarded, and the statistical treatment within the grand canonical
+ensemble can be applied. On the other hand, this acceptance region should be large enough to
+capture the relevant physics.
+   In order to reduce the volume fluctuation effects the most central collisions must be se-
+lected [68]. Another way to reduce the volume fluctuation effects is to use the so-called strongly
+intensive quantities [69] as the fluctuation measures. A detailed analysis of the required accep-
+tance and volume fluctuation corrections is however outside the scope of the present paper and
+will be a subject of the future research.
+   The baryon number fluctuations are calculated in the present paper with the assumption
+that all baryons are experimentally detectable. This is not the case in reality. Therefore, a
+binomial acceptance procedure, see Refs. [21, 26, 70], is usually applied to account for this
+inability of the event-by-event measurements of (anti)neutron numbers. This procedure leads
+to an essential decrease of the observable baryon number fluctuations. In contrast to the baryon
+
+                                              14
+number, nearly all electric charges can be experimentally detected. Thus, our results obtained
+for electric charge fluctuations are more suitable for a comparison with the experimental data.
+     Finally, an analysis of experimental data should be complemented with dynamical model
+simulations of heavy-ion collisions, where the effects of baryon-baryon interactions studied
+here are incorporated. The dynamical models can naturally incorporate the effects related to
+baryon number conservation and acceptance. Some recent developments in this direction using
+transport models can be found in Refs. [71, 72].
+     Note that the predicted large differences of the fluctuation measures at the high baryon den-
+sity correspond to the center of mass energy regime from 3 to 30 GeV, which is readily accessible
+to the Beam Energy Scan II run at Brookhaven National Laboratory, and at Helmholtzzentrum
+für Schwerionenforschung (GSI) HADES detector, as well as the Compressed Baryonic Matter
+(CBM) detector at Facility for Antiproton and Ion Research (FAIR) and the Multi Purpose
+Detector (MPD) at NICA in Dubna.
+
+
+
+V.     SUMMARY
+
+
+     The quantum van der Waals hadron resonance gas model has been applied to study chem-
+ical freeze-out properties in heavy-ion collisions as well as the higher-order fluctuations of net
+baryon and net charge numbers. The extracted chemical freeze-out parameters exhibit larger
+uncertainties as compared to the ideal hadron resonance gas model. Similar to the IHRG model,
+the dependence of Tch on µch
+                          B in the QvdW-HRG model can be parametrized as a quartic poly-
+
+nomial in µch
+           B , with parameters differing quite substantially from the IHRG case. Since both
+
+the LGPT and the chemical freeze-out are consistently obtained within a single model, their
+relative location is clarified.
+     The beam energy dependences of the skewness and the kurtosis of the baryonic, electric, and
+strange charge fluctuations has been calculated along the obtained chemical freeze-out curve.
+All six observables show large deviations from the ideal hadron resonance gas baseline at the
+highest baryon density at intermediate beam energies. These signals stem in the QvdW-HRG
+model from the nuclear critical point at T ∼ 20 MeV and µB ∼ 900 MeV. This observation
+must be taken into account in every experimental search for the QCD critical point in high
+
+                                               15
+energy nucleus-nucleus collision experiments using the higher order fluctuations of conserved
+charges. This concerns in particular the Beam Energy Scan II run at Brookhaven National
+Laboratory, as well as future GSI-HADES, FAIR-CBM, and NICA-MPD.
+
+
+
+   ACKNOWLEDGMENTS
+
+
+   The authors thank M. Gazdzicki, B. I. Lev, and G. M. Zinovjev for fruitful discussions and
+useful comments. This research was supported by theme grant of department of physics and
+astronomy of NAS of Ukraine: “Dynamics of formation of spatially non-uniform structures in
+many-body systems”, PK 0118U003535. H. St. appreciates the support through the Judah
+M. Eisenberg Laureatus Chair at Goethe University, and the Walter Greiner Gesellschaft,
+Frankfurt.
+
+
+
+
+ [1] J. Pochodzalla et al., Phys. Rev. Lett. 75, 1040 (1995).
+ [2] B. K. Jennings, S. Das Gupta, and N. Mobed, Phys. Rev. C25, 278 (1982).
+ [3] G. Röpke, L. Münchow, and H. Schulz, Nucl. Phys. A379, 536 (1982).
+ [4] G. I. Fai and J. Randrup, Nucl. Phys. A381, 557 (1982).
+ [5] T. Biro, H. W. Barz, B. Lukacs, and J. Zimanyi, Phys. Rev. C27, 2695 (1983).
+ [6] H. Stoecker, A. A. Ogloblin, and W. Greiner, Z. Phys. A303, 259 (1981).
+ [7] L. P. Csernai, P. R. Subramanian, G. Buchwald, G. Graebner, A. Rosenhauer, J. A. Maruhn,
+    W. Greiner, and H. Stoecker, Phys. Rev. C28, 2001 (1983).
+ [8] J. P. Bondorf, R. Donangelo, I. N. Mishustin, C. J. Pethick, H. Schulz, and K. Sneppen, Nucl.
+    Phys. A443, 321 (1985).
+ [9] J. P. Bondorf, R. Donangelo, I. N. Mishustin, and H. Schulz, Nucl. Phys. A444, 460 (1985).
+[10] J. J. Molitoris, D. Hahn, and H. Stoecker, NUCLEUS NUCLEUS COLLISIONS 2. PROCEED-
+    INGS, 2ND INTERNATIONAL CONFERENCE, VISBY, SWEDEN, JUNE 10-14, 1985, Nucl.
+    Phys. A447, 13C (1986).
+[11] D. Hahn and H. Stoecker, Nucl. Phys. A476, 718 (1988).
+
+                                                16
+[12] J. Aichelin, A. Bohnet, G. Peilert, H. Stoecker, W. Greiner, and A. Rosenhauer, Phys. Rev.
+    C37, 2451 (1988).
+[13] G. Peilert, H. Stoecker, W. Greiner, A. Rosenhauer, A. Bohnet, and J. Aichelin, Phys. Rev.
+    C39, 1402 (1989).
+[14] G. Peilert, J. Randrup, H. Stoecker, and W. Greiner, Phys. Lett. B260, 271 (1991).
+[15] J. P. Bondorf, A. S. Botvina, A. S. Ilinov, I. N. Mishustin, and K. Sneppen, Phys. Rept. 257,
+    133 (1995).
+[16] B. Borderie and J. D. Frankland, Prog. Part. Nucl. Phys. 105, 82 (2019), arXiv:1903.02881 [nucl-
+    ex].
+[17] M. A. Stephanov, K. Rajagopal, and E. V. Shuryak, Phys. Rev. Lett. 81, 4816 (1998), arXiv:hep-
+    ph/9806219 [hep-ph].
+[18] M. A. Stephanov, K. Rajagopal, and E. V. Shuryak, Phys. Rev. D60, 114028 (1999), arXiv:hep-
+    ph/9903292 [hep-ph].
+[19] C. Athanasiou, K. Rajagopal,        and M. Stephanov, Phys. Rev. D82, 074008 (2010),
+    arXiv:1006.4636 [hep-ph].
+[20] M. A. Stephanov, Phys. Rev. Lett. 102, 032301 (2009), arXiv:0809.3450 [hep-ph].
+[21] M. Kitazawa and M. Asakawa, Phys. Rev. C86, 024904 (2012), [Erratum:                      Phys.
+    Rev.C86,069902(2012)], arXiv:1205.3292 [nucl-th].
+[22] V. Vovchenko, R. V. Poberezhnyuk, D. V. Anchishkin, and M. I. Gorenstein, J. Phys. A49,
+    015003 (2016), arXiv:1507.06537 [nucl-th].
+[23] V. Vovchenko, D. V. Anchishkin,      and M. I. Gorenstein, Phys. Rev. C91, 064314 (2015),
+    arXiv:1504.01363 [nucl-th].
+[24] R. Poberezhnyuk, V. Vovchenko, M. I. Gorenstein, and H. Stoecker, Phys. Rev. C99, 024907
+    (2019), arXiv:1810.07640 [hep-ph].
+[25] V. Vovchenko, D. V. Anchishkin, M. I. Gorenstein, and R. V. Poberezhnyuk, Phys. Rev. C92,
+    054901 (2015), arXiv:1506.05763 [nucl-th].
+[26] V. Vovchenko, L. Jiang, M. I. Gorenstein, and H. Stoecker, Phys. Rev. C98, 024910 (2018),
+    arXiv:1711.07260 [nucl-th].
+
+
+
+
+                                                 17
+[27] V. Vovchenko, M. I. Gorenstein,     and H. Stoecker, Phys. Rev. Lett. 118, 182301 (2017),
+    arXiv:1609.03975 [hep-ph].
+[28] V. Vovchenko, D. V. Anchishkin,       and M. I. Gorenstein, J. Phys. A48, 305001 (2015),
+    arXiv:1501.03785 [nucl-th].
+[29] K. Redlich and K. Zalewski, Acta Phys. Polon. B47, 1943 (2016), arXiv:1605.09686 [cond-
+    mat.quant-gas].
+[30] V. Vovchenko, Phys. Rev. C96, 015206 (2017), arXiv:1701.06524 [nucl-th].
+[31] R. V. Poberezhnyuk, V. Vovchenko, D. V. Anchishkin, and M. I. Gorenstein, Int. J. Mod. Phys.
+    E26, 1750061 (2017), arXiv:1708.05605 [nucl-th].
+[32] V. Vovchenko and H. Stoecker, (2019), arXiv:1901.05249 [nucl-th].
+[33] C. Patrignani et al. (Particle Data Group), Chin. Phys. C40, 100001 (2016).
+[34] S. Yang, B. N. Zhang, and B. Y. Sun, (2019), arXiv:1906.07783 [nucl-th].
+[35] B. Abelev et al. (ALICE), Phys. Rev. C88, 044910 (2013), arXiv:1303.0737 [hep-ex].
+[36] B. B. Abelev et al. (ALICE), Phys. Rev. Lett. 111, 222301 (2013), arXiv:1307.5530 [nucl-ex].
+[37] B. B. Abelev et al. (ALICE), Phys. Lett. B728, 216 (2014), [Erratum:                         Phys.
+    Lett.B734,409(2014)], arXiv:1307.5543 [nucl-ex].
+[38] B. B. Abelev et al. (ALICE), Phys. Rev. C91, 024609 (2015), arXiv:1404.0495 [nucl-ex].
+[39] S. V. Afanasiev et al. (NA49), Phys. Rev. C66, 054902 (2002), arXiv:nucl-ex/0205002 [nucl-ex].
+[40] C. Alt et al. (NA49), Phys. Rev. C73, 044910 (2006).
+[41] C. Alt et al. (NA49), Phys. Rev. C78, 034918 (2008), arXiv:0804.3770 [nucl-ex].
+[42] C. Alt et al. (NA49), Phys. Rev. C78, 044907 (2008), arXiv:0806.1937 [nucl-ex].
+[43] C. Alt et al. (NA49), Phys. Rev. Lett. 94, 192301 (2005), arXiv:nucl-ex/0409004 [nucl-ex].
+[44] T. Anticic et al. (NA49), Phys. Rev. C85, 044913 (2012), arXiv:1111.2588 [nucl-ex].
+[45] V. Friese (NA49), Quark matter 2001. Proceedings, 15th International Conference on Ultrarel-
+    ativistic nucleus nucleus collisions, QM 2001, Stony Brook, USA, January 15-20, 2001, Nucl.
+    Phys. A698, 487 (2002).
+[46] T. Anticic et al. (NA49), Phys. Rev. C84, 064909 (2011), arXiv:1105.3109 [nucl-ex].
+[47] C. Alt et al. (NA49), Phys. Rev. C77, 024903 (2008), arXiv:0710.0118 [nucl-ex].
+[48] L. Ahle et al. (E-802), Phys. Rev. C59, 2173 (1999).
+
+
+                                               18
+[49] L. Ahle et al. (E802), Phys. Rev. C60, 064901 (1999).
+[50] L. Ahle et al. (E-802, E-866), Phys. Rev. C60, 044904 (1999), arXiv:nucl-ex/9903009 [nucl-ex].
+[51] F. Becattini, J. Cleymans, A. Keranen, E. Suhonen, and K. Redlich, Phys. Rev. C64, 024901
+    (2001), arXiv:hep-ph/0002267 [hep-ph].
+[52] J. Cleymans, H. Oeschler, and K. Redlich, Phys. Rev. C59, 1663 (1999), arXiv:nucl-th/9809027
+    [nucl-th].
+[53] R. Averbeck, R. Holzmann, V. Metag,         and R. S. Simon, Phys. Rev. C67, 024903 (2003),
+    arXiv:nucl-ex/0012007 [nucl-ex].
+[54] P. Braun-Munzinger, J. Cleymans, H. Oeschler, and K. Redlich, Nucl. Phys. A697, 902 (2002),
+    arXiv:hep-ph/0106066 [hep-ph].
+[55] J. Cleymans, B. Hippolyte, H. Oeschler, K. Redlich, and N. Sharma, (2016), arXiv:1603.09553
+    [hep-ph].
+[56] V. Vovchenko, M. I. Gorenstein,         and H. Stoecker, Phys. Rev. C98, 034906 (2018),
+    arXiv:1807.02079 [nucl-th].
+[57] V. Vovchenko, V. V. Begun,         and M. I. Gorenstein, Phys. Rev. C93, 064906 (2016),
+    arXiv:1512.08025 [nucl-th].
+[58] J. Rafelski, Eur. Phys. J. A51, 114 (2015), arXiv:1508.03260 [nucl-th].
+[59] F. Becattini, M. Gazdzicki, A. Keranen, J. Manninen, and R. Stock, Phys. Rev. C69, 024905
+    (2004), arXiv:hep-ph/0310049 [hep-ph].
+[60] V. Vovchenko and H. Stöcker, J. Phys. G44, 055103 (2017), arXiv:1512.08046 [hep-ph].
+[61] V. Vovchenko and H. Stoecker, Phys. Rev. C95, 044904 (2017), arXiv:1606.06218 [hep-ph].
+[62] L. M. Satarov, V. Vovchenko, P. Alba, M. I. Gorenstein, and H. Stoecker, Phys. Rev. C95,
+    024902 (2017), arXiv:1610.08753 [nucl-th].
+[63] J. Cleymans, H. Oeschler, K. Redlich,       and S. Wheaton, Phys. Rev. C73, 034905 (2006),
+    arXiv:hep-ph/0511094 [hep-ph].
+[64] N. U. Bastian, P. Batyuk, D. Blaschke, P. Danielewicz, Yu. B. Ivanov, I. Karpenko, G. Röpke,
+    O. Rogachevsky, and H. H. Wolter, Eur. Phys. J. A52, 244 (2016), arXiv:1608.02851 [nucl-th].
+[65] G. Röpke, D. Blaschke, Y. B. Ivanov, I. Karpenko, O. V. Rogachevsky, and H. H. Wolter, Phys.
+    Part. Nucl. Lett. 15, 225 (2018), arXiv:1712.07645 [nucl-th].
+
+
+                                                 19
+[66] J. Randrup and J. Cleymans, Phys. Rev. C74, 047901 (2006), arXiv:hep-ph/0607065 [hep-ph].
+[67] V. V. Begun, M. Gazdzicki,       and M. I. Gorenstein, Phys. Rev. C88, 024902 (2013),
+    arXiv:1208.4107 [nucl-th].
+[68] P. Braun-Munzinger, A. Rustamov,         and J. Stachel, Nucl. Phys. A960, 114 (2017),
+    arXiv:1612.00702 [nucl-th].
+[69] M. I. Gorenstein and M. Gazdzicki, Phys. Rev. C84, 014904 (2011), arXiv:1101.4865 [nucl-th].
+[70] A. Bzdak and V. Koch, Phys. Rev. C86, 044904 (2012), arXiv:1206.4286 [nucl-th].
+[71] S. He, X. Luo, Y. Nara, S. Esumi, and N. Xu, Phys. Lett. B762, 296 (2016), arXiv:1607.06376
+    [nucl-ex].
+[72] Y. Ye, Y. Wang, J. Steinheimer, Y. Nara, H.-j. Xu, P. Li, D. Lu, Q. Li, and H. Stoecker, Phys.
+    Rev. C98, 054620 (2018), arXiv:1808.06342 [nucl-th].
+
+
+
+
+                                               20
+

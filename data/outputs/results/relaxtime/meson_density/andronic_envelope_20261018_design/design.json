@@ -1,0 +1,919 @@
+{
+  "schema": "freezeout_parameter_design_v1",
+  "family": "andronic_logistic_rational_v1",
+  "created_utc": "2026-10-18T05:35:12.035848+00:00",
+  "catalog_sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac",
+  "domain_input": {
+    "path": "D:\\w\\meson-freezeout-defaults\\config\\physics\\freezeout\\parameter_domains\\andronic_literature_envelope_v2.toml",
+    "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+  },
+  "source_evidence": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\recent_sources_manifest.json",
+      "sha256": "633b8cd7daf698a5d7c01ffb9d0e20b74d19d91c65d5125ec5169b728e014666"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\source_manifest.json",
+      "sha256": "6a9e7faac1c983528c12468f05bb8ed06d4fbd5c7acb2d16d6a13491bf206af5"
+    }
+  ],
+  "source_pdf_hashes": {
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ElfnerMuller2023_JPhysG50_103001.pdf": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Du2024_PRC110_014904.pdf": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ThakurHirono2022_JHEP02_207.pdf": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Andronic2026_arxiv2606.14799v2.pdf": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\LaffertyRothkopf2020_PRD101_056010.pdf": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774"
+  },
+  "parameter_order": [
+    "T_lim_GeV",
+    "log_offset",
+    "log_width",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "pooled_bounds": [
+    [
+      0.1535,
+      0.164
+    ],
+    [
+      2.2,
+      2.82
+    ],
+    [
+      0.4,
+      0.48
+    ],
+    [
+      1.05,
+      1.3568
+    ],
+    [
+      0.286,
+      0.326
+    ]
+  ],
+  "interior_bounds": [
+    [
+      0.15455,
+      0.16295
+    ],
+    [
+      2.262,
+      2.758
+    ],
+    [
+      0.40800000000000003,
+      0.472
+    ],
+    [
+      1.08068,
+      1.32612
+    ],
+    [
+      0.29,
+      0.322
+    ]
+  ],
+  "design": {
+    "seed": 20261018,
+    "interior_trim_fraction": 0.1,
+    "interior_sample_count": 32,
+    "minimum_energy_GeV": 4.87,
+    "maximum_energy_GeV": 200.0,
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "screening_energies_GeV": [
+      4.87,
+      6.27,
+      7.62,
+      7.7,
+      8.77,
+      9.25,
+      10.0,
+      11.5,
+      12.32,
+      14.5,
+      17.27,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "near_best_rmse_factor": 1.1,
+    "local_step_fraction": 0.05,
+    "local_rounds": 1,
+    "boundary_axis_samples": true,
+    "maximum_mapping_candidates": 3,
+    "refined_curve_count": 3,
+    "description": "Four distinct nonbaseline complete source anchors, 32 stratified interior samples and 10 axis-boundary probes; one axial refinement round and up to three admissible geometry-preserving energy rescalings. Reuse Andronic 2018 as the frozen baseline; Elfner duplicates it and JHEP is temperature-only. Fixed nine-point scoring and complete-curve envelopes match the polynomial exploration."
+  },
+  "candidates": [
+    {
+      "name": "andronic2009",
+      "role": "source_anchor",
+      "values": [
+        0.164,
+        2.6,
+        0.45,
+        1.303,
+        0.286
+      ],
+      "provenance": [
+        "andronic2009"
+      ],
+      "profile_sha256": "ccede096d5a750ec85ddd8072dc696dc17dce9754e4dd69bf7cd54f0fadf1f10",
+      "in_interior_box": false
+    },
+    {
+      "name": "yu2025_set_ii",
+      "role": "source_anchor",
+      "values": [
+        0.1535,
+        2.82,
+        0.4,
+        1.3568,
+        0.326
+      ],
+      "provenance": [
+        "yu2025_set_ii"
+      ],
+      "profile_sha256": "541e9a68f273a0c9d750462a49c280f9d4ea22b4963573ef57ea061c236c564a",
+      "in_interior_box": false
+    },
+    {
+      "name": "du2024",
+      "role": "source_anchor",
+      "values": [
+        0.156,
+        2.6,
+        0.45,
+        1.05,
+        0.288
+      ],
+      "provenance": [
+        "du2024"
+      ],
+      "profile_sha256": "13a9609ff2ca4bfdae4743e4410d03d52e12fcf36cfbfd78c8c42b2b3514a147",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic2026_v2",
+      "role": "source_anchor",
+      "values": [
+        0.1566,
+        2.2,
+        0.48,
+        1.3075,
+        0.288
+      ],
+      "provenance": [
+        "andronic2026_v2"
+      ],
+      "profile_sha256": "74746d6d74d2dd3a305d0f19f07092e9b0737b1755e2a90ce406a5fadd479f04",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_sample_001",
+      "role": "interior_sample",
+      "values": [
+        0.16234142787298345,
+        2.7550420366753006,
+        0.4344661046820209,
+        1.210753666696032,
+        0.3144101458859533
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "160c5077743fd232d49df4e180380a5437b2540dac3b4c87a4eef89ea6073d5e",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_002",
+      "role": "interior_sample",
+      "values": [
+        0.1605053184416321,
+        2.66897836980303,
+        0.4138167891599423,
+        1.2007467402205572,
+        0.31730847881189694
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "d003250e23e24e8fa971f7bc3bb0f7dc5dfc7331f44b76cf642f1d638fab856f",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_003",
+      "role": "interior_sample",
+      "values": [
+        0.15743759098241542,
+        2.531391539959439,
+        0.4494016526428989,
+        1.298753274699835,
+        0.2914703511045602
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "78bf8770aa2c78ad2b9039ed786c15ac129ae96d6fee77a2bdc04d8f9ed71655",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_004",
+      "role": "interior_sample",
+      "values": [
+        0.15457028635308925,
+        2.4764902204046884,
+        0.44193577585155785,
+        1.3185728362503104,
+        0.3058711683303307
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "790c781f4f1d03e017fabd8f86c97b723303b4f2eb9dc05bf2f6847f406280a2",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_005",
+      "role": "interior_sample",
+      "values": [
+        0.15615186253753197,
+        2.7319637105144956,
+        0.4152862042992574,
+        1.1334765955109947,
+        0.2987233386398554
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "2207a8b906aeadd0a6a5af24992cd559ef41bf3ae175ff28694d25c36cb8f6bf",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_006",
+      "role": "interior_sample",
+      "values": [
+        0.15931987936454797,
+        2.63433626564277,
+        0.46410803315266824,
+        1.2549384034072226,
+        0.2932954742977582
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "99f2ffdb425e01b3bf3489bc54f3d86465cf03d8630658664589bd886a66c079",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_007",
+      "role": "interior_sample",
+      "values": [
+        0.1556237989842087,
+        2.5240845268530245,
+        0.42381320362176905,
+        1.1547892159163562,
+        0.30015095540855724
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "df9daa06f6d2cf40d395350f42c3cc5aa330d37d1473e54f1e7e73ca9c670ec9",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_008",
+      "role": "interior_sample",
+      "values": [
+        0.16152803463771723,
+        2.495154208138295,
+        0.43054252669683557,
+        1.1665352649074563,
+        0.2975448337554308
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "3bbacba51e1827c8034094fb80079a6711fdd209fea571347f812220c4a4a1a3",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_009",
+      "role": "interior_sample",
+      "values": [
+        0.15692371887033155,
+        2.586026838823366,
+        0.408610338083636,
+        1.1018313590840139,
+        0.3062636038572619
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "48301aa0843bc8159c8edda10d9156b736060a43105f98659215c6e7b15caf92",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_010",
+      "role": "interior_sample",
+      "values": [
+        0.15870344641140444,
+        2.348087397381436,
+        0.41612376606847573,
+        1.1496878256129528,
+        0.3093388478082933
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "bb6384ebf29f9a464713df4a69ceab76e1a6a304cdf4843149900829a3d20d9c",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_011",
+      "role": "interior_sample",
+      "values": [
+        0.16251351621192897,
+        2.428261525329763,
+        0.4591025851449608,
+        1.2731934142525845,
+        0.2929626442353711
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "b4d859c1f0e7162a278159f01479fa23f6a06f6a0eeda5bd32148914c8a079aa",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_012",
+      "role": "interior_sample",
+      "values": [
+        0.16215205884314776,
+        2.6332486615940334,
+        0.4380583451362586,
+        1.0894427175031702,
+        0.31220315588570247
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "4a39674136c6d80b9f7da55c25ba4cb9f156c646694472fd3dafe8cfbb6e133f",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_013",
+      "role": "interior_sample",
+      "values": [
+        0.1627177316931028,
+        2.6959086766834366,
+        0.4377558763507379,
+        1.2902482051582216,
+        0.3029124704657071
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "961b564f4605aab675c9b90967421e699e73fda83acdc0e3598a5341a5555592",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_014",
+      "role": "interior_sample",
+      "values": [
+        0.1580397887227166,
+        2.4021995969284045,
+        0.45029264755140047,
+        1.1409201598221113,
+        0.3216254347378947
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "909736d15ee010cf98a55a46379fecae6d024f1f7af5f227f306ab9227b98f1e",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_015",
+      "role": "interior_sample",
+      "values": [
+        0.16073570317935348,
+        2.397949696490984,
+        0.4276835167186449,
+        1.1638084841694187,
+        0.29682910090106024
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "4142bef90c95d0ef07190907672941597201adb2c620808cb96901661f3cee9b",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_016",
+      "role": "interior_sample",
+      "values": [
+        0.1600832669054975,
+        2.5936397770961954,
+        0.41965951211187186,
+        1.1049221773956612,
+        0.29538004251531963
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "4a73b2a3bcf95146db2bb96672a75c589ef573ec62ef5091b8b5059f15fcae45",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_017",
+      "role": "interior_sample",
+      "values": [
+        0.16131550588390356,
+        2.3356460515097694,
+        0.4113480359771065,
+        1.1881044857870369,
+        0.30199209291168166
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "415588b73b4aecfa2d10bee5c6bf466d3bf63ee1f9dc931208d356367c2adafc",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_018",
+      "role": "interior_sample",
+      "values": [
+        0.15599847968628586,
+        2.376357720012387,
+        0.42189898198893244,
+        1.0866747715255334,
+        0.3196379076104621
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "83e9077e205e78753c89a1bc40933333a162bf5c757a0ea3abcc6c61b736ae49",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_019",
+      "role": "interior_sample",
+      "values": [
+        0.1600374204228385,
+        2.3056783547597246,
+        0.4539246273722239,
+        1.2252181643082896,
+        0.3076062439563706
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "75b5fc76574560130c0c6411e8b653e3c1c5df66af1b71337eb72a00109eb1b6",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_020",
+      "role": "interior_sample",
+      "values": [
+        0.15684656198266378,
+        2.553283741212568,
+        0.4454216229332549,
+        1.2464763254294506,
+        0.294209400967295
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "6488164ff8e272ea486a89d963fbe3a078534e5379e4735c465f338c2cb151d0",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_021",
+      "role": "interior_sample",
+      "values": [
+        0.1596664074823039,
+        2.3101560386492914,
+        0.4420081964680675,
+        1.2318034852189388,
+        0.31582347936151633
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "75749e7f0b3580029a6bf6496cd2e03e969fb65bfe0b8330bf126150bdb2605b",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_022",
+      "role": "interior_sample",
+      "values": [
+        0.15503368637489545,
+        2.718417742065884,
+        0.47150281506186065,
+        1.1184781730770237,
+        0.31049824162389916
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "dd798e88ed0c62a5fec09d9b55dcf7d0e13d95d85dcff0d3ef873725dbb8ee25",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_023",
+      "role": "interior_sample",
+      "values": [
+        0.15663898111964053,
+        2.4814005582864915,
+        0.45704651756194725,
+        1.235336844679684,
+        0.31162339222849095
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "a2517bb02f694d14db7fceec642991d224c73af87840a8cf4e071497e12024ed",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_024",
+      "role": "interior_sample",
+      "values": [
+        0.1554737728729052,
+        2.604593609602084,
+        0.4615219829868128,
+        1.3042780824572708,
+        0.31638057730801716
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "3f4c06668691dae96063da753192fd918210e873ae62cef038e0ec73d950858c",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_025",
+      "role": "interior_sample",
+      "values": [
+        0.15902036041950104,
+        2.6526406215596317,
+        0.43345217099749084,
+        1.2854693112811015,
+        0.30822515654171934
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "cc5b6d08ea1e8dfbd9f51c9ea5667b2f03168670ee4bc763a39dc2285dc689f7",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_026",
+      "role": "interior_sample",
+      "values": [
+        0.15893825085665061,
+        2.43509932976677,
+        0.462511239992547,
+        1.1257317147087509,
+        0.31842013291482163
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "445554c9ed3b3ce12bc460e530011410f3b022db4b48373fd208b27c132d7435",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_027",
+      "role": "interior_sample",
+      "values": [
+        0.158355353725051,
+        2.2771123258285053,
+        0.468193123465474,
+        1.2654846518146354,
+        0.3041463931980534
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "7f6bc3b9b6853ca4ae7fce6f4398edcf909225b514d7aef43d6a9d0568c4d0bc",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_028",
+      "role": "interior_sample",
+      "values": [
+        0.16181528819243857,
+        2.291206459008052,
+        0.4677788013905104,
+        1.2644512536263186,
+        0.29950133826722775
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "2dc4f555390a9a0ace4c4556087565932c14e809d4c88bddb4ce88de4c011870",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_029",
+      "role": "interior_sample",
+      "values": [
+        0.15512744218252114,
+        2.3676805343638465,
+        0.45478961834908377,
+        1.174509861026185,
+        0.3207831887843753
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "73b271b7a4b08b55059fbdf24eb02e4cdeb52a946a01854f07433dcc7658ec76",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_030",
+      "role": "interior_sample",
+      "values": [
+        0.1610423957181799,
+        2.709757845179747,
+        0.44724329926329975,
+        1.2141438348252072,
+        0.31384716393386125
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "74a50a5a1debb489ea29093881e3b75d5b4268e7534cb2ae28c1cee07a1e0c1d",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_031",
+      "role": "interior_sample",
+      "values": [
+        0.15718075317571026,
+        2.4487528779083876,
+        0.42588235947102204,
+        1.3109349391097407,
+        0.29032682974486607
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "288a729ca9924b74b5b3787394ac55854fb607b5324c193fd6feaa7e46f4474f",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_sample_032",
+      "role": "interior_sample",
+      "values": [
+        0.1578374858204721,
+        2.567605053664352,
+        0.42935358366599286,
+        1.1879222531868026,
+        0.30336461526376973
+      ],
+      "provenance": [
+        "stratified sampling in the middle 80% of each selected coordinate interval"
+      ],
+      "profile_sha256": "6b2454a849f3e8583c487a17abff4f5e433b220b4817b07ce6d072e2a358be00",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_axis_T_lim_GeV_low",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.1535,
+        2.51,
+        0.44,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "T_lim_GeV at low bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "5775c28b49beb2518eb885507872f4300a828f84e1db9b6a2b59a0b461576e5a",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_T_lim_GeV_high",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.164,
+        2.51,
+        0.44,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "T_lim_GeV at high bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "4a5aa907164f398ffd4cbaff0580a426d1d6cdc76de7077ba0bb1df455bd7964",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_log_offset_low",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.2,
+        0.44,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "log_offset at low bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "56cc23ac0510fc32b7dad073a47dc0539ac0d2462a2890699d4428ca12cb1886",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_log_offset_high",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.82,
+        0.44,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "log_offset at high bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "43a7e3308998bb0dc26e4e5d2de17e271cdc7f835b562fa34dc816d0250ff0ba",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_log_width_low",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.4,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "log_width at low bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "881607477d4c0cc3768ec52be789db4b8351894cc1bb1c3bb244d1e4e5bcb736",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_log_width_high",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.48,
+        1.2034,
+        0.306
+      ],
+      "provenance": [
+        "log_width at high bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "240767a4423283624da6c4de8c587c34e8cc2d262e2d47f0643b7ee64a9d8ee9",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_d_GeV_low",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.44,
+        1.05,
+        0.306
+      ],
+      "provenance": [
+        "d_GeV at low bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "f6433101dbe8cf7926ac647f5cbd1139472c6f72a02b98d761564367bd6f14e2",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_d_GeV_high",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.44,
+        1.3568,
+        0.306
+      ],
+      "provenance": [
+        "d_GeV at high bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "44c73fa98331494903e5689785579d2025dc9d435fed3c40f2c25c6e6942f365",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_e_GeV_inv1_low",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.44,
+        1.2034,
+        0.286
+      ],
+      "provenance": [
+        "e_GeV_inv1 at low bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "ab997f68f6aed6a8bacc56d7e79aa65389abb11d98a9f4b1c71fbca226c35a9f",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_axis_e_GeV_inv1_high",
+      "role": "axis_boundary_sample",
+      "values": [
+        0.15875,
+        2.51,
+        0.44,
+        1.2034,
+        0.326
+      ],
+      "provenance": [
+        "e_GeV_inv1 at high bound; other four coordinates at box center"
+      ],
+      "profile_sha256": "d902cfb21238f243dce8c8acb159c303e1bc2078c1822d6baa877dfd5086d20c",
+      "in_interior_box": false
+    }
+  ],
+  "rejected_proposals": [],
+  "reused_reference": "andronic2018; Elfner 2023 duplicates it; JHEP 2022 provides no D/E",
+  "parent": null,
+  "parameter_policy": "literature_envelope_exploration",
+  "band_semantics": "finite sampled complete-curve envelope; no statistical confidence level",
+  "physical_prior": "Tlim,w,D,E>0; analytic T rises and muB decreases on the declared positive-energy interval",
+  "generator_sha256": "c3ec002804ee7c476a24c03ea7548a1b2c2c189d6f8e68623317dc749c47445e",
+  "parts": [
+    [
+      "andronic2009",
+      "du2024",
+      "andronic_sample_001",
+      "andronic_sample_003",
+      "andronic_sample_005",
+      "andronic_sample_007",
+      "andronic_sample_009",
+      "andronic_sample_011",
+      "andronic_sample_013",
+      "andronic_sample_015",
+      "andronic_sample_017",
+      "andronic_sample_019",
+      "andronic_sample_021",
+      "andronic_sample_023",
+      "andronic_sample_025",
+      "andronic_sample_027",
+      "andronic_sample_029",
+      "andronic_sample_031",
+      "andronic_axis_T_lim_GeV_low",
+      "andronic_axis_log_offset_low",
+      "andronic_axis_log_width_low",
+      "andronic_axis_d_GeV_low",
+      "andronic_axis_e_GeV_inv1_low"
+    ],
+    [
+      "yu2025_set_ii",
+      "andronic2026_v2",
+      "andronic_sample_002",
+      "andronic_sample_004",
+      "andronic_sample_006",
+      "andronic_sample_008",
+      "andronic_sample_010",
+      "andronic_sample_012",
+      "andronic_sample_014",
+      "andronic_sample_016",
+      "andronic_sample_018",
+      "andronic_sample_020",
+      "andronic_sample_022",
+      "andronic_sample_024",
+      "andronic_sample_026",
+      "andronic_sample_028",
+      "andronic_sample_030",
+      "andronic_sample_032",
+      "andronic_axis_T_lim_GeV_high",
+      "andronic_axis_log_offset_high",
+      "andronic_axis_log_width_high",
+      "andronic_axis_d_GeV_high",
+      "andronic_axis_e_GeV_inv1_high"
+    ]
+  ]
+}

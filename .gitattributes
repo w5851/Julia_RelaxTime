@@ -1,6 +1,24 @@
 # Preserve SHA256-bound publication snapshots and their exact input bytes.
 # These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
 
+# Frozen chemical-freezeout research inputs, run records, and PNG evidence.
+data/inputs/meson_freezeout_*/*.pdf binary
+data/inputs/meson_freezeout_*/**/*.png binary
+data/outputs/figures/relaxtime/meson_density/freezeout_*/*.png binary
+data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018*/*.png binary
+data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/*.zip binary
+data/inputs/meson_freezeout_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+
 # Accepted PRD phase-map delivery and its hash-bound source/acceptance evidence.
 data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

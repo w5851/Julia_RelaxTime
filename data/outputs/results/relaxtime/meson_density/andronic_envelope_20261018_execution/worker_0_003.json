@@ -1,0 +1,36 @@
+{
+  "schema": "freezeout_envelope_worker_request_v1",
+  "action": "scan",
+  "output": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_standard",
+  "profiles": [
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_log_offset_plus"
+  ],
+  "energies_GeV": [
+    4.87,
+    6.27,
+    6.5,
+    7.0,
+    7.5,
+    7.62,
+    7.7,
+    8.0,
+    8.5,
+    8.77,
+    9.25,
+    10.0,
+    11.5,
+    12.32,
+    14.5,
+    17.27,
+    19.6,
+    27.0,
+    39.0,
+    62.4,
+    130.0,
+    200.0
+  ],
+  "resolution": "standard",
+  "profile_dir": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_selected_design\\profiles"
+}

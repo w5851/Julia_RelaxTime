@@ -1,0 +1,304 @@
+{
+  "schema": "chemical_freezeout_resolution_comparison_v1",
+  "method": "exact profile and energy match; no interpolation; absolute refined-minus-reference ratio difference",
+  "profiles": {
+    "andronic2018": {
+      "common_valid_points": 47,
+      "added_refined_energies_GeV": [
+        9.25,
+        9.75
+      ],
+      "max_absolute_difference": {
+        "energy_GeV": 2.35,
+        "absolute_ratio_difference": 2.3157583181887542e-05,
+        "relative_to_reference": 0.0001580183234943575
+      },
+      "max_relative_difference": {
+        "energy_GeV": 2.35,
+        "absolute_ratio_difference": 2.3157583181887542e-05,
+        "relative_to_reference": 0.0001580183234943575
+      },
+      "mean_absolute_difference": 1.2372275174032943e-05,
+      "failure_comparison": [
+        {
+          "energy_GeV": 17.27,
+          "reference_passed": false,
+          "refined_passed": false
+        }
+      ]
+    },
+    "cleymans2006": {
+      "common_valid_points": 48,
+      "added_refined_energies_GeV": [
+        9.25,
+        9.75
+      ],
+      "max_absolute_difference": {
+        "energy_GeV": 2.35,
+        "absolute_ratio_difference": 2.9183663404541704e-05,
+        "relative_to_reference": 0.00014132162673669016
+      },
+      "max_relative_difference": {
+        "energy_GeV": 2.35,
+        "absolute_ratio_difference": 2.9183663404541704e-05,
+        "relative_to_reference": 0.00014132162673669016
+      },
+      "mean_absolute_difference": 1.3179691147670083e-05,
+      "failure_comparison": []
+    }
+  },
+  "reference_metrics": {
+    "schema": "chemical_freezeout_default_comparison_v1",
+    "primary_metric": "equal-weight AuAu RMSE",
+    "selection_scope": "descriptive comparison/model selection on these observations; not independent validation or a fit",
+    "parameter_adjustment": false,
+    "common_primary_points": 14,
+    "excluded_failed_observations": [
+      {
+        "id": "NA49_17.27",
+        "energy": 17.27,
+        "failed_profiles": [
+          "andronic2018"
+        ]
+      }
+    ],
+    "best_default_on_primary_metric": "andronic2018",
+    "profiles": {
+      "andronic2018": {
+        "AuAu_primary": {
+          "count": 14,
+          "rmse": 0.14359158416913514,
+          "mae": 0.14124479429374806,
+          "mean_signed_bias": 0.14124479429374806
+        },
+        "AuAu_horn_4_to_20_GeV": {
+          "count": 6,
+          "rmse": 0.16113615896333094,
+          "mae": 0.15852352756495067,
+          "mean_signed_bias": 0.15852352756495067
+        },
+        "AuAu_19p6_to_200_GeV": {
+          "count": 6,
+          "rmse": 0.1386963009591435,
+          "mae": 0.1372051778145143,
+          "mean_signed_bias": 0.1372051778145143
+        },
+        "NA49_auxiliary": {
+          "count": 4,
+          "rmse": 0.16775831387866433,
+          "mae": 0.16577963474928004,
+          "mean_signed_bias": 0.16577963474928004
+        },
+        "sampled_peak_4_to_20_GeV": {
+          "energy_GeV": 9.5,
+          "ratio": 0.39538183415020056,
+          "neighbor_bracket_GeV": [
+            9.0,
+            10.0
+          ],
+          "at_window_edge": false,
+          "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+        },
+        "ratio_at_7p7": 0.38986701654781936,
+        "ratio_at_200": 0.27449809866884267,
+        "NA49_7p62_minus_17p27": null,
+        "negative_passed_points": 0
+      },
+      "cleymans2006": {
+        "AuAu_primary": {
+          "count": 14,
+          "rmse": 0.18507321058077308,
+          "mae": 0.18346523856047334,
+          "mean_signed_bias": 0.18346523856047334
+        },
+        "AuAu_horn_4_to_20_GeV": {
+          "count": 6,
+          "rmse": 0.19802131557347089,
+          "mae": 0.19727259455127164,
+          "mean_signed_bias": 0.19727259455127164
+        },
+        "AuAu_19p6_to_200_GeV": {
+          "count": 6,
+          "rmse": 0.1687402658231523,
+          "mae": 0.1670743612976052,
+          "mean_signed_bias": 0.1670743612976052
+        },
+        "NA49_auxiliary": {
+          "count": 4,
+          "rmse": 0.19508762015366876,
+          "mae": 0.19352785004662085,
+          "mean_signed_bias": 0.19352785004662085
+        },
+        "sampled_peak_4_to_20_GeV": {
+          "energy_GeV": 9.5,
+          "ratio": 0.41977826953036756,
+          "neighbor_bracket_GeV": [
+            9.0,
+            10.0
+          ],
+          "at_window_edge": false,
+          "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+        },
+        "ratio_at_7p7": 0.4153790021583074,
+        "ratio_at_200": 0.2989028057674061,
+        "NA49_7p62_minus_17p27": 0.01920565198361396,
+        "negative_passed_points": 0
+      }
+    },
+    "experimental_features": {
+      "STAR_7p7": 0.2227,
+      "STAR_200": 0.159,
+      "NA49_7p62_minus_17p27": 0.07400000000000001
+    }
+  },
+  "refined_metrics": {
+    "schema": "chemical_freezeout_default_comparison_v1",
+    "primary_metric": "equal-weight AuAu RMSE",
+    "selection_scope": "descriptive comparison/model selection on these observations; not independent validation or a fit",
+    "parameter_adjustment": false,
+    "common_primary_points": 14,
+    "excluded_failed_observations": [
+      {
+        "id": "NA49_17.27",
+        "energy": 17.27,
+        "failed_profiles": [
+          "andronic2018"
+        ]
+      }
+    ],
+    "best_default_on_primary_metric": "andronic2018",
+    "profiles": {
+      "andronic2018": {
+        "AuAu_primary": {
+          "count": 14,
+          "rmse": 0.14360389109634308,
+          "mae": 0.1412574834711552,
+          "mean_signed_bias": 0.1412574834711552
+        },
+        "AuAu_horn_4_to_20_GeV": {
+          "count": 6,
+          "rmse": 0.16114868395708543,
+          "mae": 0.15853659238071952,
+          "mean_signed_bias": 0.15853659238071952
+        },
+        "AuAu_19p6_to_200_GeV": {
+          "count": 6,
+          "rmse": 0.13870510493292446,
+          "mae": 0.13721395371982073,
+          "mean_signed_bias": 0.13721395371982073
+        },
+        "NA49_auxiliary": {
+          "count": 4,
+          "rmse": 0.16777134040602953,
+          "mae": 0.16579295431559288,
+          "mean_signed_bias": 0.16579295431559288
+        },
+        "sampled_peak_4_to_20_GeV": {
+          "energy_GeV": 9.25,
+          "ratio": 0.3954858274379151,
+          "neighbor_bracket_GeV": [
+            9.0,
+            9.5
+          ],
+          "at_window_edge": false,
+          "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+        },
+        "ratio_at_7p7": 0.3898807630863314,
+        "ratio_at_200": 0.2745059011773912,
+        "NA49_7p62_minus_17p27": null,
+        "negative_passed_points": 0
+      },
+      "cleymans2006": {
+        "AuAu_primary": {
+          "count": 14,
+          "rmse": 0.18508719288280984,
+          "mae": 0.18347906871135145,
+          "mean_signed_bias": 0.18347906871135145
+        },
+        "AuAu_horn_4_to_20_GeV": {
+          "count": 6,
+          "rmse": 0.19803498481663184,
+          "mae": 0.19728651507538988,
+          "mean_signed_bias": 0.19728651507538988
+        },
+        "AuAu_19p6_to_200_GeV": {
+          "count": 6,
+          "rmse": 0.16874886583391696,
+          "mae": 0.16708289953072328,
+          "mean_signed_bias": 0.16708289953072328
+        },
+        "NA49_auxiliary": {
+          "count": 4,
+          "rmse": 0.1951012928923505,
+          "mae": 0.19354176075597423,
+          "mean_signed_bias": 0.19354176075597423
+        },
+        "sampled_peak_4_to_20_GeV": {
+          "energy_GeV": 9.5,
+          "ratio": 0.4197915461252066,
+          "neighbor_bracket_GeV": [
+            9.25,
+            9.75
+          ],
+          "at_window_edge": false,
+          "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+        },
+        "ratio_at_7p7": 0.41539335661986543,
+        "ratio_at_200": 0.2989101376127549,
+        "NA49_7p62_minus_17p27": 0.019209332504244614,
+        "negative_passed_points": 0
+      }
+    },
+    "experimental_features": {
+      "STAR_7p7": 0.2227,
+      "STAR_200": 0.159,
+      "NA49_7p62_minus_17p27": 0.07400000000000001
+    }
+  },
+  "reference_settings": {
+    "endpoint_policy": "finite_window",
+    "qmax": 8.0,
+    "tail_nodes": 64,
+    "mesh": 128,
+    "q_nodes": 16,
+    "omega_nodes": 96,
+    "omega_lower_inv_fm": 1e-05,
+    "cut_nodes": 64
+  },
+  "refined_settings": {
+    "endpoint_policy": "finite_window",
+    "qmax": 8.0,
+    "tail_nodes": 96,
+    "mesh": 256,
+    "q_nodes": 32,
+    "omega_nodes": 128,
+    "omega_lower_inv_fm": 1e-05,
+    "cut_nodes": 96
+  },
+  "reference_scan_identity": "8a7592d2119128dd9a20a4a3e9af50af5d912a9855882957b334a30d83fa1801",
+  "refined_scan_identity": "dea79282e3dcfeb63634801bcb58b65691e0946ceb127326c8b9bb2a3d4b5544",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/run.json",
+      "path_kind": "repository_relative",
+      "role": "reference_resolution",
+      "bytes": 39635,
+      "sha256": "38a8bf45d4d37883dba3c86b59ad6e687f9f437f80c3a5797eead902c74e45d2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json",
+      "path_kind": "repository_relative",
+      "role": "reference_resolution",
+      "bytes": 11038,
+      "sha256": "e5f576fbd039cce34a9cd2e9270bbe76123aaa19af9804c7fd148877fc184eb1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/freezeout_ratios.csv",
+      "path_kind": "repository_relative",
+      "role": "reference_resolution",
+      "bytes": 25541,
+      "sha256": "51fb12cdaaad9a8a1acdc16d80498906939af504f30020388ac7ff175add3a2f"
+    }
+  ],
+  "limitation": "sampling refinement only; fixed qmax and finite lower endpoint; not full production convergence"
+}

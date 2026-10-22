@@ -1,0 +1,10 @@
+profile_name = "andronic_axis_log_offset_high"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:andronic_axis_log_offset_high"
+
+[coefficients]
+T_lim_GeV = 0.15875
+log_offset = 2.82
+log_width = 0.44
+d_GeV = 1.2034
+e_GeV_inv1 = 0.306

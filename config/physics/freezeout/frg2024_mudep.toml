@@ -1,0 +1,16 @@
+# Chemical freeze-out trajectory; published central values without tuning.
+# Source: https://arxiv.org/abs/2305.16763v2; Eqs. (29)-(30), PDF p.7 Table IV mu-dependent row.
+# 7.7 GeV point excluded by authors from fit; use 11.5-200 GeV for supported-range scoring.
+# Polynomial family describes algebra only; it does not identify the fitted source.
+# Normalized source form, when used: T=T0*(1-k2*(muB/T0)^2-k4*(muB/T0)^4).
+# Exact coefficient conversion: b=k2/T0 and c=k4/T0^3, with T0 in GeV.
+profile_name = "frg2024_mudep"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "frg2024_mudep_arxiv2305.16763v2_published_central"
+
+[coefficients]
+a_GeV = 0.15480000000000002
+b_GeV_inv1 = 2.6162790697674415e-06
+c_GeV_inv3 = 0.5930752652797623
+d_GeV = 0.70896
+e_GeV_inv1 = 0.147

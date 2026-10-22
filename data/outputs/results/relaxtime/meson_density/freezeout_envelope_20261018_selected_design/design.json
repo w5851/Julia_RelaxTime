@@ -1,0 +1,186 @@
+{
+  "schema": "freezeout_parameter_design_v1",
+  "created_utc": "2026-10-18T03:00:41.761052+00:00",
+  "catalog_sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8",
+  "source_pdf_hashes": {
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S01_Cleymans_2006_freezeout_criteria.pdf": "f854d7eae0897dae0684dc23f1ce39c8e8ba862b982c0935575b50a3a99149fc",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S22_Poberezhnyuk_2019_QvdW_freezeout.pdf": "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S18b_Shao_2024_FRG_published.pdf": "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S21_Lu_2026_functional_QCD_freezeout.pdf": "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S05_Bazavov_2016_freezeout_curvature.pdf": "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S06_Borsanyi_2014_freezeout_consistency.pdf": "454edb804701f7e611abfa335b626ff9ef30043a72ff676e8512487c012490d8"
+  },
+  "parameter_order": [
+    "a_GeV",
+    "b_GeV_inv1",
+    "c_GeV_inv3",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "pooled_bounds": [
+    [
+      0.143,
+      0.168
+    ],
+    [
+      0.0,
+      0.15500000000000003
+    ],
+    [
+      0.032,
+      1.0973473819267652
+    ],
+    [
+      0.70896,
+      1.336
+    ],
+    [
+      0.147,
+      0.281
+    ]
+  ],
+  "interior_bounds": [
+    [
+      0.1455,
+      0.1655
+    ],
+    [
+      0.015500000000000003,
+      0.1395
+    ],
+    [
+      0.13853473819267653,
+      0.9908126437340886
+    ],
+    [
+      0.771664,
+      1.273296
+    ],
+    [
+      0.1604,
+      0.2676
+    ]
+  ],
+  "design": {
+    "seed": 20261018,
+    "interior_trim_fraction": 0.1,
+    "interior_sample_count": 32,
+    "proposal_count": 2048,
+    "minimum_energy_GeV": 4.87,
+    "maximum_energy_GeV": 200.0,
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "screening_energies_GeV": [
+      4.87,
+      6.27,
+      7.62,
+      7.7,
+      8.77,
+      9.25,
+      10.0,
+      11.5,
+      12.32,
+      14.5,
+      17.27,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "near_best_rmse_factor": 1.1,
+    "local_step_fraction": 0.05,
+    "local_rounds": 1,
+    "description": "Interior sampling in the middle 80% of each pooled coordinate interval; unmodified source anchors and explicit low-T hybrids retained separately. Positive T across the declared energy window is required. No numerical failure may remove an observation from the fixed scoring grid."
+  },
+  "candidates": [
+    {
+      "name": "hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.14564421970002192,
+        0.10364148726030518,
+        0.5463741671473763,
+        0.7304851722505652,
+        0.273
+      ],
+      "provenance": [
+        "local_a_minus",
+        "d=mu_at_sampled_peak*(1+e*target_energy); e is Cleymans central value"
+      ],
+      "original_peak_energy_GeV": 11.5,
+      "target_energy_GeV": 7.7,
+      "map_e_GeV_inv1": 0.273,
+      "profile_sha256": "235a8702b680ff5d6a79343cc9b29ad18efef921b4a617585b40223093701b66",
+      "in_interior_box": false
+    },
+    {
+      "name": "hornmap_003",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.14689421970002192,
+        0.10364148726030518,
+        0.5463741671473763,
+        0.7760897501036745,
+        0.273
+      ],
+      "provenance": [
+        "local_d_minus",
+        "d=mu_at_sampled_peak*(1+e*target_energy); e is Cleymans central value"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7,
+      "map_e_GeV_inv1": 0.273,
+      "profile_sha256": "9b6bced6b97f69a9b3c0cd669b77198c212c6868276742df70011f7c0f51e536",
+      "in_interior_box": false
+    },
+    {
+      "name": "local_a_minus",
+      "role": "local_exploration",
+      "values": [
+        0.14564421970002192,
+        0.10364148726030518,
+        0.5463741671473763,
+        0.8402712694332657,
+        0.2233322518914494
+      ],
+      "provenance": [
+        "envelope_014",
+        "one predefined axial refinement round"
+      ],
+      "profile_sha256": "d6b840047072be151e38ef18921fbd46c6fb07fda4ebda8dbc960b7318bec117",
+      "in_interior_box": true
+    }
+  ],
+  "rejected_proposals": [],
+  "parent": {
+    "assessment": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_all_screen_assessment\\assessment.json",
+    "assessment_sha256": "ee0de543aa740f3cc7e34b332b07e238e3a72bf46f5e3ac20d61256e4705222f",
+    "selection_rule": "RMSE leader; near-best rising/falling horn alternative; remaining slots by fixed RMSE",
+    "numerical_plan": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_execution\\numerical_plan.json",
+    "numerical_plan_sha256": "a60a921d4fedad842f4593db410e517171ea28834dddb2c7bd0089675ee219b0"
+  },
+  "parameter_policy": "literature_envelope_exploration",
+  "band_semantics": "finite sampled parameter envelope; no statistical confidence level",
+  "physical_prior": "a,d,e>0; b,c>=0; T>0 throughout declared domain; source-specific negative curvature not imported",
+  "generator_sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f",
+  "parts": [
+    [
+      "hornmap_001",
+      "local_a_minus"
+    ],
+    [
+      "hornmap_003"
+    ]
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "baseline_curves.csv": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717",
+  "fine_band.csv": "07395d94abb41cdeff82ffd057651d90460893fe4b46650d44bae56d8c6620db",
+  "fine_curves.csv": "039e166141f9f95b339a9725349da2ca6ea02082e333f8576af403b43b18f82c",
+  "near_best_parameters.csv": "1ea1fe583aa565b904611dc643f04a2da1553a7c09b58b1b0b67f7a23bc10ccb",
+  "resolution_comparison.json": "8437edc9e1f03f66c055b4a83f3dc3e111a92fd92e76f4f8e682814208ea2d67",
+  "screen_band.csv": "0c9e0426921e290982c6085f26ec185098926d062a57d120649c56d66d9e0b57",
+  "selected_parameters.csv": "8d2055488ae27862a19bcb7f46c456347a9728a201e340108c8f643c225e4f2b",
+  "source_snapshot/scripts/analysis/relaxtime/freezeout_parameter_envelope.py": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f",
+  "source_snapshot/scripts/analysis/relaxtime/plot_freezeout_comparison.py": "f40601e3460c43be3c449d1b31db2b46c60a3ca8a09150076835037adfd21ca8",
+  "source_snapshot/scripts/analysis/relaxtime/summarize_freezeout_envelope.py": "14a28f2a728bafdec595857e3d2eb27c464bd059ef9aac821f9945a09d61a988",
+  "summary.json": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+}

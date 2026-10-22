@@ -1,0 +1,196 @@
+{
+  "schema": "freezeout_parameter_design_v1",
+  "family": "andronic_logistic_rational_v1",
+  "created_utc": "2026-10-18T06:31:42.322128+00:00",
+  "catalog_sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac",
+  "domain_input": {
+    "path": "D:\\w\\meson-freezeout-defaults\\config\\physics\\freezeout\\parameter_domains\\andronic_literature_envelope_v2.toml",
+    "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+  },
+  "source_evidence": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\recent_sources_manifest.json",
+      "sha256": "633b8cd7daf698a5d7c01ffb9d0e20b74d19d91c65d5125ec5169b728e014666"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\source_manifest.json",
+      "sha256": "6a9e7faac1c983528c12468f05bb8ed06d4fbd5c7acb2d16d6a13491bf206af5"
+    }
+  ],
+  "source_pdf_hashes": {
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ElfnerMuller2023_JPhysG50_103001.pdf": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Du2024_PRC110_014904.pdf": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ThakurHirono2022_JHEP02_207.pdf": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Andronic2026_arxiv2606.14799v2.pdf": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\LaffertyRothkopf2020_PRD101_056010.pdf": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Yu2025_arxiv2403.16548v3.pdf": "4d40ab1f83ae7bad9eb031357ef2668e7f03758fc8abc53358eb671da705ff16"
+  },
+  "parameter_order": [
+    "T_lim_GeV",
+    "log_offset",
+    "log_width",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "pooled_bounds": [
+    [
+      0.1535,
+      0.164
+    ],
+    [
+      2.2,
+      2.82
+    ],
+    [
+      0.4,
+      0.48
+    ],
+    [
+      1.05,
+      1.3568
+    ],
+    [
+      0.286,
+      0.326
+    ]
+  ],
+  "interior_bounds": [
+    [
+      0.15455,
+      0.16295
+    ],
+    [
+      2.262,
+      2.758
+    ],
+    [
+      0.40800000000000003,
+      0.472
+    ],
+    [
+      1.08068,
+      1.32612
+    ],
+    [
+      0.29,
+      0.322
+    ]
+  ],
+  "design": {
+    "seed": 20261018,
+    "interior_trim_fraction": 0.1,
+    "interior_sample_count": 32,
+    "minimum_energy_GeV": 4.87,
+    "maximum_energy_GeV": 200.0,
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "screening_energies_GeV": [
+      4.87,
+      6.27,
+      7.62,
+      7.7,
+      8.77,
+      9.25,
+      10.0,
+      11.5,
+      12.32,
+      14.5,
+      17.27,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "near_best_rmse_factor": 1.1,
+    "local_step_fraction": 0.05,
+    "local_rounds": 1,
+    "boundary_axis_samples": true,
+    "maximum_mapping_candidates": 3,
+    "refined_curve_count": 3,
+    "description": "Four distinct nonbaseline complete source anchors, 32 stratified interior samples and 10 axis-boundary probes; one axial refinement round and up to three admissible geometry-preserving energy rescalings. Reuse Andronic 2018 as the frozen baseline; Elfner duplicates it and JHEP is temperature-only. Fixed nine-point scoring and complete-curve envelopes match the polynomial exploration."
+  },
+  "candidates": [
+    {
+      "name": "andronic_local_T_lim_GeV_minus",
+      "role": "local_exploration",
+      "values": [
+        0.15450868637489545,
+        2.718417742065884,
+        0.47150281506186065,
+        1.1184781730770237,
+        0.31049824162389916
+      ],
+      "provenance": [
+        "andronic_sample_022",
+        "one axial refinement round"
+      ],
+      "profile_sha256": "5aed65954d27af656f58ac13d9ffba704f196356ba389edca611a9fab2dd382b",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_local_d_GeV_minus",
+      "role": "local_exploration",
+      "values": [
+        0.15503368637489545,
+        2.718417742065884,
+        0.47150281506186065,
+        1.1031381730770238,
+        0.31049824162389916
+      ],
+      "provenance": [
+        "andronic_sample_022",
+        "one axial refinement round"
+      ],
+      "profile_sha256": "5d927c06b4e88fbad0e8274118deca20702d7ce2f0c8bf39d225a06a5a3bf534",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_local_log_offset_plus",
+      "role": "local_exploration",
+      "values": [
+        0.15503368637489545,
+        2.749417742065884,
+        0.47150281506186065,
+        1.1184781730770237,
+        0.31049824162389916
+      ],
+      "provenance": [
+        "andronic_sample_022",
+        "one axial refinement round"
+      ],
+      "profile_sha256": "7fc43e584ee27d279a09c9428d43bcac7315e253253f3c26e46898a0e2bb7f89",
+      "in_interior_box": true
+    }
+  ],
+  "rejected_proposals": [],
+  "reused_reference": "andronic2018; Elfner 2023 duplicates it; JHEP 2022 provides no D/E",
+  "parent": {
+    "assessment": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_all_screen_assessment\\assessment.json",
+    "sha256": "ec01edf2ce27b3b2edbf713f3897ff63a6fa0bd7736af975fd28fc6b6eca20c9",
+    "best": "andronic_local_T_lim_GeV_minus"
+  },
+  "parameter_policy": "literature_envelope_exploration",
+  "band_semantics": "finite sampled complete-curve envelope; no statistical confidence level",
+  "physical_prior": "Tlim,w,D,E>0; analytic T rises and muB decreases on the declared positive-energy interval",
+  "generator_sha256": "b170084f65e4c01f284ec2abf12593d177905919e8b7bce94f7a10a064df03ae",
+  "parts": [
+    [
+      "andronic_local_T_lim_GeV_minus",
+      "andronic_local_log_offset_plus"
+    ],
+    [
+      "andronic_local_d_GeV_minus"
+    ]
+  ]
+}

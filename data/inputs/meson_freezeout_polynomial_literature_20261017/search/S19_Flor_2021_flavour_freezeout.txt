@@ -1,0 +1,530 @@
+                                               Flavour and Energy Dependence of Chemical Freeze-out Temperatures in Relativistic
+                                                             Heavy Ion Collisions from RHIC-BES to LHC Energies
+
+                                                                                   Fernando Antonio Flor, Gabrielle Olinger, René Bellwied
+                                                                                  Department of Physics, University of Houston, Houston, Texas 77204, USA
+
+
+
+
+                                           Abstract
+
+                                           We present calculations of the chemical freeze-out temperature (T ch ) based on particle yields from STAR and ALICE measured
+                                                                              √
+                                           at collision energies ranging from sNN = 11.5 GeV to 5.02 TeV. Employing the Grand Canonical Ensemble approach using
+arXiv:2009.14781v2 [nucl-ex] 21 Jan 2021
+
+
+
+
+                                           the Thermal-FIST Hadron Resonance Gas model package, we show evidence for a flavour-dependent chemical freeze-out in the
+                                           crossover region of the QCD phase diagram. At a vanishing baryochemical potential, we calculate light and strange flavour freeze-
+                                           out temperatures T L = 150.2 ± 2.6 MeV and T S = 165.1 ± 2.7 MeV, respectively.
+                                           Keywords: Sequential Flavour Freeze-out, Statistical Hadronization, Hadron Resonance Gas
+
+
+                                           1. Introduction                                                   difference in the determined freeze-out temperatures between
+                                                                                                             flavours in the crossover region of the QCD phase diagram.
+                                              In depth determinations of a pseudo-critical temperature based
+                                                                                                             This effect is likely due to the difference in the bare quark masses
+                                           on continuum extrapolations of temperature dependence of the
+                                                                                                             which is not negligible in a thermally equilibrated deconfined
+                                           chiral susceptibilities on the lattice, in comparison to calcula-
+                                                                                                             system near the phase boundary. In particular, a comparison
+                                           tions using Statistical Hadronization Models (SHM) using par-
+                                                                                                             of the flavour specific susceptibility ratios χ4 /χ2 , suggested as
+                                           ticle yields from experiments at the Relativistic Heavy Ion Col-
+                                                                                                             an observable for directly determining freeze-out temperatures
+                                           lider (RHIC) and the Large Hadron Collider (LHC), indicate
+                                                                                                             [10], show a deviation of the lattice and Hadron Resonance Gas
+                                           that chemical freeze-out and hadronization coincide near the
+                                                                                                             (HRG) model calculations coinciding at the peaks of the lat-
+                                           phase boundary in the Quantum Chromodynamics (QCD) phase
+                                                                                                             tice data, which occur at flavour specific temperatures differing
+                                           diagram [1, 2, 3, 4, 5]. Whether this transition from quark to
+                                                                                                             by 15 − 20 MeV from light to strange quarks [9]. Net-particle
+                                           hadron degrees of freedom occurs at a uniform temperature for
+                                                                                                             fluctuation measurements by the STAR collaboration have also
+                                           all quark flavours remains a question of interest.
+                                                                                                             shown comparable temperature differences between the light
+                                              SHMs have been successful in adequately reproducing hadronic
+                                                                                                             and strange mesons [11, 12, 13].
+                                           particle abundances over nine orders of magnitude in high en-
+                                                                                                                Thermal fits to experimental data via SHMs have shown sim-
+                                           ergy collisions of heavy ions over a wide range in energy [6, 7].
+                                                                                                             ilar results, depicting a difference in the freeze-out temperatures
+                                           In these calculations, assuming a thermally equilibrated system,
+                                                                                                             between flavours in the crossover region. The STAR Collabo-
+                                           experimental particle yields in relativistic heavy ion collisions
+                                                                                                             ration recently published the dependence of their thermal fits to
+                                           serve as an anchor for the determination of common freeze-
+                                                                                                             the yields on the particle species included in the fit rendering a
+                                           out parameters in the QCD phase diagram – namely, the baryo-
+                                                                                                             freeze-out temperature about 10 − 15 MeV lower when fitting
+                                           chemical potential (µB ) and the chemical freeze-out tempera-
+                                                                                                             only pions, kaons and protons than a common freeze-out tem-
+                                           ture (T ch ). The resulting parameters can also be compared with
+                                                                                                             perature extracted from fits to yields of all measured particle
+                                           independently obtained results from either lattice QCD based
+                                                                                                             species [14]. Moreover, it has been shown that assuming two
+                                           susceptibility calculations of conserved quantum numbers or
+                                                                                                             distinct freeze-out temperatures improves the overall fit to AL-
+                                           measurements of higher order fluctuations of net-particle dis-
+                                                                                                             ICE data [15]. Thus, a point of interest arises when comparing
+                                           tributions.
+                                                                                                             the extracted freeze-out parameters obtained using different sets
+                                                                                                             of particles in the SHM calculation. This approach was recently
+                                           2. Sequential Flavour Freeze-out                                  performed in an HRG-based study on both diagonal and non-
+                                              Continuum extrapolated susceptibility calculations of single   diagonal second order correlators of conserved charges [16].
+                                           flavour quantum numbers on the lattice [8, 9] have shown a
+
+                                               Email address: faflor@uh.edu (Fernando Antonio Flor)
+
+                                           Preprint submitted to Elsevier                                                                                         January 22, 2021
+3. Model and Data Preparation
+                                                                                        Table 1: Interpolation results from methods used in Ref. [33] for weak-decay
+                                                                                        feed-down contributions to (anti)proton yields at STAR AuAu Collisions from
+   The entirety of our analysis was performed using the open                            √
+                                                                                          sNN = 11.5 to 200 GeV.
+source Thermal FIST (The FIST) thermal model package [17].
+                                                                                                                                 Proton    Anti-Proton
+Without loss of generality, The FIST is a user-friendly package                                            √
+                                                                                                               sNN (GeV)           δ            δ
+within the family of HRG Models. Although there exists a wide
+range of options for the HRG model within The FIST frame-                                                        11.5        23.00%         48.00%
+work, we restricted our analysis to the default – namely, mod-                                                   19.6        27.50%         44.00%
+eling an ideal non-interacting gas of hadrons and resonances                                                     27.0        29.50%         41.50%
+within a Grand Canonical Ensemble (GCE).                                                                         39.0        31.00%         40.00%
+   All our calculations used the PDG2016+ hadronic spectrum                                                      64.2        32.00%         38.50%
+[18] as the HRG input list, including a total of 738 states (i.e.                                                200         34.00%         36.50%
+*, **, *** and **** states from the 2016 Particle Data Group
+Data Book [19]). Deviations of the HRG calculations from the
+                                                                                        (light), πK pΛΞΩKS0 φ (all) and KΛΞΩKS0 φ (strange), respec-
+lattice curves of flavour specific susceptibilities at specific tem-
+                                                                                        tively. The inclusion of the kaons in the light fit was done in
+peratures in the crossover region may be affected by the inclu-
+                                                                                        order to avoid too few degrees of freedom in the fit and has no
+sion of certain states [20, 21, 22], thus a realistic determina-
+                                                                                        effect on the extracted freeze-out temperature, since the kaon
+tion of the underlying hadronic spectrum is key to this study.
+                                                                                        yield is rather insensitive to the temperature, as was also shown
+The PDG2016+ hadronic spectrum has been shown to be an
+                                                                                        previously in Ref. [34]. For the two ALICE energies, we let
+optimized compromise between too few (found) and too many
+                                                                                        µB = 0. For all fits to STAR AuAu data, we let µB be a free
+(from a simple Quark Model) excited states when compared to
+                                                                                        parameter in the fits to also gauge its sensitivity to the flavour-
+a large number of lattice QCD predictions [18].
+                                                                                        specific fits.
+   Yield data for π+ , π- , K + , K - , p, p̄, Λ, Λ̄, Ξ− , Ξ̄+ , Ω− , Ω̄+ , KS0 ,
+                                               √
+and φ for ALICE PbPb collisions at sNN = 2.76 TeV [23, 24,
+25, 26] and preliminary results at 5.02 TeV [27] in the 0 - 10%                         4. Results and Discussion
+                                                                     √
+centrality class, as well as STAR AuAu collisions at sNN =
+                                                                                           We extracted freeze-out parameters, T ch and V, for the full
+11.5, 19.6, 27.0, 39.0, 62.4 and 200 GeV [14, 28, 29, 30, 31, 32]
+                                                        √                               (πK pΛΞΩKS0 φ), light (πK p), and strange (KΛΞΩKS0 φ) particle
+were used. We excluded AuAu collisions at sNN = 7.7 GeV
+                                                                                        thermal fits. Figure 1 shows T ch from the full fits as a function
+due to the wider centrality binning of the data, particularly for
+                                                                                        of µB . The magenta line represents the spline fit function with
+multi-strange baryons.                                                                                         √                                  √
+                                                                                        three nodes (PbPb at sNN = 5.02 TeV and AuAu at sNN =
+   For the sake of brevity, we introduced a shorthand notation
+                                                                                        27.0 and 19.6 GeV) to the freeze-out parameters. The magenta
+when naming our fits with (anti)particle species (e.g. Ω refers to
+                                                                                        band represents the residual to the spline fit and is determined
+both Ω− and Ω̄+ , etc.). This shorthand is used for the remainder
+                                                                                        by the mean square error of the spline function.
+of this letter.
+   (Anti)proton yields for the STAR data in Refs. [14, 30, 31]
+                                                                                         Tch (MeV)
+
+
+
+
+                                                                                                     190
+are all inclusive. In order to correct for weak-decay feed-down                                            Thermal FIST: PDG2016+          π K p Λ Ξ Ω K0S φ
+                                                                                                     180   Grand Canonical Ensemble         ALICE PbPb @ 5.02 TeV
+contributions from (Λ̄)Λ, we interpolated the contributions to                                                                              STAR AuAu @ 200 GeV
+                                                                                                                                            STAR AuAu @ 62.4 GeV
+(anti)proton yields based on the method suggested in Ref. [33].                                      170
+                                                                                                                                            STAR AuAu @ 39.0 GeV
+                                                                                                                                            STAR AuAu @ 27.0 GeV
+                                                                                                                                            STAR AuAu @ 19.6 GeV
+Table 1 summarizes our interpolation results. The contribu-                                                                                 STAR AuAu @ 11.5 GeV
+
+tion from (Λ̄)Λ to (anti)proton yields are labeled as δ. These                                       160
+δ values were subtracted from unity and multiplied by their re-
+                                                                                                     150
+spective (anti)proton yields. The resulting (anti)proton yields
+were then used for the entirety of this analysis. This procedure                                     140
+should be considered an upper limit for the feed-down contri-
+bution since the experiment imposes an, albeit loose, primary                                        130
+                                                                                                           0       50      100      150   200   250      300    350
+vertex cut on the (Λ̄)Λ decay daughter candidates. Neverthe-                                                                                             µB (MeV)
+less, these percentages are in general agreement with estimates
+in the aforementioned STAR papers.                                                      Figure 1: Full GCE fits to STAR and ALICE data measured at collision energies
+                                                                                                      √
+                                                                                        ranging from sNN = 11.5 GeV to 5.02 TeV (0 - 10%) using The FIST with the
+   All our thermal fits were performed with T ch (MeV) and V
+                                                                                        PDG2016+ hadronic spectrum. Magenta bands shows a spline fit to the points.
+(fm3 ) as free parameters, setting γS and γq to unity. Our anal-
+ysis focused on varying the particle species included in the fit.                         Figure 2 shows T ch from the light and strange fit as a function
+The particle species included in our temperature fits were πK p                         of µB ; both fits are compared to Lattice QCD calculations in
+                                                                                    2
+Ref. [35]. Each flavour dependent spline fit and error band was
+
+
+
+
+                                                                                        Yields
+                                                                                                               103                                                            1CFO: T = 150.4 MeV, χ2 / dof = 5.639
+                                                                                                                                                                              2CFO: T L = 142.4 MeV, (χ2 / dof) L = 2.446
+determined in the same manner as in Figure 1. The width of the                                                                                                                2CFO: T S = 164.4 MeV, (χ2 / dof) S = 0.163
+                                                                                                                                                                              ALICE PbPb @ 5.02 TeV
+
+                                                                                                               102
+lattice curve is based on the width (σ) of the chiral susceptibility
+[35].                                                                                                          10
+   Tch (MeV)
+
+
+
+
+               190
+                                                                                                                 1
+                     Thermal FIST: PDG2016+      Lattice QCD
+                     Grand Canonical Ensemble       WB Collaboration (2020)
+               180
+
+
+
+
+                                                                                         (Model-Data)/σData
+                                                                                                                  3 0            2           4            6           8                 10                12                14
+                          K Λ Ξ Ω K0S φ                                                                           2
+                          π K p                                                                                   1
+                                                                                                                  0
+               170                                                                                               −1
+                                                                                                                 −2
+                                                                                                                 −3
+
+                                                                                                                        π+
+                                                                                                                             -
+                                                                                                                             π       +
+                                                                                                                                     K
+                                                                                                                                         -
+                                                                                                                                         K
+                                                                                                                                                 0
+                                                                                                                                                 KS   p       p   Λ       Λ       φ          Ξ       Ξ         Ω       Ω
+               160
+
+
+
+
+                                                                                        Yields
+                                                                                                               103                                                            1CFO: T = 161.8 MeV, χ2 / dof = 1.407
+                                                                                                                                                                              2CFO: T L = 151.0 MeV, (χ2 / dof) L = 0.866
+               150                                                                                                                                                            2CFO: T S = 164.4 MeV, (χ2 / dof) S = 0.961
+                                                                                                                                                                              STAR AuAu @ 39.0 GeV
+                                                                                                               102
+
+
+               140
+                                                                                                               10
+
+
+
+               130                                                                                               1
+                     0      50       100   150   200     250       300        350
+                                                                   µB (MeV)                                   10− 1
+
+
+
+
+                                                                                         (Model-Data)/σData
+                                                                                                                  3 0            2           4            6           8                 10                12                14
+
+                                                                                                                  2
+                                                                                                                  1
+
+Figure 2: Strange (blue points) and light (red points) GCE fits to STAR and                                       0
+                                                                                                                 −1
+                                                        √
+ALICE data measured at collision energies ranging from sNN = 11.5 GeV to                                         −2
+                                                                                                                 −3
+
+5.02 TeV (0 - 10%) via The FIST using the PDG2016+ hadronic spectrum.                                                   π+
+                                                                                                                             -
+                                                                                                                             π       +
+                                                                                                                                     K
+                                                                                                                                         -
+                                                                                                                                         K
+                                                                                                                                                 0
+                                                                                                                                                 KS   p       p   Λ       Λ       φ          Ξ       Ξ         Ω       Ω
+
+
+                                                                                                                                                              √
+   Detailed fit results for each energy including V and χ2 /do f ,                      Figure 3: Top and bottom panels show GCE fits to ALICE PbPb at sNN =
+                                                                                                                                 √
+                                                                                        5.02 TeV (0 - 10%) and STAR AuAu at sNN = 39.0 GeV (0 - 10%), respec-
+are shown in Table 2. Generally, the separation into light and                          tively, via The FIST using the PDG2016+ hadronic spectrum. Single tempera-
+strange particles improves the quality of the fits by at least a                        ture (1CFO) yield calculations are shown in magenta. Two temperature (2CFO)
+factor two at all energies.                                                             yield calculations are shown in dashed blue lines. Experimental values [27, 28]
+   In Figure 2, the light and strange fits consistently fall within                     are shown in green.
+
+the lattice QCD crossover width as determined by detailed stud-
+ies of the temperature dependence of the chiral order parame-                           differs from the value quoted by ALICE, which is based on the
+ters [35]. Our flavour-dependent fits agree with the calculated                         Heidelberg-GSI model, by about 4 MeV, most likely due to the
+freeze-out temperatures from net-proton, net-charge and net-                            difference in the hadronic input spectrum [27].
+kaon fluctuations up to µB ≃ 150 MeV [36, 12]. T ch remains                                Figure 3 shows a comparison between the 1CFO and 2CFO
+constant with increasing µB until µB ≃ 100 MeV, where the                               approaches for data sets at two exemplary energies, namely the
+strange and light fit begin to approach. The two fits converge                          preliminary 5.02 TeV central PbPb data from ALICE and the
+within errors at µB ≃ 300 MeV; therefore, we propose that a                             39.0 GeV central AuAu data from STAR. The deviations of
+separate treatment of strange and light particles might not be                          each yield calculation from the experimental value are shown
+meaningful at µB ≥ 300 MeV. The convergence of the two                                  at the bottom of each plot. We observe that the 2CFO approach
+flavour-dependent temperatures is expected in the vicinity of                           provides an excellent and much improved description of the ex-
+a critical point in the QCD phase diagram.                                              perimental data; rendering yields within one standard deviation
+   The greatest difference between the two temperatures is seen                         of the experimental measurements for most particle species.
+at the highest energy, namely the ALICE top energy. To ad-                              The 2CFO treatment all but eliminates the tension between light
+dress the impact of a flavour dependent freeze-out on the par-                          and strange baryons, the so-called proton anomaly, seen in the
+ticle abundances, we calculated yields for the full particle set                        1CFO approach. It should also be noted that alternative meth-
+(πK pΛΞΩKS0 φ) for ALICE PbPb 5.02 TeV with a one chemi-                                ods to treat interactions in the SHM via the S-matrix approach
+cal freeze-out (1CFO) approach and compared them with yields                            [37] impact in particular the proton yields and improve the per-
+calculated for light (πK p) and strange (KΛΞΩKS0 φ) particles                           formance of the 1CFO method in the Heidelberg-GSI fits [7].
+separately with a two chemical freeze-out (2CFO) approach.                                 As a cross-check with lattice QCD predictions, we deter-
+We fixed the temperature(s) and volume(s) to the T ch and V val-                        mined whether our 2CFO parameters lie on the isentropic tra-
+                             √
+ues shown in Table 2 for sNN = 5020 GeV. In the 1CFO ap-                                jectories in the T-µb plane, which were calculated using a lattice
+proach, we calculated yields using a temperature of 150.4 MeV.                          QCD equation of state [38]. The validity of this approach to fi-
+In the 2CFO approach, our light and strange particle yield cal-                         nite densities has been proven out to µb /T = 2. Therefore, in
+culations were done with temperatures fixed to 142.4 MeV and                            Figure 4, we show our data only for collision energies down to
+                                                                                        √
+164.4 MeV, respectively. We note that our 1CFO temperature                                (sNN ) = 19.6 GeV. The ALICE points are also excluded since
+                                                                                    3
+                                                                                                                                   √
+Table 2: The FIST Grand Canonical Ensemble Yield Fits via the PDG2016+ hadronic spectrum for collision energies ranging from sNN = 11.5 GeV to 5.02 TeV.
+The top, middle and bottom sections show the full (πK pΛΞΩKS φ), light (πK p), and strange (KΛΞΩKS φ) particle fits, respectively. For all fits, µB , T ch , and V were
+                                                            0                                    0
+
+used as free parameters.
+                                                                           πK pΛΞΩKS0 φ
+                  √
+                      sNN (GeV)                 µB (MeV)                     T ch (MeV)                        V( f m3 )                   χ2 /do f
+                       5020                        0.0                      150.4 ± 1.50                  6238.8 ± 538.8                   78.9/12
+                       2760                        0.0                      149.6 ± 1.76                  5764.4 ± 635.8                   23.4/12
+                        200                    25.0 ± 7.94                  160.0 ± 2.07                  1596.3 ± 198.3                   23.3/10
+                       62.4                    68.4 ± 11.0                  158.1 ± 2.87                  1151.7 ± 178.2                   41.0/11
+                        39                    110.3 ± 8.51                  161.8 ± 2.32                   751.6 ± 103.0                   15.5/11
+                        27                    154.2 ± 6.92                  159.4 ± 1.60                    741.8 ± 70.4                   12.8/11
+                       19.6                   202.8 ± 7.29                  159.3 ± 1.91                    643.2 ± 72.6                   15.2/11
+                       11.5                   310.7 ± 11.7                  151.8 ± 1.89                    649.4 ± 78.8                   15.9/11
+                                                                                 πK p
+                  √
+                      sNN (GeV)                 µB (MeV)                     T ch (MeV)                        V( f m3 )                   χ2 /do f
+                       5020                        0.0                      142.4 ± 1.70                 9371.6 ± 902.1                     14.6/4
+                       2760                        0.0                      143.2 ± 2.79                 8031.7 ± 1263.0                    5.65/4
+                        200                    24.5 ± 14.0                  153.9 ± 4.91                  2210.0 ± 553.4                    3.10/3
+                       62.4                    67.8 ± 13.1                  151.2 ± 4.53                  1721.7 ± 394.5                    7.79/3
+                        39                    101.4 ± 12.9                  151.0 ± 4.61                  1368.8 ± 338.9                    2.60/3
+                        27                    145.3 ± 14.0                  149.9 ± 4.68                  1333.3 ± 336.8                    2.79/3
+                       19.6                   182.9 ± 16.7                  149.0 ± 5.24                  1186.1 ± 341.5                    7.66/3
+                       11.5                   289.4 ± 16.2                  145.0 ± 4.98                  1074.8 ± 300.1                    2.67/3
+                                                                             KΛΞΩKS0 φ
+                  √
+                      sNN (GeV)                 µB (MeV)                     T ch (MeV)                        V( f m3 )                   χ2 /do f
+                       5020                        0.0                      164.4 ± 2.28                  3086.8 ± 366.7                    1.58/8
+                       2760                        0.0                      153.9 ± 2.30                  4389.7 ± 640.8                    10.5/8
+                        200                    25.7 ± 10.3                  163.2 ± 2.64                  1287.5 ± 208.8                    17.3/6
+                       62.4                    66.7 ± 21.0                  164.2 ± 3.63                   784.5 ± 152.2                    21.4/7
+                        39                    116.0 ± 11.7                  164.4 ± 2.57                    643.6 ± 97.7                    6.73/7
+                        27                    156.0 ± 7.88                  160.4 ± 1.68                    695.0 ± 69.3                    3.55/7
+                       19.6                   206.5 ± 8.30                  160.7 ± 2.00                    585.2 ± 69.3                    3.87/7
+                       11.5                   321.0 ± 14.7                  153.4 ± 2.08                    574.8 ± 77.2                    5.36/7
+
+
+
+
+                                                                                  4
+at zero baryo-chemical potential the S/NB value diverges. For                                                                              6. Acknowledgments
+all five250collision energies light and strange freeze-out parame-
+ters lie well within the calculated trajectories. The uncertainties                                                                           The authors acknowledge edifying discussions with Volodymyr
+                                                                                                                                           Vovchenko, Claudia Ratti, Paolo Parotto, Livio Bianchi, Boris
+        T [MeV]
+
+
+
+
+on the200isentropic trajectories are based on folding the errors of
+the light hadron freeze-out parameters for T ch and µB into the                                                                            Hippolyte and Jamie Stafford – particularly for her assistance
+calculation. A trend       towards                                                                                                        in producing the lattice QCD based isentropes in Figure 4. This
+                                 a sharper
+                                                turn in the isentropic
+                                                          
+       150                                                                                                                                 work was supported by the DOE grant DEFG02-07ER4152.
+curve seems to develop with increasing density. It is likely that
+in order to captureπ K p said turn in future lattice QCD calculations
+                   K Λ Ξ Ω KS0 ϕ
+beyond 100µB /T = 2, it will be necessary to extend the Taylor ex-                                                                         References
+            0             100           200           300          400
+pansion to terms higher than c6 [38].
+                                                        B [MeV]                                                                            [1] R. Bellwied, S. Borsányi, Z. Fodor, J. Günther, S. Katz, C. Ratti, and
+                                                                                                                                                K. Szabó, Physics Letters B 751, 559 (2015).
+Tch (MeV)
+
+
+
+
+                                                                           V)                                   V)
+                                                                                                                                            [2] S. Borsányi, Z. Fodor, C. Hoelbling, S. D. Katz, S. Krieg, C. Ratti, and
+                                                                        Ge                                    Ge
+                                 V)
+
+
+
+
+                                                                                                        0                                       K. K. Szabó, Journal of High Energy Physics 2010, 73 (2010).
+                                 Ge
+
+
+
+
+                                                                    4                                9.
+            250                                                  2.                              (3                          )
+                                                              (6                                                            V
+                              .0
+
+
+
+
+                                                                                           91                            Ge                 [3] S. Borsányi, Z. Fodor, C. Hoelbling, S. D. Katz, S. Krieg, and K. K.
+                                                          7                                                        0
+                            00
+
+
+
+
+                                                        13                             =                        7.
+                                                                                  NB                          (2                                Szabó, Physics Letters B 730, 99 (2014).
+                            (2
+
+
+
+
+                                                    =                           S/                   =
+                                                                                                         64
+                                           N    B
+                         2
+
+
+
+
+                                        S/                                                   NB                                             [4] A. Bazavov et al. (HotQCD Collaboration), Phys. Rev. D 90, 094503
+                                                                                           S/
+                         37
+
+
+
+
+                                                                                                                           eV)
+            200                                                                                                       6 G
+                                                                                                                   19.                          (2014).
+                        =
+
+
+
+
+                                                                                                            (
+                                                                                                         50
+                       NB
+
+
+
+
+                                                                                                     =                                      [5] J. Stachel, A. Andronic, P. Braun-Munzinger, and K. Redlich, Journal of
+                   S/
+
+
+
+
+                                                                                           S/N
+                                                                                                 B
+
+                                                                                                                                           Physics: Conference Series 509, 012019 (2014).
+            150                                                                                                                             [6] J. Cleymans and K. Redlich, Phys. Rev. Lett. 81, 5284 (1998).
+                                                                                                                                            [7] A. Andronic, P. Braun-Munzinger, K. Redlich, and J. Stachel, Nature
+                       K Λ Ξ Ω K0 φ
+                       π K p                                                                                                                    561, 321 (2018).
+            100                                                                                                                             [8] C. Ratti, R. Bellwied, M. Cristoforetti, and M. Barbaro, Phys. Rev. D 85,
+               0         50           100                     150                    200                      250                300
+                                                                                                                                                014004 (2012).
+                                                                                                               µB(MeV)                      [9] R. Bellwied, S. Borsanyi, Z. Fodor, S. D. Katz, and C. Ratti, Phys. Rev.
+                                                                                                                                                Lett. 111, 202302 (2013).
+Figure 4: Isentropic trajectories (fixed S/NB ) in the T-µB plane based on a lat-                                                          [10] F. Karsch, Central European Journal of Physics 10, 1234 (2012).
+tice QCD Equation of State expanded to finite density [38]. The open points                                                                [11] L. Adamczyk et al. (STAR Collaboration), Phys. Rev. Lett. 112, 032302
+show the light hadron freeze-out parameters and the closed points show the                                                                      (2014).
+strange hadron freeze-out parameters in our 2CFO approach. The S/NB ratios                                                                 [12] R. Bellwied, J. Noronha-Hostler, P. Parotto, I. Portillo Vazquez, C. Ratti,
+correspond to the RHIC energies 200, 62.4, 39, 27, 19.6 GeV, respectively.                                                                      and J. M. Stafford, Phys. Rev. C 99, 034912 (2019).
+                                                                                                                                           [13] M. Bluhm and M. Nahrgang, Eur. Phys. J. C. 79, 155 (2019).
+                                                                                                                                           [14] L. Adamczyk et al. (STAR Collaboration), Phys. Rev. C 96, 044904
+                                                                                                                                                (2017).
+5. Conclusion                                                                                                                              [15] S. Chatterjee, A. K. Dash, and B. Mohanty, Journal of Physics G: Nuclear
+                                                                                                                                                and Particle Physics 44, 105106 (2017).
+                                                                                                                                           [16] R. Bellwied, S. Borsányi, Z. Fodor, J. N. Guenther, J. Noronha-Hostler,
+   We presented calculations of the chemical freeze-out tem-
+                                                                                                                                                P. Parotto, A. Pásztor, C. Ratti, and J. M. Stafford, Phys. Rev. D 101,
+perature (T ch ) based on particle yields from STAR and ALICE                                                                                   034506 (2020).
+                                                √
+measured at collision energies ranging from sNN = 11.5 GeV                                                                                 [17] V. Vovchenko and H. Stoecker, Computer Physics Communications 244,
+to 5.02 TeV. Based on a splined fit to our thermal fit parameters                                                                               295 (2019).
+                                                                                                                                           [18] P. Alba, R. Bellwied, S. Borsányi, Z. Fodor, J. Günther, S. D. Katz,
+at all energies, we calculated a light flavour freeze-out temper-
+                                                                                                                                                V. Mantovani Sarti, J. Noronha-Hostler, P. Parotto, A. Pasztor, I. P.
+ature T L = 150.2 ± 2.6 MeV and a strange flavour freeze-out                                                                                    Vazquez, and C. Ratti, Phys. Rev. D 96, 034517 (2017).
+temperature T S = 165.1 ± 2.7 MeV at vanishing µB , employing                                                                              [19] C. Patrignani et al. (Particle Data Group), Chin. Phys. C40, 100001
+the GCE approach within the framework of the The FIST HRG                                                                                       (2016).
+                                                                                                                                           [20] J. Noronha-Hostler and C. Greiner, Nuclear Physics A 931, 1108 (2014).
+model package. We showed evidence for flavour-dependent
+                                                                                                                                           [21] P. Alba, V. M. Sarti, J. Noronha-Hostler, P. Parotto, I. Portillo-Vazquez,
+chemical freeze-out temperatures in the crossover region of the                                                                                 C. Ratti, and J. M. Stafford, Phys. Rev. C 101, 054905 (2020).
+QCD phase diagram, which start to converge above µB ≃ 300                                                                                  [22] A. Bazavov, H.-T. Ding, P. Hegde, O. Kaczmarek, F. Karsch, E. Laer-
+MeV. We employed the flavour-dependent two temperature ap-                                                                                      mann, Y. Maezawa, S. Mukherjee, H. Ohno, P. Petreczky, C. Schmidt,
+                                                                                                                                                S. Sharma, W. Soeldner, and M. Wagner, Phys. Rev. Lett. 113, 072001
+proach via The FIST to successfully model and reproduce ex-                                                                                     (2014).
+perimental yields at top ALICE energies. Thus, at the highest                                                                              [23] B. Abelev et al. (ALICE Collaboration), Phys. Rev. C 88, 044910 (2013).
+energies at RHIC and the LHC a separation of the hadronization                                                                             [24] B. Abelev et al. (ALICE Collaboration), Phys. Rev. Lett. 111, 222301
+temperature of light and strange particles seems likely. Further-                                                                               (2013).
+                                                                                                                                           [25] B. Abelev et al. (ALICE Collaboration), Phys. Rev. C 91, 024609 (2015).
+more, our results suggest the existence of a critical point in the                                                                         [26] B. Abelev et al. (ALICE Collaboration), Physics Letters B 728, 216
+QCD phase diagram above µB ≃ 300 MeV and a temperature                                                                                          (2014).
+below T ch ≃ 150 MeV.                                                                                                                      [27] F. Bellini (ALICE Collaboration), Nuclear Physics A 982, 427 (2019).
+                                                                                                                                           [28] J. Adam et al. (STAR Collaboration), Phys. Rev. C 102, 034909 (2020).
+                                                                                                                                           [29] B. I. Abelev et al. (STAR Collaboration), Phys. Rev. C 79, 034909 (2009).
+
+                                                                                                                                       5
+[30] M. M. Aggarwal et al. (STAR Collaboration), Phys. Rev. C 83, 024901
+     (2011).
+[31] G. Agakishiev et al. (STAR Collaboration), Phys. Rev. Lett. 108, 072301
+     (2012).
+[32] J. Adams et al. (STAR Collaboration), Phys. Rev. Lett. 98, 062301 (2007).
+[33] A. Andronic, P. Braun-Munzinger, and J. Stachel, Nuclear Physics A 772,
+     167 (2006).
+[34] D. Magestro, Journal of Physics G: Nuclear and Particle Physics 28, 1745
+     (2002).
+[35] S. Borsanyi, Z. Fodor, J. N. Guenther, R. Kara, S. D. Katz, P. Parotto,
+     A. Pasztor, C. Ratti, and K. K. Szabó, Phys. Rev. Lett. 125, 052001
+     (2020).
+[36] P. Alba, W. Alberico, R. Bellwied, M. Bluhm, V. M. Sarti, M. Nahrgang,
+     and C. Ratti, Physics Letters B 738, 305 (2014).
+[37] A. Andronic, P. Braun-Munzinger, B. Friman, P. M. Lo, K. Redlich, and
+     J. Stachel, Phys. Lett. B792, 304 (2019).
+[38] J. Guenther, R. Bellwied, S. Borsanyi, Z. Fodor, S. Katz, A. Pasztor,
+     C. Ratti, and K. Szabó, Nucl. Phys. A 967, 720 (2017).
+
+
+
+
+                                                                                 6
+

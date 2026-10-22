@@ -1,0 +1,529 @@
+                                                Chemical freeze-out curve in heavy-ion collisions and the QCD critical point
+
+                                                    Artemiy Lysenko,1, 2 Mark I. Gorenstein,2 Roman Poberezhniuk,3, 2 and Volodymyr Vovchenko3
+                                                          1
+                                                              Physics Department, Taras Shevchenko National University of Kyiv, 03022 Kyiv, Ukraine
+                                                                        2
+                                                                          Bogolyubov Institute for Theoretical Physics, 03680 Kyiv, Ukraine
+                                                              3
+                                                                Physics Department, University of Houston, Box 351550, Houston, Texas 77204, USA
+                                                         The chemical freeze-out curve in heavy-ion collisions is investigated in the context of a quantum
+                                                       chromodynamics (QCD) critical point (CP) search at finite baryon densities. Taking the hadron
+                                                       resonance gas picture at face value, chemical freeze-out points at a given baryochemical potential
+                                                       provide a lower bound on the possible temperature of the QCD CP. We first verify that the freeze-out
+                                                       data in heavy-ion collisions are well described by a constant energy per particle curve, E/N = const,
+                                                       under strangeness neutrality conditions (µS ̸= 0, µQ ̸= 0). We then evaluate the hypothetical lower
+                                                       bound on the freeze-out curve based on this criterion in the absence of strangeness neutrality (µS = 0,
+                                                       µQ = 0) and confront it with recent predictions on the CP location. We find that recent estimates
+                                                       based on Yang-Lee edge singularities from lattice QCD data on coarse lattices (Nτ = 6) place the
+                                                       CP significantly below the freeze-out curve, hinting at the importance of performing continuum
+arXiv:2408.06473v3 [nucl-th] 6 May 2025
+
+
+
+
+                                                       extrapolation within this method. Predictions based on functional methods and holography place
+                                                       the CP slightly above the freeze-out curve, indicating that the QCD CP may be located very close
+                                                                                                         √
+                                                       to the chemical freeze-out in A+A collisions at sN N = 3.5–6 GeV.
+
+
+                                                           I.    INTRODUCTION                               same ballpark of TCP ≈ 90–120 MeV and µB, CP ≈ 400–
+                                                                                                            650 MeV.
+                                             Recently, quantum chromodynamics (QCD) turned                     These results indicate the possibility that the CP can
+                                          50 years old. Identifying the phases and structure of             be explored in heavy-ion collisions that probe baryon-
+                                          strongly interacting matter is one of the outstanding is-         rich matter. Analysis of hadron production in heavy-ion
+                                          sues in modern nuclear physics. A chiral crossover tran-          collisions performed over many years across many colli-
+                                          sition at vanishing baryon density and a pseudocritical           sion energies indicate that a significant degree of chem-
+                                          temperature Tpc ≈ 155 MeV has been well established [1–           ical equilibration is reached, and that heavy-ion hadron
+                                          3]. Whether the analytic crossover turns into a first-order       matter is well described by a hadron resonance gas at
+                                          phase transition at finite baryon density at a QCD crit-          freeze-out [22]. Chemical freeze-out curve maps different
+                                          ical point (CP) remains an open question studied both             collision energies onto the (T, µB ) phase diagram [23, 24].
+                                          theoretically, and experimentally through heavy-ion col-          It remains an open question, however, how close these CP
+                                          lisions [4–7].                                                    estimates are to the freeze-out curve in heavy-ion colli-
+                                             First-principle lattice QCD constraints on the QCD             sions. The majority of the CP estimates have been ob-
+                                          CP come to rely on extrapolations from vanishing and              tained at vanishing charge and strangeness chemical po-
+                                          imaginary µB . The state-of-the-art results show no indi-         tentials, µQ = µS = 0, while in heavy-ion collisions, these
+                                          cations for the CP at small baryon densities and disfavor         are non-zero due to strangeness neutrality and the initial
+                                          its existence at µB /T ⪅ 3 [8–10]. Similar conclusion             isospin asymmetry in colliding nuclei. Here, we address
+                                          can be drawn from the measurements of proton num-                 this issue by reevaluating the chemical freeze-out curve
+                                          ber cumulants in heavy-ion collisions [11, 12], which are         and its hypothetical counterpart under µQ = µS = 0
+                                          consistent with non-critical effects at collision energies        conditions.
+                                          √                                √
+                                             sN N ⪆ 20 GeV [13], where sN N is the collision en-               First, we show that a constant energy per particle line,
+                                          ergy per nucleon pair in center of mass frame.                    E/N = 0.951 GeV in the hadron resonance gas (HRG)
+                                             Theoretical predictions for the QCD CP have also               model under strangeness neutrality and charge-to-baryon
+                                          evolved from early days [14], now being increasingly              ratio Q/B = 0.4 describes well the available chemical
+                                                                                                                                                              √
+                                          constrained to lattice QCD data at µB = 0. These                  freeze-out data in a broad collision energy range sN N =
+                                          are based either on the expected universal behavior of            2.4–5020 GeV. Next, we evaluate the same E/N =
+                                          Yang-Lee edge singularities in the vicinity of the CP and         0.951 GeV line at vanishing charge and strangeness chem-
+                                          the extrapolation of the lattice data to lower tempera-           ical potentials, µQ = µS = 0, which would correspond
+                                          tures [15, 16], on the analysis of contours of constant en-       to the hypothetical heavy-ion collisions with the corre-
+                                          tropy density [17], or through effective QCD approaches           sponding electric charge and strangeness content. We
+                                          such as Dyson-Schwinger equations [18, 19], functional            then compare this line in the T -µB plane with the re-
+                                          renormalization group [20], or holography [21]. These             cent CP estimates and discuss how close they are to the
+                                          different predictions place the QCD CP in roughly the             freeze-out curve and at which energies.
+                                                                                                                                       2
+
+   The paper is organized as follows. In Sec. II we briefly             prescription [26].
+revisit the HRG model. In Sec. III we discuss the world                    We also consider an extension of the Id-HRG model
+data of chemical freeze-out points in the T -µB and how                 (see the Appendix) that takes into account the repulsive
+these can be described by the constant energy per particle              and attractive interactions among (anti)baryons. This is
+criterion. In Sec. IV, we examine the chemical freeze-                  done within the QvdW-HRG model (Ref. [34]). Calcula-
+out line in the context of QCD critical point search and                tions are performed using the Thermal-FIST (Ref. [35])
+reevaluate the E/N = const line under µQ = µS = 0                       software, which is freely available.
+conditions. Summary in Sec. V closes the article.
+
+                                                                            III. CHEMICAL FREEZE-OUT LINE AND
+    II.   HADRON RESONANCE GAS MODEL                                           CONSTANT ENERGY PER PARTICLE
+
+
+   We use the hadron resonance gas (HRG) model [28–30]                     Chemical freeze-out (F-O) is a stage of nucleus-nucleus
+in our calculations. The model describes the equilibrated               collisions where the chemical composition of (primor-
+hadronic system as a multicomponent gas of hadrons and                  dial) hadrons becomes fixed, with subsequent changes
+resonance. The essence of this model is described in de-                in hadron abundances occurring only through resonance
+tail in Refs. [31, 32]. We perform most of our calculations             decays. At each collision energy, chemical F-O corre-
+within the ideal HRG (Id-HRG) model but also consider                   sponds to a pair of T -µB values, with primordial hadron
+its two extensions – the excluded volume hadron reso-                   abundances computed in the framework of the HRG
+nance gas (EV-HRG) [33] and quantum van der Waals                       model. This simple model has proven to be very suc-
+hadron resonance gas (QvdW-HRG) [34]. The calcula-                      cessful in describing the measured yields of many differ-
+tions are performed in the grand-canonical ensemble.                    ent hadron species in heavy-ion collisions across a broad
+   In the case of the Id-HRG, the grand canonical pres-                 collision energy range [22, 27, 36–38]. Figure 1 depicts
+sure, energy density, and particle number densities are                 various F-O points from different experiments, including
+calculated as follows:                                                  STAR-BES [27], NA49 [25, 39–41], E-802 [25, 42, 43],
+                   X                                                    and GSI-SIS [44]. To fill the gap at high µB , we ad-
+        p(T, µ) =       pid
+                         i (T, µi ),                    (1)             ditionally performed fits to the recent data for 0–10%
+                                                                                                           √
+                    i                                                   central Au-Au collisions at sN N = 3 GeV from the
+                   di
+                         Z               Z ∞
+                                                  dk k 4                STAR Collaboration [45, 46] using Thermal-FIST and
+    pid
+     i (T, µi ) =            dmfi (m)          √                        the Id-HRG model in the strangeness-canonical ensem-
+                  6π 2                   0        k 2 + m2              ble. Namely, we fitted the 4π yields of primordial pro-
+                  "          √                   !      #−1
+                                 k 2 + m2 − µi                          tons, light nuclei (d, 3 H, 3 He, 4 He), ⟨Npart ⟩, and the yields
+              × exp                                ±1         ,   (2)   of Λ, KS0 , K − , ϕ, Ξ− normalized by ⟨Npart ⟩. This point is
+                                     T
+                                                                        shown in Fig. 1 by the turquoise square.
+                    ∂pid
+                        
+                                                                           By varying the collision energy, one obtains the so-
+    nid
+     i (T, µi ) =          ,                                      (3)
+                    ∂µi T                                               called chemical F-O line in the T -µB plane. There have
+                     id                                               been different chemical F-O criteria proposed in the lit-
+                      ∂p       X
+     εid (T, µ) = T          +   µi nid
+                                     i − p
+                                           id
+                                              ,                   (4)   erature to describe the F-O line [23, 24, 36]. Perhaps
+                      ∂T µ     i                                        the most robust criterion corresponds to the constant
+            µi = bi µB + qi µQ + si µS ,                          (5)   energy per particle of E/N  P ≡ ε/n ≈ 0.9–1.0 GeV [24]
+                                                                        at a F-O, where n =            i ni . One motivation for this
+where µ ≡ (µB , µQ , µS ) and εid is the energy density, nid            criterion is that below a certain energy per particle, the
+is the particle number density, di is the number of internal            inelastic reactions become too weak to maintain chemi-
+degrees of freedom, µi is the chemical potential of ith                 cal equilibrium in a rapidly expanding system created in
+type of hadrons. Three fundamental chemical potentials                  heavy-ion collisions. The validity of such criterion has
+µB , µQ , and µS regulate the three conserved charges in                also been verified with microscopic hadronic transport
+strong interactions, and bi , qi , and si are, respectively,            simulations [47].
+the baryonic, electric, and strange charges of hadrons of                  We use the ε/n = const criterion to estimate the chem-
+the ith type. In Eq. (2) ”-1” is chosen for bosons, and                 ical freeze-out line. Figure 1 depicts the line
+”+1” - for fermions.                                                                        ε
+   Resonances are also included in the HRG model. The                                         = 0.951+0.009
+                                                                                                     −0.011 GeV                      (6)
+                                                                                            n
+                   R taken into account as the integrals
+resonance widths are
+over their masses dmfi (m) in Eq. (1). They are cal-                    calculated in the Id-HRG model. The central ε/n
+culated according to the energy-dependent Breit-Wigner                  value corresponds to the chemical freeze-out tempera-
+                                                                                                                                                                                 3
+
+                                                    2 0 0
+                                                             6 2 .4
+                                                                      3 9   2 7 1 9 .6
+                                       1 6 0                                                       1 1 .5
+                                                   2 7 6 0
+                                                                                                            8 .8 7 .7
+                                                                                          1 7 .3                         6 .3
+                                       1 4 0
+
+                                                                                                                                4 .9
+                          T [M e V ]   1 2 0
+
+
+                                       1 0 0
+                                                                                                                                                      3
+
+                                         8 0                          F r e e z e - o u t l i n e ε/ n = 0 . 9 5 1 G e V
+                                                                       L H C , P R C 9 8 , 0 3 4 9 0 6 (2 0 1 8 )                                                       2 .2
+                                                                        R H IC -B E S , P R C 9 6 , 0 4 4 9 0 4 (2 0 1 7 )
+                                         6 0                             S P S , P R C 9 3 , 0 6 4 9 0 6 (2 0 1 6 )
+                                                                                                                                                                 2 .3
+                                                                          A G S , P R C 9 3 , 0 6 4 9 0 6 (2 0 1 6 )
+                                                                           R H I C - F X T , th is w o r k
+                                         4 0                                G S I-S IS , P R C 9 3 , 0 6 4 9 0 6 (2 0 1 6 )                               2 .4
+
+                                               0                                  2 0 0                         4 0 0                  6 0 0              8 0 0
+                                                                                                                µB [ M e V ]
+
+Figure 1. The symbols depict the various chemical freeze-out data points from the literature [25–27] and include the 3 GeV
+data point obtained in this paper (see text for details). Different symbol styles represent different experiments with the labels
+           √
+indicating sN N [GeV] for each point. The dashed black line shows the constant energy per particle line ε/n = 0.951 GeV,
+computed within the ideal HRG model and used in this paper as a parametrization of the freeze-out curve. For clarity, the
+black dashed line passes through the gray area. The lower limit of the gray area corresponds to the line of constant energy per
+particle ε/n = 0.940 GeV, and the upper limit to the line ε/n = 0.960 GeV.
+
+
+ture Tch = 160 MeV at µB = 0, which is in line with                                                                     reduces to solving a system of transcendental equations
+thermal fits at CERN Large Hadron Collider (LHC) en-
+ergies performed within the same model using Thermal-                                                                                           ε(T, µB , µQ , µS )
+                                                                                                                                                                     = const,   (7)
+FIST code from Ref. [35] (blue point in Fig. 1). The                                                                                            n(T, µB , µQ , µS )
+upper and lower errors have been obtained by requir-                                                                                           nQ (T, µB , µQ , µS )
+ing the ε/n = const to graze the lower error bar of                                                                                                                  = 0.4,     (8)
+√                       √                                                                                                                      nB (T, µB , µQ , µS )
+  sN N = 8.8 GeV and sN N = 4.9 GeV F-O points,
+respectively. These requirements are in place to inter-                                                                                        nS (T, µB , µQ , µS ) = 0        (9)
+pret the ε/n = const line as a lower limit on the F-O
+                                                                                                                        with respect to T , µQ , and µS at each fixed value of µB .
+temperature at µB > 400 MeV, where the CP may be
+                                                                                                                        One can see from Fig. 1 that the line ε(T, µB )/n(T, µB ) =
+located.
+                                                                                                                        0.951 GeV describes fairly well the depicted F-O points,
+                                                                                                                        especially at µB ⪅ 300 MeV. At high µB , it tends to pro-
+                                                                                                                        vide a lower limit on the chemical F-O temperature. In
+                                                                                                                        fact, it is our main motivation here to obtain a lower
+                                                                                                                        temperature limit in the baryon-dense regime for the
+   The line shown in Fig. 1 is calculated taking into ac-                                                               freeze-out line, which will be relevant for the discussion
+count conservation of strangeness S = 0 and electric                                                                    of the QCD critical point in the following section. As
+charge Q/B = 0.4 (the second condition corresponds                                                                      one can see from Fig. 1, the line in Eq. (6) captures the
+to proton-to-nucleon ratio in heavy nuclei). By solving                                                                 lowest possible chemical freeze-out temperature value at
+these two equations, one determines the values of the                                                                   µB > 400 MeV, thus we take it to define the lower limit
+electric and strangeness chemical potentials µQ and µS                                                                  on Tch for µB > 400 MeV. In the Appendix (see Fig.
+as a function of the baryochemical potential µB and the                                                                 3), we show the same calculation within EV-HRG and
+temperature T . For this reason, µQ and µS are not inde-                                                                QvdW-HRG models, which place the F-O line slightly
+pendent variables, and the construction of the F-O line
+                                                                                                                                                                                                                                                         4
+
+                                   _ _                                                                                                                   1 4 0
+              1 6 0              √s N N = 2 0 G e V
+                                                                                                                                 (a )                                                                                                        (b )
+
+              1 4 0                                                                                                                                      1 3 0
+                                                                                    6                                                                                            6
+              1 2 0                                                                             5
+                                                                                                                                                         1 2 0
+                                                                                                                                                                                                         5
+ T [M e V ]
+
+
+
+
+                                                                                                                                            T [M e V ]
+              1 0 0                                                                                          4
+                                                                                                                      3 .5
+                                                                                                                                                         1 1 0
+                8 0       ε / n = 0 . 9 5 1 G e V ( µQ = 0 , µS = µB / 3 )                                                   3
+                          ε/ n = 0 . 9 5 1 G e V ( n Q / n B = 0 . 4 , n S = 0 )                                                                                                                                                  4
+                          ε / n = 0 . 9 5 1 G e V ( µQ = µS = 0 )                                                                                        1 0 0
+                6 0
+                          D S E ( G u n k e l e t a l . , µS = µB / 3 )                  fR G       ( F u e t a l.)
+                          L Q C D - S ( S h a h e t a l.)                        fR G - D S E ( G a o , P a w lo w s k i)                                                                                                             3 .5
+                                                                                                                                                           9 0           Q C D       c r itic a l p o in t d is fa v o r e d
+                4 0        L Q C D -Y L E (B a s a r, N τ= 8 )                              B H E ( H ip p e r t e t a l.)
+                          L Q C D - Y L E ( P a r m a - B ie le fe ld , N   τ=    6 )
+                      0              2 0 0                        4 0 0                              6 0 0                          8 0 0                        4 0 0                  5 0 0                             6 0 0                  7 0 0
+                                                            µB [ M e V ]                                                                                                                        µB [ M e V ]
+
+
+Figure 2. (a) The lines represent the chemical freeze-out curves computed through constant energy per particle criterion
+ε/n = 0.951 GeV in the ideal HRG model under (dashed black line) heavy-ion collision conditions (nQ /nB = 0.4 and nS = 0),
+(solid red line) vanishing charge and strangeness chemical potentials (µQ = µS = 0), and (dotted blue line) under the conditions
+µQ = 0 and µS = µB /3. The shaded area beneath the red line indicates the region of the phase diagram where the QCD
+                                                                                     √
+critical point is disfavored by heavy-ion data. The black points depict the different sN N values in GeV. Various critical point
+predictions from the literature for µS = 0 [15–17, 19–21] and µS = µB /3 [18] are shown by the colored symbols. (b) Zoomed-in
+view of the region µB ∈ [370–700] MeV.
+
+
+higher at nonzero µB . We note that the F-O curve may                                                                                           picted by symbols in Fig. 2. One can observe a contradic-
+be affected significantly by other choices of repulsive in-                                                                                     tion of sorts for some of the estimates, namely that they
+teractions, such as bag model scaling [48, 49], but these                                                                                       lie below the F-O curve (dashed black line in Fig. 2),
+always tend to increase the F-O temperature. Therefore,                                                                                         where the existence of the CP should be excluded. Of
+the black line in Fig. 1 can indeed be regarded as the                                                                                          course, there is some uncertainty in the F-O curve at
+lower limit on the F-O curve in heavy-ion collisions.                                                                                           large µB , but, as discussed in the previous section and
+                                                                                                                                                visible in Fig. 1, the black dashed curve generally corre-
+                                                                                                                                                sponds to the lower end of the error bar in temperatures.
+IV.               CHEMICAL FREEZE-OUT LINE AND QCD                                                                                                 However, it is important to keep in mind that the F-O
+                         CRITICAL POINT                                                                                                         curve is obtained under conditions of strangeness neutral-
+                                                                                                                                                ity and a charge-to-baryon ratio of 0.4, which corresponds
+   Taking a picture of an equilibrated hadron resonance                                                                                         to significantly non-zero values of µS and µQ , roughly
+gas at chemical F-O at face value; the F-O line provides                                                                                        µS ≈ µB /3 and µQ ≈ −µB /30. On the other hand, the
+a lower bound in temperature at fixed µB for the possi-                                                                                         majority of the theoretical estimates of the CP location in
+ble location of the QCD CP. Decreasing the temperature                                                                                          T -µB plane are obtained for µS = µQ = 0. Resolving this
+at a fixed µB leads to smaller hadron number densities.                                                                                         difference in strangeness and charge conservation condi-
+Therefore, the significant effects of deconfinement and                                                                                         tions is necessary to make further conclusions, especially
+chiral symmetry restoration necessary for the CP can                                                                                            given that most of the CP estimates are only slightly be-
+only be observed at higher temperatures.                                                                                                        low the chemical F-O curve. Either the CP estimates
+   It is instructive to put the lower bound from the F-                                                                                         should be provided under nS = 0, nQ /nB = 0.4 condi-
+O curve in the context of recent estimates of the CP                                                                                            tions, or modifications to the F-O curve corresponding
+location. These estimates come from lattice QCD analy-                                                                                          to µS = µQ = 0 should be evaluated.
+ses of Yang-Lee edge singularities [15, 16], entropy den-                                                                                          Here, we pursue the latter approach and calculate the
+sity contours [17], effective QCD approaches, including                                                                                         hypothetical chemical F-O curve under µS = µQ = 0
+Dyson-Schwinger equations (DSE) [18, 19], functional                                                                                            conditions. We do this by calculating the same con-
+renormalization group (fRG) [20], and black-hole engi-                                                                                          stant energy per particle line ε(T, µB , µQ = 0, µS =
+neering (BHE) [21]. The corresponding estimates are de-                                                                                         0)/n(T, µB , µQ = 0, µS = 0) = 0.951 GeV in the Id-HRG
+                                                                                                                                5
+
+model. The result is shown by the red line in Fig. 2. One    malization group (fRG) [20], or Dyson-Schwinger equa-
+can see that the red line lies systematically below the      tions (DSE) [18, 19], depicted in Fig. 2 by different sym-
+black curve at finite µB . Although this downward shift      bols and which all also lie above the F-O curve.1 The
+is not dramatic, it is significant for comparisons of CP     question of systematic error in functional approaches is
+estimates with the F-O curve.                                important and has been estimated in fRG [20] to give the
+   In addition, we also consider the case µS = µB /3 and     range (135, 480) MeV ⪅ (TCP , µB, CP ) ⪅ (103, 660) MeV
+µQ = 0, which corresponds to vanishing strange quark         for the possible location of the CP. Finally, the estimates
+chemical potential, µs = 0, and describes strangeness        from Ref. [21] are based on a holographic black hole
+neutral isospin-symmetric matter in the free QGP limit.      model fixed to reproduce lattice QCD thermodynamics
+The resulting chemical freeze-out line, shown by the blue    at µB = 0. These estimates place the CP very close to
+dotted line in Fig. 2, is very close to the heavy-ion line   the F-O curve.
+obtained under nS = 0, nQ /nB = 0.4 conditions. Set-            One can see that the various estimates presented here
+ting µS = µB /3 is sometimes used to approximate the         place the CP in a similar region of the phase diagram, and
+strangeness-neutral equation of state in heavy-ion col-      some of them are very close to the F-O line. It should be
+lisions (see e.g. [18]), and our HRG model calculation       noted that the HRG model is expected to break down as
+presented here indicates that such an approximation is       one approaches the CP of the QCD phase transition, as
+reasonably accurate.                                         the model has no phase transition or partonic degrees of
+   We now discuss the various CP estimates and their         freedom. Therefore, one could argue that the CP should
+comparison with the F-O bound in more detail. The            not only lie above F-O curve, but also be some distance
+LQCD-YLE estimate from Parma-Bielefeld group [16]            away from the F-O curve. It is not trivial to estimate pre-
+is based on extracting Yang-Lee edge singularities from      cisely how far away from the phase transition the HRG
+imaginary µB simulations via multipoint Padé approach.      model description of hadron yields still applies, but this
+The extraction is performed at temperatures T ≥              argument does indicate that the obtained F-O line fa-
+120 MeV, and extrapolation toward a CP at a lower tem-       vors LQCD-S/DSE/fRG estimates that are 10–15 MeV
+perature is performed based on the expected critical scal-   in temperature above the F-O line somewhat more than
+ing behavior of YLE [50]. The extracted CP location is       LQCD-YLE and BHE ones.
+TCP = 105+8                                +80
+             −18 MeV and µB, CP = 422−35 MeV, which
+                                                               To estimate the relevant collision energy range where
+is significantly below the F-O curve as shown in Fig. 2.
+                                                             the F-O lies the closest to the CP estimates, we utilize
+However, the primary analysis in Ref. [16] was performed
+                                                             the following parametrization of the collision energy de-
+on coarse lattices (Nτ = 6), and the importance of taking
+                                                             pendence of µB [25]:
+the continuum limit was emphasized. Possible systematic
+uncertainties in determining YLE singularities and the                                          c
+extrapolation from higher temperatures down to the CP                               µB ∼
+                                                                                       =        √                            (10)
+                                                                                           1 + d sN N
+needs also be controlled. Analyses of Nτ = 8 data sets
+using Padé method in [16] and using various resumma-        with parameter values2 of c = 1.477 GeV and d =
+tions in Ref. [15] indicate larger values of µB, CP ≈ 560–   0.343 GeV−1 . By utilizing Eq. (10) (see black points
+580 MeV, and the temperature of TCP ≈ 100 MeV, with          in Fig. 2), one can estimate the collision energy range of
+sizable errors. These estimates are closer to the F-O        √
+                                                               sN N = 3.5–6 GeV as most promising in the search for
+curve and indicate the importance of continuum extrap-       the CP, which can be explored with the measurements
+olation, along with that of the control over systematic      of proton cumulants within RHIC fixed target program
+uncertainties in determining YLE singularities and the       and the future CBM experiment at FAIR [51, 52]. The
+extrapolation from high temperatures down to the CP.                          √
+                                                             lower energies, sN N ⪅ 3.5 GeV, on the other hand,
+   A different lattice-based estimation of the CP has        can be utilized to look for the signs of a first-order phase
+recently been presented in Ref. [17]. It is based on         transition.
+the appearance of crossings of entropy density contours,
+which have been extrapolated from µB = 0 based on
+continuum-extrapolated lattice data on entropy density
+and baryon number susceptibility at vanishing baryon
+density. This LQCD-S estimate, obtained in Ref. [17] on
+                                                             1 Note that the DSE estimate from Ref. [18] is obtained for µ
+a O(µ2B ) level places the CP at TCP = 114.3 ± 6.9 MeV,                                                                    Q = 0,
+                                                               µS = µB /3 case instead of µQ = µS = 0. This CP estimate
+µB, CP = 602.1 ± 62.1 MeV, which is above the F-O line         should therefore be contrasted with the blue dotted line in Fig. 2,
+presented here.                                                and it is positioned higher than this line.
+                                                             2 The parameter errors are immaterial for the discussion in the
+   The LQCD-S results are consistent with the predic-
+tions of functional approaches, based on functional renor-     present paper.
+                                                                                                                           6
+
+                    V.   SUMMARY                                The pressure in the QvdW-HRG model reads
+
+                                                                     p(T, µ) = PM (T, µ) + PB (T, µ) + PB̄ (T, µ)       (A1)
+   In the present work we pointed out that the chemi-
+cal freeze-out (F-O) line in heavy-ion collisions provides    with
+a lower bound in temperature on the possible location                                     X
+of the QCD critical point (CP). While the F-O line is                      PM (T, µ) =           pid
+                                                                                                  i (T, µi ) ,          (A2)
+subject to uncertainties at large baryochemical potential                                 i∈M
+µB , we observe that a constant energy per particle line                                  X
+ε/n = 0.951 GeV evaluated within the ideal HRG model                       PB (T, µ) =           pid     B∗      2
+                                                                                                  i (T, µi ) − anB ,    (A3)
+provides a reasonable estimate for the lower bound on                                     i∈B
+                                                                                          X
+the chemical F-O temperature at µB > 400 MeV and                           PB̄ (T, µ) =          pid     B̄∗     2
+                                                                                                  i (T, µi ) − anB̄ ,   (A4)
+thus also sets the lower bound on QCD CP.                                                 i∈B̄
+   Here we evaluated in detail the effect of strangeness
+neutrality condition and found that its removal leads to                B(B̄)∗
+                                                              where µi       = µi − bPB(B̄) − abn2B(B̄) + 2anB(B̄) , nB(B̄)
+a downward shift of the F-O temperature at fixed µB .         is the number density of baryons (antibaryons), which is
+Comparing the F-O line under µS = µQ = 0 conditions           determined from the following expression:
+to recent CP location estimates, we find that most of the
+recent CP estimates, based either on effective QCD ap-                                     X              B(B̄)∗
+                                                                   nB(B̄) = (1 − bnB(B̄) )      nid
+                                                                                                  i (T, µi       )    (A5)
+proaches or extrapolation of lattice QCD data, place the
+                                                                                                 i∈B(B̄)
+CP slightly above the F-O curve, suggesting that heavy-
+                  √
+ion collisions at sN N = 3.5–6 GeV may be most sensi-         and a, b are the constants of the van der Waals quantum
+tive to the CP. We also observe that a CP estimate based      equation of state.
+on Yang-Lee edge singularities extracted from Nτ = 6
+                                                                The total particle number density in the QvdW-HRG
+lattice QCD simulations lies significantly below the F-
+                                                              model is calculated as
+O line, likely indicating the importance of achieving the
+continuum limit in that approach.                                                n = nM + nB + nB̄ ,                    (A6)
+   We do point out that our conclusions are based on the
+validity of an equilibrated hadron resonance gas picture      where baryon and antibaryon densities are given by
+at the chemical freeze-out stage of heavy-ion collision, in   Eq. (A5) and meson number density by the ideal gas
+particular at intermediate collision energies that probe      expression:
+the baryon-rich region of the QCD phase diagram where                             X
+the CP may be located. Although there is significant ev-                     nM =     nid
+                                                                                       i (T, µi ) .         (A7)
+idence from the measured hadron abundances that this                                       i∈M
+is the case, one has to keep this assumption in mind
+when considering the F-O bound on CP presented in this        The total energy density can be calculated as
+paper. On the other hand, if convincing evidence does                                          
+emerge that the CP is located below the phenomenolog-                          ∂p             ∂p
+                                                                ε(T, µ) = T          + µB                      (A8)
+ical freeze-out curve, the concept of chemical freeze-out                      ∂T µ          ∂µB T,µQ ,µS
+may need to be revisited.                                              
+                                                                          ∂p
+                                                                                           
+                                                                                               ∂p
+                                                                                                   
+   Acknowledgements. A.L. thanks Prof. S. Vilchin-               + µQ                  + µS                 − p.
+                                                                         ∂µQ T,µB ,µS         ∂µS T,µB ,µQ
+skii for his useful advice and assistance, which played a
+major role in writing this paper. V.V. thanks S. Borsányi
+for fruitful discussions on the strangeness neutrality con-      It can be seen from Eqs. (A1)-(A5) that at a = 0 and
+dition. M.I.G. is thankful for the support from the Si-       b = 0, the system reduces to the Id-HRG. The special
+mons Foundation.                                              case where a = 0 but b remains nonzero is referred to
+                                                              as an excluded volume hadron resonance gas (EV-HRG).
+                                                              This scenario represents a system where only repulsive
+                                                              interactions between (anti)baryons are present.
+   Appendix A: Freeze-out line in non-ideal HRG                  In this work, we use the values a = 329 MeV fm3 ,
+                     models                                   b = 3.42 fm3 for calculations within QvdW-HRG model,
+                                                              and b = 1 fm3 within the EV-HRG model. The former
+  Here we analyze the possible influence of baryonic in-      parameter set corresponds to the ground state of nuclear
+teractions on the chemical F-O line by evaluating the         matter at temperature T = 0 [53], while the latter pro-
+ε/n = const line in EV-HRG and QvdW-HRG models.               vides a good description of baryon number susceptibili-
+                                                                                                                            7
+
+                                   160
+
+
+                                   140
+
+
+                         T [MeV]   120
+
+
+                                   100
+
+
+                                   80
+                                             ε/n = const:
+                                   60              Id-HRG
+
+                                                   EV-HRG
+
+                                   40              QvdW-HRG
+
+
+
+                                         0            200           400             600            800
+
+                                                                  µB [MeV]
+
+Figure 3. Constant energy per particle lines corresponding to chemical F-O in heavy-ion collisions calculated within three
+versions of the HRG model: Id-HRG (dashed black line), EV-HRG (dotted red line), and QvdW-HRG (dash-dotted blue line).
+
+
+ties from lattice QCD at µB = 0 and T < 160 MeV [10].                  • EV-HRG: 0.946 GeV,
+  The results of the calculations are presented in Fig. 3.             • QvdW-HRG: 0.942 GeV.
+The lines were plotted under the condition ε/n = const,
+with the value of the constant chosen differently for each            One observes that the three lines do not differ much.
+model to ensure T (µB = 0) = 160 MeV. Namely,                       The inclusion of interactions generally shifts the temper-
+                                                                    ature slightly upward (see also Ref. [54]). Thus one can
+                                                                    regard the Id-HRG model calculation as providing a lower
+   • Id-HRG: 0.951 GeV,                                             bound on the F-O temperature at fixed µB .
+
+
+
+
+ [1] Y. Aoki, G. Endrodi, Z. Fodor, S. D. Katz, and K. K.                Phys. Rev. Lett. 125, 052001 (2020), arXiv:2002.02821
+     Szabo, Nature 443, 675 (2006), arXiv:hep-lat/0611014.               [hep-lat].
+ [2] S. Borsanyi, Z. Fodor, C. Hoelbling, S. D. Katz, S. Krieg,      [9] A. Bazavov et al. (HotQCD), Phys. Lett. B 795, 15
+     C. Ratti, and K. K. Szabo (Wuppertal-Budapest), JHEP                (2019), arXiv:1812.08235 [hep-lat].
+     09, 073 (2010), arXiv:1005.3508 [hep-lat].                     [10] V. Vovchenko, J. Steinheimer, O. Philipsen,       and
+ [3] A. Bazavov et al. (HotQCD), Phys. Rev. D 90, 094503                 H. Stoecker, Phys. Rev. D 97, 114030 (2018),
+     (2014), arXiv:1407.6387 [hep-lat].                                  arXiv:1711.01261 [hep-ph].
+ [4] M. A. Stephanov, K. Rajagopal, and E. V. Shuryak,              [11] S. Acharya et al. (ALICE), Phys. Lett. B 807, 135564
+     Phys. Rev. Lett. 81, 4816 (1998), arXiv:hep-ph/9806219.             (2020), arXiv:1910.14396 [nucl-ex].
+ [5] M. A. Stephanov, K. Rajagopal, and E. V. Shuryak,              [12] M. Abdallah et al. (STAR), Phys. Rev. C 104, 024902
+     Phys. Rev. D 60, 114028 (1999), arXiv:hep-ph/9903292.               (2021), arXiv:2101.12413 [nucl-ex].
+ [6] J. Adam et al. (STAR), Phys. Rev. Lett. 126, 092301            [13] V. Vovchenko, V. Koch, and C. Shen, Phys. Rev. C 105,
+     (2021), arXiv:2001.02852 [nucl-ex].                                 014904 (2022), arXiv:2107.00163 [hep-ph].
+ [7] J. Adamczewski-Musch et al. (HADES), Phys. Rev. C              [14] M. A. Stephanov, Prog. Theor. Phys. Suppl. 153, 139
+     102, 024914 (2020), arXiv:2002.08701 [nucl-ex].                     (2004), arXiv:hep-ph/0402115.
+ [8] S. Borsanyi, Z. Fodor, J. N. Guenther, R. Kara, S. D.          [15] G. Basar, Phys. Rev. C 110, 015203 (2024),
+     Katz, P. Parotto, A. Pasztor, C. Ratti, and K. K. Szabo,            arXiv:2312.06952 [hep-th].
+                                                                                                                           8
+
+[16] D. A. Clarke, P. Dimopoulos, F. Di Renzo, J. Goswami,           ph].
+     C. Schmidt, S. Singh, and K. Zambello, (2024),             [35] V. Vovchenko and H. Stoecker, Comput. Phys. Commun.
+     arXiv:2405.10196 [hep-lat].                                     244, 295 (2019), arXiv:1901.05249 [nucl-th].
+[17] H. Shah, M. Hippert, J. Noronha, C. Ratti, and             [36] J. Cleymans and K. Redlich, Phys. Rev. C 60, 054908
+     V. Vovchenko, (2024), arXiv:2410.16206 [hep-ph].                (1999), arXiv:nucl-th/9903063.
+[18] P. J. Gunkel and C. S. Fischer, Phys. Rev. D 104, 054022   [37] F. Becattini, J. Cleymans, A. Keranen, E. Suhonen, and
+     (2021), arXiv:2106.08356 [hep-ph].                              K. Redlich, Phys. Rev. C 64, 024901 (2001), arXiv:hep-
+[19] F. Gao and J. M. Pawlowski, Phys. Lett. B 820, 136584           ph/0002267.
+     (2021), arXiv:2010.13705 [hep-ph].                         [38] F. Becattini, M. Gazdzicki, A. Keranen, J. Manninen,
+[20] W.-j. Fu, J. M. Pawlowski, and F. Rennecke, Phys. Rev.          and R. Stock, Phys. Rev. C 69, 024905 (2004), arXiv:hep-
+     D 101, 054032 (2020), arXiv:1909.02991 [hep-ph].                ph/0310049.
+[21] M. Hippert, J. Grefa, T. A. Manning, J. Noronha,           [39] S. V. Afanasiev et al. (NA49), Phys. Rev. C 66, 054902
+     J. Noronha-Hostler, I. Portillo Vazquez, C. Ratti,              (2002), arXiv:nucl-ex/0205002.
+     R. Rougemont, and M. Trujillo, Phys. Rev. D 110,           [40] C. Alt et al. (NA49), Phys. Rev. C 73, 044910 (2006).
+     094006 (2024), arXiv:2309.00579 [nucl-th].                 [41] C. Alt et al. (NA49), Phys. Rev. C 77, 024903 (2008),
+[22] A. Andronic, P. Braun-Munzinger, K. Redlich, and                arXiv:0710.0118 [nucl-ex].
+     J. Stachel, Nature 561, 321 (2018), arXiv:1710.09425       [42] L. Ahle et al. (E802), Phys. Rev. C 60, 064901 (1999).
+     [nucl-th].                                                 [43] L. Ahle et al. (E-802, E-866), Phys. Rev. C 60, 044904
+[23] J. Cleymans and K. Redlich, Phys. Rev. Lett. 81, 5284           (1999), arXiv:nucl-ex/9903009.
+     (1998), arXiv:nucl-th/9808030.                             [44] R. Averbeck, R. Holzmann, V. Metag, and R. S. Simon,
+[24] J. Cleymans, H. Oeschler, K. Redlich, and S. Wheaton,           Phys. Rev. C 67, 024903 (2003), arXiv:nucl-ex/0012007.
+     Phys. Rev. C 73, 034905 (2006), arXiv:hep-ph/0511094.      [45] M. Abdulhamid et al. (STAR), Phys. Rev. C 110, 054911
+[25] V. Vovchenko, V. V. Begun, and M. I. Gorenstein, Phys.          (2024), arXiv:2311.11020 [nucl-ex].
+     Rev. C 93, 064906 (2016), arXiv:1512.08025 [nucl-th].      [46] (2024), arXiv:2407.10110 [nucl-ex].
+[26] V. Vovchenko, M. I. Gorenstein, and H. Stoecker, Phys.     [47] T. Reichert, G. Inghirami, and M. Bleicher, Eur. Phys.
+     Rev. C 98, 034906 (2018), arXiv:1807.02079 [nucl-th].           J. A 56, 267 (2020), arXiv:2007.06440 [nucl-th].
+[27] L. Adamczyk et al. (STAR), Phys. Rev. C 96, 044904         [48] V. Vovchenko and H. Stöcker, J. Phys. G 44, 055103
+     (2017), arXiv:1701.07065 [nucl-ex].                             (2017), arXiv:1512.08046 [hep-ph].
+[28] R. Hagedorn, Nuovo Cim. Suppl. 3, 147 (1965).              [49] V. Vovchenko and H. Stoecker, Phys. Rev. C 95, 044904
+[29] R. Dashen, S.-K. Ma, and H. J. Bernstein, Phys. Rev.            (2017), arXiv:1606.06218 [hep-ph].
+     187, 345 (1969).                                           [50] M. A. Stephanov, Phys. Rev. D 73, 094508 (2006),
+[30] R. Venugopalan and M. Prakash, Nucl. Phys. A 546, 718           arXiv:hep-lat/0603014.
+     (1992).                                                    [51] T. Ablyazimov et al. (CBM), Eur. Phys. J. A 53, 60
+[31] J. Cleymans and H. Satz, Z. Phys. C 57, 135 (1993),             (2017), arXiv:1607.01487 [nucl-ex].
+     arXiv:hep-ph/9207204.                                      [52] D. Almaalol et al., (2022), arXiv:2209.05009 [nucl-ex].
+[32] V. Vovchenko, D. V. Anchishkin, and M. I. Gorenstein,      [53] V. Vovchenko, D. V. Anchishkin, and M. I. Gorenstein,
+     Phys. Rev. C 91, 024905 (2015), arXiv:1412.5478 [nucl-          Phys. Rev. C 91, 064314 (2015), arXiv:1504.01363 [nucl-
+     th].                                                            th].
+[33] V. Vovchenko, A. Pasztor, Z. Fodor, S. D. Katz,            [54] R. Poberezhnyuk, V. Vovchenko, A. Motornenko, M. I.
+     and H. Stoecker, Phys. Lett. B 775, 71 (2017),                  Gorenstein, and H. Stoecker, Phys. Rev. C 100, 054904
+     arXiv:1708.02852 [hep-ph].                                      (2019), arXiv:1906.01954 [hep-ph].
+[34] V. Vovchenko, M. I. Gorenstein, and H. Stoecker, Phys.
+     Rev. Lett. 118, 182301 (2017), arXiv:1609.03975 [hep-
+

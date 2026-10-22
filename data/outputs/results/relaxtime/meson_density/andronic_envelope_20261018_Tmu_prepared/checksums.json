@@ -1,0 +1,8 @@
+{
+  "energy_anchors.csv": "826952ed27bed20c11b07e422be10fc2b7e600274852f6181c4e0d2861704ad1",
+  "freezeout_parameter_envelope.py": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422",
+  "parameters.csv": "e53c5a3651e4e7fd4f7ed56774a14337eab34af11c676c30baff5413031a79c8",
+  "plot_freezeout_thermodynamic_envelope.py": "7d067840c15ad435e4cfac7714bbec1527a00c0973c5e5fa903a2aa582b036fc",
+  "preparation.json": "b09a6c0c5173bb52f1cb22d28fc510f6b825843d7e0f86d185d5cf5eb0e6e355",
+  "thermodynamic_band.csv": "88242996dc025b9e368abcb22eb47f37ae3982bc6b0d1456304b46581401fbb5"
+}

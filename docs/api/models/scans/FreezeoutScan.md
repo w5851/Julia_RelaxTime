@@ -58,6 +58,49 @@
 - `\mu_B(\sqrt{s_{NN}}) = d / (1 + e \sqrt{s_{NN}})`
 - `T(\mu_B) = a - b \mu_B^2 - c \mu_B^4`
 
+`Models.load_freezeout_profile(profile="andronic2018")` 现在返回
+`AndronicFreezeoutProfile`，使用文献默认的 logistic 温度与有理式化学势。
+`default` 和 `cleymans2006` 仍返回原来的 `FreezeoutParameterProfile`，原字段与
+构造器保留。两者均属于 `AbstractFreezeoutParameterProfile`；扫描和 baseline
+path 层按这一公共类型接收 profile，温度公式按具体类型分派。
+
+设 `z = sqrt_s_NN_GeV`，Andronic 2018 的默认值为：
+
+```math
+T_f = \frac{0.1584}{1+\exp(2.60-\ln z/0.45)}\;\mathrm{GeV},\qquad
+\mu_B = \frac{1.3075}{1+0.288z}\;\mathrm{GeV}.
+```
+
+来源是 Nature **561**, 321 (2018), Fig. 3 图注（[arXiv:1710.09425v2](https://arxiv.org/abs/1710.09425v2)，PDF p.6）。
+该参数化的高能极限是 158.4 MeV，不能替换为同文 ALICE 单点拟合的 156.5 MeV。
+两种配置均为化学冻结线，不包含 crossover 线或 critical-line 代理路径。
+
+```julia
+profile = Models.load_freezeout_profile(profile="andronic2018")
+pt = Models.freezeout_point_MeV(profile, 7.7) # T ~= 138.428 MeV, muB ~= 406.359 MeV
+points = Models.build_freezeout_scan_points([7.7, 19.6, 200.]; profile=profile)
+```
+
+映射入口接受有限、非负的碰撞能量；温度函数的化学势参数单位是 GeV。
+Andronic 的 `freezeout_temperature_GeV(profile, muB_GeV)` 用同一有理式的逆映射，
+定义域是 `0 <= muB_GeV <= d_GeV`，零化学势返回 `T_lim_GeV`。
+零能量仅保留解析极限；实际计算的路径必须具有正能量和正温度。
+`freezeout_point_MeV` 保留原有 GeV、MeV、`T_fm`、`muB_fm` 字段，后两者单位为 fm^-1。
+
+未知命名 profile、未知 family、损坏的 TOML 或缺失的 Andronic 系数会抛出
+`ArgumentError`，不会静默改用 Cleymans。旧 Cleymans 的部分系数覆盖仍可继承
+默认值；新 family 必须给出完整系数，以避免混合两篇文献的映射参数。
+不同路径的 q=0 外推比较入口和输出见
+[化学冻结线比较脚本](../../../guides/scripts/meson_freezeout_comparison.md)。
+
+补充的文献配置 `ihrg2019`、`frg2024_mudep`、`frg2024_muindep`、
+`functional_qcd2026_mean` 均可用同一加载接口，返回 `FreezeoutParameterProfile`。
+这里的多项式 family 只描述代数形式，不表示来源仍是 Cleymans。归一化曲率式
+`T=T0*(1-k2*(muB/T0)^2-k4*(muB/T0)^4)` 以 GeV 为单位时对应
+`a=T0,b=k2/T0,c=k4/T0^3`。API 的数学输入检查不替代文献适用能区的审查；
+FRG 的 7.7 GeV 外推及守恒荷差异见
+[来源与范围](../../../analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/literature_candidates_20261017.md)。
+
 公式与参数来源见：
 
 - [../../../reference/formula/relaxtime/meson_density/MesonDensity_Freezeout路径参数化.md](../../../reference/formula/relaxtime/meson_density/MesonDensity_Freezeout%E8%B7%AF%E5%BE%84%E5%8F%82%E6%95%B0%E5%8C%96.md)

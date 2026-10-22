@@ -1,0 +1,16 @@
+# Chemical freeze-out trajectory; published central values without tuning.
+# Source: https://arxiv.org/abs/2305.16763v2; Eqs. (29)-(30), PDF p.7 Table IV mu-independent row.
+# Companion published glue-potential scenario; 7.7 GeV is excluded from source fit.
+# Polynomial family describes algebra only; it does not identify the fitted source.
+# Normalized source form, when used: T=T0*(1-k2*(muB/T0)^2-k4*(muB/T0)^4).
+# Exact coefficient conversion: b=k2/T0 and c=k4/T0^3, with T0 in GeV.
+profile_name = "frg2024_muindep"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "frg2024_muindep_arxiv2305.16763v2_published_central"
+
+[coefficients]
+a_GeV = 0.1539
+b_GeV_inv1 = 4.775828460038986e-06
+c_GeV_inv3 = 1.0973473819267652
+d_GeV = 0.7513099999999999
+e_GeV_inv1 = 0.159

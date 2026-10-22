@@ -1,0 +1,121 @@
+{
+  "schema": "freezeout_pr_validation_v1",
+  "recorded_at_utc": "2026-10-22T00:31:44.870227+00:00",
+  "scope": "One research chain: published defaults, literature screening, polynomial and Andronic finite parameter envelopes, matched-resolution review and PNG evidence. No new production scan or follow-up research.",
+  "base_commit": "698feaf8fada670fde81c93bab6093b50093935f",
+  "branch": "codex/meson-freezeout-review",
+  "source_worktree": "D:/w/meson-freezeout-defaults",
+  "review_worktree": "D:/w/meson-freezeout-review",
+  "evidence_status": "diagnostic_only",
+  "author_png_review": "pending",
+  "stage_conclusion": "Polynomial sampled best matches the fixed nine Au+Au points better than Andronic sampled best; neither reproduces the full horn. No global-optimum, confidence-region, independent-prediction or full endpoint/tail convergence claim.",
+  "software_checks": {
+    "julia_version": "1.12.5",
+    "julia_assertions": 625,
+    "unit_assertions": 213,
+    "integration_assertions": 71,
+    "regression_assertions": 341,
+    "python_tests": 30,
+    "selectors": {
+      "unit": "models/test_freezeout_profiles.jl,models/test_freezeout_path_profiles.jl,relaxtime/test_charged_gbu_q0_reference.jl",
+      "integration": "relaxtime/test_charged_gbu_freezeout_comparison.jl",
+      "regression": "relaxtime/test_meson_density_freezeout_phase_shift_gbu_path_regression.jl"
+    },
+    "python_command": "python -X utf8 -m unittest tests.unit.python.test_andronic_parameter_envelope tests.unit.python.test_freezeout_parameter_envelope tests.unit.python.test_freezeout_thermodynamic_envelope tests.unit.python.test_freezeout_comparison tests.unit.python.test_freezeout_review_evidence",
+    "existing_kernel_regression": "passed without changing numerical baselines or tolerances"
+  },
+  "evidence_review": {
+    "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/evidence_review.json",
+    "sha256": "b2d6dc3cba40b4407189a4293291bce0e2cd385a2eb899c7427582783ec7eb1f",
+    "numerical_runs": 22,
+    "hash_records": 3212,
+    "successful_density_quotients": 2600,
+    "retained_files": 522,
+    "zip_archives": 5,
+    "restored_members": 5806,
+    "independent_decimal_rmse": "50-digit decimal arithmetic reproduces both selected best scores and the reused Andronic 2018 score",
+    "analytic_projection_values_checked": 4064,
+    "successful_restore": "5806 raw numerical members were restored byte-for-byte; later verify covered 5809 numerical/search archive members and restoration wrote zero existing files; conflicting-file behavior passed fixture tests.",
+    "restored_numerical_members": 5806,
+    "search_response_members": 3
+  },
+  "agent_visual_review": {
+    "color_and_grayscale_pngs_inspected": 10,
+    "manifest_contracts_passed": 5,
+    "observations": "Legends, tick labels, hollow markers and hatch bands readable; no clipping or data occlusion; failed Andronic 17.27 GeV gap retained.",
+    "author_acceptance": "pending"
+  },
+  "governance": {
+    "task_ledger": "passed",
+    "docs_consistency": "passed",
+    "script_entrypoints": "passed: 298 Julia files",
+    "models_entry_contract": "passed",
+    "local_links_checked": 111,
+    "unrelated_tracks": "Source worktree thermal/threshold optimization and SciPlot backlog excluded; root worktree preserved.",
+    "followup": "No new tasks scheduled; determine independently after group meeting.",
+    "staged_evidence_records_checked": 527,
+    "git_diff_cached_check": "passed; frozen PDF binary attributes and one existing source-manifest EOF exception preserve original bytes"
+  },
+  "logs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/archive_restore.log",
+      "bytes": 113,
+      "sha256": "5321029c4fdf80e2f74ab78cbf9c3ab1f017ced91d0fc8852199d1ad7dff9d80"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/archive_verify.log",
+      "bytes": 89,
+      "sha256": "a9e849eb333b75d07fe700ad66945f6ef59b402e84d94402d641921ee0edb427"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/docs.log",
+      "bytes": 67,
+      "sha256": "5affa1c546336c6847ccfd98866e161def73c99716990631bb9e4d41c93d5601"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/entrypoints.log",
+      "bytes": 100,
+      "sha256": "ab48ee9c67264a9d1a7bac0309cead4854973db93d779fe047517bdb7f255d5a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/evidence.log",
+      "bytes": 1179,
+      "sha256": "49f55c19f5260c1d0e48c43d2e4b8dea6a0c2408861c957b01e4357b2a710d16"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/integration.log",
+      "bytes": 409,
+      "sha256": "841b728af8255b89082273942d4b704efaea361a70eb56c627f44f5f2b06019d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/ledger.log",
+      "bytes": 60,
+      "sha256": "90ab51e6206d25c861a5fb2bcfa54b47dbf95ad4515333a00ed58cc2873b2826"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/python.log",
+      "bytes": 134,
+      "sha256": "caa2156388c569d06d1debadba6f536e2b5234d1116d24e540dcc216399b3880"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/regression.log",
+      "bytes": 406,
+      "sha256": "30e0ca20b387e02be3ebafd8ee7b50f465115caac0634cdb10d6ee409dfd1a31"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/scripts.log",
+      "bytes": 209,
+      "sha256": "12511e5f05e4f0b72037305524a14acd627f4c92c3cd4e8f77d7576fe9b9aedb"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/unit.log",
+      "bytes": 76,
+      "sha256": "57f1047c27b89b9444a91f60d08b214fc8f1c48feedf08ffeb9952695e69a5d1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/checks/archive_restore_idempotent.log",
+      "bytes": 110,
+      "sha256": "2cf760976596413a0747cb459d1878c12561991b4c49081535de4ef713f456d3"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "published_ratio_transcription_v1",
+  "citation": "STAR, Phys. Rev. C 79, 034909 (2009), arXiv:0808.2041",
+  "location": "PDF p.27, Table IX, K+/pi+ column, most central Au+Au row at each energy",
+  "rapidity": "|y|<0.1",
+  "observable": "Kplus_over_piplus",
+  "error_definition": "quadrature sum of statistical and systematic uncertainties, as published",
+  "visual_check": "star2009_tableIX_crop.png inspected; charge column and centrality verified",
+  "rows": [
+    {
+      "sqrt_s_NN_GeV": 62.4,
+      "centrality": "0-5%",
+      "ratio": 0.162,
+      "error": 0.012
+    },
+    {
+      "sqrt_s_NN_GeV": 130.0,
+      "centrality": "0-6%",
+      "ratio": 0.167,
+      "error": 0.011
+    },
+    {
+      "sqrt_s_NN_GeV": 200.0,
+      "centrality": "0-5%",
+      "ratio": 0.159,
+      "error": 0.019
+    }
+  ]
+}

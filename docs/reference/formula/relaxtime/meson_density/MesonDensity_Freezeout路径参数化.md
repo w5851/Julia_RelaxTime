@@ -10,7 +10,9 @@
 
 ## 1. 结论先行
 
-当前本地文献库中，与 `K^\pm/\pi^\pm`、freeze-out 现象学最直接相关的几篇文献，**确实共享一条统计模型 chemical freeze-out 参数化基线**：
+当前实现保留 Cleymans 2006 默认线，并提供 Andronic 2018 化学冻结线。
+它们是不同的参数化 family；不能只修改 family 字符串而继续使用同一个温度公式。
+其中，旧的 `K^\pm/\pi^\pm` 文献对照共用以下 Cleymans 基线：
 
 ```math
 T_{\mathrm{fo}}(\mu_B)
@@ -50,7 +52,7 @@ e = 0.265.
 
 这说明当前更稳定的统一结论应是：
 
-1. **函数形式高度统一**；
+1. **明确区分参数化 family**；
 2. **系数组并不天然唯一**；
 3. 因此项目侧必须把“freeze-out parameterization family”与“default coefficient set”分开治理。
 
@@ -64,6 +66,21 @@ e = 0.265.
    - 或用 critical-line + constant-`T` 的拼接代理路径。
 
 因此，freeze-out 参数化与“最终扫描路径”必须在公式层明确拆开。
+
+### 1.1 Andronic 2018 的默认化学冻结线
+
+设 `z = sqrt(s_NN)/GeV`：
+
+```math
+T_f(z)=\frac{158.4\;\mathrm{MeV}}{1+\exp(2.60-\ln z/0.45)},\qquad
+\mu_B(z)=\frac{1307.5\;\mathrm{MeV}}{1+0.288z}.
+```
+
+来自 Andronic et al., Nature **561**, 321 (2018), Fig. 3 图注；
+[arXiv:1710.09425v2](https://arxiv.org/abs/1710.09425v2) PDF p.6。
+括号不能写成 `(2.60 - log(z))/0.45`。158.4 MeV 是跨能量参数化的高能极限，
+与同文的单点温度拟合不同。`config/physics/freezeout/andronic2018.toml` 保存全部中心值。
+本轮默认方案比较不拟合这些参数，不引入参数带；格点 crossover 不属于候选。
 
 ## 2. 引用口径与文献分工
 

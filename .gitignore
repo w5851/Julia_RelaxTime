@@ -43,3 +43,18 @@ test/SuppositionDB/
 
 # 编译产物
 /build/
+
+# Raw chemical-freezeout review records are retained in freezeout_review_20261022 ZIPs.
+data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017*/points/
+data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017*/source_snapshot/
+data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017*/points/
+data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017*/source_snapshot/
+data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018*/points/
+data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018*/source_snapshot/
+data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018*/points/
+data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018*/source_snapshot/
+
+# Original full INSPIRE responses are retained in the literature-search ZIP.
+/data/inputs/meson_freezeout_polynomial_literature_20261017/search/chemical_recent.json
+/data/inputs/meson_freezeout_polynomial_literature_20261017/search/fluctuation_recent.json
+/data/inputs/meson_freezeout_polynomial_literature_20261017/search/parameterization_recent.json

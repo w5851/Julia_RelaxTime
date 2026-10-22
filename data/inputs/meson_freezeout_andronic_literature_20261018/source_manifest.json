@@ -1,0 +1,363 @@
+{
+  "schema": "andronic_freezeout_literature_sources_v1",
+  "review_date": "2026-10-18",
+  "review_timezone": "Asia/Shanghai",
+  "scope": "Directed literature review and analytic coordinates only. No new density calculations, optimized Andronic parameters, joint confidence region, or production approval.",
+  "worktree": "D:/w/meson-freezeout-defaults",
+  "base_head": "698feaf8fada670fde81c93bab6093b50093935f",
+  "formula": {
+    "x": "numerical value of sqrt(sNN) in GeV",
+    "T_MeV": "T_lim_MeV/(1+exp(log_offset-log(x)/log_width))",
+    "muB_MeV": "D_MeV/(1+E_GeV_inv1*x)"
+  },
+  "parameter_order": [
+    "T_lim_MeV",
+    "log_offset",
+    "log_width",
+    "D_MeV",
+    "E_GeV_inv1"
+  ],
+  "references": [
+    {
+      "id": "andronic2009",
+      "year": 2009,
+      "url": "https://arxiv.org/html/0901.2909",
+      "same_fit_url": "https://arxiv.org/html/0812.1186",
+      "locator": "Acta Phys. Pol. B 40, 1005: p.1008 Eq.(1); muB footnote on preceding page",
+      "use": "original logistic fit",
+      "inspire_id": "811333"
+    },
+    {
+      "id": "andronic2018",
+      "year": 2018,
+      "url": "https://arxiv.org/html/1710.09425v2",
+      "doi": "10.1038/s41586-018-0491-6",
+      "locator": "Fig.3 caption",
+      "use": "updated fit",
+      "inspire_id": "1632809"
+    },
+    {
+      "id": "mukherjee2017",
+      "year": 2017,
+      "url": "https://arxiv.org/html/1611.10144",
+      "doi": "10.1103/PhysRevC.96.025205",
+      "locator": "Eqs.(16)-(17); Tlim=165/120 MeV",
+      "use": "adopted shape; 120 MeV scenario is closer to kinetic freezeout"
+    },
+    {
+      "id": "wen_fu2021",
+      "year": 2021,
+      "url": "https://arxiv.org/html/1909.12564",
+      "doi": "10.1088/1674-1137/abe199",
+      "locator": "published Eqs.(34)-(37); preprint Eqs.(33)-(36)",
+      "use": "adopted curve then effective-theory scale mapping"
+    },
+    {
+      "id": "zhao2023",
+      "year": 2023,
+      "url": "https://arxiv.org/pdf/2302.12010",
+      "doi": "10.1088/1674-1137/acbf2a",
+      "locator": "Eq.(28), preprint PDF p.6",
+      "use": "adopted 2009 curve in nonextensive PNJL",
+      "inspire_id": "2635804"
+    },
+    {
+      "id": "du2024",
+      "year": 2024,
+      "url": "https://arxiv.org/html/2401.00596v2",
+      "doi": "10.1103/PhysRevC.110.014904",
+      "locator": "Fig.10 discussion; published PDF p.10",
+      "use": "hydrodynamic comparison with adjusted scales",
+      "inspire_id": "2744157"
+    },
+    {
+      "id": "yu2025",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2403.16548v3",
+      "doi": "10.1007/s41365-025-01661-z",
+      "locator": "open preprint PDF pp.6-7 Eq.(5), Table 4",
+      "use": "same form refitted to particle sets",
+      "inspire_id": "2771655"
+    },
+    {
+      "id": "cross_rapidity2026",
+      "year": 2026,
+      "url": "https://arxiv.org/html/2609.01859v1",
+      "locator": "supplement Eq.(S47)",
+      "use": "adopted 2018 curve",
+      "status": "preprint as of review",
+      "inspire_id": "3198975"
+    }
+  ],
+  "search": {
+    "method": "Directed web searches plus read-only INSPIRE REST metadata queries; not an exhaustive bibliometric census.",
+    "queries": [
+      "Andronic freeze-out 2.60 0.45 parametrization",
+      "freeze-out 158.4 1.4 Andronic",
+      "freeze-out 2.60 0.45 fit errors offset width",
+      "Effect of light nuclei on chemical freeze-out parameters at RHIC energies arxiv"
+    ],
+    "verified_reference_groups": 8
+  },
+  "local_source": {
+    "path": "Yu2025_arxiv2403.16548v3.pdf",
+    "url": "https://arxiv.org/pdf/2403.16548v3",
+    "sha256": "4d40ab1f83ae7bad9eb031357ef2668e7f03758fc8abc53358eb671da705ff16",
+    "bytes": 278927,
+    "visually_reviewed_pdf_pages": [
+      6,
+      7
+    ],
+    "table": 4,
+    "equation": 5
+  },
+  "profiles": [
+    {
+      "id": "andronic2009",
+      "values": [
+        164,
+        2.6,
+        0.45,
+        1303,
+        0.286
+      ],
+      "scope": "hadron_related_center_pool"
+    },
+    {
+      "id": "andronic2018",
+      "values": [
+        158.4,
+        2.6,
+        0.45,
+        1307.5,
+        0.288
+      ],
+      "scope": "hadron_related_center_pool",
+      "Tlim_uncertainty_MeV": 1.4
+    },
+    {
+      "id": "yu2025_set_I",
+      "values": [
+        161.8,
+        0.52,
+        0.79,
+        1442.2,
+        0.329
+      ],
+      "scope": "hadron_related_center_pool",
+      "Tlim_uncertainty_MeV": 3.6,
+      "D_uncertainty_MeV": 306.5
+    },
+    {
+      "id": "yu2025_set_II",
+      "values": [
+        153.5,
+        2.82,
+        0.4,
+        1356.8,
+        0.326
+      ],
+      "scope": "hadron_related_center_pool",
+      "Tlim_uncertainty_table_MeV": 0.6,
+      "Tlim_uncertainty_prose_MeV": 1.4,
+      "D_uncertainty_MeV": 104.3
+    },
+    {
+      "id": "du2024_hydro",
+      "values": [
+        156,
+        2.6,
+        0.45,
+        1050,
+        0.288
+      ],
+      "scope": "separate hydrodynamic comparison"
+    },
+    {
+      "id": "yu2025_set_III",
+      "values": [
+        141.7,
+        8,
+        0.21,
+        829.7,
+        0.184
+      ],
+      "scope": "excluded from common hadron pool; light nuclei only"
+    }
+  ],
+  "analytic_coordinates": [
+    {
+      "profile": "andronic2009",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 143.32239143367653,
+      "muB_MeV": 406.90775092124164,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "andronic2009",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 161.08564577553906,
+      "muB_MeV": 197.25687295627952,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "andronic2009",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 163.9829954760565,
+      "muB_MeV": 22.38831615120275,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "andronic2018",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 138.42845611642903,
+      "muB_MeV": 406.35877672799603,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "andronic2018",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 155.58516031003285,
+      "muB_MeV": 196.77040693474598,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "andronic2018",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 158.3835761183375,
+      "muB_MeV": 22.312286689419796,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_I",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 143.57111722625308,
+      "muB_MeV": 408.1736620156794,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_I",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 155.74008733007975,
+      "muB_MeV": 193.62547661242684,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_I",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 161.46793490707248,
+      "muB_MeV": 21.58982035928144,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_II",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 139.29565548003396,
+      "muB_MeV": 386.5306820124209,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_II",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 152.00060664495788,
+      "muB_MeV": 183.60939699036481,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_II",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 153.4954476992135,
+      "muB_MeV": 20.49546827794562,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "du2024_hydro",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 136.3310552661801,
+      "muB_MeV": 326.33018398806564,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "du2024_hydro",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 153.22780939624445,
+      "muB_MeV": 158.01830002407897,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "du2024_hydro",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 155.98382496502933,
+      "muB_MeV": 17.918088737201366,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_III",
+      "sqrt_sNN_GeV": 7.7,
+      "T_MeV": 120.18162290454758,
+      "muB_MeV": 343.30519695465074,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_III",
+      "sqrt_sNN_GeV": 19.6,
+      "T_MeV": 141.40405066674117,
+      "muB_MeV": 180.11896491837442,
+      "kind": "analytic_formula_only"
+    },
+    {
+      "profile": "yu2025_set_III",
+      "sqrt_sNN_GeV": 200,
+      "T_MeV": 141.69999533941967,
+      "muB_MeV": 21.949735449735453,
+      "kind": "analytic_formula_only"
+    }
+  ],
+  "center_coordinate_bounds": {
+    "T_lim_MeV": [
+      153.5,
+      164
+    ],
+    "log_offset": [
+      0.52,
+      2.82
+    ],
+    "log_width": [
+      0.4,
+      0.79
+    ],
+    "D_MeV": [
+      1303,
+      1442.2
+    ],
+    "E_GeV_inv1": [
+      0.286,
+      0.329
+    ]
+  },
+  "box_counterexample_at_7_7_GeV": {
+    "member_T_range_MeV": [
+      138.428456,
+      143.571117
+    ],
+    "independently_mixed_T_range_MeV": [
+      67.7286104442654,
+      162.34028839447038
+    ]
+  },
+  "verification": {
+    "max_absolute_logit_identity_error": 2.135003285275161e-9,
+    "coordinate_comparison_tolerance_dimensionless": 1e-7,
+    "explanation": "Tolerance accounts for cancellation in Tlim-T near high-energy saturation; not a solver accuracy gate."
+  },
+  "source_caveats": [
+    "Yu Set II Tlim uncertainty differs between Table 4 (0.6 MeV) and prose (1.4 MeV).",
+    "Yu Table 4 Andronic reference row D=1307,E=0.286 differs from original 2018 D=1307.5,E=0.288.",
+    "Full five-parameter covariance was not available at checked source locations.",
+    "Particle-set differences and effective-theory scale mappings are not interchangeable statistical errors."
+  ],
+  "access_limitations": [
+    "NST publisher site TLS hostname mismatch via direct HTTP client; Springer landing page confirmed publication metadata and open arXiv v3 PDF supplied full text."
+  ]
+}
+

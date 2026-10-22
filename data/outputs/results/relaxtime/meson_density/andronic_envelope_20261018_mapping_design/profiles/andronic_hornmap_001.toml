@@ -1,0 +1,10 @@
+profile_name = "andronic_hornmap_001"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:andronic_hornmap_001"
+
+[coefficients]
+T_lim_GeV = 0.15870344641140444
+log_offset = 2.373185601359924
+log_width = 0.41612376606847573
+d_GeV = 1.1496878256129528
+e_GeV_inv1 = 0.30612493770119414

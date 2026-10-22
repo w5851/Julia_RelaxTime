@@ -1,0 +1,100 @@
+{
+  "schema": "freezeout_evidence_layout_relocation_v1",
+  "recorded_at_utc": "2026-10-22T00:50:39.102509+00:00",
+  "source_commit": "8248b9bba3d60f2192e811c5dc59b70e2dcd0ee3",
+  "reason": "Move six non-figure assets from figures to results; preserve frozen values, source and PNG bytes.",
+  "original_archive_manifest": {
+    "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/archive_manifest.original.json",
+    "bytes": 128244,
+    "sha256": "521ccf64fe30c6c34136d00381063ede82fc92e5c17cf227a0578565351ee1d5"
+  },
+  "relocated_files": [
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_metrics.json",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_metrics.json",
+        "bytes": 3196,
+        "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
+      },
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_residuals.csv",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_residuals.csv",
+        "bytes": 4575,
+        "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
+      },
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_freezeout_comparison.py",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_freezeout_comparison.py",
+        "bytes": 17897,
+        "sha256": "2e0685f563e52c46e80298fa8c9584527792f840a8b6fba0e221c999e20ff349"
+      },
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+        "bytes": 3196,
+        "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
+      },
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+        "bytes": 4575,
+        "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
+      },
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+      "current": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+        "bytes": 17961,
+        "sha256": "7fbe60046af4635155c7b2a50ae44794bdaa16d7307ecb914d50db887d69c400"
+      },
+      "bytes_unchanged": true
+    }
+  ],
+  "plot_manifests": [
+    {
+      "current": {
+        "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/plot_manifest.json",
+        "bytes": 16515,
+        "sha256": "c2259fb7f0dcaff012f1cd6d692fab0bfe093e084d3bb7e7367b5a7275f8c47a"
+      },
+      "original": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_manifest.original.json",
+        "bytes": 16515,
+        "sha256": "d8ed57d0d714d18c298bb85186df0d6bfc54c8ba9d01d8c39d3ed785f800b39f"
+      },
+      "change": "Only the three relocated asset path strings changed; original bytes retained."
+    },
+    {
+      "current": {
+        "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/plot_manifest.json",
+        "bytes": 16608,
+        "sha256": "deb98a4312e8462a0da13f32ee01211fb12accd83dd86011c46cf4cac8d150d8"
+      },
+      "original": {
+        "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_manifest.original.json",
+        "bytes": 16608,
+        "sha256": "4e012ca4ebf60325941aa4c73b8ccc49966dca9993dddefce722ea7c34c04503"
+      },
+      "change": "Only the three relocated asset path strings changed; original bytes retained."
+    }
+  ],
+  "numerical_outputs_unchanged": true,
+  "png_outputs_unchanged": true,
+  "path_guard_rules_unchanged": true,
+  "evidence_status": "diagnostic_only",
+  "author_png_review": "pending"
+}

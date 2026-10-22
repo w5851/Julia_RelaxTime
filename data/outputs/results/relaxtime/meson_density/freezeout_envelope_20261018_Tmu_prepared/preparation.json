@@ -1,0 +1,167 @@
+{
+  "schema": "chemical_freezeout_Tmu_envelope_v1",
+  "best_selected": "hornmap_001",
+  "band_members": [
+    "cleymans2006",
+    "envelope_001",
+    "envelope_003",
+    "envelope_005",
+    "envelope_007",
+    "envelope_009",
+    "envelope_011",
+    "envelope_013",
+    "envelope_015",
+    "envelope_019",
+    "envelope_021",
+    "envelope_025",
+    "envelope_029",
+    "envelope_031",
+    "frg2024_muindep",
+    "functional_qcd2026_lower",
+    "hybrid_a147_functional_qcd2026_mean",
+    "hybrid_a147_ihrg2019",
+    "hybrid_a150_frg2024_muindep",
+    "qvdw2019",
+    "envelope_006",
+    "envelope_008",
+    "envelope_010",
+    "envelope_012",
+    "envelope_014",
+    "envelope_016",
+    "envelope_018",
+    "envelope_020",
+    "envelope_022",
+    "envelope_026",
+    "envelope_028",
+    "envelope_030",
+    "envelope_032",
+    "frg2024_mudep",
+    "functional_qcd2026_mean",
+    "functional_qcd2026_upper",
+    "hybrid_a147_frg2024_muindep",
+    "hybrid_a150_functional_qcd2026_mean",
+    "hybrid_a150_ihrg2019",
+    "ihrg2019",
+    "local_a_minus",
+    "local_b_minus",
+    "local_c_minus",
+    "local_d_minus",
+    "local_e_minus",
+    "local_a_plus",
+    "local_b_plus",
+    "local_c_plus",
+    "local_d_plus",
+    "local_e_plus",
+    "hornmap_001",
+    "hornmap_002",
+    "hornmap_003"
+  ],
+  "near_best_members": [
+    "hornmap_001",
+    "local_a_minus",
+    "hornmap_002",
+    "hornmap_003"
+  ],
+  "near_best_distinct_Tmu_curves": 3,
+  "selected_parameters": {
+    "a_GeV": 0.14564421970002192,
+    "b_GeV_inv1": 0.10364148726030518,
+    "c_GeV_inv3": 0.5463741671473763,
+    "d_GeV": 0.7304851722505652,
+    "e_GeV_inv1": 0.273
+  },
+  "andronic_default": {
+    "T_lim_GeV": 0.1584,
+    "log_offset": 2.6,
+    "log_width": 0.45,
+    "d_GeV": 1.3075,
+    "e_GeV_inv1": 0.288
+  },
+  "optimized_family": "cleymans_polynomial_rational_v1",
+  "andronic_optimized": false,
+  "muB_range_MeV": [
+    0,
+    500.0
+  ],
+  "original_energy_range_GeV": [
+    4.87,
+    200.0
+  ],
+  "base_grid_points": 501,
+  "grid_points": 508,
+  "definition": "At fixed muB take T minima/maxima over the same frozen full and near-best sets as the ratio figure; no new selection",
+  "coordinate_validation": {
+    "points": 156,
+    "maximum_error_MeV": 5.684341886080802e-14
+  },
+  "support_semantics": "Analytic parameterizations on the declared muB domain, including continuations outside each member's original finite energy window; no new density solutions",
+  "projection_semantics": "Only a,b,c determine polynomial T(muB); d,e set the energy positions on that curve",
+  "failure_semantics": "Earlier ratio failures remain unchanged; analytic chemical-freezeout geometry itself has no K+ integration gate",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "source_run_id": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 22339,
+      "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/checksums.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 1196,
+      "sha256": "6d9da458638aeba093822a6a161553f6d69774a8f6570bb7fb2da5ed61077cc1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/fine_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 9669,
+      "sha256": "039e166141f9f95b339a9725349da2ca6ea02082e333f8576af403b43b18f82c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/baseline_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/assessment.json",
+      "path_kind": "repository_relative",
+      "role": "fixed_band_membership",
+      "bytes": 60199,
+      "sha256": "ee0de543aa740f3cc7e34b332b07e238e3a72bf46f5e3ac20d61256e4705222f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/source_snapshot/config/physics/freezeout/andronic2018.toml",
+      "path_kind": "repository_relative",
+      "role": "frozen_Andronic_default",
+      "bytes": 535,
+      "sha256": "2bc25d501a9c04af292aa272ec8cddde17d5f1aee526d20ce3d9e9f2793c4843"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 27153,
+      "sha256": "fd1ed1fad497d3fc2e579058414ba7059266e3b6e06039d945b9a774f3952436"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 9116,
+      "sha256": "45ef6a18898d3769aa9d31992106d04e3640527487d8c85f874dce0d4d9ea190"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 5930,
+      "sha256": "e9ce42e2568545e9676cf602dd900a5b015597d97bdcc3ef1b01e2f5fa57332a"
+    }
+  ]
+}

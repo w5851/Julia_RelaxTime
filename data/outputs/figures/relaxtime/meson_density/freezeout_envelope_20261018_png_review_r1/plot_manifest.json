@@ -1,0 +1,567 @@
+{
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-10-18T03:16:32.119924+00:00",
+  "asset_id": "meson_freezeout_parameter_envelope_20261018",
+  "figure_family": "charged_meson_freezeout",
+  "case_slug": "freezeout_envelope_20261018_png_review_r1",
+  "asset_kind": "figure",
+  "figure_mode": "audit",
+  "semantic_status": "cross_literature_parameter_exploration",
+  "style_profile": "candidate_aps_v2",
+  "publication_scope": "internal_review",
+  "generator": {
+    "path": "scripts/analysis/relaxtime/plot_freezeout_envelope.py",
+    "path_kind": "repository_relative",
+    "sha256": "64fb3109754ff5f6f0b078056672eae2206da606b149416cb185015da0164b10",
+    "command": "scripts/analysis/relaxtime/plot_freezeout_envelope.py --summary-dir data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary --output-dir data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "executable": "D:\\Python313\\python.exe",
+      "matplotlib": "3.10.1"
+    },
+    "source_snapshot": {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/plot_freezeout_envelope.py",
+      "path_kind": "repository_relative",
+      "role": "generator_source_snapshot",
+      "bytes": 13264,
+      "sha256": "64fb3109754ff5f6f0b078056672eae2206da606b149416cb185015da0164b10"
+    }
+  },
+  "git_commit": "698feaf8fada670fde81c93bab6093b50093935f",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "postprocess_sha": null,
+  "source_run_id": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 22339,
+      "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/checksums.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 1196,
+      "sha256": "6d9da458638aeba093822a6a161553f6d69774a8f6570bb7fb2da5ed61077cc1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/screen_band.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 2026,
+      "sha256": "0c9e0426921e290982c6085f26ec185098926d062a57d120649c56d66d9e0b57"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/fine_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 9669,
+      "sha256": "039e166141f9f95b339a9725349da2ca6ea02082e333f8576af403b43b18f82c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/baseline_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/selected_parameters.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_exploration",
+      "bytes": 360,
+      "sha256": "8d2055488ae27862a19bcb7f46c456347a9728a201e340108c8f643c225e4f2b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/assessment.json",
+      "path_kind": "repository_relative",
+      "role": "screening_membership_and_selection",
+      "bytes": 60199,
+      "sha256": "ee0de543aa740f3cc7e34b332b07e238e3a72bf46f5e3ac20d61256e4705222f"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261018/experimental_ratios.csv",
+      "path_kind": "repository_relative",
+      "role": "experimental_observations",
+      "bytes": 5093,
+      "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261018/sources.json",
+      "path_kind": "repository_relative",
+      "role": "experimental_provenance",
+      "bytes": 985,
+      "sha256": "9122e38f8cd1531cb2f55b007dd6e9406dfe880df098c6c1b75f296a689653d4"
+    },
+    {
+      "path": "config/plotting/candidate_aps_v2.toml",
+      "path_kind": "repository_relative",
+      "role": "plot_style_contract",
+      "bytes": 2171,
+      "sha256": "94e9f7c4c24eacbc79ae2f16582c6a93b38213295cb71fa21cc09b9e2f5890ac"
+    },
+    {
+      "path": "scripts/plotting/plot_style.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "path": "scripts/plotting/plot_manifest.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "path": "scripts/plotting/plot_quality.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 19247,
+      "sha256": "43bfe56040d936a4e88f69de99b4d2c3711ebaf0ab57db65ff65ddf93738d5ae"
+    },
+    {
+      "path": "scripts/plotting/plot_accessibility.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 3536,
+      "sha256": "11da33b4fbc0393983bf1775e98607fbc6ff5a1472515c6674d400a8701f9102"
+    },
+    {
+      "path": "scripts/plotting/validate_plot_artifact.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 33243,
+      "sha256": "c85d2dbb3e34be0ba35a697220fe9e98730f68941ab1e0b9510e710128fd7208"
+    }
+  ],
+  "axes": [
+    {
+      "field": "sqrt_s_NN_GeV",
+      "source_unit": "GeV",
+      "display_unit": "GeV",
+      "scale": "log",
+      "label": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$"
+    },
+    {
+      "field": "Kplus_over_pi_plus",
+      "source_unit": "dimensionless",
+      "display_unit": "dimensionless",
+      "scale": "linear",
+      "label": "$K^+/\\pi^+$"
+    }
+  ],
+  "series": [
+    {
+      "series_id": "screening_envelope",
+      "state": "parameter_exploration",
+      "point_count": 17,
+      "member_count": 53,
+      "support_rule": "direct q0 support; fixed complete curves",
+      "mask_rule": "incomplete trajectories excluded with named records; no zero filling"
+    },
+    {
+      "series_id": "near_best_envelope",
+      "state": "parameter_exploration",
+      "point_count": 17,
+      "member_count": 4,
+      "members": [
+        "hornmap_001",
+        "local_a_minus",
+        "hornmap_002",
+        "hornmap_003"
+      ],
+      "selection_rule": "fixed nine-point Au+Au RMSE <= 1.10 times sampled minimum",
+      "support_rule": "direct screening q0 support; fixed complete curves",
+      "mask_rule": "incomplete trajectories excluded as whole curves"
+    },
+    {
+      "series_id": "hornmap_001",
+      "state": "q0_reference_diagnostic",
+      "point_count": 40,
+      "support_rule": "direct fine solves",
+      "mask_rule": "NaN at failed support"
+    },
+    {
+      "series_id": "andronic2018",
+      "state": "published_default_reference",
+      "point_count": 36
+    },
+    {
+      "series_id": "Au+Au",
+      "state": "experimental",
+      "point_count": 10,
+      "ids": [
+        "AGS_4.87",
+        "STAR_BES_7.7",
+        "STAR_BES_11.5",
+        "STAR_14.5",
+        "STAR_BES_19.6",
+        "STAR_BES_27",
+        "STAR_BES_39",
+        "STAR_62.4",
+        "STAR_130",
+        "STAR_200"
+      ]
+    },
+    {
+      "series_id": "Pb+Pb",
+      "state": "experimental",
+      "point_count": 5,
+      "ids": [
+        "NA49_6.27",
+        "NA49_7.62",
+        "NA49_8.77",
+        "NA49_12.32",
+        "NA49_17.27"
+      ]
+    }
+  ],
+  "selection_rule": "4.87-200 GeV; frozen fixed sample envelope and selected refined curve",
+  "interpolation_policy": "none",
+  "connector_policy": "forbidden",
+  "missing_value_policy": "gaps retained; no zero fill",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 399034,
+      "sha256": "f6072350f59758d3ab5fbda7df0068207a239c84e1501bbf910ef11cfa007f63",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope_gray.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 374396,
+      "sha256": "cb16f74f3a79dd02c0b322cbeea5dd339e23d7c7919373216e044dedba5bd684",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    }
+  ],
+  "rendering": {
+    "delivery_stage": "png_review",
+    "vector_delivery_pending": true,
+    "review_contract": "prd_review_v1",
+    "figure_size_inches": [
+      6.75,
+      4.6
+    ],
+    "column": "double_column",
+    "font": {
+      "requested": "Times New Roman",
+      "resolved": "Times New Roman",
+      "path": "C:\\Windows\\Fonts\\times.ttf"
+    },
+    "legend_policy": "declared_geometry_checked",
+    "legend_outside": false,
+    "legend_placements": [
+      {
+        "legend_index": 0,
+        "host_axes_index": 0,
+        "title": "",
+        "labels": [
+          "Sampled envelope",
+          "Near-best envelope",
+          "Best sampled (refined)",
+          "Andronic (2018)",
+          "Au+Au: AGS, STAR",
+          "Pb+Pb: NA49"
+        ],
+        "placement": "in_axes",
+        "location": "upper right",
+        "scope": "bands, curves and experiments"
+      }
+    ],
+    "legend_layout_reason": "author requests legends inside one panel; upper-right whitespace retained",
+    "color_route": "undecided_review",
+    "quality": {
+      "figure_size_inches": [
+        6.75,
+        4.6
+      ],
+      "intended_width_inches": 6.75,
+      "placement_scale": 1.0,
+      "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+      "minimum_capital_numeral_height_mm": 2.1443652343749995,
+      "minimum_primary_capital_numeral_height_mm": 2.8032604166666664,
+      "minimum_script_capital_numeral_height_mm": 2.1443652343749995,
+      "smallest_glyphs": [
+        {
+          "text": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "$\\sqrt{s_{NN}}\\;(\\mathrm{GeV})$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "Best sampled (refined)",
+          "glyph": "B",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Au+Au: AGS, STAR",
+          "glyph": "T",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Au+Au: AGS, STAR",
+          "glyph": "R",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: NA49",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Pb+Pb: NA49",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "PNJL + GBU\nChemical freezeout",
+          "glyph": "P",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        }
+      ],
+      "minimum_curve_linewidth_pt": 1.7,
+      "minimum_landmark_diameter_mm": null,
+      "tick_axes": [
+        {
+          "axis": "x",
+          "scale": "log",
+          "minor_locator": "LogLocator",
+          "major_count": 6,
+          "minor_count": 10,
+          "inward": true,
+          "both_sides": true
+        },
+        {
+          "axis": "y",
+          "scale": "linear",
+          "minor_locator": "AutoMinorLocator",
+          "major_count": 7,
+          "minor_count": 7,
+          "inward": true,
+          "both_sides": true
+        }
+      ],
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_axes_overlap_count": 1,
+      "legend_count": 1,
+      "legend_layout": [
+        {
+          "legend_index": 0,
+          "host_axes_index": 0,
+          "overlapped_axes": [
+            0
+          ],
+          "contained_in_host": true,
+          "title": "",
+          "labels": [
+            "Sampled envelope",
+            "Near-best envelope",
+            "Best sampled (refined)",
+            "Andronic (2018)",
+            "Au+Au: AGS, STAR",
+            "Pb+Pb: NA49"
+          ],
+          "bbox_inches": [
+            4.263749999999999,
+            2.905374999999999,
+            2.2341666666666673,
+            1.4272916666666668
+          ]
+        }
+      ],
+      "legend_pair_overlap_count": 0,
+      "legend_pair_overlaps": [],
+      "legend_curve_overlap_count": 0,
+      "legend_curve_overlaps": [],
+      "legend_landmark_overlap_count": 0,
+      "legend_landmark_overlaps": [],
+      "legend_in_axes_overflow_count": 0,
+      "legend_in_axes_overflows": [],
+      "human_visual_review": "required"
+    },
+    "placement_limits": {
+      "schema": "plot_placement_limits_v1",
+      "measured_width_inches": 6.75,
+      "minimum_width_inches": 6.2955693291375034,
+      "maximum_width_inches": 6.75,
+      "minimum_width_constraints": {
+        "glyph": 6.2955693291375034,
+        "curve": 1.9852941176470589
+      },
+      "maximum_width_constraints": {
+        "project_profile": 7.0,
+        "png_0_effective_dpi": 6.75,
+        "png_1_effective_dpi": 6.75
+      },
+      "has_usable_interval": true,
+      "measured_width_qualified": true,
+      "single_column_width_inches": 3.375,
+      "single_column_reuse_qualified": false,
+      "single_column_minimum_glyph_mm": 1.0721826171874997,
+      "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+    },
+    "accessibility": {
+      "schema": "plot_accessibility_v1",
+      "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+      "minimum_contrast": 3.0,
+      "backgrounds": [
+        "#FFFFFF",
+        "#E8E8E8",
+        "#C6DEF0"
+      ],
+      "background_scope": "white axes and light band fills; dark boundaries and hatching carry band semantics",
+      "parameters": [
+        {
+          "value": "sampled envelope",
+          "color": "#595959",
+          "noncolor_encoding": "dashed boundary",
+          "contrasts": [
+            7.004729208035935,
+            5.716874770655375,
+            5.03937493176288
+          ]
+        },
+        {
+          "value": "near-best envelope",
+          "color": "#0072B2",
+          "noncolor_encoding": "hatched fill",
+          "contrasts": [
+            5.185446345779855,
+            4.232076145751255,
+            3.7305379763925877
+          ]
+        },
+        {
+          "value": "best sampled",
+          "color": "#0072B2",
+          "noncolor_encoding": "solid",
+          "contrasts": [
+            5.185446345779855,
+            4.232076145751255,
+            3.7305379763925877
+          ]
+        },
+        {
+          "value": "Andronic",
+          "color": "#A04800",
+          "noncolor_encoding": "dashed",
+          "contrasts": [
+            6.137367363209724,
+            5.008981731474433,
+            4.415373431095248
+          ]
+        },
+        {
+          "value": "AuAu",
+          "color": "#B2282E",
+          "noncolor_encoding": "filled circles",
+          "contrasts": [
+            6.489566257177475,
+            5.296427100364221,
+            4.668754000785158
+          ]
+        },
+        {
+          "value": "NA49",
+          "color": "#222222",
+          "noncolor_encoding": "open squares",
+          "contrasts": [
+            15.909984431773273,
+            12.984854360276907,
+            11.446035146974179
+          ]
+        }
+      ]
+    },
+    "connections": "straight segments at existing direct support; no additional points"
+  },
+  "validation": {
+    "finite": true,
+    "duplicate_keys": true,
+    "support": true,
+    "solver_called": false,
+    "canonical_data_modified": false,
+    "checks": "frozen hashes, fixed membership, source semantics, measured rendering",
+    "author_review": "pending"
+  },
+  "external_layout": null,
+  "delivery_stage": "png_review",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true,
+  "caption": {
+    "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/caption.md",
+    "path_kind": "repository_relative",
+    "role": "figure_caption",
+    "bytes": 1267,
+    "sha256": "85f0c8d4c5208e0d0746589d1f9d6ff20256746eb8a6648e6999b830a169e57e"
+  }
+}

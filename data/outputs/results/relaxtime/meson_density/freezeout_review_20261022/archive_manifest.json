@@ -1,0 +1,2691 @@
+{
+  "schema": "freezeout_review_evidence_v1",
+  "recorded_at_utc": "2026-10-22T00:06:51.519338+00:00",
+  "source_worktree": "D:/w/meson-freezeout-defaults",
+  "base_commit": "698feaf8fada670fde81c93bab6093b50093935f",
+  "evidence_status": "diagnostic_only",
+  "author_review": "pending",
+  "archive_layout": "repository-relative member paths; restore points and source_snapshot under the repository root",
+  "archives": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/andronic_envelope_20261018_raw.zip",
+      "family": "andronic_envelope_20261018",
+      "files": 2594,
+      "uncompressed_bytes": 16659682,
+      "bytes": 5200698,
+      "sha256": "9443de095a0e58cb8e9d4af3c03a4bb14d7c46fbf71b941503e68606e6ff7629"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_defaults_20261017_raw.zip",
+      "family": "freezeout_defaults_20261017",
+      "files": 454,
+      "uncompressed_bytes": 5625374,
+      "bytes": 1428830,
+      "sha256": "9955ac3038e571c0b7f6454dc64706d15512698497140b473c648a78363562b7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_envelope_20261018_raw.zip",
+      "family": "freezeout_envelope_20261018",
+      "files": 2574,
+      "uncompressed_bytes": 16448005,
+      "bytes": 5075548,
+      "sha256": "79c2c0b4b202c6d64e0f9de7f7f2067421b613cf5e19a32dc47dc61f6f186657"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_literature_candidates_20261017_raw.zip",
+      "family": "freezeout_literature_candidates_20261017",
+      "files": 184,
+      "uncompressed_bytes": 2217512,
+      "bytes": 591059,
+      "sha256": "3aa7ddef0f2a54d9e077b36a96eac5305e9d92be99dfe56df90e700b533ff199"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_literature_search_20261017_raw.zip",
+      "family": "freezeout_literature_search_20261017",
+      "files": 3,
+      "uncompressed_bytes": 25319657,
+      "bytes": 3659014,
+      "sha256": "fc2b5e7ff69275d11a8dc250320bdfdabdd3f7f5db1f540df58941236539d4ef"
+    }
+  ],
+  "retained_files": [
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/Andronic2026_arxiv2606.14799v2.pdf",
+      "bytes": 471933,
+      "sha256": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/Du2024_PRC110_014904.pdf",
+      "bytes": 1145169,
+      "sha256": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/ElfnerMuller2023_JPhysG50_103001.pdf",
+      "bytes": 9556449,
+      "sha256": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/LaffertyRothkopf2020_PRD101_056010.pdf",
+      "bytes": 1487079,
+      "sha256": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/ThakurHirono2022_JHEP02_207.pdf",
+      "bytes": 1397257,
+      "sha256": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/Yu2025_arxiv2403.16548v3.pdf",
+      "bytes": 278927,
+      "sha256": "4d40ab1f83ae7bad9eb031357ef2668e7f03758fc8abc53358eb671da705ff16"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json",
+      "bytes": 10536,
+      "sha256": "633b8cd7daf698a5d7c01ffb9d0e20b74d19d91c65d5125ec5169b728e014666"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json",
+      "bytes": 9825,
+      "sha256": "6a9e7faac1c983528c12468f05bb8ed06d4fbd5c7acb2d16d6a13491bf206af5"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/README.md",
+      "bytes": 3877,
+      "sha256": "4b7fc4c993b7dddde172bb66d043b50927c63d259ce23514b294d7fa5a209c61"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/experimental_ratios.csv",
+      "bytes": 5095,
+      "sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitize_config.json",
+      "bytes": 1752,
+      "sha256": "d92d180a35199ae09bd70d1cdf55afff534d8296eed50ad2224ee776a8c37e83"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitize_replay.json",
+      "bytes": 1600,
+      "sha256": "fbb0998fc0a771d0d54f98b9ebc816d5d41331f2882727eba13fbc2b92d7d6c2"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitized/figure_crop.png",
+      "bytes": 91321,
+      "sha256": "fc0acb991f16d1d9f1334bdd5c1498c5c2153a15c870c1e4c8bc92f3eeea6a14"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitized/figure_overlay.png",
+      "bytes": 91361,
+      "sha256": "eac0981e45051b7eceafe0c27d4445abef2715254021cccacc083b2039ac77f1"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitized/metadata.json",
+      "bytes": 5410,
+      "sha256": "c13bfef8b626cdb6ee6940f3f98788a9c0cb26541d951d520ad834409071c984"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/hades_digitized/points.csv",
+      "bytes": 343,
+      "sha256": "99e0268fa96b00edee50dda2f50ecdf6e4d5f070cd18aff27c6cceeae6171217"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/alice2013_kpi_hepdata.json",
+      "bytes": 3569,
+      "sha256": "50989446ad60f0b3c7ebd9b301cfbb4d6355c13359d80e197f1ff49af8bf56d1"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/alice2020_kpi_hepdata.json",
+      "bytes": 4435,
+      "sha256": "2174394b0a0e4c3bcbfc526af0088a8f12f138c6f8eaf52238fb5865f48219b4"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/na492008_kpi_hepdata.json",
+      "bytes": 4099,
+      "sha256": "721df72deac9a1f1370dd594147d571bb5b707642ef9f74240874d1597fff05d"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/star145_kplus_hepdata.json",
+      "bytes": 3553,
+      "sha256": "fa892b28a8e7c0fde7d84e4b986a5fd16906cde01b142eb43b17fb7410c6c441"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/star145_piplus_hepdata.json",
+      "bytes": 3549,
+      "sha256": "a42641860d5409b07e64858f39df9c0d40732dc874295e06880fd1af6c00f2a4"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/star2009_tableIX_crop.png",
+      "bytes": 502162,
+      "sha256": "34c59e7a43a855852ff636c18f79097f3980bd7141b8c341654101b3259cb3fe"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/star2009_table_ix.json",
+      "bytes": 854,
+      "sha256": "192a53fee118b577c3f7abefed89b76f80729af8cb87ea7b895813cf8a20034f"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/raw/star2017_kpi_hepdata.json",
+      "bytes": 2785,
+      "sha256": "109388be00a2fa7906a04c5a41ac71b5d0574e35c62b04e412ff26f54dd56bba"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261017/sources.json",
+      "bytes": 3586,
+      "sha256": "cb8052edeaf23439f8299b444bb555463ae7f10efb0e00225a4648c15421c7d6"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261018/README.md",
+      "bytes": 484,
+      "sha256": "c80d981e5743448354a7ccf8f6a76e3ab8d1ccb1024f06866f460cf1390624f4"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261018/experimental_ratios.csv",
+      "bytes": 5093,
+      "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_experiment_20261018/sources.json",
+      "bytes": 985,
+      "sha256": "9122e38f8cd1531cb2f55b007dd6e9406dfe880df098c6c1b75f296a689653d4"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S01_Cleymans_2006_freezeout_criteria.pdf",
+      "bytes": 242409,
+      "sha256": "f854d7eae0897dae0684dc23f1ce39c8e8ba862b982c0935575b50a3a99149fc"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S02_Andronic_2018_hadronization.pdf",
+      "bytes": 662243,
+      "sha256": "de467e50cf292bd4108a247303f286cf8d050a45bf4cef964c9dea517847393c"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S05_Bazavov_2016_freezeout_curvature.pdf",
+      "bytes": 256261,
+      "sha256": "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S06_Borsanyi_2014_freezeout_consistency.pdf",
+      "bytes": 478499,
+      "sha256": "454edb804701f7e611abfa335b626ff9ef30043a72ff676e8512487c012490d8"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S17_Lu_2022_DSE_chemical_freezeout.pdf",
+      "bytes": 707613,
+      "sha256": "efcc7b0d6cad0abb03ec80bb28e32d56fa323a516168aa12644b4528405f7e19"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S18_Shao_2024_FRG_chemical_freezeout.pdf",
+      "bytes": 1183469,
+      "sha256": "a5eedf24b35c503b07e70f4b1608bdd3a0381db95cc62d9b536bdd889b676821"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S18b_Shao_2024_FRG_published.pdf",
+      "bytes": 1810625,
+      "sha256": "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S19_Flor_2021_flavour_freezeout.pdf",
+      "bytes": 1102487,
+      "sha256": "8bd245ab0640dbcb8bf5573ea1f87c774fce92fb6d5a3d8d294cc642139cbe72"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S20_Lysenko_2025_freezeout_curve.pdf",
+      "bytes": 783871,
+      "sha256": "8ddfa17859dd1a58f8c33575d68e62a63b08eab9b4cf95978b1f0d03da80d44c"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S21_Lu_2026_functional_QCD_freezeout.pdf",
+      "bytes": 2011928,
+      "sha256": "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S22_Poberezhnyuk_2019_QvdW_freezeout.pdf",
+      "bytes": 2862124,
+      "sha256": "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S23_Singh_2023_repulsive_HRG_freezeout.pdf",
+      "bytes": 559987,
+      "sha256": "71df5a5e9266e31c327d0ca0390969d6b7333a337ad31bcf438babd55a768463"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/S24_Sarkar_2025_PCA_freezeout.pdf",
+      "bytes": 2386538,
+      "sha256": "b505afcee5ce93f34f1449bea3d9dcf7bb04fd2de83332eb26f56f8940a7c5f0"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/README.md",
+      "bytes": 2265,
+      "sha256": "9eff90a715a0141013954328c0a7a8e6e5c494345769fe8d2260e6411654abc3"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S17_Lu_2022_DSE_chemical_freezeout.source.json",
+      "bytes": 703,
+      "sha256": "281a630c320456a97f0c4743b52a457557568121753a446a7f15e02557f76b97"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S17_Lu_2022_DSE_chemical_freezeout.txt",
+      "bytes": 74108,
+      "sha256": "2107ea6e7fce93169436f3c4b778cdc343721a8d21c55cb57521ad09c3b67cae"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S18_Shao_2024_FRG_chemical_freezeout.source.json",
+      "bytes": 710,
+      "sha256": "4df9da52aa7bf15dd82deddf10202578c7a691eb4decd52f40a9e4ef37aa6bc9"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S18_Shao_2024_FRG_chemical_freezeout.txt",
+      "bytes": 127354,
+      "sha256": "e4a4ace8dc4951184c7b7b3a13791b8f653a420c6ceb9038342f26101f3d4950"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S18b_Shao_2024_FRG_published.source.json",
+      "bytes": 435,
+      "sha256": "c004b968f8f7f4012dcc9f9bbc7630052adf922a979bbf92c7c486ea524985ca"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S18b_Shao_2024_FRG_published.txt",
+      "bytes": 100671,
+      "sha256": "9f97c808c68fad7ad01f8bb8f46d8f416c38e0f73d36d61f2f3cab4dd5dc58ac"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S19_Flor_2021_flavour_freezeout.source.json",
+      "bytes": 695,
+      "sha256": "cf9b4313ec93477e8374980be12cd95949418134c60dab03a92d17b32e6780e2"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S19_Flor_2021_flavour_freezeout.txt",
+      "bytes": 54121,
+      "sha256": "f4113f1c371cf9044e1df27c0940368b0b51b39eb2307b9f069c6b1743c0ee70"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S20_Lysenko_2025_freezeout_curve.source.json",
+      "bytes": 697,
+      "sha256": "eb1a9371f2ef2aa1f77c35e446e4b293c720f32f39a05455c1151eb3efaa9ef6"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S20_Lysenko_2025_freezeout_curve.txt",
+      "bytes": 57033,
+      "sha256": "206e181813d8b9501792ecf1446171895b29be5bff71b5020e3ff3eafd210b15"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S21_Lu_2026_functional_QCD_freezeout.source.json",
+      "bytes": 710,
+      "sha256": "19362c1f0e0288727f43ceef756b17328df54b9f32c42b3d8d353d53fa28a47c"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S21_Lu_2026_functional_QCD_freezeout.txt",
+      "bytes": 75839,
+      "sha256": "46cc6a382ae37c775874fe3c2e68a948c12c65320cd84206d8b7436c9df06e62"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S22_Poberezhnyuk_2019_QvdW_freezeout.source.json",
+      "bytes": 710,
+      "sha256": "2640a10da4aadfe80cecbe34eaf8c3893aa5d1656726751ea2f18213926e3f35"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S22_Poberezhnyuk_2019_QvdW_freezeout.txt",
+      "bytes": 75301,
+      "sha256": "03c2b644e17fd9732d0dc588abe778c26ee24dead3086b9448b4805abfb1c767"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S23_Singh_2023_repulsive_HRG_freezeout.source.json",
+      "bytes": 715,
+      "sha256": "85ee68563380e04445026aa289863041ff0a5ce7879c6616a20a2a40018f0b0c"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S23_Singh_2023_repulsive_HRG_freezeout.txt",
+      "bytes": 85046,
+      "sha256": "50597885b3250be51c88964c4bbcb32e80449f2b9e71380214082a035c8c3fa5"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S24_Sarkar_2025_PCA_freezeout.source.json",
+      "bytes": 689,
+      "sha256": "6129ff4ff04299acb17b9130fa2a11ab920d655a25b5ad6013779da5296688c5"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/S24_Sarkar_2025_PCA_freezeout.txt",
+      "bytes": 105684,
+      "sha256": "c464c9d1c93a5de9a5fc6baf1f5e2675ecb0bfed23434f352f6fcd79cb7c3742"
+    },
+    {
+      "path": "data/inputs/meson_freezeout_polynomial_literature_20261017/search/screening_index.json",
+      "bytes": 13252,
+      "sha256": "3507cdc744e3604660194ed555795ac74443d82da96889fca2b764a04fce1036"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/chemical_freezeout_T_muB_band.png",
+      "bytes": 452613,
+      "sha256": "f506045228b6da9d52aa8c9001490b97fc6d685c7d06b7395ae2c8355d1166d5"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/chemical_freezeout_T_muB_band_gray.png",
+      "bytes": 418151,
+      "sha256": "c6e579cd75606c48b502af525a3d0e92a205404c89be5dc891962760fb3775ec"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/plot_manifest.json",
+      "bytes": 22014,
+      "sha256": "a2dd8fb9fd49eb96ca6bb2d345b0528cb587d19af388e8084f8092aa4b3c1df9"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope.png",
+      "bytes": 389511,
+      "sha256": "86363d706ce6e5cbf945cc7393309232935cf4dbb44c3c5c7497e8af81364281"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope_gray.png",
+      "bytes": 362261,
+      "sha256": "50201a1539e27c65127c8de2cb808b02f0d05a24f333b374a8707ea51f93d1ca"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/plot_manifest.json",
+      "bytes": 19659,
+      "sha256": "74c7db6adb1e3e1a1a0b245c155eb0b82188dc7105633f4cb76e6895924b194b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/kplus_piplus_freezeout_defaults.png",
+      "bytes": 365305,
+      "sha256": "4103927e2493374791454922d13deb2a0c65bb6d57e6ad789d2690993f8c1e8c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/kplus_piplus_freezeout_defaults_gray.png",
+      "bytes": 346078,
+      "sha256": "e61c2e86cb3c974376d1cd8304506a4313f6eb77e9f37fb38037ed8659ac39e8"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/plot_manifest.json",
+      "bytes": 17293,
+      "sha256": "ef4042ececc2421382c691d9568248fe83b22745ca8f8c25c4b8b06d24f2d3ee"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/kplus_piplus_freezeout_defaults.png",
+      "bytes": 365305,
+      "sha256": "4103927e2493374791454922d13deb2a0c65bb6d57e6ad789d2690993f8c1e8c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/kplus_piplus_freezeout_defaults_gray.png",
+      "bytes": 346078,
+      "sha256": "e61c2e86cb3c974376d1cd8304506a4313f6eb77e9f37fb38037ed8659ac39e8"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/plot_manifest.json",
+      "bytes": 18955,
+      "sha256": "204a01b0d7bf59733f9121b8f0549f7d3cd0c5949cbcbc77c323c0a3df2537da"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_metrics.json",
+      "bytes": 3196,
+      "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_residuals.csv",
+      "bytes": 4575,
+      "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/kplus_piplus_freezeout_defaults.png",
+      "bytes": 365356,
+      "sha256": "a3026a3f5105897904a2bfd98cbd3d1aad91fba482579df1494e75cb335d2953"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/kplus_piplus_freezeout_defaults_gray.png",
+      "bytes": 345843,
+      "sha256": "1303271acc5bccc2a22c4f4c50b425784a8213001507a5a141ce88e09d476dca"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/plot_manifest.json",
+      "bytes": 16515,
+      "sha256": "c2259fb7f0dcaff012f1cd6d692fab0bfe093e084d3bb7e7367b5a7275f8c47a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_freezeout_comparison.py",
+      "bytes": 17897,
+      "sha256": "2e0685f563e52c46e80298fa8c9584527792f840a8b6fba0e221c999e20ff349"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+      "bytes": 3196,
+      "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+      "bytes": 4575,
+      "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/kplus_piplus_freezeout_defaults.png",
+      "bytes": 365356,
+      "sha256": "a3026a3f5105897904a2bfd98cbd3d1aad91fba482579df1494e75cb335d2953"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/kplus_piplus_freezeout_defaults_gray.png",
+      "bytes": 345843,
+      "sha256": "1303271acc5bccc2a22c4f4c50b425784a8213001507a5a141ce88e09d476dca"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/plot_manifest.json",
+      "bytes": 16608,
+      "sha256": "deb98a4312e8462a0da13f32ee01211fb12accd83dd86011c46cf4cac8d150d8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+      "bytes": 17961,
+      "sha256": "7fbe60046af4635155c7b2a50ae44794bdaa16d7307ecb914d50db887d69c400"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r1/chemical_freezeout_T_muB_band.png",
+      "bytes": 448000,
+      "sha256": "af0372b8618f26a61b2a055c9432c9c242b716e3ec2fd1d0c1d2c45066812493"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r1/chemical_freezeout_T_muB_band_gray.png",
+      "bytes": 416552,
+      "sha256": "2b0c117155b7ad81879823fd130297e4090603f46299aacb608713187507c6c0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r1/plot_manifest.json",
+      "bytes": 21759,
+      "sha256": "cc4f2663b1b2ba9c411bcae2067d373fffddce6904acd8b74a93f93a9ea8bc4b"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/chemical_freezeout_T_muB_band.png",
+      "bytes": 448000,
+      "sha256": "af0372b8618f26a61b2a055c9432c9c242b716e3ec2fd1d0c1d2c45066812493"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/chemical_freezeout_T_muB_band_gray.png",
+      "bytes": 416552,
+      "sha256": "2b0c117155b7ad81879823fd130297e4090603f46299aacb608713187507c6c0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/plot_manifest.json",
+      "bytes": 21677,
+      "sha256": "2b32c7cb603e27abbc3d327450f4402f5a23080197f0e61c58c42205b858d99a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope.png",
+      "bytes": 399034,
+      "sha256": "f6072350f59758d3ab5fbda7df0068207a239c84e1501bbf910ef11cfa007f63"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/kplus_piplus_parameter_envelope_gray.png",
+      "bytes": 374396,
+      "sha256": "cb16f74f3a79dd02c0b322cbeea5dd339e23d7c7919373216e044dedba5bd684"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/plot_manifest.json",
+      "bytes": 18839,
+      "sha256": "721ff741597b55dd31e8789c059cb477be83f5c85b26cb0523ccafd22f13f558"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/kplus_piplus_parameter_envelope.png",
+      "bytes": 399034,
+      "sha256": "f6072350f59758d3ab5fbda7df0068207a239c84e1501bbf910ef11cfa007f63"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/kplus_piplus_parameter_envelope_gray.png",
+      "bytes": 374396,
+      "sha256": "cb16f74f3a79dd02c0b322cbeea5dd339e23d7c7919373216e044dedba5bd684"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json",
+      "bytes": 19327,
+      "sha256": "d29627fdc530ef853e58ddb992417a2367ecf6cd79de068319f0a460992dc8b6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/caption.md",
+      "bytes": 1161,
+      "sha256": "ca3f6b4f15c9e4c7c5758edf988c8ad4ac03c24a769d9f9de5c44cb78798a61c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/plot_freezeout_thermodynamic_envelope.py",
+      "bytes": 22591,
+      "sha256": "7d067840c15ad435e4cfac7714bbec1527a00c0973c5e5fa903a2aa582b036fc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/review.json",
+      "bytes": 1544,
+      "sha256": "c593ed0aa128dc0a0db33858511f13435222c71914c3678621e3e3d11b694c12"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/checksums.json",
+      "bytes": 596,
+      "sha256": "9504e1701ef197939a3d375b326837fa1acfb977cd76b76a489094cd22c246c4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/energy_anchors.csv",
+      "bytes": 618,
+      "sha256": "826952ed27bed20c11b07e422be10fc2b7e600274852f6181c4e0d2861704ad1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/parameters.csv",
+      "bytes": 4480,
+      "sha256": "e53c5a3651e4e7fd4f7ed56774a14337eab34af11c676c30baff5413031a79c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/plot_freezeout_thermodynamic_envelope.py",
+      "bytes": 22591,
+      "sha256": "7d067840c15ad435e4cfac7714bbec1527a00c0973c5e5fa903a2aa582b036fc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/preparation.json",
+      "bytes": 6295,
+      "sha256": "b09a6c0c5173bb52f1cb22d28fc510f6b825843d7e0f86d185d5cf5eb0e6e355"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/thermodynamic_band.csv",
+      "bytes": 113956,
+      "sha256": "88242996dc025b9e368abcb22eb47f37ae3982bc6b0d1456304b46581401fbb5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment/assessment.json",
+      "bytes": 61295,
+      "sha256": "ec01edf2ce27b3b2edbf713f3897ff63a6fa0bd7736af975fd28fc6b6eca20c9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "8e42cfe2ed51b573e61efb4208244e507e3c11092b88d5a2250c0ab3eb62050e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment/curves.csv",
+      "bytes": 90030,
+      "sha256": "2a53048a28f0e1047bda39e948d099618ecf50d4d594de0a4ea395e355b1c430"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment/sampled_band.csv",
+      "bytes": 2404,
+      "sha256": "7f38a0529aa2e9901d581c0cd9d13728a29c2b0cf25d5d97f5dc5f00f6bb3442"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/assessment.json",
+      "bytes": 61295,
+      "sha256": "c39ba64514c9bb451ff97c5e133402941e6f02fd8c2bcdd753d57f04061f20f7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/checksums.json",
+      "bytes": 377,
+      "sha256": "27617fcd4756f6f3e00764218abd19b55a975a61375af5460d2be045464f8e8c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/curves.csv",
+      "bytes": 90030,
+      "sha256": "2a53048a28f0e1047bda39e948d099618ecf50d4d594de0a4ea395e355b1c430"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/sampled_band.csv",
+      "bytes": 2404,
+      "sha256": "7f38a0529aa2e9901d581c0cd9d13728a29c2b0cf25d5d97f5dc5f00f6bb3442"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/andronic_exploration_v1.toml",
+      "bytes": 1122,
+      "sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/andronic_literature_envelope_v2.toml",
+      "bytes": 5470,
+      "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/andronic_parameter_envelope.py",
+      "bytes": 12011,
+      "sha256": "c3ec002804ee7c476a24c03ea7548a1b2c2c189d6f8e68623317dc749c47445e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/design.json",
+      "bytes": 27808,
+      "sha256": "76d960045c2679fe2ea98a673b480063df8af4258af4e0bad1a618b835f7aad0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/parameters.csv",
+      "bytes": 5595,
+      "sha256": "cb7fd2962c58e5a6e05d96e4383e8313c32ddc78b54163fe91d8f7ebf48b14cd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic2009.toml",
+      "bytes": 242,
+      "sha256": "ccede096d5a750ec85ddd8072dc696dc17dce9754e4dd69bf7cd54f0fadf1f10"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic2026_v2.toml",
+      "bytes": 250,
+      "sha256": "74746d6d74d2dd3a305d0f19f07092e9b0737b1755e2a90ce406a5fadd479f04"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_T_lim_GeV_high.toml",
+      "bytes": 276,
+      "sha256": "4a5aa907164f398ffd4cbaff0580a426d1d6cdc76de7077ba0bb1df455bd7964"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_T_lim_GeV_low.toml",
+      "bytes": 275,
+      "sha256": "5775c28b49beb2518eb885507872f4300a828f84e1db9b6a2b59a0b461576e5a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_d_GeV_high.toml",
+      "bytes": 270,
+      "sha256": "44c73fa98331494903e5689785579d2025dc9d435fed3c40f2c25c6e6942f365"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_d_GeV_low.toml",
+      "bytes": 266,
+      "sha256": "f6433101dbe8cf7926ac647f5cbd1139472c6f72a02b98d761564367bd6f14e2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_e_GeV_inv1_high.toml",
+      "bytes": 280,
+      "sha256": "d902cfb21238f243dce8c8acb159c303e1bc2078c1822d6baa877dfd5086d20c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_e_GeV_inv1_low.toml",
+      "bytes": 278,
+      "sha256": "ab997f68f6aed6a8bacc56d7e79aa65389abb11d98a9f4b1c71fbca226c35a9f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_log_offset_high.toml",
+      "bytes": 280,
+      "sha256": "43a7e3308998bb0dc26e4e5d2de17e271cdc7f835b562fa34dc816d0250ff0ba"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_log_offset_low.toml",
+      "bytes": 277,
+      "sha256": "56cc23ac0510fc32b7dad073a47dc0539ac0d2462a2890699d4428ca12cb1886"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_log_width_high.toml",
+      "bytes": 278,
+      "sha256": "240767a4423283624da6c4de8c587c34e8cc2d262e2d47f0643b7ee64a9d8ee9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_axis_log_width_low.toml",
+      "bytes": 275,
+      "sha256": "881607477d4c0cc3768ec52be789db4b8351894cc1bb1c3bb244d1e4e5bcb736"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_001.toml",
+      "bytes": 324,
+      "sha256": "160c5077743fd232d49df4e180380a5437b2540dac3b4c87a4eef89ea6073d5e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_002.toml",
+      "bytes": 323,
+      "sha256": "d003250e23e24e8fa971f7bc3bb0f7dc5dfc7331f44b76cf642f1d638fab856f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_003.toml",
+      "bytes": 323,
+      "sha256": "78bf8770aa2c78ad2b9039ed786c15ac129ae96d6fee77a2bdc04d8f9ed71655"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_004.toml",
+      "bytes": 326,
+      "sha256": "790c781f4f1d03e017fabd8f86c97b723303b4f2eb9dc05bf2f6847f406280a2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_005.toml",
+      "bytes": 325,
+      "sha256": "2207a8b906aeadd0a6a5af24992cd559ef41bf3ae175ff28694d25c36cb8f6bf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_006.toml",
+      "bytes": 324,
+      "sha256": "99f2ffdb425e01b3bf3489bc54f3d86465cf03d8630658664589bd886a66c079"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_007.toml",
+      "bytes": 326,
+      "sha256": "df9daa06f6d2cf40d395350f42c3cc5aa330d37d1473e54f1e7e73ca9c670ec9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_008.toml",
+      "bytes": 325,
+      "sha256": "3bbacba51e1827c8034094fb80079a6711fdd209fea571347f812220c4a4a1a3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_009.toml",
+      "bytes": 323,
+      "sha256": "48301aa0843bc8159c8edda10d9156b736060a43105f98659215c6e7b15caf92"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_010.toml",
+      "bytes": 325,
+      "sha256": "bb6384ebf29f9a464713df4a69ceab76e1a6a304cdf4843149900829a3d20d9c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_011.toml",
+      "bytes": 324,
+      "sha256": "b4d859c1f0e7162a278159f01479fa23f6a06f6a0eeda5bd32148914c8a079aa"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_012.toml",
+      "bytes": 326,
+      "sha256": "4a39674136c6d80b9f7da55c25ba4cb9f156c646694472fd3dafe8cfbb6e133f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_013.toml",
+      "bytes": 324,
+      "sha256": "961b564f4605aab675c9b90967421e699e73fda83acdc0e3598a5341a5555592"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_014.toml",
+      "bytes": 325,
+      "sha256": "909736d15ee010cf98a55a46379fecae6d024f1f7af5f227f306ab9227b98f1e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_015.toml",
+      "bytes": 325,
+      "sha256": "4142bef90c95d0ef07190907672941597201adb2c620808cb96901661f3cee9b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_016.toml",
+      "bytes": 326,
+      "sha256": "4a73b2a3bcf95146db2bb96672a75c589ef573ec62ef5091b8b5059f15fcae45"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_017.toml",
+      "bytes": 326,
+      "sha256": "415588b73b4aecfa2d10bee5c6bf466d3bf63ee1f9dc931208d356367c2adafc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_018.toml",
+      "bytes": 325,
+      "sha256": "83e9077e205e78753c89a1bc40933333a162bf5c757a0ea3abcc6c61b736ae49"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_019.toml",
+      "bytes": 324,
+      "sha256": "75b5fc76574560130c0c6411e8b653e3c1c5df66af1b71337eb72a00109eb1b6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_020.toml",
+      "bytes": 323,
+      "sha256": "6488164ff8e272ea486a89d963fbe3a078534e5379e4735c465f338c2cb151d0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_021.toml",
+      "bytes": 325,
+      "sha256": "75749e7f0b3580029a6bf6496cd2e03e969fb65bfe0b8330bf126150bdb2605b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_022.toml",
+      "bytes": 326,
+      "sha256": "dd798e88ed0c62a5fec09d9b55dcf7d0e13d95d85dcff0d3ef873725dbb8ee25"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_023.toml",
+      "bytes": 326,
+      "sha256": "a2517bb02f694d14db7fceec642991d224c73af87840a8cf4e071497e12024ed"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_024.toml",
+      "bytes": 324,
+      "sha256": "3f4c06668691dae96063da753192fd918210e873ae62cef038e0ec73d950858c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_025.toml",
+      "bytes": 327,
+      "sha256": "cc5b6d08ea1e8dfbd9f51c9ea5667b2f03168670ee4bc763a39dc2285dc689f7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_026.toml",
+      "bytes": 323,
+      "sha256": "445554c9ed3b3ce12bc460e530011410f3b022db4b48373fd208b27c132d7435"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_027.toml",
+      "bytes": 322,
+      "sha256": "7f6bc3b9b6853ca4ae7fce6f4398edcf909225b514d7aef43d6a9d0568c4d0bc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_028.toml",
+      "bytes": 325,
+      "sha256": "2dc4f555390a9a0ace4c4556087565932c14e809d4c88bddb4ce88de4c011870"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_029.toml",
+      "bytes": 325,
+      "sha256": "73b271b7a4b08b55059fbdf24eb02e4cdeb52a946a01854f07433dcc7658ec76"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_030.toml",
+      "bytes": 325,
+      "sha256": "74a50a5a1debb489ea29093881e3b75d5b4268e7534cb2ae28c1cee07a1e0c1d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_031.toml",
+      "bytes": 327,
+      "sha256": "288a729ca9924b74b5b3787394ac55854fb607b5324c193fd6feaa7e46f4474f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/andronic_sample_032.toml",
+      "bytes": 325,
+      "sha256": "6b2454a849f3e8583c487a17abff4f5e433b220b4817b07ce6d072e2a358be00"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/du2024.toml",
+      "bytes": 229,
+      "sha256": "13a9609ff2ca4bfdae4743e4410d03d52e12fcf36cfbfd78c8c42b2b3514a147"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/profiles/yu2025_set_ii.toml",
+      "bytes": 246,
+      "sha256": "541e9a68f273a0c9d750462a49c280f9d4ea22b4963573ef57ea061c236c564a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/final_validation.json",
+      "bytes": 18653,
+      "sha256": "6e2e331f1e498144b9c448ac5a63ae18c77a842e476f27822c01b99de9015fa0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/mapping_decision.json",
+      "bytes": 393,
+      "sha256": "f373a10466c1047bb80b9a27be443e1323b77a3511617ec1c7ad730fb0480191"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/numerical_plan.json",
+      "bytes": 2166,
+      "sha256": "3cfad0e0c4f03607cc7b91d63a26e9eadf27c7248eec06a17b4af718d3152682"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/pipeline.log",
+      "bytes": 35032,
+      "sha256": "670141981c9ca59ed6c175f0341954bf674b742512b69d99616c678b9a24dc6f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/postprocessing_recovery.json",
+      "bytes": 3536,
+      "sha256": "1db5bcb24034ac14c33d2b1639c22575d175ba2cddec4578189854817bd9cbea"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/previous_research_notes.json",
+      "bytes": 973,
+      "sha256": "d53c48e102336dc04f3066bf15582ea2123c8c25b2e3e98dc5eda0e092df2d83"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/profiles_preflight.json",
+      "bytes": 3377,
+      "sha256": "8da96c4ac669f29cbc1120a3c0fcb8e0869fbc5faf50b24a95d910eb09b66bc2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/run_andronic_envelope_pipeline.py",
+      "bytes": 6797,
+      "sha256": "624988704469add74a9b2ae252740124d1ce7f0c80da2eadd007e16f012edccb"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/run_freezeout_envelope_refinement.jl",
+      "bytes": 1547,
+      "sha256": "d78522de14266933a526da187f7dba4b0f4410c04a1f2d9b8f90c677c4cc85a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/run_freezeout_envelope_worker.jl",
+      "bytes": 1917,
+      "sha256": "e28f68ee5ad1e16a05b40af77c248dc44dc38620d39225730e03f312e6a53e00"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/screen_0.log",
+      "bytes": 35638,
+      "sha256": "e8ab847ba080939dfbf4a4437c8f61fb538b80d9d10cb359867010221cfcb3b4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/screen_1.log",
+      "bytes": 35910,
+      "sha256": "5feede71686793b67fdb4ed67fdd663cb9cad10e3d4faaf47dafb23a04e3b58c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0.log",
+      "bytes": 22334,
+      "sha256": "9685ca074e873f46aefcc4ab2cae1bb22e9f88e5b478564ebb6cc8e19eba1e6a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_001.json",
+      "bytes": 835,
+      "sha256": "79c3df31583d00e36dc30c0c9348828a0405809041966f1e66077f612536106d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_001_done.json",
+      "bytes": 395,
+      "sha256": "8dd078dd0e0f0acf297ae656fb99f5cf2e2f4b07f244e25981f2b36690bb1956"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_001_done.json.sha256",
+      "bytes": 64,
+      "sha256": "e12610ce206929c56d18f175a6799e91b2f54ccd0e1e9b395444be77248dfb33"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_002.json",
+      "bytes": 704,
+      "sha256": "569689e83c7bac527d6f9f3c24aabd7ada533a601c8e56b8be0b4750803f70c2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_002_done.json",
+      "bytes": 397,
+      "sha256": "5ebc0ae90b4787a146b4ef7743ac44a80ed3cd5a4965f119323c6679303fae0a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_002_done.json.sha256",
+      "bytes": 64,
+      "sha256": "2797d40aeffddb9395c844b890925804ff02ab4280c47c2decbfa1f241530c20"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_003.json",
+      "bytes": 801,
+      "sha256": "489c779134d7fb4c248be9ee77ed25fb4f27b916e191266d344c9fb63a913e54"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_003_done.json",
+      "bytes": 389,
+      "sha256": "c72f9918e431008e1e9a08dcb26d358032086c27580a6c02d020ccaeb7f2218e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_003_done.json.sha256",
+      "bytes": 64,
+      "sha256": "f6aec6fb09dc67fbb8c9843339166a5362befc581de1fd3faa22ed1f3b9221e7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_004.json",
+      "bytes": 916,
+      "sha256": "b9c1a3b3931de3937a7c6538345e0ce9ba552e8792bc736720e25d1b85f2a23e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_004_done.json",
+      "bytes": 387,
+      "sha256": "ff96194003bca6a9d11d4264b446f860f1a215fbbacb38c0a6388bb0b5319ee6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_004_done.json.sha256",
+      "bytes": 64,
+      "sha256": "67f8e44ae8477398579bff9361da574e98259064263d617793435f91f621bee6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_0_005.json",
+      "bytes": 79,
+      "sha256": "a1eedab37de530431bda380e0a5b98fa38f0bd4f9bf144d10ba022be3c442156"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1.log",
+      "bytes": 17985,
+      "sha256": "ac722c662ae64ea982813ef8d82e030cbef71da85bad2c24ee48b635d007cfbe"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_001.json",
+      "bytes": 830,
+      "sha256": "406df3136350968016d6e4776f1fedccff72a8ac682aad2d117d05548a68ecbc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_001_done.json",
+      "bytes": 395,
+      "sha256": "62c5a7efb1072b0f43a6bd2cd547bb31212f5e20a0090e3e57c543e2a982c0a6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_001_done.json.sha256",
+      "bytes": 64,
+      "sha256": "a3fa9cf261a8c535bcd3eabd52e506f87bbdd3bdfa98066e21011cf9d3f4cce4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_002.json",
+      "bytes": 675,
+      "sha256": "1e7106fa443796fc4276b88b14679ad78de6e9849d1f706967545acbf9c3a260"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_002_done.json",
+      "bytes": 397,
+      "sha256": "665a9ddd16e8df98d8fec81534eefab049609171bfdd71c7e802d91cb8e126b6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_002_done.json.sha256",
+      "bytes": 64,
+      "sha256": "c39a30bc41c6cb6c2cd4bf1aa7c9e073dcdf4fb8e5b87be23d4be42cd2a57807"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_003.json",
+      "bytes": 951,
+      "sha256": "0982548185dce11182530c43c1bdb20509243fe837e69e11b38bd2e61147d6c9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_003_done.json",
+      "bytes": 387,
+      "sha256": "d36615478ee3a85ddcb9ee4a33a53c2c1fdaa891b277bc91d9d6ddc66663aedf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_003_done.json.sha256",
+      "bytes": 64,
+      "sha256": "ac4f40d9214f31d73f9635b03c328cf25749d9cf2a4268b42c3bb121d59db508"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/worker_1_004.json",
+      "bytes": 79,
+      "sha256": "a1eedab37de530431bda380e0a5b98fa38f0bd4f9bf144d10ba022be3c442156"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_0/freezeout_ratios.csv",
+      "bytes": 12747,
+      "sha256": "7ab2a2643964b89c8ef902b62632b3a3ea5f6165df6943f4f04c3cbd0dad696d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_0/manifest.json",
+      "bytes": 5930,
+      "sha256": "bde8f30987bd367017788c889697830763bcc1d56f3d555f463a53193c22f3e1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "da7dfda706ecd088cc9c5ed69d87873f01159e899e56aec9c9e069831b0a73ea"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_0/run.json",
+      "bytes": 27334,
+      "sha256": "9fc925acba3b9559901c1bcccffeafacb3173c7ffef8f5e5be7fb881a1cc3849"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "32e5dc8bfc54a925d939355bafb0c30c703ce61f3fcd99a14360d675d6573fed"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_1/freezeout_ratios.csv",
+      "bytes": 24853,
+      "sha256": "443aedddc5c0cd6302a36eebfe287a16ee54cd9cf2f7a87653fab51501c86709"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_1/manifest.json",
+      "bytes": 10719,
+      "sha256": "49a1262fbc3c093b69ea1473108b8e4445e08b264ec2d7d1bffc7c732535a1ec"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "5489bfd5ac7ce8a13583b040a1ec540f9001f27f945674d6f1441819151f11e3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_1/run.json",
+      "bytes": 43631,
+      "sha256": "459a7bd9769420246c6fe003fe79e8e3922e9c73f8633a97bf08859c2266896c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_fine_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "a6563e29137ef80f28917bcc41b5aa3fc7d69aa7f28e677942b0914990780950"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_initial_assessment/assessment.json",
+      "bytes": 46224,
+      "sha256": "f23e4aa42f2f4e9e7fd6de329811097633da7da256af9ceda3156990e3bdd253"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_initial_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "4bb04965168cb08a5af198178f2e898710c6fe40a8aafb9d1bdc2fabf9130a78"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_initial_assessment/curves.csv",
+      "bytes": 68938,
+      "sha256": "733b4c29ede8d8bbd565ba5bab8f8b8a735f0ab3fae1a735c6fdada1115313fe"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_initial_assessment/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_initial_assessment/sampled_band.csv",
+      "bytes": 2216,
+      "sha256": "919a891371e330036e6b5fafdb5c50d5917735cd55a685df4ada66c0018fe594"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_assessment/assessment.json",
+      "bytes": 57667,
+      "sha256": "06b6315d345ce35d870adf3474691c8dbc85bd3cbc77c00e295fe1887cd6eeb3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "5546e1762c1c88565bf61d8c189fce026ae408b31204cb68fef5c59e93b58c4e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_assessment/curves.csv",
+      "bytes": 85570,
+      "sha256": "78bbbf23c54e01c22430b34c46229e4b20ac9ee30bf001adedc5451e158ffb58"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_assessment/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_assessment/sampled_band.csv",
+      "bytes": 2404,
+      "sha256": "9ec47df9732c9c8db6f1448caa839806d033a8e91747638e023ab4cb69d57e0e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/andronic_exploration_v1.toml",
+      "bytes": 1122,
+      "sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/andronic_literature_envelope_v2.toml",
+      "bytes": 5470,
+      "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/andronic_parameter_envelope.py",
+      "bytes": 12362,
+      "sha256": "b170084f65e4c01f284ec2abf12593d177905919e8b7bce94f7a10a064df03ae"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/design.json",
+      "bytes": 10313,
+      "sha256": "3fbb57d9cf720502ebb18d77b74441f70fe4820afa0189e0772c125b5f272308"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/parameters.csv",
+      "bytes": 1591,
+      "sha256": "cbe12fe1e938c835cf2191c92e0374cdcca7d55b7469b6895ee15646ab1a8c13"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_T_lim_GeV_minus.toml",
+      "bytes": 348,
+      "sha256": "5aed65954d27af656f58ac13d9ffba704f196356ba389edca611a9fab2dd382b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_T_lim_GeV_plus.toml",
+      "bytes": 346,
+      "sha256": "54ae8bd809778e134ca0549b74206e57ee59bf89806111eae58bdd2df60b058e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_d_GeV_minus.toml",
+      "bytes": 340,
+      "sha256": "5d927c06b4e88fbad0e8274118deca20702d7ce2f0c8bf39d225a06a5a3bf534"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_d_GeV_plus.toml",
+      "bytes": 338,
+      "sha256": "c647bcf7c546b72ae16073c15c729b9de49180eba6d40ac3d42f44ab02627e4d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_e_GeV_inv1_minus.toml",
+      "bytes": 350,
+      "sha256": "73e0716e15c84252dd69c8b016510b932047b39118805a58a64a0d472f3de20c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_e_GeV_inv1_plus.toml",
+      "bytes": 348,
+      "sha256": "10b7a2c1ea3c726c13d2764435c2166995fe294865860d192da2c4735a56ae98"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_log_offset_minus.toml",
+      "bytes": 350,
+      "sha256": "2f7f258ef7870d29ccd0c2e262a27e208ce5b9a604547e3e3d98c4c12d0d4c9a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_log_offset_plus.toml",
+      "bytes": 348,
+      "sha256": "7fc43e584ee27d279a09c9428d43bcac7315e253253f3c26e46898a0e2bb7f89"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_log_width_minus.toml",
+      "bytes": 348,
+      "sha256": "9198cab9841a075f929cd83ed2b1079401b2937e4ab1ce125c58fecf37d02dfe"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/profiles/andronic_local_log_width_plus.toml",
+      "bytes": 346,
+      "sha256": "5f4f0ffef410dd27d680a91d590ae4313188693f3c9900c6b7f3f606cfc4b960"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_0/freezeout_ratios.csv",
+      "bytes": 26668,
+      "sha256": "f863cf38b3a591de336711ba840d54ddcd47a69e42ba83d47398778a27bb534a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_0/manifest.json",
+      "bytes": 11563,
+      "sha256": "56c629048ca7cf8a159246e57baa0e81f6da6bb810ddc0bec14333ab0f78a34c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "1376d6d373ba292029faf11b115258a6f879cc02ba42abae8991476a5bc6d021"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_0/run.json",
+      "bytes": 45796,
+      "sha256": "e53fd4906b8b1b976a92915acfdcdc42c21f0a453ed24cc355971d428811f3db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "1a08d7a3ef63dee41afad8c625112be9aea170dd1a09ca63cfd6826ab858c042"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_1/freezeout_ratios.csv",
+      "bytes": 26528,
+      "sha256": "be8351520a4ac1c1376bedffa880428db3c2e04a31fc58a7cef5df7144f791a5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_1/manifest.json",
+      "bytes": 11473,
+      "sha256": "7825806a3c38c3193e07a45077c93b826a79a6c9c7c1e3fb97f868542dd59ce7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "ed341a0f42f0c3e2309bde7301b80ed1da71dcf0336832983ccbc86386a810af"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_1/run.json",
+      "bytes": 45538,
+      "sha256": "ecd9c76f50a11593a449eb922a05ee1b066601afc8406fefbfdefb4e3addd796"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_screen_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "fa8cf8c3ecfc8f42097b19459d040dd5ec5bfd556d7b8983258fd4e17125fdde"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/andronic_exploration_v1.toml",
+      "bytes": 1122,
+      "sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/andronic_literature_envelope_v2.toml",
+      "bytes": 5470,
+      "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/andronic_parameter_envelope.py",
+      "bytes": 12362,
+      "sha256": "b170084f65e4c01f284ec2abf12593d177905919e8b7bce94f7a10a064df03ae"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/design.json",
+      "bytes": 17299,
+      "sha256": "35473252108b0f58670e602fa787c46da3045b9596ab0cc5d11d1a19ad39c5cd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/parameters.csv",
+      "bytes": 531,
+      "sha256": "99e575a2498e2ccfedcaf79ceb08abf6b4f4cc475175f38c9f1c348ad37ddd11"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/profiles/andronic_hornmap_001.toml",
+      "bytes": 328,
+      "sha256": "b68e0a34152335ea4f7c0e17379d959a572066d645ba7fb869112c38c927abcb"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/profiles/andronic_hornmap_002.toml",
+      "bytes": 328,
+      "sha256": "c8c45affe79a54cb58acd61a4f9e759326a48db734ee2d39849ae5ef1dc33023"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/profiles/andronic_hornmap_003.toml",
+      "bytes": 327,
+      "sha256": "898d6e4b179710d58182ce064f3de998b3257a72b804436cb80c90559513cb3a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_0/freezeout_ratios.csv",
+      "bytes": 10275,
+      "sha256": "627b7f351259665232df15c73e0fd66820a9b7ca78a63222e602d35c636a2b6f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_0/manifest.json",
+      "bytes": 4868,
+      "sha256": "31a409752ecfd92046ead175ec0137a08ea9a9b505f030e33634054c6eb02b46"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "100d802af979f5ae924243a7239a1d5e9fd7fe42192408583e04fd48ae5b9f92"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_0/run.json",
+      "bytes": 23917,
+      "sha256": "9af1ab2aed7f188269314ba631812dd1fe57b1e67622556f1ea971677351794a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "25a3e08d28e77515c520d185c85c4a8187aae4da3cd0537ae06c75da09fe866c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_1/freezeout_ratios.csv",
+      "bytes": 5269,
+      "sha256": "728eab125fa002e8deed4aeec175f5449f5f99429d15aa09e8bdfc85896bfde7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_1/manifest.json",
+      "bytes": 2924,
+      "sha256": "0661f58d348b4a03d2ca516a73198e52bd711173936fec4cdaf37ebc60d11ccf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "c4914589862c53f094a3c5e1f34e570e1c5ea9621fe75ca3007779d12f0b8a81"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_1/run.json",
+      "bytes": 17039,
+      "sha256": "5bc0119be2f99b06937cf99ae0dafcd7b9a6cb4649ba2564e6e361258d7f1990"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_screen_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "d62438a5bbabca3ed47bcacea4200cc1842f7302a430eda438b86e19f7152f43"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/caption.md",
+      "bytes": 1287,
+      "sha256": "3073a214863dfb953c57f83ecfc59e7141d56a749c9851a53809e96f78b39899"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/plot_freezeout_envelope.py",
+      "bytes": 13840,
+      "sha256": "4bbbd03e8025e08d7d26d73c5c7b8f3fd725c5f5fe678c1b0cebf7c710191ec7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/review.json",
+      "bytes": 1536,
+      "sha256": "7b0f9b8bbe311ed361f00ae6093234f45be7c87cbc1327a8e12a08bd45273eb1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_0/freezeout_ratios.csv",
+      "bytes": 114160,
+      "sha256": "97162713b36274ff8bf8a1d21496412526e6e9460cc94fe2b8272899eb9433f4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_0/manifest.json",
+      "bytes": 45605,
+      "sha256": "023c80def442f849e9ba6b203aa50a54e12562fb71fbf6e8b03d07ae25326dd6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "ffde3b5e42a3f7d543b874bec825ea0a1265f52ae479a9d69474160ab1401959"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_0/run.json",
+      "bytes": 166701,
+      "sha256": "3089ec834ef87718b93b4769e11177c0590687e6a0983bb0d3507bb804bd5df9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "344d3cc97c3e79bccc7c16f45bc927416464c521d0c44c5d6f69b79ebdfc02ad"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_1/freezeout_ratios.csv",
+      "bytes": 114512,
+      "sha256": "69667346a6de81bc16d8064e812592124de970ae4aa28c6fcb098e9db6d68c9b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_1/manifest.json",
+      "bytes": 45875,
+      "sha256": "c28082337babb263291e31231a38ffc35092a5e11d08e9c9c3e897283668ba57"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "87f291c3ac202fcbf420a7062e3af741a1cca793beb3c12ce3e1be706ad297d8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_1/run.json",
+      "bytes": 167282,
+      "sha256": "80eca75762e9604c2febaeab311afc947cff4f0904ddc8ba474f054e19423ea1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_screen_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "fe3d112d8432ffa9969d4cc5a9a1801900f5df3080ed47a84c2d6e064a51dae2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/andronic_exploration_v1.toml",
+      "bytes": 1122,
+      "sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/andronic_literature_envelope_v2.toml",
+      "bytes": 5470,
+      "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/andronic_parameter_envelope.py",
+      "bytes": 12362,
+      "sha256": "b170084f65e4c01f284ec2abf12593d177905919e8b7bce94f7a10a064df03ae"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/design.json",
+      "bytes": 6535,
+      "sha256": "12c2bcda69999616cfce6ce5705f9b9b297bc1c813579c1d974cf7fda148169e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/freezeout_parameter_envelope.py",
+      "bytes": 24545,
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/parameters.csv",
+      "bytes": 531,
+      "sha256": "4fbae9d160b4367bfa5708f73f9103dd8322f7c5ad41e1011a5949794ddd3397"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/profiles/andronic_local_T_lim_GeV_minus.toml",
+      "bytes": 348,
+      "sha256": "5aed65954d27af656f58ac13d9ffba704f196356ba389edca611a9fab2dd382b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/profiles/andronic_local_d_GeV_minus.toml",
+      "bytes": 340,
+      "sha256": "5d927c06b4e88fbad0e8274118deca20702d7ce2f0c8bf39d225a06a5a3bf534"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_selected_design/profiles/andronic_local_log_offset_plus.toml",
+      "bytes": 348,
+      "sha256": "7fc43e584ee27d279a09c9428d43bcac7315e253253f3c26e46898a0e2bb7f89"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_standard/freezeout_ratios.csv",
+      "bytes": 20660,
+      "sha256": "4a943ec5b989983e3a96903e06d4f2fc538a6545f356f233c413f292acc8aa24"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_standard/manifest.json",
+      "bytes": 9105,
+      "sha256": "aa8f37a02e9ca9ddee6d20cf5948167a9a39b3155b25a6bbbf4e17cf3163899c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_standard/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "65a748d6910dea2fb7565ed168b864b52f62012f5e449679b00d851ba393f376"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_standard/run.json",
+      "bytes": 38199,
+      "sha256": "6269a6b58436bccd4599c96237126abbe1fde6136c3e2dc376327a887e459590"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_standard/run.json.sha256",
+      "bytes": 64,
+      "sha256": "470f3683c3b3f0850e0ed54fcba80c1ca5d1f4d51470e73fbb502318993b0010"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/baseline_curves.csv",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/checksums.json",
+      "bytes": 1196,
+      "sha256": "900f88d5fb364213b2e6e54aa952b562b12590a5921414b10ef0e95b23b7fb99"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/fine_band.csv",
+      "bytes": 4364,
+      "sha256": "6e06e8afc095a316aa1fd4475392d5da80cf56a81916c2ba1e2ea72bafd088c1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/fine_curves.csv",
+      "bytes": 11713,
+      "sha256": "7c5402072123e99619a99d43f894f3a983029b6328ba341488214f34f996c416"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/near_best_parameters.csv",
+      "bytes": 1542,
+      "sha256": "7f0d3b538a06643aa4742923dc96dbf6f9a34a9f154e256b06458536e2e3ee8f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/resolution_comparison.json",
+      "bytes": 2814,
+      "sha256": "8e648e5f7e9456a8ad193feac216976a9f0456386b64edec0aa60c9f9ae30e71"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/screen_band.csv",
+      "bytes": 2404,
+      "sha256": "7f38a0529aa2e9901d581c0cd9d13728a29c2b0cf25d5d97f5dc5f00f6bb3442"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/selected_parameters.csv",
+      "bytes": 440,
+      "sha256": "fa5ffafc915eda79b32c42b76fd2798d899a36abe7abb59a67767970eb01213a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/summary.json",
+      "bytes": 27390,
+      "sha256": "8ea288556cfd8512697c191ac3b74aa6e0fb8b1336a6f29aeeb09e1cd4fb55a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/freezeout_ratios.csv",
+      "bytes": 26573,
+      "sha256": "d309b78c23d01bb2974c5539a1ce558de995bc4a7cdbf385c5922021e00be225"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json",
+      "bytes": 11456,
+      "sha256": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "e94d599457790d27aa66af46d95e73179ed9174437d3936c35247e2d9c8d8a0e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/run.json",
+      "bytes": 41346,
+      "sha256": "686385ed03425ac8a8fe59589113c57a1efb1a46f79c1f5e30896b39f99598d8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/run.json.sha256",
+      "bytes": 64,
+      "sha256": "6dcbe1021ca8f082311d7034782cdc0352f14096b95d18cb3ff85e4d40dca6fd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/caption.md",
+      "bytes": 1386,
+      "sha256": "0072e4daac096b85c61c282c988fdf2acc0486cbe86dcef1e2b57a577712f1ab"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/comparison_metrics.json",
+      "bytes": 3198,
+      "sha256": "bbd479e35c9f01fc70d4ca199379bffb1bf9a6b7071187070027c4fe6cbd156b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/comparison_residuals.csv",
+      "bytes": 4574,
+      "sha256": "b2f5841b8a88952278bfc8ee2dea1290ddb9a3aebc5dd6d4e5e442eff60af8d4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/resolution_comparison.json",
+      "bytes": 10181,
+      "sha256": "0442d10bfb18f9fdba6a326697a14cea2e2a8d7c9503e19a29733fa8460ed563"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review/source/plot_freezeout_comparison.py",
+      "bytes": 24292,
+      "sha256": "7cbbbf671a41a45224b7939a00155d503e0e110cfc20a0bbe55edf75f57bf1c2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/caption.md",
+      "bytes": 1386,
+      "sha256": "0072e4daac096b85c61c282c988fdf2acc0486cbe86dcef1e2b57a577712f1ab"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/comparison_metrics.json",
+      "bytes": 3198,
+      "sha256": "bbd479e35c9f01fc70d4ca199379bffb1bf9a6b7071187070027c4fe6cbd156b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/comparison_residuals.csv",
+      "bytes": 4574,
+      "sha256": "b2f5841b8a88952278bfc8ee2dea1290ddb9a3aebc5dd6d4e5e442eff60af8d4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/resolution_comparison.json",
+      "bytes": 10181,
+      "sha256": "0442d10bfb18f9fdba6a326697a14cea2e2a8d7c9503e19a29733fa8460ed563"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/source/plot_freezeout_comparison.py",
+      "bytes": 24809,
+      "sha256": "f40601e3460c43be3c449d1b31db2b46c60a3ca8a09150076835037adfd21ca8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_smoke/freezeout_ratios.csv",
+      "bytes": 1386,
+      "sha256": "36b30a8baf377dd00c323dd10bd395b0d2af8b3e286e89c1a0695f9369113fd0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_smoke/manifest.json",
+      "bytes": 1375,
+      "sha256": "79b33bada07997e2baa1a4b944c6a4ccbab238d8c718e434a164ba8e73f558ba"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_smoke/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "8b3d502cb0d82fb63fe1332034c29c3ffbe5b1f933dc8bb50dee34d6c0e1283c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_smoke/run.json",
+      "bytes": 6012,
+      "sha256": "cf2bf2b3f2f5176866568b8c6d9c63de3c0a7dacfbd85d52088e8a87073aa653"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_smoke/run.json.sha256",
+      "bytes": 64,
+      "sha256": "d83772c32c25ff2b642556e6e26a21700c092607cabaa235527d1109d20a4399"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/freezeout_ratios.csv",
+      "bytes": 25541,
+      "sha256": "51fb12cdaaad9a8a1acdc16d80498906939af504f30020388ac7ff175add3a2f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json",
+      "bytes": 11038,
+      "sha256": "e5f576fbd039cce34a9cd2e9270bbe76123aaa19af9804c7fd148877fc184eb1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "dd5acc0389f2f929965dfb8f7ed56d84d8a9015d0c49deaa020d9bc540c3f3cc"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/run.json",
+      "bytes": 39635,
+      "sha256": "38a8bf45d4d37883dba3c86b59ad6e687f9f437f80c3a5797eead902c74e45d2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/run.json.sha256",
+      "bytes": 64,
+      "sha256": "6becda9d5bc5bb7ebdafe9f23443d008f74ac1303226c258f16072643b3ce4d0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r1/caption.md",
+      "bytes": 1107,
+      "sha256": "72b0134dbc8b78d1102aeb1e5bb6e59bd829962eb4e44dea2ef08885dfa09703"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r1/plot_freezeout_thermodynamic_envelope.py",
+      "bytes": 21446,
+      "sha256": "5d09eb4e0b37b45cc5ed2f278a0adcaf666d7959cf96dfe42932f2b1c86cc18a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/caption.md",
+      "bytes": 1100,
+      "sha256": "8d9a7fcc18a05528e3c8bbdb25fb79c9bf3f38266c91ae8ada4e2d5502db221b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/plot_freezeout_thermodynamic_envelope.py",
+      "bytes": 21460,
+      "sha256": "2535872a4edc3285800511c480593a247ccd9ddca2d2f177c514ab39b1728542"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/review.json",
+      "bytes": 2062,
+      "sha256": "f6eed46f768ed89fae3344628a248cce5703478058289ed75e7ad1e823ca0fec"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/checksums.json",
+      "bytes": 596,
+      "sha256": "e33f5929470e14d11de7859c118c6cae0a7654c7428e437d830ac274546760fb"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/energy_anchors.csv",
+      "bytes": 542,
+      "sha256": "a4365379260294f82195191959d7851bacc738aa36e17a599977c056fbeb1d58"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/freezeout_parameter_envelope.py",
+      "bytes": 23224,
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/parameters.csv",
+      "bytes": 5361,
+      "sha256": "fb7933abc3b24f172a42448fd6a622b9c38e2749de24ae05badda8a679772e43"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/plot_freezeout_thermodynamic_envelope.py",
+      "bytes": 21463,
+      "sha256": "389b0500cdc90cc812aa53b55cdf0649f67732b74429b0f0015c0e72877ab0dd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/preparation.json",
+      "bytes": 5927,
+      "sha256": "fde5960d2e7f5579bb8f62dcfa63057e1241d6df71f445be65a1de9bbb6c790e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_prepared/thermodynamic_band.csv",
+      "bytes": 86620,
+      "sha256": "2fb3b3371261b59d46b4aaf1c080b757efda94f6d06faa1bd5133736e2f3b767"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/assessment.json",
+      "bytes": 60199,
+      "sha256": "ee0de543aa740f3cc7e34b332b07e238e3a72bf46f5e3ac20d61256e4705222f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "f4c7ad6bf18cf77a40a325c61a085abb36fcb40503ada012d16d7208d6890124"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/curves.csv",
+      "bytes": 82876,
+      "sha256": "9287ef3872d7597cfc986b51a742656813be185f1c2c7b5b00e12df71e41fdcd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/freezeout_parameter_envelope.py",
+      "bytes": 23224,
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_all_screen_assessment/sampled_band.csv",
+      "bytes": 2026,
+      "sha256": "0c9e0426921e290982c6085f26ec185098926d062a57d120649c56d66d9e0b57"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json",
+      "bytes": 27153,
+      "sha256": "fd1ed1fad497d3fc2e579058414ba7059266e3b6e06039d945b9a774f3952436"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/freezeout_parameter_envelope.py",
+      "bytes": 18968,
+      "sha256": "a4ad46dcd826c94a792fa6dc278b81e02838d90cdb78fbfa7dfb110473bc3237"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/literature_envelope_v1.toml",
+      "bytes": 7240,
+      "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/parameters.csv",
+      "bytes": 5601,
+      "sha256": "329575ffca3bdd0146a070161e938a1043edfe07bac247c333e5da4927ef0f1e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/cleymans2006.toml",
+      "bytes": 230,
+      "sha256": "de0a9aceafc50822920beacc89eb9a1e4ac5afe96a52e9e7a8289454742969bd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_001.toml",
+      "bytes": 310,
+      "sha256": "a17db2842f19e629a2a282f3349e91adf9bde9784862254d4264e6707bbc9bf3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_002.toml",
+      "bytes": 308,
+      "sha256": "dc59d68601d640d4feffd645faa5dfc736ac5bc73791900a9ef5bf683ef4397b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_003.toml",
+      "bytes": 308,
+      "sha256": "f603809b7eeb29ca6d79365142bc8e5f7a0fa6f2cc9e8ac640aea1c0d12cd91a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_004.toml",
+      "bytes": 307,
+      "sha256": "9e3b74b5cfafafe973981f6d9325faf30b97b0034bacfb9db14526a257588b90"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_005.toml",
+      "bytes": 309,
+      "sha256": "ca6c14e59f3e19964c70ab9af426840ce52e8ebfc312eb70e774264602b722ed"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_006.toml",
+      "bytes": 308,
+      "sha256": "f65166dee85a27373123e82e69c8e4a7818f813d9c10b9c71431e76519ee4980"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_007.toml",
+      "bytes": 308,
+      "sha256": "873cbae1cb1ea41ba0fdc7ba0ce5af4799db0800cd1e0472eb99d7a5f8e2592a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_008.toml",
+      "bytes": 309,
+      "sha256": "e7d023a7f8e03dec84f90e95bd48837d9ff09bfd9bb8953880da68ff58996cb8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_009.toml",
+      "bytes": 309,
+      "sha256": "0f2c5066bdbf5407d7c14d1b9d1c02876131139dd9d15906c57e97d5bd62f63f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_010.toml",
+      "bytes": 308,
+      "sha256": "52f96c8616ccd6fa424bbcf04d14137592a7d42151e4eb6872498531a961bf13"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_011.toml",
+      "bytes": 309,
+      "sha256": "e42da63785af72cbb4fd93b777a170a8dd5062cde5e2e5f6a9a6de1e89f846b0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_012.toml",
+      "bytes": 308,
+      "sha256": "362acddb04df040959532d342e3874cbe1d905e14fbee20b43403dff1c6e620a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_013.toml",
+      "bytes": 309,
+      "sha256": "0c0b10f32449567ac391650dd0da302a99861858f9ccbe5e79d1b6b8dd9a9d9f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_014.toml",
+      "bytes": 308,
+      "sha256": "33cee582a9675d1fec0ddbae76b11223e5fd7f1d1b89b2d2203221d4e1b41d02"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_015.toml",
+      "bytes": 309,
+      "sha256": "243f99caf1e5755f093c2989a990590cbe1e18a49f194990068686034280af1c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_016.toml",
+      "bytes": 309,
+      "sha256": "4f7bd42658a0ef009b256777f20166a2ba897b1716c853a71a66e67d2b31f53e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_017.toml",
+      "bytes": 308,
+      "sha256": "feefcf3d66b7b20b1f9fbaad1920d2de8e3e20fcffaaf9ebd067d78d1d580778"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_018.toml",
+      "bytes": 307,
+      "sha256": "f99888a9e951091fa5e4c41a0df76e6d371b7e730d023387db4103fc9d332bfe"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_019.toml",
+      "bytes": 308,
+      "sha256": "2fc7347c3a96c142027a1313ab9633b82305730246e02c29edab50be93768a75"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_020.toml",
+      "bytes": 307,
+      "sha256": "ca45f9fbacde6d7f27383b24a852b52d1a62b860a2536ea9fa684bc61620a49a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_021.toml",
+      "bytes": 309,
+      "sha256": "eb3fe1f54d51177af3b20c0f0235e6626b4c3efa26f5f57d909924dccf956e8e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_022.toml",
+      "bytes": 309,
+      "sha256": "0024834d41cbabb879e9c5cde181d3e9f1463179269f15f60d0b78934de6fca9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_023.toml",
+      "bytes": 307,
+      "sha256": "77c988dc51fac512cc8b33d74d383ab785e0d5268047a035b15887e441203e33"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_024.toml",
+      "bytes": 309,
+      "sha256": "5b049bc854c97e67ab3488289119c8862676c6ae29332865e2b095a604a49050"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_025.toml",
+      "bytes": 308,
+      "sha256": "0a0afb2424056b84a369bed2779ceec687a163e5ca5a056e716fe2ae375cc4c6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_026.toml",
+      "bytes": 306,
+      "sha256": "5df580bdd4c85a2bb38a6fe7dc4c73b6ff1c4fe4f09f85a22dd4a31e25cd8195"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_027.toml",
+      "bytes": 309,
+      "sha256": "3b675f5dc7f0e34dd74f819241d2a28f6209ee6c507dfa3e53c9c29450c4e522"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_028.toml",
+      "bytes": 308,
+      "sha256": "a4276da55c6949aab41e8d3f22e19b6fa3f84d1cc2e7c7deed106d5260c2c4e8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_029.toml",
+      "bytes": 309,
+      "sha256": "71c7514ec03e3cfca7bd9a208124816bbc132e8e610dff368b62b54762efe8c0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_030.toml",
+      "bytes": 306,
+      "sha256": "7201e525f64f81ee31b56cabc0d99db6e3587b25f966291c0d26eb5e3f8e5826"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_031.toml",
+      "bytes": 309,
+      "sha256": "4f94231913085ed4c49f7a2e28c2bb0581151053550bb9fec243bdb2a3d870e6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_032.toml",
+      "bytes": 311,
+      "sha256": "8b0e47d191689cb55ce9327bc45dea55783e2bb7939cceb442476bbfbea0d57e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/frg2024_mudep.toml",
+      "bytes": 264,
+      "sha256": "2de83900474ba9bcd09b67e166303ebbc2b2eef059945f000ae98bbcbc4ef28a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/frg2024_muindep.toml",
+      "bytes": 268,
+      "sha256": "13c590df2608515490bd6e639b16d8f5502673eb029d483ee6e1f8c886502608"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/functional_qcd2026_lower.toml",
+      "bytes": 283,
+      "sha256": "d84fe682cfdd2b4a6fc4ee8c0687aae9505f2742f4200abcf18d972ace672e00"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/functional_qcd2026_mean.toml",
+      "bytes": 281,
+      "sha256": "248267a5dc45bf5dcd28d090c0755d8074f948168382f506f438313aa70ce3d2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/functional_qcd2026_upper.toml",
+      "bytes": 283,
+      "sha256": "5fd18ea9234ca53f7f6f22d75fd67215f64fe6d8edb9abf6af80a27f802c371b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a147_frg2024_muindep.toml",
+      "bytes": 302,
+      "sha256": "b3d428e5960e836ede994fa9f8c59ed9ccf9180e642de48923896d83074ce52c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a147_functional_qcd2026_mean.toml",
+      "bytes": 316,
+      "sha256": "b6371ef6f64f78a70585fb03a0bf6892a7ad826ca3385068b38c05ac44d952f9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a147_ihrg2019.toml",
+      "bytes": 256,
+      "sha256": "0c2ca973b4b0fed0c2c3269e3148ae498c19ff3588c2d9a581bfd99991add2b1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a150_frg2024_muindep.toml",
+      "bytes": 301,
+      "sha256": "eed8c1196feac6700bc8a1978977b86ceff1eaa2486ada80897177f252a4f6a4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a150_functional_qcd2026_mean.toml",
+      "bytes": 315,
+      "sha256": "96b389b9555e3fc74d045e8ad6c48fe00052600f7f3bc9c6edfa27bc2e64439c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/hybrid_a150_ihrg2019.toml",
+      "bytes": 255,
+      "sha256": "906859b4f7a18a0857c030f2580dee32b97e954b6b6eb6117acc4a0086f1d233"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/ihrg2019.toml",
+      "bytes": 221,
+      "sha256": "40132c0eb999c2603d215727d0bb299c049e7ce1abc24a059251fd3646d5d0ae"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/qvdw2019.toml",
+      "bytes": 223,
+      "sha256": "1a3ac8bbadb4f7784c77bf18c51d3bdf3aaa1c8063e35bf25ec545f808385ce6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/governance_checks.json",
+      "bytes": 1580,
+      "sha256": "dc1775176edfc93670de0a9ae68411100773792b2325513c77289c3e1510e40e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/integration_r2.log",
+      "bytes": 830,
+      "sha256": "bbabb994d4e1636374f229cf7e2e09425fc8b10494473ece83e6131000840982"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/local_screen_0.log",
+      "bytes": 7233,
+      "sha256": "b5dfd42256ef47e33eae9519af3fd7eac11adb0291d9450bbd2c5f4465265dce"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/local_screen_1.log",
+      "bytes": 7145,
+      "sha256": "9abe32ba9e40e5fe9c75668d09341664be68f7e16d328eee122031d45d518d0b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/mapping_screen.log",
+      "bytes": 4265,
+      "sha256": "9c9cd5ba91ebcf033c3034009d481668eb4414de1ef94f32675e17881dc325dd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/numerical_plan.json",
+      "bytes": 1296,
+      "sha256": "a60a921d4fedad842f4593db410e517171ea28834dddb2c7bd0089675ee219b0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/numerical_plan_r2.json",
+      "bytes": 1869,
+      "sha256": "952cc1328cb6841cfb0366c13f8bbfd9fb2763a64ed2cf48fed008051abccd9f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/refinement_0.log",
+      "bytes": 792,
+      "sha256": "885c87e77ca3361a17fb05db2af8a8ddecf69424ced31d3f0298a3063f59eaf1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/refinement_0_r2.log",
+      "bytes": 8784,
+      "sha256": "ed886475c63ebf324044409f46b1d3713bc9752545941786c0a06a26b10f4d5e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/refinement_1.log",
+      "bytes": 792,
+      "sha256": "885c87e77ca3361a17fb05db2af8a8ddecf69424ced31d3f0298a3063f59eaf1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/refinement_1_r2.log",
+      "bytes": 6669,
+      "sha256": "52e8ea549d98e87961e21b5f568e1138123a46567c9049f7048cf54250037f1f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/run_freezeout_envelope_refinement_r2.jl",
+      "bytes": 1547,
+      "sha256": "d78522de14266933a526da187f7dba4b0f4410c04a1f2d9b8f90c677c4cc85a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/screen_0.log",
+      "bytes": 1886,
+      "sha256": "bb08734129a2860804b63a283332062045bf43587c31131ae3ae7483ec15bb43"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/screen_0_r2.log",
+      "bytes": 33586,
+      "sha256": "8f6114ade04deadd85ef0430feda3225141a5d67bc04980f042b20d1d7995dfa"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/screen_1.log",
+      "bytes": 1886,
+      "sha256": "c661641831d046cf0c625b94638e8005052c5648232620b32f6e7b8ac45cbfe9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/screen_1_r2.log",
+      "bytes": 33734,
+      "sha256": "54bc275ef87daa5dd42646feea9ca4abc5e39527913ea6c2db88f2e9f06b9ed6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_execution/trajectory_review.json",
+      "bytes": 2524,
+      "sha256": "ec510ac4da08d3482c754500510395e6dae880f676599dcad5ce65ae5041046a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_0/freezeout_ratios.csv",
+      "bytes": 11192,
+      "sha256": "d4e2b6e9879f6afc78e9408f3ab4d73cdfe58cb0a323498f7abce3250d0185c2"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_0/manifest.json",
+      "bytes": 5151,
+      "sha256": "0ddedde997c96672a1c50704090e672dbec10f9e3cccc1e3901c6b0e1068f556"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "f73cfb91decf9d3495a8a94bc81ca5b135e715760daa80f9b902f505ae9d97ae"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_0/run.json",
+      "bytes": 22909,
+      "sha256": "24c31195a101151b7d80783460273262d8fb37e588018578c63efbb00d0f8480"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "4bfa876ff2fc836fedbbb2f351ad9e839e2b7d547a414098143893e570532c88"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_1/freezeout_ratios.csv",
+      "bytes": 22189,
+      "sha256": "eeed65e396b608c22d4acbf0c499f67d861b71af95b5a0813d0ac4d78656fee6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_1/manifest.json",
+      "bytes": 9407,
+      "sha256": "e5612ca16571231aefee27ff2933ae9bafe5f81086b50a754390eb488165562c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "bb0d931025b4ff4ef1a98bf48b4c0dc8c5e55d6c1ada3114dc917645362f2b56"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_1/run.json",
+      "bytes": 38102,
+      "sha256": "5231145899522491496ee5d7016396ec940496071708990661ebca830118886a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_fine_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "3ec498dc4e2aa8ad8c02759bb36af3eb81f89bf431d563e76b8813c7a803991f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_assessment/assessment.json",
+      "bytes": 57052,
+      "sha256": "9de702fb76929b7727c13c0beae75f6714e82744f28e5d6e29fe25c12a042851"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "8d00d4ce96e9777cc87dc4ca0341a281293b90cf26e24bd529b50f53bcbe36c5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_assessment/curves.csv",
+      "bytes": 78815,
+      "sha256": "58a13c169bc27f01fbc308a14d6477e41a30e0762eea42543c1bb52609bfb9c4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_assessment/freezeout_parameter_envelope.py",
+      "bytes": 23224,
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_assessment/sampled_band.csv",
+      "bytes": 2058,
+      "sha256": "ef2f08ab3c761341573abeae1e68d1ae046076899f9c69e204c683cc72ef2fe6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/design.json",
+      "bytes": 9116,
+      "sha256": "45ef6a18898d3769aa9d31992106d04e3640527487d8c85f874dce0d4d9ea190"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/freezeout_parameter_envelope.py",
+      "bytes": 21184,
+      "sha256": "689f3fa545ff28ce7f3086147ca444b5963f087f7a4c4fd6023f386c84d9c723"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/literature_envelope_v1.toml",
+      "bytes": 7240,
+      "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/parameters.csv",
+      "bytes": 1420,
+      "sha256": "f5232c5cab2954a9cf5a17e1e17f556cb1af067bff67efd68de95bb0de7399b8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_a_minus.toml",
+      "bytes": 310,
+      "sha256": "d6b840047072be151e38ef18921fbd46c6fb07fda4ebda8dbc960b7318bec117"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_a_plus.toml",
+      "bytes": 308,
+      "sha256": "6e4095ec6418c4cb13406f81dd063a47f0def7b33da53213e9fa19ccaf5a62f0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_b_minus.toml",
+      "bytes": 310,
+      "sha256": "2623b7e60946e9af363c8a81d8e09a41a03b3b8a0f072346699c2837dbb82f9c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_b_plus.toml",
+      "bytes": 308,
+      "sha256": "26ee61469b0e58643d1c70bb39e26d7ee5b49fe6506ab53cded620863c64b2a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_c_minus.toml",
+      "bytes": 309,
+      "sha256": "2338b7c6b269554e4c595f75883a0780fa301f4cecfafd2acdd78e536aaa94b7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_c_plus.toml",
+      "bytes": 308,
+      "sha256": "53dc8f7a8073c150b9447f4f830c4445bb059c1dca6194078ca1ceca9b02ab7c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_d_minus.toml",
+      "bytes": 310,
+      "sha256": "41a0a97bd7a77282b827cfca79dce9d91f82e7728359762aaa754b515c118305"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_d_plus.toml",
+      "bytes": 308,
+      "sha256": "96b61eeccb222d6d97d70514d1b99812f465ca8f1d285b59e51151a31bfd2e95"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_e_minus.toml",
+      "bytes": 311,
+      "sha256": "957a8cd9941bcfc169de423455149d8bdfd00cedddd1f969c6eeea7597e10a2b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_design/profiles/local_e_plus.toml",
+      "bytes": 308,
+      "sha256": "ec41f29e0db75e7ecdc5fabfc416ba7af7e7f2effabe7acf67f204c7eb8837f0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_0/freezeout_ratios.csv",
+      "bytes": 23746,
+      "sha256": "268fdd68305fa770277418763b328c3d7d6508d3c56de4a0921eb046a019c080"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_0/manifest.json",
+      "bytes": 10069,
+      "sha256": "e447a1f1d07ea8690d65d6d3333675444faed464221437887d70f9be2316be83"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_0/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "3bef9c5069d86ba2f8f53f261b3b3f7fd20ca68fe9850c070d5b1ae72a3c56da"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_0/run.json",
+      "bytes": 39973,
+      "sha256": "c012163c5afb0622b3f131c40c6ac25baa95eea310528b3552a1b3122254a212"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_0/run.json.sha256",
+      "bytes": 64,
+      "sha256": "1bcd31a832b12b307cd5f977f45cab7cb6954f78e345be7a7bf0c2338079f343"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_1/freezeout_ratios.csv",
+      "bytes": 23574,
+      "sha256": "8b8c9ab636a886f85e36bd19ed8496b2e405f1c45bc4c5ec369198355764936c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_1/manifest.json",
+      "bytes": 9979,
+      "sha256": "216d6dd8dfef36efecf4b8b5a97e150057ee5a141c573b434dd4c7772ac1db2a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_1/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "dbfcffee69918ddd59ee27e56b05c69516989f6fad4b9e3081ddcee8ab5b2f51"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_1/run.json",
+      "bytes": 39716,
+      "sha256": "aabf7e1b24a4113426d0a55a3f6145e480cb82d8e813603b94cf041a03c6c65d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_local_screen_1/run.json.sha256",
+      "bytes": 64,
+      "sha256": "b8e3048aff1300cac95ae6f7f31e42a3ee0ebdb4bd03ae7decf3893bab175c17"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/design.json",
+      "bytes": 5930,
+      "sha256": "e9ce42e2568545e9676cf602dd900a5b015597d97bdcc3ef1b01e2f5fa57332a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/freezeout_parameter_envelope.py",
+      "bytes": 23224,
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/literature_envelope_v1.toml",
+      "bytes": 7240,
+      "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/parameters.csv",
+      "bytes": 465,
+      "sha256": "72fffadf8294fd7daf93f04b4ba67b1e8ae6a41e5cbc4a79a4901d1daa0be40b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/profiles/hornmap_001.toml",
+      "bytes": 293,
+      "sha256": "235a8702b680ff5d6a79343cc9b29ad18efef921b4a617585b40223093701b66"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/profiles/hornmap_002.toml",
+      "bytes": 293,
+      "sha256": "313e9658283646271b6c350ef193b666a5696cf2110346ff6a55048511b775e3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_design/profiles/hornmap_003.toml",
+      "bytes": 293,
+      "sha256": "9b6bced6b97f69a9b3c0cd669b77198c212c6868276742df70011f7c0f51e536"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_screen/freezeout_ratios.csv",
+      "bytes": 14168,
+      "sha256": "c1c2e35c445522cb41df359b2bcb32d7f3a59834e6a7aad1d182c47d41330ab0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_screen/manifest.json",
+      "bytes": 6325,
+      "sha256": "079366dfd1b1ce5a32444ed9751aea05ed946de90e0d84a2689f3db4944aabd3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_screen/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "7e8dfa2f2032646bd2958353cc10210b92048f7f4b1f592524b7dd91b3d06a40"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_screen/run.json",
+      "bytes": 26828,
+      "sha256": "3db9eb4376cbbd02ffa259b15cde08d8b86ac75b36288b946b2961a983b7b319"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_mapping_screen/run.json.sha256",
+      "bytes": 64,
+      "sha256": "07c453d5f04de1611a26e26f95c24973ee506009913bd3ee9216c57190f6041e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/caption.md",
+      "bytes": 1267,
+      "sha256": "85f0c8d4c5208e0d0746589d1f9d6ff20256746eb8a6648e6999b830a169e57e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r1/plot_freezeout_envelope.py",
+      "bytes": 13264,
+      "sha256": "64fb3109754ff5f6f0b078056672eae2206da606b149416cb185015da0164b10"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/caption.md",
+      "bytes": 1267,
+      "sha256": "85f0c8d4c5208e0d0746589d1f9d6ff20256746eb8a6648e6999b830a169e57e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_freezeout_envelope.py",
+      "bytes": 13654,
+      "sha256": "deb6bbc42b05296f5ad9af81ded8e070a49b4d149bf00f059cebcf39f367db8a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_0_r2/freezeout_ratios.csv",
+      "bytes": 108541,
+      "sha256": "fe51a9e2e93b2b2eac0667b961da2a5a283d2253620982a9aa116f3705938d56"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_0_r2/manifest.json",
+      "bytes": 43409,
+      "sha256": "431e5b15c76a33a896d54feb9e6b297adb8a25d72f2401662c3c45f787abe534"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_0_r2/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "29772da8d806f352276454a2d6f0656c323598a416b2aa981c777f64723496da"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_0_r2/run.json",
+      "bytes": 158476,
+      "sha256": "2c57a95846879c328230b36c2b96257ac8b62a6d75a5cc3b883bc8a5d8c11976"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_0_r2/run.json.sha256",
+      "bytes": 64,
+      "sha256": "431c4b1870d2b7d588c30075779b776010326c3d46e119f3e8412bf93e2cba59"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_1_r2/freezeout_ratios.csv",
+      "bytes": 108858,
+      "sha256": "eb37a084c10ecebb5a2ce46522a6e7f31971e869df9d6996e014866a5eb137be"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_1_r2/manifest.json",
+      "bytes": 43571,
+      "sha256": "2f53ae319a4f0afe6da72fdda885970b7c691e4a4adf6e4ec90123cc630cbc12"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_1_r2/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "2841a1821884ab995463f89536cd6123e4d3bd83de8a668aadd21970f6830c7d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_1_r2/run.json",
+      "bytes": 158734,
+      "sha256": "7b441bcba1358417f80d38c206cb41903e71358244fecdbb2a4993d2e2cdafb6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_1_r2/run.json.sha256",
+      "bytes": 64,
+      "sha256": "dc9517045a332d1e1d7f112560a441acb7c528d6dcf6c92365f95a7e356793db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_assessment/assessment.json",
+      "bytes": 46270,
+      "sha256": "455bf45b4eef304e33fcaa2f28b9f0253f47d78fe7441f8e9949f93ab0d95a38"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_assessment/checksums.json",
+      "bytes": 377,
+      "sha256": "adcb0d81f38e5c26f78afcc65c932c2f2ce2e669dba10c26c50962d5a3eee650"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_assessment/curves.csv",
+      "bytes": 64993,
+      "sha256": "827a8b0dcf1ed12915c59bef7f37af3829fad7c0504cfb8d629b0d93eb42a595"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_assessment/freezeout_parameter_envelope.py",
+      "bytes": 21184,
+      "sha256": "689f3fa545ff28ce7f3086147ca444b5963f087f7a4c4fd6023f386c84d9c723"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_screen_assessment/sampled_band.csv",
+      "bytes": 2036,
+      "sha256": "9823022e32d99de56f9b58af91fc4bc7fbd91aa11cd97ead81ea0626d0dd3648"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/design.json",
+      "bytes": 6163,
+      "sha256": "b8d91089b24a6015cbb315f6dd185ee0217fceb70363a0bd468c9d738cab0cbd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/freezeout_parameter_envelope.py",
+      "bytes": 23224,
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/literature_envelope_v1.toml",
+      "bytes": 7240,
+      "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/parameters.csv",
+      "bytes": 470,
+      "sha256": "72c92971be315d42b3519446b0ee74496475ede7e0f4265be3e5bf53dee25b93"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/profiles/hornmap_001.toml",
+      "bytes": 293,
+      "sha256": "235a8702b680ff5d6a79343cc9b29ad18efef921b4a617585b40223093701b66"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/profiles/hornmap_003.toml",
+      "bytes": 293,
+      "sha256": "9b6bced6b97f69a9b3c0cd669b77198c212c6868276742df70011f7c0f51e536"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/profiles/local_a_minus.toml",
+      "bytes": 310,
+      "sha256": "d6b840047072be151e38ef18921fbd46c6fb07fda4ebda8dbc960b7318bec117"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_selected_design/run_freezeout_envelope_refinement.jl",
+      "bytes": 1539,
+      "sha256": "80a1045177404ca18d1d7681cd3e3e50890bb3307e391896f8b99cadf4182d98"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_standard/freezeout_ratios.csv",
+      "bytes": 18323,
+      "sha256": "eeaf7f0d55558d59c3488231822a03953061966b8557a1e310dcace0c700eb71"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_standard/manifest.json",
+      "bytes": 7932,
+      "sha256": "01ae80b60da10bedf3fd100d15ed39a9b7f3e100242f60652b6de0fdaa219fa6"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_standard/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "d8500e72812325cde8037886e2dae12e13294d3f1fe4431333a022d17d246e4f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_standard/run.json",
+      "bytes": 32870,
+      "sha256": "8f7ad014ba3a7a5e167899a3b9b2ca3a9d0b7e6880509bd5bed659355f70c33a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_standard/run.json.sha256",
+      "bytes": 64,
+      "sha256": "c1e3197e9d207b8f1cab1c78561468764c988221f2404d485291f212398f6090"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/baseline_curves.csv",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/checksums.json",
+      "bytes": 1196,
+      "sha256": "6d9da458638aeba093822a6a161553f6d69774a8f6570bb7fb2da5ed61077cc1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/fine_band.csv",
+      "bytes": 2959,
+      "sha256": "07395d94abb41cdeff82ffd057651d90460893fe4b46650d44bae56d8c6620db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/fine_curves.csv",
+      "bytes": 9669,
+      "sha256": "039e166141f9f95b339a9725349da2ca6ea02082e333f8576af403b43b18f82c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/near_best_parameters.csv",
+      "bytes": 552,
+      "sha256": "1ea1fe583aa565b904611dc643f04a2da1553a7c09b58b1b0b67f7a23bc10ccb"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/resolution_comparison.json",
+      "bytes": 2770,
+      "sha256": "8437edc9e1f03f66c055b4a83f3dc3e111a92fd92e76f4f8e682814208ea2d67"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/screen_band.csv",
+      "bytes": 2026,
+      "sha256": "0c9e0426921e290982c6085f26ec185098926d062a57d120649c56d66d9e0b57"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/selected_parameters.csv",
+      "bytes": 360,
+      "sha256": "8d2055488ae27862a19bcb7f46c456347a9728a201e340108c8f643c225e4f2b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json",
+      "bytes": 22339,
+      "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_assessment/assess_freezeout_literature_candidates.py",
+      "bytes": 7376,
+      "sha256": "70f1bff62bb455d547d971e2f6b96c911ea4b48bef9c993c51df1a17e2aa0cb4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_assessment/assessment.json",
+      "bytes": 12670,
+      "sha256": "ee4ac072ee8259678a090ee767fa8fee5dc81862a6de513a1c9cdebbe38cc82e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_assessment/residuals.csv",
+      "bytes": 5686,
+      "sha256": "566f3a8977c88641c18ed08d8e7dcf2704a3692b33da38d991047699323ca063"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_assessment/verification.json",
+      "bytes": 1436,
+      "sha256": "04907b4300b399a20312eae0646137116489d71412b91857eb8b409b5ba2a03b"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_fine/freezeout_ratios.csv",
+      "bytes": 10611,
+      "sha256": "94efb8ad6fcbd512ca0edb8659cb24472b1b7f8b232f74940263631c7a43bd26"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_fine/manifest.json",
+      "bytes": 4875,
+      "sha256": "20ae11fc6ab17544b2f31e6865df81ef0570ac85ef060901ba9f2c08e2a597b9"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_fine/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "d4f646fa531a09c439cd8da3e78bca630db57be4a20051756c53dba29dcabc66"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_fine/run.json",
+      "bytes": 20301,
+      "sha256": "c48f9117e755606e2306b1204f9fa03ce0ad453eff9ef4c6e26bb166e096b945"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_fine/run.json.sha256",
+      "bytes": 64,
+      "sha256": "e94580607a2b8291bc7b8b7f7d5bc6db331bd50b68ea6992c53b54681889c2f5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/freezeout_ratios.csv",
+      "bytes": 10630,
+      "sha256": "52e80709d0ffcf221bb0026872e8d0e097671ab0edab50ecc8720f8d4ffd9701"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/manifest.json",
+      "bytes": 4878,
+      "sha256": "1e5c4367570ecefc3d014abd34d10909ea22fd64a5cd1507ebf06aec4795f018"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/manifest.json.sha256",
+      "bytes": 64,
+      "sha256": "4b8245098ddef2d579f3908a845a87b8e363069acc99ad331019dfe8d0f39726"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/run.json",
+      "bytes": 20131,
+      "sha256": "916deed01ba0fd94848eb92f19e6b1e26fd0c87797121535695e419c36ca212d"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/run.json.sha256",
+      "bytes": 64,
+      "sha256": "b1396ca18aedadf5d3b6bde6e4b1b53c02f78d85bf89df1f9ac122b104ddefdf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_manifest.original.json",
+      "bytes": 16515,
+      "sha256": "d8ed57d0d714d18c298bb85186df0d6bfc54c8ba9d01d8c39d3ed785f800b39f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_manifest.original.json",
+      "bytes": 16608,
+      "sha256": "4e012ca4ebf60325941aa4c73b8ccc49966dca9993dddefce722ea7c34c04503"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/archive_manifest.original.json",
+      "bytes": 128244,
+      "sha256": "521ccf64fe30c6c34136d00381063ede82fc92e5c17cf227a0578565351ee1d5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/layout_relocation_20261022.json",
+      "bytes": 4935,
+      "sha256": "b4728860add44c6634cf16594bf53270932de182e6350aeb534fa363c12398d4"
+    }
+  ],
+  "source_pdf_mirror": "data/inputs/meson_freezeout_polynomial_literature_20261017",
+  "original_polynomial_source_root": "D:/Desktop/PNJL论文/01_论文与综述/相图与守恒荷涨落/化学冻结线与Kpi_20261017",
+  "excluded_work": "transport threshold/thermal optimization and SciPlot backlog remain in the original worktree",
+  "layout_correction": {
+    "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/layout_relocation_20261022.json",
+    "bytes": 4935,
+    "sha256": "b4728860add44c6634cf16594bf53270932de182e6350aeb534fa363c12398d4"
+  }
+}

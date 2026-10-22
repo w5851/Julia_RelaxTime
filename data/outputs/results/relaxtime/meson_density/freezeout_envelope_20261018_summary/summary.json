@@ -1,0 +1,612 @@
+{
+  "schema": "freezeout_envelope_review_v1",
+  "best_selected": "hornmap_001",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "selected_parameters": {
+    "a_GeV": 0.14564421970002192,
+    "b_GeV_inv1": 0.10364148726030518,
+    "c_GeV_inv3": 0.5463741671473763,
+    "d_GeV": 0.7304851722505652,
+    "e_GeV_inv1": 0.273
+  },
+  "selected_fine_ranking": [
+    "hornmap_001",
+    "local_a_minus",
+    "hornmap_003"
+  ],
+  "selected_standard_ranking": [
+    "hornmap_001",
+    "local_a_minus",
+    "hornmap_003"
+  ],
+  "selected_ranking_stable": true,
+  "selected_count": 3,
+  "fine_complete_band_members": [
+    "hornmap_001",
+    "hornmap_003",
+    "local_a_minus"
+  ],
+  "improvement_vs_andronic_fraction": 0.5513423713605805,
+  "best_previous_default": "frg2024_muindep",
+  "improvement_vs_best_previous_default_fraction": 0.46065818497494704,
+  "maximum_standard_fine_relative_difference": 4.854560497971396e-05,
+  "metrics": {
+    "metric": "equal-weight RMSE at nine Au+Au observations, 7.7-200 GeV",
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "observation_count": 9,
+    "profiles": {
+      "andronic2018": {
+        "count": 9,
+        "rmse": 0.15402462505033582,
+        "mae": 0.1516632813592216,
+        "mean_signed_bias": 0.1516632813592216,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.15230022100728416,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.12533577465793092,
+          "mae": 0.12485946206377563,
+          "mean_signed_bias": 0.12485946206377563
+        },
+        "ratio_7p7": 0.3898807630863314,
+        "ratio_200": 0.2745059011773912,
+        "failed_all_energies": [
+          17.27
+        ],
+        "sampled_horn": {
+          "energy_GeV": 9.25,
+          "ratio": 0.3954858274379151,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 22
+        },
+        "horn_three_point_difference_rmse": 0.040438327309995595,
+        "horn_rises_then_falls": true
+      },
+      "cleymans2006": {
+        "count": 9,
+        "rmse": 0.18290768011440542,
+        "mae": 0.18074620745593592,
+        "mean_signed_bias": 0.18074620745593592,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.1816474075365763,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.15347548033955244,
+          "mae": 0.15284505515811392,
+          "mean_signed_bias": 0.15284505515811392
+        },
+        "ratio_7p7": 0.41539335661986543,
+        "ratio_200": 0.2989101376127549,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 9.5,
+          "ratio": 0.4197915461252066,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 22
+        },
+        "horn_three_point_difference_rmse": 0.024189458818695685,
+        "horn_rises_then_falls": false
+      },
+      "frg2024_mudep": {
+        "count": 9,
+        "rmse": 0.1428899308239018,
+        "mae": 0.14014595641435268,
+        "mean_signed_bias": 0.14014595641435268,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.1381993126508905,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.1129189373702983,
+          "mae": 0.11249962314639361,
+          "mean_signed_bias": 0.11249962314639361
+        },
+        "ratio_7p7": 0.3986698577606584,
+        "ratio_200": 0.26349616709429297,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.3986698577606584,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "frg2024_muindep": {
+        "count": 9,
+        "rmse": 0.12812713774834875,
+        "mae": 0.12657892319877803,
+        "mean_signed_bias": 0.12657892319877803,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.12919010207050483,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.1091746829077287,
+          "mae": 0.10878959143862468,
+          "mean_signed_bias": 0.10878959143862468
+        },
+        "ratio_7p7": 0.341982903487295,
+        "ratio_200": 0.2604465953575071,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 11.5,
+          "ratio": 0.35389536601353927,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "functional_qcd2026_mean": {
+        "count": 9,
+        "rmse": 0.13794450993119048,
+        "mae": 0.13671491083098433,
+        "mean_signed_bias": 0.13671491083098433,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.13776781279219819,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.11942435645938387,
+          "mae": 0.11904946210628692,
+          "mean_signed_bias": 0.11904946210628692
+        },
+        "ratio_7p7": 0.3620500213456655,
+        "ratio_200": 0.2702260039673215,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.3620500213456655,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "ihrg2019": {
+        "count": 9,
+        "rmse": 0.14084092130280762,
+        "mae": 0.1361325286085328,
+        "mean_signed_bias": 0.1361325286085328,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.13176573934924915,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10280878628681635,
+          "mae": 0.10241625959156275,
+          "mean_signed_bias": 0.10241625959156275
+        },
+        "ratio_7p7": 0.42176733908599545,
+        "ratio_200": 0.2543861612182271,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.42176733908599545,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "hornmap_001": {
+        "count": 9,
+        "rmse": 0.0691043230271594,
+        "mae": 0.06873941653719812,
+        "mean_signed_bias": 0.06873941653719812,
+        "role": "energy_mapping_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.07105043451319916,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07085526334071456,
+          "mae": 0.07074857950418115,
+          "mean_signed_bias": 0.07074857950418115
+        },
+        "ratio_7p7": 0.27362497612432135,
+        "ratio_200": 0.23099539246374007,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.5,
+          "ratio": 0.27365565185162766,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.013393940193777007,
+        "horn_rises_then_falls": true
+      },
+      "hornmap_003": {
+        "count": 9,
+        "rmse": 0.07523240097225416,
+        "mae": 0.07491143063482308,
+        "mean_signed_bias": 0.07491143063482308,
+        "role": "energy_mapping_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.07711237346316249,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07565004165285619,
+          "mae": 0.07554534245168881,
+          "mean_signed_bias": 0.07554534245168881
+        },
+        "ratio_7p7": 0.2807403504079039,
+        "ratio_200": 0.2351427522723152,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 8.0,
+          "ratio": 0.28081562505734814,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.012149786351335744,
+        "horn_rises_then_falls": true
+      },
+      "local_a_minus": {
+        "count": 9,
+        "rmse": 0.0734141909466352,
+        "mae": 0.07248618538373676,
+        "mean_signed_bias": 0.07248618538373676,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.07642918271149124,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07428543882492199,
+          "mae": 0.074153658788575,
+          "mean_signed_bias": 0.074153658788575
+        },
+        "ratio_7p7": 0.2648358651456103,
+        "ratio_200": 0.23242501184978817,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 11.0,
+          "ratio": 0.27364055702725437,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.029772714029780736,
+        "horn_rises_then_falls": false
+      }
+    },
+    "ranking": [
+      "hornmap_001",
+      "local_a_minus",
+      "hornmap_003",
+      "frg2024_muindep",
+      "functional_qcd2026_mean",
+      "ihrg2019",
+      "frg2024_mudep",
+      "andronic2018",
+      "cleymans2006"
+    ],
+    "best_sampled": "hornmap_001",
+    "near_best_profiles": [
+      "hornmap_001",
+      "local_a_minus",
+      "hornmap_003"
+    ],
+    "near_best_factor": 1.1,
+    "failures_policy": "incomplete candidate is ineligible; never shrink the experimental set",
+    "optimization_scope": "finite sampled exploration, not proof of a global optimum"
+  },
+  "standard_metrics": {
+    "metric": "equal-weight RMSE at nine Au+Au observations, 7.7-200 GeV",
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "observation_count": 9,
+    "profiles": {
+      "hornmap_001": {
+        "count": 9,
+        "rmse": 0.06909579163032958,
+        "mae": 0.06873079648390348,
+        "mean_signed_bias": 0.06873079648390348,
+        "role": "energy_mapping_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.0710419888208438,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07084727876802854,
+          "mae": 0.07074058358771498,
+          "mean_signed_bias": 0.07074058358771498
+        },
+        "ratio_7p7": 0.2736150506651044,
+        "ratio_200": 0.23098758575208608,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.5,
+          "ratio": 0.2736456884463387,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.013394047270459434,
+        "horn_rises_then_falls": true
+      },
+      "hornmap_003": {
+        "count": 9,
+        "rmse": 0.07522374656620151,
+        "mae": 0.07490270723588267,
+        "mean_signed_bias": 0.07490270723588267,
+        "role": "energy_mapping_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.07710383051514702,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07564201706995843,
+          "mae": 0.07553730899178257,
+          "mean_signed_bias": 0.07553730899178257
+        },
+        "ratio_7p7": 0.2807301902998507,
+        "ratio_200": 0.23513492727209567,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 8.0,
+          "ratio": 0.28080552406244724,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.012150107374353902,
+        "horn_rises_then_falls": true
+      },
+      "local_a_minus": {
+        "count": 9,
+        "rmse": 0.07340543644365963,
+        "mae": 0.07247725225490965,
+        "mean_signed_bias": 0.07247725225490965,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.07642044405927682,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.07427732908278746,
+          "mae": 0.07414554137429986,
+          "mean_signed_bias": 0.07414554137429986
+        },
+        "ratio_7p7": 0.26482539297883056,
+        "ratio_200": 0.23241715833886664,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 11.5,
+          "ratio": 0.2736150506651044,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.02977295135406859,
+        "horn_rises_then_falls": false
+      }
+    },
+    "ranking": [
+      "hornmap_001",
+      "local_a_minus",
+      "hornmap_003"
+    ],
+    "best_sampled": "hornmap_001",
+    "near_best_profiles": [
+      "hornmap_001",
+      "local_a_minus",
+      "hornmap_003"
+    ],
+    "near_best_factor": 1.1,
+    "failures_policy": "incomplete candidate is ineligible; never shrink the experimental set",
+    "optimization_scope": "finite sampled exploration, not proof of a global optimum"
+  },
+  "physics_checks": [
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 16,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 19,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    }
+  ],
+  "standard_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_standard",
+      "scan_identity": "88ab55d901e0afc44e14ca0accf67d396b2fa3e2ddf0372763776c7fbf6f059a",
+      "manifest_sha256": "01ae80b60da10bedf3fd100d15ed39a9b7f3e100242f60652b6de0fdaa219fa6",
+      "point_count": 66,
+      "successful_points": 66,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 19
+    }
+  ],
+  "fine_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_0",
+      "scan_identity": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
+      "manifest_sha256": "0ddedde997c96672a1c50704090e672dbec10f9e3cccc1e3901c6b0e1068f556",
+      "point_count": 40,
+      "successful_points": 40,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 17
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_1",
+      "scan_identity": "9623b22537b4e6ab6245dee79055219be26561047f0c3a89417e53e8557f40e0",
+      "manifest_sha256": "e5612ca16571231aefee27ff2933ae9bafe5f81086b50a754390eb488165562c",
+      "point_count": 80,
+      "successful_points": 80,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 18
+    }
+  ],
+  "baseline_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_defaults_20261017_fine",
+      "scan_identity": "dea79282e3dcfeb63634801bcb58b65691e0946ceb127326c8b9bb2a3d4b5544",
+      "manifest_sha256": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8",
+      "point_count": 100,
+      "successful_points": 99,
+      "warning_points": 61,
+      "snapshot_hashes_checked": 18
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_literature_candidates_20261017_fine",
+      "scan_identity": "5fdbc2442d03672e12a456954c6f3d148bcd84481be92c06b0cec038d97b8afa",
+      "manifest_sha256": "20ae11fc6ab17544b2f31e6865df81ef0570ac85ef060901ba9f2c08e2a597b9",
+      "point_count": 36,
+      "successful_points": 36,
+      "warning_points": 12,
+      "snapshot_hashes_checked": 20
+    }
+  ],
+  "screen_assessment": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_all_screen_assessment\\assessment.json",
+    "sha256": "ee0de543aa740f3cc7e34b332b07e238e3a72bf46f5e3ac20d61256e4705222f"
+  },
+  "design_input": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_selected_design\\design.json",
+    "sha256": "b8d91089b24a6015cbb315f6dd185ee0217fceb70363a0bd468c9d738cab0cbd"
+  },
+  "sampled_design_inputs": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_design\\design.json",
+      "sha256": "fd1ed1fad497d3fc2e579058414ba7059266e3b6e06039d945b9a774f3952436"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_local_design\\design.json",
+      "sha256": "45ef6a18898d3769aa9d31992106d04e3640527487d8c85f874dce0d4d9ea190"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_mapping_design\\design.json",
+      "sha256": "e9ce42e2568545e9676cf602dd900a5b015597d97bdcc3ef1b01e2f5fa57332a"
+    }
+  ],
+  "near_best_parameter_sets": [
+    {
+      "profile": "hornmap_001",
+      "a_GeV": 0.14564421970002192,
+      "b_GeV_inv1": 0.10364148726030518,
+      "c_GeV_inv3": 0.5463741671473763,
+      "d_GeV": 0.7304851722505652,
+      "e_GeV_inv1": 0.273,
+      "screening_rmse": 0.06884344280176259
+    },
+    {
+      "profile": "local_a_minus",
+      "a_GeV": 0.14564421970002192,
+      "b_GeV_inv1": 0.10364148726030518,
+      "c_GeV_inv3": 0.5463741671473763,
+      "d_GeV": 0.8402712694332657,
+      "e_GeV_inv1": 0.2233322518914494,
+      "screening_rmse": 0.07314458100577463
+    },
+    {
+      "profile": "hornmap_002",
+      "a_GeV": 0.14689421970002192,
+      "b_GeV_inv1": 0.11139148726030519,
+      "c_GeV_inv3": 0.5463741671473763,
+      "d_GeV": 0.7304851722505652,
+      "e_GeV_inv1": 0.273,
+      "screening_rmse": 0.07340200341943202
+    },
+    {
+      "profile": "hornmap_003",
+      "a_GeV": 0.14689421970002192,
+      "b_GeV_inv1": 0.10364148726030518,
+      "c_GeV_inv3": 0.5463741671473763,
+      "d_GeV": 0.7760897501036745,
+      "e_GeV_inv1": 0.273,
+      "screening_rmse": 0.07496839738761256
+    }
+  ],
+  "experiment": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261018\\experimental_ratios.csv",
+    "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50"
+  },
+  "analysis_sources": [
+    {
+      "path": "scripts/analysis/relaxtime/summarize_freezeout_envelope.py",
+      "sha256": "14a28f2a728bafdec595857e3d2eb27c464bd059ef9aac821f9945a09d61a988"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/freezeout_parameter_envelope.py",
+      "sha256": "ecd22655b4a2d452b2a34dc05ecc2491cad9bbfec730728ed35fe394d0f3955f"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/plot_freezeout_comparison.py",
+      "sha256": "f40601e3460c43be3c449d1b31db2b46c60a3ca8a09150076835037adfd21ca8"
+    }
+  ],
+  "limitations": [
+    "best among sampled/selected curves; no global optimum guarantee",
+    "screening band has not been uniformly recomputed at fine resolution",
+    "source-specific covariance relaxed by author-approved exploration; no confidence level",
+    "low-energy extensions do not reproduce each source paper's validity range",
+    "fixed finite integration window; no endpoint/tail limit certification",
+    "no final-state decay or rapidity-acceptance model"
+  ]
+}

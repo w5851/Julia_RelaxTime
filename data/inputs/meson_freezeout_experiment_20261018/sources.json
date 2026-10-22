@@ -1,0 +1,28 @@
+{
+  "schema": "meson_freezeout_experiment_metadata_revision_v1",
+  "parent_csv": "../meson_freezeout_experiment_20261017/experimental_ratios.csv",
+  "parent_csv_sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631",
+  "parent_sources": "../meson_freezeout_experiment_20261017/sources.json",
+  "parent_sources_sha256": "cb8052edeaf23439f8299b444bb555463ae7f10efb0e00225a4648c15421c7d6",
+  "csv_sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50",
+  "corrections": [
+    {
+      "id": "NA49_17.27",
+      "field": "centrality",
+      "old": "0-7.2%",
+      "new": "0-5%",
+      "source": "https://arxiv.org/abs/nucl-ex/0205002",
+      "locator": "PDF p.20 Table I, 158A GeV; previously verified correction in parent README"
+    }
+  ],
+  "numeric_columns_changed": false,
+  "row_count": 22,
+  "independent_field_comparison": [
+    [
+      "NA49_17.27",
+      "centrality",
+      "0-7.2%",
+      "0-5%"
+    ]
+  ]
+}

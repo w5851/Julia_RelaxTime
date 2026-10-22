@@ -1,0 +1,36 @@
+{
+  "schema": "andronic_exploration_preflight_v1",
+  "checked_utc": "2026-10-18T05:43:54.451029+00:00",
+  "status": "passed",
+  "design_sha256": "76d960045c2679fe2ea98a673b480063df8af4258af4e0bad1a618b835f7aad0",
+  "profile_roundtrips": 46,
+  "positive_analytic_coordinates_checked": 782,
+  "source_pdf_hashes": {
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ElfnerMuller2023_JPhysG50_103001.pdf": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Du2024_PRC110_014904.pdf": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ThakurHirono2022_JHEP02_207.pdf": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Andronic2026_arxiv2606.14799v2.pdf": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\LaffertyRothkopf2020_PRD101_056010.pdf": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Yu2025_arxiv2403.16548v3.pdf": "4d40ab1f83ae7bad9eb031357ef2668e7f03758fc8abc53358eb671da705ff16"
+  },
+  "focused_python_tests": {
+    "count": 25,
+    "result": "passed",
+    "modules": [
+      "test_andronic_parameter_envelope",
+      "test_freezeout_parameter_envelope",
+      "test_freezeout_thermodynamic_envelope",
+      "test_freezeout_comparison"
+    ]
+  },
+  "preserved_polynomial_artifacts": {
+    "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/checksums.json": "6d9da458638aeba093822a6a161553f6d69774a8f6570bb7fb2da5ed61077cc1",
+    "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/kplus_piplus_parameter_envelope.png": "f6072350f59758d3ab5fbda7df0068207a239c84e1501bbf910ef11cfa007f63",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/kplus_piplus_parameter_envelope_gray.png": "cb16f74f3a79dd02c0b322cbeea5dd339e23d7c7919373216e044dedba5bd684",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json": "d29627fdc530ef853e58ddb992417a2367ecf6cd79de068319f0a460992dc8b6",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/chemical_freezeout_T_muB_band.png": "af0372b8618f26a61b2a055c9432c9c242b716e3ec2fd1d0c1d2c45066812493",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/chemical_freezeout_T_muB_band_gray.png": "2b0c117155b7ad81879823fd130297e4090603f46299aacb608713187507c6c0",
+    "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_Tmu_png_review_r2/plot_manifest.json": "2b32c7cb603e27abbc3d327450f4402f5a23080197f0e61c58c42205b858d99a"
+  }
+}

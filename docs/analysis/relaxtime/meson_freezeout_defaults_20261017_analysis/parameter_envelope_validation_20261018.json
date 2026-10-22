@@ -1,0 +1,319 @@
+{
+  "schema": "chemical_freezeout_parameter_envelope_validation_v1",
+  "recorded_at_utc": "2026-10-18T03:25:29.276394+00:00",
+  "scope": "Cross-literature parameter exploration, fixed-observation scoring, matched-resolution q0 checks and PNG review; not full finite-q production, a confidence region, or author acceptance.",
+  "software_tests": {
+    "julia_integration_assertions": 71,
+    "integration_log": {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_execution\\integration_r2.log",
+      "sha256": "bbabb994d4e1636374f229cf7e2e09425fc8b10494473ece83e6131000840982"
+    },
+    "integration_file": {
+      "path": "D:\\w\\meson-freezeout-defaults\\tests\\integration\\relaxtime\\test_charged_gbu_freezeout_comparison.jl",
+      "sha256": "82b987719af9440394fe4c39a76f7b2ab4900c3adb30d96fba803758c532b764"
+    },
+    "python_tests": 17,
+    "python_command": "D:/Python313/python.exe -X utf8 -m unittest discover -s tests/unit/python -p test_freezeout*.py -v",
+    "python_test_files": [
+      {
+        "path": "D:\\w\\meson-freezeout-defaults\\tests\\unit\\python\\test_freezeout_comparison.py",
+        "sha256": "32445fac1956d3bfe243976ca8650cbd9e37b1a00626f48d7a01c8983aa092c1"
+      },
+      {
+        "path": "D:\\w\\meson-freezeout-defaults\\tests\\unit\\python\\test_freezeout_parameter_envelope.py",
+        "sha256": "0672e6b4388940e311ac76b64555099dbf234c33dc4f5d9bd22d06cdbdfb78c4"
+      }
+    ],
+    "unchanged_kernel_regression": "Reused prior kernel regression; no new kernel or tolerance changes",
+    "prior_validation": {
+      "path": "D:\\w\\meson-freezeout-defaults\\docs\\analysis\\relaxtime\\meson_freezeout_defaults_20261017_analysis\\validation.json",
+      "sha256": "1edc0105ec4f4694ef9900738c234827b411b6fdfce961232afa91a0734b33bd"
+    }
+  },
+  "governance_checks": [
+    {
+      "name": "implementation_ledger",
+      "command": "julia --startup-file=no --project=. scripts/dev/check_task_ledger.jl",
+      "workdir": "D:\\w\\meson-freezeout-defaults",
+      "exit_code": 0,
+      "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml\n"
+    },
+    {
+      "name": "root_ledger",
+      "command": "julia --startup-file=no --project=. scripts/dev/check_task_ledger.jl",
+      "workdir": "D:\\Desktop\\Julia_RelaxTime",
+      "exit_code": 0,
+      "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml\n"
+    },
+    {
+      "name": "implementation_docs",
+      "command": "julia --startup-file=no --project=. scripts/dev/check_docs_consistency.jl",
+      "workdir": "D:\\w\\meson-freezeout-defaults",
+      "exit_code": 0,
+      "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突\n"
+    },
+    {
+      "name": "root_docs",
+      "command": "julia --startup-file=no --project=. scripts/dev/check_docs_consistency.jl",
+      "workdir": "D:\\Desktop\\Julia_RelaxTime",
+      "exit_code": 0,
+      "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突\n"
+    },
+    {
+      "name": "implementation_diff",
+      "command": "git diff --check",
+      "workdir": "D:\\w\\meson-freezeout-defaults",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "name": "root_scoped_diff",
+      "command": "git diff --check -- config/governance/task_tracks.toml docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/parameter_envelope_handoff.md",
+      "workdir": "D:\\Desktop\\Julia_RelaxTime",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "numerical_counts": {
+    "screening": [
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_screen_0_r2",
+        "point_count": 391,
+        "successful_points": 384,
+        "warning_points": 118
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_screen_1_r2",
+        "point_count": 391,
+        "successful_points": 386,
+        "warning_points": 127
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_local_screen_0",
+        "point_count": 85,
+        "successful_points": 85,
+        "warning_points": 0
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_local_screen_1",
+        "point_count": 85,
+        "successful_points": 85,
+        "warning_points": 0
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_mapping_screen",
+        "point_count": 51,
+        "successful_points": 51,
+        "warning_points": 0
+      }
+    ],
+    "standard": [
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_standard",
+        "scan_identity": "88ab55d901e0afc44e14ca0accf67d396b2fa3e2ddf0372763776c7fbf6f059a",
+        "manifest_sha256": "01ae80b60da10bedf3fd100d15ed39a9b7f3e100242f60652b6de0fdaa219fa6",
+        "point_count": 66,
+        "successful_points": 66,
+        "warning_points": 0,
+        "snapshot_hashes_checked": 19
+      }
+    ],
+    "fine": [
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_0",
+        "scan_identity": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
+        "manifest_sha256": "0ddedde997c96672a1c50704090e672dbec10f9e3cccc1e3901c6b0e1068f556",
+        "point_count": 40,
+        "successful_points": 40,
+        "warning_points": 0,
+        "snapshot_hashes_checked": 17
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_1",
+        "scan_identity": "9623b22537b4e6ab6245dee79055219be26561047f0c3a89417e53e8557f40e0",
+        "manifest_sha256": "e5612ca16571231aefee27ff2933ae9bafe5f81086b50a754390eb488165562c",
+        "point_count": 80,
+        "successful_points": 80,
+        "warning_points": 0,
+        "snapshot_hashes_checked": 18
+      }
+    ],
+    "total_points": 1189,
+    "successful_points": 1177,
+    "failed_points": 12,
+    "warning_points": 245
+  },
+  "independent_score_and_density_checks": [
+    {
+      "profile": "hornmap_001",
+      "rmse": 0.0691043230271594,
+      "all_ratios_match_density_quotient": true,
+      "maximum_background_residual": 8.322019024322822e-10
+    },
+    {
+      "profile": "hornmap_003",
+      "rmse": 0.07523240097225416,
+      "all_ratios_match_density_quotient": true,
+      "maximum_background_residual": 2.730320141375469e-11
+    },
+    {
+      "profile": "local_a_minus",
+      "rmse": 0.0734141909466352,
+      "all_ratios_match_density_quotient": true,
+      "maximum_background_residual": 3.835734867658512e-11
+    }
+  ],
+  "summary": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_summary\\summary.json",
+    "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+  },
+  "resolution": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_summary\\resolution_comparison.json",
+    "sha256": "8437edc9e1f03f66c055b4a83f3dc3e111a92fd92e76f4f8e682814208ea2d67"
+  },
+  "selected_ranking_stable": true,
+  "maximum_relative_difference_to_standard": 4.854560497971396e-05,
+  "physical_source_checks": [
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 16,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 19,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    }
+  ],
+  "source_snapshot_validation": {
+    "screening_runs": 5,
+    "screening_points": 1003,
+    "screening_source_hashes_checked": 139,
+    "baseline_runs": [
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_defaults_20261017_fine",
+        "scan_identity": "dea79282e3dcfeb63634801bcb58b65691e0946ceb127326c8b9bb2a3d4b5544",
+        "manifest_sha256": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8",
+        "point_count": 100,
+        "successful_points": 99,
+        "warning_points": 61,
+        "snapshot_hashes_checked": 18
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_literature_candidates_20261017_fine",
+        "scan_identity": "5fdbc2442d03672e12a456954c6f3d148bcd84481be92c06b0cec038d97b8afa",
+        "manifest_sha256": "20ae11fc6ab17544b2f31e6865df81ef0570ac85ef060901ba9f2c08e2a597b9",
+        "point_count": 36,
+        "successful_points": 36,
+        "warning_points": 12,
+        "snapshot_hashes_checked": 20
+      }
+    ],
+    "current_calculation_sources_match_frozen_fine_runs": true,
+    "runner_diff_review": "Only explicit parameter policy, relative snapshot path handling, CLI help and default energy list; all compared runs supply energies explicitly"
+  },
+  "catalog": {
+    "path": "D:\\w\\meson-freezeout-defaults\\config\\physics\\freezeout\\parameter_domains\\literature_envelope_v1.toml",
+    "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+  },
+  "verified_pdf_hashes": {
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S01_Cleymans_2006_freezeout_criteria.pdf": "f854d7eae0897dae0684dc23f1ce39c8e8ba862b982c0935575b50a3a99149fc",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S22_Poberezhnyuk_2019_QvdW_freezeout.pdf": "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S18b_Shao_2024_FRG_published.pdf": "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S21_Lu_2026_functional_QCD_freezeout.pdf": "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S05_Bazavov_2016_freezeout_curvature.pdf": "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S06_Borsanyi_2014_freezeout_consistency.pdf": "454edb804701f7e611abfa335b626ff9ef30043a72ff676e8512487c012490d8"
+  },
+  "trajectory_review": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_execution\\trajectory_review.json",
+    "sha256": "ec510ac4da08d3482c754500510395e6dae880f676599dcad5ce65ae5041046a"
+  },
+  "numerical_plan": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_execution\\numerical_plan_r2.json",
+    "sha256": "952cc1328cb6841cfb0366c13f8bbfd9fb2763a64ed2cf48fed008051abccd9f"
+  },
+  "experimental_revision": {
+    "old": {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261017\\experimental_ratios.csv",
+      "sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631"
+    },
+    "current": {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261018\\experimental_ratios.csv",
+      "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50"
+    },
+    "row_count": 22,
+    "only_changes": [
+      {
+        "id": "NA49_17.27",
+        "field": "centrality",
+        "old": "0-7.2%",
+        "new": "0-5%"
+      }
+    ]
+  },
+  "figures": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\freezeout_envelope_20261018_png_review_r2\\kplus_piplus_parameter_envelope.png",
+      "sha256": "f6072350f59758d3ab5fbda7df0068207a239c84e1501bbf910ef11cfa007f63",
+      "identical_to_visually_reviewed_r1": true
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\freezeout_envelope_20261018_png_review_r2\\kplus_piplus_parameter_envelope_gray.png",
+      "sha256": "cb16f74f3a79dd02c0b322cbeea5dd339e23d7c7919373216e044dedba5bd684",
+      "identical_to_visually_reviewed_r1": true
+    }
+  ],
+  "plot_manifest": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\freezeout_envelope_20261018_png_review_r2\\plot_manifest.json",
+    "sha256": "d29627fdc530ef853e58ddb992417a2367ecf6cd79de068319f0a460992dc8b6"
+  },
+  "visual_review": {
+    "reviewer": "agent",
+    "color_and_grayscale": "passed",
+    "legend_within_single_panel": true,
+    "legend_curve_overlap_count": 0,
+    "clipped_text": [],
+    "author_review": "pending",
+    "failed_r1": "Missing support_rule/mask_rule for baseline and experimental series; r2 fixes metadata without changing PNG bytes"
+  },
+  "old_default_plot_contract": "Validated freezeout_defaults_20261017_fine_png_review_r2/plot_manifest.json successfully; frozen data and outputs unchanged",
+  "worktrees": {
+    "implementation": {
+      "path": "D:\\w\\meson-freezeout-defaults",
+      "branch": "codex/meson-freezeout-defaults",
+      "head": "698feaf8fada670fde81c93bab6093b50093935f",
+      "staged_paths": [],
+      "committed": false
+    },
+    "primary_workspace": {
+      "path": "D:\\Desktop\\Julia_RelaxTime",
+      "branch": "codex/docs-architecture-cleanup",
+      "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+      "scope": "Only meson ledger and handoff updated in this continuation"
+    }
+  }
+}

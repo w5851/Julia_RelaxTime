@@ -1,6 +1,78 @@
 schema_version = 1
-primary_track = "formula-route-closure"
-updated_at = "2026-10-08"
+primary_track = "meson-freezeout-experiment"
+updated_at = "2026-10-22"
+
+[[tracks]]
+id = "meson-freezeout-experiment"
+title = "Meson K/pi chemical-freezeout parameter envelopes"
+status = "review"
+current_task = "meson-freezeout-parameter-envelope"
+blocked_by = []
+unlocks = []
+next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+required_author_review = true
+author_review_status = "pending"
+promotion_required = false
+current_branch = "codex/meson-freezeout-review"
+current_sha = "698feaf8fada670fde81c93bab6093b50093935f"
+run_ids = []
+evidence = [
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/plot_manifest.json",
+  "note:author_selected_meson_primary_default_comparison_before_parameter_bands",
+  "note:scoped_pr_implementation_and_frozen_source_snapshots",
+  "note:author_20261018_authorized_cross_literature_parameter_pooling",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/parameter_envelope_20261018.md",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md",
+  "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml",
+  "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted",
+  "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml",
+  "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json",
+  "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion",
+  "file:data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/summary.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_png_review_r1/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018_Tmu_png_review_r1/plot_manifest.json",
+  "file:data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/final_validation.json",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/pr_validation_20261022.json",
+]
+updated_at = "2026-10-22"
+
+[[items]]
+id = "meson-freezeout-default-comparison"
+track_id = "meson-freezeout-experiment"
+classification = "research"
+status = "review"
+parent = "track:meson-freezeout-experiment"
+task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
+reason = "作者要求模块化完整化学冻结线，使用q0外推与Au+Au实验同图比较，先选择文献默认参数下较优方案，再开展参数带调优。"
+next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
+  "file:data/inputs/meson_freezeout_experiment_20261017/README.md",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/resolution_comparison.json",
+  "note:transport_fig4_followup_remains_deferred_in_root_worktree_ledger",
+]
+
+[[items]]
+id = "meson-freezeout-parameter-envelope"
+track_id = "meson-freezeout-experiment"
+classification = "research"
+status = "review"
+parent = "track:meson-freezeout-experiment"
+task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md"
+reason = "作者允许汇合不同文献参数范围并跨源组合；先明确探索范围，再以固定完整曲线评价q0的K/pi，区别最优样本和参数包络。"
+next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:config/physics/freezeout/parameter_domains/literature_envelope_v1.toml", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json", "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json", "note:author_20261018_authorized_cross_literature_parameter_pooling", "note:png_review_pending_author_acceptance", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md", "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml", "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json", "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion"]
+
 
 [[tracks]]
 id = "issue130-phase"
