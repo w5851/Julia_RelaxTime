@@ -1,6 +1,10 @@
 # Preserve SHA256-bound publication snapshots and their exact input bytes.
 # These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
 
+# Retained charged-GBU diagnostics and the hash-bound derived comparison table.
+data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/*.zip binary
+docs/analysis/relaxtime/charged_gbu_mub_sensitivity_20260912_analysis/q0_finite_q_comparison.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
 # Frozen chemical-freezeout research inputs, run records, and PNG evidence.
 data/inputs/meson_freezeout_*/*.pdf binary
 data/inputs/meson_freezeout_*/**/*.png binary

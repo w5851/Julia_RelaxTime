@@ -1,12 +1,17 @@
 # charged GBU 相图介子数密度等高图任务单
 
-当前实现、远程计算和组会图交付已完成，本地改动已按功能与证据整理。当前 q0 口径及产物入口见
-M9；前面各批次的数值、门禁判断和运行 SHA 保留为历史证据。绘图参数和复现方法
-统一维护在[脚本入口说明](../../guides/scripts/README.md)。分支整理保留与远程
-证据绑定的既有提交；M4 的研究产物晋升仍是独立事项，本文继续保留在 active。
-代码集成与最终 CI 状态见 [PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325)。
+当前状态：`review`（2026-10-22）。实现、远程计算、组会图交付和代码集成已完成。
+[PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325) 已于 2026-10-08 合并，
+merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；十项合并 PR 检查均成功。
+M4 的作者研究产物审阅仍待处理，本文继续保留在 active，不自动提升为 accepted/promoted。
 
-2026-10-08 PR 集成验证：已合入主干 `fcbb3befafcdc1a50df248346e60095035be953e`，
+当前 q0 口径及产物入口见 M9；前面各批次的数值、门禁判断和运行 SHA 保留为历史证据。
+绘图参数和复现方法统一维护在[脚本入口说明](../../guides/scripts/README.md)。
+联合 T–μB 路径与参数探索由[化学冻结线主线](../../analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md)
+承接，已随 [PR #327](https://github.com/w5851/Julia_RelaxTime/pull/327) 集成。
+μB 灵敏度的 q0/有限 q 对照、失败和源码另见[历史诊断留存](../../analysis/relaxtime/charged_gbu_mub_sensitivity_20260912_analysis/README.md)。
+
+2026-10-08 合并前本地集成验证：当时 topic 分支已合入主干 `fcbb3befafcdc1a50df248346e60095035be953e`，
 五个 Julia 合成/契约测试文件 `263/263`、三个 Python 绘图/候选测试文件 `43/43`
 通过；有限窗口审计测试已补入常规 core CI。文档一致性、脚本入口、数据输出路径、
 task ledger、active 文档、relaxtime 脚本及 SOP 治理检查均通过。active 检查在主干

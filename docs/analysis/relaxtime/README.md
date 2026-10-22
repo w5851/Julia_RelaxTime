@@ -48,6 +48,10 @@ v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_
 
 `charged_phase_analysis_archive_20260909/` 记录当前 PR #311 审查所需的有限-q/q=0 对照和历史冻结线叠加。原始 CSV/PNG 仍保留在 `data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/`，但保持 diagnostic-only、未跟踪状态；该 index 只保存逐文件哈希、目录级清单和 `D:/w/jrt-ord` 的一致性证据。`freezeout_20260907_v2` 的 accepted smoke-production result 仍以 `data/outputs/results/relaxtime/meson_density/` 为正式 result-side 路径。
 
+[μB 灵敏度历史诊断留存](charged_gbu_mub_sensitivity_20260912_analysis/README.md)
+保存九批原始结果、q0/有限 q 同背景对照、失败和现存源码快照，明确早期脚本的来源缺口。
+联合 T–μB 建议已由化学冻结线主线承接；等高图 PR #325 已合并，M4 作者审阅独立保留。
+
 ## Package Contract
 
 新的 transport 分析包优先采用：
