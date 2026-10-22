@@ -1,0 +1,104 @@
+{
+  "schema": "chemical_freezeout_default_comparison_v1",
+  "primary_metric": "equal-weight AuAu RMSE",
+  "selection_scope": "descriptive comparison/model selection on these observations; not independent validation or a fit",
+  "parameter_adjustment": false,
+  "common_primary_points": 14,
+  "excluded_failed_observations": [
+    {
+      "id": "NA49_17.27",
+      "energy": 17.27,
+      "failed_profiles": [
+        "andronic2018"
+      ]
+    }
+  ],
+  "best_default_on_primary_metric": "andronic2018",
+  "profiles": {
+    "andronic2018": {
+      "AuAu_primary": {
+        "count": 14,
+        "rmse": 0.14360389109634308,
+        "mae": 0.1412574834711552,
+        "mean_signed_bias": 0.1412574834711552
+      },
+      "AuAu_horn_4_to_20_GeV": {
+        "count": 6,
+        "rmse": 0.16114868395708543,
+        "mae": 0.15853659238071952,
+        "mean_signed_bias": 0.15853659238071952
+      },
+      "AuAu_19p6_to_200_GeV": {
+        "count": 6,
+        "rmse": 0.13870510493292446,
+        "mae": 0.13721395371982073,
+        "mean_signed_bias": 0.13721395371982073
+      },
+      "NA49_auxiliary": {
+        "count": 4,
+        "rmse": 0.16777134040602953,
+        "mae": 0.16579295431559288,
+        "mean_signed_bias": 0.16579295431559288
+      },
+      "sampled_peak_4_to_20_GeV": {
+        "energy_GeV": 9.25,
+        "ratio": 0.3954858274379151,
+        "neighbor_bracket_GeV": [
+          9.0,
+          9.5
+        ],
+        "at_window_edge": false,
+        "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+      },
+      "ratio_at_7p7": 0.3898807630863314,
+      "ratio_at_200": 0.2745059011773912,
+      "NA49_7p62_minus_17p27": null,
+      "negative_passed_points": 0
+    },
+    "cleymans2006": {
+      "AuAu_primary": {
+        "count": 14,
+        "rmse": 0.18508719288280984,
+        "mae": 0.18347906871135145,
+        "mean_signed_bias": 0.18347906871135145
+      },
+      "AuAu_horn_4_to_20_GeV": {
+        "count": 6,
+        "rmse": 0.19803498481663184,
+        "mae": 0.19728651507538988,
+        "mean_signed_bias": 0.19728651507538988
+      },
+      "AuAu_19p6_to_200_GeV": {
+        "count": 6,
+        "rmse": 0.16874886583391696,
+        "mae": 0.16708289953072328,
+        "mean_signed_bias": 0.16708289953072328
+      },
+      "NA49_auxiliary": {
+        "count": 4,
+        "rmse": 0.1951012928923505,
+        "mae": 0.19354176075597423,
+        "mean_signed_bias": 0.19354176075597423
+      },
+      "sampled_peak_4_to_20_GeV": {
+        "energy_GeV": 9.5,
+        "ratio": 0.4197915461252066,
+        "neighbor_bracket_GeV": [
+          9.25,
+          9.75
+        ],
+        "at_window_edge": false,
+        "interpretation": "maximum of directly evaluated support; not a fitted continuous peak"
+      },
+      "ratio_at_7p7": 0.41539335661986543,
+      "ratio_at_200": 0.2989101376127549,
+      "NA49_7p62_minus_17p27": 0.019209332504244614,
+      "negative_passed_points": 0
+    }
+  },
+  "experimental_features": {
+    "STAR_7p7": 0.2227,
+    "STAR_200": 0.159,
+    "NA49_7p62_minus_17p27": 0.07400000000000001
+  }
+}

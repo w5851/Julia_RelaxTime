@@ -12,6 +12,7 @@ description: 将仓库当前的 figure_production_v2 契约应用于新科研图
 - 新 case 使用 `config/plotting/candidate_aps_v2.toml` 供作者审阅；只有输入资质和最终交付范围足以支持严格状态时，才使用 `config/plotting/strict_aps_v2.toml`。
 - v1 配置（`audit_v1`、`candidate_origin_like_v1` 和 `strict_origin_like_v1`）已弃用，仅保留兼容用途。可加载它们来复现历史产物，但新 case 不得选择这些配置。
 - 复用 `scripts/plotting/plot_style.py`、`plot_manifest.py`、`plot_quality.py` 和 `validate_plot_artifact.py`。图族脚本负责数据选择和物理标签，共享层负责渲染与产物契约。
+- 新接入图族使用 `plot_series.py` 登记固定身份，抽取子集或重排不得重新分配样式或循环调色板。创建时使用 `style_context` 并绑定 figure，公共测量／导出恢复其创建主题。按 profile 的显式字体策略处理缺失，记录实际普通／数学字体来源；接口见[公共样式 API](../../../docs/api/plotting/PlotStyle.md)。
 - 绘图生产过程中不得调用求解器、修改数值 CSV/JSON 的值、引入隐藏的插值或平滑，或修改论文项目。
 - 每个 case 交付一个 `plot_manifest.json`。多图 case 使用 `plot_manifest_bundle_v1`：共享来源信息只记录一次，各图使用唯一标识，并在 `figures[]` 中保留完整的逐图记录。无需另建独立附属记录文件。使用 `scripts/plotting/plot_bundle.py` 提取共享字段并展开记录。
 

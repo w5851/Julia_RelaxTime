@@ -21,6 +21,7 @@ from scripts.plotting.plot_provenance import code_ref_for_manifest, read_manifes
 from scripts.plotting.plot_bundle import BUNDLE_SCHEMA, expand_bundle
 from scripts.plotting.plot_accessibility import validate_accessibility
 from scripts.plotting.plot_delivery import validate_png_delivery
+from scripts.plotting.plot_series import validate_series_styles
 
 
 ALLOWED_MODES = {"audit", "estimated_midpoint", "strict", "legacy"}
@@ -275,6 +276,13 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
                     errors.append(f"strict validation.{field} must be true")
 
     rendering = manifest.get("rendering")
+    if isinstance(rendering, dict):
+        font = rendering.get("font")
+        if isinstance(font, dict) and "schema" in font:
+            _check_font_evidence(rendering, profile, repo_root, errors)
+        if "series_styles" in rendering:
+            errors.extend(validate_series_styles(rendering["series_styles"], series or [],
+                rendering.get("quality", {}).get("series_styles", [])))
     if mode == "strict":
         if not isinstance(rendering, dict):
             errors.append("strict rendering metadata is required")
@@ -307,6 +315,46 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
                 errors.extend(validate_png_delivery(manifest, root=repo_root))
 
     return errors
+
+
+def _check_font_evidence(rendering: dict[str, Any], profile: Any, root: Path, errors: list[str]) -> None:
+    """New font records are checked without migrating historical manifests."""
+    from matplotlib.font_manager import FontProperties
+
+    font = rendering["font"]
+    try:
+        if font["schema"] != "plot_font_resolution_v1":
+            raise ValueError("unsupported font resolution schema")
+        policy, candidates = font["policy"], font["candidates"]
+        if profile is None or policy != profile.data.get("font_policy", "legacy_default"):
+            raise ValueError("font policy differs from the profile")
+        if candidates != profile.data.get("font_candidates", []):
+            raise ValueError("font candidates differ from the profile")
+        if font["requested"] != (candidates[0] if candidates else "serif"):
+            raise ValueError("requested font differs from the declared first candidate")
+        if policy != "legacy_default":
+            index = candidates.index(font["selected"])
+            if policy == "error" and index != 0:
+                raise ValueError("error policy cannot use a substitute font")
+            if font["missing_candidates"] != candidates[:index] or font["fallback_used"] is not (index > 0):
+                raise ValueError("font fallback evidence disagrees with candidate order")
+        if font["mathtext_fontset"] != profile.data.get("mathtext_fontset", "stix"):
+            raise ValueError("mathtext fontset differs from the profile")
+        quality = rendering["quality"]
+        if ("font" in quality and quality["font"] != font) or not quality.get("actual_fonts"):
+            raise ValueError("declared font must match the bound font and measured font sources")
+        actual_fonts = quality["actual_fonts"]
+        if not any(item.get("sha256") == font["sha256"] for item in actual_fonts):
+            raise ValueError("resolved font is absent from the measured glyph sources")
+        for item in [font, *actual_fonts]:
+            issues = validate_hash_record(item, root=root, label="font source", allow_historical=False)
+            errors.extend(issues)
+            if not issues:
+                path = _resolve_artifact_path(item["path"], root)
+                if FontProperties(fname=str(path)).get_name() != item["resolved"]:
+                    raise ValueError("resolved font name differs from the measured source file")
+    except (KeyError, TypeError, ValueError, OSError) as exc:
+        errors.append(f"font evidence: {exc}")
 
 
 def validate_review_companion(manifest: dict[str, Any], *, repo_root: Path = PROJECT_ROOT,

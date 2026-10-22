@@ -1,0 +1,14 @@
+profile_name = "andronic2018"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic2018_nature_fig3_arxiv1710.09425v2_p6"
+
+# Nature 561, 321 (2018), Fig. 3 caption; arXiv:1710.09425v2, PDF p. 6.
+# z = sqrt(s_NN)/GeV; T = T_lim/[1 + exp(log_offset - log(z)/log_width)].
+# These are the published energy-parameterization values, not the separate
+# ALICE single-energy fit (156.5 +/- 1.5 MeV). No fit to this project's K/pi.
+[coefficients]
+T_lim_GeV = 0.1584
+log_offset = 2.60
+log_width = 0.45
+d_GeV = 1.3075
+e_GeV_inv1 = 0.288

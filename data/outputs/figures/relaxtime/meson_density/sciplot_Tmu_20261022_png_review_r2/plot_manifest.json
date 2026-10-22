@@ -1,0 +1,758 @@
+{
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-10-22T10:39:36.152834+00:00",
+  "asset_id": "meson_freezeout_andronic_Tmu_envelope_20261018",
+  "figure_family": "charged_meson_freezeout",
+  "case_slug": "sciplot_Tmu_20261022_png_review_r2",
+  "asset_kind": "figure",
+  "figure_mode": "audit",
+  "semantic_status": "analytic_chemical_freezeout_parameter_envelope",
+  "style_profile": "candidate_aps_v2",
+  "publication_scope": "internal_review",
+  "generator": {
+    "path": "scripts/analysis/relaxtime/plot_freezeout_thermodynamic_envelope.py",
+    "path_kind": "repository_relative",
+    "sha256": "5f1c36c4e631c7b44e9637668f2efa83a566bec9a5d02cc5540131a1a0a9efa3",
+    "command": "scripts/analysis/relaxtime/plot_freezeout_thermodynamic_envelope.py render --prepared-dir data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared --output-dir data/outputs/figures/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "executable": "D:\\Python313\\python.exe",
+      "matplotlib": "3.10.1"
+    },
+    "source_snapshot": {
+      "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/plot_freezeout_thermodynamic_envelope.py",
+      "path_kind": "repository_relative",
+      "role": "generator_source_snapshot",
+      "bytes": 23771,
+      "sha256": "5f1c36c4e631c7b44e9637668f2efa83a566bec9a5d02cc5540131a1a0a9efa3"
+    }
+  },
+  "git_commit": "698feaf8fada670fde81c93bab6093b50093935f",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "postprocess_sha": null,
+  "source_run_id": "000cc88876d02c8dc7722d94d78dc2799061de53f6bdc813d8617da433550fb3",
+  "inputs": [
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/thermodynamic_band.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_analytic_parameter_table",
+      "bytes": 113956,
+      "sha256": "88242996dc025b9e368abcb22eb47f37ae3982bc6b0d1456304b46581401fbb5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/energy_anchors.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_analytic_parameter_table",
+      "bytes": 618,
+      "sha256": "826952ed27bed20c11b07e422be10fc2b7e600274852f6181c4e0d2861704ad1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/parameters.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_analytic_parameter_table",
+      "bytes": 4480,
+      "sha256": "e53c5a3651e4e7fd4f7ed56774a14337eab34af11c676c30baff5413031a79c8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/preparation.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_analytic_parameter_table",
+      "bytes": 6295,
+      "sha256": "b09a6c0c5173bb52f1cb22d28fc510f6b825843d7e0f86d185d5cf5eb0e6e355"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_Tmu_prepared/checksums.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_analytic_parameter_table",
+      "bytes": 596,
+      "sha256": "9504e1701ef197939a3d375b326837fa1acfb977cd76b76a489094cd22c246c4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/summary.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 27390,
+      "sha256": "8ea288556cfd8512697c191ac3b74aa6e0fb8b1336a6f29aeeb09e1cd4fb55a7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/checksums.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 1196,
+      "sha256": "900f88d5fb364213b2e6e54aa952b562b12590a5921414b10ef0e95b23b7fb99"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/fine_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 11713,
+      "sha256": "7c5402072123e99619a99d43f894f3a983029b6328ba341488214f34f996c416"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/baseline_curves.csv",
+      "path_kind": "repository_relative",
+      "role": "frozen_parameter_selection",
+      "bytes": 8797,
+      "sha256": "11cbbd8ff3d7d17ab2ed7ccfc7fa53dc5e6acc745a1b1dfed1607f24d9077717"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_all_screen_assessment_r2/assessment.json",
+      "path_kind": "repository_relative",
+      "role": "fixed_band_membership",
+      "bytes": 61295,
+      "sha256": "c39ba64514c9bb451ff97c5e133402941e6f02fd8c2bcdd753d57f04061f20f7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/source_snapshot/config/physics/freezeout/andronic2018.toml",
+      "path_kind": "repository_relative",
+      "role": "frozen_Andronic_default",
+      "bytes": 535,
+      "sha256": "2bc25d501a9c04af292aa272ec8cddde17d5f1aee526d20ce3d9e9f2793c4843"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 27808,
+      "sha256": "76d960045c2679fe2ea98a673b480063df8af4258af4e0bad1a618b835f7aad0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_local_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 10313,
+      "sha256": "3fbb57d9cf720502ebb18d77b74441f70fe4820afa0189e0772c125b5f272308"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_mapping_design/design.json",
+      "path_kind": "repository_relative",
+      "role": "frozen_sampled_parameters",
+      "bytes": 17299,
+      "sha256": "35473252108b0f58670e602fa787c46da3045b9596ab0cc5d11d1a19ad39c5cd"
+    },
+    {
+      "path": "config/plotting/candidate_aps_v2.toml",
+      "path_kind": "repository_relative",
+      "role": "plot_style_contract",
+      "bytes": 2221,
+      "sha256": "e0761af1b98bcbc53a6a011f514b507068f84fe73f60eaea04f91ee9df86f864",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/config/plotting/candidate_aps_v2.toml",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 2221,
+        "sha256": "e0761af1b98bcbc53a6a011f514b507068f84fe73f60eaea04f91ee9df86f864"
+      }
+    },
+    {
+      "path": "scripts/plotting/plot_style.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 17773,
+      "sha256": "a8622d1bda273ca172e7742989bca3240141fe4c26e3d8eb99a29c1726a4ef23",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/plot_style.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 17773,
+        "sha256": "a8622d1bda273ca172e7742989bca3240141fe4c26e3d8eb99a29c1726a4ef23"
+      }
+    },
+    {
+      "path": "scripts/plotting/plot_series.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 6378,
+      "sha256": "8c94b05f8ddb341cefa1359f16b266cf8da45271e3102b7220fb0bc60d30afe7",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/plot_series.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 6378,
+        "sha256": "8c94b05f8ddb341cefa1359f16b266cf8da45271e3102b7220fb0bc60d30afe7"
+      }
+    },
+    {
+      "path": "scripts/plotting/plot_manifest.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 7095,
+      "sha256": "e0385335eb0ada1f204ffd75bcbdb38775be287534f3f226d34c7267dc78dcbc",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/plot_manifest.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 7095,
+        "sha256": "e0385335eb0ada1f204ffd75bcbdb38775be287534f3f226d34c7267dc78dcbc"
+      }
+    },
+    {
+      "path": "scripts/plotting/plot_quality.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 22493,
+      "sha256": "1c3855538d428631fb9c3a8d4a9ac8969db5a81078a60814f9b85e94a792ed6d",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/plot_quality.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 22493,
+        "sha256": "1c3855538d428631fb9c3a8d4a9ac8969db5a81078a60814f9b85e94a792ed6d"
+      }
+    },
+    {
+      "path": "scripts/plotting/plot_accessibility.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 3536,
+      "sha256": "11da33b4fbc0393983bf1775e98607fbc6ff5a1472515c6674d400a8701f9102",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/plot_accessibility.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 3536,
+        "sha256": "11da33b4fbc0393983bf1775e98607fbc6ff5a1472515c6674d400a8701f9102"
+      }
+    },
+    {
+      "path": "scripts/plotting/validate_plot_artifact.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 36235,
+      "sha256": "8db56255b7766639baae980059f43eff9985db373edfcde1300e865172e01616",
+      "source_snapshot": {
+        "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/source/scripts/plotting/validate_plot_artifact.py",
+        "path_kind": "repository_relative",
+        "role": "plotting_source_snapshot",
+        "bytes": 36235,
+        "sha256": "8db56255b7766639baae980059f43eff9985db373edfcde1300e865172e01616"
+      }
+    }
+  ],
+  "axes": [
+    {
+      "field": "muB_MeV",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "scale": "linear",
+      "label": "$\\mu_B\\;(\\mathrm{MeV})$"
+    },
+    {
+      "field": "T_MeV",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "scale": "linear",
+      "label": "$T\\;(\\mathrm{MeV})$"
+    }
+  ],
+  "series": [
+    {
+      "series_id": "sampled_band",
+      "state": "analytic_parameterization",
+      "point_count": 508,
+      "support_rule": "frozen direct analytic evaluations, including explicitly declared continuation",
+      "mask_rule": "all fixed members have positive finite T throughout the display domain; no member removal",
+      "members": [
+        "andronic2009",
+        "andronic_axis_d_GeV_low",
+        "andronic_sample_001",
+        "andronic_sample_003",
+        "andronic_sample_005",
+        "andronic_sample_007",
+        "andronic_sample_009",
+        "andronic_sample_011",
+        "andronic_sample_013",
+        "andronic_sample_017",
+        "andronic_sample_023",
+        "andronic_sample_029",
+        "andronic_sample_031",
+        "du2024",
+        "andronic2026_v2",
+        "andronic_axis_d_GeV_high",
+        "andronic_axis_e_GeV_inv1_high",
+        "andronic_axis_log_offset_high",
+        "andronic_axis_log_width_high",
+        "andronic_sample_004",
+        "andronic_sample_008",
+        "andronic_sample_010",
+        "andronic_sample_012",
+        "andronic_sample_014",
+        "andronic_sample_018",
+        "andronic_sample_020",
+        "andronic_sample_022",
+        "andronic_sample_024",
+        "andronic_sample_028",
+        "andronic_sample_032",
+        "yu2025_set_ii",
+        "andronic_local_T_lim_GeV_minus",
+        "andronic_local_d_GeV_minus",
+        "andronic_local_e_GeV_inv1_minus",
+        "andronic_local_log_offset_minus",
+        "andronic_local_log_width_minus",
+        "andronic_local_T_lim_GeV_plus",
+        "andronic_local_d_GeV_plus",
+        "andronic_local_e_GeV_inv1_plus",
+        "andronic_local_log_offset_plus",
+        "andronic_hornmap_003",
+        "andronic_hornmap_002"
+      ]
+    },
+    {
+      "series_id": "near_best_band",
+      "state": "analytic_parameterization",
+      "point_count": 508,
+      "support_rule": "frozen direct analytic evaluations, including explicitly declared continuation",
+      "mask_rule": "all fixed members have positive finite T throughout the display domain; no member removal",
+      "members": [
+        "andronic_local_T_lim_GeV_minus",
+        "andronic_local_d_GeV_minus",
+        "andronic_local_log_offset_plus",
+        "andronic_local_e_GeV_inv1_plus",
+        "andronic_sample_022",
+        "andronic_local_e_GeV_inv1_minus",
+        "andronic_local_log_offset_minus",
+        "andronic_local_d_GeV_plus",
+        "andronic_local_log_width_minus",
+        "andronic_local_T_lim_GeV_plus"
+      ]
+    },
+    {
+      "series_id": "andronic_local_T_lim_GeV_minus",
+      "state": "analytic_parameterization",
+      "point_count": 508,
+      "support_rule": "frozen direct analytic evaluations, including explicitly declared continuation",
+      "mask_rule": "all fixed members have positive finite T throughout the display domain; no member removal",
+      "members": [
+        "andronic_local_T_lim_GeV_minus"
+      ]
+    },
+    {
+      "series_id": "andronic2018",
+      "state": "analytic_parameterization",
+      "point_count": 508,
+      "support_rule": "frozen direct analytic evaluations, including explicitly declared continuation",
+      "mask_rule": "all fixed members have positive finite T throughout the display domain; no member removal",
+      "members": [
+        "andronic2018"
+      ]
+    }
+  ],
+  "selection_rule": "fixed membership inherited from ratio study; analytic muB display domain 0-500 MeV",
+  "interpolation_policy": "none",
+  "connector_policy": "forbidden",
+  "missing_value_policy": "no density values inferred; retain original failures externally",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/chemical_freezeout_T_muB_band.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 452613,
+      "sha256": "f506045228b6da9d52aa8c9001490b97fc6d685c7d06b7395ae2c8355d1166d5",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/chemical_freezeout_T_muB_band_gray.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 418151,
+      "sha256": "c6e579cd75606c48b502af525a3d0e92a205404c89be5dc891962760fb3775ec",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          2760
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          4.6000092000184
+        ]
+      }
+    }
+  ],
+  "rendering": {
+    "delivery_stage": "png_review",
+    "vector_delivery_pending": true,
+    "review_contract": "prd_review_v1",
+    "figure_size_inches": [
+      6.75,
+      4.6
+    ],
+    "column": "double_column",
+    "font": {
+      "schema": "plot_font_resolution_v1",
+      "requested": "Times New Roman",
+      "candidates": [
+        "Times New Roman",
+        "Times",
+        "STIXGeneral"
+      ],
+      "policy": "candidate_fallback",
+      "resolved": "Times New Roman",
+      "selected": "Times New Roman",
+      "path": "C:\\Windows\\Fonts\\times.ttf",
+      "bytes": 1190736,
+      "sha256": "931c5de5c70401d9324d5014c123802b4fb753000360ceb2f56c589403cd58c5",
+      "fallback_used": false,
+      "missing_candidates": [],
+      "mathtext_fontset": "stix"
+    },
+    "series_styles": {
+      "schema": "plot_series_styles_v1",
+      "registry_id": "freezeout_Tmu_v1",
+      "styles": [
+        {
+          "series_id": "andronic_local_T_lim_GeV_minus",
+          "color": "#0072b2",
+          "linestyle": "-",
+          "marker": "o"
+        },
+        {
+          "series_id": "andronic2018",
+          "color": "#a04800",
+          "linestyle": "--",
+          "marker": "s"
+        }
+      ],
+      "selected_ids": [
+        "andronic_local_T_lim_GeV_minus",
+        "andronic2018"
+      ]
+    },
+    "legend_policy": "declared_geometry_checked",
+    "legend_outside": false,
+    "legend_placements": [
+      {
+        "legend_index": 0,
+        "host_axes_index": 0,
+        "title": "Markers: $\\sqrt{s_{NN}}=7.7\\;\\mathrm{GeV}$",
+        "labels": [
+          "Sampled band (42 sets)",
+          "Near-best band (10 sets)",
+          "Best Andronic",
+          "Andronic 2018 (default)"
+        ],
+        "placement": "in_axes",
+        "location": "lower left",
+        "scope": "parameter bands, curve families and collision-energy positions"
+      }
+    ],
+    "legend_layout_reason": "author requests in-panel legends; lower-left region is empty of curves",
+    "color_route": "undecided_review",
+    "quality": {
+      "figure_size_inches": [
+        6.75,
+        4.6
+      ],
+      "intended_width_inches": 6.75,
+      "placement_scale": 1.0,
+      "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+      "actual_fonts": [
+        {
+          "path": "C:\\Windows\\Fonts\\times.ttf",
+          "resolved": "Times New Roman",
+          "bytes": 1190736,
+          "sha256": "931c5de5c70401d9324d5014c123802b4fb753000360ceb2f56c589403cd58c5",
+          "roles": [
+            "mathtext",
+            "text"
+          ]
+        },
+        {
+          "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneral.ttf",
+          "resolved": "STIXGeneral",
+          "bytes": 448228,
+          "sha256": "167378031e2dddc6216d67819c9260e9a06ffc4c478e4e23cb98a6fd44b183c2",
+          "roles": [
+            "mathtext"
+          ]
+        },
+        {
+          "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneralItalic.ttf",
+          "resolved": "STIXGeneral",
+          "bytes": 175040,
+          "sha256": "6cfcb333d22b7c3c623bdfd40174f14c85c3d6731ca6166c1edc80140eae8527",
+          "roles": [
+            "mathtext"
+          ]
+        }
+      ],
+      "series_styles": [
+        {
+          "series_id": "andronic_local_T_lim_GeV_minus",
+          "color": "#0072b2",
+          "linestyle": "-",
+          "marker": "o"
+        },
+        {
+          "series_id": "andronic2018",
+          "color": "#a04800",
+          "linestyle": "--",
+          "marker": "s"
+        }
+      ],
+      "minimum_capital_numeral_height_mm": 2.096211067708333,
+      "minimum_primary_capital_numeral_height_mm": 2.8032604166666664,
+      "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+      "smallest_glyphs": [
+        {
+          "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+          "glyph": "B",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.096211067708333,
+          "role": "script"
+        },
+        {
+          "text": "Markers: $\\sqrt{s_{NN}}=7.7\\;\\mathrm{GeV}$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "Markers: $\\sqrt{s_{NN}}=7.7\\;\\mathrm{GeV}$",
+          "glyph": "N",
+          "font": "STIXGeneralItalic.ttf",
+          "source_size_pt": 9.1,
+          "final_height_mm": 2.1443652343749995,
+          "role": "script"
+        },
+        {
+          "text": "Best Andronic",
+          "glyph": "B",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8032604166666664,
+          "role": "primary"
+        },
+        {
+          "text": "Near-best band (10 sets)",
+          "glyph": "N",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8489010416666667,
+          "role": "primary"
+        },
+        {
+          "text": "Sampled band (42 sets)",
+          "glyph": "4",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8608072916666663,
+          "role": "primary"
+        },
+        {
+          "text": "Sampled band (42 sets)",
+          "glyph": "2",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8608072916666663,
+          "role": "primary"
+        },
+        {
+          "text": "Near-best band (10 sets)",
+          "glyph": "1",
+          "font": "times.ttf",
+          "source_size_pt": 12.0,
+          "final_height_mm": 2.8608072916666663,
+          "role": "primary"
+        }
+      ],
+      "minimum_curve_linewidth_pt": 1.7,
+      "minimum_landmark_diameter_mm": 2.1166666666666663,
+      "tick_axes": [
+        {
+          "axis": "x",
+          "scale": "linear",
+          "minor_locator": "AutoMinorLocator",
+          "major_count": 6,
+          "minor_count": 5,
+          "inward": true,
+          "both_sides": true
+        },
+        {
+          "axis": "y",
+          "scale": "linear",
+          "minor_locator": "AutoMinorLocator",
+          "major_count": 7,
+          "minor_count": 7,
+          "inward": true,
+          "both_sides": true
+        }
+      ],
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_axes_overlap_count": 1,
+      "legend_count": 1,
+      "legend_layout": [
+        {
+          "legend_index": 0,
+          "host_axes_index": 0,
+          "overlapped_axes": [
+            0
+          ],
+          "contained_in_host": true,
+          "title": "Markers: $\\sqrt{s_{NN}}=7.7\\;\\mathrm{GeV}$",
+          "labels": [
+            "Sampled band (42 sets)",
+            "Near-best band (10 sets)",
+            "Best Andronic",
+            "Andronic 2018 (default)"
+          ],
+          "bbox_inches": [
+            0.87625,
+            0.836,
+            2.336666666666667,
+            1.3145833333333334
+          ]
+        }
+      ],
+      "legend_pair_overlap_count": 0,
+      "legend_pair_overlaps": [],
+      "legend_curve_overlap_count": 0,
+      "legend_curve_overlaps": [],
+      "legend_landmark_overlap_count": 0,
+      "legend_landmark_overlaps": [],
+      "legend_in_axes_overflow_count": 0,
+      "legend_in_axes_overflows": [],
+      "human_visual_review": "required",
+      "font": {
+        "schema": "plot_font_resolution_v1",
+        "requested": "Times New Roman",
+        "candidates": [
+          "Times New Roman",
+          "Times",
+          "STIXGeneral"
+        ],
+        "policy": "candidate_fallback",
+        "resolved": "Times New Roman",
+        "selected": "Times New Roman",
+        "path": "C:\\Windows\\Fonts\\times.ttf",
+        "bytes": 1190736,
+        "sha256": "931c5de5c70401d9324d5014c123802b4fb753000360ceb2f56c589403cd58c5",
+        "fallback_used": false,
+        "missing_candidates": [],
+        "mathtext_fontset": "stix"
+      }
+    },
+    "placement_limits": {
+      "schema": "plot_placement_limits_v1",
+      "measured_width_inches": 6.75,
+      "minimum_width_inches": 6.440191165844179,
+      "maximum_width_inches": 6.75,
+      "minimum_width_constraints": {
+        "glyph": 6.440191165844179,
+        "curve": 1.9852941176470589,
+        "landmark": 3.1889763779527565
+      },
+      "maximum_width_constraints": {
+        "project_profile": 7.0,
+        "png_0_effective_dpi": 6.75,
+        "png_1_effective_dpi": 6.75
+      },
+      "has_usable_interval": true,
+      "measured_width_qualified": true,
+      "single_column_width_inches": 3.375,
+      "single_column_reuse_qualified": false,
+      "single_column_minimum_glyph_mm": 1.0481055338541665,
+      "scope": "size gates only; layout, grayscale, author acceptance and source qualification remain separate"
+    },
+    "accessibility": {
+      "schema": "plot_accessibility_v1",
+      "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+      "minimum_contrast": 3.0,
+      "backgrounds": [
+        "#FFFFFF",
+        "#E8E8E8",
+        "#C6DEF0"
+      ],
+      "background_scope": "white axes and light band fills; dark boundaries and hatching carry band semantics",
+      "parameters": [
+        {
+          "value": "sampled band",
+          "color": "#595959",
+          "noncolor_encoding": "dashed boundary",
+          "contrasts": [
+            7.004729208035935,
+            5.716874770655375,
+            5.03937493176288
+          ]
+        },
+        {
+          "value": "near-best band",
+          "color": "#0072B2",
+          "noncolor_encoding": "hatched fill",
+          "contrasts": [
+            5.185446345779855,
+            4.232076145751255,
+            3.7305379763925877
+          ]
+        },
+        {
+          "value": "best andronic",
+          "color": "#0072B2",
+          "noncolor_encoding": "solid and circle",
+          "contrasts": [
+            5.185446345779855,
+            4.232076145751255,
+            3.7305379763925877
+          ]
+        },
+        {
+          "value": "Andronic default",
+          "color": "#A04800",
+          "noncolor_encoding": "dashed and square",
+          "contrasts": [
+            6.137367363209724,
+            5.008981731474433,
+            4.415373431095248
+          ]
+        }
+      ]
+    },
+    "connections": "straight display segments between frozen direct analytic evaluations; no interpolation of ratio data"
+  },
+  "validation": {
+    "finite": true,
+    "duplicate_keys": true,
+    "support": true,
+    "solver_called": false,
+    "canonical_data_modified": false,
+    "checks": "frozen hashes, analytical identities and coordinate comparison, positive T, rendering geometry",
+    "author_review": "pending"
+  },
+  "external_layout": null,
+  "delivery_stage": "png_review",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true,
+  "caption": {
+    "path": "data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/caption.md",
+    "path_kind": "repository_relative",
+    "role": "figure_caption",
+    "bytes": 1161,
+    "sha256": "ca3f6b4f15c9e4c7c5758edf988c8ad4ac03c24a769d9f9de5c44cb78798a61c"
+  }
+}

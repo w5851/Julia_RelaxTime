@@ -102,3 +102,42 @@ class ComparisonTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_renderer_reorders_and_selects_curves_without_changing_styles_or_nan_gaps(tmp_path, monkeypatch):
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import pytest
+    from scripts.analysis.relaxtime import plot_freezeout_comparison as renderer
+
+    models = {name: {energy: dict(energy=energy, ratio=value, passed=math.isfinite(value),
+        pi_plus_endpoint_warning_shells=0, K_plus_endpoint_warning_shells=0)
+        for energy, value in ((3., .2), (10., math.nan), (100., .15))}
+        for name in ("cleymans2006", "andronic2018")}
+    state = {"points": [{"profile_name": name} for name in models]}
+    class CapturedRendering(Exception):
+        pass
+    observed = []
+    def capture(figure, *args, **kwargs):
+        ax = figure.axes[0]
+        observed.append([(line.get_gid(), line.get_color(), line.get_linestyle(), line.get_ydata())
+                         for line in ax.lines if line.get_gid()])
+        raise CapturedRendering
+    monkeypatch.setattr(renderer, "export_figure", capture)
+    before_figures = plt.get_fignums()
+    before = dict(matplotlib.rcParams)
+    orders = (["cleymans2006", "andronic2018"], ["andronic2018", "cleymans2006"], ["andronic2018"])
+    for order in orders:
+        with pytest.raises(CapturedRendering):
+            renderer.render(models, [], tmp_path, tmp_path, {}, state, tmp_path, tmp_path, series_order=order)
+        assert dict(matplotlib.rcParams) == before
+        assert plt.get_fignums() == before_figures
+    for order, lines in zip(orders, observed):
+        assert [item[0] for item in lines] == order
+        for identity, color, linestyle, values in lines:
+            style = renderer.CURVE_STYLES.select([identity])[0]
+            assert (color, linestyle) == (style.color, style.linestyle)
+            assert math.isnan(values[1])
+    with pytest.raises(ValueError, match="duplicate"):
+        renderer.render(models, [], tmp_path, tmp_path, {}, state, tmp_path, tmp_path,
+                        series_order=["andronic2018", "andronic2018"])

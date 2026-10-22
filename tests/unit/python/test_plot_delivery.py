@@ -105,6 +105,19 @@ def test_palette_or_legend_changes_need_a_new_png_review(delivery):
     assert any("rendering mismatch" in error for error in validate_png_delivery(manifest, root=root))
 
 
+@pytest.mark.parametrize("field", ["font", "series_styles"])
+def test_new_font_and_curve_identity_records_cannot_drift_on_vector_delivery(delivery, field):
+    manifest, _, root = delivery
+    manifest["rendering"][field] = {"changed": True}
+    assert any(f"rendering mismatch: {field}" in issue for issue in validate_png_delivery(manifest, root=root))
+
+
+def test_measured_font_sources_cannot_change_between_delivery_stages(delivery):
+    manifest, _, root = delivery
+    manifest["rendering"]["quality"] = {"actual_fonts": [{"sha256": "different-font"}]}
+    assert any("measured font sources changed" in issue for issue in validate_png_delivery(manifest, root=root))
+
+
 def test_input_removal_and_png_substitution_are_rejected(delivery):
     manifest, _, root = delivery
     manifest["inputs"] = []

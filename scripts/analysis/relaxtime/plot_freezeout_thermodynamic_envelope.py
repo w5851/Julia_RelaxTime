@@ -18,7 +18,8 @@ from scripts.analysis.relaxtime.freezeout_parameter_envelope import (
 from scripts.plotting.plot_manifest import (build_manifest, generator_record, input_record,
     output_record, runtime_record, sha256_file, write_manifest)
 from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
-from scripts.plotting.plot_style import load_profile, configure_matplotlib, configure_axis_ticks, figure_size_inches
+from scripts.plotting.plot_style import load_profile, style_context, configure_axis_ticks, figure_size_inches
+from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
 from scripts.plotting.plot_accessibility import accessibility_record
 from scripts.plotting.validate_plot_artifact import validate_manifest
 
@@ -203,7 +204,30 @@ def prepare(args):
         distinct_near_curves=metadata["near_best_distinct_Tmu_curves"], coordinate_validation=metadata["coordinate_validation"])))
 
 
+def curve_styles(meta):
+    """Bind the selected physical profile, rather than its drawing position."""
+    return SeriesStyleRegistry("freezeout_Tmu_v1", (
+        SeriesStyle(meta["best_selected"], "#0072B2", "-", "o"),
+        SeriesStyle("andronic2018", "#A04800", "--", "s"),
+    ))
+
+
 def render(args):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    profile = load_profile("candidate_aps_v2")
+    with style_context(profile) as context:
+        figure, ax = plt.subplots(figsize=figure_size_inches(profile))
+        context.bind(figure)
+        try:
+            return _render_figure(args, figure, ax, profile, context.font)
+        finally:
+            plt.close(figure)
+
+
+def _render_figure(args, figure, ax, profile, font):
     source, output = args.prepared_dir.resolve(), args.output_dir.resolve()
     results = ROOT / "data/outputs/results/relaxtime/meson_density" / output.name
     if output.exists() or results.exists():
@@ -217,27 +241,25 @@ def render(args):
     bands, anchors = table(source / "thermodynamic_band.csv"), table(source / "energy_anchors.csv")
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
     from matplotlib.ticker import MultipleLocator
     from PIL import Image
-    profile = load_profile("candidate_aps_v2")
-    font = configure_matplotlib(profile)
-    figure, ax = plt.subplots(figsize=figure_size_inches(profile))
     figure.subplots_adjust(left=.115,right=.975,bottom=.16,top=.96)
     x = [float(r["muB_MeV"]) for r in bands]
     ax.fill_between(x,[float(r["minimum_T_MeV"]) for r in bands],[float(r["maximum_T_MeV"]) for r in bands],
         facecolor="#E8E8E8",edgecolor="#595959",linewidth=.65,linestyle="--",label=f"Sampled band ({len(meta['band_members'])} sets)",zorder=1)
     ax.fill_between(x,[float(r["near_minimum_T_MeV"]) for r in bands],[float(r["near_maximum_T_MeV"]) for r in bands],
         facecolor="#C6DEF0",edgecolor="#0072B2",linewidth=.65,hatch="/",label=f"Near-best band ({len(meta['near_best_members'])} sets)",zorder=2)
-    for name,key,color,style,marker,label in (
-        (meta["best_selected"],"best_T_MeV","#0072B2","-","o",best_label),
-        ("andronic2018","andronic_T_MeV","#A04800","--","s","Andronic 2018 (default)")):
+    registry = curve_styles(meta)
+    selected = [meta["best_selected"], "andronic2018"]
+    for style,key,label in zip(registry.select(selected), ("best_T_MeV", "andronic_T_MeV"),
+                               (best_label, "Andronic 2018 (default)")):
+        name = style.series_id
         anchor = next(r for r in anchors if r["profile"] == name and float(r["energy_GeV"]) == 7.7)
         index = min(range(len(x)),key=lambda i:abs(x[i]-float(anchor["muB_MeV"])))
         if abs(x[index]-float(anchor["muB_MeV"])) > 1e-9:
             raise ValueError("7.7 GeV anchor outside frozen display grid")
-        ax.plot(x,[float(r[key]) for r in bands],color=color,linestyle=style,linewidth=1.7,
-            marker=marker,markevery=[index],markersize=6,markerfacecolor="white",markeredgewidth=1.1,
+        ax.plot(x,[float(r[key]) for r in bands],**style.plot_kwargs(),linewidth=1.7,
+            markevery=[index],markersize=6,markerfacecolor="white",markeredgewidth=1.1,
             label=label,zorder=3)
     ax.set_xlim(0,meta["muB_range_MeV"][1]+10)
     lowest = min(float(r["minimum_T_MeV"]) for r in bands)
@@ -263,7 +285,6 @@ def render(args):
     gray_record = output_record(gray,fmt="png",dpi=profile.dpi,vector=False)
     gray_record["inspection"] = inspect_export(gray)
     outputs.append(gray_record)
-    plt.close(figure)
     snapshot = results / Path(__file__).name
     shutil.copy2(__file__,snapshot)
     caption = ("Chemical-freezeout T(muB) parameterizations. Gray and hatched blue use exactly the same "
@@ -292,7 +313,7 @@ def render(args):
             ("thermodynamic_band.csv","energy_anchors.csv","parameters.csv","preparation.json","checksums.json")] +
             meta["inputs"] + [input_record(ROOT / "config/plotting/candidate_aps_v2.toml",role="plot_style_contract")] +
             [input_record(ROOT / "scripts/plotting" / n,role="shared_plotting_code") for n in
-                ("plot_style.py","plot_manifest.py","plot_quality.py","plot_accessibility.py","validate_plot_artifact.py")],
+                ("plot_style.py","plot_series.py","plot_manifest.py","plot_quality.py","plot_accessibility.py","validate_plot_artifact.py")],
         axes=[dict(field="muB_MeV",source_unit="MeV",display_unit="MeV",scale="linear",label=xlabel),
             dict(field="T_MeV",source_unit="MeV",display_unit="MeV",scale="linear",label=ylabel)],
         series=[dict(series_id=name,state="analytic_parameterization",point_count=len(bands),
@@ -306,6 +327,7 @@ def render(args):
             checks="frozen hashes, analytical identities and coordinate comparison, positive T, rendering geometry",author_review="pending"),
         rendering=dict(delivery_stage="png_review",vector_delivery_pending=True,review_contract="prd_review_v1",
             figure_size_inches=list(figure_size_inches(profile)),column="double_column",font=font,
+            series_styles=registry.record(selected),
             legend_policy="declared_geometry_checked",legend_outside=False,
             legend_placements=[dict(legend_index=0,host_axes_index=0,title=legend_title,labels=labels,
                 placement="in_axes",location="lower left",scope="parameter bands, curve families and collision-energy positions")],
@@ -317,6 +339,13 @@ def render(args):
         calculation_sha=meta["calculation_sha"],source_run_id=meta["source_run_id"])
     manifest.update(delivery_stage="png_review",manuscript_eligible=False,current_publication_layer=False,
         vector_delivery_pending=True,caption=input_record(results / "caption.md",role="figure_caption"))
+    for record in manifest["inputs"]:
+        if record["role"] in {"plot_style_contract", "shared_plotting_code"}:
+            code_path = ROOT / record["path"]
+            code_snapshot = results / "source" / record["path"]
+            code_snapshot.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(code_path, code_snapshot)
+            record["source_snapshot"] = input_record(code_snapshot, role="plotting_source_snapshot")
     write_manifest(output / "plot_manifest.json",manifest)
     issues = validate_manifest(output / "plot_manifest.json",repo_root=ROOT)
     if issues:

@@ -38,6 +38,10 @@
 - 模型变体总入口：`docs/api/models/variants/README.md`
 - 衍生量总入口：`docs/api/models/derived/README.md`
 
+### 使用公共绘图 helper
+
+- [曲线身份、局部样式上下文与字体策略](plotting/PlotStyle.md)
+
 ## 2. 当前主导航口径
 
 - `docs/api/models/phase/`、`docs/api/models/scans/`、`docs/api/models/workflows/`、`docs/api/models/solver/` 是 `Models` 主链的核心主题。
