@@ -117,7 +117,7 @@ export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate
 export Constants_PNJL
 export TmuScanConfig, TrhoScanConfig
 export FreezeoutScanConfig
-export FreezeoutParameterProfile
+export AbstractFreezeoutParameterProfile, FreezeoutParameterProfile, AndronicFreezeoutProfile
 export load_freezeout_profile, freezeout_profile_dir
 export freezeout_muB_GeV, freezeout_temperature_GeV
 export freezeout_point_GeV, freezeout_point_MeV

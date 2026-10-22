@@ -1,0 +1,949 @@
+                                          Resolving Ratio Redundancy in Chemical Freeze-out Studies with Principal Component Analysis and
+                                                                              Bayesian Calibration
+                                                                                                      Nachiketa Sarkar1, ∗
+                                                       1
+                                                           Department of Physics, Amrita School of Physical Sciences, Coimbatore, Amrita Vishwa Vidyapeetham, India
+                                                                                                 (Dated: November 20, 2025)
+                                                              We introduce a Principal Component Analysis (PCA)–Bayesian framework for extracting chemical freeze-out
+                                                           conditions in relativistic heavy-ion collisions that resolves long-standing ambiguities in hadron-ratio–based
+                                                           analyses. By constructing all possible hadron-yield ratios from a chosen set of species and transforming them
+                                                           into an orthogonal PCA basis, the method removes linear redundancies and eliminates the information loss
+                                                           and systematic uncertainties associated with ratio selection. Energy-wise Bayesian calibration of the Hadron
+                                                           Resonance Gas (HRG) model is then performed directly in this decorrelated space, with a Gaussian Process
+                                                           emulator enabling fast and accurate model evaluations. A detailed Sobol sensitivity analysis, together with
+                                                           the PCA loading structure, identifies the most informative ratio combinations and reveals a transition from
+                                                                                                                                                  √
+arXiv:2511.15707v1 [hep-ph] 19 Nov 2025
+
+
+
+
+                                                           chemical-potential–dominated to temperature-controlled freeze-out with increasing sN N . The calibrated
+                                                           model reproduces all measured ratios, and the extracted freeze-out parameters are consistent with previous HRG
+                                                           determinations.
+
+
+                                                                 I.   INTRODUCTION                                  introduces redundancy because only N − 1 ratios are linearly
+                                                                                                                    independent [14, 50, 58, 59]. Second, restricting the analysis
+                                             The quark–gluon plasma (QGP) [1], an emergent state of                 to a subset of ratios avoids over-counting but discards part of
+                                          matter formed in ultra-relativistic heavy-ion collisions, under-          the information and may bias the extracted parameters [14].
+                                          goes rapid expansion and cooling as it evolves from a decon-              However, as emphasized by Becattini [60], constructing ratios
+                                          fined medium toward hadronization. As the system cools, in-               a posteriori from measured yields and treating them as inde-
+                                          elastic interactions cease and the relative abundances of hadron          pendent observables violates the assumptions of least-squares
+                                          species become fixed. This chemical freeze-out stage is char-             fitting, as it neglects correlations arising from shared denom-
+                                          acterized by the temperature Tch and the baryon, strangeness,             inators and common systematic uncertainties. This omission
+                                          and electric-charge chemical potentials (µB , µS , µQ ) [2, 3].           renders the resulting χ2 statistically inconsistent and can bias
+                                          These thermodynamic parameters quantitatively relate the ob-              the inferred freeze-out parameters [50]. Although directly mea-
+                                          served hadron yields to the underlying properties of strongly             sured ratios (e.g., π − /π + or p/p̄) avoid this issue, they still do
+                                          interacting matter. Their systematic dependence on colli-                 not resolve the information loss inherent in fitting fewer than
+                                          sion energy—studied across AGS, SPS, RHIC, and LHC pro-                   the full set of independent ratios. Direct yield fits, on the other
+                                          grams—provides essential information on the Quantum Chro-                 hand, avoid ratio redundancy but introduce the system volume
+                                          modynamics (QCD) phase structure and the conditions relevant              as an additional fit parameter and often suffer from parame-
+                                          for deconfinement and potential critical phenomena [4–7].                 ter degeneracies between the volume and the thermodynamic
+                                             Thermal statistical models, in particular the Hadron Reso-             variables [29, 61].
+                                          nance Gas (HRG) model, have been widely employed to extract                   Several studies have attempted to address these difficulties.
+                                          these freeze-out parameters [2, 3, 8–31]. Numerous refine-                Bhattacharyya et al. [58] analyzed the uncertainties introduced
+                                          ments have been developed, including excluded-volume inter-               by ratio selection, while Ref. [59] proposed sampling statisti-
+                                          actions [18, 27–37], extended hadron lists [28, 38–42], finite-           cally independent spanning trees of ratios to quantify this effect.
+                                          size effects [39, 43, 44], treatments based on scattering phase           Another method, based on four global constraints, was intro-
+                                          shifts [45–48], and approaches incorporating a strangeness-               duced in Ref. [62]; however, the required choice of specific
+                                          suppression factor γs [12, 23, 49–51] to model incomplete                 ratios and the sensitivity to feed-down corrections and accep-
+                                          equilibration of strange quarks. Alternative freeze-out scenar-           tance mismatches introduce additional systematic uncertainties.
+                                          ios, such as flavor-dependent or sequential freeze-out [24, 52–           Furthermore, the imposition of exactly four constraints—and
+                                          54], and system-size-dependent schemes [55–57], have also                 the fact that their selection is not unique—adds an additional
+                                          been explored to accommodate potential species-dependent                  source of ambiguity in the extracted freeze-out parameters.
+                                          decoupling.                                                                   These considerations motivate the development of an ap-
+                                             Despite these various statistical-model refinements and                proach that retains the full information content of the measured
+                                          methodological approaches, traditional extractions of freeze-             yields while avoiding ambiguities associated with ratio selec-
+                                          out parameters still rely primarily on χ2 minimization of ex-             tion and correlated observables. In this work, we adopt a
+                                          perimental hadron multiplicities or their ratios. Ratio-based             data-driven strategy in which all possible hadron ratios are
+                                          fits, however, face two structural limitations. First, for N mea-         constructed and then transformed using Principal Component
+                                          sured yields, forming the full set of ∼ N (N − 1)/2 ratios                Analysis (PCA) [63, 64]. The resulting PCA basis provides
+                                                                                                                    an orthogonal set of statistically independent combinations
+                                                                                                                    of ratios, removing linear correlations and redundancy while
+                                                                                                                    preserving the full set of independent degrees of freedom. This
+                                          ∗ nachiketa.sarkar@gmail.com
+                                                                                                                    procedure directly addresses the correlation issues highlighted
+                                                                                                                                                                 2
+
+by Becattini [60]: correlations among hadron ratios are not ig-                   of species i is computed as
+nored but are systematically treated through orthogonalization,                                                                                         
+ensuring that each transformed observable carries a distinct                                                                   X
+statistical weight. The Bayesian calibration of the freeze-out                              Ni = Vsys ni (Tch , µi ) +              nj (Tch , µj ) Bj→i  ,    (3)
+parameters is then performed using these principal components                                                                    j
+rather than the raw ratios, allowing each independent direction
+in the data to contribute consistently and avoiding the infor-                    where Bj→i denotes the branching ratio for the decay of reso-
+mation loss or over-counting that can arise in conventional χ2                    nance j into hadron i, and Vsys is the effective system volume.
+analyses.                                                                         For yield ratios, the volume factor cancels, leaving the ratios
+   To isolate the intrinsic energy dependence of chemical                         dependent only on the thermal parameters (Tch , µB , µS , µQ ).
+freeze-out and minimize complications arising from centrality-                      In this analysis, the HRG calculation employs all established
+related correlations, we restrict our analysis to the most cen-                   hadrons and resonances with masses up to 3 GeV, following
+                                                      √
+tral collisions, covering a beam energy range from sN N =                         the latest Particle Data Group (PDG) compilation [67].
+7.7 GeV (RHIC Beam Energy Scan) up to 2.76 TeV (LHC).
+For each energy, we perform two independent fits—with and
+without explicit conserved-charge constraints—to assess their                                        III.    ANALYSIS METHODOLOGY
+influence on the extracted parameters. The methodology de-
+veloped here provides a consistent framework for determining                           A.     Construction of Experimental Ratios and Covariance
+freeze-out conditions and can be extended in future work to in-
+corporate centrality dependence and a more detailed treatment
+                                                                                    The analysis begins with the N experimentally measured
+of systematic uncertainties.
+                                                                                  hadron yields and their reported statistical uncertainties,
+   The remainder of this paper is organized as follows. Sec-
+tion II presents a brief overview of the Hadron Resonance Gas                               y = (y1 , y2 , . . . , yN ),         σ = (σ1 , σ2 , . . . , σN ).   (4)
+(HRG) model. Section III describes the analysis methodology.
+Section IV presents the Bayesian calibration results together                          From these yields, all distinct pairwise ratios are constructed
+with a detailed discussion. Finally, Section V summarizes the                     as
+main conclusions of this work.
+                                                                                                                   yi
+                                                                                                        rij =         ,       1 ≤ i < j ≤ N,                    (5)
+                                                                                                                   yj
+     II.   HADRON RESONANCE GAS (HRG) MODEL                                       forming the ratio vector
+
+   The Hadron Resonance Gas (HRG) model provides a widely                                                                                  N (N − 1)
+                                                                                               r = (r1 , r2 , . . . , rM ),          M=              .          (6)
+used and effective description of hadronic matter in the con-                                                                                  2
+fined phase of QCD [2, 3, 7–50, 52–59, 61, 62, 65–67]. In the
+ideal HRG formulation, the hadronic medium is described as a                         To propagate the experimental uncertainties to the ratios,
+non-interacting gas of all known hadrons and resonances, each                     Monte Carlo (MC) sampling of the yields is performed. In
+contributing to the thermodynamic properties according to its                     the absence of published experimental covariance matrices,
+mass, spin, and conserved quantum numbers. For a hadron                           the yield uncertainties are treated as independent Gaussian
+species i with mass mi , degeneracy gi , and chemical potential                   fluctuations*,
+µi , the equilibrium momentum distribution is given by the
+Bose–Einstein or Fermi–Dirac form,                                                          y(k) ∼ N (y, Σy ),                                         2
+                                                                                                                              Σy = diag(σ12 , . . . , σN ),
+                                                                                                                                                                (7)
+                                                                                               k = 1, . . . , NMC .
+                                          1
+                 fi (Ei ) =                               ,                 (1)
+                                                                                    For each sampled yield vector, the corresponding ratios are
+                                    h            i
+                                        Ei −µi
+                              exp        Tch         ±1
+                                                                                  computed as
+
+where the + (−) sign corresponds to fermions (bosons), Ei =                                                  (k)
+                                                                                                            yi
+                                                                                                  (k)                              (k)          (k) 
+                                                                                                                           r(k) = r1 , . . . , rM .
+p
+  p2 + m2i is the single-particle energy, and Tch denotes the                                    rij =       (k)
+                                                                                                                   ,                                            (8)
+chemical freeze-out temperature.                                                                            yj
+  The primordial number density of species i follows from the
+momentum integral,                                                                     The complete ensemble of sampled ratios forms the matrix
+
+                              Z ∞                                                                                      R ∈ RNMC ×M ,                            (9)
+                        gi                           p2 dp
+      ni (Tch , µi ) =                    √                           .   (2)
+                       2π 2   0                  p2 +m2i −µi                         where each row corresponds to a single Monte Carlo realiza-
+                                    exp             Tch            ±1
+                                                                                  tion. A sample size of NMC = 5000 was found sufficient, as
+                                                                                  doubling the sample size modifies the covariance eigenvalues
+  To incorporate resonance decays, the final observable yield                     by less than 0.1%.
+                                                                                                                                     3
+
+                                                                       space and restricts the analysis to the independent degrees of
+                                                                       freedom relevant for Bayesian calibration. However, Before
+                                                                       performing PCA, we work with log-ratios, which convert the
+                                                                       nonlinear redundancy among raw ratios into linear constraints.
+                                                                       For two species i and j the log-ratio is
+                                                                                            Rij = ln yi − ln yj .                (10)
+                                                                       With N species, only N −1 independent combinations exist. In
+                                                                       log space these constraints are linear, allowing PCA to recover
+                                                                       exactly N − 1 nonzero components.
+                                                                          Let R denote the log-ratio ensemble matrix, with each row
+                                                                       corresponding to a MC sample and each column to a distinct
+                                                                       log-ratio. Before PCA, each column of R is standardized to
+                                                                       have zero mean and unit variance. The eigen-decomposition
+                                                                       of RT R is then performed,
+                                                                                            RT R = V Σ2 V T ,                    (11)
+                                                                       where Σ contains the singular values and V defines the orthog-
+                                                                       onal transformation.
+FIG. 1. PCA diagnostics for the hadron yield ratio ensemble. Top:        The principal components are obtained by projecting the
+Cumulative variance explained as a function of the number of princi-   log-ratio ensemble onto these eigenvectors:
+pal components, with dashed lines marking the 96% and 99% thresh-                                Z = RV.                         (12)
+olds. Middle: Comparison between the standardized log-ratio data
+and the reconstruction from the retained components. Bottom: Ratio     Because only N − 1 independent combinations exist, we retain
+of the reconstructed to the original data.                             exactly q = N − 1 principal components,
+                                                                                                Zq = RVq ,                       (13)
+  From this ensemble, the mean ratio vector and covariance             thereby preserving all independent information. As also ev-
+matrix are computed as                                                 ident from the top panel of Fig. 1, the cumulative explained
+                         NMC
+                                                                       variance saturates after the ninth component. The comparison
+                 1       X
+                                                                       between the original and PCA-reconstructed log ratios (middle
+         r̄ =                  r(k) ,
+                NMC                                                    and bottom panels) indicates that these nine components retain
+                         k=1
+                               N
+                                                                       all the (as all higher components have vanishing eigenvalues)
+                                 MC                       T
+                     1         X                 
+                                                                       information needed to describe the ensemble.
+       Cr =                             r(k) − r̄ r(k) − r̄ .
+                NMC − 1                                                   In the PCA framework, the product V Σ (up to normalization
+                               k=1
+                                                                       conventions) is referred to as the loading matrix. Its columns
+   This MC construction preserves the statistical correlations         correspond to the principal components, and its rows to the
+generated by the ratio definition itself, since each sampled           original log-ratios. Each entry quantifies the direction and
+yield vector contributes coherently to all ratios. Ratios sharing      variance-weighted contribution of a given ratio to a compo-
+common yields therefore fluctuate together across the ensem-           nent. The loading matrix therefore offers physical insight, as
+ble, and these induced dependencies appear in the off-diagonal         it helps identify the dominant sources of correlated fluctua-
+elements of the covariance matrix Cr . Full experimental co-           tions within the ratio ensemble. Figure 2 shows the loading
+                                                                                  √
+variance matrices for identified hadron yields are not publicly        matrix at sN N = 39 GeV. Only the first nine components
+available, so possible cross-species systematic correlations           exhibit nonzero eigenvalues, consistent with the expected N −1
+cannot be included explicitly. The assumption of independent           independent degrees of freedom. The eigenvalue pattern illus-
+Gaussian uncertainties is therefore applied at the level of the        trates that PCA removes the near-singular directions of the
+yields. The ratio construction nevertheless captures the dom-          ratio covariance matrix, reducing its condition number from
+inant correlation structure arising from shared yields. While          κ = λmax /λmin ∼ ∞ to O(1) for the nine retained compo-
+neglecting unreported experimental covariances may slightly            nents. This indicates that the transformed basis is numerically
+affect the relative weighting of the principal components, it          well-conditioned for subsequent Bayesian inference. A de-
+does not alter their orientation or the physical interpretation of     tailed discussion of the physical interpretation of the energy-
+the PCA basis. Within these limitations, the PCA transforma-           dependent loading patterns is provided in Sec. IV.
+tion remains sufficiently stable for the subsequent analysis.
+
+                                                                        C.   Gaussian Process Regression and Construction of Model
+                          B.     PCA Analysis                                                     Input
+
+  PCA is used to transform the correlated hadron ratios into             Markov Chain Monte Carlo (MCMC) sampling during
+an orthogonal set of observables. This decorrelates the ratio          Bayesian inference requires repeated evaluation of model pre-
+                                                                                                                                             4
+
+
+
+
+                                                                       FIG. 3. GP Emulator diagnostics. Top-left: HRG model calculations
+                                                                       versus emulator predictions for various hadron species , with error bars
+                                                                       scaled to the predicted uncertainty. The dashed line denotes perfect
+                                                                       agreement. Bottom-left: Ratio of model to emulator predictions,
+                                                                       showing deviations tightly clustered around unity. Right: Distribution
+                                                                       of normalized residuals with a standard normal overlay, demonstrating
+                                                                       statistically consistent uncertainty estimates.
+
+
+                                                                       numerical stability. The hyperparameters (σGP , lk , σn ) are
+                                                                       determined by maximizing the marginal likelihood.
+                                                                          The emulator performance is assessed using the 50 valida-
+                                                                       tion points, as shown in Fig. 3. Emulator predictions follow
+                                                                       the HRG model values closely over the sampled range. The
+                                                                       ratio plot (bottom-left) shows residuals centered around unity,
+                                                                       and the normalized residuals (right panel) are approximately
+                                                                       standard normal, indicating that both the mean predictions and
+                                                                       the associated uncertainty estimates are consistent with the
+                                                                       validation data.
+
+                                                                         Starting from the emulator-predicted mean yields µm , we
+FIG. 2. Loading matrix representing the first ten principal compo-     construct the corresponding set of model log ratios using the
+                                                            √
+nents (PC1–PC10) for identified-particle yield log-ratios at sN N =    same index pairs (ik , jk ) as in the experimental analysis:
+39 GeV. The eigenvalues λi are indicated for each component. The                                         
+color bar shows the contribution of each log-ratio to each principal                                 µi
+component.                                                                       Rmodel
+                                                                                  i,j   = log                 ,   1 ≤ i < j ≤ N.          (15)
+                                                                                                     µj
+
+
+dictions across a large number of parameter points. Performing
+                                                                         textbfCovariance propagation in ratio space. To quantify
+full HRG calculations at every step would be computationally
+                                                                       emulator-induced uncertainties in log-ratio space, we propa-
+expensive. To reduce this cost, we construct a Gaussian Process
+                                                                       gate the yield covariance matrix using linear error propagation.
+(GP) emulator that provides interpolated model predictions to-
+                                                                       For
+gether with their associated uncertainties.
+   A set of 500 design points in the four-dimensional param-
+                                                                                          Rmodel
+                                                                                           i,j   = ln(µi ) − ln(µj ),
+eter space (T, µB , µS , µQ ) is generated using Latin Hyper-
+cube Sampling (LHS) [68]. At each point, the full HRG
+                                                                       the Jacobian elements are
+model—including all resonance decay contributions—is eval-
+uated to obtain the corresponding hadron densities. Of these,                                       1
+                                                                                                
+450 points are used for GP training and 50 points are retained
+                                                                                                
+                                                                                                 + , ℓ = i,
+                                                                                                    µ
+                                                                                                
+                                                                                       ∂Rmodel       i
+                                                                                                
+                                                                                                
+for validation.                                                                          i,j
+                                                                                               = − 1 , ℓ = j,                             (16)
+   The GP emulator employs a squared-exponential (radial                                ∂µℓ     
+                                                                                                   µj
+basis function) kernel,
+                                                                                                
+                                                                                                
+                                                                                                0,    otherwise.
+                                            !
+                           X (xk − x′ )2
+         ′      2
+  k(x, x ) = σGP exp −                   k
+                                               + σn2 δxx′ , (14)       This yields the Jacobian matrix J ∈ RNR ×N , where NR =
+                                    2lk2                               N − 1 is the number of independent log ratios. The ratio-space
+                              k
+                                                                       covariance matrix is then
+        2
+where σGP   is the signal variance, lk are the characteristic
+length scales, and σn2 is a small diagonal term included for                                  model
+                                                                                             CR     = J CyGPR J ⊤ ,                       (17)
+                                                                                                                                           5
+
+with CyGPR the GP yield covariance matrix. This procedure              where ym (θ) denotes the model PCs, ye the experimental PCs,
+ensures consistency between model and experimental covari-             and Σ the total covariance matrix. The covariance Σ includes
+ance treatments.                                                       contributions from experimental uncertainties, the GP emulator,
+                                                                       and a small regularization term following Ref. [75].
+                                                                         Flat, non-informative priors are assigned over parameter
+  Standardization to experimental space. To match the                  ranges motivated by previous studies and standard HRG analy-
+preprocessing applied to the experimental ratios, the model            ses (Table I).
+log-ratio means and covariance are standardized using the
+experimentally determined mean vector µexpR and standard
+           exp                                                         TABLE I. Model parameters and prior ranges used in the Bayesian
+deviation σR   :
+                                                                       calibration.
+                                                                                     Parameter            Symbol       Range
+                   Rmodel − µexp
+      Rmodel
+       std   =          exp
+                             R
+                                 ,                             (18)                 Temperature             T     [120, 180] MeV
+                      σR
+                                                                              Baryon chemical potential     µB     [0, 450] MeV
+    std, model                                         exp
+   CR          = D−1 CR
+                      model
+                            D−1 ,            D = diag(σR   ).               Strangeness chemical potential µS    [−10, 150] MeV
+                                                           (19)               Charge chemical potential     µQ    [−20, 30] MeV
+
+This places the model ratios in the same standardized space
+                                                                          Posterior sampling is performed in PC space using the affine-
+used for the PCA of the data.
+                                                                       invariant ensemble Markov Chain Monte Carlo algorithm im-
+                                                                       plemented in emcee [76]. Each run employs 100 walkers
+   Projection into experimental principal-component space.             initialized uniformly within the prior bounds. A two-stage
+Finally, the standardized model ratios are projected onto the          burn-in of 1,000 steps is followed by 5,000 production steps,
+leading k principal components obtained from the experimen-            yielding roughly 106 posterior samples. Convergence is as-
+tal PCA. Let Vk ∈ RNR ×k denote the matrix of the top k                sessed using standard diagnostics: the Gelman–Rubin statistic
+eigenvectors. The model predictions and uncertainties in PC            satisfies R̂ ≈ 1.0 for all parameters, and the integrated autocor-
+space are                                                              relation times indicate that the effective sample size exceeds
+                                                                       50 times the largest autocorrelation time, providing at least
+                PCmodel = Vk⊤ Rmodel ,                         (20)
+                               std                                     O(103 ) effectively independent samples per parameter. The
+                                 std, model                            analysis code used in this work is publicly available at [77]
+                  CPmodel
+                     C    = Vk⊤ CR          Vk .               (21)
+
+These quantities provide the emulator predictions in the re-
+duced space used for Bayesian calibration.                                           IV.   RESULTS AND DISCUSSION
+
+                                                                          This analysis uses identified-hadron yield data for,
+                    D.   Bayesian Calibration                          π + , π − , K + , K − , p, p̄, Λ, Λ̄, Ξ− , Ξ̄+ , across collision en-
+                                                                                      √
+                                                                       ergies from sN N = 7.7 to 200 GeV at RHIC [78] and
+                                                                       √
+   After validating the GP emulator and mapping all model                sN N = 2.76 TeV at the LHC [79–82]. For each energy,
+observables into the experimental principal-component (PC)             all distinct hadron-yield ratios are constructed following the
+space, the freeze-out parameters are inferred using Bayesian           procedure described in Sec. III. These ratios constitute the
+calibration. Compared with conventional χ2 minimization, the           inputs to the PCA decorrelation and the Sobol-based global
+Bayesian framework offers several key advantages: it yields            sensitivity analysis presented in the subsections below.
+the full posterior distribution rather than a single point estimate,
+incorporates correlated uncertainties in a statistically consistent
+manner, and mitigates parameter degeneracies that often arise                               A.   Sensitivity Analysis
+in traditional χ2 -based analyses. These features make Bayesian
+inference particularly well suited to the present study, where            To quantify how variations in the chemical freeze-out pa-
+the observables exhibit strong correlations and the model re-          rameters (T, µB , µS , µQ ) influence the predicted hadron-yield
+sponse is inherently nonlinear. Consequently, Bayesian calibra-        ratios, we perform a global sensitivity analysis based on Sobol
+tion has been widely adopted in heavy-ion physics to address           total-effect indices [83, 84].
+a range of problems, including parameter estimation, model                For a model observable Y = f (θ), the total variance can be
+comparison, and uncertainty quantification [69–74].                    decomposed as
+   The likelihood function quantifies the agreement between
+the model predictions and the experimental PCs and is modeled                               X           X
+                                                                               Var(Y ) =         Vi +         Vij + · · · + V1,2,...,d ,
+as a multivariate Gaussian,
+                                                                                             i          i<j
+                     h                   T                    i
+  P (D | θ) ∝ exp − 12 ym (θ) − ye Σ−1 ym (θ) − ye ,                   where Vi denotes the contribution from parameter θi and Vij ,
+                                                                (22)   Vijk , etc., denote higher-order interaction terms. The first-
+                                                                                                                                         6
+
+
+
+
+FIG. 4. Energy-wise sensitivities of the chemical freeze-out parameters obtained from Sobol total indices (ST ). Each column shows the nine
+algebraically independent hadron yield ratios with the largest ST values for the corresponding freeze-out parameter. The common color bar
+indicates the magnitude of ST .
+
+
+order Sobol index,                                                     across both baryon–to–meson ratios (e.g., p/π + , Λ/K − ) and
+                                                                                                                            √
+                                                                       baryon–to–antibaryon ratios (e.g., p̄/p, Λ/p̄). As sN N in-
+                                  Vi
+                         Si =           ,                              creases, the sensitivity becomes concentrated almost entirely
+                                Var(Y )                                in baryon–to–antibaryon ratios such as p̄/p, Λ̄/Λ, and Ξ/Λ̄,
+measures the isolated effect of θi , while the total index,            while baryon–to–meson ratios lose relevance as their values
+                                                                       approach equilibrium limits that are largely insensitive to µB .
+                                   V∼i                                 This reflects the near-symmetric production of baryons and
+                      SiT = 1 −           ,
+                                  Var(Y )                              antibaryons at high energies, which reduces the influence of
+                                                                       µB on the hadronic yields. The strangeness chemical po-
+captures both the individual and interaction contributions of          tential µS exhibits dominant sensitivity to kaon–to–pion ra-
+θi .                                                                   tios, with additional contributions at low energies from multi-
+    For each freeze-out parameter and collision energy, we com-        strange–to–single-strange and non-strange baryon or meson
+pute the total-effect indices SiT for all hadron-yield ratios          ratios. With increasing energy, a convergence pattern similar to
+and identify the nine algebraically independent ratios with            that of µB is observed, although the decline in µS sensitivity
+the largest sensitivities. These results, summarized in Fig. 4,        occurs more gradually. This slower reduction reflects the pro-
+indicate which observables carry the dominant information              gressive approach to global strangeness neutrality in a nearly
+on each thermodynamic parameter and how their sensitivity              baryon-symmetric environment, which is effectively realized
+               √
+evolves with sN N .                                                    by LHC energies.
+       √
+    At sN N = 7.7 GeV, the temperature is the least sensi-
+tive parameter, with its influence carried almost entirely by
+rare strange antibaryon–to–kaon ratios and, to a lesser extent,
+                                                                                       B.   Principal Component Analysis
+by antibaryon–to–meson ratios. The small ST values at this
+energy reflect the strong suppression of antibaryons—and par-
+ticularly strange antibaryons—caused by the large µB and                  To characterize the dominant structures in the hadron-yield
+          √
+µS . As sN N increases, antibaryon suppression weakens,                data and their evolution with collision energy, we perform
+and ratios involving pions, such as p̄/π − , become increasingly       a Principal Component Analysis (PCA) of the log-ratio ob-
+                      √
+sensitive to T . By sN N = 27 GeV, ratios like p̄/π − and              servables constructed from the experimental yields. To deter-
+      +
+p̄/K exhibit ST values comparable to Λ̄/K + , indicating the           mine which freeze-out parameters control each component, we
+reduced influence of chemical potentials. At the top RHIC              additionally apply a Sobol global sensitivity analysis to the
+energies, many strange and antibaryon ratios act as effective          principal-component amplitudes. The corresponding energy-
+thermal probes. By the LHC regime, T becomes the dominant              wise PCA loading matrices and the energy dependence of the
+parameter, and ratios across a wide mass range respond primar-         principal-component sensitivities are shown in Appendix A
+ily to the Boltzmann factor, making the temperature sensitivity        (Fig. 8 8 ).
+                                                                                                          √
+effectively universal.                                                    At the lowest RHIC energies ( sN N = 7.7–19.6 GeV),
+    In contrast, the Sobol sensitivity of the baryon chemi-            the leading components are governed primarily by the baryon
+cal potential µB decreases monotonically with collision en-            and strangeness chemical potentials (µB , µS ). These modes
+ergy, mirroring the gradual reduction in baryon–antibaryon             capture antibaryon suppression, baryon–meson imbalance,
+asymmetry. At low energies, µB sensitivity is distributed              and strangeness–antimatter asymmetry, reflecting the strongly
+                                                                                                                                            7
+
+baryon-rich environment. Subleading components encode                                    C.   MCMC Calibration
+isospin effects through the p/π ± splitting and the tempera-
+ture dependence of strange-hadron production.                           The HRG model parameters were calibrated independently
+                                                                                                        √
+                                                                     at each collision energy from sN N = 7.7 to 200 GeV at
+                                                                                           √
+   At low intermediate energies (27–39 GeV), the                     RHIC [78] and at sN N = 2.76 TeV at the LHC [79–82]
+PCA structure shows a clear transition from chemical-                using Bayesian inference. All analyses were performed in the
+potential–dominated to temperature-controlled freeze-out. At         principal-component (PC) space constructed from the loga-
+27 GeV, PC1 is still governed by antibaryon–to–meson scaling         rithmic hadron-yield ratios in the most central collisions. As
+set by µB and µS , reflecting the reduced net-baryon density         discussed in Sec. IV B, the first nine PCs contain all indepen-
+and enhanced antibaryon production. PCs 2–4, dominated               dent information from the ratio ensemble and therefore form
+by pion-normalized baryon and kaon ratios, exhibit mixed             the basis for the parameter calibration.
+sensitivity to T and µS , signaling the onset of thermal mass           Following earlier studies [58, 59, 62, 78], two complemen-
+ordering, while the higher modes further separate chemical and       tary fitting schemes were employed to examine the sensitivity
+thermal effects, most prominently in strange-baryon–to–kaon          of the extracted parameters to the imposed conservation con-
+ratios such as Ξ/K + and Λ/K + . By 39 GeV, PCs 1–2                  straints.
+become largely temperature driven, governed by Ξ and Ξ̄                 Case 1: Unconstrained fit. All chemical freeze-out
+yields, whereas the remaining components retain only minor           parameters—the temperature (T ), baryon chemical potential
+charge and strangeness structure. The diminishing role of            (µB ), strangeness chemical potential (µS ), and charge chem-
+µB and µS thus marks the emergence of a nearly thermally             ical potential (µQ )—were treated as free parameters in the
+equilibrated freeze-out surface.                                     Bayesian calibration. This provides the most general determi-
+                                                                     nation of the freeze-out conditions without explicitly enforcing
+   At the high RHIC energies (62.4 GeV) and above, temper-           any external constraints.
+ature largely controls the hadron-yield pattern. The leading            Case 2: Constrained fit. The strangeness and electric-
+PCs are dominated by multistrange and antibaryon ratios (Ξ,          charge chemical potentials were fixed by imposing global
+Λ̄, p̄), reflecting the near restoration of matter–antimatter sym-   strangeness neutrality and a constant charge-to-baryon ra-
+metry at these energies. Intermediate components capture             tio [21]: These conditions,
+residual charge–strangeness correlations and baryon–meson               X
+balance, while higher modes contain only small fluctuations                  ni (T, µB , µS , µQ ) Si = 0,                       (23)
+from weak chemical-potential effects. At the LHC energy of              i
+√
+   sN N = 2.76 TeV, freeze-out becomes almost purely ther-            X                                    X
+                                                                            ni (T, µB , µS , µQ ) Qi = r       ni (T, µB , µS , µQ ) Bi ,
+mal: PCs 1–2 are governed by Λ- and Λ̄-related ratios, with
+                                                                        i                                  i
+the remaining components contributing negligibly. This corre-                                                                         (24)
+sponds to a regime of effectively vanishing chemical potentials,
+where hadron yields are set primarily by the temperature.            These constraints reduce the fit to two independent parame-
+                                                                     ters, T and µB , with µS and µQ determined implicitly from
+   Overall, the PCA decorrelates the ratio space into nine sta-      Eqs. (23)–(24).
+tistically independent directions whose energy dependence re-           The detailed results of the Bayesian calibration for both ap-
+veals a smooth transition from a baryon-rich, chemically driven      proaches (Case I and Case II) are summarized in Table II. The
+                                                                                                                  √
+regime to a nearly thermal, temperature-dominated freeze-out.        MCMC posterior distributions for Case I at sN N = 39 GeV
+                                                                     are shown in Fig. 5, which displays the one-dimensional
+   It is worth noting that interpreting individual principal com-    marginalized posteriors along the diagonal and the two-
+ponents can be challenging because each PC mixes several             dimensional parameter correlations in the off-diagonal panels.
+correlated observables. To aid interpretation, we identify           The posterior structure shows that the freeze-out temperature
+at each collision energy the nine algebraically independent          T is largely uncorrelated with the chemical potentials. In the
+hadron-yield ratios with the largest absolute loadings across        HRG model, T affects all hadron species in a broadly similar
+all PCs; the corresponding figures are provided in Appendix A        way, whereas µB , µS , and µQ primarily control the relative
+(Fig. 10). These ratios span directions in observable space          baryon, antibaryon, and strangeness abundances. As a result,
+that carry maximal variance, making them the most informa-           variations in the chemical potentials have limited impact on
+tive and physically constraining combinations in the dataset.        the temperature preferred by the data, yielding a comparatively
+Although algebraically independent, they are not necessarily         narrow posterior for T .
+                                             √
+physically independent. For example, at sN N = 2.76 TeV,                In contrast, the chemical potentials exhibit strong mutual
+the ratios Λ/p̄ and Λ̄/p̄ remain correlated through antibaryon       correlations that arise naturally from the composition of the
+production and baryon–strangeness conservation, while ratios         hadronic spectrum. An increase in µB enhances baryon yields
+such as Ξ/K + and Λ/K − share common strange-baryon and              relative to antibaryons, which in turn requires a larger µS to
+kaon production mechanisms. These examples underscore the            maintain the observed ratios of strange baryons to mesons,
+need for PCA to isolate the least redundant and most informa-        producing a positive µB –µS correlation. Conversely, µQ is
+tive observable combinations, even when physical correlations        strongly anti-correlated with both µB and µS : increases in
+persist.                                                             baryon number or strangeness content raise the abundance
+                                                                                                                                           8
+
+
+
+
+                                                                √
+FIG. 5. Posterior distributions from the Bayesian calibration at sN N = 39 GeV (Case I). Diagonal: one-dimensional marginalized posteriors
+with mean (dashed) and median (solid) lines. Off-diagonal: two-dimensional joint posteriors with 68Inset: evolution of χ2 /ndf during burn-in
+and production sphase.
+
+
+of positively charged hadrons, necessitating a compensating              PC basis. For completeness, the corresponding χ2 /ndf values
+reduction in µQ to maintain the observed charge balance. It              obtained from direct comparisons of experimental and model-
+is worth noting that these interdependencies are not imposed             predicted hadron ratios are summarized in Table II, providing
+externally but emerge from the statistical interplay between             a complementary validation in the physical observable space.
+baryon number, strangeness, and electric charge conservation
+                                                                            The comparison between the calibrated HRG model and the
+within the HRG framework. The resulting posterior correla-                                       √
+                                                                        experimental data for sN N = 39 GeV in Case I is shown in
+tions provide clear physical insight into parameter sensitivities
+                                                                        Fig. 6; the figure caption provides additional details. The top
+and degeneracies in the freeze-out description. They also ex-
+                                                                        panel compares the nine dominant principal components (PCs)
+plain why enforcing explicit strangeness neutrality and a fixed
+                                                                        of the experimental points with the calibrated model. The
+charge-to-baryon ratio in Case II leads to only minor shifts rel-
+                                                                        close overlap between the data and the posterior bands shows
+ative to the unconstrained Case I: the experimental data already
+                                                                        that the model accurately reproduces the variance structure in
+encode these conservation relations through the correlated pos-
+                                                                        PC space. The middle panel compares the calibrated model
+terior structure.
+                                                                        predictions with all 45 constructed experimental hadron-yield
+                                                                        ratios in the original ratio space and shows excellent agreement.
+   The top-right inset of Fig. 5 shows the evolution of
+                                                                        As confirmed in the bottom panel, the data-to-model ratios
+χ2 /ndf during the MCMC sampling, where χ2 = (yexp −
+                                                                        cluster tightly around unity across all observables. It is worth
+ymodel )⊤ Σ−1 (yexp − ymodel ), and Σ denotes the total covari-
+                                                                        emphasizing that these ratios were not used directly in the
+ance matrix, incorporating uncertainties from both the model
+                                                                        fit: the calibration was performed entirely in the principal-
+predictions and the experimental measurements. A rapid de-
+                                                                        component (PC) basis, and the values shown here are obtained
+crease in χ2 /ndf during the second burn-in period, followed
+                                                                        by transforming the model predictions back to ratio space using
+by stable fluctuations around a constant mean during produc-
+                                                                        the inverse PCA map. This demonstrates that the PCA-based
+tion,further confirms the convergence and equilibration of the
+                                                                        Bayesian framework retains the full information content of
+Markov chains. The steady mean value, χ2 /ndf = 0.75±0.51,
+                                                                        the observables while removing redundancy from correlated
+indicates that the HRG model provides a statistically consistent
+                                                                        ratios, achieving statistical consistency comparable to a full
+description of the data within the posterior credible intervals.
+                                                                        multivariate fit in ratio space but with improved numerical
+It should be noted, however, that this χ2 /ndf is evaluated in
+                                                                        stability and transparent uncertainty propagation.
+the principal-component (PC) space, where the observables are
+orthogonalized and decorrelated, rather than from a direct com-             The quantitative results of the Bayesian calibration, summa-
+parison of hadron-yield ratios. Hence, it quantifies the model’s         rized in Table II, show that the freeze-out parameters obtained
+agreement with the data in the reduced, information-preserving           from both approaches agree closely across all collision energies.
+                                                                                                                                         9
+
+
+
+
+                                                                                             √
+FIG. 6. Comparison between experimental data and the Bayesian-calibrated HRG model for sN N = 39 GeV (Case I). Top: Experimental
+data (red circles) and calibrated model predictions (black bands) for the nine dominant principal components (PCs) of hadron-yield ratios.
+The green bands denote samples from the MCMC burn-in phases. Middle: Comparison between the calibrated model predictions and the
+original experimental hadron-yield ratios, obtained by transforming the model results from the decorrelated PC space back into the physical
+ratio space using the inverse PCA transformation. Bottom: Ratio of experimental to marginalized model predictions for all 45 hadron-yield
+ratios, demonstrating excellent agreement across the full observable set.
+
+
+
+
+FIG. 7. Comparison of the chemical freeze-out parameters extracted without constraints (WC) in the present PCA-based Bayesian analysis
+(orange box–whisker symbols) with earlier determinations [15, 19, 23, 58, 62, 78, 85] across a range of collision energies. Each orange box
+denotes the 68% credible interval, the horizontal line marks the posterior median, and the whiskers show the 95% credible interval. Left:
+Freeze-out temperature (T ). Middle: Baryon chemical potential (µB ). Right: Strangeness chemical potential (µS ).
+
+
+This consistency indicates that imposing global strangeness            the constraining effect of these physical relations, which re-
+neutrality and a fixed charge-to-baryon ratio provides a physi-        duce parameter degeneracies and improve the precision of the
+cally motivated reduction of the parameter space without de-           extracted freeze-out parameters.
+grading the fit quality. Although the central values of µS and            A variety of methodologies have been employed to ex-
+µQ are nearly identical in the two cases, their statistical inter-     tract chemical freeze-out parameters within the HRG frame-
+pretation differs: in Case I they are treated as free parameters       work, differing in fitting strategies, model assumptions, and
+sampled directly in the MCMC analysis, whereas in Case II              the choice of hadron ratios. Several studies introduce a
+they are determined implicitly from the neutrality conditions,         strangeness–saturation parameter γs to account for possible
+with their variations arising solely from fluctuations in T and        deviations from full strangeness equilibration. For example,
+µB . The slightly narrower posterior widths in Case II reflect         Refs. [14, 78] analyze a restricted subset of particle ratios while
+                                                                                                                                  10
+
+simultaneously fitting γs . In contrast, Ref. [58] examines the      ibration was performed directly in this decorrelated principal-
+sensitivity of the extracted parameters to ratio selection by        component space—rather than the raw, correlated ratio space,
+performing independent fits with nine representative ratio sets,     ensuring that only the independent degrees of freedom enter
+whereas Ref. [59] undertakes an exhaustive exploration of all        the analysis. A Gaussian Process (GP) emulator, validated
+possible hadron-ratio combinations (of order 108 ) to quantify       against full HRG calculations, provided efficient and accu-
+the systematic uncertainties associated with ratio choice.           rate predictions across the four-dimensional parameter space
+   A comparison of the extracted freeze-out parameters from          (T, µB , µS , µQ ) throughout the MCMC sampling.
+this work with previous analyses across collision energies is           An energy-dependent global Sobol sensitivity analysis was
+presented in Fig. 7. The results obtained using both fitting         performed to identify the nine algebraically independent
+strategies (Case I and Case II) show excellent overall agree-        hadron-yield ratios most sensitive to the freeze-out param-
+ment with earlier determinations based on diverse methodologi-       eters. The results show a clear transition from chemical-
+cal approaches. The mean values of the parameters extracted in       potential–dominated to temperature-controlled freeze-out with
+                                                                                  √
+this study are slightly higher than those reported in most earlier   increasing sN N . At low energies, the dominant sensitivities
+works [14, 58, 78, 85] but remain well within the correspond-        are to µB and µS , reflecting strong baryon–antibaryon asym-
+                                            √
+ing credible intervals. In particular, at sN N = 200 GeV,            metry and strangeness suppression; µB sensitivity appears
+our results show remarkable consistency with the comprehen-          in both baryon–to–meson and baryon–to–antibaryon ratios.
+sive analysis of Ref. [59], further validating the reliability of    With increasing energy, these effects weaken and temperature
+the present Bayesian–PCA calibration framework. Consistent           becomes the primary control parameter, with ratios such as
+with previous HRG-based studies, the freeze-out temperature          Λ̄/K + and Ξ̄/K + acting as effective thermal probes. By LHC
+TCF is more tightly constrained than the chemical potentials,        energies, the system is nearly matter–antimatter symmetric
+reflecting its dominant role in determining the overall hadron       and strangeness neutral, so the chemical potentials contribute
+yield distribution.                                                  only marginally. Consistently, with increasing energy, the
+   The posterior distributions show that µS and                      µB sensitivity becomes restricted to baryon–to–antibaryon ra-
+µQ —particularly µQ —exhibit broader credible inter-                 tios, while the µS sensitivity—dominated by kaon–to–pion
+vals across collision energies than µB and T . Among the             ratios—decreases more gradually as the system approaches
+chemical potentials, µQ carries the largest relative uncertainty,    global strangeness neutrality.
+reflecting its strong compensating correlations with µB and µS .        We have also performed a rigorous energy-dependent Princi-
+This trend is consistent with the very small Sobol sensitivity       pal Component Analysis (PCA) of experimental hadron-yield
+indices for µQ (Fig. 9), indicating its weak direct influence        ratios, complemented by a Sobol sensitivity analysis of the
+on the modeled observables. In comparison, Ref. [62]                 principal components. The resulting energy-wise PCA loading
+reports narrower uncertainties for µS and µQ , though the            maps and parameter sensitivities were presented to identify the
+central values remain consistent with our results. That study        dominant observables and to trace the transition from chemical-
+determines the freeze-out parameters from a reduced set of           potential–dominated to temperature-controlled freeze-out dy-
+conserved-charge observables rather than fitting the full set of     namics.
+hadron-yield ratios. The correspondingly smaller error bands            The HRG parameters were calibrated at each energy using
+likely arise from direct χ2 minimization with fixed observables      the Bayesian–PCA framework, which performs the analysis
+and a more limited treatment of uncertainties. In contrast,          entirely in decorrelated PC space to retain all experimental
+the Bayesian–PCA framework developed here propagates                 information without redundancy. Although individual ratios
+experimental correlations, emulator variance, and statistical        are not fitted directly, the reconstructed predictions agree well
+fluctuations, yielding broader but more reliable credible            with the data, with data-to-model ratios clustering around unity
+intervals that better reflect the true information content of the    for all 45 observables. The posteriors show that T is largely
+data.                                                                uncorrelated with the chemical potentials, while µB , µS , and
+                                                                     µQ exhibit strong mutual correlations arising from baryon
+                                                                     number, charge, and strangeness conservation. The broader
+            V.   SUMMARY AND CONCLUSIONS                             credible intervals for µS and especially µQ reflect their weaker
+                                                                     direct influence on the observables, consistent with their small
+   This work presents a statistically consistent, data-driven        Sobol sensitivities. The results from the unconstrained and
+framework for determining the chemical freeze-out parame-            constrained fits are in close agreement across all energies,
+ters in ultra-relativistic heavy-ion collisions using a Principal    indicating that the conservation conditions are already encoded
+Component Analysis (PCA)–based Bayesian calibration of the           in the data. The extracted freeze-out parameters are consistent
+Hadron Resonance Gas (HRG) model. The approach addresses             with previous HRG-based studies, confirming the robustness
+limitations of conventional ratio-based analyses by eliminating      of the Bayesian–PCA framework.
+redundancy among hadron ratios and ambiguities arising from             In conclusions, the PCA–Bayesian framework introduced
+arbitrary ratio selection with proper treatment of correlations.     here provides a statistically consistent method for determin-
+   Starting from the identified hadron yields at each collision      ing chemical freeze-out conditions. By working in a PCA-
+                 √
+energy—from sN N = 7.7 GeV at RHIC to 2.76 TeV at                    decorrelated space, the approach eliminates systematic un-
+the LHC—all possible yield ratios were constructed and trans-        certainties associated with ratio selection and ensures that
+formed into an orthogonal basis using PCA. The Bayesian cal-         only the independent information in the data enters the cal-
+                                                                                                                                                       11
+
+                                                                                                                                     √
+TABLE II. Posterior mean, median, and credible intervals (CI) for the calibrated freeze-out parameters at various collision energies sN N . The
+left and right tables correspond to Case I and Case II, respectively. In Case II, µS and µQ are not fitted parameters but are determined from the
+fitted T and µB using Eqs. (23)–(24). The quantity χ2 /ndf is computed by comparing the model predictions with the experimental values in
+the experimental ratio space. All quantities are in MeV.
+ Parameter Mean Median MAP          68% CI    90% CI       95% CI
+                               2                                            Parameter Mean Median    MAP           68% CI        90% CI       95% CI
+                   7.7 GeV (χ /ndf = 2.12 ± 0.77)
+                                                                                                             2
+ T          145   144   143    143–147     141–148     141–149                                 7.7 GeV (χ /ndf = 1.97 ± 0.74)
+ µB         422   421   394    409–435     402–443     399–447              T          143   143      143          141–145     140–146     139–147
+ µS          96    96    74     89–104      83–108      81–111              µB         419   419      420          407–431     398–439     396–444
+ µQ         -16   -15   -12      >-17        >-23        >-25               µS         100   100       –            93–106      92–113      88–113
+   y
+ σm        0.015 0.014 0.009 0.004–0.020 0.002–0.029 0.001–0.034            µQ         -11   -11       –           -12 – -10   -12 – -10   -12 – -10
+                                                                              y
+                                                                            σm        0.015 0.013    0.010       0.045–0.019 0.002–0.029 0.001–0.033
+                  11.5 GeV (χ2 /ndf = 1.91 ± 0.51)
+                                                                                              11.5 GeV (χ2 /ndf = 1.68 ± 0.31)
+ T          151   151   150    148–153        147–155     146–156
+ µB         307   306   292    290–321        281–331     277–336           T          150   150 148–152 147–154      146–155                 145–156
+ µS          68    66    56     56–75          50–82       49–86            µB         311   310 297–323 288–331      286–337                 279–345
+ µQ          -6    -5    -5     -8 – 4         >-17        >-22             µS          71   70   65–76    61–80       60–83                    58–89
+ σmy
+           0.005 0.001 0.001 0.001–0.002      <0.003      <0.005            µQ          -8    -8  -9– -7   -9– -7      -10—7                   -10– -7
+                                                                              y
+                                                                            σm        0.014 0.001 0.001 0.001–0.002 0.001–0.004               <0.010
+                  19.6 GeV (χ2 /ndf = 1.87 ± 0.60)
+                                                                                              19.6 GeV (χ2 /ndf = 1.60 ± 0.51)
+ T          157   157   156    154–159     152–161        152–162
+                                                                            T          156   156      156          154–158      152–160       151–161
+ µB         203   202   191    185–219     175–230        172–237
+                                                                            µB         204   204      203          194–213      189–220       186–223
+ µS          44    43    35     32–55       26–63          23–67
+                                                                            µS          47   47        –            43–50        40–53         39–54
+ µQ          -5    -3    -4      >-9        > -20          >-24
+   y
+                                                                            µQ          -6    -6       –            -6– -5       -6– -5        -6– -5
+ σm        0.020 0.019 0.033 0.003–0.029 0.002–0.037      <0.038            σmy
+                                                                                      0.020 0.020    0.003         <0.028       <0.036        < 0.038
+                   27 GeV (χ2 /ndf = 1.69 ± 0.76)                                              27 GeV (χ2 /ndf = 1.33 ± 0.48)
+ T          158   158     158    156–161      154–162     153–163           T          159   159      158          156–161      154–163       154–164
+ µB         154   153     148    136–170      126–181     122–186           µB         155   155      155          146–163      141–169       139–172
+ µS          34    33      30     20–46        13–54       10–60            µS          35   35        –            32–39        29–42         27–44
+ µQ          -2    -2      -2      >-6         >-17        >-22             µQ          -4    -4       –            -5– -4       -5– -3        -5– -3
+   y                                                                          y
+ σm        0.020 0.020    0.03 0.012–0.030    <0.035      <0.038            σm        0.020 0.021    0.002       0.013–0.039     <0.04        <0.055
+
+                   39 GeV (χ2 /ndf = 0.75 ± 0.51)                                              39 GeV (χ2 /ndf = 0.33 ± 0.23)
+
+ T          161   161   160    157–164     155–166     154–167              T         160     160     160          157–163     155–166     154–167
+ µB         108   107   102     91–123     82–133       79–139              µB        111     111     110          100–121      94–128      91–132
+ µS          23    22    18      8–32        3–40        1–43               µS         26     26       –            22–28       20–30       20–32
+ µQ          -3    -2    -2     -15–12      -21–19      -24–20              µQ         -3      -3      –            -3– -3       -4– -2      -4– -2
+                                                                              y
+   y                                                                        σm        0.03   0.020   0.021       0.001–0.027 0.003–0.036 0.001–0.038
+ σm        0.020 0.021 0.030 0.013–0.040 0.004–0.042 0.002–0.042
+                                                                                              62.4 GeV (χ2 /ndf = 1.10 ± 0.28)
+                  62.4 GeV (χ2 /ndf = 1.52 ± 0.65)
+                                                                            T          162   162      162          159–164      158–165       158–166
+ T          163   163   162    160–165     159–167     158–168
+                                                                            µB          60   60       61            52–69        46–74         43–77
+ µB          69    69    66     55–84       47–92       44–96
+                                                                            µS          14   14        –            13–16        11–17         10–17
+ µS          21    20    18     11–30        6–35        3–37
+                                                                            µQ          -2    -2       –             -2–2        -2– -1        -2– -1
+ µQ          -3    -3    -1      -9–8       >-15        >-17                σmy
+                                                                                      0.020 0.021    0.007         <0.027       <0.036        <0.038
+   y
+ σm        0.020 0.019 0.032 0.003–0.032 0.002–0.038 0.002–0.040
+                                                                                              2760 GeV (χ2 /ndf = 0.42 ± 0.17)
+                  200 GeV (χ2 /ndf = 0.52 ± 0.26)
+                                                                            T          169   169      169          166–172       164–174      164–175
+ T          169   169   169    166–172     164–174     164–175              µB          31   31        31           22–40         16–45        14–48
+ µB          29    30    26     25–39       20–40       17–40               µS           6     7        –             5–9          2–10         1–10
+ µS          7     7     4       1–9         <14         <15                µQ          -1    -1        –         -1.2 – -0.5   -1.2– -0.2    -1.3–0.0
+                                                                              y
+ µQ          -1    -1    -1     -10–2        <7          <8                 σm        0.022 0.023    0.007       0.013–0.028     <0.039       < 0.041
+   y
+ σm        0.021 0.021 0.038 0.013–0.039 0.004–0.040 0.002–0.040                              2760 GeV (χ2 /ndf = 0.55 ± 0.24)
+                                2
+                  2760 GeV (χ /ndf = 0.81 ± 0.38)                           T          155   155      155          153–157       151–159      150–160
+ T          155   155   155    152–157        151–159     150–160           µB          4     4        1           0.01– 5.0    0.01 – 8.0    0.0 –9.0
+ µB          4     4    0.1     0.01–5          0–8          0–9            µS          1    0.9       –           0.20 – 1.3 0.04 –1.71      0.0 – 1.8
+ µS        0.40 0.46 0.01 -2.0 – 3.8         -3.3 – 4.0   -5.0– 5.0         µQ         -0.1  -0.1      –         -0.16 – -0.02 -0.20 – -0.01 -0.22 – 0.0
+                                                                              y
+                                                                            σm        0.020 0.022    0.002        0.01 – 0.03 0.003– 0.04 0.002–0.04
+ µQ        -0.43 0.55   0.0    -4.0 –1.0      -5.0–3.5      < 4.2
+   y
+ σm        0.020 0.021 0.005 0.013–0.030      <0.035       <0.040
+                                                                                                                                              12
+
+ibration. The Bayesian formulation enables a transparent                   Day for her unwavering and unconditional support throughout
+and uncertainty-aware extraction of the freeze-out parameters,             this work.
+while the combined PCA loadings and Sobol sensitivity analy-
+sis offer direct physical insight into which hadron ratios, and
+which ratio combinations, are most informative across colli-                  Appendix A: Extended Energy-Dependent PCA and Sobol
+sion energies. Looking ahead, this framework can be extended                                   Sensitivity Analysis
+to centrality-dependent analyses that incorporate correlations
+between centrality bins, as well as to studies of sequential                  This appendix collects the extended figures associated with
+freeze-out, higher-order fluctuations, and interacting HRG for-            the energy-dependent PCA and the Sobol global sensitivity
+mulations, including QCD-motivated extensions of the hadron                analysis discussed in Sec. IV B.
+spectrum.                                                                     Figure 8 shows, for each collision energy, the full PCA
+                                                                           loading matrices, including all nine algebraically independent
+                                                                           hadron-yield ratios with the largest absolute loadings across the
+                 VI.   ACKNOWLEDGEMENTS                                    principal components. In addition, the corresponding energy
+                                                                           dependence of the Sobol total-effect indices for the principal-
+   The author gratefully acknowledges Deeptak Biswas and                   component amplitudes is presented in Fig. 9. For completeness
+Rajesh Biswas for their careful reading of the manuscript and              and to aid interpretation, Fig. 10 summarizes the nine alge-
+for many valuable suggestions. Support from the Department                 braically independent ratios with the largest absolute loadings
+of Physics, Amrita Vishwa Vidyapeetham, is sincerely appreci-              across all PCs at each collision energy. The detailed explana-
+ated. The author also wishes to express deep gratitude to Tanu             tions of these figures are provided in their respective captions.
+
+
+
+
+ [1] Edward V. Shuryak. Quantum Chromodynamics and the Theory                   duction in central nucleus-nucleus collisions at chemical freeze-
+     of Superdense Matter. Phys. Rept., 61:71–158, 1980.                        out. Nucl. Phys. A, 772:167–199, 2006.
+ [2] P. Braun-Munzinger, J. Stachel, J. P. Wessels, and N. Xu. Ther-       [15] F. Becattini, J. Manninen, and M. Gazdzicki. Energy and system
+     mal equilibration and expansion in nucleus-nucleus collisions at           size dependence of chemical freeze-out in relativistic nuclear
+     the AGS. Phys. Lett. B, 344:43–48, 1995.                                   collisions. Phys. Rev. C, 73:044905, 2006.
+ [3] J. Cleymans and K. Redlich. Chemical and thermal freezeout pa-        [16] A. Andronic, P. Braun-Munzinger, and J. Stachel. Thermal
+     rameters from 1-A/GeV to 200-A/GeV. Phys. Rev. C, 60:054908,               hadron production in relativistic nuclear collisions: The Hadron
+     1999.                                                                      mass spectrum, the horn, and the QCD phase transition. Phys.
+ [4] Misha A. Stephanov, K. Rajagopal, and Edward V. Shuryak.                   Lett. B, 673:142–145, 2009. [Erratum: Phys.Lett.B 678, 516
+     Signatures of the tricritical point in QCD. Phys. Rev. Lett.,              (2009)].
+     81:4816–4819, 1998.                                                   [17] A. Andronic, P. Braun-Munzinger, K. Redlich, and J. Stachel.
+ [5] Misha A. Stephanov, K. Rajagopal, and Edward V. Shuryak.                   The thermal model on the verge of the ultimate test: particle pro-
+     Event-by-event fluctuations in heavy ion collisions and the QCD            duction in Pb-Pb collisions at the LHC. J. Phys. G, 38:124081,
+     critical point. Phys. Rev. D, 60:114028, 1999.                             2011.
+ [6] Mikhail A. Stephanov. QCD Phase Diagram and the Critical              [18] V. V. Begun, M. Gazdzicki, and M. I. Gorenstein. Hadron-
+     Point. Prog. Theor. Phys. Suppl., 153:139–156, 2004.                       resonance gas at freeze-out: Reminder on the importance of
+ [7] A. Tawfik. QCD phase diagram: A Comparison of lattice                      repulsive interactions. Phys. Rev. C, 88(2):024902, 2013.
+     and hadron resonance gas model calculations. Phys. Rev. D,            [19] Anton Andronic, Peter Braun-Munzinger, Krzysztof Redlich,
+     71:054502, 2005.                                                           and Johanna Stachel. Decoding the phase structure of QCD via
+ [8] J. Cleymans, D. Elliott, H. Satz, and R. L. Thews. Thermal                 particle production at high energy. Nature, 561(7723):321–330,
+     hadron production in Si - Au collisions. Z. Phys. C, 74:319–324,           2018.
+     1997.                                                                 [20] Sandeep Chatterjee, Debadeepti Mishra, Bedangadas Mohanty,
+ [9] J. Cleymans and K. Redlich. Unified description of freezeout               and Subhasis Samanta. Freezeout systematics due to the hadron
+     parameters in relativistic heavy ion collisions. Phys. Rev. Lett.,         spectrum. Phys. Rev. C, 96(5):054907, 2017.
+     81:5284–5286, 1998.                                                   [21] Paolo Alba, Wanda Alberico, Rene Bellwied, Marcus Bluhm,
+[10] P. Braun-Munzinger, I. Heppe, and J. Stachel. Chemical equili-             Valentina Mantovani Sarti, Marlene Nahrgang, and Claudia Ratti.
+     bration in Pb + Pb collisions at the SPS. Phys. Lett. B, 465:15–20,        Freeze-out conditions from net-proton and net-charge fluctua-
+     1999.                                                                      tions at RHIC. Phys. Lett. B, 738:305–310, 2014.
+[11] P. Braun-Munzinger, D. Magestro, K. Redlich, and J. Stachel.          [22] Rama Prasad Adak, Supriya Das, Sanjay K. Ghosh, Rajarshi
+     Hadron production in Au - Au collisions at RHIC. Phys. Lett. B,            Ray, and Subhasis Samanta. Centrality dependence of chemi-
+     518:41–46, 2001.                                                           cal freeze-out parameters from net-proton and net-charge fluc-
+[12] F. Becattini, M. Gazdzicki, A. Keranen, J. Manninen, and                   tuations using a hadron resonance gas model. Phys. Rev. C,
+     R. Stock. Chemical equilibrium in nucleus nucleus collisions at            96(1):014902, 2017.
+     relativistic energies. Phys. Rev. C, 69:024905, 2004.                 [23] J. Cleymans, H. Oeschler, K. Redlich, and S. Wheaton. Com-
+[13] Peter Braun-Munzinger, Krzysztof Redlich, and Johanna Stachel.             parison of chemical freeze-out criteria in heavy-ion collisions.
+     Particle production in heavy ion collisions. pages 491–599, 4              Phys. Rev. C, 73:034905, 2006.
+     2003.                                                                 [24] S. Chatterjee, R. M. Godbole, and Sourendu Gupta. Strange
+[14] A. Andronic, P. Braun-Munzinger, and J. Stachel. Hadron pro-               freezeout. Phys. Lett. B, 727:554–557, 2013.
+                                                                                                                                               13
+
+
+
+
+FIG. 8. Energy dependence of the PCA loading matrices for hadron-yield log ratios. Each panel corresponds to a different collision energy, with
+the nine leading principal components (PCs) shown column-wise. For each PC, only the nine most significant and algebraically independent
+ratios with the largest loadings are displayed. The common color bar indicates the magnitude and sign of the loadings.
+
+
+
+
+FIG. 9. Sobol sensitivity analysis of the leading principal components (PCs) across collision energies. The color scale quantifies the fractional
+variance in each PC explained by the freeze-out parameters (T , µB , µS , and µQ ), illustrating the transition from chemical-potential– to
+temperature-dominated freeze-out.
+
+
+[25] Volodymyr Vovchenko and Horst Stöcker. Surprisingly large un-             Data. 8 2025.
+     certainties in temperature extraction from thermal fits to hadron     [30] Granddon D. Yen, Mark I. Gorenstein, Walter Greiner, and Shin-
+     yield data at LHC. J. Phys. G, 44(5):055103, 2017.                         Nan Yang. Excluded volume hadron gas model for particle
+[26] Volodymyr Vovchenko and Horst Stoecker. Examination of the                 number ratios in A+A collisions. Phys. Rev. C, 56:2210–2218,
+     sensitivity of the thermal fits to heavy-ion hadron yield data to          1997.
+     the modeling of the eigenvolume interactions. Phys. Rev. C,           [31] S. K. Tiwari, P. K. Srivastava, and C. P. Singh. Description of Hot
+     95(4):044904, 2017.                                                        and Dense Hadron Gas Properties in a New Excluded-Volume
+[27] P. Alba, V. Vovchenko, M. I. Gorenstein, and H. Stoecker. Flavor-          model. Phys. Rev. C, 85:014908, 2012.
+     dependent eigenvolume interactions in a hadron resonance gas.         [32] Dirk H. Rischke, Mark I. Gorenstein, Horst Stoecker, and Walter
+     Nucl. Phys. A, 974:22–34, 2018.                                            Greiner. Excluded volume effect for the nuclear matter equation
+[28] Paolo Alba and L. Oliva. Balance of attractive and repulsive               of state. Z. Phys. C, 51:485–490, 1991.
+     hadronic interactions: The influence of hadronic spectrum and         [33] J. Cleymans, Mark I. Gorenstein, J. Stalnacke, and E. Suhonen.
+     excluded-volume effects on lattice thermodynamics, and conse-              Excluded volume effect and the quark - hadron phase transition.
+     quences for experiments. Phys. Rev. C, 99(5):055207, 2019.                 Phys. Scripta, 48:277–280, 1993.
+[29] Nachiketa Sarkar. Bayesian Calibration of the Crossterms Eigen-       [34] A. Andronic, P. Braun-Munzinger, J. Stachel, and M. Winn.
+     volume HRG Model: Integrating Lattice QCD and Experimental                 Interacting hadron resonance gas meets lattice QCD. Phys. Lett.
+                                                                                                                                              14
+
+                                                                              interactions between baryons in a hadron gas. Phys. Rev. C,
+                                                                              97(3):035202, 2018.
+                                                                         [48] Ashutosh Dash, Subhasis Samanta, and Bedangadas Mohanty.
+                                                                              Thermodynamics of a gas of hadrons with attractive and repul-
+                                                                              sive interactions within an S -matrix formalism. Phys. Rev. C,
+                                                                              99(4):044919, 2019.
+                                                                         [49] P. Koch, Berndt Muller, and Johann Rafelski. Strangeness in
+                                                                              Relativistic Heavy Ion Collisions. Phys. Rept., 142:167–262,
+                                                                              1986.
+                                                                         [50] J. Manninen and F. Becattini. Chemical freeze-out in ultra-
+                                                                              relativistic heavy ion collisions at s(NN)**(1/2) = 130 and 200-
+                                                                              GeV. Phys. Rev. C, 78:054901, 2008.
+                                                                         [51] Deeptak Biswas. Centrality dependence of chemical freeze-out
+FIG. 10. Energy dependence of the largest loadings across all                 parameters and strangeness equilibration in RHIC and LHC
+principal components (PCs). Each column corresponds to a different            energies. Adv. High Energy Phys., 2021:6611394, 2021.
+collision energy, showing the nine algebraically independent hadron-     [52] K. A. Bugaev, D. R. Oliinychenko, J. Cleymans, A. I. Ivanytskyi,
+yield ratios with the largest absolute loadings across all PCs. These         I. N. Mishustin, E. G. Nikonov, and V. V. Sagun. Chemical
+ratios represent the most information-rich observables at each energy.        Freeze-out of Strange Particles and Possible Root of Strangeness
+                                                                              Suppression. EPL, 104(2):22002, 2013.
+                                                                         [53] Sandeep Chatterjee and Bedangadas Mohanty. Production of
+                                                                              Light Nuclei in Heavy Ion Collisions Within Multiple Freezeout
+     B, 718:80–85, 2012.                                                      Scenario. Phys. Rev. C, 90(3):034908, 2014.
+[35] Abhijit Bhattacharyya, Supriya Das, Sanjay K. Ghosh, Rajarshi       [54] Fernando Antonio Flor, Gabrielle Olinger, and Rene Bellwied.
+     Ray, and Subhasis Samanta. Fluctuations and correlations of              Flavour and Energy Dependence of Chemical Freeze-out Tem-
+     conserved charges in an excluded volume hadron resonance gas             peratures in Relativistic Heavy Ion Collisions from RHIC-BES
+     model. Phys. Rev. C, 90(3):034909, 2014.                                 to LHC Energies. Phys. Lett. B, 814:136098, 2021.
+[36] Volodymyr Vovchenko, Mark I. Gorenstein, and Horst Stoecker.        [55] Natasha Sharma, Jean Cleymans, Boris Hippolyte, and Masimba
+     van der Waals Interactions in Hadron Resonance Gas: From Nu-             Paradza. A Comparison of p-p, p-Pb, Pb-Pb Collisions in the
+     clear Matter to Lattice QCD. Phys. Rev. Lett., 118(18):182301,           Thermal Model: Multiplicity Dependence of Thermal Parame-
+     2017.                                                                    ters. Phys. Rev. C, 99(4):044914, 2019.
+[37] Nachiketa Sarkar and Premomoy Ghosh. van der Waals                  [56] Susil Kumar Panda, Sandeep Chatterjee, Ajay Kumar Dash,
+     hadron resonance gas and QCD phase diagram. Phys. Rev. C,                Bedangadas Mohanty, Rita Paikaray, Subhasis Samanta, and
+     98(1):014907, 2018.                                                      Ranbir Singh. Multiplicity dependence of freezeout scenarios in
+[38] V. Vovchenko, D. V. Anchishkin, and M. I. Gorenstein. Hadron             pp collisions at s=7 TeV. Phys. Rev. C, 104(6):064905, 2021.
+     Resonance Gas Equation of State from Lattice QCD. Phys. Rev.        [57] Fernando Antonio Flor, Gabrielle Olinger, and René Bellwied.
+     C, 91(2):024905, 2015.                                                   System size and flavour dependence of chemical freeze-out tem-
+[39] Nachiketa Sarkar and Premomoy Ghosh. Thermalization in a                 peratures in ALICE data from pp, pPb and PbPb collisions at
+     small hadron gas system and high-multiplicity pp events. Phys.           LHC energies. Phys. Lett. B, 834:137473, 2022.
+     Rev. C, 96(4):044901, 2017.                                         [58] Sumana Bhattacharyya, Deeptak Biswas, Sanjay K. Ghosh, Ra-
+[40] Jamie M. Karthein, Volker Koch, Claudia Ratti, and Volodymyr             jarshi Ray, and Pracheta Singha. Systematics of chemical freeze-
+     Vovchenko. Constraining the hadronic spectrum and repulsive              out parameters in heavy-ion collision experiments. Phys. Rev. D,
+     interactions in a hadron resonance gas via fluctuations of con-          101(5):054002, 2020.
+     served charges. Phys. Rev. D, 104(9):094009, 2021.                  [59] Sumana Bhattacharyya, Amaresh Jaiswal, and Sutanu Roy.
+[41] Jacquelyn Noronha-Hostler, Jorge Noronha, and Carsten Greiner.           Chemical freeze-out systematics of thermal model analysis using
+     Hadron Mass Spectrum and the Shear Viscosity to Entropy Den-             hadron yield ratios. Phys. Rev. C, 103(2):024905, 2021.
+     sity Ratio of Hot Hadronic Matter. Phys. Rev. C, 86:024913,         [60] F. Becattini. Remark on statistical model fits to particle ratios in
+     2012.                                                                    relativistic heavy ion collisions. 7 2007.
+[42] Nachiketa Sarkar and Premomoy Ghosh. The η/s of the LQCD-           [61] Giorgio Torrieri, S. Steinke, Wojciech Broniowski, Wojciech
+     EoS complied hadron gas of different sizes approach common               Florkowski, Jean Letessier, and Johann Rafelski. SHARE: Sta-
+     minimum near the crossover temperature. Eur. Phys. J. A,                 tistical hadronization with resonances. Comput. Phys. Commun.,
+     54(11):194, 2018.                                                        167:229–251, 2005.
+[43] M. Albright, J. Kapusta, and C. Young. Matching Excluded            [62] Sumana Bhattacharyya, Deeptak Biswas, Sanjay K. Ghosh, Ra-
+     Volume Hadron Resonance Gas Models and Perturbative QCD                  jarshi Ray, and Pracheta Singha. Novel scheme for parametrizing
+     to Lattice Calculations. Phys. Rev. C, 90(2):024915, 2014.               the chemical freeze-out surface in Heavy Ion Collision Experi-
+[44] Nachiketa Sarkar, Paramita Deb, and Premomoy Ghosh. Finite               ments. Phys. Rev. D, 100(5):054037, 2019.
+     size effect on thermodynamics of hadron gas in high-multiplicity    [63] I. T. Jolliffe and J. Cadima. Principal component analysis: A
+     events of proton-proton collisions at the LHC. 5 2019.                   review and recent developments. Philosophical Transactions of
+[45] R. Venugopalan and M. Prakash. Thermal properties of interact-           the Royal Society A: Mathematical, Physical and Engineering
+     ing hadrons. Nucl. Phys. A, 546:718–760, 1992.                           Sciences, 374(2065):20150202, 2016.
+[46] Ashutosh Dash, Subhasis Samanta, and Bedangadas Mohanty.            [64] Karl Pearson. On lines and planes of closest fit to systems of
+     Interacting hadron resonance gas model in the K -matrix formal-          points in space. Philosophical Magazine, 2(11):559–572, 1901.
+     ism. Phys. Rev. C, 97(5):055208, 2018.                              [65] F. Karsch, K. Redlich, and A. Tawfik. Thermodynamics at
+[47] Volodymyr Vovchenko, Anton Motornenko, Mark I. Gorenstein,               nonzero baryon number density: A Comparison of lattice and
+     and Horst Stoecker. Beth-Uhlenbeck approach for repulsive                hadron resonance gas model calculations. Phys. Lett. B, 571:67–
+                                                                                                                                           15
+
+     74, 2003.                                                           [75] Jonah E. Bernhard. Bayesian parameter estimation for relativis-
+[66] P. Garg, D. K. Mishra, P. K. Netrakanti, B. Mohanty, A. K. Mo-           tic heavy-ion collisions. PhD thesis, Duke U., 4 2018.
+     hanty, B. K. Singh, and N. Xu. Conserved number fluctuations        [76] Daniel Foreman-Mackey, David W. Hogg, Dustin Lang, and
+     in a hadron resonance gas model. Phys. Lett. B, 726:691–696,             Jonathan Goodman. emcee: The mcmc hammer. Publications of
+     2013.                                                                    the Astronomical Society of the Pacific, 125(925):306, feb 2013.
+[67] P. A. Zyla et al. Review of Particle Physics. PTEP,                 [77] Nachiketa Sarkar. Hepbayes: Bayesian inference frame-
+     2020(8):083C01, 2020.                                                    work for heavy-ion collisions. https://github.com/
+[68] M. D. McKay, R. J. Beckman, and W. J. Conover. A compari-                nachiketa-sarkar/HepBayes, 2025.
+     son of three methods for selecting values of input variables in     [78] L. Adamczyk et al. Bulk Properties of the Medium Produced in
+     the analysis of output from a computer code. Technometrics,              Relativistic Heavy-Ion Collisions from the Beam Energy Scan
+     21(2):239–245, 1979.                                                     Program. Phys. Rev. C, 96(4):044904, 2017.
+[69] Jonah E. Bernhard, J. Scott Moreland, Steffen A. Bass, Jia Liu,     [79] Betty Abelev et al. Centrality dependence of π, K, p produc-
+                                                                                                           √
+     and Ulrich Heinz. Applying Bayesian parameter estimation to              tion in Pb-Pb collisions at sN N = 2.76 TeV. Phys. Rev. C,
+     relativistic heavy-ion collisions: simultaneous characterization         88:044910, 2013.
+     of the initial state and quark-gluon plasma medium. Phys. Rev.      [80] Betty Bezverkhny Abelev et al. KS0 and Λ production in Pb-Pb
+                                                                                            √
+     C, 94(2):024907, 2016.                                                   collisions at sN N = 2.76 TeV. Phys. Rev. Lett., 111:222301,
+[70] S. Cao et al. Determining the jet transport coefficient ∩q from          2013.
+     inclusive hadron suppression measurements using Bayesian pa-        [81] Betty Bezverkhny Abelev et al. Multi-strange baryon production
+                                                                                                                     √
+     rameter estimation. Phys. Rev. C, 104(2):024905, 2021.                   at mid-rapidity in Pb-Pb collisions at sN N = 2.76 TeV. Phys.
+[71] Jonah E. Bernhard, J. Scott Moreland, and Steffen A. Bass.               Lett. B, 728:216–227, 2014. [Erratum: Phys.Lett.B 734, 409–
+     Bayesian estimation of the specific shear and bulk viscosity of          410 (2014)].
+     quark–gluon plasma. Nature Phys., 15(11):1113–1117, 2019.           [82] F. Becattini, Eduardo Grossi, Marcus Bleicher, Jan Steinheimer,
+[72] S. Wesolowski, N. Klco, R. J. Furnstahl, D. R. Phillips, and             and Reinhard Stock. Centrality dependence of hadronization
+     A. Thapaliya. Bayesian parameter estimation for effective field          √ chemical freeze-out conditions in heavy ion collisions at
+                                                                              and
+     theories. J. Phys. G, 43(7):074001, 2016.                                   sN N = 2.76 TeV. Phys. Rev. C, 90(5):054907, 2014.
+[73] Govert Nijs, Wilke van der Schee, Umut Gürsoy, and Raimond         [83] I. M. Sobol. Sensitivity estimates for nonlinear mathematical
+     Snellings. Bayesian analysis of heavy ion collisions with the            models. Mathematical Modelling and Computational Experi-
+     heavy ion computational framework Trajectum. Phys. Rev. C,               ments, 1:407–414, 1993.
+     103(5):054909, 2021.                                                [84] A. Saltelli. Making best use of model evaluations to compute sen-
+[74] J. E. Parkkila, A. Onnerstad, S. F. Taghavi, C. Mordasini, A. Bi-        sitivity indices. Computer Physics Communications, 145:280–
+     landzic, M. Virta, and D. J. Kim. New constraints for QCD                297, 2002.
+     matter from improved Bayesian parameter estimation in heavy-        [85] V. Vovchenko, V. V. Begun, and M. I. Gorenstein. Hadron multi-
+     ion collisions at LHC. Phys. Lett. B, 835:137485, 2022.                  plicities and chemical freeze-out conditions in proton-proton and
+                                                                              nucleus-nucleus collisions. Phys. Rev. C, 93(6):064906, 2016.
+

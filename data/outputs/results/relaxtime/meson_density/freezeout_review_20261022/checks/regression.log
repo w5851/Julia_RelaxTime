@@ -1,0 +1,6 @@
+[regression] 预期可选跳过项（用于解释 summary 中的 Broken 计数）:
+  - tau xi probe regression fixtures
+    file: tests/regression/relaxtime/test_tau_xi_probe_regression.jl
+    reason: 缺少 data/outputs/results/relaxtime/scan/_xi_probe_T190_summary.csv 或 _xi_probe_T200_summary.csv 时会触发 @test_skip
+Test Summary: | Pass  Total     Time
+Regression    |  341    341  6m59.5s

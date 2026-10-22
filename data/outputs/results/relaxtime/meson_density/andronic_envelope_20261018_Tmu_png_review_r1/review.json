@@ -1,0 +1,37 @@
+{
+  "schema": "andronic_png_review_v1",
+  "checked_utc": "2026-10-18T06:44:57.993686+00:00",
+  "status": "agent_review_passed",
+  "author_review": "pending",
+  "delivery_stage": "png_review",
+  "manifest": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_png_review_r1\\plot_manifest.json",
+    "sha256": "a2dd8fb9fd49eb96ca6bb2d345b0528cb587d19af388e8084f8092aa4b3c1df9",
+    "bytes": 22014
+  },
+  "images": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_png_review_r1\\chemical_freezeout_T_muB_band.png",
+      "sha256": "f506045228b6da9d52aa8c9001490b97fc6d685c7d06b7395ae2c8355d1166d5",
+      "bytes": 452613
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_png_review_r1\\chemical_freezeout_T_muB_band_gray.png",
+      "sha256": "c6e579cd75606c48b502af525a3d0e92a205404c89be5dc891962760fb3775ec",
+      "bytes": 418151
+    }
+  ],
+  "actual_visual_inspection": true,
+  "checks": {
+    "labels_readable": true,
+    "legend_inside_panel": true,
+    "no_clipping": true,
+    "no_data_occlusion": true,
+    "grayscale_line_and_marker_encodings_distinguishable": true,
+    "gray_band_members": 42,
+    "near_best_members": 10,
+    "original_2018_ratio_gap_retained": true
+  },
+  "manuscript_eligible": false,
+  "vector_delivery_pending": true
+}

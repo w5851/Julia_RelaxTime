@@ -1,0 +1,10 @@
+profile_name = "andronic_sample_030"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:andronic_sample_030"
+
+[coefficients]
+T_lim_GeV = 0.1610423957181799
+log_offset = 2.709757845179747
+log_width = 0.44724329926329975
+d_GeV = 1.2141438348252072
+e_GeV_inv1 = 0.31384716393386125

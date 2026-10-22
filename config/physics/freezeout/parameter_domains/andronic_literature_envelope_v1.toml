@@ -1,0 +1,64 @@
+schema = "chemical_freezeout_andronic_envelope_v1"
+family = "andronic_logistic_rational_v1"
+parameter_order = ["T_lim_GeV", "log_offset", "log_width", "d_GeV", "e_GeV_inv1"]
+formula = "x=sqrt_s_NN_GeV; T=T_lim_GeV/(1+exp(log_offset-log(x)/log_width)); muB=d_GeV/(1+e_GeV_inv1*x)"
+policy = "closed coordinate box of the three selected literature central parameter groups; exploratory domain, not a confidence region"
+author_decision = "Exclude Yu 2025 Set I (hadrons without light nuclei); use the coordinate minima/maxima of Andronic 2009, Andronic 2018 and Yu 2025 Set II for this stage."
+selection_status = "author_selected_for_research"
+cross_source_combinations = true
+expand_by_reported_errors = false
+same_parameters_at_all_energies = true
+source_manifest = "data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json"
+report = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md"
+
+[bounds]
+T_lim_GeV = [0.1535, 0.164]
+log_offset = [2.60, 2.82]
+log_width = [0.40, 0.45]
+d_GeV = [1.303, 1.3568]
+e_GeV_inv1 = [0.286, 0.326]
+
+[comparison]
+primary_energies_GeV = [7.7, 11.5, 14.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+baseline_profile = "config/physics/freezeout/andronic2018.toml"
+baseline_standard_manifest = "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json"
+baseline_fine_manifest = "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json"
+baseline_policy = "Reuse the completed Andronic 2018 trajectories and ratios; preserve failed coordinates. Recalculate only if the numerical or physics contract changes."
+workflow_reference = "docs/guides/scripts/meson_freezeout_comparison.md"
+
+[[sources]]
+id = "andronic2009"
+values = [0.164, 2.60, 0.45, 1.303, 0.286]
+url = "https://arxiv.org/abs/0901.2909"
+locator = "Acta Phys. Pol. B 40, 1005: p.1008 Eq.(1), muB footnote on preceding page; same fit as arXiv:0812.1186"
+
+[[sources]]
+id = "andronic2018"
+values = [0.1584, 2.60, 0.45, 1.3075, 0.288]
+url = "https://arxiv.org/abs/1710.09425v2"
+locator = "Nature 561, 321 (2018), Fig.3 caption; preprint PDF p.6"
+
+[[sources]]
+id = "yu2025_set_ii"
+values = [0.1535, 2.82, 0.40, 1.3568, 0.326]
+url = "https://arxiv.org/abs/2403.16548v3"
+locator = "Eq.(5), Table 4 Set II; preprint PDF pp.6-7; hadrons and light nuclei together"
+
+[[excluded_sources]]
+id = "yu2025_set_i"
+reason = "Excluded by the author for this stage because its parameter group differs strongly from the other selected groups."
+
+[[excluded_sources]]
+id = "yu2025_set_iii"
+reason = "Light-nuclei-only fit; outside the selected common hadron freeze-out domain."
+
+[[context_only_sources]]
+id = "du2024"
+reason = "Hydrodynamic comparison with changed overall scales; not one of the three author-selected groups."
+
+[[context_only_sources]]
+id = "andronic2026_v2"
+values = [0.1566, 2.20, 0.48, 1.3075, 0.288]
+url = "https://arxiv.org/abs/2606.14799v2"
+locator = "PDF p.9 Eq.(6)"
+reason = "Newly found author-team update; log_offset and log_width lie outside the selected box. Retain as a separate literature reference without changing this stage's bounds."

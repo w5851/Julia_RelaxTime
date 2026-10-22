@@ -1,0 +1,10 @@
+Sysimage or metadata missing; falling back to plain julia --project=.
+Test Summary:                                        | Pass  Total   Time
+q0 chemical freezeout comparison inputs and dispatch |   23     23  22.3s
+andronic2018 sqrt(s)=200 T=158.3836 muB=22.3123 K/pi=0.2742722 screened (46.37 s)
+Test Summary:                                                             | Pass  Total     Time
+relative profile directory retains its source and snapshots inside output |    6      6  1m15.2s
+cleymans2006 sqrt(s)=200 T=165.9231 muB=23.5252 K/pi=0.2986818 screened (1.56 s)
+andronic2018 sqrt(s)=200 T=158.3836 muB=22.3123 K/pi=0.2742722 screened (2.53 s)
+Test Summary:                                                 | Pass  Total  Time
+real q0 run, frozen source, CSV, resume and failure semantics |   42     42  9.6s

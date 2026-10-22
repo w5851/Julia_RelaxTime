@@ -1,0 +1,10 @@
+profile_name = "yu2025_set_ii"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:yu2025_set_ii"
+
+[coefficients]
+T_lim_GeV = 0.1535
+log_offset = 2.82
+log_width = 0.4
+d_GeV = 1.3568
+e_GeV_inv1 = 0.326

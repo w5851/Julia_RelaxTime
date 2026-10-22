@@ -1,0 +1,10 @@
+profile_name = "hybrid_a147_ihrg2019"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cross_literature_exploration:hybrid_a147_ihrg2019"
+
+[coefficients]
+a_GeV = 0.147
+b_GeV_inv1 = 0.026
+c_GeV_inv3 = 0.219
+d_GeV = 1.31
+e_GeV_inv1 = 0.278

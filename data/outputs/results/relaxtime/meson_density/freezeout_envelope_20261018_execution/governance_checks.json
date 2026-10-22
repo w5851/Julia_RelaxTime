@@ -1,0 +1,44 @@
+[
+  {
+    "name": "implementation_ledger",
+    "command": "julia --startup-file=no --project=. scripts/dev/check_task_ledger.jl",
+    "workdir": "D:\\w\\meson-freezeout-defaults",
+    "exit_code": 0,
+    "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml\n"
+  },
+  {
+    "name": "root_ledger",
+    "command": "julia --startup-file=no --project=. scripts/dev/check_task_ledger.jl",
+    "workdir": "D:\\Desktop\\Julia_RelaxTime",
+    "exit_code": 0,
+    "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml\n"
+  },
+  {
+    "name": "implementation_docs",
+    "command": "julia --startup-file=no --project=. scripts/dev/check_docs_consistency.jl",
+    "workdir": "D:\\w\\meson-freezeout-defaults",
+    "exit_code": 0,
+    "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突\n"
+  },
+  {
+    "name": "root_docs",
+    "command": "julia --startup-file=no --project=. scripts/dev/check_docs_consistency.jl",
+    "workdir": "D:\\Desktop\\Julia_RelaxTime",
+    "exit_code": 0,
+    "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突\n"
+  },
+  {
+    "name": "implementation_diff",
+    "command": "git diff --check",
+    "workdir": "D:\\w\\meson-freezeout-defaults",
+    "exit_code": 0,
+    "output": ""
+  },
+  {
+    "name": "root_scoped_diff",
+    "command": "git diff --check -- config/governance/task_tracks.toml docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/parameter_envelope_handoff.md",
+    "workdir": "D:\\Desktop\\Julia_RelaxTime",
+    "exit_code": 0,
+    "output": ""
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "reason": "Preserve the exact notes checked during the completed domain-v2 validation before updating current-state summaries for the new numerical study",
+  "snapshots": [
+    {
+      "previous_current_path": "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md",
+      "preserved_snapshot": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/source_snapshot/previous_research_notes/andronic_family_20261018.md",
+      "sha256": "03cdd003546c2fbab6b0700cd58e17254288285990b793132ff40b43f8f76a14"
+    },
+    {
+      "previous_current_path": "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
+      "preserved_snapshot": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/source_snapshot/previous_research_notes/README.md",
+      "sha256": "fc69a065caa30b186f166399a5492608b1855fae8539e22f1377ede0e8a3fe40"
+    }
+  ]
+}

@@ -1,0 +1,723 @@
+{
+  "schema": "freezeout_envelope_review_v1",
+  "family": "andronic_logistic_rational_v1",
+  "parameter_order": [
+    "T_lim_GeV",
+    "log_offset",
+    "log_width",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "best_selected": "andronic_local_T_lim_GeV_minus",
+  "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
+  "selected_parameters": {
+    "T_lim_GeV": 0.15450868637489545,
+    "log_offset": 2.718417742065884,
+    "log_width": 0.47150281506186065,
+    "d_GeV": 1.1184781730770237,
+    "e_GeV_inv1": 0.31049824162389916
+  },
+  "selected_fine_ranking": [
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_log_offset_plus"
+  ],
+  "selected_standard_ranking": [
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_log_offset_plus"
+  ],
+  "selected_ranking_stable": true,
+  "selected_count": 3,
+  "fine_complete_band_members": [
+    "andronic_local_T_lim_GeV_minus",
+    "andronic_local_d_GeV_minus",
+    "andronic_local_log_offset_plus"
+  ],
+  "improvement_vs_andronic_fraction": 0.3245817510358775,
+  "best_previous_default": "frg2024_muindep",
+  "improvement_vs_best_previous_default_fraction": 0.18806394666227488,
+  "maximum_standard_fine_relative_difference": 5.930043745662205e-05,
+  "metrics": {
+    "metric": "equal-weight RMSE at nine Au+Au observations, 7.7-200 GeV",
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "observation_count": 9,
+    "profiles": {
+      "andronic2018": {
+        "count": 9,
+        "rmse": 0.15402462505033582,
+        "mae": 0.1516632813592216,
+        "mean_signed_bias": 0.1516632813592216,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.15230022100728416,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.12533577465793092,
+          "mae": 0.12485946206377563,
+          "mean_signed_bias": 0.12485946206377563
+        },
+        "ratio_7p7": 0.3898807630863314,
+        "ratio_200": 0.2745059011773912,
+        "failed_all_energies": [
+          17.27
+        ],
+        "sampled_horn": {
+          "energy_GeV": 9.25,
+          "ratio": 0.3954858274379151,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 22
+        },
+        "horn_three_point_difference_rmse": 0.040438327309995595,
+        "horn_rises_then_falls": true
+      },
+      "cleymans2006": {
+        "count": 9,
+        "rmse": 0.18290768011440542,
+        "mae": 0.18074620745593592,
+        "mean_signed_bias": 0.18074620745593592,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.1816474075365763,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.15347548033955244,
+          "mae": 0.15284505515811392,
+          "mean_signed_bias": 0.15284505515811392
+        },
+        "ratio_7p7": 0.41539335661986543,
+        "ratio_200": 0.2989101376127549,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 9.5,
+          "ratio": 0.4197915461252066,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 22
+        },
+        "horn_three_point_difference_rmse": 0.024189458818695685,
+        "horn_rises_then_falls": false
+      },
+      "frg2024_mudep": {
+        "count": 9,
+        "rmse": 0.1428899308239018,
+        "mae": 0.14014595641435268,
+        "mean_signed_bias": 0.14014595641435268,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.1381993126508905,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.1129189373702983,
+          "mae": 0.11249962314639361,
+          "mean_signed_bias": 0.11249962314639361
+        },
+        "ratio_7p7": 0.3986698577606584,
+        "ratio_200": 0.26349616709429297,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.3986698577606584,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "frg2024_muindep": {
+        "count": 9,
+        "rmse": 0.12812713774834875,
+        "mae": 0.12657892319877803,
+        "mean_signed_bias": 0.12657892319877803,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.12919010207050483,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.1091746829077287,
+          "mae": 0.10878959143862468,
+          "mean_signed_bias": 0.10878959143862468
+        },
+        "ratio_7p7": 0.341982903487295,
+        "ratio_200": 0.2604465953575071,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 11.5,
+          "ratio": 0.35389536601353927,
+          "peak_at_grid_boundary": false,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "functional_qcd2026_mean": {
+        "count": 9,
+        "rmse": 0.13794450993119048,
+        "mae": 0.13671491083098433,
+        "mean_signed_bias": 0.13671491083098433,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.13776781279219819,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.11942435645938387,
+          "mae": 0.11904946210628692,
+          "mean_signed_bias": 0.11904946210628692
+        },
+        "ratio_7p7": 0.3620500213456655,
+        "ratio_200": 0.2702260039673215,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.3620500213456655,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "ihrg2019": {
+        "count": 9,
+        "rmse": 0.14084092130280762,
+        "mae": 0.1361325286085328,
+        "mean_signed_bias": 0.1361325286085328,
+        "role": "published_default",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.13176573934924915,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10280878628681635,
+          "mae": 0.10241625959156275,
+          "mean_signed_bias": 0.10241625959156275
+        },
+        "ratio_7p7": 0.42176733908599545,
+        "ratio_200": 0.2543861612182271,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 7.7,
+          "ratio": 0.42176733908599545,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 3
+        },
+        "horn_three_point_difference_rmse": null,
+        "horn_rises_then_falls": null
+      },
+      "andronic_local_T_lim_GeV_minus": {
+        "count": 9,
+        "rmse": 0.10403104254885334,
+        "mae": 0.10150122531092512,
+        "mean_signed_bias": 0.10150122531092512,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.10939746113336256,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10502146847848166,
+          "mae": 0.1048436372269104,
+          "mean_signed_bias": 0.1048436372269104
+        },
+        "ratio_7p7": 0.2634392231738338,
+        "ratio_200": 0.260274427090318,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.30701768160377896,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.07251045252975095,
+        "horn_rises_then_falls": false
+      },
+      "andronic_local_d_GeV_minus": {
+        "count": 9,
+        "rmse": 0.10544342517550187,
+        "mae": 0.10286822777901722,
+        "mean_signed_bias": 0.10286822777901722,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.11089320852613048,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10659645892976646,
+          "mae": 0.10642018122104077,
+          "mean_signed_bias": 0.10642018122104077
+        },
+        "ratio_7p7": 0.2637659668937197,
+        "ratio_200": 0.2618234861076831,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.308404088285822,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.07363174012386144,
+        "horn_rises_then_falls": false
+      },
+      "andronic_local_log_offset_plus": {
+        "count": 9,
+        "rmse": 0.10556149144750063,
+        "mae": 0.10284274349005203,
+        "mean_signed_bias": 0.10284274349005203,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.11110094723840712,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10682692196406113,
+          "mae": 0.10664566302685596,
+          "mean_signed_bias": 0.10664566302685596
+        },
+        "ratio_7p7": 0.2619643919017747,
+        "ratio_200": 0.26191670232267744,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.30854379676828336,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 25
+        },
+        "horn_three_point_difference_rmse": 0.0749009632187997,
+        "horn_rises_then_falls": false
+      }
+    },
+    "ranking": [
+      "andronic_local_T_lim_GeV_minus",
+      "andronic_local_d_GeV_minus",
+      "andronic_local_log_offset_plus",
+      "frg2024_muindep",
+      "functional_qcd2026_mean",
+      "ihrg2019",
+      "frg2024_mudep",
+      "andronic2018",
+      "cleymans2006"
+    ],
+    "best_sampled": "andronic_local_T_lim_GeV_minus",
+    "near_best_profiles": [
+      "andronic_local_T_lim_GeV_minus",
+      "andronic_local_d_GeV_minus",
+      "andronic_local_log_offset_plus"
+    ],
+    "near_best_factor": 1.1,
+    "failures_policy": "incomplete candidate is ineligible; never shrink the experimental set",
+    "optimization_scope": "finite sampled exploration, not proof of a global optimum"
+  },
+  "standard_metrics": {
+    "metric": "equal-weight RMSE at nine Au+Au observations, 7.7-200 GeV",
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "observation_count": 9,
+    "profiles": {
+      "andronic_local_T_lim_GeV_minus": {
+        "count": 9,
+        "rmse": 0.10402221343011389,
+        "mae": 0.10149208639951612,
+        "mean_signed_bias": 0.10149208639951612,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.10938851192236629,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10501330285990358,
+          "mae": 0.10483547120979614,
+          "mean_signed_bias": 0.10483547120979614
+        },
+        "ratio_7p7": 0.26342856070847714,
+        "ratio_200": 0.26026658646579215,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.30700767303039356,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.07250980949196809,
+        "horn_rises_then_falls": false
+      },
+      "andronic_local_d_GeV_minus": {
+        "count": 9,
+        "rmse": 0.10543461384833155,
+        "mae": 0.10285910631536815,
+        "mean_signed_bias": 0.10285910631536815,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.11088427454398272,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.1065883051500452,
+          "mae": 0.10641202721612442,
+          "mean_signed_bias": 0.10641202721612442
+        },
+        "ratio_7p7": 0.2637553461434493,
+        "ratio_200": 0.26181565657481926,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.3083940968041953,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.07363105028255792,
+        "horn_rises_then_falls": false
+      },
+      "andronic_local_log_offset_plus": {
+        "count": 9,
+        "rmse": 0.10555267894217461,
+        "mae": 0.10283360510449674,
+        "mean_signed_bias": 0.10283360510449674,
+        "role": "local_exploration",
+        "failed_required_energies": [],
+        "complete_primary": true,
+        "eight_point_rmse": 0.11109199726298229,
+        "high_energy": {
+          "count": 4,
+          "rmse": 0.10681876057095502,
+          "mae": 0.10663750154800394,
+          "mean_signed_bias": 0.10663750154800394
+        },
+        "ratio_7p7": 0.26195375701509893,
+        "ratio_200": 0.2619088700862824,
+        "failed_all_energies": [],
+        "sampled_horn": {
+          "energy_GeV": 14.5,
+          "ratio": 0.3085337743956987,
+          "peak_at_grid_boundary": true,
+          "complete": true,
+          "support_count": 15
+        },
+        "horn_three_point_difference_rmse": 0.07490024758393887,
+        "horn_rises_then_falls": false
+      }
+    },
+    "ranking": [
+      "andronic_local_T_lim_GeV_minus",
+      "andronic_local_d_GeV_minus",
+      "andronic_local_log_offset_plus"
+    ],
+    "best_sampled": "andronic_local_T_lim_GeV_minus",
+    "near_best_profiles": [
+      "andronic_local_T_lim_GeV_minus",
+      "andronic_local_d_GeV_minus",
+      "andronic_local_log_offset_plus"
+    ],
+    "near_best_factor": 1.1,
+    "failures_policy": "incomplete candidate is ineligible; never shrink the experimental set",
+    "optimization_scope": "finite sampled exploration, not proof of a global optimum"
+  },
+  "physics_checks": [
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 16,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 15,
+      "changed": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 17,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    },
+    {
+      "identical_source_count": 19,
+      "changed": [],
+      "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+    }
+  ],
+  "standard_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_standard",
+      "scan_identity": "ac49dc4d84cca2bb69ca171c6c79c34e230b1f1c526b7f6299e5e3cdf7401c0f",
+      "manifest_sha256": "aa8f37a02e9ca9ddee6d20cf5948167a9a39b3155b25a6bbbf4e17cf3163899c",
+      "point_count": 66,
+      "successful_points": 66,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 19
+    }
+  ],
+  "fine_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_fine_0",
+      "scan_identity": "000cc88876d02c8dc7722d94d78dc2799061de53f6bdc813d8617da433550fb3",
+      "manifest_sha256": "bde8f30987bd367017788c889697830763bcc1d56f3d555f463a53193c22f3e1",
+      "point_count": 40,
+      "successful_points": 40,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 17
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_fine_1",
+      "scan_identity": "22682c82831fbf31577b425595527ed9f2ba7f89c26542da0497ae1123d59a7c",
+      "manifest_sha256": "49a1262fbc3c093b69ea1473108b8e4445e08b264ec2d7d1bffc7c732535a1ec",
+      "point_count": 80,
+      "successful_points": 80,
+      "warning_points": 0,
+      "snapshot_hashes_checked": 18
+    }
+  ],
+  "baseline_inputs": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_defaults_20261017_fine",
+      "scan_identity": "dea79282e3dcfeb63634801bcb58b65691e0946ceb127326c8b9bb2a3d4b5544",
+      "manifest_sha256": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8",
+      "point_count": 100,
+      "successful_points": 99,
+      "warning_points": 61,
+      "snapshot_hashes_checked": 18
+    },
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_literature_candidates_20261017_fine",
+      "scan_identity": "5fdbc2442d03672e12a456954c6f3d148bcd84481be92c06b0cec038d97b8afa",
+      "manifest_sha256": "20ae11fc6ab17544b2f31e6865df81ef0570ac85ef060901ba9f2c08e2a597b9",
+      "point_count": 36,
+      "successful_points": 36,
+      "warning_points": 12,
+      "snapshot_hashes_checked": 20
+    }
+  ],
+  "screen_assessment": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_all_screen_assessment_r2\\assessment.json",
+    "sha256": "c39ba64514c9bb451ff97c5e133402941e6f02fd8c2bcdd753d57f04061f20f7"
+  },
+  "design_input": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_selected_design\\design.json",
+    "sha256": "12c2bcda69999616cfce6ce5705f9b9b297bc1c813579c1d974cf7fda148169e"
+  },
+  "sampled_design_inputs": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_design\\design.json",
+      "sha256": "76d960045c2679fe2ea98a673b480063df8af4258af4e0bad1a618b835f7aad0"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_local_design\\design.json",
+      "sha256": "3fbb57d9cf720502ebb18d77b74441f70fe4820afa0189e0772c125b5f272308"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_mapping_design\\design.json",
+      "sha256": "35473252108b0f58670e602fa787c46da3045b9596ab0cc5d11d1a19ad39c5cd"
+    }
+  ],
+  "near_best_parameter_sets": [
+    {
+      "profile": "andronic_local_T_lim_GeV_minus",
+      "T_lim_GeV": 0.15450868637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10376363854775611
+    },
+    {
+      "profile": "andronic_local_d_GeV_minus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1031381730770238,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.1051767932716614
+    },
+    {
+      "profile": "andronic_local_log_offset_plus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.749417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10529474092548598
+    },
+    {
+      "profile": "andronic_local_e_GeV_inv1_plus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31249824162389916,
+      "screening_rmse": 0.10568654833488475
+    },
+    {
+      "profile": "andronic_sample_022",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10601167194977319
+    },
+    {
+      "profile": "andronic_local_e_GeV_inv1_minus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.30849824162389916,
+      "screening_rmse": 0.10634236389833994
+    },
+    {
+      "profile": "andronic_local_log_offset_minus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.687417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10673354645934745
+    },
+    {
+      "profile": "andronic_local_d_GeV_plus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1338181730770236,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10686269584079826
+    },
+    {
+      "profile": "andronic_local_log_width_minus",
+      "T_lim_GeV": 0.15503368637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.46750281506186064,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10707498208993994
+    },
+    {
+      "profile": "andronic_local_T_lim_GeV_plus",
+      "T_lim_GeV": 0.15555868637489545,
+      "log_offset": 2.718417742065884,
+      "log_width": 0.47150281506186065,
+      "d_GeV": 1.1184781730770237,
+      "e_GeV_inv1": 0.31049824162389916,
+      "screening_rmse": 0.10827054547243144
+    }
+  ],
+  "experiment": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261018\\experimental_ratios.csv",
+    "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50"
+  },
+  "analysis_sources": [
+    {
+      "path": "scripts/analysis/relaxtime/summarize_freezeout_envelope.py",
+      "sha256": "f95f9a220ef9311491962f19ab207b88f8ee44137c8b2cc4ccd9ba53ea7c310c"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/freezeout_parameter_envelope.py",
+      "sha256": "93cfa87ff7e36879819e2aef5a7041e5c49cf6c0bb417cbbfcdcd165246e2422"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/plot_freezeout_comparison.py",
+      "sha256": "f40601e3460c43be3c449d1b31db2b46c60a3ca8a09150076835037adfd21ca8"
+    }
+  ],
+  "limitations": [
+    "best among sampled/selected curves; no global optimum guarantee",
+    "screening band has not been uniformly recomputed at fine resolution",
+    "source-specific covariance relaxed by author-approved exploration; no confidence level",
+    "low-energy extensions do not reproduce each source paper's validity range",
+    "fixed finite integration window; no endpoint/tail limit certification",
+    "no final-state decay or rapidity-acceptance model"
+  ],
+  "other_family_comparison": {
+    "summary_path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_summary\\summary.json",
+    "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db",
+    "family": "cleymans_polynomial_rational_v1",
+    "best_selected": "hornmap_001",
+    "selected_parameters": {
+      "a_GeV": 0.14564421970002192,
+      "b_GeV_inv1": 0.10364148726030518,
+      "c_GeV_inv3": 0.5463741671473763,
+      "d_GeV": 0.7304851722505652,
+      "e_GeV_inv1": 0.273
+    },
+    "rmse": 0.0691043230271594,
+    "this_family_rmse": 0.10403104254885334,
+    "relative_rmse_change": 0.5054201820046345,
+    "fine_inputs": [
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_0",
+        "scan_identity": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
+        "manifest_sha256": "0ddedde997c96672a1c50704090e672dbec10f9e3cccc1e3901c6b0e1068f556",
+        "point_count": 40,
+        "successful_points": 40,
+        "warning_points": 0,
+        "snapshot_hashes_checked": 17
+      },
+      {
+        "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_fine_1",
+        "scan_identity": "9623b22537b4e6ab6245dee79055219be26561047f0c3a89417e53e8557f40e0",
+        "manifest_sha256": "e5612ca16571231aefee27ff2933ae9bafe5f81086b50a754390eb488165562c",
+        "point_count": 80,
+        "successful_points": 80,
+        "warning_points": 0,
+        "snapshot_hashes_checked": 18
+      }
+    ],
+    "physics_checks": [
+      {
+        "identical_source_count": 16,
+        "changed": [],
+        "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+      },
+      {
+        "identical_source_count": 16,
+        "changed": [],
+        "allowed_runner_difference": "explicit parameter-policy metadata and safe profile snapshot paths; older defaults also had a CLI default-energy change; all runs supply energies explicitly"
+      }
+    ],
+    "interpretation": "Matched fine resolution and fixed nine observations; finite sampled family minima, not global optima"
+  }
+}

@@ -1,0 +1,309 @@
+{
+  "schema": "andronic_selected_domain_validation_v2",
+  "checked_utc": "2026-10-18T05:25:32.960535+00:00",
+  "status": "passed",
+  "scope": "v2 source coefficients, units, coordinate extrema, analytic trajectories, PDF integrity and historical preservation; no new density scan",
+  "head": "698feaf8fada670fde81c93bab6093b50093935f",
+  "domain": "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml",
+  "domain_sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b",
+  "recent_source_manifest": "data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json",
+  "recent_source_manifest_sha256": "633b8cd7daf698a5d7c01ffb9d0e20b74d19d91c65d5125ec5169b728e014666",
+  "full_source_ids": [
+    "andronic2009",
+    "andronic2018",
+    "yu2025_set_ii",
+    "elfner_muller2023",
+    "du2024",
+    "andronic2026_v2"
+  ],
+  "full_source_records": 6,
+  "distinct_full_center_groups": 5,
+  "partial_source_ids": [
+    "thakur_hirono2022"
+  ],
+  "partial_source_contributes_no_D_or_E": true,
+  "full_source_MeV_to_GeV_conversions_match_manifest": true,
+  "bounds_GeV_configuration": {
+    "T_lim_GeV": [
+      0.1535,
+      0.164
+    ],
+    "log_offset": [
+      2.2,
+      2.82
+    ],
+    "log_width": [
+      0.4,
+      0.48
+    ],
+    "d_GeV": [
+      1.05,
+      1.3568
+    ],
+    "e_GeV_inv1": [
+      0.286,
+      0.326
+    ]
+  },
+  "bounds_equal_provided_center_coordinate_extrema": true,
+  "extrema_sources": {
+    "T_lim_GeV": {
+      "minimum": [
+        "yu2025_set_ii"
+      ],
+      "maximum": [
+        "andronic2009"
+      ]
+    },
+    "log_offset": {
+      "minimum": [
+        "andronic2026_v2"
+      ],
+      "maximum": [
+        "yu2025_set_ii"
+      ]
+    },
+    "log_width": {
+      "minimum": [
+        "yu2025_set_ii"
+      ],
+      "maximum": [
+        "andronic2026_v2"
+      ]
+    },
+    "d_GeV": {
+      "minimum": [
+        "du2024"
+      ],
+      "maximum": [
+        "yu2025_set_ii"
+      ]
+    },
+    "e_GeV_inv1": {
+      "minimum": [
+        "andronic2009"
+      ],
+      "maximum": [
+        "yu2025_set_ii"
+      ]
+    }
+  },
+  "baseline_profile_exactly_matches_selected_2018_anchor": true,
+  "comparison_contract_unchanged": true,
+  "primary_energy_count": 9,
+  "corner_count": 32,
+  "corner_and_distinct_full_center_points_checked": 333,
+  "partial_temperature_points_checked": 9,
+  "analytic_checks": [
+    "finite positive T and muB",
+    "T strictly increases and muB strictly decreases on primary energy grid",
+    "direct logistic versus logit identity",
+    "32 corner extrema equal monotonic closed-form extrema at each primary energy"
+  ],
+  "maximum_logit_roundoff": 2.8812507935072063e-12,
+  "analytic_coordinate_ranges": [
+    {
+      "sqrt_s_NN_GeV": 7.7,
+      "T_MeV": [
+        123.92011015665356,
+        155.47151522539465
+      ],
+      "muB_MeV": [
+        299.12825480029625,
+        423.7087002685654
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 11.5,
+      "T_MeV": [
+        139.10336759890822,
+        160.76485045930494
+      ],
+      "muB_MeV": [
+        221.09917877447882,
+        316.3441361622756
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 14.5,
+      "T_MeV": [
+        144.28660317281017,
+        162.17188538619655
+      ],
+      "muB_MeV": [
+        183.34206390780514,
+        263.6098698270838
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 19.6,
+      "T_MeV": [
+        148.44100583192548,
+        163.1343286552608
+      ],
+      "muB_MeV": [
+        142.09158817797984,
+        205.4014775342134
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 27.0,
+      "T_MeV": [
+        150.86195423081222,
+        163.6101937405208
+      ],
+      "muB_MeV": [
+        107.12099571516018,
+        155.56065122678285
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 39.0,
+      "T_MeV": [
+        152.26238621141673,
+        163.8443254040425
+      ],
+      "muB_MeV": [
+        76.56409508531428,
+        111.634029948988
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 62.4,
+      "T_MeV": [
+        153.0327740082745,
+        163.95189360388406
+      ],
+      "muB_MeV": [
+        49.197840917610016,
+        71.99252907717124
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 130.0,
+      "T_MeV": [
+        153.39849606237559,
+        163.99231908450818
+      ],
+      "muB_MeV": [
+        24.20470262793914,
+        35.536930330015714
+      ]
+    },
+    {
+      "sqrt_s_NN_GeV": 200.0,
+      "T_MeV": [
+        153.4586105924627,
+        163.99738356596217
+      ],
+      "muB_MeV": [
+        15.861027190332326,
+        23.312714776632305
+      ]
+    }
+  ],
+  "full_sources_at_7p7_GeV": [
+    {
+      "id": "andronic2009",
+      "T_MeV": 143.32239143367653,
+      "muB_MeV": 406.90775092124164
+    },
+    {
+      "id": "andronic2018",
+      "T_MeV": 138.42845611642903,
+      "muB_MeV": 406.35877672799603
+    },
+    {
+      "id": "yu2025_set_ii",
+      "T_MeV": 139.29565548003396,
+      "muB_MeV": 386.5306820124209
+    },
+    {
+      "id": "elfner_muller2023",
+      "T_MeV": 138.42845611642903,
+      "muB_MeV": 406.35877672799603
+    },
+    {
+      "id": "du2024",
+      "T_MeV": 136.3310552661801,
+      "muB_MeV": 326.33018398806564
+    },
+    {
+      "id": "andronic2026_v2",
+      "T_MeV": 138.77958668790302,
+      "muB_MeV": 406.35877672799603
+    }
+  ],
+  "pdf_visual_checks": [
+    "ElfnerMuller2023 published PDF p.35 Eq.(37), Fig.18",
+    "Du2024 published PDF p.10 Fig.10 discussion (retained previous visual verification)",
+    "ThakurHirono2022 published PDF p.18, printed p.17, Eq.(4.7) and following muB=0 text",
+    "Andronic2026 v2 PDF p.9 Eq.(6) (retained previous visual verification)"
+  ],
+  "pdf_integrity": [
+    {
+      "id": "elfner_muller2023",
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/ElfnerMuller2023_JPhysG50_103001.pdf",
+      "bytes": 9556449,
+      "sha256": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678"
+    },
+    {
+      "id": "du2024",
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/Du2024_PRC110_014904.pdf",
+      "bytes": 1145169,
+      "sha256": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8"
+    },
+    {
+      "id": "thakur_hirono2022",
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/ThakurHirono2022_JHEP02_207.pdf",
+      "bytes": 1397257,
+      "sha256": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c"
+    },
+    {
+      "id": "andronic2026_v2",
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/Andronic2026_arxiv2606.14799v2.pdf",
+      "bytes": 471933,
+      "sha256": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a"
+    },
+    {
+      "id": "lafferty_rothkopf2020",
+      "path": "data/inputs/meson_freezeout_andronic_literature_20261018/LaffertyRothkopf2020_PRD101_056010.pdf",
+      "bytes": 1487079,
+      "sha256": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774"
+    }
+  ],
+  "preserved_sha256": {
+    "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml": "4c4532c84292d94ff1eb40ba318c197629319e96254291ad0ac202078f0bf6ca",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_20261018.json": "23f98b3e647dd5cf776ea6424b4a7c109850927b6deb715c90eb35eec4eea3c0",
+    "data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json": "6a9e7faac1c983528c12468f05bb8ed06d4fbd5c7acb2d16d6a13491bf206af5",
+    "config/physics/freezeout/andronic2018.toml": "2bc25d501a9c04af292aa272ec8cddde17d5f1aee526d20ce3d9e9f2793c4843",
+    "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json": "e5f576fbd039cce34a9cd2e9270bbe76123aaa19af9804c7fd148877fc184eb1",
+    "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8"
+  },
+  "primary_track_unchanged": true,
+  "prior_numerical_artifact_author_review_still_pending": true,
+  "density_calculations_started": false,
+  "numerical_regression": {
+    "run": false,
+    "reason": "Only source PDFs, research-domain configuration and documentation changed; existing numerical implementations, profiles, results and regression baselines preserved."
+  },
+  "repository_checks": [
+    {
+      "command": "julia --project=. scripts/dev/check_task_ledger.jl",
+      "result": "passed",
+      "exit_code": 0,
+      "output": "[task-ledger] OK ledger=config/governance/task_tracks.toml"
+    },
+    {
+      "command": "julia --project=. scripts/dev/check_docs_consistency.jl",
+      "result": "passed",
+      "exit_code": 0,
+      "output": "[docs-consistency] OK: 未发现历史路径或状态口径冲突"
+    }
+  ],
+  "local_document_links_checked": 32,
+  "checked_document_sha256": {
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md": "03cdd003546c2fbab6b0700cd58e17254288285990b793132ff40b43f8f76a14",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md": "fc69a065caa30b186f166399a5492608b1855fae8539e22f1377ede0e8a3fe40"
+  }
+}

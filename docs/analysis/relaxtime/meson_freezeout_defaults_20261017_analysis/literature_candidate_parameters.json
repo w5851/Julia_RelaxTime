@@ -1,0 +1,255 @@
+{
+  "schema": "literature_candidate_parameter_audit_v1",
+  "parameter_policy": "published central values; no fitting",
+  "formula_check": "independent normalized-MeV vs TOML polynomial-GeV evaluation, 9 energies/profile, absolute agreement <=1e-11 MeV",
+  "profiles": [
+    {
+      "profile": "ihrg2019",
+      "arxiv": "1906.01954v2",
+      "locator": "Eq. (5), PDF pp.8-9 Table II IHRG row",
+      "source_parameters": {
+        "T0_MeV": 152.0,
+        "kappa2": null,
+        "kappa4": null,
+        "d_MeV": 1310.0,
+        "e_GeV_inv1": 0.278,
+        "polynomial_b_GeV_inv1": 0.026,
+        "polynomial_c_GeV_inv3": 0.219
+      },
+      "scope": "Yield-fit parameterization spanning SIS to LHC; uses the IHRG branch.",
+      "coordinates": [
+        {
+          "sqrts_GeV": 7.7,
+          "T_MeV": 140.8468626562905,
+          "muB_MeV": 417.1177482009807
+        },
+        {
+          "sqrts_GeV": 11.5,
+          "T_MeV": 147.38837165028252,
+          "muB_MeV": 312.1277102692399
+        },
+        {
+          "sqrts_GeV": 14.5,
+          "T_MeV": 149.23045497448692,
+          "muB_MeV": 260.3856092228185
+        },
+        {
+          "sqrts_GeV": 19.6,
+          "T_MeV": 150.5541844990848,
+          "muB_MeV": 203.13856841582927
+        },
+        {
+          "sqrts_GeV": 27.0,
+          "T_MeV": 151.26010760326554,
+          "muB_MeV": 154.0089348695039
+        },
+        {
+          "sqrts_GeV": 39.0,
+          "T_MeV": 151.64902854761442,
+          "muB_MeV": 110.6232055396048
+        },
+        {
+          "sqrts_GeV": 62.4,
+          "T_MeV": 151.86175922618574,
+          "muB_MeV": 71.40054068195691
+        },
+        {
+          "sqrts_GeV": 130.0,
+          "T_MeV": 151.96731416879518,
+          "muB_MeV": 35.27194399569198
+        },
+        {
+          "sqrts_GeV": 200.0,
+          "T_MeV": 151.9860093382331,
+          "muB_MeV": 23.144876325088337
+        }
+      ]
+    },
+    {
+      "profile": "frg2024_mudep",
+      "arxiv": "2305.16763v2",
+      "locator": "Eqs. (29)-(30), PDF p.7 Table IV mu-dependent row",
+      "source_parameters": {
+        "T0_MeV": 154.8,
+        "kappa2": 4.05e-07,
+        "kappa4": 0.0022,
+        "d_MeV": 708.96,
+        "e_GeV_inv1": 0.147,
+        "polynomial_b_GeV_inv1": 2.6162790697674415e-06,
+        "polynomial_c_GeV_inv3": 0.5930752652797623
+      },
+      "scope": "7.7 GeV point excluded by authors from fit; use 11.5-200 GeV for supported-range scoring.",
+      "coordinates": [
+        {
+          "sqrts_GeV": 7.7,
+          "T_MeV": 147.54651448948994,
+          "muB_MeV": 332.54843097706276
+        },
+        {
+          "sqrts_GeV": 11.5,
+          "T_MeV": 151.94048520444616,
+          "muB_MeV": 263.5049247351793
+        },
+        {
+          "sqrts_GeV": 14.5,
+          "T_MeV": 153.24179549685516,
+          "muB_MeV": 226.39629570493375
+        },
+        {
+          "sqrts_GeV": 19.6,
+          "T_MeV": 154.1396258483468,
+          "muB_MeV": 182.66515510666804
+        },
+        {
+          "sqrts_GeV": 27.0,
+          "T_MeV": 154.55418133310695,
+          "muB_MeV": 142.67659488830753
+        },
+        {
+          "sqrts_GeV": 39.0,
+          "T_MeV": 154.72706515812058,
+          "muB_MeV": 105.29630179711867
+        },
+        {
+          "sqrts_GeV": 62.4,
+          "T_MeV": 154.78599674516346,
+          "muB_MeV": 69.69172695816296
+        },
+        {
+          "sqrts_GeV": 130.0,
+          "T_MeV": 154.79908063658883,
+          "muB_MeV": 35.25410243659871
+        },
+        {
+          "sqrts_GeV": 200.0,
+          "T_MeV": 154.79982314766826,
+          "muB_MeV": 23.32105263157895
+        }
+      ]
+    },
+    {
+      "profile": "frg2024_muindep",
+      "arxiv": "2305.16763v2",
+      "locator": "Eqs. (29)-(30), PDF p.7 Table IV mu-independent row",
+      "source_parameters": {
+        "T0_MeV": 153.9,
+        "kappa2": 7.35e-07,
+        "kappa4": 0.004,
+        "d_MeV": 751.31,
+        "e_GeV_inv1": 0.159,
+        "polynomial_b_GeV_inv1": 4.775828460038986e-06,
+        "polynomial_c_GeV_inv3": 1.0973473819267652
+      },
+      "scope": "Companion published glue-potential scenario; 7.7 GeV is excluded from source fit.",
+      "coordinates": [
+        {
+          "sqrts_GeV": 7.7,
+          "T_MeV": 139.61553667413617,
+          "muB_MeV": 337.7736816076968
+        },
+        {
+          "sqrts_GeV": 11.5,
+          "T_MeV": 148.437104844112,
+          "muB_MeV": 265.62135407459783
+        },
+        {
+          "sqrts_GeV": 14.5,
+          "T_MeV": 150.97107164379014,
+          "muB_MeV": 227.2908788382998
+        },
+        {
+          "sqrts_GeV": 19.6,
+          "T_MeV": 152.6821122363992,
+          "muB_MeV": 182.51627635798266
+        },
+        {
+          "sqrts_GeV": 27.0,
+          "T_MeV": 153.4544391391445,
+          "muB_MeV": 141.9440770829397
+        },
+        {
+          "sqrts_GeV": 39.0,
+          "T_MeV": 153.76991621482878,
+          "muB_MeV": 104.33412026107483
+        },
+        {
+          "sqrts_GeV": 62.4,
+          "T_MeV": 153.87540340596408,
+          "muB_MeV": 68.7912027541752
+        },
+        {
+          "sqrts_GeV": 130.0,
+          "T_MeV": 153.89840869017684,
+          "muB_MeV": 34.67051222888786
+        },
+        {
+          "sqrts_GeV": 200.0,
+          "T_MeV": 153.89969541183262,
+          "muB_MeV": 22.90579268292683
+        }
+      ]
+    },
+    {
+      "profile": "functional_qcd2026_mean",
+      "arxiv": "2603.09336v1",
+      "locator": "Eqs. (3)-(5), PDF p.3 Table I mean row",
+      "source_parameters": {
+        "T0_MeV": 157.0,
+        "kappa2": 0.0153,
+        "kappa4": 0.00096,
+        "d_MeV": 953.7,
+        "e_GeV_inv1": 0.2026,
+        "polynomial_b_GeV_inv1": 0.09745222929936305,
+        "polynomial_c_GeV_inv3": 0.2480688742556965
+      },
+      "scope": "BES-I/II fluctuation extraction plus SPS 6.3 GeV anchor; T0 and kappa2 tied to source chiral-line constraints. Mean row only, no band tuning.",
+      "coordinates": [
+        {
+          "sqrts_GeV": 7.7,
+          "T_MeV": 138.69727116405528,
+          "muB_MeV": 372.53615206131207
+        },
+        {
+          "sqrts_GeV": 11.5,
+          "T_MeV": 147.33705863437834,
+          "muB_MeV": 286.4049971470615
+        },
+        {
+          "sqrts_GeV": 14.5,
+          "T_MeV": 150.42991233464193,
+          "muB_MeV": 242.19722172842015
+        },
+        {
+          "sqrts_GeV": 19.6,
+          "T_MeV": 153.07687954852503,
+          "muB_MeV": 191.85428971466277
+        },
+        {
+          "sqrts_GeV": 27.0,
+          "T_MeV": 154.76561425567573,
+          "muB_MeV": 147.39884393063585
+        },
+        {
+          "sqrts_GeV": 39.0,
+          "T_MeV": 155.8486506212614,
+          "muB_MeV": 107.14044981688275
+        },
+        {
+          "sqrts_GeV": 62.4,
+          "T_MeV": 156.517815307601,
+          "muB_MeV": 69.90787436667293
+        },
+        {
+          "sqrts_GeV": 130.0,
+          "T_MeV": 156.88103335986193,
+          "muB_MeV": 34.88550735240325
+        },
+        {
+          "sqrts_GeV": 200.0,
+          "T_MeV": 156.94851466557097,
+          "muB_MeV": 22.96965317919075
+        }
+      ]
+    }
+  ]
+}

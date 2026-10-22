@@ -1,0 +1,10 @@
+profile_name = "andronic2009"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:andronic2009"
+
+[coefficients]
+T_lim_GeV = 0.164
+log_offset = 2.6
+log_width = 0.45
+d_GeV = 1.303
+e_GeV_inv1 = 0.286

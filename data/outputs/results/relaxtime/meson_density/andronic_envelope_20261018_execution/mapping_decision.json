@@ -1,0 +1,6 @@
+{
+  "checked_utc": "2026-10-18T06:27:34.690224+00:00",
+  "output": "{\"output\": \"D:\\\\w\\\\meson-freezeout-defaults\\\\data\\\\outputs\\\\results\\\\relaxtime\\\\meson_density\\\\andronic_envelope_20261018_mapping_design\", \"candidates\": 3, \"rejected\": 22}\n",
+  "design_created": true,
+  "policy": "Exact T(muB)-preserving joint A,E rescaling; reject outside the selected box"
+}

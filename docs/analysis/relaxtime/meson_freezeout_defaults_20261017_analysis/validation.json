@@ -1,0 +1,119 @@
+{
+  "schema": "chemical_freezeout_defaults_validation_v1",
+  "recorded_at_utc": "2026-10-17 03:53:37 UTC",
+  "scope": "Local implementation, frozen-data reconstruction, sampling comparison and PNG review. Not production convergence or an experimental calibration.",
+  "software_checks": "passed",
+  "tests": {
+    "julia_assertions": 613,
+    "julia": [
+      {
+        "file": "tests/unit/models/test_freezeout_profiles.jl",
+        "passed": 75
+      },
+      {
+        "file": "tests/unit/models/test_freezeout_path_profiles.jl",
+        "passed": 10
+      },
+      {
+        "file": "tests/unit/relaxtime/test_charged_gbu_q0_reference.jl",
+        "passed": 128
+      },
+      {
+        "file": "tests/integration/relaxtime/test_charged_gbu_freezeout_comparison.jl",
+        "passed": 59,
+        "rechecked_after_default_energy_correction": true
+      },
+      {
+        "file": "tests/regression/relaxtime/test_meson_density_freezeout_phase_shift_gbu_path_regression.jl",
+        "passed": 341
+      }
+    ],
+    "python": {
+      "file": "tests/unit/python/test_freezeout_comparison.py",
+      "passed": 7
+    },
+    "regression_scope": "Existing phase-shift GBU path regression passed; no numerical baseline or tolerance was changed.",
+    "recording_note": "Counts summarize the successful test outputs during this task. Integration and Python checks were rerun after the final relevant edits."
+  },
+  "governance": {
+    "docs_consistency": "passed",
+    "script_entrypoints": "passed; 296 Julia files",
+    "models_entry_contract": "passed",
+    "implementation_task_ledger": "passed",
+    "root_task_ledger": "passed",
+    "implementation_diff_check": "passed",
+    "root_scoped_diff_check": "passed",
+    "commits_created": 0,
+    "remote_ci_run": false
+  },
+  "experimental_rows_reproduced": 22,
+  "primary_AuAu_points": 14,
+  "plot_contract": "passed",
+  "plot_and_analysis_hash_records_verified": 21,
+  "root_unrelated_ledger_sha256_unchanged": "ce0634d423f03d24cb682542a0054c4521acabcdb7e5fd02c25984c794b1ee08",
+  "root_historical_evidence_sha256_unchanged": "ee88a8e3f18224a4046fc563c58dd073ff60f71f3777cfeb6e4d1bc9c0f0fa2a",
+  "implementation_baseline_ledger_entries_unchanged": true,
+  "runs": [
+    {
+      "case": "freezeout_defaults_20261017_standard",
+      "scan_identity": "8a7592d2119128dd9a20a4a3e9af50af5d912a9855882957b334a30d83fa1801",
+      "point_count": 96,
+      "successful_points": 95,
+      "source_snapshots_verified": 18
+    },
+    {
+      "case": "freezeout_defaults_20261017_fine",
+      "scan_identity": "dea79282e3dcfeb63634801bcb58b65691e0946ceb127326c8b9bb2a3d4b5544",
+      "point_count": 100,
+      "successful_points": 99,
+      "source_snapshots_verified": 18
+    }
+  ],
+  "worktrees": [
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime",
+      "branch": "codex/docs-architecture-cleanup",
+      "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+      "staged_paths": []
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults",
+      "branch": "codex/meson-freezeout-defaults",
+      "head": "698feaf8fada670fde81c93bab6093b50093935f",
+      "staged_paths": []
+    }
+  ],
+  "plot_manifest_sha256": "204a01b0d7bf59733f9121b8f0549f7d3cd0c5949cbcbc77c323c0a3df2537da",
+  "figure_review": {
+    "case": "freezeout_defaults_20261017_fine_png_review_r2",
+    "delivery_stage": "png_review",
+    "author_acceptance": "pending",
+    "agent_visual_review": "Color and grayscale PNG inspected; all legend entries within the shared panel; no obscured curve, clipped text or bridged failed point observed.",
+    "width_inches": 6.75,
+    "dpi": 600,
+    "minimum_displayed_glyph_height_mm": 2.1443652343749995,
+    "manifest_contract": "figure_production_v2; declared_geometry_checked; prd_review_v1"
+  },
+  "scientific_limits": {
+    "unresolved_point": {
+      "profile": "andronic2018",
+      "sqrt_s_NN_GeV": 17.27,
+      "channel": "K_plus",
+      "reason": "ArgumentError: q0 reference onset is not positive real",
+      "resolutions": [
+        "standard",
+        "fine"
+      ],
+      "primary_AuAu_score_affected": false
+    },
+    "endpoint_warning_points": {
+      "standard": 56,
+      "fine": 61
+    },
+    "full_endpoint_or_q_tail_limit_certified": false,
+    "parameter_adjustment": false,
+    "crossover_candidates_included": false,
+    "observation_scope": "14 published Au+Au points define the primary equal-weight RMSE; NA49, ALICE charge sums and digitized HADES are separately labeled.",
+    "accepted_for_manuscript": false
+  }
+}

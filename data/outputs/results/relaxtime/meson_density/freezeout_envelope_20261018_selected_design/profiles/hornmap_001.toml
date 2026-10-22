@@ -1,0 +1,10 @@
+profile_name = "hornmap_001"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cross_literature_exploration:hornmap_001"
+
+[coefficients]
+a_GeV = 0.14564421970002192
+b_GeV_inv1 = 0.10364148726030518
+c_GeV_inv3 = 0.5463741671473763
+d_GeV = 0.7304851722505652
+e_GeV_inv1 = 0.273

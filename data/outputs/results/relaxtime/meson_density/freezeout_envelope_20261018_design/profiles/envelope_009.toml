@@ -1,0 +1,10 @@
+profile_name = "envelope_009"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cross_literature_exploration:envelope_009"
+
+[coefficients]
+a_GeV = 0.14942780095008373
+b_GeV_inv1 = 0.06252809800452158
+c_GeV_inv3 = 0.7390317008794427
+d_GeV = 0.8676118492269161
+e_GeV_inv1 = 0.24424654029630308

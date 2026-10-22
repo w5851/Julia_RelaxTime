@@ -1,0 +1,10 @@
+profile_name = "qvdw2019"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "literature_anchor:qvdw2019"
+
+[coefficients]
+a_GeV = 0.157
+b_GeV_inv1 = 0.0032
+c_GeV_inv3 = 0.259
+d_GeV = 1.094
+e_GeV_inv1 = 0.157

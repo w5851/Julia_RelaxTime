@@ -1,0 +1,81 @@
+{
+  "image": "D:\\Desktop\\Julia_RelaxTime\\tmp\\freezeout_literature_20261017\\universe_figure_left_preview.png",
+  "output_dir": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261017\\hades_digitized",
+  "figure": 1,
+  "task": "points",
+  "plot_box": [
+    261,
+    179,
+    997,
+    870
+  ],
+  "x_axis": {
+    "label": "sqrt_s_NN",
+    "unit": "GeV",
+    "scale": "log10",
+    "anchors": [
+      {
+        "px": 261,
+        "value": 1
+      },
+      {
+        "px": 603,
+        "value": 100
+      }
+    ],
+    "check_anchors": [
+      {
+        "px": 944,
+        "value": 10000
+      }
+    ],
+    "calibration_error_px": 1
+  },
+  "y_axis": {
+    "label": "Kplus_over_piplus",
+    "unit": "dimensionless",
+    "anchors": [
+      {
+        "px": 868,
+        "value": 0
+      },
+      {
+        "px": 179,
+        "value": 0.3
+      }
+    ],
+    "check_anchors": [
+      {
+        "px": 639,
+        "value": 0.1
+      },
+      {
+        "px": 409,
+        "value": 0.2
+      }
+    ],
+    "calibration_error_px": 1
+  },
+  "points": [
+    {
+      "id": "HADES_2p4",
+      "curve": "AuAu_SIS",
+      "pixels": [
+        326,
+        845
+      ],
+      "pixel_bounds": [
+        323,
+        842,
+        329,
+        848
+      ]
+    }
+  ],
+  "source": {
+    "citation": "Universe 9 (2023) 106; arXiv:2205.06726v5, PDF p.5, Fig.1 left, SIS filled cross",
+    "panel": "central heavy ions; K+/pi+ at y approx 0",
+    "conditions": "Au+Au; central; nominal sqrt(s_NN)=2.4 GeV. Display-only digitization; no experimental uncertainty recovered.",
+    "render": "pdftoppm -f 5 -l 5 -scale-to 3400 -singlefile -png; crop [190,180,1330,1420]"
+  }
+}

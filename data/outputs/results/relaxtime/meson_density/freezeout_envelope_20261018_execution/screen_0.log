@@ -1,0 +1,26 @@
+Sysimage or metadata missing; falling back to plain julia --project=.
+ERROR: LoadError: ArgumentError: 'D:/w/meson-freezeout-defaults/data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_011.toml' exists. `force=true` is required to remove 'D:/w/meson-freezeout-defaults/data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/profiles/envelope_011.toml' before copying.
+Stacktrace:
+  [1] checkfor_mv_cp_cptree(src::String, dst::String, txt::String; force::Bool)
+    @ Base.Filesystem .\file.jl:360
+  [2] checkfor_mv_cp_cptree
+    @ .\file.jl:344 [inlined]
+  [3] cp(src::String, dst::String; force::Bool, follow_symlinks::Bool)
+    @ Base.Filesystem .\file.jl:406
+  [4] cp
+    @ .\file.jl:404 [inlined]
+  [5] run_scan(; output::String, profiles::Vector{String}, energies::Vector{Float64}, resolution::String, resume::Bool, config::String, profile_dir::String, parameter_policy::String)
+    @ Main.ChargedGBUFreezeoutComparison D:\w\meson-freezeout-defaults\scripts\analysis\relaxtime\run_charged_gbu_freezeout_comparison.jl:126
+  [6] main(args::Vector{String})
+    @ Main.ChargedGBUFreezeoutComparison D:\w\meson-freezeout-defaults\scripts\analysis\relaxtime\run_charged_gbu_freezeout_comparison.jl:227
+  [7] main()
+    @ Main.ChargedGBUFreezeoutComparison D:\w\meson-freezeout-defaults\scripts\analysis\relaxtime\run_charged_gbu_freezeout_comparison.jl:222
+  [8] top-level scope
+    @ D:\w\meson-freezeout-defaults\scripts\analysis\relaxtime\run_charged_gbu_freezeout_comparison.jl:232
+  [9] include(mod::Module, _path::String)
+    @ Base .\Base.jl:306
+ [10] exec_options(opts::Base.JLOptions)
+    @ Base .\client.jl:317
+ [11] _start()
+    @ Base .\client.jl:550
+in expression starting at D:\w\meson-freezeout-defaults\scripts\analysis\relaxtime\run_charged_gbu_freezeout_comparison.jl:232

@@ -1,0 +1,10 @@
+profile_name = "andronic_axis_d_GeV_low"
+family = "andronic_logistic_rational_v1"
+source_tag = "andronic_literature_envelope_v2:andronic_axis_d_GeV_low"
+
+[coefficients]
+T_lim_GeV = 0.15875
+log_offset = 2.51
+log_width = 0.44
+d_GeV = 1.05
+e_GeV_inv1 = 0.306

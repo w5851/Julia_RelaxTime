@@ -1,0 +1,110 @@
+schema = "chemical_freezeout_andronic_envelope_v2"
+family = "andronic_logistic_rational_v1"
+parameter_order = ["T_lim_GeV", "log_offset", "log_width", "d_GeV", "e_GeV_inv1"]
+formula = "x=sqrt_s_NN_GeV; T=T_lim_GeV/(1+exp(log_offset-log(x)/log_width)); muB=d_GeV/(1+e_GeV_inv1*x)"
+policy = "closed coordinate box of selected literature central values; temperature-only sources contribute only their provided coefficients; exploratory domain, not a confidence region"
+author_decision = "Update the previous three-group box using the three verified foreign-team papers and the Andronic 2026 v2 review. Continue to exclude Yu 2025 Set I and Set III."
+selection_status = "author_selected_for_research"
+cross_source_combinations = true
+expand_by_reported_errors = false
+same_parameters_at_all_energies = true
+previous_domain = "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml"
+previous_domain_sha256 = "4c4532c84292d94ff1eb40ba318c197629319e96254291ad0ac202078f0bf6ca"
+source_manifest = "data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json"
+previous_source_manifest = "data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json"
+report = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md"
+
+[bounds]
+T_lim_GeV = [0.1535, 0.164]
+log_offset = [2.20, 2.82]
+log_width = [0.40, 0.48]
+d_GeV = [1.050, 1.3568]
+e_GeV_inv1 = [0.286, 0.326]
+
+[comparison]
+primary_energies_GeV = [7.7, 11.5, 14.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+baseline_profile = "config/physics/freezeout/andronic2018.toml"
+baseline_standard_manifest = "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard/manifest.json"
+baseline_fine_manifest = "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json"
+baseline_policy = "Reuse the completed Andronic 2018 trajectories and ratios; preserve failed coordinates. Recalculate only if the numerical or physics contract changes."
+workflow_reference = "docs/guides/scripts/meson_freezeout_comparison.md"
+
+[[sources]]
+id = "andronic2009"
+values = [0.164, 2.60, 0.45, 1.303, 0.286]
+source_kind = "original_parameterization"
+url = "https://arxiv.org/abs/0901.2909"
+locator = "Acta Phys. Pol. B 40, 1005: p.1008 Eq.(1), muB footnote on preceding page; same fit as arXiv:0812.1186"
+
+[[sources]]
+id = "andronic2018"
+values = [0.1584, 2.60, 0.45, 1.3075, 0.288]
+source_kind = "original_parameterization"
+url = "https://arxiv.org/abs/1710.09425v2"
+locator = "Nature 561, 321 (2018), Fig.3 caption; preprint PDF p.6"
+
+[[sources]]
+id = "yu2025_set_ii"
+values = [0.1535, 2.82, 0.40, 1.3568, 0.326]
+source_kind = "hadrons_and_light_nuclei_refit"
+url = "https://arxiv.org/abs/2403.16548v3"
+locator = "Eq.(5), Table 4 Set II; preprint PDF pp.6-7"
+
+[[sources]]
+id = "elfner_muller2023"
+values = [0.1584, 2.60, 0.45, 1.3075, 0.288]
+source_kind = "adoption"
+adopts_source = "andronic2018"
+independent_parameter_fit = false
+url = "https://doi.org/10.1088/1361-6471/ace824"
+locator = "Published PDF p.35 Eq.(37), Fig.18; preprint Sec.5.1 Eq.(40)"
+local_pdf = "data/inputs/meson_freezeout_andronic_literature_20261018/ElfnerMuller2023_JPhysG50_103001.pdf"
+
+[[sources]]
+id = "du2024"
+values = [0.156, 2.60, 0.45, 1.050, 0.288]
+source_kind = "hydrodynamic_comparison_scale_adjustment"
+independent_parameter_fit = false
+url = "https://doi.org/10.1103/PhysRevC.110.014904"
+locator = "Published PDF p.10 (014904-10), Fig.10 discussion; unnumbered pair of formulas"
+local_pdf = "data/inputs/meson_freezeout_andronic_literature_20261018/Du2024_PRC110_014904.pdf"
+use_note = "Adjusted scales for comparison with hydrodynamic freeze-out; included as an exploratory source, not a new joint hadron-yield fit."
+
+[[sources]]
+id = "andronic2026_v2"
+values = [0.1566, 2.20, 0.48, 1.3075, 0.288]
+source_kind = "author_team_update"
+url = "https://arxiv.org/abs/2606.14799v2"
+locator = "v2 (2026-09-02), PDF p.9 Eq.(6) and following paragraph"
+local_pdf = "data/inputs/meson_freezeout_andronic_literature_20261018/Andronic2026_arxiv2606.14799v2.pdf"
+T_lim_reported_error_GeV = 0.0017
+use_note = "Low-energy shape revisited with strangeness-canonical treatment; plateau fixed to the LHC fit. Reported temperature error is recorded but not added to the box."
+
+[[partial_sources]]
+id = "thakur_hirono2022"
+source_kind = "temperature_only_adoption"
+contributes_to_bounds = ["T_lim_GeV", "log_offset", "log_width"]
+missing_parameters = ["d_GeV", "e_GeV_inv1"]
+fixed_muB_GeV = 0.0
+has_muB_energy_mapping = false
+url = "https://doi.org/10.1007/JHEP02(2022)207"
+locator = "Published PDF p.18, printed p.17, Sec.4.1 Eq.(4.7) and following text; preprint Eq.(55)"
+local_pdf = "data/inputs/meson_freezeout_andronic_literature_20261018/ThakurHirono2022_JHEP02_207.pdf"
+use_note = "The section sets muB=0. This is not a D=0 rational-map fit and supplies neither D nor E."
+
+[partial_sources.coefficients]
+T_lim_GeV = 0.158
+log_offset = 2.60
+log_width = 0.45
+
+[[excluded_sources]]
+id = "yu2025_set_i"
+reason = "Excluded by the author for this stage because its parameter group differs strongly from the other selected groups."
+
+[[excluded_sources]]
+id = "yu2025_set_iii"
+reason = "Light-nuclei-only fit; outside the selected common hadron freeze-out domain."
+
+[[context_only_sources]]
+id = "lafferty_rothkopf2020"
+reason = "Older supplementary adoption; the present update uses the four explicitly requested recent sources."

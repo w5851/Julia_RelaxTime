@@ -1,0 +1,242 @@
+{
+  "schema": "andronic_recent_literature_sources_v1",
+  "review_date": "2026-10-18",
+  "review_timezone": "Asia/Shanghai",
+  "retrieved_utc": "2026-10-18T05:08:32.519Z",
+  "scope": "Recent foreign-institution examples of the Andronic temperature/rational-muB family; separate full-pair use, temperature-only use, refit and author-team update. No new density scan.",
+  "previous_source_manifest": "source_manifest.json",
+  "selected_domain": "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml",
+  "previous_selected_domain": "config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml",
+  "parameter_order": [
+    "T_lim_MeV",
+    "log_offset",
+    "log_width",
+    "d_MeV",
+    "e_GeV_inv1"
+  ],
+  "temperature_parameter_order": [
+    "T_lim_MeV",
+    "log_offset",
+    "log_width"
+  ],
+  "domain_change_policy": "Author requested an updated coordinate box from the three verified foreign-team papers and the Andronic 2026 v2 review, in addition to the previous three groups. Use provided central coefficients only, keep temperature-only evidence partial, and continue excluding Yu Set I and Set III. Preserve v1 and its validation unchanged.",
+  "references": [
+    {
+      "id": "elfner_muller2023",
+      "title": "The exploration of hot and dense nuclear matter: introduction to relativistic heavy-ion physics",
+      "authors": [
+        "Hannah Elfner",
+        "Berndt Müller"
+      ],
+      "institutions": [
+        "GSI / Frankfurt University / FIAS / HFHF, Germany",
+        "Duke University, USA"
+      ],
+      "inspire_id": "2168969",
+      "metadata_url": "https://inspirehep.net/api/literature/2168969",
+      "doi": "10.1088/1361-6471/ace824",
+      "publication": "J. Phys. G 50, 103001 (2023)",
+      "text_url": "https://arxiv.org/html/2210.12056v1",
+      "locator": "Published PDF p.35 Eq.(37), Fig.18; preprint Sec.5.1 Eq.(40)",
+      "use": "Review displays the full 2018 pair; no new five-parameter fit.",
+      "domain_role": "full_pair_adoption",
+      "adopts_source": "andronic2018",
+      "independent_parameter_fit": false,
+      "values_MeV": [
+        158.4,
+        2.6,
+        0.45,
+        1307.5,
+        0.288
+      ],
+      "local_pdf": "ElfnerMuller2023_JPhysG50_103001.pdf",
+      "download_url": "https://inspirehep.net/files/27c239398c018fa568d5244e8855f706",
+      "bytes": 9556449,
+      "sha256": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678",
+      "verification": "Published PDF text extracted and p.35 rendered and visually checked; Eq.(37) contains the full 2018 pair. Publication and preprint equation numbers differ."
+    },
+    {
+      "id": "du2024",
+      "title": "Bulk medium properties of heavy-ion collisions from the beam energy scan with a multistage hydrodynamic model",
+      "authors": [
+        "Lipei Du"
+      ],
+      "institutions": [
+        "McGill University, Canada"
+      ],
+      "inspire_id": "2744157",
+      "metadata_url": "https://inspirehep.net/api/literature/2744157",
+      "doi": "10.1103/PhysRevC.110.014904",
+      "publication": "Phys. Rev. C 110, 014904 (2024)",
+      "text_url": "https://doi.org/10.1103/PhysRevC.110.014904",
+      "locator": "Published PDF p.10, Fig.10 discussion",
+      "use": "Full same-family pair with temperature and muB scales adjusted for a hydrodynamic comparison; not a yield refit.",
+      "domain_role": "full_pair_comparison_scale_adjustment",
+      "independent_parameter_fit": false,
+      "values_MeV": [
+        156,
+        2.6,
+        0.45,
+        1050,
+        0.288
+      ],
+      "local_pdf": "Du2024_PRC110_014904.pdf",
+      "download_url": "https://scoap3-prod-backend.s3.cern.ch/media/files/86807/10.1103/PhysRevC.110.014904.pdf",
+      "bytes": 1145169,
+      "sha256": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8",
+      "verification": "Published PDF text extracted and p.10 rendered and visually checked; same-form pair and adjusted scales confirmed."
+    },
+    {
+      "id": "thakur_hirono2022",
+      "title": "Spectral functions of heavy quarkonia in a bulk-viscous quark gluon plasma",
+      "authors": [
+        "Lata Thakur",
+        "Yuji Hirono"
+      ],
+      "institutions": [
+        "APCTP, Republic of Korea",
+        "POSTECH, Republic of Korea",
+        "RIKEN iTHEMS, Japan"
+      ],
+      "inspire_id": "1969351",
+      "metadata_url": "https://inspirehep.net/api/literature/1969351",
+      "doi": "10.1007/JHEP02(2022)207",
+      "publication": "JHEP 02 (2022) 207",
+      "text_url": "https://arxiv.org/html/2111.08225v2",
+      "locator": "Published PDF p.18, printed p.17, Eq.(4.7); preprint Eq.(55); following text sets muB=0",
+      "use": "Temperature-only logistic use in psi-prime/J-psi energy dependence. Does not supply or use the full five-parameter pair in this step.",
+      "domain_role": "temperature_only",
+      "contributes_to_bounds": [
+        "T_lim_GeV",
+        "log_offset",
+        "log_width"
+      ],
+      "has_muB_energy_mapping": false,
+      "missing_parameters": [
+        "d_GeV",
+        "e_GeV_inv1"
+      ],
+      "temperature_values_MeV": [
+        158,
+        2.6,
+        0.45
+      ],
+      "muB_MeV": 0,
+      "local_pdf": "ThakurHirono2022_JHEP02_207.pdf",
+      "download_url": "https://inspirehep.net/files/1a546eee728fd622db53b2e3fc91f0dd",
+      "bytes": 1397257,
+      "sha256": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c",
+      "verification": "Published PDF p.18 (printed p.17) rendered and visually checked. Eq.(4.7) supplies only the temperature coefficients; adjacent text explicitly fixes muB=0. No D/E values inferred."
+    },
+    {
+      "id": "andronic2026_v2",
+      "title": "Experimental exploration of the QCD phase diagram",
+      "authors": [
+        "Anton Andronic",
+        "Peter Braun-Munzinger",
+        "Krzysztof Redlich",
+        "Johanna Stachel"
+      ],
+      "institutions": [
+        "Münster University, Germany",
+        "GSI / Heidelberg University, Germany",
+        "Wrocław University, Poland",
+        "Some authors also list CCNU, China"
+      ],
+      "inspire_id": "3168836",
+      "metadata_url": "https://inspirehep.net/api/literature/3168836",
+      "doi": null,
+      "publication_status": "Encyclopedia chapter preprint; no journal publication or DOI found in the checked INSPIRE record.",
+      "text_url": "https://arxiv.org/abs/2606.14799v2",
+      "version": "v2, 2026-09-02",
+      "locator": "PDF p.9 Eq.(6) and following paragraph",
+      "use": "Original author team changes the low-energy temperature shape after revisiting the strangeness-canonical treatment. Temperature plateau is fixed to its LHC fit. Included in v2 by the author's latest request.",
+      "domain_role": "full_pair_author_team_update",
+      "values_MeV": [
+        156.6,
+        2.2,
+        0.48,
+        1307.5,
+        0.288
+      ],
+      "T_lim_reported_error_MeV": 1.7,
+      "local_pdf": "Andronic2026_arxiv2606.14799v2.pdf",
+      "download_url": "https://arxiv.org/pdf/2606.14799v2",
+      "bytes": 471933,
+      "sha256": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a",
+      "verification": "PDF text extracted and p.9 rendered and visually checked. Current values come from v2."
+    },
+    {
+      "id": "lafferty_rothkopf2020",
+      "title": "Improved Gauss law model and in-medium heavy quarkonium at finite density and velocity",
+      "authors": [
+        "David Lafferty",
+        "Alexander Rothkopf"
+      ],
+      "institutions": [
+        "Heidelberg University, Germany",
+        "Stavanger University, Norway"
+      ],
+      "inspire_id": "1737714",
+      "metadata_url": "https://inspirehep.net/api/literature/1737714",
+      "doi": "10.1103/PhysRevD.101.056010",
+      "publication": "Phys. Rev. D 101, 056010 (2020)",
+      "recency": "Older supplementary example, not a recent-paper claim.",
+      "domain_role": "supplementary_not_selected",
+      "text_url": "https://doi.org/10.1103/PhysRevD.101.056010",
+      "locator": "Published PDF p.16 Eqs.(64)-(65)",
+      "use": "Full logistic/rational pair for finite-density quarkonium phenomenology; Tlim rounded to 158 MeV.",
+      "values_MeV": [
+        158,
+        2.6,
+        0.45,
+        1307.5,
+        0.288
+      ],
+      "local_pdf": "LaffertyRothkopf2020_PRD101_056010.pdf",
+      "download_url": "https://inspirehep.net/files/7b6ce4451db41d96f6f02e8b8af5e1e2",
+      "bytes": 1487079,
+      "sha256": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774",
+      "verification": "Published PDF text extracted; equations and coefficients checked."
+    }
+  ],
+  "search_log": [
+    {
+      "provider": "INSPIRE REST",
+      "query": "refersto:recid:1632809 and date > 2021 and fulltext 2.60 and fulltext 0.45",
+      "sort": "mostcited",
+      "size": 20,
+      "total": 11,
+      "returned_ids": [
+        "2168969",
+        "2744157",
+        "1969351",
+        "2703871",
+        "2786939",
+        "2771655",
+        "3150539",
+        "3183696",
+        "3198975",
+        "2866719",
+        "3142478"
+      ],
+      "interpretation": "Candidate discovery only: numeric matches and citation links do not prove actual formula adoption or bibliometric completeness."
+    },
+    {
+      "provider": "Web search",
+      "queries": [
+        "\"Experimental exploration of the QCD phase diagram\" Andronic",
+        "\"freeze-out\" \"2.20\" \"0.48\" Andronic",
+        "\"freeze-out\" \"2.60\" \"0.45\" \"2024\""
+      ],
+      "interpretation": "Search snippets led to primary arXiv and publisher/INSPIRE records; source versions and formulas were then checked."
+    }
+  ],
+  "screening_notes": [
+    "Reichert et al., PRC107,014912 (2023), cites Vovchenko et al. PRC93,064906 (2016) for its freeze-out curve; not counted here as an explicit Andronic logistic adoption without checking that distinct parameterization.",
+    "2506.04733 and 2601.18666 were inspected as contextual reviews; not promoted into the explicit same-form evidence list.",
+    "No new recent Nature/PRL-level full five-parameter refit was verified in this directed search.",
+    "Foreign-institution classification uses listed affiliations, not inferred author nationality."
+  ],
+  "domain_updated_utc": "2026-10-18T05:24:26.072768+00:00"
+}

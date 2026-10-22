@@ -1,0 +1,4 @@
+{
+  "schema": "freezeout_envelope_worker_request_v1",
+  "action": "stop"
+}

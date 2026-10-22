@@ -1,0 +1,111 @@
+{
+  "schema": "chemical_freezeout_resolution_comparison_v1",
+  "method": "exact profile and energy match; no interpolation; absolute refined-minus-reference ratio difference",
+  "profiles": {
+    "hornmap_001": {
+      "common_valid_points": 22,
+      "added_refined_energies_GeV": [
+        5.0,
+        5.5,
+        6.0,
+        9.0,
+        9.5,
+        10.5,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        22.0,
+        32.0,
+        50.0,
+        80.0,
+        100.0,
+        160.0
+      ],
+      "max_absolute_difference": {
+        "energy_GeV": 4.87,
+        "absolute_ratio_difference": 1.049485835424857e-05,
+        "relative_to_reference": 3.9829681965932714e-05
+      },
+      "max_relative_difference": {
+        "energy_GeV": 4.87,
+        "absolute_ratio_difference": 1.049485835424857e-05,
+        "relative_to_reference": 3.9829681965932714e-05
+      },
+      "mean_absolute_difference": 9.325768488134924e-06,
+      "failure_comparison": []
+    },
+    "hornmap_003": {
+      "common_valid_points": 22,
+      "added_refined_energies_GeV": [
+        5.0,
+        5.5,
+        6.0,
+        9.0,
+        9.5,
+        10.5,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        22.0,
+        32.0,
+        50.0,
+        80.0,
+        100.0,
+        160.0
+      ],
+      "max_absolute_difference": {
+        "energy_GeV": 4.87,
+        "absolute_ratio_difference": 1.0716208372618663e-05,
+        "relative_to_reference": 4.0528125103424306e-05
+      },
+      "max_relative_difference": {
+        "energy_GeV": 4.87,
+        "absolute_ratio_difference": 1.0716208372618663e-05,
+        "relative_to_reference": 4.0528125103424306e-05
+      },
+      "mean_absolute_difference": 9.496541912696786e-06,
+      "failure_comparison": []
+    },
+    "local_a_minus": {
+      "common_valid_points": 22,
+      "added_refined_energies_GeV": [
+        5.0,
+        5.5,
+        6.0,
+        9.0,
+        9.5,
+        10.5,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        22.0,
+        32.0,
+        50.0,
+        80.0,
+        100.0,
+        160.0
+      ],
+      "max_absolute_difference": {
+        "energy_GeV": 6.27,
+        "absolute_ratio_difference": 1.059681035020521e-05,
+        "relative_to_reference": 4.25612958558332e-05
+      },
+      "max_relative_difference": {
+        "energy_GeV": 4.87,
+        "absolute_ratio_difference": 1.0401836696871669e-05,
+        "relative_to_reference": 4.854560497971396e-05
+      },
+      "mean_absolute_difference": 9.734565811629751e-06,
+      "failure_comparison": []
+    }
+  }
+}

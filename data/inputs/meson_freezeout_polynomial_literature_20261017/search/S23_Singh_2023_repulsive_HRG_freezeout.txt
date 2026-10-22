@@ -1,0 +1,863 @@
+                                          Chemical freeze-out parametrization with mean field repulsive hadron resonance gas model
+
+                                                                          Sunny Kumar Singh,1, ∗ Nachiketa Sarkar,2, † and Deeptak Biswas3, ‡
+                                                                          1
+                                                                            Indian Institute of Technology Gandhinagar, Palaj, Gujarat 382355
+                                                                      2
+                                                                    School of Physical Sciences, National Institute of Science Education and Research,
+                                                                             An OCC of Homi Bhabha National Institute, Jatni-752050, India
+                                                      3
+                                                        The Institute of Mathematical Sciences, a CI of Homi Bhabha National Institute, Chennai, 600113, India
+                                                                                                   (Dated: July 13, 2023)
+                                                          We have examined the chemical freeze-out surface of the heavy-ion collision experiments within
+                                                        an interacting hadron resonance gas model. By considering repulsive interaction among hadrons in
+                                                        the mean-field level, we have suitably parameterized the freeze-out surface by fitting the yield data of
+                                                        mid-rapidity for the most central collision, for the collision energy available in AGS, RHIC (BES), and
+                                                        LHC programs. To suitably account for the repulsive interaction among mesons and (anti-) baryons,
+                                                        we have introduced phenomenological parameters KM and KB in the freeze-out parametrization.
+                                                        Although a finite value of these two parameters seem to be necessary to have an improved normalized
+arXiv:2307.05930v1 [hep-ph] 12 Jul 2023
+
+
+
+
+                                                        chi-square, the effect on the rest of the parameters like temperature and relevant chemical potentials
+                                                        seem to be within the standard variance.
+
+
+                                                                I.        INTRODUCTION                        value. Additionally, an excess in the pion number den-
+                                                                                                              sity at chemical freeze-out was observed[12], indicating
+                                             The investigation of the phase structure of strongly-            the need to incorporate short-range repulsive interactions
+                                          interacting matter stands as a pivotal and fundamental              between hadrons to achieve more accurate Equations
+                                          inquiry within the realm of ultra-relativistic heavy-ion            of State (EoS) and realistic estimations of the chemical
+                                          physics. To comprehend the particle spectra observed                freeze-out boundary.
+                                          in these experiments, statistical thermal models inspired              One of the frequently employed methods to model the
+                                          by quantum chromodynamics (QCD) are employed. In                    short-range repulsion is the Excluded Volume Hadron
+                                          particular, the transverse momentum (pT ) integrated ra-            Resonance Gas (EVHRG) model [12–17]. In this model,
+                                          pidity spectra (namely dN/dY ) are frozen onward the                repulsive interactions are taken into account by incorpo-
+                                          chemical freeze-out (CFO) boundary and helps to map                 rating an impenetrable volume surrounding the individual
+                                          the freeze-out surface on the phase diagram via the CFO             hadrons. Several versions of the EVHRG model have been
+                                          parametrization with temperature (T ) and baryon chem-              proposed in the literature to determine the strength of
+                                          ical potentials (µB ) [1]. For the past few decades, the            short-range repulsive interactions through comparisons
+                                          Hadron resonance Gas (HRG) model has been success-                  with lattice QCD calculations or experimental data. These
+                                          fully describing the abundance of hadrons in collisions             include the diagonal EVHRG model [12], the cross-terms
+                                          across a wide range of energies, from the SchwerIonen-              EVHRG [18, 19], the mass-dependent EVHRG [20, 21],
+                                          Synchrotron (SIS) to the Large Hadron Collider (LHC) [2–            and the Flavor- dependent EVHRG model [22]. Another
+                                          7]. The success of the HRG model, coupled with the lack             phenomenological approach to include the interaction
+                                          of reliable first-principle theories that can provide such          is the Van der Waals Hadron Resonance Gas (vdWHRG)
+                                          parameterization for both high and low baryon density               model, which explicitly incorporates both repulsive and
+                                          regions of the phase diagram have firmly established HRG            attractive interactions between baryons and anti-baryons
+                                          as one of the most widely utilized models in this field.            [23–27].
+                                             The simplest version of the HRG model is the ideal                  The repulsive interactions between the various baryon-
+                                          HRG model (IHRG) [4, 5, 7], where attractive interac-               baryon and meson- meson can also be incorporated at the
+                                          tions among hadrons in a dilute hadron gas can be ap-               mean-field level [28–31]. The interacting part of the pres-
+                                          proximated by treating higher mass resonances as stable             sure is added along with the ideal one and modification
+                                          particles. Initially proposed within the relativistic virial        is introduced into the statistical model by shifting the en-
+                                          expansion framework, using the S-matrix approach [8],               ergy of each particle by an amount equal to U (n) = Kn
+                                          this model allows for the calculation of various thermody-          where n is the total hadron number density. One can
+                                          namic quantities [9]. However, the IHRG model encoun-               incorporate the mean-field coefficients KM and KB to
+                                          tered discrepancies in different thermodynamic quantities           scale the repulsive interaction strength among the mesons
+                                          when compared to lattice QCD results [10, 11], particu-             and baryons respectively. Recent works [31] have aug-
+                                          larly at the temperature range above the pseudo-critical            mented the mean-field coefficients KB from lattice data
+                                                                                                              of χB      B       B    B
+                                                                                                                   2 −χ4 and χ2 −χ6 . In another investigation, suitable
+                                                                                                              values of KB and KM were estimated by fitting lattice
+                                                                                                              QCD data of bulk observables, cumulants, and the speed
+                                          ∗ sunny.singh@iitgn.ac.in                                           of sound [32].
+                                          † nachiketa.sarkar@gmail.com
+                                                                                                                 In this study, we have focused on constraining the mean-
+                                          ‡ deeptakb@gmail.com
+                                                                                                              field model at the chemical freeze-out boundary by com-
+                                                                                                                                       2
+
+paring it with experimental yields through a χ2 minimiza-        The total number density of each species considering de-
+tion procedure. Previous applications of this mean-field         cays from higher resonances can be computed as follows:
+model at freeze-out involved fixing the repulsive strength
+parameter K to explain the data of 200 AGeV S + Au               nTi ot = ni (T, µB , µQ , µS )
+collisions at CERN- SPS [33]. While earlier studies consis-                  X
+tently suggested a value of KB = 450 MeV fm−3 , we aim                    +      nj (T, µB , µQ , µS ) × Branching Ratio(j → i)
+                                                                            j
+to investigate the collision energy dependence of these
+                                                                                                                                   (5)
+phenomenological parameters by analyzing the rapidity
+spectra. Within this approach, for the first time we have
+obtained the collision energy dependence of mean-field
+coefficients by parameterizing the chemical freeze-out                           A.   Mean-Field HRG (MFHRG)
+surface for RHIC and LHC energies.
+   We have organized the paper as follows. In Sec. II               With the inclusion of short-range repulsive interactions
+we give a short description of the ideal HRG and the             between hadrons via mean-field approach, the effective
+MFHRG model. In Sec. III we discuss the method we                chemical potential of each particle species gets modified
+have employed to extract the various parameters in the           by µeff,i = µi − Kn, where K is a phenomenological
+model. In Sec. IV our results and the discussion of our          parameter that signifies the strength of the repulsive in-
+results are provided in the context of heavy ion collision       teraction and n is the number density of the interacting
+experiments. We conclude by giving a summary of the              species of particles [31, 32]. The pressure of the mean-
+present work in Sec. V.                                          field repulsive model is given by:
+
+                                                                 PMF (T, µ, V )
+                      II.   FORMALISM                                   X gi Z             h                     i
+                                                                                    d3 p ln 1 ± e−(Ei −µeff,i )/T + PM,B,B̄ nM,B,B̄
+                                                                                                                                    
+                                                                  = ±T           3
+                                                                          i
+                                                                            (2π)
+  In the ideal hadron resonance gas model, the thermo-                                                                  (6)
+dynamic potential for each species is [15, 34]:                  Here, P is the factor arising from the interacting part,
+                                                                 which is necessary to maintain the thermodynamic con-
+        lnZiid (T, µ, V )                                        sistency [31].
+                                                           (1)
+                        Z
+                  Vg
+          =±              d3 p ln[1 ± e(−(Ei −µi )/T ) ]                             1
+                 (2π)3                                                 PB{B̄} nB{B̄} = KB n2B{B̄} ,                   (Baryons)
+                                                                                       2                                           (7)
+Where the upper(lower) sign corresponds to                                             1
+                                                                             PM (nM ) = KM n2M ,                      (Mesons)
+fermions(bosons). Here g is the degeneracy factor                                      2
+and V is the volume. Considering the baryon number
+(B), electric charge (Q), and strangeness (S), the               The above form of interacting pressure is written con-
+chemical potential (µi ) of the ith hadron is determined         sidering repulsive interactions among meson-meson and
+by µi = Qi µQ + Si µS + Bi µB .                                  baryon(anti-baryon)- baryon(anti-baryon) pairs. Here the
+  The grand thermodynamic potential for the total en-            total meson number density nM is calculated as:
+semble is given by:
+                                                                                                              d3 p
+                                                                                           Z
+                                                                            X        gi
+                                                                     nM =                                                 .     (8)
+                  ln Z ideal =
+                                 X
+                                     ln Ziideal            (2)                     (2π)3       exp        Ei − µeff,i /T − 1
+                                                                            i∈M
+                                 i
+                                                                 For mesons, µeff,i = µi − KM nM . KM signifies the
+The number density of each species can be determined             strength of the repulsive interactions among the meson-
+by:                                                              meson pairs. We have a similar equation for baryons and
+                                                               anti-baryon number densities:
+             T ∂ ln Zi
+       ni =
+                                                                                                                    d3 p
+                                                                                                  Z
+             V      ∂µi    V,T
+                                                                                 X          gi
+                                                                   nB{B̄} =                                                     .
+               gi
+                    Z
+                                d3 p                                                      (2π)3       exp       Ei − µeff,i /T + 1
+                                                                                i∈B{B̄}
+          =       3
+                                                . (3)
+             (2π)      exp [(Ei − µi ) /T ] ± 1                                                                          (9)
+                                                                 B and B̄ imply baryons and anti-baryons respectively.
+One can relate the thermal abundance of the detected             Here, the effective chemical potential of the ith (anti-
+particles at the chemical freeze-out surface with the cor-       )baryon µeff,i = µi −KB nB{B̄} . The repulsive interactions
+responding rapidity densities as follows:                        among the baryon-baryon and antibaryon-antibaryon
+                                                                 pairs are given by the same strength parameter KB . These
+                  dNi       dV Tot                               equations are transcendental in nature and should be
+                          ≃   n                            (4)
+                   dy Det   dy i Det                             solved simultaneously with these two equations Eq.[8-9].
+                                                                                                                                             3
+
+            III.   METHOD AND DATA ANALYSIS                                             KM = 100 MeV.fm3
+                                                                                        KM = 50 MeV.fm3
+   The mid-rapidity data of hadron yields dN/dY were                           0.8
+                                                                                        KM = 0         MeV.fm3
+taken from various experiments at 0-5% centrality (most
+central) and at different energies. These consist of Pb-Pb
+collisions in LHC at a collision energy of 2760 GeV [35–                       0.6
+
+
+
+
+                                                                     KB (GeV.fm3)
+38]. We have also included Au-Au collisions at RHIC of
+200, 130, 62.4 GeV [39–54], RHIC BES of 39, 27, 19.6,
+11.5, 7.7 GeV [55, 56]. and in AGS at 4.85 GeV [57–65].
+   To extract the chemical freeze-out parameters i.e., T ,                     0.4
+µB , µS , µQ along with the parameters scaling the strength
+of the hadron-hadron interaction (KB and KM ), we have
+fitted the detected hadron yields with the thermal model                       0.2
+estimations. Considering the initial condition of the heavy-
+ion collision, it is customarily practiced to fix µQ and µS
+via two constraint equations. The first constraint is the
+ratio of net baryon to net charge which remains fixed                               0
+throughout the collision process considering the isen-                                           10                 102             103
+tropic evolution [66].                                                                                           sNN (GeV)
+           P
+               n (T, µB , µS , µQ , KM , KB )Bi
+           Pi i                                  =r    (10)
+              i i (T, µB , µS , µQ , KM , KB )Qi
+               n                                                                FIG. 1. Results from the fitted set of parameters. Blue, green,
+                                                                                and red points are results for KM values of 0, 50, and 100
+One can evaluate this ratio r considering the number of                         MeV fm−3 respectively.
+neutrons and protons in the incident nuclei. For heavy
+nuclei like Au-Au and Pb-Pb, this ratio r is approximately
+2.5 [67].                                                                                        IV.    RESULT AND DISCUSSION
+   The conservation of strangeness along with the
+strangeness neutrality imposes another constraint:                                        A.     Variation of freeze-out parameters:
+           X
+              ni (T, µB , µS , µQ , KM , KB )Si = 0  (11)
+                                                                                  We have tabulated the fitted parameter set in Table. I.
+             i
+                                                                               For convenience, let us first discuss the variation for the
+The rest of the parameters are determined by the χ2                            mean-field coefficients, as these are the most novel out-
+minimization procedure. The χ2 is defined as:                                  put from our present study. Changes in other freeze-out
+                                           2                                 parameters are commensurate with the variation in these
+                     dNi          dNi                                          mean-field coefficients. Extraction of both the KM and
+                      dy      −    dy
+                X        Expt         Model                                    KB becomes numerically challenging due to the slow
+          χ2 =                  2              (12)                            convergence rate. We have fixed the values of KM to
+                              σ i
+                                                                               be 0, 50, and 100 MeV fm−3 and examined the corre-
+                 i
+
+Here, we would like to emphasize that our present anal-                        sponding values of KB . For a fixed value of KM , the
+ysis focuses exclusively on data from the most central                         KB increases with collision energies and remains similar
+events of the collisions, thus we have chosen not to in-                       at higher RHIC and LHC energies as shown in Fig. 1. A
+corporate the strangeness suppression factor γs assum-                         similar saturation of thermal parameters at higher colli-
+ing a state of complete chemical equilibrium. For the                          sion energies has been noticed earlier for temperature
+present study, we have used data of π ± , K ± , p, p̄, Λ, Λ̄, Ξ± ,             and chemical potentials [69, 70]. We have found that
+as these are widely available for most of the collision en-                    even for KM = 0.0 MeV fm−3 a non-zero value of KB
+ergies. To optimize numerical efficiency and reduce the                        helps achieve better χ2 per degree of freedom while fit-
+number of free parameters, we have fixed the KM at three                       ting with yield data. With increasing the KM to 50 and
+different values, i.e. 0, 50, and 100 MeV fm−3 . In the                        100 MeV fm−3 the values of KB increases. In the con-
+considered HRG spectrum, all confirmed hadronic states                         text of heavy-ion collision, the total ensemble of baryons
+up to mass 3 GeV have been included, with masses and                           and mesons are connected via the constraints like net
+branching ratios following the Particle Data Group [68].                       strangeness neutrality and a fixed net baryon-to-charge
+  The statistics and systematic uncertainties in a given                       ratio. Along with these constraints, the final yield of
+data have been added considering the quadrature method.                        mesons is predominantly influenced by the decay of vari-
+The variance of the evaluated parameter set for a partic-                      ous higher-mass baryon resonances [71]. Consequently,
+ular minimization procedure has been calculated from                           imposing a mean- field repulsion in mesons necessitates
+the ±1 deviation of the minimized χ2 per degree of free-                       a higher value of KB to restrict the baryon abundances,
+dom [6].                                                                       which eventually affects the final yield of mesons and
+                                                                                                                                           4
+
+
+       180                                                                    600
+                                                                                                                                      3
+                                                                                                             KM = 100 MeV.fm
+                                                                                                                                   3
+                                                                                                             KM = 50 MeV.fm
+                                                                                                                           3
+       160                                                                    400                            KM = 0 MeV.fm
+
+
+
+
+                                                                        µ (MeV)
+ T (MeV)
+
+
+
+
+                                                                             B
+       140                                                                    200
+
+                                                                                                                                (b)
+                                                           (a)
+       120                                                                           0
+                                             2                3
+                         10          sNN10
+                                        (GeV)              10                                   10        sNN10
+                                                                                                                2
+                                                                                                              (GeV)            103
+       100                                                                          10
+µ (MeV)
+
+
+
+
+                                                                           R (fm)    8
+           50
+       S
+
+
+
+
+                                                                                     6
+                                                          (c)                                                                   (d)
+             0
+                        10               102              103                                  10              102             103
+                                    sNN (GeV)                                                              sNN (GeV)
+
+            FIG. 2. Fitted set of parameters. Blue, green, and red points are results for KM values of 0, 50, and 100 MeV fm−3 respectively.
+
+
+           validates the required constraints.                                    temperature (T ) the difference from considering three
+              Towards the lower collision energy, the medium is                   different values of KM seems to be similar to KB . The
+           mainly baryon-dominated [72], and the effect from the                  differences increase towards high collision energies, fol-
+           variation of KM is minimal. However, the system be-                    lowing the variation of KB . For all three values of KM ,
+                                                          √                       the temperature increases with the collision energy and
+           comes meson dominated with increasing sN N , and
+           the effect of KM is much more pronounced. We would                     becomes constant around 160 MeV near higher BES ener-
+           like to emphasize that for the range of KM considered,                 gies. We want to iterate here that, although the qualita-
+           which spans from 0 to 100 MeV fm−3 , the corresponding                 tive behavior is similar to the usual understanding of our
+           KB values vary between 100 and 800 (considering vari-                  freeze-out parametrization within the ideal HRG formal-
+                                                                                  ism, the temperature value is slightly higher (∼ 5 MeV)
+           ances) MeV fm−3 . These specific values were previously
+                                                                                  than the ideal HRG result. A finite value of the mean-field
+           explored in a hydrodynamic simulation that incorporated
+                                                                                  repulsion parameter restricts the number density which
+           a hadronic equation of state, as mentioned in Ref. [33].
+                                                                                  in turn produces a higher T to fit the yields.
+           Furthermore, recent studies conducted using the MFHRG
+           model have also confirmed this range of KB values as                      The collision energy dependence of the baryon chemi-
+           they successfully account for the lattice data of various              cal potential is shown in the top right panel. The effect
+           charge susceptibilities [31, 32, 73].                                  of repulsion is almost negligible on the freeze-out values
+              In the top left panel of Fig. 2, we have shown the varia-           of µB . However, at very lower collision energy, the effect
+           tion of freeze-out temperature with collision energy for               of KB seems to induce a higher µB as the medium in
+           the three considered values of the mesonic mean-field                  dominated by baryons. The chemical potential is shifted
+           coefficients KM as mentioned earlier. For the freeze-out               by KB nB , so a higher value of KB should be accompa-
+                                                                                                                                               5
+
+
+
+
+                                                                              0.04
+       0.2
+
+
+
+
+                                                                             K+ (fm-3)
+π+ (fm-3)
+
+
+
+
+           0.1                                                                0.02
+
+
+
+           0.1            10              102         103                                       10             102                 103
+                                       sNNK(GeV)            3
+                                            M = 100 MeV. fm                   0.02                          sNN (GeV)
+p (fm-3)
+
+
+
+
+                                                          3
+                                          KM = 50 MeV. fm
+
+
+                                                                             Λ (fm-3)
+                                          KM = 0 MeV. fm3
+
+    0.05
+                                                                               0.01
+
+
+
+              0
+                          10             102                 103                                10             102                 103
+                                      sNN (GeV)                                                             sNN (GeV)
+                    √
+            FIG. 3. sN N variation of the yields of (top left) π + , (top right) K + , (bottom left) p and (bottom right) Λ. Blue, green, and red
+            points are the results for KM values of 0, 50, and 100 MeV fm−3 respectively. Black points are the experimental data.
+
+
+            nied by a higher µB to produce a similar estimation of                 performing the freeze-out parametrization with yields.
+            yields. The general behavior is similar to that of the ideal
+            HRG parametrization. With higher collision energies the
+            baryon stopping diminishes so the medium tends to form
+            with lower net charges (B, Q, and S), which results in
+            a lower value of chemical potentials in the freeze-out                  The resulting values of the freeze-out volume (which is
+            parametrization. At lower collision energy this behavior              presented in the freeze-out radius here), are presented in
+            induces a high value of µB , which tends to be zero at                the right bottom panel. A similar non-monotonic behavior
+            higher RHIC LHC energy                                                with the collision energy was earlier observed from the
+                                                                                  chemical freeze-out parametrization with ideal HRG in
+               The strange chemical potential follows the trend of µB .           Refs. [6, 74]. The interesting observation here is the
+            A finite µB results in the dominance of the hyperons over             higher value of freeze-out radius while we imply a higher
+            the anti-hyperons, on the other hand, the strangeness-                value of KM . A higher value of KM and KB suppresses
+            neutrality constraint demands the cancellation of the net             the number density, which in turn results in a higher value
+            strangeness arising from the baryon sector with that from             of freeze-out radius to fit the yields. One can see that
+            the meson sector, which demands the µS to be propor-                  among the above-discussed parameters, the variation of
+            tional to the µB . The variance of µS is within the un-               volume with K is much more prominent. It seems that
+            certainties for the three values of KM , which indicates              considering the repulsive interaction affects the value
+            that the higher mass strange mesons and baryons have                  of the freeze-out volume mostly as the yield is directly
+            negligible influence from the mean-field repulsion, while             proportional to the volume.
+                                                                                                                                  6
+
+
+ 1.4
+                                                π-/ π+                           -
+                                                                              K /K +
+                                                                       1
+ 1.2
+
+                                                                   0.5
+   1
+
+                                                       3
+               10              102               10                0.2               10            102                10
+                                                                                                                           3
+0.25                                           K / π+
+                                                  +                             -
+                            sNN (GeV)
+                                                                              K /π    -         sNN (GeV)
+
+                                                                 0.15
+ 0.2
+                                                                    0.1
+
+0.15
+                                                                 0.05
+                                                      3                                                                  3
+                10             102                10                                 10             102               10
+                            sNN (GeV)
+                                                p/π        +
+                                                                   0.1        p/ π    -          sNN (GeV)
+
+   1                           KM = 100 MeV. fm3
+                               KM = 50 MeV. fm3
+                               KM = 0 MeV. fm3                  0.05
+0.5                            Experimental Data
+
+
+  0                                                                   0
+               10              102              103                                  10            102               103
+                          sNN (GeV)                                                            sNN (GeV)
+            √
+   FIG. 4. sN N variation of the particle to particle ratios π − /π + and K − /K + (top), strange to non-strange meson, K + /π + and
+     −    −
+   K /π (middle), non-strange baryon to meson, proton to pion (bottom). Blue, green, and red points are the results for KM values
+   of 0, 50, and 100 MeV fm−3 respectively. Black points are the experimental data from Ref. [75].
+
+
+        B.   Particle yields from thermal parametrization:           calculated with the resulting parametrization. The impact
+                                                                     of varying KM is more pronounced for lighter mass pions,
+      To examine the differences in thermal abundances re-           while the effect diminishes as the particle mass increases.
+   sulting from different values of KM , it would be informa-        Baryons with higher masses show negligible variations
+   tive to analyze the variations in yields. Fig. 3 displays the     across the three cases, whereas pions demonstrate more
+   number density of pions, kaons, protons, and lambdas,             significant alterations when different KM values are con-
+                                                                                                                                        7
+
+                                                                           challenging to decouple this systemic dependency.
+
+                                        (p+p)/(π++π-)
+                                        KM = 100 MeV. fm3                                       C.   Particle ratios:
+                                        KM = 50 MeV. fm3
+                                        KM = 0 MeV. fm3                       It would be interesting to estimate various particle ra-
+                                        Experimental Data                  tios and compare them with those from the experimental
+                                                                           data. Along with checking the efficacy of our parameteri-
+                                                                           zation, this will also examine the effect of various choices
+                                                                           of KM on thermal yields. Here we shall discuss some of
+                                                                           the important particle ratios from various sectors.
+10−1                                                                          The ratios of π − /π + and K − /K + as a function of
+                                                                           √
+                                                                             sN N are depicted in the upper panel of Fig. 4. Our
+                                                                           parametrization successfully reproduces the observed vari-
+                                                                           ation of the experimental data. The pion ratio is greater
+                                                                                                 √
+                                                                           than unity at lower sN N due to the higher abundance of
+                                                                           neutrons in the colliding nuclei, which induces an isospin
+                10                102                   103                asymmetry favoring π − . However, this asymmetry di-
+                               sNN (GeV)                                   minishes at higher RHIC and LHC energies, resulting in
+                                                                           similar yields of π − and π + . In the case of kaons, the vari-
+               √                                                           ation follows the trend of µS . At lower collision energies,
+       FIG. 5. sN N variation of the total proton to total pion. Blue,
+                                                                           the positively charged kaon (K + ) becomes more abun-
+       green, and red points are the results for KM values of 0, 50, and
+       100 MeV fm−3 respectively. Black points are the experimental        dant than the negatively charged kaon (K − ) to maintain
+       data from Ref. [75].                                                strangeness neutrality. As the collision energy increases,
+                                                                           this effect disappears, and the yields of particles and
+                                                                           antiparticles become equal at the LHC. The qualitative
+                                                                           behavior is the same for all three values of KM . It seems
+       sidered.
+                                                                           that the effect of KM does not result in the large variation
+          The effective chemical potential µeff,i = µi − KnM,B,B̄          of the mentioned ratio.
+       is expected to have a significant impact on pions since                In the context of the heavy-ion collision, the strange
+       they carry only electric charge, and the magnitude of µQ            to non-strange ratios signify the relative abundance of
+       is much smaller compared to other chemical potentials.              strangeness and portray the degree of equilibration for the
+       Conversely, the effect of this shift diminishes for strange         strange sector [76]. Deviations from the equilibrium val-
+       and non-strange baryons, as their respective chemical po-           ues have earlier been observed for non- central collisions,
+       tentials have larger magnitudes. It is worth noting that            which necessitates the use of a strangeness saturation
+       the chemical potentials themselves are modified for differ-         factor γS [70]. Being the lightest strange to non- strange
+       ent KM values, contributing to the observed variations.             particle, the ratio K + /π + and K − /π − are widely stud-
+          In this context, it is important to consider the decay           ied within the thermal model. The explanation of the
+       feed-down effect as well. The total pion density receives           non-monotonic behavior of the K + /π + was discussed as
+       a significant contribution from the decay of higher-mass            a signature of the thermalization in the strange sector
+       meson and baryon resonances. The suppression of these               and a possible existence of initial partonic state [77–81].
+       states is also reflected in the final pion abundance, re-           Although these details are beyond the scope of the present
+       sulting in substantial variations. This effect is similarly         thermal model, our parameterization suitably explains
+       observed for the lowest-mass strange hadron, kaon. On               the data for all three values of KM in the middle panel
+       the other hand, baryons receive contributions from higher-          of Fig.4. Although, there is not much variation among
+       mass baryons that are already thermally suppressed, lead-           the estimations from the three cases, indicating that these
+       ing to insignificant variations while considering different         ratios have a weak dependence on the variation of KM
+       KM values.                                                          and KB .
+          At this juncture, we want to reiterate that the yield               We have shown the proton-to-pion ratio in the bottom
+       dN/dY is a product of this thermal density and the freeze-          panel of Fig. 4. As we have separately used two different
+       out volume dV /dY . A reverse trend was observed for                mean-field coefficients KM and KB for the meson and
+       the freeze-out volume in Fig. 2, i.e. a higher value of             baryon sectors separately, this ratio will portray their ef-
+       KM resulted in higher values of freeze-out volume. The              fect on the respective variation. We have plotted p/π +
+       cumulative effect of these two ensures the agreement                and p̄/π − to nullify the effect of the charge chemical
+       between the yield data and our thermal model estimation.            potential. In the context of heavy-ion collision, the abun-
+       This indicates that the resulting parameters (especially            dance of pions is mainly dominated by the temperature
+       freeze-out volume and KB ) are dependent on each other              as they are the lowest mass hadrons, whereas the protons
+       and on the values of KM . In our present study, it becomes          mimic the variation of exponential of µB /T . At lower
+                                                                                                                               8
+
+collision energy the medium is dominated by the baryons
+due to the baryon stopping, whereas at higher collision                                                     3
+energies the system is dominated by the mesons, and            6               KM = 100 MeV. fm
+changes from a baryon-dominated freeze-out to meson-                                                    3
+                                                                               KM = 50 MeV. fm
+dominated freeze-out occurs [72]. This phenomenon
+                                                                                                    3
+explains the variation observed in the proton to π + ra-                       KM = 0 MeV. fm
+tio. On the other hand, the production of anti-proton          4
+increases as the collision energy increases and at high                        Experimental Data
+RHIC and LHC energies, the two ratio becomes similar.
+Here the values of the p/π + ratio increase as we increase
+                                                               2                                                          C1
+the KM for a given collision energy. A higher value of
+KM suppresses the abundance of pions and produces a                                                                       C2
+higher value of the ratio.
+   To quantify the impact of the various choice of repulsive
+parameters KM and KB in the particle ratios, we have
+plotted the total proton (p + p̄) abundance normalized
+                                                               1                                                   C2
+to total pion (π + + π − ) in Fig. 5. This ratio has a larger                                                         2
+impact from various choices of KM than that of the indi-                            10                          10 C3
+vidual ratios, as it signifies the relative abundance of the
+lowest mass baryons to that of the lowest mass mesons.                                  sNN (GeV)
+The parametrization for KM = 0 seems to agree with 0.5
+the data better than the other choices. At the freeze-out
+parametrization, one should not expect much variation
+in the baryon yield from the variation of KB due to their
+heavier masses, on the contrary, the pion yields get signif-
+icantly suppressed for a higher value of KM due to the         0
+lower masses. This results in the variation shown as the
+ratio ((p + p̄)/(π + + π − )), as for a given collision energy
+it increases for a higher value of KM . The difference is        3                   10                           102
+                                                                                            sNN (GeV)
+much more pronounced at higher collision energies, as                                                                   C4
+the thermal medium is meson dominated, so the different
+choices of KM produce a larger effect.                           2                                                      C2
+   Motivated by the fact that the ratio corresponding to
+the total proton yield to pions gets significant variation
+from the values of mean-field parameter KM , we have
+investigated their impact on the ratios of susceptibilities      1
+calculated with the freeze-out parameterization. The nth
+order susceptibility is defined as:
+
+                    χnx =
+                              1 ∂ n (ln Z)
+                                                        (13)
+                                                                 0
+                            V T 3 ∂ µTx n
+                                        
+
+where µx is the chemical potential for conserved charge                              10 s (GeV)                  102
+x. The susceptibilities would be related to the cumulants                                NN
+measured in the heavy-ion collisions as:
+                                                                          √
+                                                                 FIG. 6. sN N variation of the cumulant ratios C2 /C1 (top),
+                       V T 3 χnx = Cn .                 (14)     C3 /C2 (middle) and C4 /C2 (bottom). Blue, green, and red
+                                                                 points are the results for KM values of 0, 50, and 100 MeV fm−3
+As we have fixed the KM and fitted the mean-field co-            respectively. Black points are the experimental data from
+efficient KB , it will be interesting to check the variance in   Ref. [75].
+the baryon cumulant ratios. We have calculated these
+cumulants within the Boltzmann approximation as it
+provides a reasonable baseline for the massive hadrons           as we move to ratios of higher-order cumulants. The
+and resonances (except π) along the chemical freeze-out          effect is negligible for C2 /C1 , while C3 /C2 and C4 /C2
+boundary [71], as mi − µi >> T at the respective freeze-         decrease as we fix the KM to higher values. As we imply
+out parametrization. Within this consideration, we can           a higher value of KM , it produces a higher value of KB as
+approximate the interacting partition functions in the           discussed earlier in Sec. IV A, which translates into these
+Boltzmann limit and calculate the χnB [31, 82]. The dif-         differences. We want to mention that the ratio C4 /C2 is 1
+ferences arising from various values of the KM increase          at all collision energy for the ideal HRG case, whereas the
+                                                                                                                          9
+
+impact of interaction gives rise to the observed variation.     effects, evaluating them independently can lead to larger
+   As a baseline, we have also plotted results for the net      numerical variances. To address this issue, we fixed KM
+proton cumulants estimations from STAR collaboration            at three representative values (0, 50, and 100 MeV.fm−3 )
+[75, 83]. For simplification, we have not mimicked the ex-      and performed a χ2 fitting to determine the remaining pa-
+perimental specification like pT cut, decay feed-down into      rameters: T , µB , µQ , µS , KB , and the freeze-out radius
+the cumulants calculations. Although the effect of decay        R.
+feed-down and pT cut-off have been found to be minimal             While the values of KB were found to be finite and
+earlier [82, 84, 85]. We want to reiterate that we have         influenced the goodness of fit, the other parameters were
+calculated the baryon cumulants ratios, which is different      consistent with those obtained from the ideal HRG model.
+from the net-proton ratios. Although the qualitative be-        Notably, KB increases with collision energy and becomes
+                                                                                                  √
+havior is similar, the quantitative difference between these    significantly higher at higher sN N . It is intriguing to
+two increases for higher order cumulant ratios [75]. The        observe that the values of KB obtained from this freeze-
+non-monotonic variation of C4 /C2 is not well captured          out analysis are similar to those from earlier studies using
+in the thermal model estimation, although the results           the mean- field approach. The agreement between the
+vary from the ideal baseline of 1. The C2 /C1 and C3 /C2        estimation of KB from lattice QCD-motivated studies [31,
+estimations agree with the data for KM = 50 MeV fm−3 ,          32, 73, 86] and our analysis underscores the effectiveness
+there are larger deviation for C4 /C2 , which seem to match     of this model in describing the bulk properties of the
+for higher values of KM . This behavior suggests that a         created medium in heavy-ion collisions.
+complete study of the net-proton cumulants with experi-            Studying the influence of repulsive interactions on the
+mental constraints might restrict the variation of KM and       thermal abundance of different states was crucial. While
+KB both.                                                        the effect of finite KM and KB values on the number
+                                                                density of massive strange hadrons and baryons was not
+                                                                significant, it played a more prominent role in the case
+                      V.   SUMMARY                              of pions. Particle ratios within the same sector, such
+                                                                as meson-to-meson and baryon- to-baryon ratios were
+   Recent advancements in incorporating repulsive inter-        less affected by variations in KM and KB . However, the
+actions between baryons and mesons in the hadron res-           proton-to-pion ratios exhibited significant variations. Con-
+onance gas (HRG) model have established it as a suit-           sequently, the total proton to total pion ratio became a
+able candidate for providing a bulk description of the          subject of investigation, as it appeared to be strongly de-
+QCD medium below the transition temperature. Phe-               pendent on the values of KM . Additionally, we explored
+nomenological descriptions such as the excluded volume          the ratio of baryon susceptibilities using this freeze-out
+HRG and van der Waals HRG models consider param-                parameterization, as these susceptibilities are linked to
+eters such as a hard-core impenetrable radius of the            net-proton cumulants measured in heavy-ion collisions.
+hadrons. On the other hand, the mean-field repulsive            While our freeze-out parametrization was based on yields,
+HRG model (MFHRG) provides a robust representation              there was a general agreement between our estimations
+of the medium by accounting for a density- dependent            of baryon cumulant ratios and the measurements of net-
+interaction strength. However, this model requires the          proton for lower orders. However, discrepancies arose
+inclusion of parameters such as KB and KM to scale the          when considering fourth-order cumulants. Proper treat-
+interaction strength among baryons and mesons, which            ment of cumulant ratios requires accounting for decay
+can be appropriately estimated using bulk observables ob-       feed-down effects and implementing pT cuts within the
+tained from lattice QCD [31, 32]. It is crucial to apply this   framework of this mean-field repulsive HRG model. This
+mean-field repulsive model to analyze data from heavy-          consideration will be essential for future studies, particu-
+ion collision experiments and assess its effectiveness in       larly in the context of energy available in BES-II, HADES,
+comparison to other counterparts such as the ideal HRG,         and CBM experiments.
+evHRG, vdWHRG, and so on. Exploring the chemical
+freeze-out surface provides a foundation for investigating
+the collision energy dependence of the repulsive interac-                        ACKNOWLEDGEMENTS
+tion strength by estimating KM and KB .
+   To parametrize the chemical freeze-out surface, we uti-         D.B expresses gratitude to Sayantan Sharma, Aman
+lized the pT - integrated mid-rapidity yield dN/dY data         Kanojia, Somenath Pal and Hiranmaya Mishra for engag-
+for pions, kaons, protons, Λ, and Ξ in the most central         ing and fruitful discussions. D.B. would like to express
+collisions. The collision energy range available in AGS         sincere gratitude for the support received from NISER,
+(4.85 GeV), RHIC-BES, and LHC (2.76 TeV) was analyzed.          Bhubaneswar, with special thanks to A. Jaiswal for the
+Given that the parameters KB and KM are interdepen-             kind assistance and hospitality during the visit, where the
+dent due to relevant constraints and decay feed-down            majority of this work was performed.
+                                                                                                                           10
+
+
+                                                           TABLE I.
+
+             Particle+Anti Particle: π, K, P, Λ, Ξ, centrality: 0-5%, Constrain: netB/netQ = 2.5 and netS = 0.0
+      √
+       sN N (GeV) κM (MeV.fm−3 ) κB (GeV.fm−3 ) Tch (MeV)               µB (MeV)       µS (MeV)       R(fm)    χ2 /ndf
+                           0            0.03(0.05) 124.50(3.70) 526.02(21.50) 112.02(9.39) 6.25(0.26) 1.11
+          4.83            50            0.16(0.05) 125.08(3.73) 532.34(21.39) 111.11(10.28) 6.68(0.27) 1.72
+                         100             0.18(0.0)     125.85(3.38) 540.40(22.24) 117.59(11.32) 6.80(0.29) 1.67
+                           0            0.04(0.04) 131.03(2.95) 454.88(14.25) 93.27(14.20) 6.77(0.37) 2.60
+          6.27            50            0.18(0.06) 130.57(3.13) 450.07(14.91) 96.07(13.50) 6.96(0.38) 2.81
+                         100            0.22(0.05) 131.43(2.95) 463.34(17.58) 98.04(14.04) 7.16(0.37) 2.65
+                           0            0.07(0.06) 147.50(3.40) 428.35(11.53) 87.62(10.38) 5.40(0.38) 2.06
+           7.7            50            0.19(0.08) 148.87(3.85) 429.77(12.07) 88.05(10.40) 5.57(0.40) 2.06
+                         100            0.25(0.09) 149.26(4.41) 431.36(13.29) 88.93(10.60) 5.71(0.44) 2.06
+                           0            0.07(0.08) 153.01(3.13) 317.27(12.37) 68.51(8.30) 5.60(0.30) 1.56
+          11.5            50            0.22(0.10) 153.85(3.33) 319.68(15.63) 70.94(9.33) 5.84(0.34) 1.57
+                         100            0.33(0.10) 154.55(4.60) 320.75(14.59) 71.05(9.45) 6.05(0.36) 1.54
+                           0            0.10(0.06) 160.03(3.56) 207.65(12.45) 44.15(7.33) 5.56(0.32) 1.18
+          19.6            50            0.32(0.12) 160.93(4.55) 212.82(12.51) 45.75(9.34) 5.77(0.35) 1.19
+                         100            0.48(0.18) 161.46(4.44) 213.43(09.45) 43.08(7.29) 6.07(0.35) 1.20
+                           0            0.12(0.07) 160.10(3.42) 162.02(14.70) 35.70(9.77) 5.76(0.28) 1.07
+          27.0            50            0.37(0.12) 162.27(3.02) 165.41(10.69) 37.52(10.26) 5.89(0.29) 0.99
+                         100            0.58(0.16) 163.77(4.43) 166.64(10.39) 39.08(8.43) 6.13(0.31) 1.09
+                           0            0.12(0.07) 160.81(4.64) 112.91(10.75) 23.89(10.56) 5.85(0.28) 0.54
+          39.0            50            0.42(0.12) 163.24(5.75) 113.83(08.94) 24.00(8.74) 6.01(0.30) 0.47
+                         100            0.65(0.18) 165.98(4.53) 116.71(08.57) 24.28(8.62) 6.25(0.34) 0.43
+                           0            0.10(0.05) 164.89(4.50) 69.91(8.68)           18.04(7.25) 6.13(0.30) 1.34
+          62.4            50            0.38(0.09)     166.80(4.90)    70.21(7.53)    18.79(9.87) 6.44(0.32) 1.23
+                         100            0.59(0.15) 167.11(5.23) 73.07(7.29) 19.87(10.90) 6.65(0.34) 1.17
+                           0            0.14(0.08) 166.70(5.46) 35.79(12.85)           9.70(8.00)  6.16(0.34) 1.62
+         130.0            50            0.28(0.10)     170.48(5.83)    35.27(8.48)    10.93(7.88)  6.61(0.37) 1.06
+                         100            0.55(0.10) 172.80(5.33) 37.39(6.08)           11.12(5.80) 6.71(0.38) 1.16
+                           0            0.14(0.07) 169.57(4.59) 28.59(7.61)            6.91(7.61)  6.81(0.40) 1.03
+         200.0            50            0.42(0.13) 171.17(4.67) 30.72(7.73)            7.76(6.70)  6.90(0.40) 0.69
+                         100            0.61(0.24) 173.15(5.22) 33.34(8.74)            8.20(6.97)  7.13(0.42) 0.57
+                           0            0.20(0.11) 158.03(5.62) 1.97(1.30)                 0.0     10.75(0.46) 2.54
+        2760.00           50            0.45(0.18) 158.77(5.03) 1.11(0.54)                 0.0     10.95(0.46) 2.31
+                         100            0.66(0.20) 159.85(5.74) 1.06(0.74)                 0.0     11.15(0.45) 2.43
+
+
+
+
+[1] R. Stock, Relativistic Nucleus-Nucleus Collisions and         [4] J. Cleymans, K. Redlich, Chemical and thermal freezeout
+    the QCD Matter Phase Diagram, Springer International              parameters from 1-A/GeV to 200-A/GeV, Phys. Rev. C60
+    Publishing, Cham, 2020, pp. 311–453. doi:10.1007/                 (1999) 054908. arXiv:nucl-th/9903063, doi:10.1103/
+    978-3-030-38207-0_7.                                              PhysRevC.60.054908.
+    URL https://doi.org/10.1007/978-3-030-38207-0_7               [5] F. Becattini, J. Cleymans, A. Keranen, E. Suhonen,
+[2] J. Cleymans, H. Satz, Thermal hadron production in high-          K. Redlich, Features of particle multiplicities and
+    energy heavy ion collisions, Z. Phys. C 57 (1993) 135–148.        strangeness production in central heavy ion collisions
+    arXiv:hep-ph/9207204, doi:10.1007/BF01555746.                     between 1.7A-GeV/c and 158A-GeV/c, Phys. Rev. C 64
+[3] J. Cleymans, K. Redlich, Unified description of freezeout         (2001) 024901. arXiv:hep-ph/0002267, doi:10.1103/
+    parameters in relativistic heavy ion collisions, Phys. Rev.       PhysRevC.64.024901.
+    Lett. 81 (1998) 5284–5286. arXiv:nucl-th/9808030,             [6] A. Andronic, P. Braun-Munzinger, J. Stachel, Hadron pro-
+    doi:10.1103/PhysRevLett.81.5284.                                  duction in central nucleus-nucleus collisions at chemical
+                                                                                                                                11
+
+     freeze-out, Nucl. Phys. A772 (2006) 167–199. arXiv:            [21] V. Vovchenko, H. Stöcker, Surprisingly large uncertainties
+     nucl-th/0511071, doi:10.1016/j.nuclphysa.2006.03.                   in temperature extraction from thermal fits to hadron yield
+     012.                                                                data at LHC, J. Phys. G 44 (5) (2017) 055103. arXiv:
+ [7] A. Andronic, P. Braun-Munzinger, J. Stachel, Ther-                  1512.08046, doi:10.1088/1361-6471/aa6409.
+     mal hadron production in relativistic nuclear colli-           [22] P. Alba, V. Vovchenko, M. I. Gorenstein, H. Stoecker,
+     sions: The Hadron mass spectrum, the horn, and the                  Flavor-dependent eigenvolume interactions in a hadron
+     QCD phase transition, Phys. Lett. B673 (2009) 142–                  resonance gas, Nucl. Phys. A 974 (2018) 22–34. arXiv:
+     145, [Erratum: Phys. Lett.B678,516(2009)]. arXiv:                   1606.06542, doi:10.1016/j.nuclphysa.2018.03.007.
+     0812.1186, doi:10.1016/j.physletb.2009.02.014,10.              [23] V. Vovchenko, D. V. Anchishkin, M. I. Gorenstein, Particle
+     1016/j.physletb.2009.06.021.                                        number fluctuations for the van der Waals equation of
+ [8] R. Dashen, S.-K. Ma, H. J. Bernstein, S Matrix formulation          state, J. Phys. A 48 (30) (2015) 305001. arXiv:1501.
+     of statistical mechanics, Phys. Rev. 187 (1969) 345–370.            03785, doi:10.1088/1751-8113/48/30/305001.
+     doi:10.1103/PhysRev.187.345.                                   [24] V. Vovchenko, D. V. Anchishkin, M. I. Gorenstein, Van der
+ [9] M. Prakash, M. Prakash, R. Venugopalan, G. Welke,                   Waals Equation of State with Fermi Statistics for Nuclear
+     Nonequilibrium properties of hadronic mixtures, Phys.               Matter, Phys. Rev. C 91 (6) (2015) 064314. arXiv:1504.
+     Rept. 227 (1993) 321–366. doi:10.1016/0370-1573(93)                 01363, doi:10.1103/PhysRevC.91.064314.
+     90092-R.                                                       [25] S. Samanta, B. Mohanty, Criticality in a Hadron Resonance
+[10] R. Bellwied, S. Borsanyi, Z. Fodor, S. D. Katz, A. Pasztor,         Gas model with the van der Waals interaction, Phys. Rev.
+     C. Ratti, K. K. Szabo, Fluctuations and correlations in high        C 97 (1) (2018) 015201. arXiv:1709.04446, doi:10.
+     temperature QCD, Phys. Rev. D 92 (11) (2015) 114505.                1103/PhysRevC.97.015201.
+     arXiv:1507.04627, doi:10.1103/PhysRevD.92.114505.              [26] N. Sarkar, P. Ghosh, van der Waals hadron resonance
+[11] A. Bazavov, et al., Strangeness at high temperatures:               gas and QCD phase diagram, Phys. Rev. C 98 (1) (2018)
+     from hadrons to quarks, Phys. Rev. Lett. 111 (2013)                 014907. arXiv:1807.02948, doi:10.1103/PhysRevC.98.
+     082301. arXiv:1304.7220, doi:10.1103/PhysRevLett.                   014907.
+     111.082301.                                                    [27] N. Sarkar, Investigating the impact of extra resonance
+[12] G. D. Yen, M. I. Gorenstein, W. Greiner, S.-N. Yang, Ex-            states in the van der Waals Hadron Resonance Gas Model
+     cluded volume hadron gas model for particle number                  (4 2023). arXiv:2304.11914.
+     ratios in A+A collisions, Phys. Rev. C56 (1997) 2210–          [28] K. A. Olive, The Thermodynamics of the Quark - Hadron
+     2218. arXiv:nucl-th/9711062, doi:10.1103/PhysRevC.                  Phase Transition in the Early Universe, Nucl. Phys. B 190
+     56.2210.                                                            (1981) 483–503. doi:10.1016/0550-3213(81)90444-2.
+[13] A. Andronic, P. Braun-Munzinger, J. Stachel, M. Winn,          [29] K. A. Olive, THE QUARK - HADRON TRANSITION IN SYS-
+     Interacting hadron resonance gas meets lattice QCD,                 TEMS WITH NET BARYON NUMBER, Nucl. Phys. B 198
+     Phys. Lett. B718 (2012) 80–85. arXiv:1201.0693, doi:                (1982) 461–473. doi:10.1016/0550-3213(82)90335-2.
+     10.1016/j.physletb.2012.10.001.                                [30] J. I. Kapusta, K. A. Olive, Thermodynamics of Hadrons:
+[14] D. H. Rischke, M. I. Gorenstein, H. Stoecker, W. Greiner,           Delimiting the Temperature, Nucl. Phys. A 408 (1983)
+     Excluded volume effect for the nuclear matter equation              478–494. doi:10.1016/0375-9474(83)90241-5.
+     of state, Z. Phys. C51 (1991) 485–490. doi:10.1007/            [31] P. Huovinen, P. Petreczky, Hadron resonance gas with re-
+     BF01548574.                                                         pulsive interactions and fluctuations of conserved charges,
+[15] R. Hagedorn, J. Rafelski, Hot Hadronic Matter and Nuclear           Phys. Lett. B 777 (2018) 125–130. arXiv:1708.00879,
+     Collisions, Phys. Lett. 97B (1980) 136. doi:10.1016/                doi:10.1016/j.physletb.2017.12.001.
+     0370-2693(80)90566-3.                                          [32] G. Kadam, H. Mishra, Hadron resonance gas with repulsive
+[16] V. V. Begun, M. Gazdzicki, M. I. Gorenstein, Hadron-                mean field interaction: Thermodynamics and transport
+     resonance gas at freeze-out: Reminder on the impor-                 properties, Phys. Rev. D 100 (7) (2019) 074015. arXiv:
+     tance of repulsive interactions, Phys. Rev. C88 (2) (2013)          1907.02199, doi:10.1103/PhysRevD.100.074015.
+     024902. arXiv:1208.4107, doi:10.1103/PhysRevC.88.              [33] J. Sollfrank, P. Huovinen, M. Kataja, P. V. Ruuskanen,
+     024902.                                                             M. Prakash, R. Venugopalan, Hydrodynamical description
+[17] S. K. Tiwari, P. K. Srivastava, C. P. Singh, Description of         of 200-A/GeV/c S + Au collisions: Hadron and electro-
+     Hot and Dense Hadron Gas Properties in a New Excluded-              magnetic spectra, Phys. Rev. C 55 (1997) 392–410. arXiv:
+     Volume model, Phys. Rev. C85 (2012) 014908. arXiv:                  nucl-th/9607029, doi:10.1103/PhysRevC.55.392.
+     1111.2406, doi:10.1103/PhysRevC.85.014908.                     [34] R. Hagedorn, Statistical thermodynamics of strong interac-
+[18] M. I. Gorenstein, A. P. Kostyuk, Y. D. Krivenko, Van                tions at high-energies, Nuovo Cim. Suppl. 3 (1965) 147–
+     der Waals excluded volume model of multicomponent                   186.
+     hadron gas, J. Phys. G 25 (1999) L75–L83. arXiv:               [35] B. Abelev, et al., Pion, Kaon, and Proton Production in
+                                                                                                        √
+     nucl-th/9906068, doi:10.1088/0954-3899/25/9/102.                    Central Pb–Pb Collisions at sN N = 2.76 TeV, Phys.
+[19] V. Vovchenko, H. Stoecker, Examination of the sensitiv-             Rev. Lett. 109 (2012) 252301. arXiv:1208.1974, doi:
+     ity of the thermal fits to heavy-ion hadron yield data              10.1103/PhysRevLett.109.252301.
+     to the modeling of the eigenvolume interactions, Phys.         [36] B. B. Abelev, et al., KS0 and Λ production in Pb-Pb colli-
+                                                                                   √
+     Rev. C 95 (4) (2017) 044904. arXiv:1606.06218, doi:                 sions at sN N = 2.76 TeV, Phys. Rev. Lett. 111 (2013)
+     10.1103/PhysRevC.95.044904.                                         222301. arXiv:1307.5530, doi:10.1103/PhysRevLett.
+[20] J. Noronha-Hostler, H. Ahmad, J. Noronha, C. Greiner,               111.222301.
+     Particle Ratios as a Probe of the QCD Critical Temperature,    [37] B. B. Abelev, et al., Multi-strange baryon produc-
+                                                                                                                             √
+     Phys. Rev. C 82 (2010) 024913. arXiv:0906.3960, doi:                tion at mid-rapidity in Pb-Pb collisions at           sN N
+     10.1103/PhysRevC.82.024913.                                         = 2.76 TeV, Phys. Lett. B728 (2014) 216–227,
+                                                                         [Erratum:      Phys. Lett.B734,409(2014)].          arXiv:
+                                                                                                                                  12
+
+     1307.5543, doi:10.1016/j.physletb.2014.05.052,10.               [54] L. Kumar, Centrality dependence of freeze-out parameters
+                                                                                                      √
+     1016/j.physletb.2013.11.048.                                         from Au+Au collisions at sN N =7.7, 11.5 and 39 GeV,
+[38] B. Abelev, et al., Centrality dependence of π, K, p produc-          Central Eur. J. Phys. 10 (2012) 1274–1277. arXiv:1201.
+                                   √
+     tion in Pb-Pb collisions at sN N = 2.76 TeV, Phys. Rev.              4203, doi:10.2478/s11534-012-0097-9.
+     C88 (2013) 044910. arXiv:1303.0737, doi:10.1103/                [55] L. Adamczyk, et al., Bulk Properties of the Medium Pro-
+     PhysRevC.88.044910.                                                  duced in Relativistic Heavy-Ion Collisions from the Beam
+[39] L. Kumar, STAR Results from the RHIC Beam Energy Scan-               Energy Scan Program, Phys. Rev. C96 (4) (2017) 044904.
+     I, Nucl. Phys. A904-905 (2013) 256c–263c. arXiv:1211.                arXiv:1701.07065, doi:10.1103/PhysRevC.96.044904.
+     1350, doi:10.1016/j.nuclphysa.2013.01.070.                      [56] J. Adam, et al., Strange hadron production in Au+Au
+                                                                                        √
+[40] S. Das, Centrality dependence of freeze-out parameters               collisions at sNN = 7.7, 11.5, 19.6, 27, and 39 GeV,
+     from the beam energy scan at STAR, Nucl. Phys. A904-                 Phys. Rev. C 102 (3) (2020) 034909. arXiv:1906.03732,
+     905 (2013) 891c–894c. arXiv:1210.6099, doi:10.1016/                  doi:10.1103/PhysRevC.102.034909.
+     j.nuclphysa.2013.02.158.                                        [57] L. Ahle, et al., Excitation function of K+ and pi+ pro-
+[41] C. Adler, et al., Midrapidity Lambda and anti-Lambda                 duction in Au + Au reactions at 2/A-GeV to 10/A-GeV,
+     production in Au + Au collisions at s(NN)**(1/2) = 130-              Phys. Lett. B476 (2000) 1–8. arXiv:nucl-ex/9910008,
+     GeV, Phys. Rev. Lett. 89 (2002) 092301. arXiv:nucl-ex/               doi:10.1016/S0370-2693(00)00037-X.
+     0203016, doi:10.1103/PhysRevLett.89.092301.                     [58] L. Ahle, et al., An Excitation function of K- and K+ pro-
+[42] J. Adams, et al., Multistrange baryon production in Au-Au            duction in Au + Au reactions at the AGS, Phys. Lett. B490
+     collisions at S(NN)**1/2 = 130 GeV, Phys. Rev. Lett. 92              (2000) 53–60. arXiv:nucl-ex/0008010, doi:10.1016/
+     (2004) 182301. arXiv:nucl-ex/0307024, doi:10.1103/                   S0370-2693(00)00916-3.
+     PhysRevLett.92.182301.                                          [59] J. L. Klay, et al., Charged pion production in 2
+[43] X. Zhu, Measurements of Ks0 , Λ and Ξ from Au+Au col-                to 8 agev central au+au collisions, Phys. Rev. C68
+                √
+     lisions at sN N = 7.7, 11.5 and 39 GeV in STAR, Acta                 (2003) 054905. arXiv:nucl-ex/0306033, doi:10.1103/
+     Phys. Polon. Supp. 5 (2012) 213–218. arXiv:1203.5183,                PhysRevC.68.054905.
+     doi:10.5506/APhysPolBSupp.5.213.                                [60] J. L. Klay, et al., Longitudinal flow from 2-A-GeV to 8-
+[44] F. Zhao, Beam Energy Dependence of Strange Hadron Pro-               A-GeV Au+Au collisions at the Brookhaven AGS, Phys.
+     duction from STAR at RHIC, J. Phys. Conf. Ser. 509 (2014)            Rev. Lett. 88 (2002) 102301. arXiv:nucl-ex/0111006,
+     012085. doi:10.1088/1742-6596/509/1/012085.                          doi:10.1103/PhysRevLett.88.102301.
+[45] L. Kumar, Systematics of Kinetic Freeze-out Properties          [61] B. B. Back, et al., Anti-lambda production in
+     in High Energy Collisions from STAR, Nucl. Phys. A931                Au+Au collisions at 11.7-AGeV/c, Phys. Rev. Lett. 87
+     (2014) 1114–1119. arXiv:1408.4209, doi:10.1016/j.                    (2001) 242301. arXiv:nucl-ex/0101008, doi:10.1103/
+     nuclphysa.2014.08.085.                                               PhysRevLett.87.242301.
+[46] S. Das, Study of freeze-out dynamics in STAR at RHIC            [62] C. Blume, C. Markert, Strange hadron production in heavy
+     Beam Energy Scan Program, J. Phys. Conf. Ser. 509 (2014)             ion collisions from SPS to RHIC, Prog. Part. Nucl. Phys.
+     012066. arXiv:1402.0255, doi:10.1088/1742-6596/                      66 (2011) 834–879. arXiv:1105.2798, doi:10.1016/j.
+     509/1/012066.                                                        ppnp.2011.05.001.
+[47] B. I. Abelev, et al., Systematic Measurements of Identified     [63] B. B. Back, et al., Baryon rapidity loss in rela-
+     Particle Spectra in pp, d+ Au and Au+Au Collisions from              tivistic Au+Au collisions, Phys. Rev. Lett. 86 (2001)
+     STAR, Phys. Rev. C79 (2009) 034909. arXiv:0808.2041,                 1970–1973. arXiv:nucl-ex/0003007, doi:10.1103/
+     doi:10.1103/PhysRevC.79.034909.                                      PhysRevLett.86.1970.
+[48] M. M. Aggarwal, et al., Strange and Multi-strange Particle      [64] J. Barrette, et al., Proton and pion production in
+                                             √
+     Production in Au+Au Collisions at sN N = 62.4 GeV,                   Au + Au collisions at 10.8A-GeV/c, Phys. Rev. C62
+     Phys. Rev. C83 (2011) 024901. arXiv:1010.0142, doi:                  (2000) 024901. arXiv:nucl-ex/9910004, doi:10.1103/
+     10.1103/PhysRevC.83.024901.                                          PhysRevC.62.024901.
+[49] B. I. Abelev, et al., Measurements of phi meson produc-         [65] B. B. Back, et al., Production of phi mesons in
+     tion in relativistic heavy-ion collisions at RHIC, Phys. Rev.        Au+Au collisions at 11.7-A-GeV/c, Phys. Rev. C69
+     C79 (2009) 064903. arXiv:0809.4737, doi:10.1103/                     (2004) 054901. arXiv:nucl-ex/0304017, doi:10.1103/
+     PhysRevC.79.064903.                                                  PhysRevC.69.054901.
+[50] K. Adcox, et al., Measurement of the Lambda                     [66] P. Alba, W. Alberico, R. Bellwied, M. Bluhm, V. Man-
+     and anti-Lambda particles in Au+Au collisions at                     tovani Sarti, M. Nahrgang, C. Ratti, Freeze-out condi-
+     s(NN)**(1/2) = 130-GeV, Phys. Rev. Lett. 89 (2002)                   tions from net-proton and net-charge fluctuations at RHIC,
+     092302.         arXiv:nucl-ex/0204007, doi:10.1103/                  Phys. Lett. B738 (2014) 305–310. arXiv:1403.4903,
+     PhysRevLett.89.092302.                                               doi:10.1016/j.physletb.2014.09.052.
+[51] C. Adler, et al., Midrapidity phi production in Au + Au         [67] D. Biswas, Formation of light nuclei at chemical freezeout:
+     collisions at s N N = 130-GeV, Phys. Rev. C65 (2002)                 Description within a statistical thermal model, Phys. Rev.
+     041901. doi:10.1103/PhysRevC.65.041901.                              C 102 (2020) 054902. arXiv:2007.07680, doi:10.1103/
+[52] J. Adams, et al., Scaling Properties of Hyperon Production           PhysRevC.102.054902.
+     in Au+Au Collisions at s**(1/2) = 200-GeV, Phys. Rev.           [68] M. Tanabashi, et al., Review of Particle Physics, Phys.
+     Lett. 98 (2007) 062301. arXiv:nucl-ex/0606014, doi:                  Rev. D98 (3) (2018) 030001. doi:10.1103/PhysRevD.
+     10.1103/PhysRevLett.98.062301.                                       98.030001.
+[53] J. Adams, et al., phi meson production in Au + Au and           [69] S. Bhattacharyya, D. Biswas, S. K. Ghosh, R. Ray, P. Singha,
+     p+p collisions at s(NN)**(1/2) = 200-GeV, Phys. Lett.                Novel scheme for parametrizing the chemical freeze-out
+     B612 (2005) 181–189. arXiv:nucl-ex/0406003, doi:                     surface in Heavy Ion Collision Experiments, Phys. Rev.
+     10.1016/j.physletb.2004.12.082.                                      D 100 (5) (2019) 054037. arXiv:1904.00959, doi:10.
+                                                                                                                                13
+
+     1103/PhysRevD.100.054037.                                          0954-3899/30/1/015.
+[70] D. Biswas, Centrality dependence of chemical freeze-out       [79] E. L. Bratkovskaya, M. Bleicher, M. Reiter, S. Soff,
+     parameters and strangeness equilibration in RHIC and LHC           H. Stoecker, M. van Leeuwen, S. A. Bass, W. Cass-
+     energies, Adv. High Energy Phys. 2021 (2021) 6611394.              ing, Strangeness dynamics and transverse pressure in
+     arXiv:2003.10425, doi:10.1155/2021/6611394.                        relativistic nucleus-nucleus collisions, Phys. Rev. C69
+[71] S. Wheaton, J. Cleymans, M. Hauer, THERMUS: A Thermal              (2004) 054907. arXiv:nucl-th/0402026, doi:10.1103/
+     model package for ROOT, Comput. Phys. Commun. 180                  PhysRevC.69.054907.
+     (2009) 84–106. arXiv:hep-ph/0407174, doi:10.1016/             [80] V. Koch, A. Majumder, J. Randrup, Signals of spinodal
+     j.cpc.2008.08.001.                                                 hadronization: Strangeness trapping, Phys. Rev. C72
+[72] J. Cleymans, H. Oeschler, K. Redlich, S. Wheaton, Transi-          (2005) 064903. arXiv:nucl-th/0509030, doi:10.1103/
+     tion from baryonic to mesonic freeze-out, Phys. Lett. B615         PhysRevC.72.064903.
+     (2005) 50–54. arXiv:hep-ph/0411187, doi:10.1016/j.            [81] J. K. Nayak, S. Banik, J.-e. Alam, The horn in the kaon to
+     physletb.2005.03.074.                                              pion ratio, Phys. Rev. C82 (2010) 024914. arXiv:1006.
+[73] P. Huovinen, P. Petreczky, Hadron resonance gas with               2972, doi:10.1103/PhysRevC.82.024914.
+     repulsive interactions, J. Phys. Conf. Ser. 1070 (1) (2018)   [82] C. Li, D. Biswas, N. R. Sahoo, Cumulants of net-strangeness
+     012004. doi:10.1088/1742-6596/1070/1/012004.                       multiplicity distributions at energies available at the BNL
+[74] S. Chatterjee, S. Das, L. Kumar, D. Mishra, B. Mohanty,            Relativistic Heavy Ion Collider, Phys. Rev. C 107 (6) (2023)
+     R. Sahoo, N. Sharma, Freeze-Out Parameters in Heavy-Ion            064905. arXiv:2209.10343, doi:10.1103/PhysRevC.
+     Collisions at AGS, SPS, RHIC, and LHC Energies, Adv. High          107.064905.
+     Energy Phys. 2015 (2015) 349013. doi:10.1155/2015/            [83] J. Adam, et al., Nonmonotonic Energy Dependence
+     349013.                                                            of Net-Proton Number Fluctuations, Phys. Rev. Lett.
+[75] M. Abdallah, et al., Cumulants and correlation func-               126 (9) (2021) 092301. arXiv:2001.02852, doi:10.
+     tions of net-proton, proton, and antiproton multiplic-             1103/PhysRevLett.126.092301.
+     ity distributions in Au+Au collisions at energies avail-      [84] P. Garg, D. K. Mishra, P. K. Netrakanti, B. Mohanty, A. K.
+     able at the BNL Relativistic Heavy Ion Collider, Phys.             Mohanty, B. K. Singh, N. Xu, Conserved number fluc-
+     Rev. C 104 (2) (2021) 024902. arXiv:2101.12413,                    tuations in a hadron resonance gas model, Phys. Lett.
+     doi:10.1103/PhysRevC.104.024902.                                   B726 (2013) 691–696. arXiv:1304.7133, doi:10.1016/
+[76] J. Adam, et al., Enhanced production of multi-strange              j.physletb.2013.09.019.
+     hadrons in high-multiplicity proton-proton collisions, Na-    [85] D. K. Mishra, P. Garg, P. K. Netrakanti, A. K. Mohanty,
+     ture Phys. 13 (2017) 535–539. arXiv:1606.07424, doi:               Effect of resonance decay on conserved number fluc-
+     10.1038/nphys4111.                                                 tuations in a hadron resonance gas model, Phys. Rev.
+[77] M. Gazdzicki, M. I. Gorenstein, On the early stage of              C 94 (1) (2016) 014905. arXiv:1607.01875, doi:10.
+     nucleus-nucleus collisions, Acta Phys. Polon. B30 (1999)           1103/PhysRevC.94.014905.
+     2705. arXiv:hep-ph/9803462.                                   [86] S. Pal, G. Kadam, A. Bhattacharyya, Hadron resonance
+[78] M. Gazdzicki, Energy scan program at the CERN SPS                  gas model with repulsive mean-field interactions: Specific
+     and an observation of the deconfinement phase transi-              heat, isothermal compressibility and speed of sound, Nucl.
+     tion in nucleus nucleus collisions, J. Phys. G30 (2004)            Phys. A 1023 (2022) 122464. arXiv:2104.08531, doi:
+     S161–S168.       arXiv:hep-ph/0305176, doi:10.1088/                10.1016/j.nuclphysa.2022.122464.
+

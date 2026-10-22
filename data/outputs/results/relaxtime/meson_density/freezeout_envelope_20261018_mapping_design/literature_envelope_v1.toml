@@ -1,0 +1,139 @@
+schema = "chemical_freezeout_literature_envelope_v1"
+parameter_order = ["a_GeV", "b_GeV_inv1", "c_GeV_inv3", "d_GeV", "e_GeV_inv1"]
+formula = "T=a-b*muB^2-c*muB^4; muB=d/(1+e*sqrt_s_NN_GeV)"
+policy = "cross-literature coordinate envelope; not a joint confidence region"
+author_decision = "2026-10-18: permit cross-source combinations without restricting to one publication"
+source_root = "D:/Desktop/PNJL论文/01_论文与综述/相图与守恒荷涨落/化学冻结线与Kpi_20261017"
+
+[design]
+seed = 20261018
+interior_trim_fraction = 0.10
+interior_sample_count = 32
+proposal_count = 2048
+minimum_energy_GeV = 4.87
+maximum_energy_GeV = 200.0
+primary_energies_GeV = [7.7, 11.5, 14.5, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+screening_energies_GeV = [4.87, 6.27, 7.62, 7.7, 8.77, 9.25, 10.0, 11.5, 12.32, 14.5, 17.27, 19.6, 27.0, 39.0, 62.4, 130.0, 200.0]
+near_best_rmse_factor = 1.10
+local_step_fraction = 0.05
+local_rounds = 1
+description = "Interior sampling in the middle 80% of each pooled coordinate interval; unmodified source anchors and explicit low-T hybrids retained separately. Positive T across the declared energy window is required. No numerical failure may remove an observation from the fixed scoring grid."
+
+[[sources]]
+id = "cleymans2006"
+kind = "polynomial"
+values = [0.166, 0.139, 0.053, 1.308, 0.273]
+errors = [0.002, 0.016, 0.021, 0.028, 0.008]
+url = "https://arxiv.org/abs/hep-ph/0511094v2"
+locator = "PDF p.3 Eqs.(1)-(2)"
+pdf = "S01_Cleymans_2006_freezeout_criteria.pdf"
+sha256 = "f854d7eae0897dae0684dc23f1ce39c8e8ba862b982c0935575b50a3a99149fc"
+limitations = "Reported marginal coefficient errors; full covariance not supplied in these equations. 200 GeV yield points not included in the polynomial fit."
+
+[[sources]]
+id = "ihrg2019"
+kind = "polynomial"
+values = [0.152, 0.026, 0.219, 1.310, 0.278]
+errors = [0.001, 0.003, 0.004, 0.006, 0.003]
+url = "https://arxiv.org/abs/1906.01954v2"
+locator = "Eq.(5), PDF p.9 Table II, IHRG row"
+pdf = "S22_Poberezhnyuk_2019_QvdW_freezeout.pdf"
+sha256 = "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322"
+limitations = "Yield extraction includes volume, gamma_s and a resonance-decay model. Reported marginal coefficient errors are not a joint independent prior."
+
+[[sources]]
+id = "qvdw2019"
+kind = "polynomial"
+values = [0.157, 0.0032, 0.259, 1.094, 0.157]
+errors = [0.002, 0.0027, 0.004, 0.004, 0.002]
+url = "https://arxiv.org/abs/1906.01954v2"
+locator = "Eq.(5), PDF p.9 Table II, QvdW row"
+pdf = "S22_Poberezhnyuk_2019_QvdW_freezeout.pdf"
+sha256 = "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322"
+limitations = "Different interacting HRG extraction. Only its T,muB trajectory is imported; the QvdW equation of state is not implemented by this profile."
+
+[[sources]]
+id = "frg2024_mudep"
+kind = "normalized_quartic"
+values = [0.1548, 4.05e-7, 0.0022, 0.70896, 0.147]
+url = "https://doi.org/10.1103/PhysRevD.109.034019"
+locator = "Published PDF p.8 Table IV; order T0_GeV,kappa2,kappa4,d_GeV,e_GeV_inv1"
+pdf = "S18b_Shao_2024_FRG_published.pdf"
+sha256 = "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9"
+limitations = "Central values only. Source uses muI=muS=0 without strangeness neutrality; 7.7 GeV omitted from the fit."
+
+[[sources]]
+id = "frg2024_muindep"
+kind = "normalized_quartic"
+values = [0.1539, 7.35e-7, 0.0040, 0.75131, 0.159]
+url = "https://doi.org/10.1103/PhysRevD.109.034019"
+locator = "Published PDF p.8 Table IV; order T0_GeV,kappa2,kappa4,d_GeV,e_GeV_inv1"
+pdf = "S18b_Shao_2024_FRG_published.pdf"
+sha256 = "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9"
+limitations = "Central values only. Mu-independent refers to the gluon potential. Source does not impose project BQS conditions; low-energy continuation is exploratory."
+
+[[sources]]
+id = "functional_qcd2026_mean"
+kind = "normalized_quartic"
+values = [0.157, 0.0153, 0.00096, 0.9537, 0.2026]
+url = "https://arxiv.org/abs/2603.09336v1"
+locator = "PDF p.3 Table I mean row, Eqs.(3)-(5)"
+pdf = "S21_Lu_2026_functional_QCD_freezeout.pdf"
+sha256 = "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027"
+limitations = "Preprint; T0 and kappa2 fixed to chiral-line values by source assumptions. Only freeze-out parameters, not a crossover line, are pooled."
+
+[[sources]]
+id = "functional_qcd2026_lower"
+kind = "normalized_quartic"
+values = [0.157, 0.0153, 0.00147, 0.9139, 0.1977]
+url = "https://arxiv.org/abs/2603.09336v1"
+locator = "PDF p.3 Table I lower row"
+pdf = "S21_Lu_2026_functional_QCD_freezeout.pdf"
+sha256 = "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027"
+limitations = "A correlated parameter group, not independent lower limits. Source interpolates whole lower/upper groups. Pooling its coordinates is an explicitly relaxed exploration."
+
+[[sources]]
+id = "functional_qcd2026_upper"
+kind = "normalized_quartic"
+values = [0.157, 0.0153, 0.00073, 1.0270, 0.2143]
+url = "https://arxiv.org/abs/2603.09336v1"
+locator = "PDF p.3 Table I upper row"
+pdf = "S21_Lu_2026_functional_QCD_freezeout.pdf"
+sha256 = "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027"
+limitations = "A correlated parameter group, not independent upper limits. Its larger muB and smaller kappa4 belong to the same original curve."
+
+[[partial_constraints]]
+id = "bazavov2016_STAR08"
+a_interval_GeV = [0.143, 0.147]
+url = "https://arxiv.org/abs/1509.05786v2"
+locator = "PDF p.4 Table I: Tf0=145(2) MeV, STAR0.8 column"
+pdf = "S05_Bazavov_2016_freezeout_curvature.pdf"
+sha256 = "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282"
+limitations = "Partial high-energy freeze-out constraint; no kappa4,d,e. Its negative curvature estimate depends on proton pT acceptance; not transferred into the current monotone polynomial model."
+
+[[partial_constraints]]
+id = "bazavov2016_STAR20"
+a_interval_GeV = [0.145, 0.149]
+b_zero_supported = true
+url = "https://arxiv.org/abs/1509.05786v2"
+locator = "PDF p.4 Table I: Tf0=147(2) MeV, STAR2.0; Eq.(8) kappa2<0.011, consistent with zero"
+pdf = "S05_Bazavov_2016_freezeout_curvature.pdf"
+sha256 = "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282"
+limitations = "Fit ranges sqrt(s)>=27 or 39 GeV. Acceptance, baryon/proton conversion and shared systematics limit interpretation. Curvature bound is source-specific, not imposed on every pooled trajectory."
+
+[[partial_constraints]]
+id = "bazavov2016_PHENIX_STAR20"
+a_interval_GeV = [0.151, 0.159]
+url = "https://arxiv.org/abs/1509.05786v2"
+locator = "PDF p.4 Table I: Tf0=155(4) MeV"
+pdf = "S05_Bazavov_2016_freezeout_curvature.pdf"
+sha256 = "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282"
+limitations = "Mixed experimental acceptance scenario; contributes only its stated Tf0 interval to the pooled coordinate box."
+
+[[context_constraints]]
+id = "borsanyi2014"
+url = "https://arxiv.org/abs/1403.4576v2"
+locator = "PDF pp.3-4, Fig.4: Tf=144+-6 MeV for sqrt(s)>=39 GeV; Table I muB points"
+pdf = "S06_Borsanyi_2014_freezeout_consistency.pdf"
+sha256 = "454edb804701f7e611abfa335b626ff9ef30043a72ff676e8512487c012490d8"
+limitations = "Finite-energy common-light-sector temperature, not a separate Tf0 coefficient interval. Used for interpretation only, not to lower a to 138 MeV."

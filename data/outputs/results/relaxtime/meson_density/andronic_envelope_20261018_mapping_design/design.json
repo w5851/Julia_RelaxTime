@@ -1,0 +1,577 @@
+{
+  "schema": "freezeout_parameter_design_v1",
+  "family": "andronic_logistic_rational_v1",
+  "created_utc": "2026-10-18T06:27:34.642781+00:00",
+  "catalog_sha256": "31353bd0a6e447766f8672946454c98cb973326d61304cad7d89eddbe70c76ac",
+  "domain_input": {
+    "path": "D:\\w\\meson-freezeout-defaults\\config\\physics\\freezeout\\parameter_domains\\andronic_literature_envelope_v2.toml",
+    "sha256": "803458a299fcef6909bd6f86b36616b31cef01db897fe36e869fb52d3156587b"
+  },
+  "source_evidence": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\recent_sources_manifest.json",
+      "sha256": "633b8cd7daf698a5d7c01ffb9d0e20b74d19d91c65d5125ec5169b728e014666"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\source_manifest.json",
+      "sha256": "6a9e7faac1c983528c12468f05bb8ed06d4fbd5c7acb2d16d6a13491bf206af5"
+    }
+  ],
+  "source_pdf_hashes": {
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ElfnerMuller2023_JPhysG50_103001.pdf": "0b08d560a8b1077598f58cfcd6e59a00f42aeb2f594e94d773e6de3bd7bfa678",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Du2024_PRC110_014904.pdf": "4ed335af020a0d04135830000c9bb77bb612b1a0166b65f953d6e8e3a61a6cf8",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\ThakurHirono2022_JHEP02_207.pdf": "e72d5fc98dc155229c4864c025dec620ca3b1b7101301bba873735c7d5df5f8c",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Andronic2026_arxiv2606.14799v2.pdf": "854228800c9d27a15ea64f95fdbffdb017bb9120efa40a082c0315f7d384f35a",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\LaffertyRothkopf2020_PRD101_056010.pdf": "a7f86160924a92c795199e044e7af535e39dce88497c07c91eae954b071e4774",
+    "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_andronic_literature_20261018\\Yu2025_arxiv2403.16548v3.pdf": "4d40ab1f83ae7bad9eb031357ef2668e7f03758fc8abc53358eb671da705ff16"
+  },
+  "parameter_order": [
+    "T_lim_GeV",
+    "log_offset",
+    "log_width",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "pooled_bounds": [
+    [
+      0.1535,
+      0.164
+    ],
+    [
+      2.2,
+      2.82
+    ],
+    [
+      0.4,
+      0.48
+    ],
+    [
+      1.05,
+      1.3568
+    ],
+    [
+      0.286,
+      0.326
+    ]
+  ],
+  "interior_bounds": [
+    [
+      0.15455,
+      0.16295
+    ],
+    [
+      2.262,
+      2.758
+    ],
+    [
+      0.40800000000000003,
+      0.472
+    ],
+    [
+      1.08068,
+      1.32612
+    ],
+    [
+      0.29,
+      0.322
+    ]
+  ],
+  "design": {
+    "seed": 20261018,
+    "interior_trim_fraction": 0.1,
+    "interior_sample_count": 32,
+    "minimum_energy_GeV": 4.87,
+    "maximum_energy_GeV": 200.0,
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "screening_energies_GeV": [
+      4.87,
+      6.27,
+      7.62,
+      7.7,
+      8.77,
+      9.25,
+      10.0,
+      11.5,
+      12.32,
+      14.5,
+      17.27,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "near_best_rmse_factor": 1.1,
+    "local_step_fraction": 0.05,
+    "local_rounds": 1,
+    "boundary_axis_samples": true,
+    "maximum_mapping_candidates": 3,
+    "refined_curve_count": 3,
+    "description": "Four distinct nonbaseline complete source anchors, 32 stratified interior samples and 10 axis-boundary probes; one axial refinement round and up to three admissible geometry-preserving energy rescalings. Reuse Andronic 2018 as the frozen baseline; Elfner duplicates it and JHEP is temperature-only. Fixed nine-point scoring and complete-curve envelopes match the polynomial exploration."
+  },
+  "candidates": [
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15870344641140444,
+        2.373185601359924,
+        0.41612376606847573,
+        1.1496878256129528,
+        0.30612493770119414
+      ],
+      "provenance": [
+        "andronic_sample_010",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 7.62,
+      "target_energy_GeV": 7.7,
+      "profile_sha256": "b68e0a34152335ea4f7c0e17379d959a572066d645ba7fb869112c38c927abcb",
+      "in_interior_box": true
+    },
+    {
+      "name": "andronic_hornmap_002",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15718075317571026,
+        2.473275986059792,
+        0.42588235947102204,
+        1.3109349391097407,
+        0.28731044709816617
+      ],
+      "provenance": [
+        "andronic_sample_031",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 7.62,
+      "target_energy_GeV": 7.7,
+      "profile_sha256": "c8c45affe79a54cb58acd61a4f9e759326a48db734ee2d39849ae5ef1dc33023",
+      "in_interior_box": false
+    },
+    {
+      "name": "andronic_hornmap_003",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.16131550588390356,
+        2.3610356443791627,
+        0.4113480359771065,
+        1.1881044857870369,
+        0.2988545127255863
+      ],
+      "provenance": [
+        "andronic_sample_017",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 7.62,
+      "target_energy_GeV": 7.7,
+      "profile_sha256": "898d6e4b179710d58182ce064f3de998b3257a72b804436cb80c90559513cb3a",
+      "in_interior_box": true
+    }
+  ],
+  "rejected_proposals": [
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.156,
+        1.7086073188676307,
+        0.45,
+        1.05,
+        0.4301298701298701
+      ],
+      "provenance": [
+        "du2024",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 11.5,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15512744218252114,
+        1.7929867559896198,
+        0.45478961834908377,
+        1.174509861026185,
+        0.41660154387581205
+      ],
+      "provenance": [
+        "andronic_sample_029",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.1554737728729052,
+        1.7354547141726377,
+        0.4615219829868128,
+        1.3042780824572708,
+        0.4725164466288568
+      ],
+      "provenance": [
+        "andronic_sample_024",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 11.5,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15599847968628586,
+        2.067951008739813,
+        0.42189898198893244,
+        1.0866747715255334,
+        0.3640551233433445
+      ],
+      "provenance": [
+        "andronic_sample_018",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15615186253753197,
+        2.102603135979092,
+        0.4152862042992574,
+        1.1334765955109947,
+        0.387952387843968
+      ],
+      "provenance": [
+        "andronic_sample_005",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.1556237989842087,
+        2.2170707849202094,
+        0.42381320362176905,
+        1.1547892159163562,
+        0.3418602440172788
+      ],
+      "provenance": [
+        "andronic_sample_007",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15663898111964053,
+        1.9095446222022994,
+        0.45704651756194725,
+        1.235336844679684,
+        0.4047057041928454
+      ],
+      "provenance": [
+        "andronic_sample_023",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.1580397887227166,
+        1.8217664818072588,
+        0.45029264755140047,
+        1.1409201598221113,
+        0.4176953697894736
+      ],
+      "provenance": [
+        "andronic_sample_014",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15875,
+        1.915989172421801,
+        0.44,
+        1.05,
+        0.39740259740259737
+      ],
+      "provenance": [
+        "andronic_axis_d_GeV_low",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15875,
+        1.5308257724047172,
+        0.48,
+        1.2034,
+        0.48960000000000004
+      ],
+      "provenance": [
+        "andronic_axis_log_width_high",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 12.32,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15692371887033155,
+        2.2675902614849317,
+        0.408610338083636,
+        1.1018313590840139,
+        0.3488223124452191
+      ],
+      "provenance": [
+        "andronic_sample_009",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15457028635308925,
+        2.1820662687032573,
+        0.44193577585155785,
+        1.3185728362503104,
+        0.34837534366974027
+      ],
+      "provenance": [
+        "andronic_sample_004",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15875,
+        1.9083483942964403,
+        0.44,
+        1.2034,
+        0.457012987012987
+      ],
+      "provenance": [
+        "andronic_axis_log_offset_high",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 11.5,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15875,
+        2.0931744939438732,
+        0.44,
+        1.2034,
+        0.39162337662337665
+      ],
+      "provenance": [
+        "andronic_axis_e_GeV_inv1_high",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 9.25,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15684656198266378,
+        2.1415317893047954,
+        0.4454216229332549,
+        1.2464763254294506,
+        0.35343337129188035
+      ],
+      "provenance": [
+        "andronic_sample_020",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 9.25,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.1578374858204721,
+        2.1404437822974627,
+        0.42935358366599286,
+        1.1879222531868026,
+        0.36443151833634674
+      ],
+      "provenance": [
+        "andronic_sample_032",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 9.25,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.158355353725051,
+        1.99920034676876,
+        0.468193123465474,
+        1.2654846518146354,
+        0.3464108919931076
+      ],
+      "provenance": [
+        "andronic_sample_027",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.16215205884314776,
+        2.03660493356938,
+        0.4380583451362586,
+        1.0894427175031702,
+        0.4054586440074058
+      ],
+      "provenance": [
+        "andronic_sample_012",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_001",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.15743759098241542,
+        2.241858831836877,
+        0.4494016526428989,
+        1.298753274699835,
+        0.3319733739203887
+      ],
+      "provenance": [
+        "andronic_sample_003",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_002",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.16234142787298345,
+        2.153465155722306,
+        0.4344661046820209,
+        1.210753666696032,
+        0.4083248647869523
+      ],
+      "provenance": [
+        "andronic_sample_001",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 10.0,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_003",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.16152803463771723,
+        2.192939050618967,
+        0.43054252669683557,
+        1.1665352649074563,
+        0.33889197299157503
+      ],
+      "provenance": [
+        "andronic_sample_008",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    },
+    {
+      "name": "andronic_hornmap_003",
+      "role": "energy_mapping_exploration",
+      "values": [
+        0.16181528819243857,
+        2.0130483271353126,
+        0.4677788013905104,
+        1.2644512536263186,
+        0.3411203554030633
+      ],
+      "provenance": [
+        "andronic_sample_028",
+        "E'=k*E; A'=A-ln(k)/w; k=x_peak/7.7; exact T(muB) preservation"
+      ],
+      "original_peak_energy_GeV": 8.77,
+      "target_energy_GeV": 7.7
+    }
+  ],
+  "reused_reference": "andronic2018; Elfner 2023 duplicates it; JHEP 2022 provides no D/E",
+  "parent": {
+    "assessment": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_local_assessment\\assessment.json",
+    "sha256": "06b6315d345ce35d870adf3474691c8dbc85bd3cbc77c00e295fe1887cd6eeb3",
+    "best": "andronic_local_T_lim_GeV_minus"
+  },
+  "parameter_policy": "literature_envelope_exploration",
+  "band_semantics": "finite sampled complete-curve envelope; no statistical confidence level",
+  "physical_prior": "Tlim,w,D,E>0; analytic T rises and muB decreases on the declared positive-energy interval",
+  "generator_sha256": "b170084f65e4c01f284ec2abf12593d177905919e8b7bce94f7a10a064df03ae",
+  "parts": [
+    [
+      "andronic_hornmap_001",
+      "andronic_hornmap_003"
+    ],
+    [
+      "andronic_hornmap_002"
+    ]
+  ]
+}

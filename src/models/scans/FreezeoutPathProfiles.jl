@@ -113,7 +113,7 @@ end
 
 function build_freezeout_path_points(
     sqrt_s_NN_values;
-    freezeout_profile::FreezeoutProfiles.FreezeoutParameterProfile=FreezeoutProfiles.load_freezeout_profile(),
+    freezeout_profile::FreezeoutProfiles.AbstractFreezeoutParameterProfile=FreezeoutProfiles.load_freezeout_profile(),
     path_profile::FreezeoutPathProfile=load_freezeout_path_profile(),
     traversal::Symbol=:sqrts_ascending,
 )

@@ -1,0 +1,2 @@
+id,curve,kind,status,method,requested_x,x,y,x_lower,x_upper,y_lower,y_upper,x_px,y_px,px_left,px_top,px_right,px_bottom,segment_id
+HADES_2p4,AuAu_SIS,point,measured,manual_pixel_region,,2.3994790313880148,0.010014513788098693,2.273658035683124,2.532262781698795,0.008272859216255443,0.011756168359941943,326.0,845.0,323.0,842.0,329.0,848.0,

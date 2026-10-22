@@ -1,0 +1,38 @@
+{
+  "schema": "literature_candidate_numerical_verification_v1",
+  "runs": [
+    {
+      "resolution": "standard",
+      "scan_identity": "ffd9c1fa15d3ecc911fc9bb22444bfccf8a69c925c457db2375d807eed103d7e",
+      "point_count": 36,
+      "successful_points": 36,
+      "warning_points": 11
+    },
+    {
+      "resolution": "fine",
+      "scan_identity": "5fdbc2442d03672e12a456954c6f3d148bcd84481be92c06b0cec038d97b8afa",
+      "point_count": 36,
+      "successful_points": 36,
+      "warning_points": 12
+    }
+  ],
+  "source_snapshot_hash_checks": 40,
+  "independent_coordinate_check_max_abs_T_MeV": 2.842170943040401e-14,
+  "independent_coordinate_check_max_abs_muB_MeV": 5.684341886080802e-14,
+  "independent_decimal_RMSE_checks": 6,
+  "max_standard_fine_relative_difference": 3.535834510993472e-05,
+  "ranking_unchanged": true,
+  "experimental_input_unchanged": true,
+  "kernel_regressions": "not rerun: no src or kernel changes; existing baseline source identities verified by assessment",
+  "full_endpoint_or_tail_convergence": false,
+  "documentation_checks": {
+    "implementation_docs_consistency": "passed",
+    "root_docs_consistency": "passed",
+    "git_diff_check": "passed",
+    "existing_local_links_checked": 35,
+    "uri_percent_escapes_decoded": true
+  },
+  "pdf_hashes_checked": 9,
+  "previous_plot_manifest_unchanged": true,
+  "verified_utc": "2026-10-17T12:02:11.173593+00:00"
+}

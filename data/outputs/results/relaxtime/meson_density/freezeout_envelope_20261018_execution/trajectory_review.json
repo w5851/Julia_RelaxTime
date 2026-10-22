@@ -1,0 +1,52 @@
+{
+  "schema": "cross_literature_trajectory_review_v1",
+  "method": "Direct evaluation of stored five-parameter formulas; no new density solves or interpolation",
+  "summary": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_envelope_20261018_summary\\summary.json",
+    "sha256": "b72ff02397e5f9da00aa161e9db85a01b5f109a30eda4b576c019fe6215e84db"
+  },
+  "catalog": {
+    "path": "D:\\w\\meson-freezeout-defaults\\config\\physics\\freezeout\\parameter_domains\\literature_envelope_v1.toml",
+    "sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8"
+  },
+  "rows": [
+    {
+      "energy_GeV": 4.87,
+      "best_T_MeV": 130.17001194901786,
+      "best_muB_MeV": 313.5788952400141,
+      "source_central_muB_min_MeV": 413.1733386172774,
+      "minimum_source": "frg2024_mudep",
+      "source_central_muB_max_MeV": 619.9740449622859,
+      "maximum_source": "qvdw2019",
+      "best_below_source_central_envelope": true,
+      "andronic_T_MeV": 113.19765638558226,
+      "andronic_muB_MeV": 544.2111747469365
+    },
+    {
+      "energy_GeV": 7.7,
+      "best_T_MeV": 138.21715840211107,
+      "best_muB_MeV": 235.48085885386197,
+      "source_central_muB_min_MeV": 332.54843097706276,
+      "minimum_source": "frg2024_mudep",
+      "source_central_muB_max_MeV": 495.26913848521895,
+      "maximum_source": "qvdw2019",
+      "best_below_source_central_envelope": true,
+      "andronic_T_MeV": 138.42845611642903,
+      "andronic_muB_MeV": 406.35877672799603
+    },
+    {
+      "energy_GeV": 200.0,
+      "best_T_MeV": 145.62631356394002,
+      "best_muB_MeV": 13.13822252249218,
+      "source_central_muB_min_MeV": 22.5431672422299,
+      "minimum_source": "functional_qcd2026_lower",
+      "source_central_muB_max_MeV": 33.76543209876544,
+      "maximum_source": "qvdw2019",
+      "best_below_source_central_envelope": true,
+      "andronic_T_MeV": 158.3835761183375,
+      "andronic_muB_MeV": 22.3122866894198
+    }
+  ],
+  "interpretation": "A coordinate-wise parameter box can produce muB(s) outside every original source curve. This is an explicit consequence of the author-approved mixing, not evidence that all mixed trajectories are jointly supported by literature.",
+  "caveat": "Source-central envelopes are descriptive, not confidence intervals or a new exclusion gate. Low-energy source continuations may be outside their original fitted ranges; no selection or ranking was changed."
+}

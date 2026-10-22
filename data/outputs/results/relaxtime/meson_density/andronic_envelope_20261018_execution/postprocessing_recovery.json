@@ -1,0 +1,72 @@
+{
+  "schema": "andronic_postprocessing_recovery_v1",
+  "checked_utc": "2026-10-18T06:44:57.892897+00:00",
+  "status": "passed",
+  "original_pipeline_exit_code": 1,
+  "original_error": "ValueError: other-family observations differ",
+  "original_log": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\pipeline.log",
+    "sha256": "670141981c9ca59ed6c175f0341954bf674b742512b69d99616c678b9a24dc6f",
+    "bytes": 35032
+  },
+  "original_plan": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\numerical_plan.json",
+    "sha256": "3cfad0e0c4f03607cc7b91d63a26e9eadf27c7248eec06a17b4af718d3152682",
+    "bytes": 2166
+  },
+  "correction": "Use the 2026-10-18 corrected observation table explicitly; retain original frozen screenings and source snapshots.",
+  "observation_inputs": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261017\\experimental_ratios.csv",
+      "sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631",
+      "bytes": 5095
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\inputs\\meson_freezeout_experiment_20261018\\experimental_ratios.csv",
+      "sha256": "8fc1b0846f975bf30b4f6bfdb585a054b4480ba784dc6536344b108969ae6c50",
+      "bytes": 5093
+    }
+  ],
+  "differences": [
+    {
+      "id": "NA49_17.27",
+      "field": "centrality",
+      "old": "0-7.2%",
+      "new": "0-5%"
+    }
+  ],
+  "scoring_and_band_membership_unchanged": true,
+  "recovered_assessment": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_all_screen_assessment_r2\\assessment.json",
+    "sha256": "c39ba64514c9bb451ff97c5e133402941e6f02fd8c2bcdd753d57f04061f20f7",
+    "bytes": 61295
+  },
+  "recovered_summary": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_summary\\summary.json",
+    "sha256": "8ea288556cfd8512697c191ac3b74aa6e0fb8b1336a6f29aeeb09e1cd4fb55a7",
+    "bytes": 27390
+  },
+  "recovered_Tmu_preparation": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_Tmu_prepared\\preparation.json",
+    "sha256": "b09a6c0c5173bb52f1cb22d28fc510f6b825843d7e0f86d185d5cf5eb0e6e355",
+    "bytes": 6295
+  },
+  "changed_sources": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\source_snapshot\\postprocessing_recovery\\andronic_parameter_envelope.py",
+      "sha256": "914d6da5bcd72c0d6dc0b0556132fd7d6a34fd2ea2c78b25cf677e8cdd79c894",
+      "bytes": 12444
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\andronic_envelope_20261018_execution\\source_snapshot\\postprocessing_recovery\\run_andronic_envelope_pipeline.py",
+      "sha256": "01648552ba02d82d88ffe9c86843756410f0d5db0edac677530ff7f255b8980d",
+      "bytes": 7018
+    }
+  ],
+  "plotting_runtime_recovery": {
+    "initial_python": "bundled runtime; matplotlib unavailable; stopped before creating cases",
+    "successful_python": "D:/Python313/python.exe",
+    "same_runtime_as_polynomial_figures": true
+  },
+  "numerical_batches_reused_without_rerun": true
+}

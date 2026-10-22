@@ -25,6 +25,15 @@ v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_
 
 该目录的物理迁移已完成；历史 figure registry 仍作为迁移前快照保留，不作为当前路径索引。
 
+## Chemical freezeout and meson ratios
+
+[化学冻结线研究链](meson_freezeout_defaults_20261017_analysis/README.md) 收纳默认参数比较、
+近期文献筛选、多项式族和 Andronic 族的有限参数探索、加密核验及 PNG 审阅。
+固定九点 fine RMSE 为多项式 0.069104、Andronic 0.104031、Andronic 2018 默认 0.154025；
+阶段结论仅适用于已采样候选和当前有限积分窗口，图像作者审阅待定。
+[证据恢复说明](../../../data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md)
+定位压缩保存的原始逐点记录与源码快照。后续研究由组会讨论后独立确定。
+
 ## Historical Evidence
 
 | 逻辑类别 | 当前路径 | 语义 |

@@ -1,0 +1,926 @@
+{
+  "schema": "freezeout_parameter_design_v1",
+  "created_utc": "2026-10-18T02:17:19.029066+00:00",
+  "catalog_sha256": "22c95970dfc90a93e0a5ad410586034d2f1c3753dff4612962915881a25c20c8",
+  "source_pdf_hashes": {
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S01_Cleymans_2006_freezeout_criteria.pdf": "f854d7eae0897dae0684dc23f1ce39c8e8ba862b982c0935575b50a3a99149fc",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S22_Poberezhnyuk_2019_QvdW_freezeout.pdf": "2a76f345401d97551dbb8a2b3e298a1a6ea7aaadaf618521042f6888acee5322",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S18b_Shao_2024_FRG_published.pdf": "63ef900cd91b906c713cab34b26371e15d6addf4fa84dd167d137c2bb7ba64e9",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S21_Lu_2026_functional_QCD_freezeout.pdf": "ae2e1e122410ee739c223f351ff8cede9b9939087a1eb15c3c2921dbb2435027",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S05_Bazavov_2016_freezeout_curvature.pdf": "1de2975b628ab1b839afd784d0f2d9ede97b069342cae331a9809703f895f282",
+    "D:\\Desktop\\PNJL论文\\01_论文与综述\\相图与守恒荷涨落\\化学冻结线与Kpi_20261017\\S06_Borsanyi_2014_freezeout_consistency.pdf": "454edb804701f7e611abfa335b626ff9ef30043a72ff676e8512487c012490d8"
+  },
+  "parameter_order": [
+    "a_GeV",
+    "b_GeV_inv1",
+    "c_GeV_inv3",
+    "d_GeV",
+    "e_GeV_inv1"
+  ],
+  "pooled_bounds": [
+    [
+      0.143,
+      0.168
+    ],
+    [
+      0.0,
+      0.15500000000000003
+    ],
+    [
+      0.032,
+      1.0973473819267652
+    ],
+    [
+      0.70896,
+      1.336
+    ],
+    [
+      0.147,
+      0.281
+    ]
+  ],
+  "interior_bounds": [
+    [
+      0.1455,
+      0.1655
+    ],
+    [
+      0.015500000000000003,
+      0.1395
+    ],
+    [
+      0.13853473819267653,
+      0.9908126437340886
+    ],
+    [
+      0.771664,
+      1.273296
+    ],
+    [
+      0.1604,
+      0.2676
+    ]
+  ],
+  "design": {
+    "seed": 20261018,
+    "interior_trim_fraction": 0.1,
+    "interior_sample_count": 32,
+    "proposal_count": 2048,
+    "minimum_energy_GeV": 4.87,
+    "maximum_energy_GeV": 200.0,
+    "primary_energies_GeV": [
+      7.7,
+      11.5,
+      14.5,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "screening_energies_GeV": [
+      4.87,
+      6.27,
+      7.62,
+      7.7,
+      8.77,
+      9.25,
+      10.0,
+      11.5,
+      12.32,
+      14.5,
+      17.27,
+      19.6,
+      27.0,
+      39.0,
+      62.4,
+      130.0,
+      200.0
+    ],
+    "near_best_rmse_factor": 1.1,
+    "local_step_fraction": 0.05,
+    "local_rounds": 1,
+    "description": "Interior sampling in the middle 80% of each pooled coordinate interval; unmodified source anchors and explicit low-T hybrids retained separately. Positive T across the declared energy window is required. No numerical failure may remove an observation from the fixed scoring grid."
+  },
+  "candidates": [
+    {
+      "name": "cleymans2006",
+      "role": "source_anchor",
+      "values": [
+        0.166,
+        0.139,
+        0.053,
+        1.308,
+        0.273
+      ],
+      "provenance": [
+        "cleymans2006"
+      ],
+      "profile_sha256": "de0a9aceafc50822920beacc89eb9a1e4ac5afe96a52e9e7a8289454742969bd",
+      "in_interior_box": false
+    },
+    {
+      "name": "ihrg2019",
+      "role": "source_anchor",
+      "values": [
+        0.152,
+        0.026,
+        0.219,
+        1.31,
+        0.278
+      ],
+      "provenance": [
+        "ihrg2019"
+      ],
+      "profile_sha256": "40132c0eb999c2603d215727d0bb299c049e7ce1abc24a059251fd3646d5d0ae",
+      "in_interior_box": false
+    },
+    {
+      "name": "qvdw2019",
+      "role": "source_anchor",
+      "values": [
+        0.157,
+        0.0032,
+        0.259,
+        1.094,
+        0.157
+      ],
+      "provenance": [
+        "qvdw2019"
+      ],
+      "profile_sha256": "1a3ac8bbadb4f7784c77bf18c51d3bdf3aaa1c8063e35bf25ec545f808385ce6",
+      "in_interior_box": false
+    },
+    {
+      "name": "frg2024_mudep",
+      "role": "source_anchor",
+      "values": [
+        0.1548,
+        2.616279069767442e-06,
+        0.5930752652797626,
+        0.70896,
+        0.147
+      ],
+      "provenance": [
+        "frg2024_mudep"
+      ],
+      "profile_sha256": "2de83900474ba9bcd09b67e166303ebbc2b2eef059945f000ae98bbcbc4ef28a",
+      "in_interior_box": false
+    },
+    {
+      "name": "frg2024_muindep",
+      "role": "source_anchor",
+      "values": [
+        0.1539,
+        4.775828460038986e-06,
+        1.0973473819267652,
+        0.75131,
+        0.159
+      ],
+      "provenance": [
+        "frg2024_muindep"
+      ],
+      "profile_sha256": "13c590df2608515490bd6e639b16d8f5502673eb029d483ee6e1f8c886502608",
+      "in_interior_box": false
+    },
+    {
+      "name": "functional_qcd2026_mean",
+      "role": "source_anchor",
+      "values": [
+        0.157,
+        0.09745222929936305,
+        0.2480688742556965,
+        0.9537,
+        0.2026
+      ],
+      "provenance": [
+        "functional_qcd2026_mean"
+      ],
+      "profile_sha256": "248267a5dc45bf5dcd28d090c0755d8074f948168382f506f438313aa70ce3d2",
+      "in_interior_box": true
+    },
+    {
+      "name": "functional_qcd2026_lower",
+      "role": "source_anchor",
+      "values": [
+        0.157,
+        0.09745222929936305,
+        0.3798554637040352,
+        0.9139,
+        0.1977
+      ],
+      "provenance": [
+        "functional_qcd2026_lower"
+      ],
+      "profile_sha256": "d84fe682cfdd2b4a6fc4ee8c0687aae9505f2742f4200abcf18d972ace672e00",
+      "in_interior_box": true
+    },
+    {
+      "name": "functional_qcd2026_upper",
+      "role": "source_anchor",
+      "values": [
+        0.157,
+        0.09745222929936305,
+        0.18863570646526917,
+        1.027,
+        0.2143
+      ],
+      "provenance": [
+        "functional_qcd2026_upper"
+      ],
+      "profile_sha256": "5fd18ea9234ca53f7f6f22d75fd67215f64fe6d8edb9abf6af80a27f802c371b",
+      "in_interior_box": true
+    },
+    {
+      "name": "hybrid_a147_ihrg2019",
+      "role": "explicit_hybrid",
+      "values": [
+        0.147,
+        0.026,
+        0.219,
+        1.31,
+        0.278
+      ],
+      "provenance": [
+        "ihrg2019",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "0c2ca973b4b0fed0c2c3269e3148ae498c19ff3588c2d9a581bfd99991add2b1",
+      "in_interior_box": false
+    },
+    {
+      "name": "hybrid_a147_frg2024_muindep",
+      "role": "explicit_hybrid",
+      "values": [
+        0.147,
+        4.775828460038986e-06,
+        1.0973473819267652,
+        0.75131,
+        0.159
+      ],
+      "provenance": [
+        "frg2024_muindep",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "b3d428e5960e836ede994fa9f8c59ed9ccf9180e642de48923896d83074ce52c",
+      "in_interior_box": false
+    },
+    {
+      "name": "hybrid_a147_functional_qcd2026_mean",
+      "role": "explicit_hybrid",
+      "values": [
+        0.147,
+        0.09745222929936305,
+        0.2480688742556965,
+        0.9537,
+        0.2026
+      ],
+      "provenance": [
+        "functional_qcd2026_mean",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "b6371ef6f64f78a70585fb03a0bf6892a7ad826ca3385068b38c05ac44d952f9",
+      "in_interior_box": true
+    },
+    {
+      "name": "hybrid_a150_ihrg2019",
+      "role": "explicit_hybrid",
+      "values": [
+        0.15,
+        0.026,
+        0.219,
+        1.31,
+        0.278
+      ],
+      "provenance": [
+        "ihrg2019",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "906859b4f7a18a0857c030f2580dee32b97e954b6b6eb6117acc4a0086f1d233",
+      "in_interior_box": false
+    },
+    {
+      "name": "hybrid_a150_frg2024_muindep",
+      "role": "explicit_hybrid",
+      "values": [
+        0.15,
+        4.775828460038986e-06,
+        1.0973473819267652,
+        0.75131,
+        0.159
+      ],
+      "provenance": [
+        "frg2024_muindep",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "eed8c1196feac6700bc8a1978977b86ceff1eaa2486ada80897177f252a4f6a4",
+      "in_interior_box": false
+    },
+    {
+      "name": "hybrid_a150_functional_qcd2026_mean",
+      "role": "explicit_hybrid",
+      "values": [
+        0.15,
+        0.09745222929936305,
+        0.2480688742556965,
+        0.9537,
+        0.2026
+      ],
+      "provenance": [
+        "functional_qcd2026_mean",
+        "bazavov2016_STAR20",
+        "cross-source exploration"
+      ],
+      "profile_sha256": "96b389b9555e3fc74d045e8ad6c48fe00052600f7f3bc9c6edfa27bc2e64439c",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_001",
+      "role": "interior_sample",
+      "values": [
+        0.15421006847751975,
+        0.033346487109111166,
+        0.40144598512794993,
+        1.096123667168174,
+        0.26434144819447086
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "a17db2842f19e629a2a282f3349e91adf9bde9784862254d4264e6707bbc9bf3",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_002",
+      "role": "interior_sample",
+      "values": [
+        0.16448381767492656,
+        0.041757566825810555,
+        0.8649811977134236,
+        0.993723495933892,
+        0.2579193199342513
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "dc59d68601d640d4feffd645faa5dfc736ac5bc73791900a9ef5bf683ef4397b",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_003",
+      "role": "interior_sample",
+      "values": [
+        0.15527172637303122,
+        0.0958144348082295,
+        0.9639021809950892,
+        0.9264663128828904,
+        0.22594276099728877
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "f603809b7eeb29ca6d79365142bc8e5f7a0fa6f2cc9e8ac640aea1c0d12cd91a",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_004",
+      "role": "interior_sample",
+      "values": [
+        0.15579553348788064,
+        0.0994922308214393,
+        0.8478494097405536,
+        0.8165060070166594,
+        0.1931130772348172
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "9e3b74b5cfafafe973981f6d9325faf30b97b0034bacfb9db14526a257588b90",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_005",
+      "role": "interior_sample",
+      "values": [
+        0.15408055290514627,
+        0.12990085027298387,
+        0.7726237267485576,
+        0.9637262346204277,
+        0.26032371598962833
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "ca6c14e59f3e19964c70ab9af426840ce52e8ebfc312eb70e774264602b722ed",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_006",
+      "role": "interior_sample",
+      "values": [
+        0.15260272509935932,
+        0.07833150304999714,
+        0.6982373188508342,
+        1.1256013365045796,
+        0.1826840165594545
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "f65166dee85a27373123e82e69c8e4a7818f813d9c10b9c71431e76519ee4980",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_007",
+      "role": "interior_sample",
+      "values": [
+        0.14944354516088018,
+        0.10183379268263273,
+        0.9548820731219905,
+        0.7933994132915413,
+        0.2224420757063933
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "873cbae1cb1ea41ba0fdc7ba0ce5af4799db0800cd1e0472eb99d7a5f8e2592a",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_008",
+      "role": "interior_sample",
+      "values": [
+        0.16326459613987154,
+        0.08518268828256888,
+        0.6625490584374978,
+        1.2705559516155114,
+        0.21380621447996492
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "e7d023a7f8e03dec84f90e95bd48837d9ff09bfd9bb8953880da68ff58996cb8",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_009",
+      "role": "interior_sample",
+      "values": [
+        0.14942780095008373,
+        0.06252809800452158,
+        0.7390317008794427,
+        0.8676118492269161,
+        0.24424654029630308
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "0f2c5066bdbf5407d7c14d1b9d1c02876131139dd9d15906c57e97d5bd62f63f",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_010",
+      "role": "interior_sample",
+      "values": [
+        0.15421955922200037,
+        0.08163858060652211,
+        0.9779015413149881,
+        1.2097268766475366,
+        0.2502884369337882
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "52f96c8616ccd6fa424bbcf04d14137592a7d42151e4eb6872498531a961bf13",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_011",
+      "role": "interior_sample",
+      "values": [
+        0.15019911713972356,
+        0.09549739870636123,
+        0.22354142185915632,
+        0.946871813168047,
+        0.16985338807498102
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "e42da63785af72cbb4fd93b777a170a8dd5062cde5e2e5f6a9a6de1e89f846b0",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_012",
+      "role": "interior_sample",
+      "values": [
+        0.1472648141657666,
+        0.04411950554931749,
+        0.8435799858784667,
+        0.8572474693969055,
+        0.17527108197545196
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "362acddb04df040959532d342e3874cbe1d905e14fbee20b43403dff1c6e620a",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_013",
+      "role": "interior_sample",
+      "values": [
+        0.15356573618053299,
+        0.04206555399992755,
+        0.16794449888659974,
+        0.8896745134520808,
+        0.1877917404922808
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "0c0b10f32449567ac391650dd0da302a99861858f9ccbe5e79d1b6b8dd9a9d9f",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_014",
+      "role": "interior_sample",
+      "values": [
+        0.14689421970002192,
+        0.10364148726030518,
+        0.5463741671473763,
+        0.8402712694332657,
+        0.2233322518914494
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "33cee582a9675d1fec0ddbae76b11223e5fd7f1d1b89b2d2203221d4e1b41d02",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_015",
+      "role": "interior_sample",
+      "values": [
+        0.14910895431902402,
+        0.13926074334365943,
+        0.3484785039025958,
+        1.0947541561958287,
+        0.19068102297517514
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "243f99caf1e5755f093c2989a990590cbe1e18a49f194990068686034280af1c",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_016",
+      "role": "interior_sample",
+      "values": [
+        0.1501478584311532,
+        0.037738368958538146,
+        0.2190320413660567,
+        0.9504792724164065,
+        0.23743223602886337
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "4f7bd42658a0ef009b256777f20166a2ba897b1716c853a71a66e67d2b31f53e",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_017",
+      "role": "interior_sample",
+      "values": [
+        0.15387987759882482,
+        0.06466781539415827,
+        0.4429712033540829,
+        1.0057445389756354,
+        0.2289263156579172
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "feefcf3d66b7b20b1f9fbaad1920d2de8e3e20fcffaaf9ebd067d78d1d580778",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_018",
+      "role": "interior_sample",
+      "values": [
+        0.15532779715808326,
+        0.03686197056684628,
+        0.5071041703113445,
+        0.8650262588367822,
+        0.183521489025539
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "f99888a9e951091fa5e4c41a0df76e6d371b7e730d023387db4103fc9d332bfe",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_019",
+      "role": "interior_sample",
+      "values": [
+        0.15699675254177164,
+        0.12798371981229056,
+        0.5199738892145264,
+        0.7822026802821815,
+        0.2479114748229111
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "2fc7347c3a96c142027a1313ab9633b82305730246e02c29edab50be93768a75",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_020",
+      "role": "interior_sample",
+      "values": [
+        0.15409402484804519,
+        0.0845265736182669,
+        0.2332444009188015,
+        0.9544004699907509,
+        0.2625236582718329
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "ca45f9fbacde6d7f27383b24a852b52d1a62b860a2536ea9fa684bc61620a49a",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_021",
+      "role": "interior_sample",
+      "values": [
+        0.15361873692408787,
+        0.03049576470978294,
+        0.8535739146429244,
+        0.9857883169835175,
+        0.16158248460859964
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "eb3fe1f54d51177af3b20c0f0235e6626b4c3efa26f5f57d909924dccf956e8e",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_022",
+      "role": "interior_sample",
+      "values": [
+        0.15200737855955518,
+        0.042680889239350935,
+        0.6023024126845847,
+        1.0783238431183433,
+        0.2178496234864955
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "0024834d41cbabb879e9c5cde181d3e9f1463179269f15f60d0b78934de6fca9",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_023",
+      "role": "interior_sample",
+      "values": [
+        0.15948884218011725,
+        0.02187534941122616,
+        0.817446865336416,
+        0.8059733260492049,
+        0.2208691494704292
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "77c988dc51fac512cc8b33d74d383ab785e0d5268047a035b15887e441203e33",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_024",
+      "role": "interior_sample",
+      "values": [
+        0.1603198207304416,
+        0.07247126045230408,
+        0.38049438153924087,
+        1.0808042700031968,
+        0.17138426553933084
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "5b049bc854c97e67ab3488289119c8862676c6ae29332865e2b095a604a49050",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_025",
+      "role": "interior_sample",
+      "values": [
+        0.1514005821173252,
+        0.08475280586348553,
+        0.9196296094902339,
+        0.9705665128926343,
+        0.22493087408871487
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "0a0afb2424056b84a369bed2779ceec687a163e5ca5a056e716fe2ae375cc4c6",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_026",
+      "role": "interior_sample",
+      "values": [
+        0.14870709685192124,
+        0.07870644034444985,
+        0.7477475242854128,
+        1.02624210328454,
+        0.2122746660358823
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "5df580bdd4c85a2bb38a6fe7dc4c73b6ff1c4fe4f09f85a22dd4a31e25cd8195",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_027",
+      "role": "interior_sample",
+      "values": [
+        0.1636442956073366,
+        0.08913247145764015,
+        0.47003213744458305,
+        0.8649825306109382,
+        0.24920625695261306
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "3b675f5dc7f0e34dd74f819241d2a28f6209ee6c507dfa3e53c9c29450c4e522",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_028",
+      "role": "interior_sample",
+      "values": [
+        0.1496319280062822,
+        0.03705348453715865,
+        0.7413114047335285,
+        0.9569230837727665,
+        0.17847416044156889
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "a4276da55c6949aab41e8d3f22e19b6fa3f84d1cc2e7c7deed106d5260c2c4e8",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_029",
+      "role": "interior_sample",
+      "values": [
+        0.15239367938920326,
+        0.09925466606162119,
+        0.5331225268355688,
+        0.9565177196897423,
+        0.21204922025530798
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "71c7514ec03e3cfca7bd9a208124816bbc132e8e610dff368b62b54762efe8c0",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_030",
+      "role": "interior_sample",
+      "values": [
+        0.1527968926621347,
+        0.1327511262001088,
+        0.19215724531565367,
+        0.820685270154953,
+        0.2670110237599197
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "7201e525f64f81ee31b56cabc0d99db6e3587b25f966291c0d26eb5e3f8e5826",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_031",
+      "role": "interior_sample",
+      "values": [
+        0.15381026047046384,
+        0.13582666853510278,
+        0.31555944873459957,
+        0.8818494146563081,
+        0.1613691676877152
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "4f94231913085ed4c49f7a2e28c2bb0581151053550bb9fec243bdb2a3d870e6",
+      "in_interior_box": true
+    },
+    {
+      "name": "envelope_032",
+      "role": "interior_sample",
+      "values": [
+        0.14997180884796066,
+        0.030232432982463663,
+        0.26040752559194325,
+        0.9825746852138079,
+        0.25487783678371256
+      ],
+      "provenance": [
+        "pooled coordinate intervals; stratified proposals with positivity rejection"
+      ],
+      "profile_sha256": "8b0e47d191689cb55ce9327bc45dea55783e2bb7939cceb442476bbfbea0d57e",
+      "in_interior_box": true
+    }
+  ],
+  "rejected_proposals": [
+    {
+      "proposal": 25,
+      "values": [
+        0.15829972077914764,
+        0.021043006439307867,
+        0.9420930180573379,
+        1.1478651331844643,
+        0.16313938947421805
+      ],
+      "reason": "nonpositive trajectory temperature"
+    }
+  ],
+  "parent": null,
+  "parameter_policy": "literature_envelope_exploration",
+  "band_semantics": "finite sampled parameter envelope; no statistical confidence level",
+  "physical_prior": "a,d,e>0; b,c>=0; T>0 throughout declared domain; source-specific negative curvature not imported",
+  "generator_sha256": "a4ad46dcd826c94a792fa6dc278b81e02838d90cdb78fbfa7dfb110473bc3237",
+  "parts": [
+    [
+      "cleymans2006",
+      "qvdw2019",
+      "frg2024_muindep",
+      "functional_qcd2026_lower",
+      "hybrid_a147_ihrg2019",
+      "hybrid_a147_functional_qcd2026_mean",
+      "hybrid_a150_frg2024_muindep",
+      "envelope_001",
+      "envelope_003",
+      "envelope_005",
+      "envelope_007",
+      "envelope_009",
+      "envelope_011",
+      "envelope_013",
+      "envelope_015",
+      "envelope_017",
+      "envelope_019",
+      "envelope_021",
+      "envelope_023",
+      "envelope_025",
+      "envelope_027",
+      "envelope_029",
+      "envelope_031"
+    ],
+    [
+      "ihrg2019",
+      "frg2024_mudep",
+      "functional_qcd2026_mean",
+      "functional_qcd2026_upper",
+      "hybrid_a147_frg2024_muindep",
+      "hybrid_a150_ihrg2019",
+      "hybrid_a150_functional_qcd2026_mean",
+      "envelope_002",
+      "envelope_004",
+      "envelope_006",
+      "envelope_008",
+      "envelope_010",
+      "envelope_012",
+      "envelope_014",
+      "envelope_016",
+      "envelope_018",
+      "envelope_020",
+      "envelope_022",
+      "envelope_024",
+      "envelope_026",
+      "envelope_028",
+      "envelope_030",
+      "envelope_032"
+    ]
+  ]
+}

@@ -1,0 +1,10 @@
+profile_name = "ihrg2019"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "literature_anchor:ihrg2019"
+
+[coefficients]
+a_GeV = 0.152
+b_GeV_inv1 = 0.026
+c_GeV_inv3 = 0.219
+d_GeV = 1.31
+e_GeV_inv1 = 0.278

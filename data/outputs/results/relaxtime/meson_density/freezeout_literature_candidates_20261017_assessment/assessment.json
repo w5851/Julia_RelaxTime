@@ -1,0 +1,317 @@
+{
+  "schema": "literature_freezeout_candidate_assessment_v1",
+  "metric": "equal-weight RMSE on common Au+Au observations at 11.5-200 GeV",
+  "scope": "restricted-energy diagnostic; not a full-energy ranking or horn-shape validation",
+  "parameter_adjustment": false,
+  "density_route": "q0_lambda_reference",
+  "experimental_csv_sha256": "0b12c4e8f7bf5ced587a09bf1065ecb28ec7539bb322e2c754c26dd1a5642631",
+  "comparisons": {
+    "standard": {
+      "energies_GeV": [
+        11.5,
+        14.5,
+        19.6,
+        27.0,
+        39.0,
+        62.4,
+        130.0,
+        200.0
+      ],
+      "excluded_failures": [],
+      "profiles": {
+        "andronic2018": {
+          "count": 8,
+          "rmse": 0.15229065459026814,
+          "mae": 0.14971412498718942,
+          "mean_signed_bias": 0.14971412498718942,
+          "ratio_at_7p7": 0.38986701654781936,
+          "ratio_at_200": 0.27449809866884267,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.0
+        },
+        "cleymans2006": {
+          "count": 8,
+          "rmse": 0.18163788898867786,
+          "mae": 0.17924344058601174,
+          "mean_signed_bias": 0.17924344058601174,
+          "ratio_at_7p7": 0.4153790021583074,
+          "ratio_at_200": 0.2989028057674061,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": -0.19270541897247262
+        },
+        "frg2024_mudep": {
+          "count": 8,
+          "rmse": 0.13818995307366688,
+          "mae": 0.13565865691731083,
+          "mean_signed_bias": 0.13565865691731083,
+          "ratio_at_7p7": 0.3986573110835479,
+          "ratio_at_200": 0.2634882696567358,
+          "7p7_outside_source_fit": true,
+          "rmse_reduction_vs_andronic_fraction": 0.0925907210428547
+        },
+        "frg2024_muindep": {
+          "count": 8,
+          "rmse": 0.1291807691651113,
+          "mae": 0.12748164564698106,
+          "mean_signed_bias": 0.12748164564698106,
+          "ratio_at_7p7": 0.34197088887902594,
+          "ratio_at_200": 0.26043869045871904,
+          "7p7_outside_source_fit": true,
+          "rmse_reduction_vs_andronic_fraction": 0.1517485461424607
+        },
+        "functional_qcd2026_mean": {
+          "count": 8,
+          "rmse": 0.13775836115406864,
+          "mae": 0.13637614603691395,
+          "mean_signed_bias": 0.13637614603691395,
+          "ratio_at_7p7": 0.3620372203086872,
+          "ratio_at_200": 0.27021815293188967,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.09542472238561217
+        },
+        "ihrg2019": {
+          "count": 8,
+          "rmse": 0.1317561554302936,
+          "mae": 0.12825615861665632,
+          "mean_signed_bias": 0.12825615861665632,
+          "ratio_at_7p7": 0.4217530060846921,
+          "ratio_at_200": 0.25437823801288867,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.13483755267335207
+        }
+      },
+      "ranking": [
+        "frg2024_muindep",
+        "ihrg2019",
+        "functional_qcd2026_mean",
+        "frg2024_mudep",
+        "andronic2018",
+        "cleymans2006"
+      ]
+    },
+    "fine": {
+      "energies_GeV": [
+        11.5,
+        14.5,
+        19.6,
+        27.0,
+        39.0,
+        62.4,
+        130.0,
+        200.0
+      ],
+      "excluded_failures": [],
+      "profiles": {
+        "andronic2018": {
+          "count": 8,
+          "rmse": 0.15230022100728416,
+          "mae": 0.1497235961433329,
+          "mean_signed_bias": 0.1497235961433329,
+          "ratio_at_7p7": 0.3898807630863314,
+          "ratio_at_200": 0.2745059011773912,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.0
+        },
+        "cleymans2006": {
+          "count": 8,
+          "rmse": 0.1816474075365763,
+          "mae": 0.17925281381044472,
+          "mean_signed_bias": 0.17925281381044472,
+          "ratio_at_7p7": 0.41539335661986543,
+          "ratio_at_200": 0.2989101376127549,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": -0.19269300028060066
+        },
+        "frg2024_mudep": {
+          "count": 8,
+          "rmse": 0.1381993126508905,
+          "mae": 0.1356679687460645,
+          "mean_signed_bias": 0.1356679687460645,
+          "ratio_at_7p7": 0.3986698577606584,
+          "ratio_at_200": 0.26349616709429297,
+          "7p7_outside_source_fit": true,
+          "rmse_reduction_vs_andronic_fraction": 0.09258626325774832
+        },
+        "frg2024_muindep": {
+          "count": 8,
+          "rmse": 0.12919010207050483,
+          "mae": 0.1274909256627134,
+          "mean_signed_bias": 0.1274909256627134,
+          "ratio_at_7p7": 0.341982903487295,
+          "ratio_at_200": 0.2604465953575071,
+          "7p7_outside_source_fit": true,
+          "rmse_reduction_vs_andronic_fraction": 0.15174054761006572
+        },
+        "functional_qcd2026_mean": {
+          "count": 8,
+          "rmse": 0.13776781279219819,
+          "mae": 0.13638552201664922,
+          "mean_signed_bias": 0.13638552201664922,
+          "ratio_at_7p7": 0.3620500213456655,
+          "ratio_at_200": 0.2702260039673215,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.0954194821187484
+        },
+        "ihrg2019": {
+          "count": 8,
+          "rmse": 0.13176573934924915,
+          "mae": 0.12826567729885,
+          "mean_signed_bias": 0.12826567729885,
+          "ratio_at_7p7": 0.42176733908599545,
+          "ratio_at_200": 0.2543861612182271,
+          "7p7_outside_source_fit": false,
+          "rmse_reduction_vs_andronic_fraction": 0.1348289682196383
+        }
+      },
+      "ranking": [
+        "frg2024_muindep",
+        "ihrg2019",
+        "functional_qcd2026_mean",
+        "frg2024_mudep",
+        "andronic2018",
+        "cleymans2006"
+      ]
+    }
+  },
+  "resolution_comparison": {
+    "schema": "chemical_freezeout_resolution_comparison_v1",
+    "method": "exact profile and energy match; no interpolation; absolute refined-minus-reference ratio difference",
+    "profiles": {
+      "frg2024_mudep": {
+        "common_valid_points": 9,
+        "added_refined_energies_GeV": [],
+        "max_absolute_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2546677110480964e-05,
+          "relative_to_reference": 3.147233667025742e-05
+        },
+        "max_relative_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2546677110480964e-05,
+          "relative_to_reference": 3.147233667025742e-05
+        },
+        "mean_absolute_difference": 9.67125634886311e-06,
+        "failure_comparison": []
+      },
+      "frg2024_muindep": {
+        "common_valid_points": 9,
+        "added_refined_energies_GeV": [],
+        "max_absolute_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2014608269050875e-05,
+          "relative_to_reference": 3.513342410061433e-05
+        },
+        "max_relative_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2014608269050875e-05,
+          "relative_to_reference": 3.513342410061433e-05
+        },
+        "mean_absolute_difference": 9.583859347523433e-06,
+        "failure_comparison": []
+      },
+      "functional_qcd2026_mean": {
+        "common_valid_points": 9,
+        "added_refined_energies_GeV": [],
+        "max_absolute_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2801036978316027e-05,
+          "relative_to_reference": 3.535834510993472e-05
+        },
+        "max_relative_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.2801036978316027e-05,
+          "relative_to_reference": 3.535834510993472e-05
+        },
+        "mean_absolute_difference": 9.756541651146428e-06,
+        "failure_comparison": []
+      },
+      "ihrg2019": {
+        "common_valid_points": 9,
+        "added_refined_energies_GeV": [],
+        "max_absolute_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.4333001303379334e-05,
+          "relative_to_reference": 3.3984348888081496e-05
+        },
+        "max_relative_difference": {
+          "energy_GeV": 7.7,
+          "absolute_ratio_difference": 1.4333001303379334e-05,
+          "relative_to_reference": 3.3984348888081496e-05
+        },
+        "mean_absolute_difference": 1.0053606539192935e-05,
+        "failure_comparison": []
+      }
+    }
+  },
+  "baseline_source_checks": {
+    "standard": {
+      "identical_source_paths": [
+        "Manifest.toml",
+        "Project.toml",
+        "config/models/pnjl/charged_gbu_infinite_v1.toml",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_profile.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_qgate.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_thermal.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_yield.jl",
+        "scripts/analysis/relaxtime/charged_gbu_q0_reference.jl",
+        "scripts/analysis/relaxtime/charged_gbu_saved_backgrounds.jl",
+        "scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl",
+        "src/config/ConfigLoader.jl",
+        "src/models/Models.jl",
+        "src/models/scans/FreezeoutProfiles.jl",
+        "src/models/solver/runtime/ConstraintSolverFixedMuBConservedCharges.jl",
+        "src/models/workflow_apps/ChargedGBUResearchWorkflow.jl"
+      ],
+      "changed_runner_path": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "runner_difference": "earlier frozen runner predates CLI default-energy correction; both used explicit energy lists"
+    },
+    "fine": {
+      "identical_source_paths": [
+        "Manifest.toml",
+        "Project.toml",
+        "config/models/pnjl/charged_gbu_infinite_v1.toml",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_profile.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_qgate.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_thermal.jl",
+        "scripts/analysis/relaxtime/causal_gbu_infinite_yield.jl",
+        "scripts/analysis/relaxtime/charged_gbu_q0_reference.jl",
+        "scripts/analysis/relaxtime/charged_gbu_saved_backgrounds.jl",
+        "scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl",
+        "src/config/ConfigLoader.jl",
+        "src/models/Models.jl",
+        "src/models/scans/FreezeoutProfiles.jl",
+        "src/models/solver/runtime/ConstraintSolverFixedMuBConservedCharges.jl",
+        "src/models/workflow_apps/ChargedGBUResearchWorkflow.jl"
+      ],
+      "changed_runner_path": [
+        "scripts/analysis/relaxtime/run_charged_gbu_freezeout_comparison.jl"
+      ],
+      "runner_difference": "earlier frozen runner predates CLI default-energy correction; both used explicit energy lists"
+    }
+  },
+  "source_limitations": {
+    "frg2024": "source uses muI=muS=0, without strangeness neutrality; 7.7 GeV excluded from fit",
+    "functional_qcd2026": "preprint; T0 and kappa2 constrained to source chiral-line values; uses mean row only",
+    "comparison_background": "all imported T,muB trajectories evaluated with project quark-only BQS nS=0,nQ/nB=0.4"
+  },
+  "inputs": {
+    "standard_run": {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_literature_candidates_20261017_standard",
+      "manifest_sha256": "1e5c4367570ecefc3d014abd34d10909ea22fd64a5cd1507ebf06aec4795f018"
+    },
+    "fine_run": {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_literature_candidates_20261017_fine",
+      "manifest_sha256": "20ae11fc6ab17544b2f31e6865df81ef0570ac85ef060901ba9f2c08e2a597b9"
+    },
+    "baseline_standard_run": {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_defaults_20261017_standard",
+      "manifest_sha256": "e5f576fbd039cce34a9cd2e9270bbe76123aaa19af9804c7fd148877fc184eb1"
+    },
+    "baseline_fine_run": {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\meson_density\\freezeout_defaults_20261017_fine",
+      "manifest_sha256": "b4add4deb5160c4f08459ade789d1980e1d434ad9c07074a62c241c407b2d7a8"
+    }
+  }
+}

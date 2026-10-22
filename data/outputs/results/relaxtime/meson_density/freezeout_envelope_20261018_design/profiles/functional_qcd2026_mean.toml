@@ -1,0 +1,10 @@
+profile_name = "functional_qcd2026_mean"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "literature_anchor:functional_qcd2026_mean"
+
+[coefficients]
+a_GeV = 0.157
+b_GeV_inv1 = 0.09745222929936305
+c_GeV_inv3 = 0.2480688742556965
+d_GeV = 0.9537
+e_GeV_inv1 = 0.2026

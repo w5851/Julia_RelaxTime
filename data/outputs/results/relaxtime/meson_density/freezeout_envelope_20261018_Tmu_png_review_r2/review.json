@@ -1,0 +1,42 @@
+{
+  "schema": "chemical_freezeout_Tmu_review_v1",
+  "reviewed_at_utc": "2026-10-18T03:54:25.297647+00:00",
+  "reviewer": "agent",
+  "author_review": "pending",
+  "manifest_sha256": "2b32c7cb603e27abbc3d327450f4402f5a23080197f0e61c58c42205b858d99a",
+  "preparation_sha256": "fde5960d2e7f5579bb8f62dcfa63057e1241d6df71f445be65a1de9bbb6c790e",
+  "parameter_and_table_hashes_verified": true,
+  "coordinate_validation": {
+    "points": 156,
+    "maximum_error_MeV": 5.684341886080802e-14
+  },
+  "focused_unit_tests": {
+    "passed": 4,
+    "file": "tests/unit/python/test_freezeout_thermodynamic_envelope.py",
+    "command": "D:/Python313/python.exe -X utf8 -m unittest discover -s tests/unit/python -p test_freezeout_thermodynamic_envelope.py -v"
+  },
+  "old_ratio_summary_images_and_experiment_hashes_unchanged": true,
+  "docs_consistency": "passed",
+  "diff_whitespace_check": "passed",
+  "images": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\freezeout_envelope_20261018_Tmu_png_review_r2\\chemical_freezeout_T_muB_band.png",
+      "sha256": "af0372b8618f26a61b2a055c9432c9c242b716e3ec2fd1d0c1d2c45066812493",
+      "identical_to_visually_checked_r1": true
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\meson_density\\freezeout_envelope_20261018_Tmu_png_review_r2\\chemical_freezeout_T_muB_band_gray.png",
+      "sha256": "2b0c117155b7ad81879823fd130297e4090603f46299aacb608713187507c6c0",
+      "identical_to_visually_checked_r1": true
+    }
+  ],
+  "visual_checks": {
+    "color": "passed",
+    "grayscale": "passed",
+    "all_members_fixed": true,
+    "legend_within_single_panel": true,
+    "marker_semantics": "7.7 GeV positions on the two parameterizations, not experimental T-muB determinations"
+  },
+  "correction_from_r1": "Axes metadata now identifies the already converted MeV table columns; PNG bytes unchanged",
+  "numerical_work": "Analytic parameter preparation only; no density solver called"
+}

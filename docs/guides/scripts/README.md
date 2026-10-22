@@ -23,6 +23,15 @@ quark-only BQS 的 charged GBU smoke production；不包含介子反馈，也不
 
 ### 二维 screening 与组会图（诊断工具）
 
+文献默认化学冻结线及跨文献参数组合的直接 q=0 沿线计算使用
+[`run_charged_gbu_freezeout_comparison.jl`](meson_freezeout_comparison.md)。
+它模块化选择冻结线 profile，保留 BQS 约束、端点警告和逐点 checkpoint；
+跨文献探索显式标记 `literature_envelope_exploration`，参数带设计、固定观测点评分与
+加密比较入口也见上述说明。
+Andronic logistic 族的候选生成与同构筛选使用 `andronic_parameter_envelope.py`，
+并复用相同数值 runner、评分和绘图入口；参数域与差异见该说明的 Andronic 小节。
+与下述旧等高网格的显示或路径插值是分开的入口。
+
 二维 screening 入口 `scripts/analysis/relaxtime/run_charged_gbu_contour_scan.jl`
 默认仍为 `--density-route direct_finite_q`；显式指定
 `--density-route q0_lambda_reference` 可用同一个无限热 q=0 核进行 timelike

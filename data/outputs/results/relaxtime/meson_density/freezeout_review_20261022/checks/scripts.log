@@ -1,0 +1,8 @@
+[script-entrypoints] OK: checked 298 Julia files
+  - benchmark\pnjl
+  - benchmark\relaxtime
+  - scripts\perf\pnjl
+  - scripts\perf\relaxtime
+  - scripts\analysis
+  - scripts\pnjl
+  - scripts\relaxtime

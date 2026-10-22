@@ -1,0 +1,6 @@
+[integration-selected] including: relaxtime\test_charged_gbu_freezeout_comparison.jl
+andronic2018 sqrt(s)=200 T=158.3836 muB=22.3123 K/pi=0.2742722 screened (58.02 s)
+cleymans2006 sqrt(s)=200 T=165.9231 muB=23.5252 K/pi=0.2986818 screened (1.48 s)
+andronic2018 sqrt(s)=200 T=158.3836 muB=22.3123 K/pi=0.2742722 screened (2.61 s)
+Test Summary: | Pass  Total     Time
+Integration   |   71     71  7m35.3s
