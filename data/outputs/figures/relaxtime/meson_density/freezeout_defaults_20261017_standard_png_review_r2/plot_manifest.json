@@ -21,7 +21,7 @@
       "matplotlib": "3.10.1"
     },
     "source_snapshot": {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
       "path_kind": "repository_relative",
       "role": "generator_source_snapshot",
       "bytes": 17961,
@@ -479,14 +479,14 @@
   "observable_note": "Local quark-only meson densities compared with final midrapidity hadron yields; no decay or acceptance model. ALICE is a charge sum.",
   "analysis_outputs": [
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
       "path_kind": "repository_relative",
       "role": "derived_comparison",
       "bytes": 3196,
       "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
       "path_kind": "repository_relative",
       "role": "derived_comparison",
       "bytes": 4575,

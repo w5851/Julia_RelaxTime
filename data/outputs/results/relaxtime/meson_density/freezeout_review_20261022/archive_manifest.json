@@ -415,12 +415,12 @@
       "sha256": "204a01b0d7bf59733f9121b8f0549f7d3cd0c5949cbcbc77c323c0a3df2537da"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_metrics.json",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_metrics.json",
       "bytes": 3196,
       "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_residuals.csv",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/comparison_residuals.csv",
       "bytes": 4575,
       "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
     },
@@ -437,20 +437,20 @@
     {
       "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/plot_manifest.json",
       "bytes": 16515,
-      "sha256": "d8ed57d0d714d18c298bb85186df0d6bfc54c8ba9d01d8c39d3ed785f800b39f"
+      "sha256": "c2259fb7f0dcaff012f1cd6d692fab0bfe093e084d3bb7e7367b5a7275f8c47a"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_freezeout_comparison.py",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_freezeout_comparison.py",
       "bytes": 17897,
       "sha256": "2e0685f563e52c46e80298fa8c9584527792f840a8b6fba0e221c999e20ff349"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_metrics.json",
       "bytes": 3196,
       "sha256": "77d7c14278a2c4a231806e28623409842657ba9896cbef8d37fac7efc7b5dfea"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/comparison_residuals.csv",
       "bytes": 4575,
       "sha256": "910b211bcfced789a9dde8bc7c8185827dbe133d854fdac1fa791bb84b03bb82"
     },
@@ -467,10 +467,10 @@
     {
       "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/plot_manifest.json",
       "bytes": 16608,
-      "sha256": "4e012ca4ebf60325941aa4c73b8ccc49966dca9993dddefce722ea7c34c04503"
+      "sha256": "deb98a4312e8462a0da13f32ee01211fb12accd83dd86011c46cf4cac8d150d8"
     },
     {
-      "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_freezeout_comparison.py",
       "bytes": 17961,
       "sha256": "7fbe60046af4635155c7b2a50ae44794bdaa16d7307ecb914d50db887d69c400"
     },
@@ -2658,9 +2658,34 @@
       "path": "data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017_standard/run.json.sha256",
       "bytes": 64,
       "sha256": "b1396ca18aedadf5d3b6bde6e4b1b53c02f78d85bf89df1f9ac122b104ddefdf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review/source/plot_manifest.original.json",
+      "bytes": 16515,
+      "sha256": "d8ed57d0d714d18c298bb85186df0d6bfc54c8ba9d01d8c39d3ed785f800b39f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_standard_png_review_r2/source/plot_manifest.original.json",
+      "bytes": 16608,
+      "sha256": "4e012ca4ebf60325941aa4c73b8ccc49966dca9993dddefce722ea7c34c04503"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/archive_manifest.original.json",
+      "bytes": 128244,
+      "sha256": "521ccf64fe30c6c34136d00381063ede82fc92e5c17cf227a0578565351ee1d5"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/layout_relocation_20261022.json",
+      "bytes": 4935,
+      "sha256": "b4728860add44c6634cf16594bf53270932de182e6350aeb534fa363c12398d4"
     }
   ],
   "source_pdf_mirror": "data/inputs/meson_freezeout_polynomial_literature_20261017",
   "original_polynomial_source_root": "D:/Desktop/PNJL论文/01_论文与综述/相图与守恒荷涨落/化学冻结线与Kpi_20261017",
-  "excluded_work": "transport threshold/thermal optimization and SciPlot backlog remain in the original worktree"
+  "excluded_work": "transport threshold/thermal optimization and SciPlot backlog remain in the original worktree",
+  "layout_correction": {
+    "path": "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/layout_relocation_20261022.json",
+    "bytes": 4935,
+    "sha256": "b4728860add44c6634cf16594bf53270932de182e6350aeb534fa363c12398d4"
+  }
 }

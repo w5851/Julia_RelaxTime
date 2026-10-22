@@ -8,11 +8,18 @@ standard/fine 核验和 PNG 审阅。研究结论见
 ## 保存与恢复
 
 [archive_manifest.json](archive_manifest.json) 记录原工作树、完整基线提交、
-522 个直接保留文件及五个 ZIP 的 SHA-256、字节数和成员数。
+526 个直接保留文件及五个 ZIP 的 SHA-256、字节数和成员数。
 四个数值 ZIP 保留 5806 个原始逐点记录、逐点 checksum 和源码快照；第五个 ZIP 保存
 三份完整 INSPIRE 检索响应。成员路径相对仓库根目录。
 所有成员与原工作树逐字节比较后才打包；CSV、参数表、失败日志、summary、核验记录、
 图注、PNG 和图像 manifest 直接入库。原始记录中的绝对路径是历史运行身份，保持原字节。
+
+两组早期 standard 图件的评分、残差和绘图源码已移到对应 `results/` 目录，
+`figures/` 仅保留 PNG 与 `plot_manifest.json`。移动的六个文件保持原 hash；
+两个当前图像 manifest 仅更正三处路径字符串，原始 manifest 与原归档清单另存原字节。
+[布局迁移记录](layout_relocation_20261022.json) 逐项关联旧路径、现路径和 hash，
+[原归档清单](archive_manifest.original.json) 保留迁移前的 522 个文件记录。
+已有验证记录描述迁移前布局，其数值与图像检查结论仍适用。
 
 在仓库根目录执行：
 
@@ -44,5 +51,6 @@ Andronic 来源位于
 python scripts/analysis/relaxtime/review_freezeout_evidence_20261022.py
 ```
 
-实际结果写入 [evidence_review.json](evidence_review.json)；原计算、summary 和图件保持原字节。
+实际结果写入 [evidence_review.json](evidence_review.json)；原计算、summary 和 PNG 保持原字节，
+当前图像 manifest 的路径更正与原始记录通过上述迁移清单关联。
 本阶段不安排新增扫描；后续问题由作者组会讨论后独立确定。
