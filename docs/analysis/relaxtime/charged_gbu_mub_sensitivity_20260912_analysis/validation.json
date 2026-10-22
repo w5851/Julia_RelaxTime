@@ -1,0 +1,46 @@
+{
+  "validated_on": "2026-10-22",
+  "archive_crc_and_member_hashes_passed": true,
+  "raw_files_verified": 64,
+  "source_files_verified": 413,
+  "raw_total_bytes": 487007,
+  "source_total_bytes": 4001306,
+  "historical_v3_report_hashes_verified": {
+    "manifest.json": "440c1d649a862eb60ae8a6941b0d7e27b026f43c058c50a8a9b9bd547b432649",
+    "ratios.csv": "bed1022e5e320e8029d694de51593072849f89c553ad537a0f371cacb1da3da1",
+    "derivatives.csv": "82b9ad191592e37a8ed52d7373212dd76c62db1b7c3882ea4734c3c798ef22ee"
+  },
+  "matched_background_points": 9,
+  "max_background_absolute_difference": 0.0,
+  "failed_refinement_channels_retained": 6,
+  "asymmetric_target_derivative_failure_retained": true,
+  "historical_provenance_gaps": {
+    "muB_sensitivity_20260911_probe3": "historical_generator_bytes_unavailable",
+    "muB_sensitivity_20260911_v1": "historical_generator_bytes_unavailable",
+    "muB_sensitivity_20260911_v2": "historical_generator_bytes_unavailable",
+    "muB_sensitivity_q0_20260913_5_77": "historical_generator_hash_unrecorded_capture_only",
+    "muB_sensitivity_q0_20260913_probe3": "historical_generator_hash_unrecorded_capture_only",
+    "muB_sensitivity_q0_20260913_target3": "historical_generator_hash_unrecorded_capture_only"
+  },
+  "numerical_solver_called": false,
+  "new_numerical_scan": false,
+  "restore_directory": "D:/Temp/charged-gbu-mub-retention-restore-20261022",
+  "extracted_files_verified": 477,
+  "local_markdown_links_checked": 15,
+  "missing_local_markdown_links": 0,
+  "other_tracks_and_items_unchanged": true,
+  "historic_contour_evidence_preserved": true,
+  "local_governance_checks": {
+    "task_ledger_preflight": "passed",
+    "task_ledger_assertions": 195,
+    "docs_consistency": "passed",
+    "active_docs_governance": "passed_with_existing_age_advisories",
+    "git_diff_check": "passed"
+  },
+  "initial_module_load_missing_dependency": "scripts/relaxtime/config/WorkflowConfig.jl",
+  "historical_script_bridge_dependencies_added": 102,
+  "restored_modules_load_passed": true,
+  "restored_julia_version": "1.12.5",
+  "restore_has_git_metadata": false,
+  "numerical_scan_replay_executed": false
+}
