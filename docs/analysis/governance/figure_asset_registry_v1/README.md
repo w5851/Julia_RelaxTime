@@ -2,6 +2,10 @@
 
 这是历史 PNG/PDF/SVG 退役流程的 PR A dry-run 报告。它只盘点 Git 已跟踪的 `data/outputs/figures` 资产；当前工作树中的未跟踪 C1/C2/pilot 文件被排除且未修改。
 
+当前任务终态为 `completed`：PR A #220 与 [PR B #222](https://github.com/w5851/Julia_RelaxTime/pull/222)
+均已合并；完整决策及执行记录见[归档任务单](../../../dev/archived/2026-08-16_历史绘图资产清理与退役任务单.md)。
+本目录的 registry、preflight 和执行 manifest 保留原始历史字节，不能据旧 dry-run 标记推断当前仍待执行。
+
 ## 文件
 
 - `asset_registry.json`：逐文件 hash、格式元数据、manifest/provenance 关联、仓库内文本引用和 review group。

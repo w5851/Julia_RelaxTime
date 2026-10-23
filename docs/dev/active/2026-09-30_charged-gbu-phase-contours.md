@@ -1,9 +1,9 @@
 # charged GBU 相图介子数密度等高图任务单
 
-当前状态：`review`（2026-10-22）。实现、远程计算、组会图交付和代码集成已完成。
+当前状态：`review`（2026-10-23）。实现、远程计算、组会图交付和代码集成已完成。
 [PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325) 已于 2026-10-08 合并，
 merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；十项合并 PR 检查均成功。
-M4 的作者研究产物审阅仍待处理，本文继续保留在 active，不自动提升为 accepted/promoted。
+M4 的作者研究产物审阅继续等待下周组会后的决定；本文保留在 active，状态保持 `review`。
 
 当前 q0 口径及产物入口见 M9；前面各批次的数值、门禁判断和运行 SHA 保留为历史证据。
 绘图参数和复现方法统一维护在[脚本入口说明](../../guides/scripts/README.md)。

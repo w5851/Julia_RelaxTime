@@ -2,7 +2,9 @@
 
 更新日期：2026-07-27
 
-当前状态：in progress。本文档只记录当前 `x_min_cut` partial-feedback 的成本与定性趋势诊断，不是 strict-support、节点收敛或 production 任务单。
+当前状态：历史诊断运行已记录完成；原始证据待定位（2026-10-23 复核）。本文记录三次热启动 benchmark 和七点粗扫，不再作为正在运行的任务。
+本次在根工作区及 `D:/w/meson-freezeout-defaults` 未找到下文引用的 benchmark JSON 和 sparse scan 目录，尚未重新验收原始字节或数值；因此暂留 active 供证据复核，不标记 accepted 或完成归档。
+`x_min_cut` partial-feedback 的成本与趋势仍仅为历史诊断，不是 strict-support、节点收敛或 production 任务单。
 
 ## 目标与固定边界
 
@@ -29,7 +31,7 @@
 
 ## 结果记录
 
-运行完成后在本节追加：
+下节已记录的运行结果包含：
 
 - warm-up 与各热启动样本耗时、median/mean/min/max；
 - 选用的 `sqrt(s_NN)` 网格及每点状态；

@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "meson-freezeout-experiment"
-updated_at = "2026-10-22"
+updated_at = "2026-10-23"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -9,12 +9,12 @@ status = "review"
 current_task = "meson-freezeout-parameter-envelope"
 blocked_by = []
 unlocks = []
-next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论及图像保持 review/diagnostic_only，作者审阅 pending；等待下周组会后的决定。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = false
-current_branch = "codex/meson-freezeout-review"
-current_sha = "698feaf8fada670fde81c93bab6093b50093935f"
+current_branch = "main"
+current_sha = "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e"
 run_ids = []
 evidence = [
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
@@ -39,8 +39,11 @@ evidence = [
   "file:data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/final_validation.json",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/pr_validation_20261022.json",
+  "pr:327",
+  "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
+  "note:author_20261023_keeps_review_pending_group_meeting_next_week",
 ]
-updated_at = "2026-10-22"
+updated_at = "2026-10-23"
 
 [[items]]
 id = "meson-freezeout-default-comparison"
@@ -50,7 +53,7 @@ status = "review"
 parent = "track:meson-freezeout-experiment"
 task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
 reason = "作者要求模块化完整化学冻结线，使用q0外推与Au+Au实验同图比较，先选择文献默认参数下较优方案，再开展参数带调优。"
-next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论及图像保持 review/diagnostic_only，作者审阅 pending；等待下周组会后的决定。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -58,6 +61,9 @@ evidence = [
   "file:data/inputs/meson_freezeout_experiment_20261017/README.md",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/resolution_comparison.json",
   "note:transport_fig4_followup_remains_deferred_in_root_worktree_ledger",
+  "pr:327",
+  "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
+  "note:author_20261023_keeps_review_pending_group_meeting_next_week",
 ]
 
 [[items]]
@@ -68,11 +74,27 @@ status = "review"
 parent = "track:meson-freezeout-experiment"
 task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md"
 reason = "作者允许汇合不同文献参数范围并跨源组合；先明确探索范围，再以固定完整曲线评价q0的K/pi，区别最优样本和参数包络。"
-next_action = "本轮默认比较、文献筛选、两族有限参数探索及加密/PNG组成同一研究链。阶段结论保留为diagnostic_only并整理进入PR；作者图像审阅待定。后续问题待组会讨论后独立确定，当前不安排新增研究。"
+next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论及图像保持 review/diagnostic_only，作者审阅 pending；等待下周组会后的决定。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:config/physics/freezeout/parameter_domains/literature_envelope_v1.toml", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json", "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json", "note:author_20261018_authorized_cross_literature_parameter_pooling", "note:png_review_pending_author_acceptance", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md", "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml", "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json", "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion"]
-
+evidence = [
+  "file:config/physics/freezeout/parameter_domains/literature_envelope_v1.toml",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json",
+  "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json",
+  "note:author_20261018_authorized_cross_literature_parameter_pooling",
+  "note:png_review_pending_author_acceptance",
+  "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md",
+  "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted",
+  "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml",
+  "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json",
+  "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion",
+  "pr:327",
+  "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
+  "note:author_20261023_keeps_review_pending_group_meeting_next_week",
+]
 
 [[tracks]]
 id = "issue130-phase"
@@ -1049,7 +1071,7 @@ status = "review"
 parent = "track:formula-route-closure"
 task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
 reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
-next_action = "PR #325 已于2026-10-08合并，十项检查成功；代码集成与组会图交付已收口。M4研究产物作者审阅仍待定，不自动晋升。联合T–muB路径及参数研究已由冻结线主线承接并随PR #327集成；保留muB灵敏度的q0/有限q对照、失败和来源，背景稳定性与全q尾部复核另行指定。"
+next_action = "PR #325 已于2026-10-08合并，十项检查成功；代码集成与组会图交付已收口。M4 研究产物保持 review，等待下周组会后的作者决定。联合T–muB路径及参数研究已由冻结线主线承接并随PR #327集成；保留muB灵敏度的q0/有限q对照、失败和来源，背景稳定性与全q尾部复核另行指定。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -1102,4 +1124,5 @@ evidence = [
   "run:36863547938",
   "run:36863558667",
   "note:12_sparse_full_gate_points_48_channels_accepted_screening_full_ratio_max_abs_relative_difference_2.91_percent",
+  "note:author_20261023_keeps_review_pending_group_meeting_next_week",
 ]
