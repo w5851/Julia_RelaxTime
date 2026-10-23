@@ -13,8 +13,8 @@ import re
 import subprocess
 from typing import Any, Iterable
 
-from scripts.plotting.plot_manifest import output_record
-from scripts.plotting.plot_style import PlotProfile
+from scripts.plotting.plot_manifest import output_record, sha256_file
+from scripts.plotting.plot_style import PlotProfile, figure_style_context
 
 
 MM_PER_POINT = 25.4 / 72
@@ -85,6 +85,15 @@ def _text_glyphs(artist: Any) -> list[tuple[str, float, str]]:
         return [(font.fname, float(size), chr(code)) for font, size, code, _, _ in parsed.glyphs]
     font_path = font_manager.findfont(properties)
     return [(font_path, float(properties.get_size_in_points()), char) for char in text]
+
+
+@lru_cache(maxsize=128)
+def _font_file_record(font_path: str) -> dict[str, Any]:
+    from matplotlib.font_manager import FontProperties
+
+    path = Path(font_path).resolve()
+    return {"path": str(path), "resolved": FontProperties(fname=str(path)).get_name(),
+            "bytes": path.stat().st_size, "sha256": sha256_file(path)}
 
 
 def visible_legends(figure: Any) -> list[Any]:
@@ -172,8 +181,18 @@ def _line_intersects_bbox(line: Any, bbox: Any) -> bool:
 
 
 def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, Any]:
+    """Measure under the creation style, also when drawing has been deferred."""
+    with figure_style_context(figure) as context:
+        quality = _measure_figure(figure, intended_width_inches=intended_width_inches)
+        if context is not None:
+            quality["font"] = dict(context.font)
+        return quality
+
+
+def _measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, Any]:
     """Measure all displayed capitals/numerals, including math subscripts."""
     from matplotlib.collections import PathCollection
+    from matplotlib.markers import MarkerStyle
     from matplotlib.transforms import Bbox
 
     figure.canvas.draw()
@@ -184,12 +203,18 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
     glyphs = []
     clipped = []
     text_boxes = []
+    actual_fonts = {}
     for artist in artists:
         box = artist.get_window_extent(renderer)
         if not figure.bbox.contains(box.x0 + 0.5, box.y0 + 0.5) or not figure.bbox.contains(box.x1 - 0.5, box.y1 - 0.5):
             clipped.append(artist.get_text())
         text_boxes.append((artist.get_text(), box))
         for font_path, font_size, char in _text_glyphs(artist):
+            source = str(Path(font_path).resolve())
+            actual = actual_fonts.setdefault(source, {**_font_file_record(source), "roles": []})
+            role = "mathtext" if "$" in artist.get_text() else "text"
+            if role not in actual["roles"]:
+                actual["roles"].append(role)
             if char.isascii() and (char.isupper() or char.isdigit()):
                 glyphs.append({
                     "text": artist.get_text(), "glyph": char,
@@ -275,6 +300,23 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
     tick_axes = []
     marker_diameters = []
     for ax in figure.axes:
+        for line in ax.lines:
+            if not line.get_visible() or line.get_marker() in {None, "", "None", " "}:
+                continue
+            positions = line.get_xydata()
+            if not any(math.isfinite(float(x)) and math.isfinite(float(y)) for x, y in positions):
+                continue
+            every = line.get_markevery()
+            if isinstance(every, (list, tuple)) and not every:
+                continue
+            marker = MarkerStyle(line.get_marker())
+            raw_bounds = marker.get_path().get_extents()
+            if raw_bounds.width == 0 or raw_bounds.height == 0:
+                continue
+            bounds = marker.get_path().transformed(marker.get_transform()).get_extents()
+            # One-dimensional error-bar caps are not data landmark glyphs.
+            if min(bounds.width, bounds.height) > 0:
+                marker_diameters.append(min(bounds.width, bounds.height) * line.get_markersize() * MM_PER_POINT * scale)
         for name, axis in (("x", ax.xaxis), ("y", ax.yaxis)):
             low, high = sorted(axis.get_view_interval())
             major = [tick for tick in axis.get_major_ticks() if low <= tick.get_loc() <= high]
@@ -300,6 +342,11 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
         "intended_width_inches": float(intended_width_inches),
         "placement_scale": scale,
         "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+        "actual_fonts": [actual_fonts[path] for path in sorted(actual_fonts)],
+        "series_styles": [{"series_id": line.get_gid(), "color": _line_color(line),
+                           "linestyle": line.get_linestyle(), "marker": line.get_marker()}
+                          for ax in figure.axes for line in ax.lines
+                          if line.get_visible() and line.get_gid() is not None],
         "minimum_capital_numeral_height_mm": min((item["final_height_mm"] for item in glyphs), default=0),
         "minimum_primary_capital_numeral_height_mm": min((item["final_height_mm"] for item in glyphs if item["role"] == "primary"), default=0),
         "minimum_script_capital_numeral_height_mm": min((item["final_height_mm"] for item in glyphs if item["role"] == "script"), default=None),
@@ -322,6 +369,12 @@ def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, An
         "legend_in_axes_overflows": legend_in_axes_overflows,
         "human_visual_review": "required",
     }
+
+
+def _line_color(line: Any) -> str:
+    from matplotlib.colors import to_hex
+
+    return to_hex(line.get_color())
 
 
 def placement_limits(quality: dict[str, Any], profile: PlotProfile,
@@ -379,6 +432,15 @@ def export_figure(
     formats: Iterable[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Export at fixed physical dimensions and return measured quality evidence."""
+    with figure_style_context(figure) as context:
+        if context is not None and (context.profile.path != profile.path or context.profile.data != profile.data):
+            raise ValueError("export profile differs from the figure's bound creation style")
+        return _export_figure(figure, stem, profile, intended_width_inches=intended_width_inches, formats=formats)
+
+
+def _export_figure(figure: Any, stem: Path, profile: PlotProfile, *,
+                   intended_width_inches: float | None,
+                   formats: Iterable[str] | None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     stem.parent.mkdir(parents=True, exist_ok=True)
     width = intended_width_inches or float(figure.get_size_inches()[0])
     quality = measure_figure(figure, intended_width_inches=width)

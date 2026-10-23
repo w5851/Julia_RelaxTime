@@ -115,3 +115,10 @@ docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publicatio
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v12_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Frozen SciPlot internal-review PNG cases and exact source/decision bytes.
+data/outputs/figures/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/sciplot_*/*.png binary

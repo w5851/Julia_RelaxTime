@@ -10,7 +10,7 @@
 
 | 职责 | 权威入口 |
 | --- | --- |
-| 公共样式 | `config/plotting/candidate_aps_v2.toml`、`strict_aps_v2.toml` |
+| 公共样式 | `config/plotting/candidate_aps_v2.toml`、`strict_aps_v2.toml`；[身份／上下文 API](../../../api/plotting/PlotStyle.md) |
 | 样式、导出、测量 | `scripts/plotting/plot_style.py`、`plot_quality.py` |
 | 可访问性、两阶段接受链 | `scripts/plotting/plot_accessibility.py`、`plot_delivery.py` |
 | 单图／多图合同、来源核验 | `plot_manifest.py`、`plot_bundle.py`、`plot_provenance.py`（均在 `scripts/plotting/`） |
@@ -47,6 +47,9 @@
    顶点和 gap；不重算、不新增平滑／插值，不修补失败点或改变 marker 物理含义。
 4. 选择最终插入宽度、轴类型／范围、共享坐标范围、图例位置和输出阶段。
    所有 case 覆盖均写入 manifest；只在语义和范围一致时共享坐标。
+5. 新接入图族先登记完整曲线身份表，再选择子集或排序。用 `style_context` 创建并
+   绑定 figure，延迟测量／保存通过公共 helper 重用创建主题。candidate 使用已声明
+   的候选字体替代，strict 默认首选缺失即失败；记录实际普通／数学字体来源及 hash。
 
 物理状态、绘图质量、作者接受和论文资格分别记录。继承显示数据不等于重新证明
 数值收敛；任何派生图都不得仅因排版合格而升级来源证据。

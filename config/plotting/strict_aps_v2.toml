@@ -3,6 +3,7 @@ profile_id = "strict_aps_v2"
 status = "active"
 default_column = "single_column"
 font_family = "serif"
+font_policy = "error"
 font_candidates = ["Times New Roman", "Times"]
 mathtext_fontset = "stix"
 font_size_pt = 13.0

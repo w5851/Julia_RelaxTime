@@ -6,10 +6,14 @@ interpolate data, call solvers, or modify numerical inputs.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from copy import deepcopy
 from dataclasses import dataclass
+import hashlib
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 import tomllib
+import warnings
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +29,7 @@ ACTIVE_PROFILE_IDS = frozenset({"candidate_aps_v2", "strict_aps_v2"})
 LEGACY_PROFILE_IDS = frozenset(set(PROFILE_FILES) - set(ACTIVE_PROFILE_IDS))
 ALLOWED_COLUMNS = {"single_column", "double_column"}
 ALLOWED_PROFILES = frozenset(PROFILE_FILES)
+FONT_POLICIES = frozenset({"error", "candidate_fallback", "legacy_default"})
 
 
 @dataclass(frozen=True)
@@ -128,6 +133,16 @@ def _validate_profile(data: Mapping[str, Any], path: Path) -> str:
     colors = data["palette"].get("colors", [])
     if not colors:
         raise ValueError(f"{path}: palette.colors must not be empty")
+    policy = data.get("font_policy", "legacy_default")
+    current_path = path.resolve() == PROFILE_FILES[profile_id].resolve()
+    if policy not in FONT_POLICIES or (profile_id in ACTIVE_PROFILE_IDS and policy == "legacy_default"
+            and ("font_policy" in data or current_path)):
+        raise ValueError(f"{path}: active profiles require font_policy=error or candidate_fallback")
+    candidates = data.get("font_candidates", [])
+    if policy != "legacy_default" and (not isinstance(candidates, list) or not candidates
+            or any(not isinstance(item, str) or not item.strip() for item in candidates)
+            or len(set(candidates)) != len(candidates)):
+        raise ValueError(f"{path}: explicit font policy requires non-empty unique font_candidates")
     support = data.get("support")
     if not isinstance(support, Mapping) or not isinstance(support.get("draw_points"), bool):
         raise ValueError(f"{path}: support.draw_points must be a boolean")
@@ -176,40 +191,96 @@ def phase_style(profile: PlotProfile, state: str) -> dict[str, Any]:
     return dict(styles[state])
 
 
-def resolve_font(profile: PlotProfile) -> dict[str, str]:
-    """Resolve the requested font for provenance without changing the profile."""
+def resolve_font(profile: PlotProfile) -> dict[str, Any]:
+    """Resolve declared fonts; active profiles never use an undeclared default."""
 
     from matplotlib import font_manager
 
     candidates = [str(item) for item in profile.data.get("font_candidates", [])]
     requested = candidates[0] if candidates else "serif"
-    path = font_manager.findfont(font_manager.FontProperties(family=requested), fallback_to_default=True)
-    resolved = font_manager.FontProperties(fname=path).get_name()
-    return {"requested": requested, "resolved": resolved, "path": str(Path(path).resolve())}
+    policy = str(profile.data.get("font_policy", "legacy_default"))
+    if policy not in FONT_POLICIES or (profile.profile_id in ACTIVE_PROFILE_IDS and policy == "legacy_default"):
+        raise ValueError("active profiles require an explicit missing-font policy")
+    if policy != "legacy_default" and (not candidates or len(set(candidates)) != len(candidates)
+            or any(not name.strip() for name in candidates)):
+        raise ValueError("explicit font policy requires non-empty unique font_candidates")
+    missing = []
+    path = None
+    selected = requested
+    if policy == "legacy_default":
+        path = font_manager.findfont(font_manager.FontProperties(family=[requested]), fallback_to_default=True)
+        return {"requested": requested,
+                "resolved": font_manager.FontProperties(fname=path).get_name(),
+                "path": str(Path(path).resolve())}
+    else:
+        choices = candidates[:1] if policy == "error" else candidates
+        for name in choices:
+            try:
+                path = font_manager.findfont(font_manager.FontProperties(family=[name]), fallback_to_default=False)
+                selected = name
+                break
+            except ValueError:
+                missing.append(name)
+        if path is None:
+            raise ValueError(f"font_policy={policy}: required font not found: {', '.join(choices)}")
+    actual = Path(path).resolve()
+    resolved = font_manager.FontProperties(fname=str(actual)).get_name()
+    fallback = bool(missing)
+    if fallback and policy != "legacy_default":
+        warnings.warn(f"{requested} is unavailable; declared font substitute is {resolved}",
+                      UserWarning, stacklevel=2)
+    return {"schema": "plot_font_resolution_v1", "requested": requested,
+            "candidates": candidates, "policy": policy, "resolved": resolved,
+            "selected": selected,
+            "path": str(actual), "bytes": actual.stat().st_size,
+            "sha256": hashlib.sha256(actual.read_bytes()).hexdigest(),
+            "fallback_used": fallback, "missing_candidates": missing,
+            "mathtext_fontset": str(profile.data.get("mathtext_fontset", "stix"))}
 
 
-def configure_matplotlib(profile: PlotProfile) -> dict[str, str]:
-    """Apply a profile to matplotlib and return resolved font provenance."""
+def _matplotlib_settings(profile: PlotProfile, font: Mapping[str, Any]) -> dict[str, Any]:
+    """Defaults shared by the global CLI compatibility path and local contexts."""
 
-    import matplotlib
     from cycler import cycler
 
-    font_candidates = [str(item) for item in profile.data.get("font_candidates", [])]
     font_size = float(profile.data.get("font_size_pt", 9.0))
     line_width = float(profile.data.get("line_width_pt", 1.0))
     axes_linewidth = float(profile.data.get("axes_linewidth_pt", 0.6))
-    matplotlib.rcParams.update(
-        {
-            "font.family": profile.data.get("font_family", "serif"),
-            "font.serif": font_candidates,
+    settings = {
+            "font.family": [font["resolved"]],
+            "font.serif": [font["resolved"]],
             "font.size": font_size,
+            "font.weight": "normal",
+            "font.style": "normal",
+            "font.variant": "normal",
+            "font.stretch": "normal",
             "mathtext.fontset": profile.data.get("mathtext_fontset", "stix"),
+            "mathtext.fallback": "stix",
+            "mathtext.default": "it",
+            "text.usetex": False,
+            "text.parse_math": True,
+            "text.color": "black",
+            "axes.labelweight": "normal",
+            "axes.titleweight": "normal",
+            "axes.edgecolor": "black",
+            "axes.labelcolor": "black",
+            "axes.grid": False,
+            "axes.unicode_minus": True,
+            "axes.formatter.use_locale": False,
+            "figure.facecolor": "white",
+            "figure.edgecolor": "white",
+            "axes.facecolor": "white",
+            "figure.autolayout": False,
+            "figure.constrained_layout.use": False,
             "axes.prop_cycle": cycler(color=list(profile.colors)),
             "axes.linewidth": axes_linewidth,
             "axes.labelsize": font_size,
             "axes.titlesize": font_size,
             "legend.fontsize": float(profile.data.get("legend_font_size_pt", max(7.0, font_size - 1.0))),
+            "legend.title_fontsize": font_size,
             "legend.frameon": False,
+            "xtick.color": "black",
+            "ytick.color": "black",
             "xtick.labelsize": float(profile.data.get("tick_font_size_pt", max(7.0, font_size - 1.0))),
             "ytick.labelsize": float(profile.data.get("tick_font_size_pt", max(7.0, font_size - 1.0))),
             "xtick.direction": "in",
@@ -219,6 +290,8 @@ def configure_matplotlib(profile: PlotProfile) -> dict[str, str]:
             "xtick.major.width": max(0.5, axes_linewidth),
             "ytick.major.width": max(0.5, axes_linewidth),
             "lines.linewidth": line_width,
+            "lines.linestyle": "-",
+            "lines.marker": "None",
             "lines.markersize": float(profile.data.get("marker_size_pt", 4.0)),
             "pdf.fonttype": 42,
             "ps.fonttype": 42,
@@ -226,9 +299,81 @@ def configure_matplotlib(profile: PlotProfile) -> dict[str, str]:
             "savefig.dpi": profile.dpi,
             "savefig.bbox": None if profile.data["output"].get("bbox_inches") == "fixed" else "tight",
             "savefig.pad_inches": 0.08,
+            "savefig.facecolor": "white",
+            "savefig.edgecolor": "white",
+            "savefig.transparent": False,
         }
-    )
-    return resolve_font(profile)
+    if profile.is_legacy:
+        # Keep the exact global defaults of frozen v1 renderers. The new local
+        # interface is opt-in and must not restyle historical compatibility.
+        previous_keys = {
+            "font.family", "font.serif", "font.size", "mathtext.fontset", "axes.prop_cycle",
+            "axes.linewidth", "axes.labelsize", "axes.titlesize", "legend.fontsize", "legend.frameon",
+            "xtick.labelsize", "ytick.labelsize", "xtick.direction", "ytick.direction", "xtick.top",
+            "ytick.right", "xtick.major.width", "ytick.major.width", "lines.linewidth", "lines.markersize",
+            "pdf.fonttype", "ps.fonttype", "svg.fonttype", "savefig.dpi", "savefig.bbox", "savefig.pad_inches",
+        }
+        settings = {key: value for key, value in settings.items() if key in previous_keys}
+        settings["font.family"] = profile.data.get("font_family", "serif")
+        settings["font.serif"] = list(profile.data.get("font_candidates", []))
+    return settings
+
+
+def configure_matplotlib(profile: PlotProfile) -> dict[str, Any]:
+    """Apply global defaults for existing standalone CLIs; prefer style_context."""
+    import matplotlib
+
+    font = resolve_font(profile)  # Fail before changing the caller's rcParams.
+    matplotlib.rcParams.update(_matplotlib_settings(profile, font))
+    return font
+
+
+@dataclass(frozen=True)
+class PlotStyleContext:
+    """Resolved settings retained for creation and later measurement/export."""
+
+    profile: PlotProfile
+    font: Mapping[str, Any]
+    settings: Mapping[str, Any]
+
+    def bind(self, figure: Any) -> None:
+        """Bind explicitly; figure families remain responsible for their artists."""
+        existing = getattr(figure, "_plot_style_context", None)
+        if existing is not None and existing is not self:
+            raise ValueError("figure already has a different style context")
+        figure._plot_style_context = self
+
+    @contextmanager
+    def activate(self) -> Iterator[PlotStyleContext]:
+        import matplotlib
+
+        with matplotlib.rc_context(rc=deepcopy(dict(self.settings))):
+            yield self
+
+
+@contextmanager
+def style_context(profile: PlotProfile) -> Iterator[PlotStyleContext]:
+    """Restore caller defaults on exit, including exceptional exits.
+
+    Bind figures created inside the context. export_figure and measure_figure
+    reactivate that exact context during deferred rendering and saving.
+    """
+    font = resolve_font(profile)
+    frozen_profile = PlotProfile(profile.profile_id, deepcopy(profile.data), profile.path)
+    context = PlotStyleContext(frozen_profile, font, _matplotlib_settings(frozen_profile, font))
+    with context.activate():
+        yield context
+
+
+@contextmanager
+def figure_style_context(figure: Any) -> Iterator[PlotStyleContext | None]:
+    """Reactivate a bound style; unbound historical CLI figures keep their behavior."""
+    context = getattr(figure, "_plot_style_context", None)
+    if context is None:
+        yield None
+    else:
+        with context.activate():
+            yield context
 
 
 def configure_axis_ticks(ax: Any, profile: PlotProfile) -> None:

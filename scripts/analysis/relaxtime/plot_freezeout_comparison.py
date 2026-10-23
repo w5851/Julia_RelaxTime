@@ -23,11 +23,16 @@ from scripts.plotting.plot_manifest import (
     runtime_record, sha256_file, write_manifest,
 )
 from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
-from scripts.plotting.plot_style import load_profile, configure_matplotlib, configure_axis_ticks, figure_size_inches
+from scripts.plotting.plot_style import load_profile, style_context, configure_axis_ticks, figure_size_inches
+from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
 from scripts.plotting.plot_accessibility import accessibility_record
 from scripts.plotting.validate_plot_artifact import validate_manifest
 
 PROFILE_LABELS = {"cleymans2006": "Cleymans (2006)", "andronic2018": "Andronic (2018)"}
+CURVE_STYLES = SeriesStyleRegistry("freezeout_defaults_v1", (
+    SeriesStyle("cleymans2006", "#0072B2", "-"),
+    SeriesStyle("andronic2018", "#D55E00", "--"),
+))
 
 
 def truth(value):
@@ -186,27 +191,40 @@ def compare_resolutions(refined, reference):
         "profiles":profiles}
 
 
-def render(models, experiments, output_dir, result_dir, calculation, state, run_dir, experiment_path):
+def render(models, experiments, output_dir, result_dir, calculation, state, run_dir, experiment_path,
+           *, series_order=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+
+    profile = load_profile("candidate_aps_v2")
+    profiles = list(dict.fromkeys(point["profile_name"] for point in state["points"])) if series_order is None else list(series_order)
+    if not profiles or any(name not in models for name in profiles):
+        raise ValueError("series_order must select existing calculation profiles")
+    styles = CURVE_STYLES.select(profiles)
+    with style_context(profile) as context:
+        figure, ax = plt.subplots(figsize=figure_size_inches(profile))
+        context.bind(figure)
+        try:
+            return _render_figure(figure, ax, profile, context.font, profiles, styles, models, experiments,
+                output_dir, result_dir, calculation, state, run_dir, experiment_path)
+        finally:
+            plt.close(figure)
+
+
+def _render_figure(figure, ax, profile, font, profiles, styles, models, experiments,
+                   output_dir, result_dir, calculation, state, run_dir, experiment_path):
+    import matplotlib
     from matplotlib.ticker import FixedLocator, FuncFormatter, MultipleLocator
     from PIL import Image
 
-    profile = load_profile("candidate_aps_v2")
-    font = configure_matplotlib(profile)
-    figure, ax = plt.subplots(figsize=figure_size_inches(profile))
     figure.subplots_adjust(left=.115, right=.975, bottom=.16, top=.96)
-    colors = ["#0072B2", "#D55E00"]
-    linestyles = ["-", "--"]
     encodings, series = [], []
-    profiles = list(dict.fromkeys(item["profile_name"] for item in state["points"]))
-    for index, name in enumerate(profiles):
+    for name, style in zip(profiles, styles):
         points = sorted(models[name].values(), key=lambda p: p["energy"])
-        color, style = colors[index % len(colors)], linestyles[index % len(linestyles)]
         ax.plot([p["energy"] for p in points], [p["ratio"] if p["passed"] else math.nan for p in points],
-            color=color, linestyle=style, linewidth=1.6, label=PROFILE_LABELS.get(name,name), zorder=2)
-        encodings.append({"value": name, "color": color, "noncolor_encoding": style})
+            **style.plot_kwargs(), linewidth=1.6, label=PROFILE_LABELS.get(name,name), zorder=2)
+        encodings.append({"value": name, "color": style.color, "noncolor_encoding": style.linestyle})
         series.append({"series_id": name, "state": "q0_reference_diagnostic", "support_rule": "direct energy solves",
             "mask_rule": "failed=NaN; disconnect at every failed support point", "point_count": len(points),
             "failure_count": sum(not p["passed"] for p in points),
@@ -254,7 +272,6 @@ def render(models, experiments, output_dir, result_dir, calculation, state, run_
         im.convert("L").convert("RGB").save(gray_path, dpi=(profile.dpi,profile.dpi))
     gray = output_record(gray_path, fmt="png", dpi=profile.dpi, vector=False)
     gray["inspection"] = inspect_export(gray_path); outputs.append(gray)
-    plt.close(figure)
     snapshot = result_dir / "source" / Path(__file__).name
     snapshot.parent.mkdir(exist_ok=True); shutil.copyfile(__file__, snapshot)
     manifest = build_manifest(asset_id="meson_freezeout_defaults_20261017", figure_family="charged_meson_freezeout",
@@ -269,7 +286,7 @@ def render(models, experiments, output_dir, result_dir, calculation, state, run_
             input_record(experiment_path.parent / "sources.json", role="experimental_provenance"),
             input_record(ROOT / "config/plotting/candidate_aps_v2.toml", role="plot_style_contract"),
             *[input_record(ROOT / "scripts/plotting" / name, role="shared_plotting_code") for name in
-                ("plot_style.py", "plot_manifest.py", "plot_quality.py", "plot_accessibility.py", "validate_plot_artifact.py")]],
+                ("plot_style.py", "plot_series.py", "plot_manifest.py", "plot_quality.py", "plot_accessibility.py", "validate_plot_artifact.py")]],
         axes=[{"field":"sqrt_s_NN_GeV","source_unit":"GeV","display_unit":"GeV","scale":"log","label":xlabel},
             {"field":"Kplus_over_pi_plus","source_unit":"dimensionless","display_unit":"dimensionless","scale":"linear","label":ylabel}],
         series=series, outputs=outputs, selection_rule="all directly calculated energies and the retained experimental table",
@@ -279,6 +296,7 @@ def render(models, experiments, output_dir, result_dir, calculation, state, run_
             "solver_called":False,"canonical_data_modified":False,"checks":"hashes, ratio finiteness, experiment energy coverage, measured rendering","author_review":"pending"},
         rendering={"delivery_stage":"png_review","vector_delivery_pending":True,"review_contract":"prd_review_v1",
             "figure_size_inches":list(figure_size_inches(profile)),"column":"double_column","font":font,
+            "series_styles":CURVE_STYLES.record(profiles),
             "legend_policy":"declared_geometry_checked","legend_outside":False,
             "legend_placements":[{"legend_index":0,"host_axes_index":0,"title":"","labels":legend_labels,
                 "placement":"in_axes","location":"upper right",
@@ -296,6 +314,13 @@ def render(models, experiments, output_dir, result_dir, calculation, state, run_
         "caption":input_record(result_dir / "caption.md",role="figure_caption"),
         "analysis_outputs":[input_record(result_dir/name,role="derived_comparison") for name in
             ("comparison_metrics.json","comparison_residuals.csv","resolution_comparison.json") if (result_dir/name).exists()]})
+    for record in manifest["inputs"]:
+        if record["role"] in {"plot_style_contract", "shared_plotting_code"}:
+            code_path = ROOT / record["path"]
+            code_snapshot = result_dir / "source" / record["path"]
+            code_snapshot.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(code_path, code_snapshot)
+            record["source_snapshot"] = input_record(code_snapshot, role="plotting_source_snapshot")
     write_manifest(output_dir / "plot_manifest.json", manifest)
     issues = validate_manifest(output_dir / "plot_manifest.json", repo_root=ROOT)
     if issues:

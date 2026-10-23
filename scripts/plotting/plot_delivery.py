@@ -86,6 +86,16 @@ def validate_png_delivery(manifest: dict[str, Any], *, root: Path) -> list[str]:
     for field in RENDER_FIELDS:
         if field not in rendering or rendering[field] != manifest.get("rendering", {}).get(field):
             errors.append(f"PNG/vector rendering mismatch: {field}")
+    # New context/identity records are conditional so frozen older packages do
+    # not acquire requirements they never declared.
+    for field in ("font", "series_styles"):
+        delivered = manifest.get("rendering", {})
+        if (field in rendering or field in delivered) and rendering.get(field) != delivered.get(field):
+            errors.append(f"PNG/vector rendering mismatch: {field}")
+    accepted_fonts = rendering.get("quality", {}).get("actual_fonts")
+    delivered_fonts = manifest.get("rendering", {}).get("quality", {}).get("actual_fonts")
+    if accepted_fonts != delivered_fonts:
+        errors.append("PNG/vector measured font sources changed")
     if accepted.get("generator", {}).get("sha256") != manifest.get("generator", {}).get("sha256"):
         errors.append("PNG/vector generator hash mismatch")
     # Snapshot locations may change on delivery; content and roles may not.

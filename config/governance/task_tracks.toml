@@ -863,6 +863,35 @@ evidence = [
 ]
 
 [[items]]
+id = "plot-sop-sciplot-selective-adoption"
+track_id = "plot-sop"
+classification = "independent"
+status = "archived"
+parent = "track:plot-sop"
+task_file = "docs/dev/archived/2026-10-21_SciPlot可取做法吸收.md"
+reason = "首轮曲线身份、局部样式上下文、显式字体策略已实现并通过工程验收；作者接受两图用于组会内部展示，本独立项已完成。"
+next_action = "本项无剩余工程或图像交付工作；使用已接受 PNG 进行内部展示。后续标签／其它图族按实际需求独立处理。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/archived/2026-10-21_SciPlot可取做法吸收.md",
+  "file:.agents/skills/plotting-sop/SKILL.md",
+  "note:author_20261021_requested_backlog_only",
+  "note:registered_in_D:/w/meson-freezeout-defaults_on_codex/meson-freezeout-defaults",
+  "note:comparison_D:/Desktop/paper/docs/workflow/sciplot_comparison_2026-10-21.md",
+  "file:docs/api/plotting/PlotStyle.md",
+  "file:scripts/plotting/plot_series.py",
+  "file:tests/unit/python/test_plotting_style.py",
+  "file:data/outputs/figures/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/plot_manifest.json",
+  "note:119_focused_tests_passed_v13_historical_delivery_passed_12_protected_artifacts_unchanged",
+  "file:data/outputs/results/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/internal_review.json",
+  "file:data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/internal_review.json",
+  "note:author_20261022_accepted_internal_group_meeting_png_only_no_pdf_or_formalization",
+  "note:first_round_complete_other_label_or_figure_family_work_only_on_future_need",
+]
+
+[[items]]
 id = "retire-stale-one-shot-actions"
 track_id = "diagnostic-workflow-lifecycle"
 classification = "independent"

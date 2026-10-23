@@ -1,0 +1,32 @@
+{
+  "schema": "plot_internal_review_v1",
+  "review_date": "2026-10-22",
+  "status": "author_accepted_for_internal_presentation",
+  "review_scope": "group_meeting_internal_presentation",
+  "author_response": "这两个图暂时还是作为内部审核图，目前我是打算组会时内部展示用，因此暂时无需正式化，也就不用导出PDF；\n不过图的效果确实不错，符合我的预期，接下来可以对该任务进行收尾处理(更新task状态，提交、通过PR合并改动、PR合并后清理等)",
+  "delivery_stage": "png_review",
+  "requested_formats": [
+    "png"
+  ],
+  "pdf_export_authorized": false,
+  "formalization_authorized": false,
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "reviewed_manifest": {
+    "path": "data/outputs/figures/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/plot_manifest.json",
+    "bytes": 24390,
+    "sha256": "4f568584fd144f7491f7b99f042573ae1f2880e920ad36fb3eea1c9d5ae65bb8"
+  },
+  "reviewed_images": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/kplus_piplus_freezeout_defaults.png",
+      "bytes": 365305,
+      "sha256": "4103927e2493374791454922d13deb2a0c65bb6d57e6ad789d2690993f8c1e8c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/sciplot_defaults_20261022_png_review_r2/kplus_piplus_freezeout_defaults_gray.png",
+      "bytes": 346078,
+      "sha256": "e61c2e86cb3c974376d1cd8304506a4313f6eb77e9f37fb38037ed8659ac39e8"
+    }
+  ]
+}

@@ -104,6 +104,11 @@ python scripts/analysis/relaxtime/plot_freezeout_comparison.py `
 指定该目录。已有任一 case 都拒绝覆盖。交付为 `png_review`，图例位于同一子图内，
 不会自动更新论文的 current 图层。
 
+默认比值图固定 `cleymans2006` 为蓝色实线、`andronic2018` 为橙色虚线，子集／重排
+保持身份；未登记参数组须先显式添加样式，不能循环两套编码。比值与解析 T–muB
+渲染器使用[局部样式及显式字体策略](../../api/plotting/PlotStyle.md)，退出后恢复调用者
+样式，并在 manifest 核对曲线编码及实际普通／数学字体文件。
+
 参数包络另用两个只读分析入口汇总与绘图：
 
 ```powershell

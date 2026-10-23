@@ -167,6 +167,12 @@ def build_manifest(
 ) -> dict[str, Any]:
     """Create the stable top-level manifest shape used by new plot cases."""
 
+    rendering_record = dict(rendering or {})
+    measured_font = rendering_record.get("quality", {}).get("font")
+    if measured_font is not None:
+        if "font" in rendering_record and rendering_record["font"] != measured_font:
+            raise ValueError("rendering.font differs from the measured figure's bound font")
+        rendering_record["font"] = dict(measured_font)
     return {
         "schema_version": MANIFEST_SCHEMA,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -191,7 +197,7 @@ def build_manifest(
         "connector_policy": connector_policy,
         "missing_value_policy": missing_value_policy,
         "outputs": [dict(item) for item in outputs],
-        "rendering": dict(rendering or {}),
+        "rendering": rendering_record,
         "validation": dict(validation),
         "external_layout": None,
     }

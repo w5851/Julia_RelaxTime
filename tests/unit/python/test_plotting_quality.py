@@ -15,7 +15,8 @@ from scripts.plotting.plot_manifest import (
     build_manifest, generator_record, input_record, output_record, write_manifest,
 )
 from scripts.plotting.plot_quality import export_figure, inspect_export, measure_figure, visible_texts, placement_limits
-from scripts.plotting.plot_style import configure_axis_ticks, configure_matplotlib, load_profile
+from scripts.plotting.plot_style import configure_axis_ticks, configure_matplotlib, load_profile, style_context
+from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
 from scripts.plotting.validate_plot_artifact import _check_declared_legends, validate_manifest
 
 
@@ -27,11 +28,12 @@ def exported_fixture(tmp_path_factory):
     source = folder / "input.csv"
     source.write_text("x,y\n-0.5,1\n0,2\n0.5,3\n", encoding="utf-8")
     profile = load_profile("strict_aps_v2")
-    with matplotlib.rc_context():
-        configure_matplotlib(profile)
+    registry = SeriesStyleRegistry("quality_fixture", (SeriesStyle("fixture", profile.colors[0]),))
+    with style_context(profile) as context:
         figure, axis = plt.subplots(figsize=(6.75, 4.6))
+        context.bind(figure)
         figure.subplots_adjust(left=0.16, right=0.95, top=0.73, bottom=0.18)
-        axis.plot([-0.5, 0, 0.5], [1, 2, 3], label=r"$\alpha_T = 1.0$")
+        axis.plot([-0.5, 0, 0.5], [1, 2, 3], label=r"$\alpha_T = 1.0$", **registry.styles[0].plot_kwargs())
         axis.set_xlabel(r"$\xi$")
         axis.set_ylabel(r"$\tau_u\;(\mathrm{fm})$")
         configure_axis_ticks(axis, profile)
@@ -48,9 +50,54 @@ def exported_fixture(tmp_path_factory):
         outputs=outputs, selection_rule="fixture", interpolation_policy="none", connector_policy="forbidden",
         missing_value_policy="reject", validation={"finite": True, "duplicate_keys": True, "support": True, "strict_gate": True},
         rendering={"column": "double_column", "figure_size_inches": quality["figure_size_inches"], "quality": quality,
-                   "color_route": "color_print_and_online"},
+                   "color_route": "color_print_and_online", "series_styles": registry.record(["fixture"])},
     )
     return manifest
+
+
+def test_global_cli_font_provenance_remains_compatible(exported_fixture, tmp_path):
+    payload = copy.deepcopy(exported_fixture)
+    payload["rendering"]["quality"].pop("font")
+    path = tmp_path / "global_cli.json"
+    write_manifest(path, payload)
+    assert validate_manifest(path) == []
+
+
+@pytest.mark.parametrize("violation", ["policy", "resolved", "hash", "fallback", "source"])
+def test_explicit_font_evidence_cannot_be_forged(exported_fixture, tmp_path, violation):
+    payload = copy.deepcopy(exported_fixture)
+    font = payload["rendering"]["font"]
+    if violation == "policy":
+        font["policy"] = "legacy_default"
+    elif violation == "resolved":
+        font["resolved"] = "Unrelated family"
+    elif violation == "hash":
+        font["sha256"] = "0" * 64
+    elif violation == "fallback":
+        font["fallback_used"] = True
+    else:
+        payload["rendering"]["quality"]["actual_fonts"][0]["sha256"] = "0" * 64
+    payload["rendering"]["quality"]["font"] = copy.deepcopy(font)
+    path = tmp_path / "font.json"
+    write_manifest(path, payload)
+    assert any("font" in issue for issue in validate_manifest(path))
+
+
+@pytest.mark.parametrize("violation", ["duplicate", "unknown", "measured", "missing"])
+def test_manifest_curve_identity_must_match_measured_artists(exported_fixture, tmp_path, violation):
+    payload = copy.deepcopy(exported_fixture)
+    record = payload["rendering"]["series_styles"]
+    if violation == "duplicate":
+        record["selected_ids"].append("fixture")
+    elif violation == "unknown":
+        record["selected_ids"] = ["unregistered"]
+    elif violation == "measured":
+        payload["rendering"]["quality"]["series_styles"][0]["color"] = "#000000"
+    else:
+        payload["rendering"]["quality"]["series_styles"] = []
+    path = tmp_path / "styles.json"
+    write_manifest(path, payload)
+    assert any("series_styles" in issue for issue in validate_manifest(path))
 
 
 def test_pdf_png_actual_export_passes_final_size_gate(exported_fixture, tmp_path):
