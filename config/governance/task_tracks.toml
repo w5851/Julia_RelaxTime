@@ -39,6 +39,15 @@ evidence = [
   "file:data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/final_validation.json",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/pr_validation_20261022.json",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/README.md",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/evidence.json",
+  "pr:325",
+  "sha:c22f5e3e267bf2dce2431cf901a9dc3508d27600",
+  "note:author_20261017_prioritizes_meson_freezeout_and_defers_transport_figure_followup",
+  "note:run37172320742_is_reused_q0_screening_evidence_no_new_solver_or_actions_run",
+  "note:historical_default_comparison_worktree_evidence_retained_with_frozen_source_snapshots",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/parameter_envelope_handoff.md",
+  "note:parameter_envelope_59_profiles_1189_records_refined_ranking_stable_png_review_only",
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
   "note:author_20261023_keeps_review_pending_group_meeting_next_week",
@@ -60,7 +69,10 @@ evidence = [
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
   "file:data/inputs/meson_freezeout_experiment_20261017/README.md",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/resolution_comparison.json",
-  "note:transport_fig4_followup_remains_deferred_in_root_worktree_ledger",
+  "note:transport_followups_use_their_independent_task_records",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/README.md",
+  "note:historical_default_comparison_implementation_merged_in_pr327",
+  "note:fine_100_points_99_successful_primary_AuAu_14_points_no_parameter_adjustment",
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
   "note:author_20261023_keeps_review_pending_group_meeting_next_week",
@@ -91,6 +103,9 @@ evidence = [
   "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json",
   "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/parameter_envelope_handoff.md",
+  "note:implementation_worktree_D:/w/meson-freezeout-defaults",
+  "note:parameter_envelope_59_profiles_1189_records_refined_ranking_stable_png_review_only",
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
   "note:author_20261023_keeps_review_pending_group_meeting_next_week",
@@ -1124,5 +1139,24 @@ evidence = [
   "run:36863547938",
   "run:36863558667",
   "note:12_sparse_full_gate_points_48_channels_accepted_screening_full_ratio_max_abs_relative_difference_2.91_percent",
+  "note:author_20261023_keeps_review_pending_group_meeting_next_week",
+]
+
+[[items]]
+id = "meson-freezeout-literature-and-band-design"
+track_id = "meson-freezeout-experiment"
+classification = "research"
+status = "review"
+parent = "track:meson-freezeout-experiment"
+task_file = "docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/README.md"
+reason = "作者要求优先寻找有文献依据的化学冻结线及参数带，兼顾 K+/pi+ horn 和整体幅度，并核对 y=0 实验与局域数密度比的差别。"
+next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论及图像保持 review/diagnostic_only，作者审阅 pending；等待下周组会后的决定。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/README.md",
+  "file:docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/evidence.json",
+  "pr:327",
+  "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
   "note:author_20261023_keeps_review_pending_group_meeting_next_week",
 ]
