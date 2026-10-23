@@ -1,0 +1,351 @@
+{
+  "schema": "retained_figure_history_v1",
+  "archived_on": "2026-10-23",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Retain the complete preceding APS stage graphs while keeping the adopted PRD v3 case unchanged.",
+  "source_checkout": {
+    "path": "D:\\Desktop\\Julia_RelaxTime",
+    "branch": "codex/docs-architecture-cleanup",
+    "HEAD_context_only": "c498d85ed0c0061f09ca936d41fcc458af213b59",
+    "original_cases_tracked": false
+  },
+  "archive": {
+    "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__history_20261023/original_aps_packages.zip",
+    "bytes": 2196545,
+    "sha256": "ed53680d0189670946d25c38caf94bacbcd87e736bee47ed6cc82cfe7f95e2f9"
+  },
+  "file_count": 48,
+  "cases": [
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008",
+      "files": 13,
+      "bytes": 691755,
+      "delivery_stage": "png_review",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/plot_manifest.json",
+        "bytes": 31533,
+        "sha256": "cd2e4f9fecd2eebc5a70f3aa6aca70c1425e7d0d4974a393663cff72ef2fd80a"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 10
+    },
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2",
+      "files": 14,
+      "bytes": 802508,
+      "delivery_stage": "png_review",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/plot_manifest.json",
+        "bytes": 63097,
+        "sha256": "ab1f62c682b3d98ad6bb506c24c20d4f0c31471099b508acdaa8cfdd9b4a411a"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 11
+    },
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2",
+      "files": 21,
+      "bytes": 1446844,
+      "delivery_stage": "vector_delivery",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/plot_manifest.json",
+        "bytes": 67827,
+        "sha256": "c8984b822a47d7249cbffb86a92e037fdfa2e3e4725305d59bd7bde6a59a6ad0"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 18
+    }
+  ],
+  "members": [
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/README.md",
+      "bytes": 1464,
+      "sha256": "2c872212f9c0bf541648e50ac7d82259e28568fa1831e770238cdf79a3689720"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/phase_diagram_TmuB_Trho.pdf",
+      "bytes": 48859,
+      "sha256": "650f683336ac9c9c5b642119ab29c3e70db7e7d846ffe3f708deb7eb6879aec2"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/phase_diagram_TmuB_Trho.png",
+      "bytes": 576855,
+      "sha256": "1b8a0f9cf354cc3346cb15d39836eaa245602b7d3ceed3c869fd9bbd0660bf3f"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/plot_manifest.json",
+      "bytes": 67827,
+      "sha256": "c8984b822a47d7249cbffb86a92e037fdfa2e3e4725305d59bd7bde6a59a6ad0"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/provenance/pdf_render_review.png",
+      "bytes": 442358,
+      "sha256": "60169fe53df3ec8c56106777eb4dcd84a3a507c4169a0b5ff6eea4b1d1400247"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/provenance/png_acceptance.json",
+      "bytes": 2783,
+      "sha256": "1f86003555bf71d1547f4147db13ac614ee3f999b37115fb5cd8eaf07148823a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/provenance/png_review_manifest.json",
+      "bytes": 63097,
+      "sha256": "ab1f62c682b3d98ad6bb506c24c20d4f0c31471099b508acdaa8cfdd9b4a411a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/provenance/render_stage_manifest.json",
+      "bytes": 64039,
+      "sha256": "d50ff1f177332efbefc58b0b18ed9289c38d72256598e56c8450e5e2f7a28a3d"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/config/plotting/candidate_aps_v2.toml",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/docs/guides/sop/workflows/figure_production.md",
+      "bytes": 25866,
+      "sha256": "fc0fd29dbe3b3b5ad56c901d1e0e69b49b50a63a37862612c6143cf4fe6ae073"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/plot_bundle.py",
+      "bytes": 3527,
+      "sha256": "6bcc0104c2e15455dbe0ef9a70a2ded9d27ab71eb5bf7348e18fffb591194775"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/plot_provenance.py",
+      "bytes": 11059,
+      "sha256": "3e7af0b2024daf973c595d9fedad48d964c604aed4b2667f24718b8004fd4f4b"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/plot_quality.py",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/contract/scripts/plotting/validate_plot_artifact.py",
+      "bytes": 27475,
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/finalize_vector_delivery.py",
+      "bytes": 8588,
+      "sha256": "4f76dc248e5a00366948fcdff1ceef919310d5d6a49766816a9597acc0455142"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/finalize_vector_delivery_v2.py",
+      "bytes": 9533,
+      "sha256": "44aad85a82eb384ef7294b404e61a6a5b012064f5adb7ce37447d65c5250bc13"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/reference/build_figure4_phase_diagram_assets.py",
+      "bytes": 31954,
+      "sha256": "f127bada04812c74445b9d03b584c764fbff52ba0735f8e14b9dff2c7e12f60e"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/source_snapshot/render_phase.py",
+      "bytes": 25630,
+      "sha256": "12105b63d361afc2eb1cc8c00e519a00908cfcc286143f3cf7f4cfb0ca0f097b"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/validation.json",
+      "bytes": 1205,
+      "sha256": "2ee131b9264828c3eeabf60f752c13e09647b30b830f2409ae850fb73d1f9e23"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/README.md",
+      "bytes": 771,
+      "sha256": "e935768bb8098521e0a52298812b0d59f891c47b9406a90f96147e85dc6907d3"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/phase_diagram_TmuB_Trho.png",
+      "bytes": 538652,
+      "sha256": "8d8bc9cd127177a538e730cf8311757f9f74c9eb58c987dcc8759a236e262b20"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/plot_manifest.json",
+      "bytes": 31533,
+      "sha256": "cd2e4f9fecd2eebc5a70f3aa6aca70c1425e7d0d4974a393663cff72ef2fd80a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/config/plotting/candidate_aps_v2.toml",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/docs/guides/sop/workflows/figure_production.md",
+      "bytes": 25866,
+      "sha256": "fc0fd29dbe3b3b5ad56c901d1e0e69b49b50a63a37862612c6143cf4fe6ae073"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/plot_bundle.py",
+      "bytes": 3527,
+      "sha256": "6bcc0104c2e15455dbe0ef9a70a2ded9d27ab71eb5bf7348e18fffb591194775"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/plot_provenance.py",
+      "bytes": 11059,
+      "sha256": "3e7af0b2024daf973c595d9fedad48d964c604aed4b2667f24718b8004fd4f4b"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/plot_quality.py",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/contract/scripts/plotting/validate_plot_artifact.py",
+      "bytes": 27475,
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/source_snapshot/render_phase.py",
+      "bytes": 17607,
+      "sha256": "56aee8c642c07327ac6fe812afc1a69e0ca44e3ac1bba1506fd44ae92198671c"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/validation.json",
+      "bytes": 540,
+      "sha256": "8cc4560be8b02e1e56eccbe165d64dcf73371043dbca552af105d3cefafc30a1"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/README.md",
+      "bytes": 1289,
+      "sha256": "429b3b368060f24b76eef1bff25425668509394ad8982bf4df5d2aed95bca0b5"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/phase_diagram_TmuB_Trho.png",
+      "bytes": 576855,
+      "sha256": "1b8a0f9cf354cc3346cb15d39836eaa245602b7d3ceed3c869fd9bbd0660bf3f"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/plot_manifest.json",
+      "bytes": 63097,
+      "sha256": "ab1f62c682b3d98ad6bb506c24c20d4f0c31471099b508acdaa8cfdd9b4a411a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/config/plotting/candidate_aps_v2.toml",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/docs/guides/sop/workflows/figure_production.md",
+      "bytes": 25866,
+      "sha256": "fc0fd29dbe3b3b5ad56c901d1e0e69b49b50a63a37862612c6143cf4fe6ae073"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/plot_bundle.py",
+      "bytes": 3527,
+      "sha256": "6bcc0104c2e15455dbe0ef9a70a2ded9d27ab71eb5bf7348e18fffb591194775"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/plot_provenance.py",
+      "bytes": 11059,
+      "sha256": "3e7af0b2024daf973c595d9fedad48d964c604aed4b2667f24718b8004fd4f4b"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/plot_quality.py",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/contract/scripts/plotting/validate_plot_artifact.py",
+      "bytes": 27475,
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/reference/build_figure4_phase_diagram_assets.py",
+      "bytes": 31954,
+      "sha256": "f127bada04812c74445b9d03b584c764fbff52ba0735f8e14b9dff2c7e12f60e"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/source_snapshot/render_phase.py",
+      "bytes": 25630,
+      "sha256": "12105b63d361afc2eb1cc8c00e519a00908cfcc286143f3cf7f4cfb0ca0f097b"
+    },
+    {
+      "archive_member": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/validation.json",
+      "bytes": 1031,
+      "sha256": "84746d36bf45b6b07faa2d1ad4a15f40ed0cf5dd707d8f1844f9f672ad5d927f"
+    }
+  ],
+  "retained_outputs_not_promoted": true,
+  "rendered_again": false,
+  "solver_called": false,
+  "adopted_case": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008",
+  "adopted_pr": "https://github.com/w5851/Julia_RelaxTime/pull/326",
+  "all_original_bytes_verified_against_archive": true,
+  "isolated_restore_verified": true,
+  "restored_file_count": 48,
+  "removed_original_directories": [
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008",
+      "files": 13,
+      "bytes": 691755,
+      "delivery_stage": "png_review",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008/plot_manifest.json",
+        "bytes": 31533,
+        "sha256": "cd2e4f9fecd2eebc5a70f3aa6aca70c1425e7d0d4974a393663cff72ef2fd80a"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 10
+    },
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2",
+      "files": 14,
+      "bytes": 802508,
+      "delivery_stage": "png_review",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__png_review_20261008_r2/plot_manifest.json",
+        "bytes": 63097,
+        "sha256": "ab1f62c682b3d98ad6bb506c24c20d4f0c31471099b508acdaa8cfdd9b4a411a"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 11
+    },
+    {
+      "original_directory": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2",
+      "files": 21,
+      "bytes": 1446844,
+      "delivery_stage": "vector_delivery",
+      "manifest": {
+        "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__aps_v2__pdf_20261008_r2/plot_manifest.json",
+        "bytes": 67827,
+        "sha256": "c8984b822a47d7249cbffb86a92e037fdfa2e3e4725305d59bd7bde6a59a6ad0"
+      },
+      "byte_covered_by_existing_prd_archives": 3,
+      "not_byte_covered_by_existing_prd_archives": 18
+    }
+  ],
+  "restore": "Verify this archive SHA-256; extract repository-relative members into a new isolated directory; compare each member with the listed byte count and SHA-256. Do not extract over current figures."
+}
