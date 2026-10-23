@@ -1,0 +1,40 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "2026-10-21 作者：FIG4我看了，这版布局可以接受",
+  "accepted_on": "2026-10-21",
+  "timezone": "Asia/Shanghai",
+  "recorded_on": "2026-10-23",
+  "acceptance_scope": "Existing (g)/(a) layout and its already delivered identical-input PDF. No scientific eligibility change.",
+  "authorization_basis": "Retain the existing same-input PDF delivery recorded in the original 2026-10-21 manifest and the author's current closeout instruction; no PDF exported during this closeout.",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 31287,
+    "sha256": "d9eed9b1729fdfa1155ce8f87ceb8f56408bb6e33ede223d0e1ada2caa4e7ff8"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/figure4_transport_fixed_T.png",
+    "path_kind": "repository_relative",
+    "role": "accepted_png",
+    "bytes": 666625,
+    "sha256": "fb796df8447784e3345f64c4142ab5c70e954f8ae009566bd8fa454a9f37cb65"
+  },
+  "original_evidence": {
+    "archive": {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/provenance/original_delivery_packages.zip",
+      "path_kind": "repository_relative",
+      "role": "original_png_and_vector_packages_before_closeout",
+      "bytes": 1320196,
+      "sha256": "56f1a4711bc257465eee85b86948d29973d92f5fdc29cdfdca2cda10d1bfc00e"
+    },
+    "manifest_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/plot_manifest.json",
+    "author_visual_acceptance": {
+      "recorded_at_utc": "2026-10-21T08:45:17.609067+00:00",
+      "statement": "2026-10-21 作者：FIG4我看了，这版布局可以接受"
+    },
+    "original_png_manifest_sha256": "540104eba386e802f62285a6ad71b3bc1e8b61748679dc7553fe4b0cb480ce22"
+  }
+}

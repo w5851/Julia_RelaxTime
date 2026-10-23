@@ -1,0 +1,237 @@
+{
+  "schema": "plot_storage_relocation_v1",
+  "date": "2026-10-23",
+  "timezone": "Asia/Shanghai",
+  "reason": "Close out accepted layout delivery under the figures/results contract; preserve the original stage graphs and make the existing acceptance explicit.",
+  "source_commit_context_only": "4b91ee73009e2b50463dc06635696dc010801e61",
+  "original_delivery_archive": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/provenance/original_delivery_packages.zip",
+    "path_kind": "repository_relative",
+    "role": "original_png_and_vector_packages_before_closeout",
+    "bytes": 1320196,
+    "sha256": "56f1a4711bc257465eee85b86948d29973d92f5fdc29cdfdca2cda10d1bfc00e"
+  },
+  "original_files": [
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/figure4_transport_fixed_T.pdf",
+      "bytes": 63241,
+      "sha256": "ac249777acd6006c5d5a8e52ec4929272b354d583d1486a06f330fc76bba0cd3"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/figure4_transport_fixed_T.png",
+      "bytes": 666625,
+      "sha256": "fb796df8447784e3345f64c4142ab5c70e954f8ae009566bd8fa454a9f37cb65"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/plot_manifest.json",
+      "bytes": 29103,
+      "sha256": "7977a4cb15f37a9e54524b1797256897a83623ee557e1b2dd9c8c4e63009b727"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/candidate_aps_v2.toml",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/export_transport_fixed_T_accepted_pdf.py",
+      "bytes": 6251,
+      "sha256": "f1d32631ac9423adcde483832c14b265358114cb6b83ce4613e5a20503391412"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/plot_fixed_T_transport.py",
+      "bytes": 4767,
+      "sha256": "0e4987b45677eff3140691aa8fb05da56dee2e7ed604e337a06df40c205a9e38"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/plot_quality.py",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/render_transport_fixed_T_panel_legends.py",
+      "bytes": 16077,
+      "sha256": "a7a6a8ec08ffb980ea716c9c66ced5fab5044376db4fac996468661a268e2973"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/source_snapshot/validate_plot_artifact.py",
+      "bytes": 27475,
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/figure4_transport_fixed_T.png",
+      "bytes": 666625,
+      "sha256": "fb796df8447784e3345f64c4142ab5c70e954f8ae009566bd8fa454a9f37cb65"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/plot_manifest.json",
+      "bytes": 26910,
+      "sha256": "540104eba386e802f62285a6ad71b3bc1e8b61748679dc7553fe4b0cb480ce22"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/candidate_aps_v2.toml",
+      "bytes": 2069,
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_fixed_T_transport.py",
+      "bytes": 4767,
+      "sha256": "0e4987b45677eff3140691aa8fb05da56dee2e7ed604e337a06df40c205a9e38"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_manifest.py",
+      "bytes": 6720,
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_quality.py",
+      "bytes": 14956,
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_style.py",
+      "bytes": 10980,
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/render_transport_fixed_T_panel_legends.py",
+      "bytes": 16077,
+      "sha256": "a7a6a8ec08ffb980ea716c9c66ced5fab5044376db4fac996468661a268e2973"
+    },
+    {
+      "archive_member": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/validate_plot_artifact.py",
+      "bytes": 27475,
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696"
+    },
+    {
+      "archive_member": "scripts/analysis/relaxtime/export_transport_fixed_T_accepted_pdf.py",
+      "bytes": 6251,
+      "sha256": "f1d32631ac9423adcde483832c14b265358114cb6b83ce4613e5a20503391412"
+    },
+    {
+      "archive_member": "scripts/analysis/relaxtime/render_transport_fixed_T_panel_legends.py",
+      "bytes": 16077,
+      "sha256": "a7a6a8ec08ffb980ea716c9c66ced5fab5044376db4fac996468661a268e2973"
+    }
+  ],
+  "moved_files": [
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/candidate_aps_v2.toml",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/candidate_aps_v2.toml",
+      "sha256": "7f52a01f2f0ae21cbd8247e37d4557672a2c8583480c080a8407079b735f992d",
+      "bytes": 2069
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_fixed_T_transport.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_fixed_T_transport.py",
+      "sha256": "0e4987b45677eff3140691aa8fb05da56dee2e7ed604e337a06df40c205a9e38",
+      "bytes": 4767
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_manifest.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_manifest.py",
+      "sha256": "1aef8d6e9427ed7c93b2c749a1e2a281ec0813be89e0cf554fd35555698f5319",
+      "bytes": 6720
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_quality.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_quality.py",
+      "sha256": "fd7a81fabca66c5aebc5215ea63ae8cfd805b256f3c5b0102949c919b1f6771a",
+      "bytes": 14956
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_style.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/plot_style.py",
+      "sha256": "e9d6263c96236d0e5cebdf87dfa90b0a53db128a55fc950472417b5b99f12cb1",
+      "bytes": 10980
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/render_transport_fixed_T_panel_legends.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/render_transport_fixed_T_panel_legends.py",
+      "sha256": "a7a6a8ec08ffb980ea716c9c66ced5fab5044376db4fac996468661a268e2973",
+      "bytes": 16077
+    },
+    {
+      "from": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/validate_plot_artifact.py",
+      "to": "data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/source_snapshot/validate_plot_artifact.py",
+      "sha256": "b659935cfef6e37f741ee61e9b20d99492ea4458bf85c180e91d2965b974d696",
+      "bytes": 27475
+    }
+  ],
+  "frozen_external_inputs": [
+    {
+      "from": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\writing_package\\outputs\\journal_en\\review_revision_2026-10-12\\figure_fixed_T\\plot_fixed_T_transport.py",
+      "path": "data/inputs/transport_fixed_T_panel_legends_20261021/plot_fixed_T_transport.py",
+      "path_kind": "repository_relative",
+      "role": "original_paper_renderer",
+      "bytes": 4767,
+      "sha256": "0e4987b45677eff3140691aa8fb05da56dee2e7ed604e337a06df40c205a9e38"
+    },
+    {
+      "from": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\writing_package\\outputs\\journal_en\\review_revision_2026-10-12\\figure_fixed_T\\figure4_transport_fixed_T.png",
+      "path": "data/inputs/transport_fixed_T_panel_legends_20261021/figure4_transport_fixed_T.png",
+      "path_kind": "repository_relative",
+      "role": "original_paper_png",
+      "bytes": 296168,
+      "sha256": "4e6df8201724b227872608ca5a7fdd3961ac13ad64bb01a2900b35155e455b81"
+    },
+    {
+      "from": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\writing_package\\outputs\\journal_en\\review_revision_2026-10-12\\figure_fixed_T\\figure4_transport_fixed_T.pdf",
+      "path": "data/inputs/transport_fixed_T_panel_legends_20261021/figure4_transport_fixed_T.pdf",
+      "path_kind": "repository_relative",
+      "role": "original_paper_pdf",
+      "bytes": 43193,
+      "sha256": "7e807fd80f003034e2afb6ddc7272244b552fa40dbc035e7aec8f29a3b510e9d"
+    },
+    {
+      "from": "D:\\Desktop\\paper\\My_Paper\\pnjl_aniso_transport\\writing_package\\outputs\\journal_en\\review_revision_2026-10-12\\figure_fixed_T\\first_order_endpoints.csv",
+      "path": "data/inputs/transport_fixed_T_panel_legends_20261021/first_order_endpoints.csv",
+      "path_kind": "repository_relative",
+      "role": "original_branch_endpoints",
+      "bytes": 163,
+      "sha256": "b3dabf76ef6a1ad8a5c721bd892148d6f5d7a3781dcf1484f923221f5a20d6dc"
+    }
+  ],
+  "metadata_adaptation": "Path remapping, explicit historical acceptance, common frozen render signature, existing legend/color declarations, and separate exporter provenance; original manifests remain in the archive.",
+  "unchanged_render_outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/figure4_transport_fixed_T.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 666625,
+      "sha256": "fb796df8447784e3345f64c4142ab5c70e954f8ae009566bd8fa454a9f37cb65",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          4440
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          7.4000148000296
+        ]
+      }
+    }
+  ],
+  "original_archive_files_verified": 22,
+  "image_bytes_unchanged": true,
+  "rendered_again": false,
+  "solver_called": false,
+  "display_semantics_unchanged": true,
+  "new_author_acceptance": false,
+  "artifact_contract_errors": []
+}

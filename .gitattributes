@@ -125,3 +125,11 @@ data/outputs/figures/relaxtime/meson_density/sciplot_*/*.png binary
 
 # Original first-round chemical-freezeout evidence, including its recorded CRLF bytes.
 docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/evidence.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Frozen transport FIG4 inputs, original stage archives and source snapshots.
+data/inputs/transport_fixed_T_panel_legends_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/inputs/transport_fixed_T_panel_legends_20261021/*.png binary
+data/inputs/transport_fixed_T_panel_legends_20261021/*.pdf binary
+data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__*/provenance/*.zip binary

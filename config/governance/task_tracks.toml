@@ -1160,3 +1160,16 @@ evidence = [
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
   "note:author_20261023_keeps_review_pending_group_meeting_next_week",
 ]
+
+[[items]]
+id = "transport-fig4-source-and-panel-legends"
+track_id = "plot-sop"
+classification = "independent"
+status = "archived"
+parent = "track:plot-sop"
+task_file = "docs/dev/archived/2026-10-17_输运FIG4来源核对与子图内图例.md"
+reason = "作者已接受 (g)/(a) 图例布局及同输入 PDF；2026-10-23 完成原包留存、显式接受链、figures/results 整理与任务归档。后续数据或论文采用由独立任务管理。"
+next_action = ""
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/dev/archived/2026-10-17_输运FIG4来源核对与子图内图例.md", "file:data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__png_review/plot_manifest.json", "file:data/outputs/figures/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/plot_manifest.json", "file:data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/provenance/png_acceptance.json", "file:data/outputs/results/relaxtime/transport/phase_guided/transport_fixed_T_panel_legends_20261021__pdf/storage_relocation.json", "note:author_20261021_accepted_fig4_layout", "note:author_20261023_authorized_completed_figure_delivery_closeout", "note:historical_affiliation_transport-review-followup_closed_as_independent_plotting"]
