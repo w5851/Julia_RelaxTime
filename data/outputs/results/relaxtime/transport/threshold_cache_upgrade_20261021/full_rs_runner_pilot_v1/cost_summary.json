@@ -1,0 +1,28 @@
+{
+  "host": "W",
+  "pilot_job_seconds": 4631.0,
+  "pilot_process_seconds": 1955.73,
+  "maximum_pilot_peak_rss_bytes": 1808244736.0,
+  "modes": {
+    "A": {
+      "jobs": 72,
+      "remaining_points": 904,
+      "max_points_per_shard": 14,
+      "planned_runner_seconds": 687181.87069744,
+      "maximum_planned_job_seconds": 10531.988821512,
+      "batch_plan_sha256": "d90173498b612dd9b1eb3ddcf9baafc764e052beb64f8bf183d4d579022b8455"
+    },
+    "B": {
+      "jobs": 63,
+      "remaining_points": 904,
+      "max_points_per_shard": 15,
+      "planned_runner_seconds": 650630.558278174,
+      "maximum_planned_job_seconds": 10753.217319088,
+      "batch_plan_sha256": "72828fc44c47779628efa31c5bcca3d3a8bed70330be648edaab9c3ae5497e05"
+    }
+  },
+  "total_planned_runner_hours": 371.6145636043372,
+  "review_sha256": "ae014caf965178e05590352ecade9b4866d2223784b4065e8922740529ae639d",
+  "basis": "Sum of per-shard conservative planning budgets from reviewed pilots; not a measured full-grid runtime or monetary charge",
+  "full_jobs_dispatched": false
+}

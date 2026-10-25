@@ -1,0 +1,15 @@
+{
+  "created_utc": "2026-10-25T19:20:04.037212+00:00",
+  "host": "W",
+  "foundation_sha256": "ee3149a4db0aba0639662f0fe7e62488557b3517e2dc91715ae26ba68d46c0d3",
+  "files": {
+    "run_remote_pilot_review.py": "a706d63d44779c8e7257868256022be962f0f6b06f9bd42815b6e70b54f584b6",
+    "plan_remaining_batches.py": "bcd15a6b13b8a2bc34a7039584c4e6335c7b8a36a12f6776facb13dddcc627a4",
+    "runner_results_manifest.json": "c15d39aba03b631791fa23de1579c8b6b38fe9cb7da55ac7ea5d3e988c290265",
+    "runner_results.zip": "90a4e97840a6c3f8b1c475953a11f5cb527e3f3d528fd1312e040bba80c47e6f",
+    "review_control_manifest.json": "d7b0c630d9a20b83277c404544911ae6a6cf0713909cc35251ed6eef48dbf85a",
+    "review_foundation_manifest.json": "fea2e5f5ff792c4f52eeb46818519bfdb90ec441b55de824e57adfc0011501cd"
+  },
+  "dispatch_performed": false,
+  "numerical_computation_performed": false
+}

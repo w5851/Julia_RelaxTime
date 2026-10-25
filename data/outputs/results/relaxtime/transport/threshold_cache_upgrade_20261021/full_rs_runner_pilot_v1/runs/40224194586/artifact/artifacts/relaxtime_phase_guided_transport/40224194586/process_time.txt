@@ -1,0 +1,23 @@
+	Command being timed: "julia --startup-file=no --project=. --heap-size-hint=1200M benchmark/relaxtime/transport_runner_timing.jl --mode fixed-muB-phase-scaled --case-name thermal_weighted_full_rs_20261025 --sampling-profile thermal_weighted_v1 --xi-list 0.35 --muB-list 450 --channel-diagnostics --alphaT-list 1.1"
+	User time (seconds): 163.86
+	System time (seconds): 0.90
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:44.78
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1749596
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 256764
+	Voluntary context switches: 56
+	Involuntary context switches: 1554
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 2848
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

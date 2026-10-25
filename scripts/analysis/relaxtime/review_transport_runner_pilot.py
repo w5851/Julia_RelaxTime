@@ -147,6 +147,21 @@ def load_module(name, path):
     return module
 
 
+def check_source_set(sources, source_root):
+    # Production calculation_identity walks these trees recursively. The
+    # qualification input preparer deliberately covers a narrower script set.
+    present = {"Project.toml", "Manifest.toml"}
+    require(all((source_root / name).is_file() for name in present),
+            "calculation environment files are missing")
+    for base in ("src", "scripts/relaxtime", "config/models/pnjl", "config/physics"):
+        present.update(path.relative_to(source_root).as_posix()
+                       for path in (source_root / base).rglob("*")
+                       if path.is_file() and path.suffix in (".jl", ".toml"))
+    declared = {item["path"] for item in sources}
+    require(len(declared) == len(sources) and declared == present,
+            "incomplete or duplicate calculation source identity")
+
+
 def review_run(directory, entry, specification, source_root):
     job, run_id = entry["job"], entry["run_id"]
     args = job["inputs"]
@@ -199,11 +214,8 @@ def review_run(directory, entry, specification, source_root):
     require(cfg["compute_bulk"] and cfg["propagator_xi_policy"] == "match_thermo" and
             summary["skipped_count"] == 0 and summary["success_count"] == job["expected_points"],
             "pilot changed physics or reused existing results")
-    inputs = load_module("pilot_inputs", source_root / "scripts/analysis/relaxtime/prepare_transport_production_inputs.py")
     contract = read(result / "phase_guided_transport_scan_sampling_contract.json")["identity"]
-    present = {p.relative_to(source_root).as_posix() for p in source_root.rglob("*")
-               if p.is_file() and inputs.is_numerical_source(p.relative_to(source_root).as_posix())}
-    require({item["path"] for item in contract["sources"]} == present, "incomplete numerical source identity")
+    check_source_set(contract["sources"], source_root)
     diagnostics = checker.read_rows(result / "phase_guided_transport_scan_sampling.csv")
     channel_times = []
     for row in rows:

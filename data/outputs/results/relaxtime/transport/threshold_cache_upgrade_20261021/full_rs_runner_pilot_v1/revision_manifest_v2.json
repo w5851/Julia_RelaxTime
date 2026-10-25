@@ -1,0 +1,9 @@
+{
+  "base_reviewer_sha256": "e4f9141ebb7939be9ec12f6683e7e91488d09d9a68731030e67f715852815ce5",
+  "reviewer_sha256": "55ef52829bfc8db8b38d5df0758a9cf7cb06946cf820809fa5b286a7e90a91d6",
+  "test_sha256": "8de8212d811191fb5bc84f24f9e31a52238ae97bd72224e99e8ff01a979778ca",
+  "reason": "Use the recursive production source contract, not the narrower qualification source scope; all 327 source files are present and hash-verified in the frozen archive.",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "source_archive_unchanged": true,
+  "numerical_rerun_required": false
+}

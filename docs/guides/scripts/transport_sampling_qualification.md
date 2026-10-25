@@ -213,7 +213,7 @@ python scripts/analysis/relaxtime/verify_transport_joint_density.py `
 十二点资格只覆盖所述代表集；两点本机计时不等于 GitHub runner 实测，也不是全扫描用时上界。
 生产入口、相边界/温度锚点及 Julia–Fortran 对齐结果见
 [生产接入报告](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_integration_20261023.md)。
-正式重跑的分片仍需用六点 runner 先导的完整时间、启动和峰值内存校正。
+正式重跑的分片依据 mode-A 六点及 mode-B 五点的 runner 先导校正，实测记录见下文生产参数留档。
 
 ## 生产入口的复现与新背景核验
 
@@ -303,7 +303,7 @@ check_transport_production_artifact.py RESULT_DIR
 指定 `--calculation-sha` 时还验证该对象确为本地可读的提交，其实际数值文件集合及内容与验收代码一致。
 Git 常规换行转换和无关文档修改不影响此检查；未知提交、旧实现或未提交的数值文件会被拒绝。
 未选择含已审阅实现的完整提交时 `pilot_input_ready=false`；
-整批的 `full_dispatch_ready` 始终为 false，须先用 runner 先导校准完整时间、启动和峰值内存。
+该输入生成器写出的 `full_dispatch_ready` 始终为 false；成本复核通过后，另生成可执行的批次计划，保留原始输入。
 生成输入不会触发工作流。
 
 workflow 通过 `benchmark/relaxtime/transport_runner_timing.jl` 原样调用扫描入口；
@@ -321,12 +321,24 @@ JIT 已包含在各阶段耗时中，不再次加到总时间；Julia 1.10 缺�
 并将源码哈希与当前检出的计算源比较。续算时仅消费与成功结果行 `run_id` 相同的通道诊断；
 旧失败尝试继续保留。dry-run 只证明计划生成，不能替代数值完成。
 
+下载先导后，在 quote-remote 运行
+`python -B scripts/analysis/relaxtime/review_transport_runner_pilot.py PILOT_CASE`。
+case 须包含绑定输入、派发清单、固定计算源码包，以及每个 run 的 API 记录、原始 ZIP 和解压产物。
+复核器按生产合同递归核对 `src/`、`scripts/relaxtime/`、PNJL 配置与物理配置下的 Julia/TOML 文件，
+另核对根 Project/Manifest；这与资格输入生成器的较窄脚本范围不同。
+`reviewed_pilot.json` 中的 `pilot_artifacts_passed` 和 `runner_cost_qualified` 均为 true 后才准备剩余批次。
+每点预算为同模式先导整段 scan 最大耗时的两倍，每个 job 另预留两倍已观察到的非 scan 开销，
+以 180 分钟目标确定分片。`steady_point_seconds=null` 表示当前包装没有独立的逐点稳态实测。
+
 ## 生产留档与远端检查
 
 当前[生产参数留档](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)
 记录 profile、各层积分、九条温度、两种模式的输入与归档要求。
-mode-A 的 910 点和 mode-B 的 909 点输入已分别准备；共七个先导 jobs、十一点，
-仍须绑定实际计算提交并验收 GitHub runner 的实际产物与时间/内存成本。
+mode-A 的 910 点和 mode-B 的 909 点输入已绑定计算提交
+`2e5c411c716d5cbc524c3fc6cfb335fe05b39444` 和标签 `transport-full-rs-20261026-v1`。
+七个先导 jobs 的 11 点、187 道诊断与成本复核已通过；剩余各 904 点分别按最多 14/15 点分为 72/63 片。
+[实际复核与批次](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/reviewed_pilot.json)
+已取回核验，剩余批次尚未派发。
 
 长数值任务优先在 W 运行。使用现有 SSH 配置的 `quote-remote`、BatchMode 公钥和主机校验，
 源码包解压到任务隔离目录，采用便携 Julia 1.12.5；保留源码包、有效参数和输出身份。
@@ -337,4 +349,4 @@ Windows PowerShell 通过短的 UTF-16LE `EncodedCommand` 加载审核过的脚�
 `relaxtime-manual-scans.yml` 的数值入口同样使用 `--sampling-profile`，不再传递旧节点或积分模式选项。
 run-id 隔离目录中的结果、图、执行命令、失败日志和 `/usr/bin/time -v` 随 artifacts 保存。
 W 上的小型自定义 profile 集成检查只验证入口与 sidecars；生产收敛沿用独立/联合验收，
-runner 分片用时与峰值内存需由 GitHub runner 的六点先导实测。
+runner 分片用时与峰值内存使用上述 GitHub runner 实测，后续批次继续保留相同计时和产物合同。

@@ -1,0 +1,66 @@
+Git context below is the frozen local workspace snapshot; checks execute on W.
+Checking task_tracks_working.toml
+[task-ledger-preflight]
+  branch=codex/meson-freezeout-defaults
+  head=2e5c411c716d5cbc524c3fc6cfb335fe05b39444
+  dirty=true tracked=13 untracked=510
+  ATTENTION: preserve these paths before changing track state:
+    - config/governance/task_tracks.toml
+    - docs/analysis/governance/figure_asset_registry_v1/README.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/parameter_envelope_20261018.md
+    - docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md
+    - docs/dev/active/2026-07-27_partial-feedback性能与冻结线粗扫.md
+    - docs/dev/active/2026-08-16_历史绘图资产清理与退役任务单.md
+    - docs/dev/active/2026-09-30_charged-gbu-phase-contours.md
+    - docs/dev/active/2026-10-23_输运采样生产接入与重跑合同.md
+    ... 513 more; use --full-paths or git status --short
+  primary_track=meson-freezeout-experiment
+  selected_track=transport-threshold-upgrade
+  status=active
+  current_task=thermal-sampling-production-integration
+  task_file=docs/dev/active/2026-10-23_输运采样生产接入与重跑合同.md
+  track_blocked_by=
+  track_next_action=计算提交 2e5c411c716d5cbc524c3fc6cfb335fe05b39444 及固定标签已发布；七个 runner jobs 的 11 点、187 道诊断、实际参数/来源及成本复核在 W 通过。复用先导 6/5 点，剩余各 904 点按最多 14/15 点分成 72/63 片，逐片请求及归档合同已准备并取回核验。本轮准备完成，后续按批次执行、取回并验收完整网格；整批尚未派发，正式晋升和论文资格另记。A 降维仍为独立待办。
+  item_blocked_by=
+  item_next_action=计算提交 2e5c411c716d5cbc524c3fc6cfb335fe05b39444 及固定标签已发布；七个 runner jobs 的 11 点、187 道诊断、实际参数/来源及成本复核在 W 通过。复用先导 6/5 点，剩余各 904 点按最多 14/15 点分成 72/63 片，逐片请求及归档合同已准备并取回核验。本轮准备完成，后续按批次执行、取回并验收完整网格；整批尚未派发，正式晋升和论文资格另记。A 降维仍为独立待办。
+  evidence_total=26; last up to 5 entries (full list in ledger):
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_repeat_defaults_v1/verification.json
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/runner_inputs_v1/runner_inputs.json
+    - note:Julia_Fortran_alignment_retained_in_primary_worktree_backlog
+    - note:runner_pilot_review_passed_full_Actions_not_dispatched
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/returned/reviewed_result.json
+Checking task_tracks.toml
+[task-ledger-preflight]
+  branch=codex/meson-freezeout-defaults
+  head=2e5c411c716d5cbc524c3fc6cfb335fe05b39444
+  dirty=true tracked=13 untracked=510
+  ATTENTION: preserve these paths before changing track state:
+    - config/governance/task_tracks.toml
+    - docs/analysis/governance/figure_asset_registry_v1/README.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md
+    - docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/parameter_envelope_20261018.md
+    - docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md
+    - docs/dev/active/2026-07-27_partial-feedback性能与冻结线粗扫.md
+    - docs/dev/active/2026-08-16_历史绘图资产清理与退役任务单.md
+    - docs/dev/active/2026-09-30_charged-gbu-phase-contours.md
+    - docs/dev/active/2026-10-23_输运采样生产接入与重跑合同.md
+    ... 513 more; use --full-paths or git status --short
+  primary_track=meson-freezeout-experiment
+  selected_track=transport-threshold-upgrade
+  status=active
+  current_task=thermal-sampling-production-integration
+  task_file=docs/dev/active/2026-10-23_输运采样生产接入与重跑合同.md
+  track_blocked_by=
+  track_next_action=计算提交 2e5c411c716d5cbc524c3fc6cfb335fe05b39444 及固定标签已发布；七个 runner jobs 的 11 点、187 道诊断、实际参数/来源及成本复核在 W 通过。复用先导 6/5 点，剩余各 904 点按最多 14/15 点分成 72/63 片，逐片请求及归档合同已准备并取回核验。本轮准备完成，后续按批次执行、取回并验收完整网格；整批尚未派发，正式晋升和论文资格另记。A 降维仍为独立待办。
+  item_blocked_by=
+  item_next_action=计算提交 2e5c411c716d5cbc524c3fc6cfb335fe05b39444 及固定标签已发布；七个 runner jobs 的 11 点、187 道诊断、实际参数/来源及成本复核在 W 通过。复用先导 6/5 点，剩余各 904 点按最多 14/15 点分成 72/63 片，逐片请求及归档合同已准备并取回核验。本轮准备完成，后续按批次执行、取回并验收完整网格；整批尚未派发，正式晋升和论文资格另记。A 降维仍为独立待办。
+  evidence_total=26; last up to 5 entries (full list in ledger):
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_repeat_defaults_v1/verification.json
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/runner_inputs_v1/runner_inputs.json
+    - note:Julia_Fortran_alignment_retained_in_primary_worktree_backlog
+    - note:runner_pilot_review_passed_full_Actions_not_dispatched
+    - file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/returned/reviewed_result.json
+Both working and selected-commit task ledgers passed.

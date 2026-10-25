@@ -1,0 +1,20 @@
+{
+  "id": 12611241044,
+  "node_id": "MDg6QXJ0aWZhY3QxMjYxMTI0MTA0NA==",
+  "name": "transport-thermal_weighted_full_rs_mode_b_20261025-pilot_modeB_T120_muB900_00",
+  "size_in_bytes": 34289,
+  "url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611241044",
+  "archive_download_url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611241044/zip",
+  "expired": false,
+  "digest": "sha256:8f3b163ddf74001a17dc35caa4cc861484d9dba25eeceaa2f258e92c487bacf1",
+  "created_at": "2026-10-25T19:14:52Z",
+  "updated_at": "2026-10-25T19:14:52Z",
+  "expires_at": "2026-11-24T19:14:52Z",
+  "workflow_run": {
+    "id": 40224250574,
+    "repository_id": 1097528528,
+    "head_repository_id": 1097528528,
+    "head_branch": "transport-full-rs-20261026-v1",
+    "head_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+  }
+}

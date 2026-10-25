@@ -1,0 +1,425 @@
+{
+  "pilot_artifacts_passed": true,
+  "runner_cost_qualified": true,
+  "modes": {
+    "A": {
+      "max_points_per_shard": 14,
+      "job_target_seconds": 10800,
+      "safety_factor": 2.0,
+      "reserved_overhead_seconds": 957.964376128,
+      "per_point_budget_seconds": 683.858888956,
+      "maximum_pilot_scan_seconds": 341.929444478,
+      "maximum_peak_memory_fraction": 0.10782796443901994,
+      "steady_point_seconds": null,
+      "basis": "Twice the largest measured whole pilot scan per budgeted point, without division by point count; twice the observed job overhead is reserved once",
+      "scope": "Conservative plan from measured pilots, not a proven upper bound for every grid point"
+    },
+    "B": {
+      "max_points_per_shard": 15,
+      "job_target_seconds": 10800,
+      "safety_factor": 2.0,
+      "reserved_overhead_seconds": 940.241895538,
+      "per_point_budget_seconds": 654.19836157,
+      "maximum_pilot_scan_seconds": 327.099180785,
+      "maximum_peak_memory_fraction": 0.1078492183566422,
+      "steady_point_seconds": null,
+      "basis": "Twice the largest measured whole pilot scan per budgeted point, without division by point count; twice the observed job overhead is reserved once",
+      "scope": "Conservative plan from measured pilots, not a proven upper bound for every grid point"
+    }
+  },
+  "runs": [
+    {
+      "mode": "A",
+      "label": "pilot_muB0_alpha1_00",
+      "run_id": 40224161650,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224161650",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "13d7dff2b4a511cd16eee9ef32a031fef0f41758e25dc6f3769c9477090d9afe",
+      "completed_points": 2,
+      "qualified_channels": 34,
+      "process": {
+        "wall_seconds": 373.16,
+        "user_seconds": 371.61,
+        "system_seconds": 1.5,
+        "peak_rss_bytes": 1807888384.0
+      },
+      "job_seconds": 809.0,
+      "load": {
+        "allocated_bytes": 2240278728,
+        "compile_seconds": 19.936637771,
+        "compile_timing_available": true,
+        "elapsed_seconds": 29.689789699,
+        "gc_seconds": 0.888788319,
+        "recompile_seconds": 6.985725967
+      },
+      "scan": {
+        "allocated_bytes": 57076741160,
+        "compile_seconds": 63.924672575,
+        "compile_timing_available": true,
+        "elapsed_seconds": 341.929444478,
+        "gc_seconds": 51.40485951,
+        "recompile_seconds": 2.63363548
+      },
+      "cpu_name": "znver3",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16766414848,
+      "channel_times": [
+        {
+          "T_MeV": 200.0898076157829,
+          "muB_MeV": 0.0,
+          "xi": -0.22,
+          "channel_seconds": 126.930162403
+        },
+        {
+          "T_MeV": 200.0898076157829,
+          "muB_MeV": 0.0,
+          "xi": 0.37,
+          "channel_seconds": 113.901417287
+        }
+      ],
+      "full_single_point_process_seconds": null,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "aa0c7591f8425773bdeade6e5d13ba643c7ac16294bac7bfbacfe5a53a32b2fe",
+        "jobs.json": "a69143ee0e1480f7c55723545a564fc406584c55081f99039c6b9bd535fe539a",
+        "artifact.json": "118a310836d1068f8a3a44fc82a9dc6055de3e35cda09b042c0f20a92bb5a127",
+        "archive_manifest.json": "53818142c821f3c7b235472d8898a52cb749e653b94423c5d076bcc1751b978f"
+      }
+    },
+    {
+      "mode": "A",
+      "label": "pilot_muB0_alpha1.2_00",
+      "run_id": 40224178198,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224178198",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "c5c1f8a5bb90b33982db76e90de2ed179ac1f937d1f602e454512a0cf3b39c7b",
+      "completed_points": 1,
+      "qualified_channels": 17,
+      "process": {
+        "wall_seconds": 272.83,
+        "user_seconds": 271.53,
+        "system_seconds": 1.26,
+        "peak_rss_bytes": 1722200064.0
+      },
+      "job_seconds": 718.0,
+      "load": {
+        "allocated_bytes": 2240711856,
+        "compile_seconds": 22.046010318,
+        "compile_timing_available": true,
+        "elapsed_seconds": 32.097027361,
+        "gc_seconds": 0.926241064,
+        "recompile_seconds": 7.506956897
+      },
+      "scan": {
+        "allocated_bytes": 33930715736,
+        "compile_seconds": 72.138185912,
+        "compile_timing_available": true,
+        "elapsed_seconds": 239.017811936,
+        "gc_seconds": 41.637383454,
+        "recompile_seconds": 2.747707338
+      },
+      "cpu_name": "znver3",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16766414848,
+      "channel_times": [
+        {
+          "T_MeV": 240.10776913893946,
+          "muB_MeV": 0.0,
+          "xi": -0.5,
+          "channel_seconds": 134.130186043
+        }
+      ],
+      "full_single_point_process_seconds": 272.83,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "73fcc55ed53b40a9c833eae4ccdb2b139fc10cec0ac709e597b69ef274a440e4",
+        "jobs.json": "71c7a64f8e9f1e4b6771b525f0a5bf01b18c3ed8c14abfa402588d3b989ce1fb",
+        "artifact.json": "6b775661bbaf7580f05a865c1379c03942da3d22509c5f62beeaf3c5f9f546f3",
+        "archive_manifest.json": "2db677fe8ab59e545270b3fe1c8bffec858b42deb32fca4aac91c0a009f8369f"
+      }
+    },
+    {
+      "mode": "A",
+      "label": "pilot_muB450_alpha1.1_00",
+      "run_id": 40224194586,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224194586",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "611ac1588a4421ac5a8bb2ed25c97293693172a63b0df3cbee73df1b3362cfa4",
+      "completed_points": 1,
+      "qualified_channels": 17,
+      "process": {
+        "wall_seconds": 164.78,
+        "user_seconds": 163.86,
+        "system_seconds": 0.9,
+        "peak_rss_bytes": 1791586304.0
+      },
+      "job_seconds": 452.0,
+      "load": {
+        "allocated_bytes": 2239033528,
+        "compile_seconds": 13.684221262,
+        "compile_timing_available": true,
+        "elapsed_seconds": 19.637880344,
+        "gc_seconds": 0.875019951,
+        "recompile_seconds": 4.5681402
+      },
+      "scan": {
+        "allocated_bytes": 33915640384,
+        "compile_seconds": 42.589661288,
+        "compile_timing_available": true,
+        "elapsed_seconds": 144.064106464,
+        "gc_seconds": 37.784718368,
+        "recompile_seconds": 1.64816562
+      },
+      "cpu_name": "znver5",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16766414848,
+      "channel_times": [
+        {
+          "T_MeV": 201.00102272233542,
+          "muB_MeV": 450.0,
+          "xi": 0.35,
+          "channel_seconds": 89.010276839
+        }
+      ],
+      "full_single_point_process_seconds": 164.78,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "1af679348c7bafb30462ae95d2937325af0a5ff5f3d0ca0092964945a28b6ab6",
+        "jobs.json": "51bc98f9699aa00d635f243a5863268c2dc71a9a4ad6a4b78fe7e67771200f24",
+        "artifact.json": "8f60e15e404142dd28365491b65d63e590fb53129dfed581382468cd97f0a845",
+        "archive_manifest.json": "99d6be296e087fca6dfaac5381fe439bdb34c32aea1934eb5be1f474112e1d45"
+      }
+    },
+    {
+      "mode": "A",
+      "label": "pilot_muB900_alpha1_00",
+      "run_id": 40224212631,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224212631",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "5bfa8bf5bc694e573f0d6f116389de00185a614a0c7e469f58bec779bf2f4c00",
+      "completed_points": 2,
+      "qualified_channels": 34,
+      "process": {
+        "wall_seconds": 358.26,
+        "user_seconds": 356.36,
+        "system_seconds": 1.88,
+        "peak_rss_bytes": 1779052544.0
+      },
+      "job_seconds": 732.0,
+      "load": {
+        "allocated_bytes": 2239112376,
+        "compile_seconds": 17.62392406,
+        "compile_timing_available": true,
+        "elapsed_seconds": 25.310188749,
+        "gc_seconds": 0.929900889,
+        "recompile_seconds": 6.400191403
+      },
+      "scan": {
+        "allocated_bytes": 60106971064,
+        "compile_seconds": 58.211312794,
+        "compile_timing_available": true,
+        "elapsed_seconds": 331.526610556,
+        "gc_seconds": 88.148251871,
+        "recompile_seconds": 2.425978545
+      },
+      "cpu_name": "sapphirerapids",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16765374464,
+      "channel_times": [
+        {
+          "T_MeV": 125.7360002645551,
+          "muB_MeV": 900.0,
+          "xi": -0.04,
+          "channel_seconds": 123.618446947
+        },
+        {
+          "T_MeV": 125.7360002645551,
+          "muB_MeV": 900.0,
+          "xi": -0.003,
+          "channel_seconds": 116.674097617
+        }
+      ],
+      "full_single_point_process_seconds": null,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "96f08995e4baa7ccc95f73a80dbdb43bf213d9975189736ced0ce9da1d091dd0",
+        "jobs.json": "7a2538fbd35dfb6ad7bbb08c9c8e8064cef6b4dbb052d9466864fc7f53c80f69",
+        "artifact.json": "701203138b89fce042c6977f1482fc4c0d605ac0fd29d27f6576ff0da1f98189",
+        "archive_manifest.json": "ea788e06e917b2a7c281c5ebfeaa1c0ca5b699d6e646f30b85ca6d25d42da4b8"
+      }
+    },
+    {
+      "mode": "B",
+      "label": "pilot_modeB_T120_muB0_00",
+      "run_id": 40224228254,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224228254",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "5add3f6966221b1749833255571cef33fa3b4c133336955142af55c661518685",
+      "completed_points": 1,
+      "qualified_channels": 17,
+      "process": {
+        "wall_seconds": 210.12,
+        "user_seconds": 209.27,
+        "system_seconds": 0.84,
+        "peak_rss_bytes": 1584836608.0
+      },
+      "job_seconds": 649.0,
+      "load": {
+        "allocated_bytes": 2240196712,
+        "compile_seconds": 19.905320436,
+        "compile_timing_available": true,
+        "elapsed_seconds": 29.692000718,
+        "gc_seconds": 0.825367977,
+        "recompile_seconds": 6.911268406
+      },
+      "scan": {
+        "allocated_bytes": 32497155640,
+        "compile_seconds": 62.697241056,
+        "compile_timing_available": true,
+        "elapsed_seconds": 178.879052231,
+        "gc_seconds": 20.459852154,
+        "recompile_seconds": 2.632242749
+      },
+      "cpu_name": "znver3",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16766410752,
+      "channel_times": [
+        {
+          "T_MeV": 120.0,
+          "muB_MeV": 0.0,
+          "xi": 0.5,
+          "channel_seconds": 114.061538878
+        }
+      ],
+      "full_single_point_process_seconds": 210.12,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "bff5144b7d7779b2ced8860ffa12abbf9c1f393722f94937c7a910c5dc1b82f9",
+        "jobs.json": "2eac018c3a24af3c712de544f9ffb0fd8b1a7e370776b27608e76e2394c6a860",
+        "artifact.json": "5b95855f2e6ea0ba8cbf381efe22d364197c3695c76462ebc54bfab56949807d",
+        "archive_manifest.json": "e59c16e32e54ca6a78ef24e411c51d4733653f5db006daf48f0ef587058b611a"
+      }
+    },
+    {
+      "mode": "B",
+      "label": "pilot_modeB_T120_muB900_00",
+      "run_id": 40224250574,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224250574",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "8f3b163ddf74001a17dc35caa4cc861484d9dba25eeceaa2f258e92c487bacf1",
+      "completed_points": 3,
+      "qualified_channels": 51,
+      "process": {
+        "wall_seconds": 347.6,
+        "user_seconds": 346.48,
+        "system_seconds": 1.06,
+        "peak_rss_bytes": 1808244736.0
+      },
+      "job_seconds": 641.0,
+      "load": {
+        "allocated_bytes": 2239137760,
+        "compile_seconds": 13.903273598,
+        "compile_timing_available": true,
+        "elapsed_seconds": 19.407982853,
+        "gc_seconds": 0.877640839,
+        "recompile_seconds": 4.64340796
+      },
+      "scan": {
+        "allocated_bytes": 85154541248,
+        "compile_seconds": 43.940417473,
+        "compile_timing_available": true,
+        "elapsed_seconds": 327.099180785,
+        "gc_seconds": 101.068912986,
+        "recompile_seconds": 1.877588641
+      },
+      "cpu_name": "znver5",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16766414848,
+      "channel_times": [
+        {
+          "T_MeV": 120.0,
+          "muB_MeV": 900.0,
+          "xi": -0.5,
+          "channel_seconds": 96.253554895
+        },
+        {
+          "T_MeV": 120.0,
+          "muB_MeV": 900.0,
+          "xi": -0.13,
+          "channel_seconds": 95.327255823
+        },
+        {
+          "T_MeV": 120.0,
+          "muB_MeV": 900.0,
+          "xi": -0.12,
+          "channel_seconds": 74.895872059
+        }
+      ],
+      "full_single_point_process_seconds": null,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "f03d53c898ad17fe5f45cd1987bee0977b3983c49d02fa727c84c368eece35e0",
+        "jobs.json": "457d522465fb9ee787bc336e355d95cd2b87ec3c419cdf7a02ec2b6f6abfb2ed",
+        "artifact.json": "3740f2c0f93174806bd7485b4f7d4c6c74b07dab7829433406e944d7caf119c4",
+        "archive_manifest.json": "da0b00b99b48dd8e2b30a73748cd5a396b70091bcdd7f0baa9d62a4d7bc78448"
+      }
+    },
+    {
+      "mode": "B",
+      "label": "pilot_modeB_T200_muB900_00",
+      "run_id": 40224267466,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224267466",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "artifact_sha256": "318f402e0700e4d647273768e790ec364f5b929acb69d03e9c18d7cd4cdfa99a",
+      "completed_points": 1,
+      "qualified_channels": 17,
+      "process": {
+        "wall_seconds": 228.98,
+        "user_seconds": 227.51,
+        "system_seconds": 1.42,
+        "peak_rss_bytes": 1773916160.0
+      },
+      "job_seconds": 630.0,
+      "load": {
+        "allocated_bytes": 2239194088,
+        "compile_seconds": 18.832047697,
+        "compile_timing_available": true,
+        "elapsed_seconds": 27.381320866,
+        "gc_seconds": 1.188627014,
+        "recompile_seconds": 6.828697052
+      },
+      "scan": {
+        "allocated_bytes": 33862569136,
+        "compile_seconds": 59.524509729,
+        "compile_timing_available": true,
+        "elapsed_seconds": 200.068450249,
+        "gc_seconds": 60.33858041,
+        "recompile_seconds": 2.406017556
+      },
+      "cpu_name": "sapphirerapids",
+      "cpu_threads": 4,
+      "total_memory_bytes": 16765378560,
+      "channel_times": [
+        {
+          "T_MeV": 200.0,
+          "muB_MeV": 900.0,
+          "xi": -0.5,
+          "channel_seconds": 133.545570713
+        }
+      ],
+      "full_single_point_process_seconds": 228.98,
+      "steady_point_seconds": null,
+      "input_evidence_sha256": {
+        "run.json": "d67549732e95323d88ea046c100d593f016eb9e5470502ee1cdf6f513414d99c",
+        "jobs.json": "6897a9fb7b9d73927ea790574121508176571fb7f77693e51d1dcc6f65c96854",
+        "artifact.json": "a90553b9da83e7ae2609f5781b8a67943ccb02b0fbe6ef71a0112c6dc56e5ecd",
+        "archive_manifest.json": "6ae679181517523dcbaf1fe08cf9ed69632c58d2e09acb2f9a74eea734320dc9"
+      }
+    }
+  ],
+  "whole_grid_transport_calculated": false,
+  "formal_production_promoted": false,
+  "reviewer_sha256": "55ef52829bfc8db8b38d5df0758a9cf7cb06946cf820809fa5b286a7e90a91d6",
+  "dispatch_manifest_sha256": "ca5b6be3acaaf1b50fc2eb19af1ee0638996ca39b769fe544d37b7b6de6eda5b",
+  "source_manifest_sha256": "72bef8fd80ff57324a132f3ffe87504011cadccab11301fbfd23199868154802"
+}

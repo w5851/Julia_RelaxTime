@@ -6,6 +6,8 @@ tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.csv -text white
 tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Frozen Actions command logs retain the original printf trailing spaces.
+data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/*/artifact/artifacts/relaxtime_phase_guided_transport/*/command.txt whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 # Retained charged-GBU diagnostics and the hash-bound derived comparison table.
 data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/*.zip binary

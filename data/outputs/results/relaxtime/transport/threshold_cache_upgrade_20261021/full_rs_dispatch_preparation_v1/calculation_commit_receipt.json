@@ -1,0 +1,12 @@
+{
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "branch": "codex/meson-freezeout-defaults",
+  "tag": "transport-full-rs-20261026-v1",
+  "tree": "4e40061145425db6163977613d34085f0e2e282e",
+  "head_base": "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+  "staged_paths": 322,
+  "numerical_files_verified": 322,
+  "frozen_files_verified": 159,
+  "preview_sha256": "454a993391d38293ffefd5550fa24eee20e6c473b68239d13f63deb10f12b832",
+  "published": false
+}

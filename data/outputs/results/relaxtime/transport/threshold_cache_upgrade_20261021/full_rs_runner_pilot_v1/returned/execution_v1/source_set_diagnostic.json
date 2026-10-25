@@ -1,0 +1,112 @@
+{
+  "source_archive": {
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "sha256": "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f",
+    "bytes": 916908,
+    "selected_paths": [
+      "Project.toml",
+      "Manifest.toml",
+      "src",
+      "config/models/pnjl",
+      "config/physics",
+      "scripts/relaxtime",
+      "scripts/analysis/relaxtime/prepare_transport_production_inputs.py",
+      "benchmark/relaxtime/transport_runner_timing.jl"
+    ],
+    "files": 340,
+    "scope": "Committed numerical sources and artifact-check helpers, without the large historical data archive"
+  },
+  "runs": [
+    {
+      "contract": "runs\\40224161650\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224178198\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224194586\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224212631\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224228254\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\thermal_weighted_full_rs_mode_b_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224250574\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\thermal_weighted_full_rs_mode_b_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    },
+    {
+      "contract": "runs\\40224267466\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\thermal_weighted_full_rs_mode_b_20261025\\phase_guided_transport_scan_sampling_contract.json",
+      "present_count": 322,
+      "declared_count": 327,
+      "missing_from_archive": [
+        "scripts/relaxtime/config/WorkflowConfig.jl",
+        "scripts/relaxtime/config/WorkflowConfigAudit.jl",
+        "scripts/relaxtime/workflow/charged_gbu_plot.jl",
+        "scripts/relaxtime/workflow/classification_manifest.toml",
+        "scripts/relaxtime/workflow/cross_section_orchestrated.jl"
+      ],
+      "not_declared_by_result": []
+    }
+  ]
+}

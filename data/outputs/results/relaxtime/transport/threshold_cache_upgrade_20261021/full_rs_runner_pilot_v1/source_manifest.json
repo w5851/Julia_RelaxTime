@@ -1,0 +1,17 @@
+{
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "sha256": "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f",
+  "bytes": 916908,
+  "selected_paths": [
+    "Project.toml",
+    "Manifest.toml",
+    "src",
+    "config/models/pnjl",
+    "config/physics",
+    "scripts/relaxtime",
+    "scripts/analysis/relaxtime/prepare_transport_production_inputs.py",
+    "benchmark/relaxtime/transport_runner_timing.jl"
+  ],
+  "files": 340,
+  "scope": "Committed numerical sources and artifact-check helpers, without the large historical data archive"
+}

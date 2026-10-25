@@ -1,0 +1,16 @@
+{
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "expected_runs": 7,
+  "expected_points": 11,
+  "files": {
+    "calculation-source.zip": "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f",
+    "source_manifest.json": "72bef8fd80ff57324a132f3ffe87504011cadccab11301fbfd23199868154802",
+    "binding_manifest.json": "1ef563d2ecdb939b36b77940198aa13cf0d981db47a1fda40ad5a5e76f7d8b04",
+    "mode_a_runner_inputs.json": "2f60487875152e7249ad6ca05a93edd77868bce7cc1e6d2dead9b79e4e9c875c",
+    "mode_b_runner_inputs.json": "fb21294be105ba6dffb18ac01f723677058c41e8fea27a2474e564e798926777",
+    "dispatch_manifest.json": "ca5b6be3acaaf1b50fc2eb19af1ee0638996ca39b769fe544d37b7b6de6eda5b",
+    "review_transport_runner_pilot.py": "e4f9141ebb7939be9ec12f6683e7e91488d09d9a68731030e67f715852815ce5",
+    "reviewer_tests.json": "1084f29772c4676ad09e2331da3b756efb59f87bc9f0bacdb47fcf9e87ae890a",
+    "reviewer_sources.json": "b8f2980ad7cc59b8e4f3710649bc699cf535ca6e3862e48855daa292330b3459"
+  }
+}

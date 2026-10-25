@@ -13,6 +13,29 @@ SPEC.loader.exec_module(pilot)
 
 
 class RunnerPilotTests(unittest.TestCase):
+    def test_production_source_set_recurses_and_rejects_omissions(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            expected = ("Project.toml", "Manifest.toml", "src/core/model.jl",
+                        "config/models/pnjl/profile.toml", "config/physics/default.toml",
+                        "scripts/relaxtime/run_scan.jl",
+                        "scripts/relaxtime/config/WorkflowConfig.jl",
+                        "scripts/relaxtime/workflow/classification_manifest.toml")
+            for name in expected + ("scripts/relaxtime/README.md", "scripts/relaxtime/helper.py",
+                                    "scripts/analysis/probe.jl"):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"fixture\n")
+            sources = [dict(path=name) for name in expected]
+            pilot.check_source_set(sources, root)
+            for altered in (sources[:-1], sources + [sources[-1]],
+                            sources + [dict(path="scripts/relaxtime/helper.py")]):
+                with self.subTest(sources=altered), self.assertRaisesRegex(ValueError, "source identity"):
+                    pilot.check_source_set(altered, root)
+            (root / "scripts/relaxtime/workflow/new_source.jl").write_bytes(b"unrecorded\n")
+            with self.assertRaisesRegex(ValueError, "source identity"):
+                pilot.check_source_set(sources, root)
+
     def test_gnu_time_handles_minutes_and_hours(self):
         template = """User time (seconds): 61.5
 System time (seconds): 0.3

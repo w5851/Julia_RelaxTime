@@ -1,0 +1,21 @@
+{
+  "head": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "selected_paths": [
+    "scripts/analysis/relaxtime/review_transport_runner_pilot.py",
+    "tests/unit/python/test_transport_runner_pilot.py",
+    "docs/dev/active/2026-10-23_\u8f93\u8fd0\u91c7\u6837\u751f\u4ea7\u63a5\u5165\u4e0e\u91cd\u8dd1\u5408\u540c.md",
+    "docs/guides/scripts/transport_sampling_qualification.md",
+    "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md"
+  ],
+  "working_ledger_sha256": "a26516137403210e294d3563011b566ceb25f51e5cd9993caefcb9eaf6475ffd",
+  "staged_ledger_sha256": "e8761c9cf6ede98b723183020664e75af5e1097a30ee2f2eb6f3ae92661482ad",
+  "preserved_dirty_paths": {
+    "docs/analysis/governance/figure_asset_registry_v1/README.md": "01b18155cff7e0826daf2db2e7d3374d7304281d870840104dff56ae11b1bfb4",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md": "8a2ccc677c44d02d77601d906912a14c6d8b123ac82580a112d8b47d9cbc98d1",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md": "133b7ee9d0e3421c4a853871ce0c65df8ec5f6d5fab0c7e4ae3b39288c913c4a",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/parameter_envelope_20261018.md": "207e9897f27e81b50447cfb606f368fd564536da639b071cab13867f4ab521d7",
+    "docs/dev/active/2026-07-27_partial-feedback\u6027\u80fd\u4e0e\u51bb\u7ed3\u7ebf\u7c97\u626b.md": "4243d88fd14f10ce6421c990ed5d64635f1177bc02a0adf8c6f3fbabd4b1356b",
+    "docs/dev/active/2026-08-16_\u5386\u53f2\u7ed8\u56fe\u8d44\u4ea7\u6e05\u7406\u4e0e\u9000\u5f79\u4efb\u52a1\u5355.md": null,
+    "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md": "387a881e755289f8c47c1e60b208d3e34f28863e6413bb4af16ef474fb8d23f6"
+  }
+}

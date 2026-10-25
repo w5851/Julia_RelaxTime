@@ -33,14 +33,14 @@ Actions 重跑准备尚未全部完成。当前已准备 mode-A 的 910 点及 m
 | 新采样默认、旧实现清理、生产入口 | 完整 \(A^\xi\) 的独立分层、十二点联合、真实入口、四点外部对齐、v3 基线及默认入口验收通过 |
 | phase-guided、manual scans、ci-integration workflow 的源码合同 | 已修正，三个 workflow 通过 actionlint；手动 argv 的实际数组构建检查通过 |
 | W 隔离环境的手动入口集成检查 | 两点、23/23 断言及 34 道诊断通过；运行前后源码身份一致，结果已取回 |
-| 实际计算提交及 GitHub 可取到的源码版本 | 已准备独立暂存区的提交范围预览，322 份数值文件及 121 份冻结文件检查通过；计时补充后仍须刷新预览，尚未形成实际提交 |
-| 两种模式的 runner 输入 | mode-A 六点/四个 jobs、mode-B 五点/三个 jobs；`calculation_sha=null`，`pilot_input_ready=false` |
-| GitHub runner 先导时间、启动/JIT、峰值内存及真实产物核验 | 待执行 |
-| mode-A 整批分片 | 暂定最多 20 点/片、54 片；待 runner 实测后校正 |
-| mode-B 新背景、共存分支及代表点覆盖，再生成批次 | 909 点背景、94 次审计、三层独立、17 点联合及真实入口通过；909 点输入已准备，暂定 54 片 |
+| 实际计算提交及 GitHub 可取到的源码版本 | `2e5c411c716d5cbc524c3fc6cfb335fe05b39444` 与固定标签 `transport-full-rs-20261026-v1` 已发布并核验；322 份数值文件及 159 份冻结文件符合最终提交预览 |
+| 两种模式的 runner 输入 | 输入已绑定计算提交；mode-A 六点/四个 jobs、mode-B 五点/三个 jobs 全部完成 |
+| GitHub runner 先导时间、启动/JIT、峰值内存及真实产物核验 | W 复核通过：11 点、187 道诊断、实际参数、来源及计时均通过；返回包已取回核验 |
+| mode-A 整批分片 | 复用六个先导点，剩余 904 点；最多 14 点/片，共 72 片，逐片请求已生成 |
+| mode-B 新背景、共存分支及代表点覆盖，再生成批次 | 909 点背景和代表点资格通过；复用五个先导点，剩余 904 点；最多 15 点/片，共 63 片 |
 | 持久归档、整批完整性核验及新图层 | 新 case 和归档合同已记录，待实际结果 |
 
-这些是准备状态，不能以本地验收或 W 的运行时间代替 GitHub runner 的成本验收。
+当前准备已完成；两种模式的剩余 135 片尚未派发。成本预算来自实际 GitHub runner 先导。
 
 ## 物理参数与积分配置
 
@@ -123,14 +123,46 @@ W 的时间可用于 W 的任务规划，GitHub runner 的整批预算仍从 run
 workflow 已接入原样调用 CLI 的计时包装，记录 `runtime_timing.toml` 中的加载/扫描及其 JIT，
 以及外层 `process_time.txt` 中的完整扫描进程时间和峰值 RSS；job 安装等开销另从 Actions 记录获取。
 2026-10-26 的 workflow 静态检查通过；包装在 W 上的 29 项单测和两点真实 dry-run 也已通过，
-1639 份源码文件在运行前后不变，返回包已取回并核验。此时尚未获得 GitHub runner 成本资格。
+1639 份源码文件在运行前后不变，返回包已取回并核验；实际 runner 验收见下表。
 
-[runner 复核器](../../../../scripts/analysis/relaxtime/review_transport_runner_pilot.py)的六项行为检查已在 W 通过。
+[runner 复核器](../../../../scripts/analysis/relaxtime/review_transport_runner_pilot.py)修订版的七项行为检查已在 W 通过。
 它将实际点集、17 道预算、计算/工作流来源、完整进程时间及 RSS 与具体派发请求核对。
 当前包装没有逐点稳态计时；分片计算预算采用先导整段扫描最大用时的两倍作为每点预算，
 不除以先导点数，同时为每个 job 留出两倍已观察到的非扫描开销。
 以 180 分钟规划目标校正每片点数，并要求先导峰值 RSS 不超过主机内存的 80%。
 这是一组先导样本支持的保守规划，不是全网格每一点的成本上界；JIT 已包含在阶段耗时中，不重复相加。
+
+实际计算和 workflow 均固定到 `2e5c411c716d5cbc524c3fc6cfb335fe05b39444`，
+执行 ref 为 `transport-full-rs-20261026-v1`。七份原始 API 记录、ZIP、解压产物和派发请求保留于
+[先导目录](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/dispatch_manifest.json)。
+
+| 模式与先导曲线 | run | 点数 | 完整扫描进程 [s] | Actions job [s] |
+| --- | --- | ---: | ---: | ---: |
+| A，μB=0、αT=1 | [40224161650](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224161650) | 2 | 373.16 | 809 |
+| A，μB=0、αT=1.2 | [40224178198](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224178198) | 1 | 272.83 | 718 |
+| A，μB=450、αT=1.1 | [40224194586](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224194586) | 1 | 164.78 | 452 |
+| A，μB=900、αT=1 | [40224212631](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224212631) | 2 | 358.26 | 732 |
+| B，T=120、μB=0 | [40224228254](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224228254) | 1 | 210.12 | 649 |
+| B，T=120、μB=900 | [40224250574](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224250574) | 3 | 347.60 | 641 |
+| B，T=200、μB=900 | [40224267466](https://github.com/w5851/Julia_RelaxTime/actions/runs/40224267466) | 1 | 228.98 | 630 |
+
+[完整复核](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/reviewed_pilot.json)
+通过 11 点、187 道诊断与 327 份递归生产源码身份，最大进程 RSS 为 1,808,244,736 字节，
+约占可见主机内存的 10.8%。runner CPU 包含 znver3、znver5 和 sapphirerapids，预算采用同模式最慢的先导。
+第一版离线复核误用了较窄的 322 文件资格输入范围；新增的五份合同文件均在原冻结包中且哈希一致。
+v2 校正枚举范围后通过，原复核器及失败证据保留；数值源码和七份原始计算产物没有改变。
+
+| 模式 | 最大先导 scan [s] | 每点规划预算 [s] | 每 job 预留开销 [s] | 剩余点/片数 | 最多点/片 |
+| --- | ---: | ---: | ---: | --- | ---: |
+| A | 341.929 | 683.859 | 957.964 | 904 / 72 | 14 |
+| B | 327.099 | 654.198 | 940.242 | 904 / 63 | 15 |
+
+[批次清单](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/remaining_batches/batches_manifest.json)
+绑定复核报告和每份请求的 SHA256；mode-A 的六点、mode-B 的五点以原 artifact 身份复用。
+复用点与剩余点无交集，并集分别等于完整的 910/909 点网格。
+按上述余量相加，[剩余批次规划](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/cost_summary.json)
+合计 371.615 runner 小时，单片最大规划时间分别为 175.533/179.220 分钟。
+这是一份保守资源计划；实际总耗时及费用须以后续执行和账户计费记录为准。
 
 ## 留档与完成条件
 
@@ -140,4 +172,6 @@ workflow 已接入原样调用 CLI 的计时包装，记录 `runtime_timing.toml
 新数值通过审阅后再产生新的论文图层；历史生产与当前图层继续可追溯。
 
 本轮准备完成的判据是：实际可取到的计算版本、commit 绑定输入、runner 成本与产物先导通过，
-mode-A/mode-B 批次及归档方式全部具体可执行。当前 `pilot_input_ready=false`、`full_dispatch_ready=false`。
+mode-A/mode-B 批次及归档方式全部具体可执行。这些准备条件已满足：绑定先导输入可用，
+经成本复核后的独立批次计划为 `full_dispatch_ready=true`。原始输入草案保持冻结。
+剩余 135 片尚未派发；全网格计算、完整性验收、正式晋升和论文使用仍分别保留后续责任。

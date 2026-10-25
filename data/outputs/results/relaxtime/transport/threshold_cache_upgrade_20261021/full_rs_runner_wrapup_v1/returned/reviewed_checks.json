@@ -1,0 +1,13 @@
+{
+  "host": "W",
+  "ledger_exit_code": 0,
+  "links_checked": 53,
+  "working_and_staged_ledgers_passed": true,
+  "source_files_unchanged": true,
+  "verified_files": 245,
+  "input_manifest_sha256": "1fdcf393b63e33faf8668a7bd2f45c750b351e3c3cbb3304c24ae4a135cfdd9b",
+  "numerical_tests_rerun": false,
+  "numerical_sources_changed": false,
+  "reason": "Only the offline reviewer, tests and current-state records changed; the fixed calculation and existing convergence/regression remain applicable.",
+  "completed_utc": "2026-10-25T19:31:52.994250+00:00"
+}
