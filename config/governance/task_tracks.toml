@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "meson-freezeout-experiment"
-updated_at = "2026-10-22"
+updated_at = "2026-10-26"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -1103,3 +1103,97 @@ evidence = [
   "run:36863558667",
   "note:12_sparse_full_gate_points_48_channels_accepted_screening_full_ratio_max_abs_relative_difference_2.91_percent",
 ]
+
+[[tracks]]
+id = "transport-threshold-upgrade"
+title = "Thermal quadrature optimization and original transport anomaly validation"
+status = "active"
+current_task = "thermal-sampling-production-integration"
+blocked_by = []
+unlocks = []
+next_action = "完整 A^xi 的十二点、真实入口、四个 xi=0 Fortran 点、v3 回归及默认入口已通过。mode-A 910 点和 mode-B 909 点背景、mode-B 三层独立、十七点联合及真实入口全部通过，153 项量/289 道生产诊断完整，最大独立参考变化 0.0720757%；返回包已核验。两种模式的七个先导 jobs/十一点及全网格输入草案已准备，计时包装在 W 上的 29 项单测和两点 dry-run 已通过，随后固定计算提交并验收 runner 成本。A 降维独立，尚未触发 Actions。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = "codex/meson-freezeout-defaults"
+current_sha = "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e"
+run_ids = []
+evidence = ["file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_complete_summary_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/summary.json", "note:author_20261022_authorized_optimization_and_original_non_first_order_anomaly_validation", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_precheck_v1/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json"]
+updated_at = "2026-10-26"
+
+[[items]]
+id = "transport-full-rs-a-reduction"
+track_id = "transport-threshold-upgrade"
+classification = "independent"
+status = "triaged"
+parent = "item:thermal-sampling-production-integration"
+task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/full_rs_a_reduction_20261025.md"
+reason = "作者要求将完整 RS 单线 A 的解析降维优化列为待办；目标是等价加速现有极化 A，保留普通在壳 E_kin 分母、真空 Λ 截止与半无穷热积分。"
+next_action = "quote-remote 原型已通过 120 个角权重组合和 72 组积分对照；A 内核中位加速 8.397 倍，但原单次 A 仅 25.14–33.02 微秒，未测完整输运加速。暂不作为新口径验收前置；生产维持二维 A。后续另做 p/q 网格与有限热域接口、算法身份及实际入口回归，本项尚未生产接入。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:src/relaxtime/OneLoopIntegralsAniso.jl",
+  "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md",
+  "note:production_context_codex_thread_01a13833-6e32-70b1-86e9-189d5da78fea",
+  "note:author_20261024_requested_todo_only_full_RS_A_angular_reduction",
+  "note:equivalent_A_loop_optimization_only_coupling_prescription_is_separate",
+  "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/full_rs_a_reduction_20261025.md",
+  "file:benchmark/relaxtime/bench_full_rs_a_reduction.jl",
+  "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/package_manifest.json",
+  "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/returned/results/summary.json",
+  "note:author_20261025_requested_priority_assessment_quote_remote_only_numerical_work",
+  "note:prototype_verified_production_integration_deferred_not_a_prerequisite",
+]
+
+[[items]]
+id = "thermal-optimization-anomaly-audit"
+track_id = "transport-threshold-upgrade"
+classification = "research"
+status = "active"
+parent = "track:transport-threshold-upgrade"
+task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/optimization_20261022.md"
+reason = "验证预计算、相对速度简化及复用在同误差下的性能；以原始数据定位和复核非一阶异常。"
+next_action = "本轮验收完成：四处孤立凹陷纠正、快速变化保留，7 项补算后全部达标；保留等价加速，采样默认替换需全通道和接口准入。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/native_performance_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/grouped_performance_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_refinement_v2/status.json"]
+
+[[items]]
+id = "thermal-sampling-production-qualification"
+track_id = "transport-threshold-upgrade"
+classification = "required_follow_up"
+status = "accepted"
+parent = "item:thermal-optimization-anomaly-audit"
+task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md"
+reason = "作者要求角度合并推广、无需例外点的稳定采样，以及 Actions 前独立/联合收敛和性能验证。"
+next_action = "切换前的十二点/108 项、独立密度和计时验收保留作历史参考；完整 A^xi 接入后需重新完成同一套 1% 收敛与性能门槛，再由 thermal-sampling-production-integration 承接生产替换。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/grouped_production_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/outer_summary_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/kernel_A_convergence_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/background_tail_controls_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/density_qualification_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_complete_summary_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_density_normalization_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/complete_timing_p48_v1/status.json", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "note:author_20261022_final_observable_tolerance_one_percent_time_priority"]
+
+[[items]]
+id = "thermal-sampling-production-integration"
+track_id = "transport-threshold-upgrade"
+classification = "required_follow_up"
+status = "active"
+parent = "item:thermal-sampling-production-qualification"
+task_file = "docs/dev/active/2026-10-23_输运采样生产接入与重跑合同.md"
+reason = "作者授权在通用性和稳定性验收后替换默认并清理旧实现；新结果须通过真实生产入口复算，并衔接新背景相界、同点外部对齐和新的计算合同。"
+next_action = "full-RS 十二点入口、四个 xi=0 外部对齐点、v3 回归 314/314 及五次默认入口通过，容差不变。mode-A 910 点、mode-B 909 点背景及 mode-B 三层独立、十七点联合/真实入口通过；153 项最终量、289 道诊断和返回包的 1584 份源码快照已核验。mode-A 六点/四个 jobs、mode-B 五点/三个 jobs 已准备，W 计时预检的 29 项单测和两点 dry-run 已通过，当前推进计算提交绑定和 runner 成本验收。A 降维仍独立，整批输运未计算。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_integration_20261023.md", "file:docs/guides/scripts/transport_sampling_qualification.md", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_plan_v1/production_parameters.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/package_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_manual_preflight_v1/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_replay_all_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/phase_revalidation_v5/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/fortran_alignment_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_integration_checks_v1/background_drift_review_v1.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_repeat_defaults_v1/verification.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/runner_inputs_v1/runner_inputs.json", "note:Julia_Fortran_alignment_retained_in_primary_worktree_backlog", "note:runner_pilot_and_full_Actions_not_dispatched", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/returned/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json"]
+
+[[items]]
+id = "transport-relative-velocity-convention"
+track_id = "transport-threshold-upgrade"
+classification = "required_follow_up"
+status = "accepted"
+parent = "item:thermal-sampling-production-integration"
+task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/relative_velocity_convention_20261024.md"
+reason = "作者确认沿用课题组和当前生产实现的质心系相对速度；论文公式已改为入射质心系能量分母，代码继续使用 profile 的 cm 口径。"
+next_action = "已完成口径决策；随完整 A^xi 耦合切换一起重做独立/联合收敛、Julia–Fortran 同点对齐和生产 pilot。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:src/relaxtime/AverageScatteringRate.jl", "file:src/relaxtime/ThermalWeightedSampling.jl", "file:src/relaxtime/ThermalWeightedCache.jl", "file:src/models/workflow_apps/TransportSamplingProfiles.jl", "file:tests/unit/relaxtime/test_thermal_optimization_native.jl", "file:tests/unit/relaxtime/test_thermal_weighted_cache.jl", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/relative_velocity_convention_20261024.md", "note:author_20261024_confirmed_cm", "note:production_profile_remains_cm_and_Actions_not_dispatched"]

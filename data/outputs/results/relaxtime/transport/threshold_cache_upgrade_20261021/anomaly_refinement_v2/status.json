@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "finished_utc": "2026-10-22T01:00:16.356",
+  "attempted": 5,
+  "successful": 5,
+  "failures": 0,
+  "original_replayed": 5,
+  "reference_converged": 5,
+  "adaptive_validated": 5
+}

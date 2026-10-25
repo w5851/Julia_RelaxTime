@@ -1,0 +1,10 @@
+{
+  "exit_code": 0,
+  "tool_sha256": "54ca21be3de4c7cfa26914aa8b61bd76bf573ef3caac5f80d110558cdf241718",
+  "workflow_sha256": {
+    ".github/workflows/ci-integration.yml": "a937eae5e708da881eb0162a6c71c2173c378d5ed14f49581a85be366bdb9ecd",
+    ".github/workflows/relaxtime-manual-scans.yml": "c474ea4b906cf2501c94215e2bb701ffb686340adfe8238f262f5badd6f749aa",
+    ".github/workflows/relaxtime-phase-guided-transport-production.yml": "56209b3ac35ece3d30c206d1488140009fc652c1dc6d214d910cca3d4675d0c8"
+  },
+  "scope": "Local workflow syntax check only"
+}

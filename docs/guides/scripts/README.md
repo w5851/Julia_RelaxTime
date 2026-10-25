@@ -298,11 +298,11 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
-  - mode a 的一阶区域默认使用 `--phase-anchor-policy direct_coexistence`：旧 phase reference 只作为初始 bracket，再按 `--p-num` / `--t-num`（默认 `12/6`）直接求两分支等热力学势温度；`reference_interpolation` 仅用于显式复现旧计划口径。
+  - 默认 `--sampling-profile thermal_weighted_v1` 将背景、A、τ 缓存和末端积分绑定。mode a 以旧 phase reference 为初始 bracket，按 profile 的热上限 25 fm⁻¹、`96/24` 节点重新求锚点；crossover 求凝聚温度导数峰，一阶区求两分支等 Ω。当前 profile 不接受 `reference_interpolation` 代替新背景锚定。
   - 一阶可能区每点都使用稳定多初值选优，continuation 只作为候选 seed。bulk 复用主扫描已解析的热力学节点和同一点 equilibrium；导数路径若跨支会显式失败。
-  - 直接锚定的 `alpha_T=1` 一阶共存切片不计算严格 `xi=0` 的唯一输运量，而是写入经主热力学节点和独立更高节点共同认证的负/正近零点，分别表示夸克侧/强子侧极限；`sampling_plan.csv` 同步记录 anchor bracket、相别和节点收敛证据。`12/6` 主节点使用 `24/8` 认证；`24/8` 主节点自动使用 `32/10` 认证，禁止同节点自比较。
-  - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；也可传 `--sigma-cache-policy validated_anchored` 诊断 threshold-subtraction 与 σ-cache 插值放大效应。默认 `match_thermo` / `default` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
-  - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
+  - 直接锚定的 `alpha_T=1` 一阶共存切片使用经认证的负/正近零点表示两侧极限；`sampling_plan.csv` 记录 bracket、相别和收敛证据。默认 profile 的独立参考提高到热上限 30 fm⁻¹、`128/32`，同时检验锚点和共存两侧。
+  - 异常诊断仍可显式用 `--propagator-xi-policy isotropic`。默认传播子为 `match_thermo`；σ 缓存只支持 `thermal_weighted`，旧固定网格/扣除参数已退役。独立及联合资格、历史源码重放和当前验证入口见[输运采样指南](transport_sampling_qualification.md)。
+  - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 默认 `run_tier=dry-run`；数值 tier 使用同一 profile，核对完整计算 SHA、实际配置、完整点集和 17 道预算。结果作为可审阅 artifact 上传，正式数据导入另行记录。
   - 高精度长任务应优先通过 action shard 触发：mode a 可用 `muB_list` + `alpha_t_list` 分片，mode b 可用 `t_list` + `muB_list` 分片，二者都可用 `xi_list` 缩小窗口，并用 `shard_label` 区分 artifact。workflow 会把扫描/绘图日志写入 result artifact；失败或取消时仍尽量上传 partial CSV、`failed_points.csv`、`channel_diagnostics.csv` 和日志，供本地合并与 convergence gate 使用。
   - 当前 phase-guided transport formal raw case：
     - 高 xi 分辨率、onshell-kernel、p128 validated-anchored 积分精度：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
@@ -356,6 +356,8 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - 开发期导出、迁移、一次性工具
 - `scripts/analysis/`
   - 后处理与分析脚本
+  - [输运采样联合验证、检查点恢复与完整计时](transport_sampling_qualification.md) 是算法验收入口，不是正式生产入口。
+  - [版本化输运采样配置](../../api/relaxtime/transport/TransportSamplingProfiles.md) 说明 `--sampling-profile` 的积分层次、逐道诊断和续算身份校验。
 - `scripts/debug/`
   - 排障脚本
 - `scripts/perf/`

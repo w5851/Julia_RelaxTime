@@ -28,12 +28,10 @@ tau_p_nodes = 8
 tau_angle_nodes = 2
 tau_phi_nodes = 2
 tau_n_sigma = 4
-sigma_grid_n = 32
 
 [scan.transport.transport]
 compute_bulk = false
 tr_p_nodes = 12
-tr_p_max_fm = 8.0
 
 [scan.cross_section]
 muB_MeV = 0.0

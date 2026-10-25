@@ -1,0 +1,28 @@
+{
+  "check_kind": "source_metadata_only",
+  "previous_manifest_sha256": "b3abc45fa37415ef149ab66c0cf0aa3359a86fb73ac998a890e3a2780c9d6bb3",
+  "current_source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "source_files_compared": 322,
+  "changed_files": [
+    {
+      "path": "src/models/workflow_apps/TransportSamplingProfiles.jl",
+      "previous_sha256": "783f27149ec2e4800ca60ad61eae1e0f69a6da4444e344718b1e7d6613336eeb",
+      "current_sha256": "08de9fae494220e69b81714d49ccd343f80dc7a0c5eef68fbfaf2e266df343ae"
+    },
+    {
+      "path": "src/relaxtime/AverageScatteringRate.jl",
+      "previous_sha256": "d9eca71698e01274e50cd32a08cbf6f1b11e9bd168a62db7fb460249da3fbdc3",
+      "current_sha256": "08fcf00dc8e72812c5dc534fb43cbe2f18ef052a84a2df61b1765ca4780b68bb"
+    },
+    {
+      "path": "src/relaxtime/ThermalWeightedCache.jl",
+      "previous_sha256": "824ab90d3b6978bdc54d57232fabc631fd878d87140b6729c48b5a4ddfb66e95",
+      "current_sha256": "172d995efe26112471bba31c2f26e16a211f583eadeaba68ffb5dc88599ae59e"
+    },
+    {
+      "path": "src/relaxtime/ThermalWeightedSampling.jl",
+      "previous_sha256": "a2d289b1afdcd28b4b506fd32e0b9580a6db6744f0cdef6c92f9a8d9edc7fa34",
+      "current_sha256": "0c59cb9e8c58a55936fd5a92e23aadf9ac9a59067e9a9d7d4d0f1db073690cb1"
+    }
+  ]
+}

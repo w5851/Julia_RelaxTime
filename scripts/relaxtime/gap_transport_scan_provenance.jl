@@ -10,7 +10,7 @@ function _phase_reference_summary_dict(source)
     return Dict{String,Any}(String(key) => value for (key, value) in pairs(summary))
 end
 
-function build_effective_config(opts; phase_reference=nothing)
+function build_effective_config(opts; phase_reference=nothing,muB_values=nothing)
     resolved_root = if phase_reference !== nothing
         get(Main.PhaseReferenceAdapter.source_summary(phase_reference), :source_root, opts.phase_reference_root)
     elseif opts.phase_reference_mode === :runtime && isdefined(Main, :DEFAULT_PHASE_REFERENCE_ROOT)
@@ -39,14 +39,8 @@ function build_effective_config(opts; phase_reference=nothing)
         "tau_angle_nodes" => opts.tau_angle_nodes,
         "tau_phi_nodes" => opts.tau_phi_nodes,
         "tau_n_sigma_points" => opts.tau_n_sigma_points,
-        "tau_threshold_subtraction" => opts.tau_threshold_subtraction,
-        "tau_asym_window" => opts.tau_asym_window,
-        "tau_asym_fit_min_points" => opts.tau_asym_fit_min_points,
-        "tau_asym_extra_points" => opts.tau_asym_extra_points,
-        "tau_interpolation_mode" => String(opts.tau_interpolation_mode),
         "propagator_xi_policy" => String(opts.propagator_xi_policy),
         "sigma_cache_policy" => String(opts.sigma_cache_policy),
-        "sigma_grid_n" => opts.sigma_grid_n,
         "integration_mode" => String(opts.integration_mode),
         "gc_every_n" => opts.gc_every_n,
         "tr_p_nodes" => opts.tr_p_nodes,
@@ -57,6 +51,8 @@ function build_effective_config(opts; phase_reference=nothing)
         "phase_reference_source" => phase_reference === nothing ? "none" : String(Main.PhaseReferenceAdapter.source_kind(phase_reference)),
     )
     phase_reference !== nothing && (cfg["phase_reference_summary"] = _phase_reference_summary_dict(phase_reference))
+    muB_values===nothing || (cfg["muB_values_MeV"]=muB_values)
+    Main.TransportSamplingScanConfig.record_profile!(cfg,opts)
     return cfg
 end
 
@@ -71,6 +67,12 @@ end
 
 function collect_artifacts(opts)
     artifacts = String[opts.output]
+    if hasproperty(opts,:sampling_profile) && opts.sampling_profile !== nothing
+        path = Main.TransportSamplingScanConfig.sampling_diagnostics_path(opts)
+        isfile(path) && push!(artifacts,path)
+        contract = Main.TransportSamplingScanConfig.sampling_contract_path(opts)
+        isfile(contract) && push!(artifacts,contract)
+    end
     if opts.channel_diagnostics_output !== nothing
         push!(artifacts, opts.channel_diagnostics_output)
     end
@@ -80,8 +82,8 @@ function collect_artifacts(opts)
     return artifacts
 end
 
-function write_scan_sidecars(provenance_dir::AbstractString, ctx, opts, stats_success::Integer, stats_error::Integer, stats_skipped::Integer; phase_reference=nothing)
-    effective_config = build_effective_config(opts; phase_reference=phase_reference)
+function write_scan_sidecars(provenance_dir::AbstractString, ctx, opts, stats_success::Integer, stats_error::Integer, stats_skipped::Integer; phase_reference=nothing,muB_values=nothing)
+    effective_config = build_effective_config(opts; phase_reference=phase_reference,muB_values=muB_values)
     summary = build_summary(stats_success, stats_error, stats_skipped)
     artifacts = collect_artifacts(opts)
     Main.ProvenanceMetadata.write_run_sidecars(

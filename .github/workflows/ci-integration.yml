@@ -5,6 +5,12 @@ on:
     paths:
       - "src/**"
       - "tests/integration/**"
+      - "tests/unit/python/test_transport_production*.py"
+      - "tests/unit/python/test_transport_runner_pilot.py"
+      - "scripts/relaxtime/**"
+      - "scripts/analysis/relaxtime/prepare_transport_production_inputs.py"
+      - "scripts/analysis/relaxtime/review_transport_runner_pilot.py"
+      - "scripts/dev/export_thermal_weighted_transport_baseline.py"
       - "config/**"
       - "Project.toml"
       - "Manifest.toml"
@@ -14,6 +20,12 @@ on:
     paths:
       - "src/**"
       - "tests/integration/**"
+      - "tests/unit/python/test_transport_production*.py"
+      - "tests/unit/python/test_transport_runner_pilot.py"
+      - "scripts/relaxtime/**"
+      - "scripts/analysis/relaxtime/prepare_transport_production_inputs.py"
+      - "scripts/analysis/relaxtime/review_transport_runner_pilot.py"
+      - "scripts/dev/export_thermal_weighted_transport_baseline.py"
       - "config/**"
       - "Project.toml"
       - "Manifest.toml"
@@ -31,6 +43,17 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check transport production inputs and artifacts
+        run: python -m unittest discover -s tests/unit/python -p 'test_transport_production*.py'
+
+      - name: Check transport pilot timing and budget review
+        run: python -m unittest discover -s tests/unit/python -p 'test_transport_runner_pilot.py'
 
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'

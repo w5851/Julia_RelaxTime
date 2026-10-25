@@ -42,10 +42,6 @@ const RELAXTIME_TAU_VALIDATION_N_SIGMA_POINTS = 4
 const RELAXTIME_TAU_VALIDATION_P_NODES = 12
 const RELAXTIME_TAU_VALIDATION_ANGLE_NODES = 3
 const RELAXTIME_TAU_VALIDATION_PHI_NODES = 4
-const RELAXTIME_TAU_VALIDATION_SIGMA_GRID_N = 24
-const RELAXTIME_TAU_VALIDATION_W0CDF_P_NODES = 8
-const RELAXTIME_TAU_VALIDATION_W0CDF_ANGLE_NODES = 3
-const RELAXTIME_TAU_VALIDATION_W0CDF_PHI_NODES = 4
 const RELAXTIME_TAU_VALIDATION_A_BUILDER_CONFIG = (
     p_nodes=length(RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_NODES),
     p_max=10.0,
@@ -147,19 +143,16 @@ function _build_tau_validation_cs_caches(
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple,
 )
-    caches = Dict{Symbol, RELAXTIME_TAU_VALIDATION_RT_ASR.CrossSectionCache}()
-    for process in RELAXTIME_TAU_VALIDATION_RT_RELAX.REQUIRED_PROCESSES
-        caches[process] = RELAXTIME_TAU_VALIDATION_RT_ASR.build_w0cdf_pchip_cache(
+    caches = Dict{Symbol, RELAXTIME_TAU_VALIDATION_RT_ASR.ThermalWeightedCache}()
+    for process in RELAXTIME_TAU_VALIDATION_RT_RELAX.REQUIRED_RATE_KEYS_FOR_TAU
+        GC.gc()
+        Main.PolarizationCache.reset_cache!()
+        caches[process] = RELAXTIME_TAU_VALIDATION_RT_ASR.build_thermal_weighted_cache(
             process,
             quark_params,
             thermo_params,
             K_coeffs;
-            N=RELAXTIME_TAU_VALIDATION_SIGMA_GRID_N,
-            design_p_nodes=RELAXTIME_TAU_VALIDATION_W0CDF_P_NODES,
-            design_angle_nodes=RELAXTIME_TAU_VALIDATION_W0CDF_ANGLE_NODES,
-            design_phi_nodes=RELAXTIME_TAU_VALIDATION_W0CDF_PHI_NODES,
-            p_cutoff=RELAXTIME_TAU_VALIDATION_LAMBDA_INV_FM,
-            n_sigma_points=RELAXTIME_TAU_VALIDATION_N_SIGMA_POINTS,
+            _tau_validation_kwargs()...,
         )
     end
     return caches

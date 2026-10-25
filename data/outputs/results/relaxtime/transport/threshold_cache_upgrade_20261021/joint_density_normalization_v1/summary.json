@@ -1,0 +1,39 @@
+{
+  "analysis_only": true,
+  "backgrounds": 24,
+  "comparisons": 144,
+  "reference": "n(xi)=n(0)/sqrt(1+xi), radial semi-infinite p256 scale5, checked against p128",
+  "historical_julia_comparisons": 876,
+  "historical_julia_max_relative": 2.886579864025407e-15,
+  "maximum_density_relative": 1.6162903029304232e-06,
+  "maximum_pair_normalization_relative": 3.2325727686854933e-06,
+  "normalization_budget": 0.001,
+  "passed": true,
+  "sources": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\convergence_selection_v1\\review_points.csv",
+      "sha256": "a4784f56add30b3822fa5f46def6012273eb06cdf183b5d762d5537be468c894"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\density_qualification_v1\\densities.csv",
+      "sha256": "e0acdf9741be6f7f53f88aeefdfe9613bc4d3a7444636f6c02e84a0813c7129d"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_native_pilot_p48_v1\\background.csv",
+      "sha256": "b4cf4a6d55c8fcab7b401d7dd93382c3281be676a977b9a18fa2b12fde87ff78"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_native_pilot_v2\\background.csv",
+      "sha256": "fcfcf4d30c021d0eef488b3cf06d34bdc50f6d86050424d25960c5d18660058f"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_native_representatives_p48_s0_recovered_v1\\background.csv",
+      "sha256": "3e3ab475beed482109205c0c7455ce9907d608c122eb7ec4bde0e267bf47aa17"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_native_representatives_p48_s1_recovered_v1\\background.csv",
+      "sha256": "2c3d3a88bcb9a3efd49dec56e733111af9d3a7f3f7d54f6bfd283bf344bda8a0"
+    }
+  ],
+  "numpy": "2.1.3"
+}

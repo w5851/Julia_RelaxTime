@@ -1,0 +1,42 @@
+acceptance_scope = "Entry point return is not numerical acceptance; check the actual transport artifact separately"
+allocation_semantics = "Cumulative bytes allocated, not peak resident memory"
+argv = ["--mode", "fixed-T-sparse-muB", "--T-list", "120", "--muB-list", "0", "--xi-list", "-0.5,0.5", "--outdir", "D:\\CodexCompute\\Julia_RelaxTime\\full-rs-runner-timing-preflight-20261026-v1\\dry_run", "--case-name", "runner_timing_preflight_20261026", "--dry-run", "--channel-diagnostics"]
+blas_threads_after_load = 1
+blas_threads_at_end = 1
+blas_threads_at_start = 1
+calculation_sha = ""
+compile_time_included_in_elapsed = true
+cpu_name = "alderlake"
+cpu_threads = 16
+entrypoint = "D:\\CodexCompute\\Julia_RelaxTime\\full-rs-runner-timing-preflight-20261026-v1\\project\\scripts\\relaxtime\\run_phase_guided_transport_scan.jl"
+entrypoint_returned = true
+entrypoint_sha256 = "9673afec66bf0535e05f7971c7edf6d7e7acda57e7c1c5a703e56eb722271229"
+finished_utc = "2026-10-25T18:49:41.424"
+free_memory_bytes_at_start = 7718449152
+github_run_id = ""
+julia_threads = 1
+julia_version = "1.12.5"
+measured_wrapper_seconds = 61.8716904
+process_scope = "GNU time supplies total process wall/CPU time and peak RSS; these phases exclude Julia startup and final report serialization"
+schema_version = 1
+started_utc = "2026-10-25T18:48:39.553"
+timing_script_sha256 = "6868db442fd1c827c919ab97d40aaf50b4971965a69490ba7d0470d6e7bd4f26"
+total_memory_bytes = 16851165184
+workflow_sha = ""
+wrapper_initialization_seconds = 0.7024036
+
+[load]
+allocated_bytes = 2254634140
+compile_seconds = 18.5293368
+compile_timing_available = true
+elapsed_seconds = 28.5501241
+gc_seconds = 0.9021908
+recompile_seconds = 6.742877
+
+[scan]
+allocated_bytes = 6268813549
+compile_seconds = 31.8259762
+compile_timing_available = true
+elapsed_seconds = 33.3009291
+gc_seconds = 2.947827
+recompile_seconds = 2.5867326

@@ -120,6 +120,7 @@ const INTEGRATION_CORE_FILES = [
     # RelaxTime: 1 e2e + 1 contract guard
     joinpath(INTEGRATION_DIR, "relaxtime", "test_transport_workflow_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_orchestrator_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "relaxtime", "test_transport_sampling_profile_cli.jl"),
 ]
 
 @testset "Integration" begin

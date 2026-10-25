@@ -155,6 +155,7 @@ function _build_consumed_keys(cmd::Symbol, effective::Dict{String, Any})
     end
     union!(consumed, Set{String}([
         "scan.transport.muB_MeV",
+        "scan.transport.sampling_profile",
         "scan.transport.xi_list",
         "scan.transport.tmin_MeV",
         "scan.transport.tmax_MeV",
@@ -169,10 +170,8 @@ function _build_consumed_keys(cmd::Symbol, effective::Dict{String, Any})
         "scan.transport.tau.tau_angle_nodes",
         "scan.transport.tau.tau_phi_nodes",
         "scan.transport.tau.tau_n_sigma",
-        "scan.transport.tau.sigma_grid_n",
         "scan.transport.transport.compute_bulk",
         "scan.transport.transport.tr_p_nodes",
-        "scan.transport.transport.tr_p_max_fm",
         "plot.transport.x",
         "plot.transport.group",
         "plot.transport.ys",

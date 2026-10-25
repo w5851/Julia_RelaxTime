@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "finished_utc": "2026-10-23T07:23:05.536",
+  "points": 4,
+  "completed_points": 4,
+  "failures": 0,
+  "frozen_algebra_replay_passed": true,
+  "external_5pct_passed": 4,
+  "comparison_complete": true
+}

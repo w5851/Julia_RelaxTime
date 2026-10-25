@@ -44,6 +44,7 @@
 - `TransportCoefficients.md`
 - `RelaxationTime.md`
 - `AverageScatteringRate.md`
+- [TransportSamplingProfiles.md](TransportSamplingProfiles.md)：默认生产配置与逐道误差诊断
 - `generated/Exports.md`
 
 ### 4. workflow 细节

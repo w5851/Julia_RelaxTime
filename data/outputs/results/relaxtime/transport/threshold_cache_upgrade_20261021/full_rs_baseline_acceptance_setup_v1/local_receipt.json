@@ -1,0 +1,15 @@
+{
+  "received_utc": "2026-10-25T14:52:00.603659+00:00",
+  "archive": {
+    "sha256": "f5619b5cb5604e19de858c65a9b073cd99b980e18a0881123b72b1b0e0a8fdbe",
+    "bytes": 1327608,
+    "files": 422
+  },
+  "source_archive_sha256": "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031",
+  "source_snapshots_verified": 358,
+  "input_snapshots_verified": 2,
+  "regression_assertions_passed": 314,
+  "replay_identity_assertions_passed": 13,
+  "default_entrypoint_passed": true,
+  "local_check_scope": "Archive bytes, source and input snapshot hashes, and remote review metadata; no local numerical execution"
+}

@@ -4,6 +4,15 @@
 
 ## Transport Mechanism Line
 
+### Threshold cache and B₀ endpoint algorithms
+
+[阈值缓存与 B₀ 端点算法对照](threshold_cache_upgrade_20261021_analysis/README.md)
+保存 ξ≈0.37 的节点/扣除四格消融、自适应 σ 与 xσ、独立主值端点核验，
+以及同误差目标下的性能结果，初轮批次按历史口径保留。
+后续[采样验收](threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md)与
+[生产接入及外部对齐](threshold_cache_upgrade_20261021_analysis/production_integration_20261023.md)
+记录新默认、相界核验、Julia–Fortran 比较和当前生产复算。
+
 ### Phase-guided transport
 
 | 阶段 | 当前路径 | 作用 |

@@ -39,15 +39,15 @@ function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.Phase
         "--p-num", string(opts.p_num),
         "--t-num", string(opts.t_num),
     ]
+    opts.sampling_profile !== nothing && append!(base_args,["--sampling-profile",opts.sampling_profile])
     opts.tau_p_nodes !== nothing && append!(base_args, ["--tau-p-nodes", string(opts.tau_p_nodes)])
     opts.tau_angle_nodes !== nothing && append!(base_args, ["--tau-angle-nodes", string(opts.tau_angle_nodes)])
     opts.tau_phi_nodes !== nothing && append!(base_args, ["--tau-phi-nodes", string(opts.tau_phi_nodes)])
     opts.tau_n_sigma_points !== nothing && append!(base_args, ["--tau-n-sigma", string(opts.tau_n_sigma_points)])
-    opts.sigma_grid_n !== nothing && append!(base_args, ["--sigma-grid-n", string(opts.sigma_grid_n)])
     opts.channel_diagnostics && append!(base_args, ["--channel-diagnostics-output", joinpath(opts.outdir, "channel_diagnostics.csv")])
     !opts.compute_bulk && push!(base_args, "--no-compute-bulk")
     opts.overwrite && push!(base_args, "--overwrite")
-    opts.resume && push!(base_args, "--resume")
+    opts.resume || push!(base_args, "--no-resume")
     return Main.parse_args(base_args)
 end
 
@@ -78,6 +78,9 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
     figure_dir = _default_figure_dir(opts)
     mkpath(opts.outdir)
 
+    scan_opts = _build_runtime_scan_opts(paths.result_csv, opts)
+    Main.TransportSamplingScanConfig.prepare_sampling_output!(scan_opts)
+
     if opts.overwrite
         for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics)
             isfile(path) && rm(path)
@@ -105,7 +108,6 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
         return plan
     end
 
-    scan_opts = _build_runtime_scan_opts(paths.result_csv, opts)
     runtime = Main.build_scan_runtime(scan_opts)
     existing = scan_opts.resume && isfile(paths.result_csv) && !scan_opts.overwrite ?
         Main.read_existing_keys(paths.result_csv) :
@@ -179,13 +181,17 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
     # Hashes must be taken only after all producer streams have been flushed and
     # closed.  In particular, a header-only failed_points.csv is a valid zero-row
     # artifact and must not be hashed as an empty file.
+    artifacts = [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points]
+    opts.channel_diagnostics && push!(artifacts,paths.channel_diagnostics)
+    for path in (Main.TransportSamplingScanConfig.sampling_diagnostics_path(scan_opts),
+        Main.TransportSamplingScanConfig.sampling_contract_path(scan_opts))
+        isfile(path) && push!(artifacts,path)
+    end
     Main.ProvenanceMetadata.write_run_sidecars(
         opts.outdir;
         ctx=ctx,
         effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference),
-        artifacts=opts.channel_diagnostics ?
-            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
-            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
+        artifacts=artifacts,
         summary=Dict{String,Any}(
             "points_total" => stats.total,
             "success_count" => stats.success,

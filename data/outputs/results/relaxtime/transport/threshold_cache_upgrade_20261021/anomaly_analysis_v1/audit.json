@@ -1,0 +1,1394 @@
+[
+  {
+    "run": "anomaly_full_s0_v1",
+    "status": {
+      "complete": false,
+      "interrupted_for_continuation": true,
+      "finished_utc": "2026-10-22T00:09:55.745406+00:00",
+      "reason": "Completed cases retained; continue remaining cases after validating exact grouping of repeated angular geometry.",
+      "successful": 9,
+      "failures": 0,
+      "original_replayed": 9,
+      "reference_converged": 9,
+      "adaptive_validated": 9,
+      "successor": "anomaly_grouped_s0_v1",
+      "rates_sha256": "ef86fb814bf910ecfedd6b1152a06158fc7055867d12c7cfbdb4731604f41be4"
+    },
+    "manifest_sha256": "80615af3ea570d32ece084364562dcaf2e9ba206e32f61458e2fef1d5e5f0fdf",
+    "source_files_verified": 294,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "continuation_checkpoint.csv",
+        "sha256": "ef86fb814bf910ecfedd6b1152a06158fc7055867d12c7cfbdb4731604f41be4"
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "80615af3ea570d32ece084364562dcaf2e9ba206e32f61458e2fef1d5e5f0fdf"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "ef86fb814bf910ecfedd6b1152a06158fc7055867d12c7cfbdb4731604f41be4"
+      },
+      {
+        "path": "status.json",
+        "sha256": "a0b8831d96bae0e50752f45ac39284f4a8a4cc37754ea0e0c6575d95a1f0ec78"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3700_uubar_to_ddbar.csv",
+        "sha256": "e4567d1bd07d5106bc8bae97161fb143c12dd4b12aab5cb0a80178b084368ccc"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3700_uubar_to_uubar.csv",
+        "sha256": "d7813a18dc3bc33519f73ae9fe9b87f702002b6bab2081cc258a292f0bae5327"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_dubar_to_dubar.csv",
+        "sha256": "4ebbf97bc521618ccd064bf2817c754df065794639ca039bf06f1300124e0a16"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_dubar_to_dubar.csv",
+        "sha256": "50d61219616da3d0441594585be7cf275759cbd3aa225b8d1eaa7804e8cc576a"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_subar_to_subar.csv",
+        "sha256": "c4b395072d8cfda2b7bf9ad1b94e9ea0cdf3e815d6745cc3c024103a9437d32a"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_udbar_to_udbar.csv",
+        "sha256": "6d9c909992bd9c357fb96625ef9f60797d62842e158cb98a4f2c21a5ad70f427"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_usbar_to_usbar.csv",
+        "sha256": "421d0b716379fa38e103e5cf253ad482d4c7b307b107081b80240dad4ac68185"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_uubar_to_ddbar.csv",
+        "sha256": "b9293abd8f2c97ed70261788ca6648cc0760285bfff96a17ea928a84e80bb7a3"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2200_uubar_to_uubar.csv",
+        "sha256": "526625699540692d414f077d7965c2d18b72809a12c7916f6849d102c74ce2f3"
+      }
+    ]
+  },
+  {
+    "run": "anomaly_full_s1_v1",
+    "status": {
+      "complete": false,
+      "interrupted_for_continuation": true,
+      "finished_utc": "2026-10-22T00:09:55.767849+00:00",
+      "reason": "Completed cases retained; continue remaining cases after validating exact grouping of repeated angular geometry.",
+      "successful": 10,
+      "failures": 0,
+      "original_replayed": 10,
+      "reference_converged": 10,
+      "adaptive_validated": 10,
+      "successor": "anomaly_grouped_s1_v1",
+      "rates_sha256": "3b76b4ff802476e901666ad9db1a2c481015124d68240e7b6d0d359e9130dc04"
+    },
+    "manifest_sha256": "ac82e633ff4118935e65745d32e895f22d2ff090c84cacd9dea93e898d266643",
+    "source_files_verified": 294,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "continuation_checkpoint.csv",
+        "sha256": "3b76b4ff802476e901666ad9db1a2c481015124d68240e7b6d0d359e9130dc04"
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "ac82e633ff4118935e65745d32e895f22d2ff090c84cacd9dea93e898d266643"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "3b76b4ff802476e901666ad9db1a2c481015124d68240e7b6d0d359e9130dc04"
+      },
+      {
+        "path": "status.json",
+        "sha256": "35e1f4e6e90749ef46135f061f59c5d94bad27fe931b718abfaa1f6c6942f6fe"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_dubar_to_dubar.csv",
+        "sha256": "215887882aed0d2545435ef810625b10918522b300714af7a2d1eb2ad54292a3"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_subar_to_subar.csv",
+        "sha256": "43fb86972fe1fa5f541d391c95ae084e15fc18cbdf58e092504297bed138c0a4"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_udbar_to_udbar.csv",
+        "sha256": "08a5a77f388ea314bdb6d545c1de4a3228671f169d82b2bfb24345ab8c5fbaef"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_usbar_to_usbar.csv",
+        "sha256": "5a2d7593252af32fa62eae8c2c5c8989e5b2fd2e2c88c94034e6ffea8ef52e90"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_dubar_to_dubar.csv",
+        "sha256": "415c885b57b7123f6710e91e7e64718ef77d7b2d5c29e655fb95e9f614bc50a2"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_subar_to_subar.csv",
+        "sha256": "65b0cdbf5fe68aae18a19918af39be02a2be5032573481e001b44e3e17cc94c5"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_udbar_to_udbar.csv",
+        "sha256": "7e0bcf91b2e0f7aba9d978793e630ecc49dab33d94575d52b38cacf7dda80735"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_usbar_to_usbar.csv",
+        "sha256": "06b43744a47dde9b80006a472adc6d0cfd4d50bb9ef2751e20f94a9ca87f470a"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_uubar_to_ddbar.csv",
+        "sha256": "9a5f344881370b918b4533df84e0722a884b5c80a35dea0363e9f4021204d0b4"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2400_uubar_to_uubar.csv",
+        "sha256": "6a371ea4bf3cb35e3628d9caf12842b55c0014153a585ed08f7727c9a0bb95db"
+      }
+    ]
+  },
+  {
+    "run": "anomaly_grouped_s0_v1",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-22T00:49:38.912",
+      "attempted": 112,
+      "successful": 112,
+      "failures": 0,
+      "skipped_previous": 9,
+      "reference_converged": 112,
+      "adaptive_validated": 109,
+      "original_replayed": 112
+    },
+    "manifest_sha256": "62a4d8e4aa76675b50e265a8e762aedc7259f414a71fdd128bab10861b4f0c73",
+    "source_files_verified": 295,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "continuation.json",
+        "sha256": "7be57185be1101a629f1808a658c25c8745296799c8d5f496404f27038c1ee24"
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "62a4d8e4aa76675b50e265a8e762aedc7259f414a71fdd128bab10861b4f0c73"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "a2215036e00fcef9717c78cbd73cc476cbecaf9b9e75936e39c61d2184082e15"
+      },
+      {
+        "path": "status.json",
+        "sha256": "046b96c42ac2da250a2c40802223642a140cd749708fa579875b898f7997fcad"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3800_uubar_to_ddbar.csv",
+        "sha256": "29a7f216cc9fbd3f8332ca3d6618a4ec898061ec48358c3e1ff3f2e9e81be5ff"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3800_uubar_to_uubar.csv",
+        "sha256": "4109f91807939f4951a014c9a8e11e95f3d7dcd53c98d3cd79bde3ef7dd8166c"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_subar_to_subar.csv",
+        "sha256": "0d5cef989449046e5c9d404e1defa0f664436c05d9031c0e0bc960dd4bfa9b11"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_udbar_to_udbar.csv",
+        "sha256": "e47ecc303fea18a01ba43f4a01df59f671c95b050a4a04c9b5a1fe2cf63a92e3"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_usbar_to_usbar.csv",
+        "sha256": "4c8e961625da376fd569fb5c8fde96d16a0f85e79689cb9649a4c002ce749442"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_uubar_to_ddbar.csv",
+        "sha256": "ea00eef39d9b9eb1bcb8add1017eb4983ccbcf4a0e68cd4279d0eea78ec658c8"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.1800_uubar_to_uubar.csv",
+        "sha256": "3a98a1ef3c29f43c41ad273fa3deb7ac0ec931d22c9738d57547b77b9ab64aab"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4800_dubar_to_dubar.csv",
+        "sha256": "e01dcaa869421e4cbf5abb18a6773b463f4390b40c272da1fbfab528dff41b44"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4800_udbar_to_udbar.csv",
+        "sha256": "c7ab1a8dbb6f4a61510b471182d6b4a4c341ce80db5342b6c3a8a5de15a6e6c7"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4800_uubar_to_ddbar.csv",
+        "sha256": "d28f59f7bbc7b2ee352ea877121f06f128fcd146ed0307f5907a7dbee41b195d"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4800_uubar_to_uubar.csv",
+        "sha256": "85a8b7bb85f785e4d935e314c7ea1f0503c21ed376feb07051d50784cead0a5d"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4600_ssbar_to_ssbar.csv",
+        "sha256": "424167fc98ce911e8a3e399076b25d3c93dcb5e4a7fe61c301092e7a9e2a2917"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4600_ssbar_to_uubar.csv",
+        "sha256": "2395e218bf4d9b7cd70661ea2a0c6a30b96f7010d422a890d3ed30953ddeb334"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4800_ssbar_to_ssbar.csv",
+        "sha256": "27902854bb9231420552c9d579ca7a0cb11e2c580683e15db3d9c4114ee3290b"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4800_ssbar_to_uubar.csv",
+        "sha256": "e98d25ea7d947ec50817473363480a91a2301ea55ed07459dbd8453dc44fd338"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2500_uubar_to_ddbar.csv",
+        "sha256": "b82d5332669441966aec7e2490f84517e5cbad457f632cfc8b5ec024056d03c2"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2500_uubar_to_uubar.csv",
+        "sha256": "aaab749d1cbd6075f350cf6f1fdf50c5b25764e9dae003704610ea9562347fb9"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2700_uubar_to_ddbar.csv",
+        "sha256": "67f870f3ae1915e6fbc01275c99578ece7c91ed39382c7715f17ec757e7b2594"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2700_uubar_to_uubar.csv",
+        "sha256": "8fc265d4781dcb4fdb6fbcb059251976b6c38e7b2d125c1ef38d5f68a2baf5c9"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_dubar_to_dubar.csv",
+        "sha256": "4915eea078732268ddea14fc41daa4101cc5762426b76517d997ad84a27217d2"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_subar_to_subar.csv",
+        "sha256": "7d21a9428d5e8bfd0eecb578f31fc54f0117336a6930bb2f739c0418fa702771"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_udbar_to_udbar.csv",
+        "sha256": "4915eea078732268ddea14fc41daa4101cc5762426b76517d997ad84a27217d2"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_usbar_to_usbar.csv",
+        "sha256": "77b1a961c36ab61ba86b449e981e7a3823c3a1418349079592c3749f4b38f5d9"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_uubar_to_ddbar.csv",
+        "sha256": "b8fb012127e4a18c19943e4f16840b7581ac0212f3d05684f0649fae7c1e811a"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2000_uubar_to_uubar.csv",
+        "sha256": "635392277599fd2885a3c58dbcd926a1991d5b51b31d57d22612e0be98971823"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_dubar_to_dubar.csv",
+        "sha256": "0dca59a3eb059b232914c12983e8323a9f5fa013978888a0ff5ea05251e1842e"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_subar_to_subar.csv",
+        "sha256": "c4b8f88b23a4a19f17baf871628fac224e34b3f7575abdf80c60f07e16448d36"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_udbar_to_udbar.csv",
+        "sha256": "74069b4096a14ea2ef7ee07d9c2c708437a98afb05f8d52591c733a16e8ac7d1"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_usbar_to_usbar.csv",
+        "sha256": "eda007ff58e35677aeed1c0ca24253b44087be5d0ddbc9b62298c85acc1e69ec"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_uubar_to_ddbar.csv",
+        "sha256": "24ff60c75a20c29c2f3ce371090942446ac9a6ed8bc61dec8402c5750623ad2d"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3500_uubar_to_uubar.csv",
+        "sha256": "56d142c8bb1e82732e1bb446ede7ce22f9ccf9549daefd97d5e85962d8208431"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_dubar_to_dubar.csv",
+        "sha256": "5b84fc18c3f089fe97d035d97f38baa2aafac6b268ef7f809d672b7b0aa233de"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_subar_to_subar.csv",
+        "sha256": "24a67648dffd5e219ae94ab6e68aac188a97724e5928a4c9ada70504a8d848ba"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_ud_to_ud.csv",
+        "sha256": "66154516b13a05d267cc45cfe5b5f552dab3e39976b03cf418c82df77d293604"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_udbar_to_udbar.csv",
+        "sha256": "34328591cf2c5200c4d2eed1067a82036111aca647834dbabb67d1222682fa3a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_us_to_us.csv",
+        "sha256": "a44b125ee8b85f814afa16e0ab9ad45544b6b0294d4ca4f166e4d7b3cd446842"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_usbar_to_usbar.csv",
+        "sha256": "6ae9c8838fa4c5f3c72ccc2328e59e9596a0c9ef4fab246c47f9612b4a10c755"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_uu_to_uu.csv",
+        "sha256": "4c2132af8a49c2a686ae11bb08c810d48fc6335480799265d203120aedfd31f0"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_uubar_to_ddbar.csv",
+        "sha256": "1bd1bfb3428067c36f9af825bfa55e1ed7be96883c94178cafb35ea7fa1e0f09"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0100_uubar_to_uubar.csv",
+        "sha256": "14d69113f9ad7242896483c5d10a5ea5d83861fbbbe66732b4abbdd62f00d4dd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_dubar_to_dubar.csv",
+        "sha256": "d973bc6a39a26539d29ebf96b3fd2ed5b784c1dd279f4bfe8e5d6f3fd7344316"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_subar_to_subar.csv",
+        "sha256": "b31f25c973566e2b0df597c1572f099ca70f4ee0126db020d654f4e2ddf7ce2a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_ud_to_ud.csv",
+        "sha256": "5681f44ab7f333b22ec4e983141627ee4fa08c02dfd325a8d5f9f556ea7a3e21"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_udbar_to_udbar.csv",
+        "sha256": "959d90ed3440feee3f384a6ddfdd78cc0f66b2859ff363632df3f72d5f489862"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_us_to_us.csv",
+        "sha256": "73c0864c2ba4b53f3cd4b427f6013794aa6ee01bf65b0bfff33adc5d9d31682a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_usbar_to_usbar.csv",
+        "sha256": "0aaed1a07f6552b0e89b7890168ea8689666e3dc684910e9c166af448483079b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_uu_to_uu.csv",
+        "sha256": "64d2de6b19082e9cac2066bd77298e87c3c8bae1e9ff50dd503f4368b01e86ff"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_uubar_to_ddbar.csv",
+        "sha256": "c9b240627b29aca5532d85145e48c875345d7b81f86d44c583da649f7310e0cf"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_uubar_to_uubar.csv",
+        "sha256": "331192ccc7e0e07f44f28d48a1f46f469888227cc527b2a4faa7c0a7b95d579b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_dubar_to_dubar.csv",
+        "sha256": "ab23383a5f9593dcaac585d83b7f8a86a1a4b9dc2276bcc27a91efa23a8253b7"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_subar_to_subar.csv",
+        "sha256": "6b36b6b85c18b364f770d6d69da2eb1b78b9784f80ead76f087ee58e544c8fe5"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_ud_to_ud.csv",
+        "sha256": "ad18287a299b5291994b46c645dd5d135f10a863dd25a4c6b94def7ebd3e6164"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_udbar_to_udbar.csv",
+        "sha256": "987e628f5e01a261f22f5aafc7ccf6c5f8644c9d6dc7d113308fbe0b608a3dda"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_us_to_us.csv",
+        "sha256": "1552994609f02c68caf2dfa23dfa991fdb61b04716cf33c0277cf67fd16c26f3"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_usbar_to_usbar.csv",
+        "sha256": "534a0b37395b993e1001bbdf63fe52c4f2c2b5777d6280470d08def6969413d8"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_uu_to_uu.csv",
+        "sha256": "c83ce56b1068c7576fc71bf278e5958d9e7fa212183755220e816120a5b19cd9"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_uubar_to_ddbar.csv",
+        "sha256": "71c402473fd4aa4d7d32f53eac7541be924f12b378685ff5303a95e4492d374d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0500_uubar_to_uubar.csv",
+        "sha256": "d714d7861ecc817fd83917d34e3581bede38787a03e050d625d1561ececadc7a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_dubar_to_dubar.csv",
+        "sha256": "d4fce2327b939bb90d1f14af610075cc20532aaafb5cbc11886f1d19f196d3cd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_subar_to_subar.csv",
+        "sha256": "ce78bb075309545a3db0044dd3a73e5b3b67bf31fa1df7c98b9485e22580db03"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_ud_to_ud.csv",
+        "sha256": "46b9bc86b1235f3625a9d1c58f146b2bae4f9fb642406827fde62d3084821a4e"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_udbar_to_udbar.csv",
+        "sha256": "ae4244c9883a28ac524666bdd2a9dd52294d01be4f92712926af39b0cf27869a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_us_to_us.csv",
+        "sha256": "c2a164e6f2e55a030795bf9a816a7d957dda85ea36ab8e58952e98f5e7ab5b93"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_usbar_to_usbar.csv",
+        "sha256": "34630759aa5b797d8742e4c685109fbafe46426bb2d11e2a334c39f8e41768bc"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uu_to_uu.csv",
+        "sha256": "60edfc0b108ec6b000e57729a78f53ed9020f5c5608c6e603a4e68f658517f18"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_ddbar.csv",
+        "sha256": "208a9cff63bb08b4cd07834b06f5f1f795145ec7840623ce1d37578781e875ac"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_uubar.csv",
+        "sha256": "6446b8cf870e27780216b1edd560bf9ff3383ebead106c50cce2599baba167cc"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_dubar_to_dubar.csv",
+        "sha256": "d19aa1ba99b295e619e975b1f1e4cd23f1f24b36da4456f0f2feccf99fc3196b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_subar_to_subar.csv",
+        "sha256": "dfe05bebfc003738f953d98db64d49105b5b683c087ef59f191b8e0ebdcce837"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_udbar_to_udbar.csv",
+        "sha256": "5219b099d254e9c4dd9f2f668f0135ae0cf8eb2220842a608cd273233bb519b3"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_usbar_to_usbar.csv",
+        "sha256": "25475b1b74d6380659c53800095552612bed3e4523673b097de15e0e6b5a2eba"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_uubar_to_ddbar.csv",
+        "sha256": "b5fab1afb602ae3464b5892939613b5422140f2ad3589d66223d28c750a2603d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1700_uubar_to_uubar.csv",
+        "sha256": "3845e5b49cf34d1ec5a827cf03196ae8a99e8c5333df143297dba0445456dd37"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_dubar_to_dubar.csv",
+        "sha256": "491dab2a10d0450517d9c6795e3dd90b37270344f944ffe0d3b6fe9282379079"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_subar_to_subar.csv",
+        "sha256": "e99afb304ca96ca779a5ffdba99680c62692ef3eab210318a0a7ac8b97b851af"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_udbar_to_udbar.csv",
+        "sha256": "9c71a1748325573b9e92b2c6ee000f8e310ffc27eef1859bc24b3f236a4f4da4"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_usbar_to_usbar.csv",
+        "sha256": "cfe0251e642c3c09d8d34d332698f2a3511bb713d1488a494d66c531f4026006"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_uubar_to_ddbar.csv",
+        "sha256": "7b4977bb595389e0c940a9c7a465ffda7d1044e0d716743044910e8d536056a4"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1900_uubar_to_uubar.csv",
+        "sha256": "5fcf9bd05242a8b71b73f09d6fc111d3e063dba272408a47093f4fef57fe665b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_dubar_to_dubar.csv",
+        "sha256": "b5cad6e6368e9dd9535b7d996a2997dec6840ffccafb87f251fb65a1949566f9"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_subar_to_subar.csv",
+        "sha256": "b3ed204d2850fb0160521d3dbae555951cbacc8518113d94c0fe76724122db3a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_udbar_to_udbar.csv",
+        "sha256": "425d241c71de2cc4ec38be7fc205170d8f922c5704396e273dfbc3b10a54a84f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_usbar_to_usbar.csv",
+        "sha256": "7523d07a06fb0789cadd1fa72e4ee5a618727d39fae0022e88ec66a030fc8c59"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_uubar_to_ddbar.csv",
+        "sha256": "6d815b937520c2df99362c53cc4785c1150b8ab91f0d1a23a2eda2d7a9c70694"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2100_uubar_to_uubar.csv",
+        "sha256": "02793f42a5774d7a98b18c466c7b129f4d5c71f90b56a88af2da949315f5c73f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4100_dubar_to_dubar.csv",
+        "sha256": "7e2f7ddf5817179f5c09cffa324ebcc997d2ceb546eec5c5062dccb0768eed01"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4100_us_to_us.csv",
+        "sha256": "f9035c1dfa1a91dce945c69ada9e0ed556ded6fe60effcb5b4b979088f2c10da"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4100_usbar_to_usbar.csv",
+        "sha256": "4b8201b79703febb0745acb6f2bb3f78c6d57500cc9e22a9bafe350cacc48003"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4100_uubar_to_ddbar.csv",
+        "sha256": "86a0960b45ec60486a9ca3b3b6be6c989f3df0e466280f0142b6112d0d6606a2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4100_uubar_to_uubar.csv",
+        "sha256": "da6832055ae12ed56ce0f97cc30acec411eb9f98bf1e749667c3f2447f144cec"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4300_dubar_to_dubar.csv",
+        "sha256": "99decf5937a72f91fb6ebcd9a44716bad7ae5d9eb2653ffc1791aab52ccecf53"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4300_us_to_us.csv",
+        "sha256": "78d8efa9ddbaee2380a1506e9da02421cfe9dfc8fb8c9bbb17975bf5cdd8ba4f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4300_usbar_to_usbar.csv",
+        "sha256": "37b74fe531cf95b52025d01731bde93d1a1c4e5deac1b441b03b2ff0be04e78f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4300_uubar_to_ddbar.csv",
+        "sha256": "057c51ddb521254415414f33d535155ffba3a3e9682c5b1462245889bca27c78"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4300_uubar_to_uubar.csv",
+        "sha256": "6d6b33278496fc2810d7cb735b5dbcc4d9944258d700d5dd55b704aaaedb4ebe"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4500_dubar_to_dubar.csv",
+        "sha256": "abe7cb77ba1076e89fac7e887186f8ffa0d394562178eda6f00f5a05a4afb850"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4500_us_to_us.csv",
+        "sha256": "20580e9aa3158d6039f2c72decea7f9633b13c98b2b13324ef60512854478283"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4500_usbar_to_usbar.csv",
+        "sha256": "a5aec5fd36c45fe028beada17193e60942523f0cd65508ae6f2c4e4cc29d48e9"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4500_uubar_to_ddbar.csv",
+        "sha256": "8648fc824fcf5e50c05c9d79c60397d7275febd263dcf511d6a5045c653a05dc"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4500_uubar_to_uubar.csv",
+        "sha256": "da73dbbfab46f9eea6272732fbfed2b7b3e86597f6ca8c0e8f85fe336a056a47"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_dubar_to_dubar.csv",
+        "sha256": "5a10429af318b73549ebb4e22a3a0695fa9b179183f282455bafa49b165ca0fa"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_subar_to_subar.csv",
+        "sha256": "26da2723231886793fa860ecfea09b3b3583d4e38c0a89c79e2bac8d2da44260"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_udbar_to_udbar.csv",
+        "sha256": "a9f9db7fedf91d70048335010a942c7de2f185e33d2f3f602e345cf45792f3d1"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_usbar_to_usbar.csv",
+        "sha256": "fe9f5e6932f8fa5e25cea317dc7ea32648a481c3662064bab6dc5436e689bda6"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_uubar_to_ddbar.csv",
+        "sha256": "ec09e4710d70d37a2624c202e17d7490d42d0f6ebc5c41ac82a9b6069c924f4d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4700_uubar_to_uubar.csv",
+        "sha256": "597290daf1612ad476644b8ccb478381c798c98d3656ab8b30c5b437a9f9fe60"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_dubar_to_dubar.csv",
+        "sha256": "511b80d1a70c0186cb063e5cd4dcf4967a947a899d8d43a93990a1c27f7d39d8"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_subar_to_subar.csv",
+        "sha256": "a59681ea81b1ea320be19d948a420d657f54feee6a78352e3fe52a0ab368041b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_udbar_to_udbar.csv",
+        "sha256": "0291e18b8cc1268256fce7635e9594aea52449195ec4e66fa59b400f3831877f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_usbar_to_usbar.csv",
+        "sha256": "702cf5d4144e741b9ca6caa0de8c59dada27370d17d81da8d312a8be60128160"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_uubar_to_ddbar.csv",
+        "sha256": "f6ab8680c56f6fada48e93e7f3ddd50676070c67f62f27503c089db394a1f9f0"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4900_uubar_to_uubar.csv",
+        "sha256": "6a9c4771c9bef044674046c499209962b728e139468b32665f6f8492f32f7d8b"
+      }
+    ]
+  },
+  {
+    "run": "anomaly_grouped_s1_v1",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-22T00:49:48.735",
+      "attempted": 118,
+      "successful": 118,
+      "failures": 0,
+      "skipped_previous": 10,
+      "reference_converged": 116,
+      "adaptive_validated": 116,
+      "original_replayed": 118
+    },
+    "manifest_sha256": "7e574c6be12cebe928903d6210838e157399b72b5f10a19043f6507a8a0ea135",
+    "source_files_verified": 295,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "continuation.json",
+        "sha256": "7be57185be1101a629f1808a658c25c8745296799c8d5f496404f27038c1ee24"
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "7e574c6be12cebe928903d6210838e157399b72b5f10a19043f6507a8a0ea135"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "81857820f80f5848b79b1afe09c5c2edc9a11d1c85d163b98dc929e5afee011b"
+      },
+      {
+        "path": "status.json",
+        "sha256": "1f8e193af93f7e7aba3ef722c1acdcd900cd3c554abb2bbbc2918a1ad664030f"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3600_uubar_to_ddbar.csv",
+        "sha256": "2fed2869eadba81ecf7367cf86654774a536fdb89e7bcc5fa7a0a2844e59e5c8"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi+0.3600_uubar_to_uubar.csv",
+        "sha256": "5193750edd3dd5e31a841bae8691bcc9569d4e3d898f158d6c205b93b7703340"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_uubar_to_ddbar.csv",
+        "sha256": "728aebacf3573b65977f9658d938af533070deafa4a9300f4ed1fb9030c4fa8b"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.0_xi-0.2000_uubar_to_uubar.csv",
+        "sha256": "13a91d6b961ae9aef02d8b1d5f9af6818320815a2e6d5259faac7e3778a1474e"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4700_dubar_to_dubar.csv",
+        "sha256": "09c262d9c56464cb7781b5f1f7d228cd7203aaf51b1128f17168e15c2eff5a57"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4700_udbar_to_udbar.csv",
+        "sha256": "4b6c09f857405a9d85e0f85ec3ab9d672caedd0239064800d2ca3e32df4d5a16"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4700_uubar_to_ddbar.csv",
+        "sha256": "ccbba6a034dc6864da343a3da97fc428e4571b668a0a807b6abd05e3b9270efa"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4700_uubar_to_uubar.csv",
+        "sha256": "268db214d474fee3ff23a0c960b853dc15c3d5bef07be1e763d177e88c467b55"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4900_dubar_to_dubar.csv",
+        "sha256": "a5d6c7da1464f8d8883f017bc50572f56aa3eb19944f6543c2086c444602de52"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4900_udbar_to_udbar.csv",
+        "sha256": "778ac5f98e2c2a22ac209aa6ae97af351290b998147246d08055d87fcda70fb4"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4900_uubar_to_ddbar.csv",
+        "sha256": "dced9737efc0445c7466c334eec421b1edad46921f49308068966dd2b80eb88e"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.1_xi+0.4900_uubar_to_uubar.csv",
+        "sha256": "451bb1a5ea8c7ec3be787fcd2b660a55a182ff9f5e6fcc76262052b6ba507894"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4700_ssbar_to_ssbar.csv",
+        "sha256": "5086c30e99446d75911720d98f759f8328be5801f5e2dd0b736bc07cb208e4e6"
+      },
+      {
+        "path": "tables\\muB0.0_alpha1.2_xi-0.4700_ssbar_to_uubar.csv",
+        "sha256": "ab4a5b0a0344431a63d8bbfc7e2fa23188fee09203979a43a66ac6fc43091d27"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2600_uubar_to_ddbar.csv",
+        "sha256": "a215bcca02d9c4a968ed7a67df2ba1ec92f1340e3e658e95d4479579b90daa67"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi+0.2600_uubar_to_uubar.csv",
+        "sha256": "db16641591fb207d19d0d2bd617a9809ee645bd655f07d0a71204a0bb637112a"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_dubar_to_dubar.csv",
+        "sha256": "317fe188b6651b5288f934b1d545802439f44528be95f434ef3fbd4d2e51aa81"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_subar_to_subar.csv",
+        "sha256": "2285ee367ee99e383c3874efa77f36f64e1f02066f04c520edf707e5bc865c36"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_udbar_to_udbar.csv",
+        "sha256": "b09da847886d8fa29570d3e17a27d8096f94297573438b31bdfa4009aa1a8e9a"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_usbar_to_usbar.csv",
+        "sha256": "1f133ae860688c37a32ee327dc3fd47c3f466540c112d5df6257f417dd50e049"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_uubar_to_ddbar.csv",
+        "sha256": "81982ce81cb7dcc8409c11340f8a49f6e2c8f60881539c348debf140440571c1"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.1900_uubar_to_uubar.csv",
+        "sha256": "1e93650e0e26ab6a962aba27ea42dfb20ee98e3ca7f573e1d3cb6dc62ea18a87"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_dubar_to_dubar.csv",
+        "sha256": "70d0753f203b11eabc80aa652971c5bfa583b9cf42eb6e47dd93abd3de506eb2"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_subar_to_subar.csv",
+        "sha256": "ffcaba53d91e780ca7afd3b3ff8c124937e2df795ca368fd80faa0f3c21c0a1b"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_udbar_to_udbar.csv",
+        "sha256": "1861dbbbbb15a81aa497cca287bd832f3bb836fee1a9db980c0b82bbb4471bc1"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_usbar_to_usbar.csv",
+        "sha256": "8162bb0079e2c19730543b583a22bc51f2fa461c7143a5e6daa3141fb9a38d05"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_uubar_to_ddbar.csv",
+        "sha256": "6ea97441e542c2487a8fcfe08d15960594ae0aef9f3241e40e47d832500c2ab8"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.0_xi-0.2100_uubar_to_uubar.csv",
+        "sha256": "1a04ad4e7026811dddd06d6b8985e094690bfd63b38e39de6eb77c806875347c"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_dubar_to_dubar.csv",
+        "sha256": "d0d8fece9d7b072d57e6f8a44e5a5f5796a713906fe7a29712ef4cd352b2bdf4"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_subar_to_subar.csv",
+        "sha256": "6c3a5202f380cb76e9b3f17aa10183d6960831979c25b6c2f0a40d1ae99ba11a"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_udbar_to_udbar.csv",
+        "sha256": "37d3e0dff56dc9e7a57c6c558c4ab83180c3f42f7e3259dfc3e8b84ce2f6d096"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_usbar_to_usbar.csv",
+        "sha256": "c36092005b194ce81f2f9085a3e419baee1124d1ef935d2430a836a7515fc286"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_uubar_to_ddbar.csv",
+        "sha256": "8e16e3ca91d0c26a638406292e95100982a722d75253a104498c7bb0f851b0c4"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3400_uubar_to_uubar.csv",
+        "sha256": "dd70d3af4f888d3f81ba28886f848e21d39df405c64b1722b0ca559f30c200b9"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_dubar_to_dubar.csv",
+        "sha256": "b31eaff889ffd3e86d2d140eae3cc57adf1ca35b49e4c27c1a99a118c404ba88"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_subar_to_subar.csv",
+        "sha256": "56879f0049c3db52c3b6320eef3034dc4ab192e4e6b3d5fac43900b5907e1aa8"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_udbar_to_udbar.csv",
+        "sha256": "b31eaff889ffd3e86d2d140eae3cc57adf1ca35b49e4c27c1a99a118c404ba88"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_usbar_to_usbar.csv",
+        "sha256": "0e365ffeffcdcb83fb04271b70817e99fa307642ee4a8ccc4f4a7a9117a7aab1"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_uubar_to_ddbar.csv",
+        "sha256": "b61fdee2249cc337fa3ac1a35adcc02f7e9ce4d6228f5c821fa2a9c0b5993d45"
+      },
+      {
+        "path": "tables\\muB450.0_alpha1.1_xi+0.3600_uubar_to_uubar.csv",
+        "sha256": "440b0cf50e2c971c5844a549e34fc1b635cfda8ee1b5fd71601b7f39058011a2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_dubar_to_dubar.csv",
+        "sha256": "378f259bbdafaac47f5b00b306c451904ce63249412e881f4db136ca1cad3e87"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_subar_to_subar.csv",
+        "sha256": "c41729f4d1a3f91ea120968b3cb29efebdd1586fb635c10694a1d36881d1fd61"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_ud_to_ud.csv",
+        "sha256": "3da4d7b44d6e0e3b77fcd1d798250230cb5f281fdfed4f81e92ea890cba570f2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_udbar_to_udbar.csv",
+        "sha256": "05741c2a90c9859312c9f025468a9b5a7aff045f768ff2802f399f4d20e81246"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_us_to_us.csv",
+        "sha256": "a142090195a2da3277722fb18a532ed0e0392068e8259029a072634866432536"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_usbar_to_usbar.csv",
+        "sha256": "145a846851af69b354d9c6bc86dacf11d89da9a620c3dc25a910ef26a80743b9"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uu_to_uu.csv",
+        "sha256": "37b57f0b6d075dca856bd92d61477164b83ac9d134dd6b04cd8917d9c359ec9a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_ddbar.csv",
+        "sha256": "5a36846382c92bffd18a140b4e64a94065879cd55262f19b32c8a771663da566"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_uubar.csv",
+        "sha256": "6b06668d2ceab398c7277b94c2faec3385bd808e396e54bd05a6d773958137de"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_dubar_to_dubar.csv",
+        "sha256": "8f2c7ace52d8fb0bcd8e2eb7ce3348fae8875f449407ad8508787766cda78489"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_subar_to_subar.csv",
+        "sha256": "b4e9fc0e58ff77cde62092853ea2c498478ff82ddf181c5cd6a1ca248241df1c"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_ud_to_ud.csv",
+        "sha256": "580353caf9677b81d91cb752ddcc03804a0b65e15f644bb19a3d273df7d83d1a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_udbar_to_udbar.csv",
+        "sha256": "8e73a571b7af2287c1703a53b997de10df9a7d4b0c7b0a9c819b4a692a5887dd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_us_to_us.csv",
+        "sha256": "9d10577e451c88a2bf1fe9327390e4dc38ab9c306f332cc57d6c1fe9dfccb9bd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_usbar_to_usbar.csv",
+        "sha256": "caccec00e3a86509af1901b07e8b1926eb2f106c451df8d9039ab56976cbd899"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_uu_to_uu.csv",
+        "sha256": "da5984729c138dd3ec5d21afc3edfe92ee0e4f4ed3e1fb128a6bbc1fb26fbd99"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_uubar_to_ddbar.csv",
+        "sha256": "4423d2b59aa9260d64365ab8040a5e3d436eeed5878c73594ea3be98e6c91bfa"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_uubar_to_uubar.csv",
+        "sha256": "e33d8a12b803fbabdbe6bfe8ef34171f82733d64a443d78bd005b61310c2c58c"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_dubar_to_dubar.csv",
+        "sha256": "e76d76d544df2d1eb1d59f654106ab43132ef88eec37a9d0d20ae0e3eae6b20d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_subar_to_subar.csv",
+        "sha256": "adbbcd982305f09e33ddd51b46f69af22a9cd2a45dd4d0a8b45dfe2f220648f6"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_ud_to_ud.csv",
+        "sha256": "f59e420911cf22764f6c97281f012da241cd65e0a4c538db5ec33cc5dc67dfdb"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_udbar_to_udbar.csv",
+        "sha256": "f15cf41136f432f22ac9e609f3c2cdccf977d701149e592fed612a2b09380fa0"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_us_to_us.csv",
+        "sha256": "47c27b8e15be14983b1c31c4d28717527fe060842cd1e2aa08790e8111b239a2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_usbar_to_usbar.csv",
+        "sha256": "4cbf47efcf789059c873f60279704be788ccda94be223fdaa5984072072b6db1"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_uu_to_uu.csv",
+        "sha256": "45916454343ecd87b76eff0d3117918a2c07394b3bfa275919cd96b9afcfe3ce"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_uubar_to_ddbar.csv",
+        "sha256": "9d20ddfcdcaa6c454c4abb071b73d8acf9637031c5b3edb5cf3ac5158ff75e90"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0600_uubar_to_uubar.csv",
+        "sha256": "bf23ca2728afe61e65b38cabf1431d6b6afd90189c363a2240eafe5ebe59261a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_dubar_to_dubar.csv",
+        "sha256": "4310311c735dd1c0dc250c3fd9eb30d321bd5a3cf360061593c56ad9500f6f53"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_subar_to_subar.csv",
+        "sha256": "7de9f3500ff21f486e5cfe86a19c6caf0403c47852b04921fb024a48c1ade359"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_udbar_to_udbar.csv",
+        "sha256": "aeee4f5242a17777475c5693356d107f0519a68810903d25eb414fabad74ef6d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_usbar_to_usbar.csv",
+        "sha256": "bed2161ff9716eb091c8ccd1ca9c234248ef86c251b08e949d27e04259c69f80"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_uubar_to_ddbar.csv",
+        "sha256": "93aa739ff9afc8a9ed1b6e6abe79aa951ba5c24bc9e0a0f321a4e5b03a9fe976"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1600_uubar_to_uubar.csv",
+        "sha256": "13da8d7c16a0569d38acc9e568bbaecbbbd5dc0b85cf1af4bf495002dbb9ecfa"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_dubar_to_dubar.csv",
+        "sha256": "9a60dee39b3f6bc5a4063fd692f5cf0d5287c7fb76c641b5bd9f2fce1869f5c6"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_subar_to_subar.csv",
+        "sha256": "cce1dc6323a7cd334fb91493e39e2aaa419d1a2857368038ca3df16bfa93e871"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_udbar_to_udbar.csv",
+        "sha256": "a5f5fb56c6f531ace85a78da1889d057383ad0b70123f0d9b4bc271b170e4e7b"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_usbar_to_usbar.csv",
+        "sha256": "0b818f9e2890758faec4c7fc174474f3143cc9727f32133e89f2be2b45c8e502"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_uubar_to_ddbar.csv",
+        "sha256": "9917502e251ccb4d2fea6194c96674b5a3942d4376dca30511a4f88fda2a57ae"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.1800_uubar_to_uubar.csv",
+        "sha256": "5037064e00375cf587e3d7be9a35b012aed8030b66080c1b576181472825a092"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_dubar_to_dubar.csv",
+        "sha256": "74cd151c0680bbff21d15bf9f4837b52b9b7d48c66c3b39aa12ab2bcd37be58d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_subar_to_subar.csv",
+        "sha256": "c4f2c2244bd107d48478a91275002c3f59d425a93adcf6e7a7ab255d71068064"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_udbar_to_udbar.csv",
+        "sha256": "74cd151c0680bbff21d15bf9f4837b52b9b7d48c66c3b39aa12ab2bcd37be58d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_usbar_to_usbar.csv",
+        "sha256": "40f841f11ad49cdfd4b169b62d2dae1e0d5cf8f5972f5f64327ea7b5ffd8aaa0"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_uubar_to_ddbar.csv",
+        "sha256": "4bfeb995a15be8f8e5144cd38a0b145473597502ca06a43119274fc648b789d2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2000_uubar_to_uubar.csv",
+        "sha256": "cb251ebe0dbe86199118e1ce95fce0fbcfcf266d9412d035d1ad9ca49b47d990"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_dubar_to_dubar.csv",
+        "sha256": "ef4f72585cdb33fd57d72dfd07eed249ae5674194bcb89d007844fbebdc4b941"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_subar_to_subar.csv",
+        "sha256": "5c559f5c29f4da63e203a22bfe0ec68e51dd12ab58353cc581dfd9a28f204323"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_udbar_to_udbar.csv",
+        "sha256": "ac9f7b2e3e002ead60d1457940ca260c29c2d98542e54bdfb8870f4df4a9fc45"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_usbar_to_usbar.csv",
+        "sha256": "55344c1dae0da0529948285fdad406281be50a7aa6d5f6a17af8856bdbd1195d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_uubar_to_ddbar.csv",
+        "sha256": "a09222d410d5055dd1da1fcc8505882331add966f047504d44167b149f5f6626"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.2200_uubar_to_uubar.csv",
+        "sha256": "ce9a7efd6f95eb3dc86b5ed195d28ea79668b3d55d90ce4c2d50aae5035c352d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4200_dubar_to_dubar.csv",
+        "sha256": "0a30ab9fab73859ac2e457729e0426ebd9f9bcfb614863e2fbc9744cf139ce8c"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4200_us_to_us.csv",
+        "sha256": "4dc3b13e9bebd9768eaef5fdfcfb9a966c2d0644076e7febe3b68f096db57d73"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4200_usbar_to_usbar.csv",
+        "sha256": "b2ed9d7afa8f4298bfff748c2317e1b117c3e1a2c7e9df9d61f37f2134b8b640"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4200_uubar_to_ddbar.csv",
+        "sha256": "4f384d85361928416ebc74332fe1a886628d68a1bda21d24f2993ba0f302e81a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4200_uubar_to_uubar.csv",
+        "sha256": "bbc89d438079db9bfa4894fbf02a44d4597a2c57bf8f908a6ef683a1c78ea520"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4400_dubar_to_dubar.csv",
+        "sha256": "32aa5079aa59d78ad49499506fa04673435a1b29bfe6c1537248c60c6b05097d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4400_us_to_us.csv",
+        "sha256": "4c1dbd9110a8848fae69dbc79870580f64e5dd514b4e4ab8c090b4d9550cbb87"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4400_usbar_to_usbar.csv",
+        "sha256": "6a1458ffbd00876c2581a4a8def5e28e5a2776d78314ddaa62ec35ec66499636"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4400_uubar_to_ddbar.csv",
+        "sha256": "2bbbb5e2e59d07331e0c660d2284bf55fb03f50f6115b8fb85d194a17166c1bd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4400_uubar_to_uubar.csv",
+        "sha256": "4ccb1002d1c02e74caef08e9f910e69267c90ae8a3f64a9057697faa7db2938f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4600_dubar_to_dubar.csv",
+        "sha256": "969f8efb519388ae9a0374bf2ebd13fe86218e7bcb5b94080a597748327a5eea"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4600_us_to_us.csv",
+        "sha256": "94e387af4244530bd527074feccea451df112b124f07486c6798ed237e48a5d3"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4600_usbar_to_usbar.csv",
+        "sha256": "2d067b111ca210ff07a3f832b01f6e79416c2be62a5dbbf196bbb634c2155577"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4600_uubar_to_ddbar.csv",
+        "sha256": "60fa95653f845b03c57012731c72f7fb4408f6ce9fb62c82fb2a185170819eea"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.1_xi+0.4600_uubar_to_uubar.csv",
+        "sha256": "7c177308971d48018e04f157c1f3561651408e0e081351be37741b0ff0a182d3"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_dubar_to_dubar.csv",
+        "sha256": "ed9ed1a33579fb45552ed5a89a106d867f91b565ab859f16f0723a8d5c029629"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_subar_to_subar.csv",
+        "sha256": "f0f010897ef088cec2034a2286c97cd20458bcbce486176585e178511e633d10"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_udbar_to_udbar.csv",
+        "sha256": "7b033b52efd10ceade0af4d09702d7056689479f12c416e77381f911f282e38a"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_usbar_to_usbar.csv",
+        "sha256": "7487e88db4c1765f6da25bfb1954769bac72f59216d3dc2156ac4d8ea30e7000"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_uubar_to_ddbar.csv",
+        "sha256": "df240213135b06e1e429e8848e67a2805aed33f0dec9fdf48d2f110aa3db6979"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.4800_uubar_to_uubar.csv",
+        "sha256": "413ffa4fa09c26a2dff9a578ef448cfcc81f77142fc1dc5faa3e40d4093ae77f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_dubar_to_dubar.csv",
+        "sha256": "31d4aa0c20ae011ba78fd0adb4a0e289bab750da029122d34931d6ed566dc5d1"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_subar_to_subar.csv",
+        "sha256": "e883087965d87ca924e854f758a044c98c76a50e12928682691ae15e1f6b568c"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_udbar_to_udbar.csv",
+        "sha256": "b28f19935d48c053281af323fdee04767edf377964ffb28958895ec770894068"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_usbar_to_usbar.csv",
+        "sha256": "fff015d9766c18501ecd0d72c500a53badf0928e00a56e0d2a2d69a0f699f530"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_uubar_to_ddbar.csv",
+        "sha256": "eab04a2a16995c1f592bd54052580502d9a2b731e84e633f6c4708061a62de3e"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.2_xi+0.5000_uubar_to_uubar.csv",
+        "sha256": "8582bbb4fc446881349481c593e228ab7101d30717675a3819006599649fdb62"
+      }
+    ]
+  },
+  {
+    "run": "anomaly_refinement_v1",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-22T00:54:42.927",
+      "attempted": 7,
+      "successful": 7,
+      "failures": 0,
+      "original_replayed": 7,
+      "reference_converged": 2,
+      "adaptive_validated": 7
+    },
+    "manifest_sha256": "7bc1083c411e0ed83d85448dc1477f4274aac654360cdaa0a03e1741270e7205",
+    "source_files_verified": 295,
+    "input_files_verified": 9,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b",
+      "5a36846382c92bffd18a140b4e64a94065879cd55262f19b32c8a771663da566",
+      "6b06668d2ceab398c7277b94c2faec3385bd808e396e54bd05a6d773958137de",
+      "c9b240627b29aca5532d85145e48c875345d7b81f86d44c583da649f7310e0cf",
+      "4423d2b59aa9260d64365ab8040a5e3d436eeed5878c73594ea3be98e6c91bfa",
+      "e33d8a12b803fbabdbe6bfe8ef34171f82733d64a443d78bd005b61310c2c58c",
+      "208a9cff63bb08b4cd07834b06f5f1f795145ec7840623ce1d37578781e875ac",
+      "6446b8cf870e27780216b1edd560bf9ff3383ebead106c50cce2599baba167cc"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "manifest.json",
+        "sha256": "7bc1083c411e0ed83d85448dc1477f4274aac654360cdaa0a03e1741270e7205"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "881629d638416ebcf3480cc38830f8af535fd1decb87072e60bc2a299124ff26"
+      },
+      {
+        "path": "status.json",
+        "sha256": "cd1b022530888321f67bd39ed958bbc1211aecf6efe09e691bf225c4dd2b5059"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_ddbar.csv",
+        "sha256": "d3c8515e4ba3021d2230e46967268684b11b601ffa3b9796cd277e9e0f4f2a8c"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_uubar.csv",
+        "sha256": "7e888c85d288518f2acb818d49efc766b3200cf2352ef91b40ee0aa367e66b73"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_uubar_to_ddbar.csv",
+        "sha256": "6493d1d75371888d8edf84836fcc779d9576d2a83af7e2fd13b06ddb8d441b7d"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_uubar_to_ddbar.csv",
+        "sha256": "655fa6f25477b4475f4fa0776175e9ef3fed04714e2d0338a397731cbad03fdd"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0400_uubar_to_uubar.csv",
+        "sha256": "24ee622ebd730e61c4e3610329d0b28b0036a77b482e5bce9816bdb34d827a88"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_ddbar.csv",
+        "sha256": "9aaf50b407fc8a6243e31d5f1c45f62e273027812f57c521fe0ecce87a81ffb0"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_uubar.csv",
+        "sha256": "1fa3415558d4df1a94589e08fa918ee1f397d66a14c3e25af076ba6f68a1f25d"
+      }
+    ]
+  },
+  {
+    "run": "anomaly_refinement_v2",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-22T01:00:16.356",
+      "attempted": 5,
+      "successful": 5,
+      "failures": 0,
+      "original_replayed": 5,
+      "reference_converged": 5,
+      "adaptive_validated": 5
+    },
+    "manifest_sha256": "1ab106fdafa6bff70b66ce45c3c4927f25fd0c00dbe705356a0c8584af44a67b",
+    "source_files_verified": 295,
+    "input_files_verified": 7,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b",
+      "d3c8515e4ba3021d2230e46967268684b11b601ffa3b9796cd277e9e0f4f2a8c",
+      "7e888c85d288518f2acb818d49efc766b3200cf2352ef91b40ee0aa367e66b73",
+      "6493d1d75371888d8edf84836fcc779d9576d2a83af7e2fd13b06ddb8d441b7d",
+      "9aaf50b407fc8a6243e31d5f1c45f62e273027812f57c521fe0ecce87a81ffb0",
+      "1fa3415558d4df1a94589e08fa918ee1f397d66a14c3e25af076ba6f68a1f25d"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "manifest.json",
+        "sha256": "1ab106fdafa6bff70b66ce45c3c4927f25fd0c00dbe705356a0c8584af44a67b"
+      },
+      {
+        "path": "rates.csv",
+        "sha256": "736260cfc006f704a268536bda0ec3b837d54f6a12b1b7f3b1a8439994ad8802"
+      },
+      {
+        "path": "status.json",
+        "sha256": "822be2cf680267cc63ce1349d3b431b0243d5c13223c2993794eecacff9e4d27"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_ddbar.csv",
+        "sha256": "7b54fd118f57ad305017c6991e7e54d2d24ed96e81402020b18435cbb27fbfa6"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0200_uubar_to_uubar.csv",
+        "sha256": "63ba83423a44ba2bf40d0b5044d902ec0ea59fa0f30a199a1c1ac16d221d10c2"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0300_uubar_to_ddbar.csv",
+        "sha256": "0a5aa2ffa451c29fc390230046e170c1a5c2af6418b9320b49edca2e113b092f"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_ddbar.csv",
+        "sha256": "e15245df04e2eb1182e774c69b1851e73ae900de3a789fded248e812c0877ec3"
+      },
+      {
+        "path": "tables\\muB900.0_alpha1.0_xi-0.0700_uubar_to_uubar.csv",
+        "sha256": "96321c2410f8be8596be6b1917b72f112253e09939ee74c579cd5a82251e3808"
+      }
+    ]
+  },
+  {
+    "run": "thermal_performance_v1",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-21T23:27:33.553",
+      "measurements": 36,
+      "numerical_parity": true
+    },
+    "manifest_sha256": "cc781d79b6df6341f66d63a0c720b00e43c774577220fa25a9331c01a6c5ba8a",
+    "source_files_verified": 295,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+      "ddaa8d4124eb8075edcf1919dd56dbb29f93193736b0628dfb5dc7d6ec9c9470"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "manifest.json",
+        "sha256": "cc781d79b6df6341f66d63a0c720b00e43c774577220fa25a9331c01a6c5ba8a"
+      },
+      {
+        "path": "status.json",
+        "sha256": "72dae90ce23c12a0ed7a21fc5c99bfc86eb3f1c840e9c79a3e74861aa63486fa"
+      },
+      {
+        "path": "timings.csv",
+        "sha256": "ffbb7cc6efcd4326af26d51502587e92a39a88a1e9eda8737e6905c5987144d8"
+      }
+    ]
+  },
+  {
+    "run": "native_performance_v1",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-21T23:35:13.684",
+      "measurements": 18,
+      "numerical_parity": true
+    },
+    "manifest_sha256": "5bb2f39321755136a69fa815eef0a29d89c677e8dd0f713b20b484da1967435b",
+    "source_files_verified": 295,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "manifest.json",
+        "sha256": "5bb2f39321755136a69fa815eef0a29d89c677e8dd0f713b20b484da1967435b"
+      },
+      {
+        "path": "status.json",
+        "sha256": "8a9cdb3da7b448699420c85761eb727db12e86f8a55eab4d14d8ec84a7b4f7c2"
+      },
+      {
+        "path": "timings.csv",
+        "sha256": "957cdc55084bf1f097ebbd0df41ddda01e5525c5b847f5ce4907f439e823a18c"
+      }
+    ]
+  },
+  {
+    "run": "grouped_performance_v2",
+    "status": {
+      "complete": true,
+      "finished_utc": "2026-10-22T00:17:52.822",
+      "measurements": 18,
+      "numerical_parity": true
+    },
+    "manifest_sha256": "eede23db6fa9b95c014b5129a261ccb15a594ed9fd6d49e1f56453ef54af7c1c",
+    "source_files_verified": 295,
+    "input_files_verified": 2,
+    "input_hashes": [
+      "a8041929b7e811ab5d84d7b10ce6f265c16178b8553dd0daf3685a873a228784",
+      "b6453089d79f8b60fa96d2a3314a24c15f5b757996a0a843dd52900dc48d6b7b"
+    ],
+    "branch": "codex/meson-freezeout-defaults",
+    "head": "698feaf8fada670fde81c93bab6093b50093935f",
+    "artifacts": [
+      {
+        "path": "manifest.json",
+        "sha256": "eede23db6fa9b95c014b5129a261ccb15a594ed9fd6d49e1f56453ef54af7c1c"
+      },
+      {
+        "path": "status.json",
+        "sha256": "cf4287a3bdd20e88a533459535a436713c4683b9cf46dbbce8623dcf6583d01f"
+      },
+      {
+        "path": "timings.csv",
+        "sha256": "c95e108533f3a00aa9ae5290f9d9c13b02ddc23473b6206aefcc60cd5f9456f8"
+      }
+    ]
+  }
+]

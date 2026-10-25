@@ -1,0 +1,7 @@
+{
+  "created_utc": "2026-10-25T16:43:27.028687+00:00",
+  "base_control_manifest_sha256": "cf0fa0b4080ab64a3902beb6139e883f4564187338fd53e2ca8c7fcb7cc42a35",
+  "original_reviewer_sha256": "783113023b1e858e6f53053edce94df4296dda4c4eef1f5206ca90a821eb2e57",
+  "reviewer_sha256": "73c81409432440a4a2cd345c4623f7f55cf0a67a2beaf64df02f4142b82209f6",
+  "reason": "Match the actual root unit runner summary while verifying the frozen controller and explicit test selector; no source, fixture or numerical changes"
+}

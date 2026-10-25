@@ -307,8 +307,10 @@ function solve_gap(
     solver::AbstractGapSolver=NLsolveGapSolver(),
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
+    iterations::Int=1000,
     kwargs...
 )
+    iterations > 0 || throw(ArgumentError("iterations must be positive"))
     x0 = initial_guess === nothing ? gap_initial_guess(model, T, mu_vec) : _as_seed_vec2(initial_guess)
     residual_kwargs = _materialize_gap_kwargs(kwargs)
     residual! = GapResidualInplace{typeof(model), typeof(T), typeof(mu_vec), typeof(residual_kwargs), 2}(
@@ -320,7 +322,7 @@ function solve_gap(
 
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
-    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol)
+    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
@@ -339,8 +341,10 @@ function solve_gap(
     solver::AbstractGapSolver=NLsolveGapSolver(),
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
+    iterations::Int=1000,
     kwargs...
 )
+    iterations > 0 || throw(ArgumentError("iterations must be positive"))
     dim = gap_state_dim(model)
     dim == 3 || throw(ArgumentError("generic solve_gap currently supports dim=3 only, got $dim"))
 
@@ -355,7 +359,7 @@ function solve_gap(
 
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
-    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol)
+    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
@@ -384,8 +388,10 @@ function solve_gap(
     solver::AbstractGapSolver=NLsolveGapSolver(),
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
+    iterations::Int=1000,
     kwargs...
 )
+    iterations > 0 || throw(ArgumentError("iterations must be positive"))
     dim = gap_state_dim(model)
     dim == 5 || throw(ArgumentError("generic PNJL solve_gap expects dim=5, got $dim"))
 
@@ -401,7 +407,7 @@ function solve_gap(
     # 如果提供了 initial_guess，走单种子路径（与旧行为一致）
     if initial_guess !== nothing
         x0 = _as_seed_vec5(initial_guess)
-        return _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; kwargs...)
+        return _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations=iterations, kwargs...)
     end
 
     # 多种子路径：尝试所有默认种子，收集收敛的物理解，选 Ω 最小者
@@ -412,7 +418,7 @@ function solve_gap(
     seeds = _pnjl_multi_seeds()
     for seed in seeds
         x0 = copy(seed)
-        st = _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; kwargs...)
+        st = _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations=iterations, kwargs...)
         st === nothing && continue
 
         any_converged = true
@@ -431,9 +437,9 @@ function solve_gap(
 end
 
 """单种子求解（无兜底，失败直接报错）"""
-function _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; kwargs...)
+function _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations::Int=1000, kwargs...)
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
-    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol)
+    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
@@ -446,18 +452,18 @@ function _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residua
 end
 
 """尝试用一个种子求解，Newton 失败则兜底 Trust-Region。返回 MeanFieldState 或 nothing。"""
-function _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; kwargs...)
+function _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations::Int=1000, kwargs...)
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
 
     # Newton 尝试
-    st = _try_nlsolve_pnjl(residual!, x0, autodiff_mode, s.method, s.xtol, s.ftol, residual_norm_max)
+    st = _try_nlsolve_pnjl(residual!, x0, autodiff_mode, s.method, s.xtol, s.ftol, residual_norm_max, iterations)
     if st !== nothing && _is_physical_pnjl(st)
         return st
     end
 
     # Trust-Region 兜底
     if s.method !== :trust_region
-        st_tr = _try_nlsolve_pnjl(residual!, copy(x0), autodiff_mode, :trust_region, s.xtol, s.ftol, residual_norm_max)
+        st_tr = _try_nlsolve_pnjl(residual!, copy(x0), autodiff_mode, :trust_region, s.xtol, s.ftol, residual_norm_max, iterations)
         if st_tr !== nothing && _is_physical_pnjl(st_tr)
             return st_tr
         end
@@ -474,16 +480,17 @@ function _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_m
 end
 
 """单次 nlsolve 尝试，成功返回 MeanFieldState，失败返回 nothing"""
-function _try_nlsolve_pnjl(residual!, x0, autodiff_mode, method, xtol, ftol, residual_norm_max)
+function _try_nlsolve_pnjl(residual!, x0, autodiff_mode, method, xtol, ftol, residual_norm_max, iterations)
     try
-        result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=method, xtol=xtol, ftol=ftol)
+        result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=method, xtol=xtol, ftol=ftol, iterations=iterations)
         resid = Float64(result.residual_norm)
         if result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max)
             x_sol = result.zero
             phi = SVector{3, Float64}(x_sol[1], x_sol[2], x_sol[3])
             return MeanFieldState(phi; Phi=Float64(x_sol[4]), PhiBar=Float64(x_sol[5]))
         end
-    catch
+    catch err
+        err isa InterruptException && rethrow()
     end
     return nothing
 end

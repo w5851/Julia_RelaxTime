@@ -19,16 +19,8 @@ end
     T_fm = T_MeV / Main.ħc_MeV_fm
     muq_fm = (muB_MeV / 3.0) / Main.ħc_MeV_fm
 
-    opts = Main.parse_args([
-        "--output", "unused.csv",
-        "--tmin", string(T_MeV),
-        "--tmax", string(T_MeV),
-        "--mubmin", string(muB_MeV),
-        "--mubmax", string(muB_MeV),
-        "--xi-list", string(xi),
-        "--p-num", "12",
-        "--t-num", "6",
-    ])
+    # Keep the baseline model and quadrature fixed while checking solver selection.
+    opts = (p_num=12,t_num=6)
 
     continuation = Main.GapTransportScanPhaseEquilibrium.solve_models_equilibrium(
         T_fm,
@@ -93,7 +85,11 @@ end
     @test certification.delta_xi == 0.003
     @test certification.anchor_convergence_certified
     @test abs(certification.anchor_convergence_delta_MeV) < 0.1
-    @test certification.node_configs == [(p_num=12, t_num=6), (p_num=24, t_num=8)]
+    @test [(p_num=cfg.p_num, t_num=cfg.t_num) for cfg in certification.node_configs] ==
+        [(p_num=12, t_num=6), (p_num=24, t_num=8)]
+    @test all(cfg.model === Main.PNJL_MODEL for cfg in certification.node_configs)
+    @test all(cfg.residual_norm_max == Main.TransportSamplingScanConfig.residual_norm_max(opts)
+        for cfg in certification.node_configs)
     @test certification.convergence_anchor.p_num == 24
     @test certification.convergence_anchor.t_num == 8
     @test all(row.minus_certified && row.plus_certified for row in certification.evidence)

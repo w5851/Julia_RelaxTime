@@ -137,6 +137,7 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
   - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
+  - 当前默认算法：`thermal_weighted_v1`，背景/热平均/末端积分与采样误差统一配置；[资格及重跑入口](docs/guides/scripts/transport_sampling_qualification.md)。新算法的验证产物与下列原生产图源分开保存。
   - phase-guided 当前 formal raw case（mode a/b，高 `xi` 分辨率）：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
   - phase-guided 低 `xi` 分辨率 anchor / p104-vs-p128 收敛依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
   - 两个 case 的完整结果、图层和 convergence evidence 路径以 `docs/guides/scripts/README.md` 的当前登记为准；旧高密度 `prod_v1` 保留为历史回退。

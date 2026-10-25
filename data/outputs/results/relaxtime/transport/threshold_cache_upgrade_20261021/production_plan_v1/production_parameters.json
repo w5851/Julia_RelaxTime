@@ -1,0 +1,405 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-23T12:18:13.196985+00:00",
+  "status": "reviewable preparation; not dispatched; full_RS coupling revalidation pending",
+  "case_name": "thermal_weighted_v1_reanchored_20261023",
+  "scope": "mode-A prepared; full_RS coupling switch requires revalidation; mode-B historical range identified, new qualification and batches pending",
+  "method_revision": {
+    "effective_coupling": "full_RS",
+    "relative_velocity": "cm",
+    "finite_s_support_disclosed": true,
+    "pre_switch_acceptance_reusable_as": "historical reference only"
+  },
+  "source_identity": {
+    "worktree": "D:\\w\\meson-freezeout-defaults",
+    "branch": "codex/meson-freezeout-defaults",
+    "head_base": "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+    "implementation_committed": false,
+    "calculation_sha": null,
+    "numerical_source_sha256": "dad101b9e567eed9e4fb64a48e5a7f4e39149b7a4817d1fde5e0096b83fe2dd6",
+    "numerical_source_status": "pre_full_RS_switch_reference_only",
+    "note": "HEAD is the checkout base, not the identity of uncommitted accepted numerical code",
+    "remote_source_archive": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/transport_preflight_source_v1.zip",
+      "sha256": "bbd540a74d9b2eb8560747fb1e56f9fc2b4713e4bdb3a6ff0f6f4d3db18aa3bb"
+    }
+  },
+  "acceptance": {
+    "final_observable_relative_target": 0.01,
+    "observables": [
+      "tau_u",
+      "tau_d",
+      "tau_s",
+      "tau_ubar",
+      "tau_dbar",
+      "tau_sbar",
+      "eta_over_s",
+      "zeta_over_s",
+      "sigma_over_T"
+    ],
+    "external_thesis_digitization_relative_target": 0.05,
+    "migration_relative_target": 0.0001,
+    "regression_rtol": 1e-06,
+    "regression_atol": 1e-08,
+    "maximum_observed_relative_to_independent_reference": 0.006863883254695113,
+    "qualification_status": "pre_full_RS_switch_reference_only",
+    "completed_phase_points": 910,
+    "cold_seed_audits": 18,
+    "completed_fortran_points": 4,
+    "evidence": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_integration_checks_v1/final_local_acceptance_v1.json",
+      "sha256": "ebac77769b4d8e3aadfdd5540ef73855852e6f25dd28017898008bf4fbfa638e"
+    }
+  },
+  "model": {
+    "name": "PNJL",
+    "profile": "default",
+    "physics_profile": "default",
+    "flavor_chemical_potential": "mu_u=mu_d=mu_s=muB/3",
+    "propagator_xi_policy": "match_thermo",
+    "compute_bulk": true,
+    "N_color": 3,
+    "N_flavor": 3,
+    "Lambda_MeV": 602.3,
+    "m_ud0_MeV": 5.5,
+    "m_s0_MeV": 140.7,
+    "G_Lambda_squared": 1.835,
+    "K_Lambda_fifth": 12.36,
+    "hbarc_MeV_fm": 197.3269804,
+    "alpha_em": 0.0072973525664,
+    "polyakov_scheme": "log",
+    "T0_MeV": 210.0,
+    "model_config": {
+      "path": "config/models/pnjl/default.toml",
+      "sha256": "628630446cf10b3d186a6b8c8e2232b67935a157d2dad7eb14155a42f076f8ab"
+    },
+    "physics_config": {
+      "path": "config/physics/default.toml",
+      "sha256": "456b0a2fe28ce9652f6545b42ac0cf4705f62a1cbcc87d1ef11c086f04ef53d1"
+    },
+    "resolved_parameters": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/fortran_alignment_v2/model_parameters.json",
+      "sha256": "b5bedf9b8a6ddc930f194905a4c8ff9798345ed532f5a6856786398e2cea75a6"
+    }
+  },
+  "numerics": {
+    "profile": "thermal_weighted_v1",
+    "profile_source": {
+      "path": "config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+      "sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca"
+    },
+    "integration_layers": {
+      "background": {
+        "cos_nodes": 24,
+        "p_nodes": 96,
+        "residual_norm_max": 1e-08,
+        "thermal_p_max_inv_fm": 25.0,
+        "domain": "finite [0,25] fm^-1 thermal momentum"
+      },
+      "a_integral": {
+        "cos_nodes": 16,
+        "p_nodes": 32,
+        "scale_inv_fm": 5.0,
+        "domain": "semi-infinite [0,infinity) momentum"
+      },
+      "tau_integral": {
+        "cos_nodes": 36,
+        "p_nodes": 48,
+        "phi_nodes": 36,
+        "scale_inv_fm": 10.0,
+        "t_nodes": 24,
+        "domain": "semi-infinite [0,infinity) momentum"
+      },
+      "internal_density": {
+        "cos_nodes": 36,
+        "p_nodes": 32,
+        "scale_inv_fm": 10.0,
+        "domain": "semi-infinite [0,infinity) momentum"
+      },
+      "external_density": {
+        "cos_nodes": 8,
+        "p_max_inv_fm": 25.0,
+        "p_nodes": 64,
+        "domain": "finite [0,25] fm^-1 momentum"
+      },
+      "terminal_integral": {
+        "cos_nodes": 16,
+        "p_nodes": 32,
+        "scale_inv_fm": 5.0,
+        "domain": "semi-infinite [0,infinity) momentum"
+      }
+    },
+    "a_polarization": "full_RS",
+    "a_coupling": "full_RS",
+    "sigma_cutoff_inv_fm": 3.0522942112582996,
+    "sampling": {
+      "atol": 1e-12,
+      "max_evaluations": 40000,
+      "max_events": 30000000,
+      "max_nodes": 12000,
+      "max_rounds": 40,
+      "rtol": 0.001,
+      "seed_order": 48,
+      "weighted_window": 0.6
+    },
+    "channels": 17,
+    "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+    "solver_max_iterations_per_attempt": 40,
+    "effective_configuration_evidence": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_replay_all_v2/points/muB0.0_alpha1.0_xi+0.0000/effective_config.json",
+      "sha256": "1719960ef14023dcd5db5cdc8b98a349ada6e810c500be12c5be878079a61484",
+      "status": "pre_switch_reference_only"
+    }
+  },
+  "mode_a": {
+    "mode": "fixed-muB-phase-scaled",
+    "muB_MeV": [
+      0,
+      450,
+      900
+    ],
+    "alpha_T": [
+      1.0,
+      1.1,
+      1.2
+    ],
+    "temperature_definition": "T=alpha_T*T_phase(muB,xi=0), reanchored with the new background",
+    "xi_range": {
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.01
+    },
+    "coexistence_exception": {
+      "muB_MeV": 900,
+      "alpha_T": 1.0,
+      "remove_xi": [
+        0.0
+      ],
+      "add_xi": [
+        -0.003,
+        0.003
+      ]
+    },
+    "anchors": [
+      {
+        "muB_MeV": 0.0,
+        "T_MeV": 200.0898076157829,
+        "method": "direct_condensate_derivative_peak"
+      },
+      {
+        "muB_MeV": 450.0,
+        "T_MeV": 182.72820247485038,
+        "method": "direct_condensate_derivative_peak"
+      },
+      {
+        "muB_MeV": 900.0,
+        "T_MeV": 125.7360002645551,
+        "method": "direct_two_branch_equal_omega_bisection"
+      }
+    ],
+    "curves": [
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.0,
+        "T_MeV": 200.0898076157829,
+        "points": 101
+      },
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.1,
+        "T_MeV": 220.0987883773612,
+        "points": 101
+      },
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.2,
+        "T_MeV": 240.10776913893946,
+        "points": 101
+      },
+      {
+        "muB_MeV": 450.0,
+        "alpha_T": 1.0,
+        "T_MeV": 182.72820247485038,
+        "points": 101
+      },
+      {
+        "muB_MeV": 450.0,
+        "alpha_T": 1.1,
+        "T_MeV": 201.00102272233542,
+        "points": 101
+      },
+      {
+        "muB_MeV": 450.0,
+        "alpha_T": 1.2,
+        "T_MeV": 219.27384296982044,
+        "points": 101
+      },
+      {
+        "muB_MeV": 900.0,
+        "alpha_T": 1.0,
+        "T_MeV": 125.7360002645551,
+        "points": 102
+      },
+      {
+        "muB_MeV": 900.0,
+        "alpha_T": 1.1,
+        "T_MeV": 138.3096002910106,
+        "points": 101
+      },
+      {
+        "muB_MeV": 900.0,
+        "alpha_T": 1.2,
+        "T_MeV": 150.8832003174661,
+        "points": 101
+      }
+    ],
+    "total_points": 910,
+    "sampling_plan": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/phase_revalidation_v5/sampling_plan.csv",
+      "sha256": "654e54cc2d40086529b4062a70158ca1afd4b4435b4d6258d215f9b92d87b2f4"
+    },
+    "anchors_source": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/phase_revalidation_v5/anchors.csv",
+      "sha256": "519268310209e596378e0d16697e296803b83f913bebdb109a40b1dfc18b0cdc"
+    }
+  },
+  "mode_b": {
+    "status": "pending new-profile branch qualification and runner input preparation",
+    "historical_T_MeV": [
+      120,
+      160,
+      200
+    ],
+    "historical_muB_MeV": [
+      0,
+      450,
+      900
+    ],
+    "historical_xi_range": {
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.01
+    },
+    "historical_points": 909,
+    "historical_source": {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+      "sha256": "3b73b937f1f09cf7112b3a42219088f98b852e5ef0354174b66f71823f7bb29c"
+    },
+    "new_final_point_count": null,
+    "note": "909 is historical coverage, not a newly certified production count; coexistence handling may change it"
+  },
+  "runner": {
+    "runtime": "Julia 1.12.5",
+    "host": "ubuntu-latest",
+    "julia_threads": 1,
+    "openblas_threads": 1,
+    "heap_size_hint": "1200M",
+    "job_timeout_minutes": 360,
+    "target_compute_load_minutes_per_shard": 180,
+    "pilot_points": [
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.0,
+        "xi": -0.22,
+        "T_MeV": 200.0898076157829,
+        "job": "pilot_muB0_alpha1_00"
+      },
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.0,
+        "xi": 0.37,
+        "T_MeV": 200.0898076157829,
+        "job": "pilot_muB0_alpha1_00"
+      },
+      {
+        "muB_MeV": 0.0,
+        "alpha_T": 1.2,
+        "xi": -0.5,
+        "T_MeV": 240.10776913893946,
+        "job": "pilot_muB0_alpha1.2_00"
+      },
+      {
+        "muB_MeV": 450.0,
+        "alpha_T": 1.1,
+        "xi": 0.35,
+        "T_MeV": 201.00102272233542,
+        "job": "pilot_muB450_alpha1.1_00"
+      },
+      {
+        "muB_MeV": 900.0,
+        "alpha_T": 1.0,
+        "xi": -0.04,
+        "T_MeV": 125.7360002645551,
+        "job": "pilot_muB900_alpha1_00"
+      },
+      {
+        "muB_MeV": 900.0,
+        "alpha_T": 1.0,
+        "xi": -0.003,
+        "T_MeV": 125.7360002645551,
+        "job": "pilot_muB900_alpha1_00"
+      }
+    ],
+    "pilot_jobs": 4,
+    "provisional_shard_points_max": 20,
+    "provisional_shards": 54,
+    "sharding_status": "pending GitHub runner complete time, startup/JIT, peak memory and artifact validation",
+    "inputs_source": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/runner_inputs_v1/runner_inputs.json",
+      "sha256": "42506b350fec08942bcdc1ff1a75dab2954fbf312308e24686ffb101bd75c913"
+    },
+    "pilot_input_ready": false,
+    "full_dispatch_ready": false,
+    "actions_dispatched": false
+  },
+  "remote_w": {
+    "ssh_alias": "quote-remote",
+    "ssh_config": "D:/Desktop/CodexBountyLab/executions/cross-chain-quote-observer-2026-10-15/tunnel-setup-2026-10-16/ssh_config",
+    "transport": "configured bastion to W, BatchMode public-key authentication and existing host verification",
+    "workspace": "D:/CodexCompute/Julia_RelaxTime/transport-preflight-20261023-v1",
+    "runtime": "isolated portable Julia 1.12.5; system Julia is left at 1.11.6",
+    "policy": "long independent numerical work on W; one Julia job initially due to available memory; GitHub runner cost is measured on GitHub",
+    "host_inventory": {
+      "cpu": "Intel i5-14400F",
+      "physical_cores": 10,
+      "logical_processors": 16,
+      "total_memory_GiB_approx": 16,
+      "available_memory_GiB_at_probe_approx": 8.4
+    },
+    "setup_source": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/setup_and_check_w.ps1",
+      "sha256": "bf210ad8d59aa74c0ad8a97ff1236666715eea7abafed1430c82859dab0ef33b"
+    },
+    "source_package_manifest": {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/package_manifest.json",
+      "sha256": "609b254a2d77ca1d91467698c699ddb285e3b20b3b4a29148c78e0d8dcf8fa71"
+    }
+  },
+  "remaining_before_full_rerun": [
+    "repeat independent convergence and joint validation after the full_RS coupling switch",
+    "bind accepted code to an actual available calculation commit and regenerate commit-bound runner inputs",
+    "measure and validate the six-point GitHub runner pilot, including startup, whole-path time and peak memory",
+    "calibrate full sharding from the measured production cost",
+    "qualify new-profile mode-B background branches and representative transport coverage, then prepare its batches",
+    "retrieve artifacts within the 30-day retention period; preserve source/configuration and reject missing, duplicate or failed points before merging",
+    "review new numerical results before deriving new paper figures"
+  ],
+  "archive": {
+    "new_case_only": true,
+    "historical_production_and_figures_preserved": true,
+    "artifact_retention_days": 30,
+    "per_shard_required": [
+      "calculation SHA",
+      "workflow SHA and run ID",
+      "sampling profile",
+      "effective configuration",
+      "sampling plan",
+      "result CSV",
+      "channel diagnostics",
+      "failed-point evidence",
+      "command",
+      "whole-process time and peak memory"
+    ],
+    "persistent_destination": "new sibling case under data/outputs/results/relaxtime/transport/phase_guided/<mode>/<new_case>"
+  }
+}

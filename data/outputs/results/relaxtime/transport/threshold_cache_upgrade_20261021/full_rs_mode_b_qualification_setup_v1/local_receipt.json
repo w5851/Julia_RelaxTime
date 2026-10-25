@@ -1,0 +1,18 @@
+{
+  "received_utc": "2026-10-25T18:47:57.315537+00:00",
+  "archive": {
+    "sha256": "ee69a5206643d1b6eece71134d0ddbe2cfc68d66de5de24188529b8b7a9912c6",
+    "bytes": 21267527,
+    "files": 2824
+  },
+  "extracted_files_verified": 2824,
+  "pre_run_manifests_verified": {
+    "package_manifest.json": "d3e618341916a37f2672b97be84d8ff3fb4ca02460220c770f271e6170babcbd"
+  },
+  "source_snapshots_verified": 1584,
+  "input_snapshots_verified": 15,
+  "remote_review_sha256": "37d717697c66c524e11a48c985c70255ea2f5ba2e3a3950a9b0ae36fdbbe669a",
+  "remote_reviewer": "review_remote_qualification.py",
+  "receiver_sha256": "071949ea9c35879dc321b08a2f69cfbf4b6a2ac77a6f720b6c9c3eb0ab48c1af",
+  "check_scope": "Archive bytes, frozen snapshots and metadata only; numerical review ran on quote-remote"
+}

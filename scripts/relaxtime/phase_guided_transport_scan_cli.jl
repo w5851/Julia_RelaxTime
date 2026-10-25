@@ -1,5 +1,9 @@
 module PhaseGuidedTransportScanCLI
 
+if !isdefined(Main, :TransportSamplingScanConfig)
+    Base.include(Main, joinpath(@__DIR__, "transport_sampling_scan_config.jl"))
+end
+
 struct PhaseGuidedScanOptions
     mode::Symbol
     outdir::String
@@ -14,7 +18,6 @@ struct PhaseGuidedScanOptions
     tau_angle_nodes::Union{Nothing,Int}
     tau_phi_nodes::Union{Nothing,Int}
     tau_n_sigma_points::Union{Nothing,Int}
-    sigma_grid_n::Union{Nothing,Int}
     channel_diagnostics::Bool
     compute_bulk::Bool
     dry_run::Bool
@@ -26,61 +29,13 @@ struct PhaseGuidedScanOptions
     phase_reference_root::Union{Nothing,String}
     phase_reference_layer::Symbol
     phase_reference_mode::Symbol
-end
-
-function PhaseGuidedScanOptions(
-    mode::Symbol,
-    outdir::String,
-    case_name::String,
-    xi_values::Vector{Float64},
-    muB_values::Vector{Float64},
-    alpha_T_values::Vector{Float64},
-    T_values::Vector{Float64},
-    propagator_xi_policy::Symbol,
-    sigma_cache_policy::Symbol,
-    tau_p_nodes::Union{Nothing,Int},
-    tau_angle_nodes::Union{Nothing,Int},
-    tau_phi_nodes::Union{Nothing,Int},
-    tau_n_sigma_points::Union{Nothing,Int},
-    sigma_grid_n::Union{Nothing,Int},
-    channel_diagnostics::Bool,
-    compute_bulk::Bool,
-    dry_run::Bool,
-    overwrite::Bool,
-    resume::Bool,
-)
-    return PhaseGuidedScanOptions(
-        mode,
-        outdir,
-        case_name,
-        xi_values,
-        muB_values,
-        alpha_T_values,
-        T_values,
-        propagator_xi_policy,
-        sigma_cache_policy,
-        tau_p_nodes,
-        tau_angle_nodes,
-        tau_phi_nodes,
-        tau_n_sigma_points,
-        sigma_grid_n,
-        channel_diagnostics,
-        compute_bulk,
-        dry_run,
-        overwrite,
-        resume,
-        12,
-        6,
-        :reference_interpolation,
-        nothing,
-        :accepted,
-        :runtime,
-    )
+    sampling_profile::Union{Nothing,String}
 end
 
 function print_usage(io::IO=stdout)
     println(io, "Usage: julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl [options]\n")
     println(io, "Options:")
+    println(io, "  --sampling-profile <name|path>  绑定背景、A、热权重缓存及末端积分（default thermal_weighted_v1）")
     println(io, "  --mode <a|b|fixed-muB-phase-scaled|fixed-T-sparse-muB>  扫描模式（推荐使用描述性模式名）")
     println(io, "  --outdir <dir>               输出目录（可选；默认写入 canonical results 路径）")
     println(io, "  --case-name <name>           canonical case 名称（default manual_case）")
@@ -89,14 +44,13 @@ function print_usage(io::IO=stdout)
     println(io, "  --alphaT-list v1,v2,...      mode a 的 T/T_phase 倍率列表（default 1.0,1.1,1.2)")
     println(io, "  --T-list v1,v2,...           mode b 的固定温度列表（required for mode b）")
     println(io, "  --propagator-xi-policy <match_thermo|isotropic>  σ(s)/propagator 的 ξ 口径 (default match_thermo)")
-    println(io, "  --sigma-cache-policy <default|validated_anchored>  σ(s) 缓存策略；validated_anchored 为诊断用锚点+taper 口径 (default default)")
+    println(io, "  --sigma-cache-policy <thermal_weighted>  唯一支持的热权重缓存策略")
     println(io, "  --tau-p-nodes <int>          透传到底层 τ 平均散射率动量节点")
     println(io, "  --tau-angle-nodes <int>      透传到底层 τ 平均散射率 cosθ 节点")
     println(io, "  --tau-phi-nodes <int>        透传到底层 τ 平均散射率 φ 节点")
     println(io, "  --tau-n-sigma <int>          透传到底层 σ(s) 的 t 积分点数")
-    println(io, "  --sigma-grid-n <int>         透传到底层 σ(s) 预计算网格点数")
-    println(io, "  --p-num <int>                主平衡态与 bulk 的热力学动量节点 (default 12)")
-    println(io, "  --t-num <int>                主平衡态与 bulk 的热力学角节点 (default 6)")
+    println(io, "  --p-num <int>                主平衡态与 bulk 的热力学动量节点 (default profile p96)")
+    println(io, "  --t-num <int>                主平衡态与 bulk 的热力学角节点 (default profile cos24)")
     println(io, "  --phase-anchor-policy <direct_coexistence|reference_interpolation>  mode a 一阶相变温度锚点 (default direct_coexistence)")
     println(io, "  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
     println(io, "  --phase-reference-layer <accepted|strict|render>  candidate layer (default accepted)")
@@ -121,6 +75,7 @@ function _parse_float_list(raw::AbstractString)
 end
 
 function parse_args(args::Vector{String})
+    Main.TransportSamplingScanConfig.reject_retired_sampling_flags(args)
     opts = Dict{Symbol,Any}(
         :mode => nothing,
         :outdir => nothing,
@@ -130,12 +85,12 @@ function parse_args(args::Vector{String})
         :alpha_T_values => Float64[1.0, 1.1, 1.2],
         :T_values => Float64[],
         :propagator_xi_policy => :match_thermo,
-        :sigma_cache_policy => :default,
+        :sigma_cache_policy => :thermal_weighted,
+        :sampling_profile => "thermal_weighted_v1",
         :tau_p_nodes => nothing,
         :tau_angle_nodes => nothing,
         :tau_phi_nodes => nothing,
         :tau_n_sigma_points => nothing,
-        :sigma_grid_n => nothing,
         :p_num => 12,
         :t_num => 6,
         :phase_anchor_policy => :direct_coexistence,
@@ -183,9 +138,11 @@ function parse_args(args::Vector{String})
             policy = Symbol(strip(require_value()))
             policy in (:match_thermo, :isotropic) || error("unknown propagator xi policy: $(policy) (expected: match_thermo|isotropic)")
             opts[:propagator_xi_policy] = policy
+        elseif arg == "--sampling-profile"
+            opts[:sampling_profile] = require_value()
         elseif arg == "--sigma-cache-policy"
             policy = Symbol(strip(require_value()))
-            policy in (:default, :validated_anchored) || error("unknown sigma cache policy: $(policy) (expected: default|validated_anchored)")
+            policy === :thermal_weighted || throw(ArgumentError("only thermal_weighted sampling is supported"))
             opts[:sigma_cache_policy] = policy
         elseif arg == "--tau-p-nodes"
             opts[:tau_p_nodes] = parse(Int, require_value())
@@ -195,8 +152,6 @@ function parse_args(args::Vector{String})
             opts[:tau_phi_nodes] = parse(Int, require_value())
         elseif arg == "--tau-n-sigma"
             opts[:tau_n_sigma_points] = parse(Int, require_value())
-        elseif arg == "--sigma-grid-n"
-            opts[:sigma_grid_n] = parse(Int, require_value())
         elseif arg == "--p-num"
             opts[:p_num] = parse(Int, require_value())
         elseif arg == "--t-num"
@@ -241,6 +196,8 @@ function parse_args(args::Vector{String})
     isnothing(opts[:xi_values]) && error("--xi-list is required")
     isnothing(opts[:muB_values]) && error("--muB-list is required")
 
+    Main.TransportSamplingScanConfig.configure_profile!(opts,args;phase_guided=true)
+
     mode = opts[:mode]
     Int(opts[:p_num]) > 0 || error("--p-num must be positive")
     Int(opts[:t_num]) > 0 || error("--t-num must be positive")
@@ -270,7 +227,6 @@ function parse_args(args::Vector{String})
         opts[:tau_angle_nodes] === nothing ? nothing : Int(opts[:tau_angle_nodes]),
         opts[:tau_phi_nodes] === nothing ? nothing : Int(opts[:tau_phi_nodes]),
         opts[:tau_n_sigma_points] === nothing ? nothing : Int(opts[:tau_n_sigma_points]),
-        opts[:sigma_grid_n] === nothing ? nothing : Int(opts[:sigma_grid_n]),
         Bool(opts[:channel_diagnostics]),
         Bool(opts[:compute_bulk]),
         Bool(opts[:dry_run]),
@@ -282,6 +238,7 @@ function parse_args(args::Vector{String})
         isnothing(opts[:phase_reference_root]) ? nothing : String(opts[:phase_reference_root]),
         Symbol(opts[:phase_reference_layer]),
         Symbol(opts[:phase_reference_mode]),
+        opts[:sampling_profile],
     )
 end
 

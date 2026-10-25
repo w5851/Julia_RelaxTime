@@ -1,5 +1,9 @@
 module GapTransportScanCLI
 
+if !isdefined(Main, :TransportSamplingScanConfig)
+    Base.include(Main, joinpath(@__DIR__, "transport_sampling_scan_config.jl"))
+end
+
 export ScanOptions
 export parse_args
 export print_usage
@@ -26,14 +30,8 @@ struct ScanOptions
     tau_angle_nodes::Int
     tau_phi_nodes::Int
     tau_n_sigma_points::Int
-    tau_threshold_subtraction::Bool
-    tau_asym_window::Float64
-    tau_asym_fit_min_points::Int
-    tau_asym_extra_points::Int
-    tau_interpolation_mode::Symbol
     propagator_xi_policy::Symbol
     sigma_cache_policy::Symbol
-    sigma_grid_n::Int
     integration_mode::Symbol
     gc_every_n::Int
     tr_p_nodes::Int
@@ -41,33 +39,13 @@ struct ScanOptions
     phase_reference_root::Union{Nothing,String}
     phase_reference_layer::Symbol
     phase_reference_mode::Symbol
-end
-
-# Keep existing programmatic callers source-compatible while the explicit
-# candidate source fields remain opt-in.
-function ScanOptions(
-    output, channel_diagnostics_output, failed_points_output, provenance_dir,
-    xi_values, tmin_mev, tmax_mev, tstep_mev, mubmin_mev, mubmax_mev, mubstep_mev,
-    overwrite, resume, compute_bulk, p_num, t_num, max_iter, tau_p_nodes,
-    tau_angle_nodes, tau_phi_nodes, tau_n_sigma_points, tau_threshold_subtraction,
-    tau_asym_window, tau_asym_fit_min_points, tau_asym_extra_points,
-    tau_interpolation_mode, propagator_xi_policy, sigma_cache_policy, sigma_grid_n,
-    integration_mode, gc_every_n, tr_p_nodes, tr_p_max_fm,
-)
-    return ScanOptions(
-        output, channel_diagnostics_output, failed_points_output, provenance_dir,
-        xi_values, tmin_mev, tmax_mev, tstep_mev, mubmin_mev, mubmax_mev, mubstep_mev,
-        overwrite, resume, compute_bulk, p_num, t_num, max_iter, tau_p_nodes,
-        tau_angle_nodes, tau_phi_nodes, tau_n_sigma_points, tau_threshold_subtraction,
-        tau_asym_window, tau_asym_fit_min_points, tau_asym_extra_points,
-        tau_interpolation_mode, propagator_xi_policy, sigma_cache_policy, sigma_grid_n,
-        integration_mode, gc_every_n, tr_p_nodes, tr_p_max_fm, nothing, :accepted, :runtime,
-    )
+    sampling_profile::Union{Nothing,String}
 end
 
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_gap_transport_scan.jl [options]\n")
     println("Options:")
+    println("  --sampling-profile <name|path>  绑定背景、A、热权重缓存及末端积分（default thermal_weighted_v1）")
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_transport_scan.csv)")
     println("  --channel-diagnostics-output <path>  可选：输出每点每通道的 τ^-1 贡献明细 CSV")
     println("  --failed-points-output <path>        可选：输出跳过失败点 sidecar CSV")
@@ -81,25 +59,18 @@ function print_usage()
     println("  --no-resume                 禁用跳过逻辑，强制重算")
     println("  --compute-bulk              显式开启体粘滞 ζ 计算（默认开启）")
     println("  --no-compute-bulk           显式关闭体粘滞 ζ 计算")
-    println("  --p-num <int>               能隙/密度的动量节点数 (default 12)")
-    println("  --t-num <int>               能隙/密度的角度节点数 (default 6)")
+    println("  --p-num <int>               能隙/密度的动量节点数 (default profile p96)")
+    println("  --t-num <int>               能隙/密度的角度节点数 (default profile cos24)")
     println("  --max-iter <int>            NLsolve iterations 上限 (default 40)")
     println("  --tau-p-nodes <int>         τ 平均散射率动量节点 (default $(Main.MODULE_DEFAULT_P_NODES))")
     println("  --tau-angle-nodes <int>     τ 平均散射率 cosθ 节点 (default $(Main.MODULE_DEFAULT_ANGLE_NODES))")
     println("  --tau-phi-nodes <int>       τ 平均散射率 φ 节点 (default $(Main.MODULE_DEFAULT_PHI_NODES))")
-    println("  --tau-n-sigma <int>         σ(s) 的 t 积分点数 (default $(Main.RT_TCS.DEFAULT_T_INTEGRAL_POINTS))")
-    println("  --tau-threshold-subtraction / --tau-no-threshold-subtraction  是否启用阈值减法缓存 (default true)")
-    println("  --tau-asym-window <float>   阈值减法拟合窗口 Δs (default 0.6)")
-    println("  --tau-asym-fit-min-points <int> 阈值减法最小拟合点数 (default 8)")
-    println("  --tau-asym-extra-points <int> 阈值减法补点数量 (default 10)")
-    println("  --tau-interpolation-mode <pchip|linear|direct|hybrid_threshold>  τ 中 σ(s) 取值模式 (default linear)")
+    println("  --tau-n-sigma <int>         σ(s) 的 t 积分点数 (default $(Main.RT_ASR.DEFAULT_N_SIGMA_POINTS))")
     println("  --propagator-xi-policy <match_thermo|isotropic>  σ(s)/propagator 的 ξ 口径；isotropic 表示传播子用 ξ=0，外层分布仍用真实 ξ (default match_thermo)")
-    println("  --sigma-cache-policy <default|validated_anchored>  σ(s) 缓存策略；validated_anchored 为诊断用锚点+taper 口径 (default default)")
-    println("  --sigma-grid-n <int>        σ(s) 预计算网格点数 (default $(Main.MODULE_DEFAULT_SIGMA_GRID_N))")
-    println("  --mode <mode>               τ 积分模式: semi_infinite | finite_15 | finite_lambda (default semi_infinite)")
+    println("  --sigma-cache-policy <thermal_weighted>  唯一支持的热权重缓存策略")
+    println("  --mode <semi_infinite>      生产配置使用半无穷动量积分")
     println("  --gc-every-n <int>          每 N 个点触发一次 GC (default 5; 0 表示关闭)")
-    println("  --tr-p-nodes <int>          输运积分动量节点 (default 24)")
-    println("  --tr-p-max <fm^-1>          输运积分 p 上限 (default 8.0)")
+    println("  --tr-p-nodes <int>          输运积分动量节点（须与 profile 一致，default 32）")
     println("  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
     println("  --phase-reference-layer <accepted|strict|render>  candidate layer (default accepted)")
     println("  --phase-reference-mode <runtime|strict|diagnostic>  accepted runtime (default), explicit strict, or diagnostic view")
@@ -107,6 +78,7 @@ function print_usage()
 end
 
 function parse_args(args::Vector{String})
+    Main.TransportSamplingScanConfig.reject_retired_sampling_flags(args)
     opts = Dict{Symbol,Any}(
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_transport_scan.csv"),
         :channel_diagnostics_output => nothing,
@@ -128,15 +100,10 @@ function parse_args(args::Vector{String})
         :tau_p_nodes => Main.MODULE_DEFAULT_P_NODES,
         :tau_angle_nodes => Main.MODULE_DEFAULT_ANGLE_NODES,
         :tau_phi_nodes => Main.MODULE_DEFAULT_PHI_NODES,
-        :tau_n_sigma => Main.RT_TCS.DEFAULT_T_INTEGRAL_POINTS,
-        :tau_threshold_subtraction => true,
-        :tau_asym_window => 0.6,
-        :tau_asym_fit_min_points => 8,
-        :tau_asym_extra_points => 10,
-        :tau_interpolation_mode => :linear,
+        :tau_n_sigma => Main.RT_ASR.DEFAULT_N_SIGMA_POINTS,
         :propagator_xi_policy => :match_thermo,
-        :sigma_cache_policy => :default,
-        :sigma_grid_n => Main.MODULE_DEFAULT_SIGMA_GRID_N,
+        :sigma_cache_policy => :thermal_weighted,
+        :sampling_profile => "thermal_weighted_v1",
         :integration_mode => :semi_infinite,
         :gc_every_n => 5,
         :tr_p_nodes => 24,
@@ -213,30 +180,16 @@ function parse_args(args::Vector{String})
             opts[:tau_phi_nodes] = parse(Int, require_value())
         elseif arg == "--tau-n-sigma"
             opts[:tau_n_sigma] = parse(Int, require_value())
-        elseif arg == "--tau-threshold-subtraction"
-            opts[:tau_threshold_subtraction] = true
-        elseif arg == "--tau-no-threshold-subtraction"
-            opts[:tau_threshold_subtraction] = false
-        elseif arg == "--tau-asym-window"
-            opts[:tau_asym_window] = parse(Float64, require_value())
-        elseif arg == "--tau-asym-fit-min-points"
-            opts[:tau_asym_fit_min_points] = parse(Int, require_value())
-        elseif arg == "--tau-asym-extra-points"
-            opts[:tau_asym_extra_points] = parse(Int, require_value())
-        elseif arg == "--tau-interpolation-mode"
-            mode = Symbol(require_value())
-            mode in (:pchip, :linear, :direct, :hybrid_threshold) || error("unknown tau interpolation mode: $(mode) (expected: pchip|linear|direct|hybrid_threshold)")
-            opts[:tau_interpolation_mode] = mode
         elseif arg == "--propagator-xi-policy"
             policy = Symbol(require_value())
             policy in (:match_thermo, :isotropic) || error("unknown propagator xi policy: $(policy) (expected: match_thermo|isotropic)")
             opts[:propagator_xi_policy] = policy
+        elseif arg == "--sampling-profile"
+            opts[:sampling_profile] = require_value()
         elseif arg == "--sigma-cache-policy"
             policy = Symbol(require_value())
-            policy in (:default, :validated_anchored) || error("unknown sigma cache policy: $(policy) (expected: default|validated_anchored)")
+            policy === :thermal_weighted || throw(ArgumentError("only thermal_weighted sampling is supported"))
             opts[:sigma_cache_policy] = policy
-        elseif arg == "--sigma-grid-n"
-            opts[:sigma_grid_n] = parse(Int, require_value())
         elseif arg == "--mode"
             mode_str = require_value()
             mode_sym = Symbol(mode_str)
@@ -246,8 +199,6 @@ function parse_args(args::Vector{String})
             opts[:gc_every_n] = parse(Int, require_value())
         elseif arg == "--tr-p-nodes"
             opts[:tr_p_nodes] = parse(Int, require_value())
-        elseif arg == "--tr-p-max"
-            opts[:tr_p_max] = parse(Float64, require_value())
         elseif arg == "--phase-reference-root"
             opts[:phase_reference_root] = require_value()
         elseif arg == "--phase-reference-layer"
@@ -267,6 +218,8 @@ function parse_args(args::Vector{String})
         i += 1
     end
 
+    Main.TransportSamplingScanConfig.configure_profile!(opts,args;phase_guided=false)
+
     xi_vals = opts[:xi_values]
     isempty(xi_vals) && (xi_vals = Float64[0.0])
     xi_vals = unique(sort(Float64.(xi_vals)))
@@ -275,6 +228,7 @@ function parse_args(args::Vector{String})
     tstep > 0 || error("tstep must be positive")
     mubstep = Float64(opts[:mubstep])
     mubstep > 0 || error("mubstep must be positive")
+    opts[:max_iter] > 0 || throw(ArgumentError("--max-iter must be positive"))
 
     return ScanOptions(
         String(opts[:output]),
@@ -298,14 +252,8 @@ function parse_args(args::Vector{String})
         Int(opts[:tau_angle_nodes]),
         Int(opts[:tau_phi_nodes]),
         Int(opts[:tau_n_sigma]),
-        Bool(opts[:tau_threshold_subtraction]),
-        Float64(opts[:tau_asym_window]),
-        Int(opts[:tau_asym_fit_min_points]),
-        Int(opts[:tau_asym_extra_points]),
-        Symbol(opts[:tau_interpolation_mode]),
         Symbol(opts[:propagator_xi_policy]),
         Symbol(opts[:sigma_cache_policy]),
-        Int(opts[:sigma_grid_n]),
         Symbol(opts[:integration_mode]),
         Int(opts[:gc_every_n]),
         Int(opts[:tr_p_nodes]),
@@ -313,6 +261,7 @@ function parse_args(args::Vector{String})
         isnothing(opts[:phase_reference_root]) ? nothing : String(opts[:phase_reference_root]),
         Symbol(opts[:phase_reference_layer]),
         Symbol(opts[:phase_reference_mode]),
+        opts[:sampling_profile],
     )
 end
 

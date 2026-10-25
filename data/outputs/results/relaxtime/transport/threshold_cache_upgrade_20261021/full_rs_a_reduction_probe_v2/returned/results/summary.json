@@ -1,0 +1,18 @@
+{
+  "complete": true,
+  "prototype_only": true,
+  "production_entry_changed": false,
+  "numerical_host": "W",
+  "julia_version": "1.12.5",
+  "julia_threads": 1,
+  "angular_checks": 120,
+  "integral_checks": 72,
+  "timing_cases": 8,
+  "passed": true,
+  "failures": [],
+  "maximum_thermal_relative_error": 3.9968028886505635e-15,
+  "median_kernel_speedup": 8.397362245147411,
+  "maximum_existing_A_seconds": 3.302e-5,
+  "whole_transport_speedup_measured": false,
+  "probe_sha256": "44f2ea51e9acd928cdeeeb73134c076789bdcf4675bd5ba64a6b90e8283439fc"
+}

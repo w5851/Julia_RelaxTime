@@ -1,6 +1,12 @@
 # Preserve SHA256-bound publication snapshots and their exact input bytes.
 # These scoped exceptions prevent checkout/staging EOL conversion; no global policy.
 
+# Frozen thermal-transport baselines and retained numerical/source evidence.
+tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
 # Retained charged-GBU diagnostics and the hash-bound derived comparison table.
 data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/*.zip binary
 docs/analysis/relaxtime/charged_gbu_mub_sensitivity_20260912_analysis/q0_finite_q_comparison.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -29,7 +29,9 @@ function _to_json(x)
         return string(x)
     elseif x isa AbstractString
         return "\"$(_json_escape(x))\""
-    elseif x isa AbstractVector
+    elseif x isa NamedTuple
+        return _to_json(Dict{String,Any}(String(k) => v for (k,v) in pairs(x)))
+    elseif x isa AbstractVector || x isa Tuple
         return "[" * join((_to_json(v) for v in x), ",") * "]"
     elseif x isa AbstractDict
         pairs_sorted = sort(collect(pairs(x)); by=kv -> String(kv.first))

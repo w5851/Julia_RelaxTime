@@ -1,0 +1,9 @@
+{
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "scripts": {
+    "full_rs_production_replay_v2\\run_remote_production.ps1": "6582b1143d2c4b1aec7dae26677b0347a170d3f01f0edb877ca4b11bda41d4dc",
+    "full_rs_phase_validation_v1\\run_remote_phase.ps1": "e67f553f682706ce86079a62ef774e849e7a42f1f88396811a72ed4975e04466"
+  },
+  "execution": "quote-remote; one Julia process; new result directories; no Actions dispatch",
+  "phase_anchor_reuse": false
+}

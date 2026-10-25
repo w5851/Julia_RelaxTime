@@ -12,11 +12,13 @@ function _solve_constraint_fixedmu(
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
     residual_norm_max::Real=1e-6,
+    iterations::Int=1000,
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
     nlsolve_kwargs...,
 )
+    iterations > 0 || throw(ArgumentError("iterations must be positive"))
     seed_pool = if seed_candidates === nothing
         _build_default_seed_candidates(seed_guess)
     else
@@ -54,6 +56,7 @@ function _solve_constraint_fixedmu(
                     solver=local_solver,
                     initial_guess=seed,
                     residual_norm_max=residual_norm_max,
+                    iterations=iterations,
                     xi=xi,
                     p_num=p_num,
                     t_num=t_num,

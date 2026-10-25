@@ -82,13 +82,12 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
             println(io, "- phase reference runtime view: `$(get(phase_summary, "runtime_view", ""))`")
         end
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
-           opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
+           opts.tau_n_sigma_points !== nothing
             println(io, "- tau/sigma overrides:")
             println(io, "  - tau_p_nodes: `$(opts.tau_p_nodes)`")
             println(io, "  - tau_angle_nodes: `$(opts.tau_angle_nodes)`")
             println(io, "  - tau_phi_nodes: `$(opts.tau_phi_nodes)`")
             println(io, "  - tau_n_sigma_points: `$(opts.tau_n_sigma_points)`")
-            println(io, "  - sigma_grid_n: `$(opts.sigma_grid_n)`")
         end
         println(io, "- channel diagnostics: `$(opts.channel_diagnostics)`")
         println(io, "- total planned points: `$(plan.total)`")
@@ -131,7 +130,6 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "tau_angle_nodes" => opts.tau_angle_nodes,
         "tau_phi_nodes" => opts.tau_phi_nodes,
         "tau_n_sigma_points" => opts.tau_n_sigma_points,
-        "sigma_grid_n" => opts.sigma_grid_n,
         "p_num" => opts.p_num,
         "t_num" => opts.t_num,
         "phase_anchor_policy" => String(opts.phase_anchor_policy),
@@ -147,6 +145,7 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "resume" => opts.resume,
     )
     phase_reference !== nothing && (cfg["phase_reference_summary"] = _phase_reference_summary_dict(phase_reference))
+    Main.TransportSamplingScanConfig.record_profile!(cfg,opts)
     return cfg
 end
 

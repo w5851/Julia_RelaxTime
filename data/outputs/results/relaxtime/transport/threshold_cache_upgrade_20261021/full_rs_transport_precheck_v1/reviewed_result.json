@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "host": "W",
+  "test_assertions_passed": 120,
+  "test_assertions_total": 120,
+  "process_exit_code": 0,
+  "returned_archive_sha256": "96462d47f7813de6f7facbfca5216fcfc85cd83ed725cc374d9aa95c3e08d8a6",
+  "source_archive_sha256": "cbbe5ac6653c5d71ab3f619d773e5d65f69ce3ec6cd93dac422579a9675f01ae",
+  "source_files_verified_before_and_after": 1598,
+  "runner_sha256": "01d898a48a1dc3c2fbf417b6f6e1a34270e8012dcd45f361a3041ac57673fcd3",
+  "numerical_scope": "selected unit tests only; independent and joint convergence remain pending",
+  "production_convergence_claim": false
+}

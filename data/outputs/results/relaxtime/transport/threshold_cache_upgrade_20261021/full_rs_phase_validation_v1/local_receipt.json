@@ -1,0 +1,14 @@
+{
+  "received_utc": "2026-10-25T14:35:08.031424+00:00",
+  "archive": {
+    "sha256": "3d0e193e0162fe91a9c02b976978953201cf94ad309bc00749b7432f7d62c1cd",
+    "bytes": 1476396,
+    "files": 410
+  },
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "source_package_manifest_sha256": "48a0276f6da1871e916b008616011c57972f81de6080cf0b8b349fa281346860",
+  "source_snapshots_verified": 356,
+  "input_snapshots_verified": 2,
+  "remote_review_complete": true,
+  "local_check_scope": "Archive bytes, frozen source and input snapshot hashes, and remote review metadata; no local numerical execution"
+}

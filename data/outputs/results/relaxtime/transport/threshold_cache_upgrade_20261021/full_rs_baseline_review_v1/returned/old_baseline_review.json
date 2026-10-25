@@ -1,0 +1,29 @@
+{
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "previous_baseline_sha256": "429da23a4476422128949e0bce8c3965b606f9781bfb07040b8703b2d5ed73fb",
+  "julia_test_counts": {
+    "passed": 219,
+    "failed": 95,
+    "errored": 0,
+    "broken": 0
+  },
+  "differences": 108,
+  "regression_failures": 81,
+  "old_reference_failures": 14,
+  "maximum_relative_change": 0.07887672927469924,
+  "maximum_xi_zero_relative_change": 0.0,
+  "maximum_background_relative_change": 0.0,
+  "physical_change": "effective coupling A: isotropic -> full_RS",
+  "relative_velocity": "cm",
+  "profile_and_sampling_parameters_unchanged": true,
+  "regression_rtol": 1e-06,
+  "regression_atol": 1e-08,
+  "all_test_failures_explained_by_actual_old_baseline_values": true,
+  "new_baseline_generated": false,
+  "previous_evidence_preserved": true,
+  "initial_regression_identity_failures": 12,
+  "identity_issue": "absolute model configuration path differs between identical source copies",
+  "original_regression_failures": 107,
+  "numerical_sources_identical_across_copies": true,
+  "regression_attempt": 2
+}

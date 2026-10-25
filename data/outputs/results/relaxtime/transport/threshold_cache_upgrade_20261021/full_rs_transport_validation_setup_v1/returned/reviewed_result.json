@@ -1,0 +1,23 @@
+﻿{
+    "host":  "W",
+    "run":  "full_rs_joint_pilot_p48_v1",
+    "point_id":  "muB0.0_alpha1.0_xi-0.2200",
+    "test_assertions_passed":  14,
+    "test_assertions_total":  14,
+    "comparisons":  9,
+    "rate_rows":  34,
+    "unique_channels_per_configuration":  17,
+    "max_absolute_relative_change":  0.0013753304503472119,
+    "target":  0.01,
+    "joint_target_passed":  true,
+    "source_archive_sha256":  "533bbc8dcb13681a3873d6b9e94f5734772311f5f52575ae12f9bbaf6955448a",
+    "source_files_verified_before_and_after":  1600,
+    "result_source_snapshots_verified":  304,
+    "calculation_commit":  null,
+    "head_base":  "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+    "provenance_verified":  true,
+    "candidate_p":  48,
+    "physical_conventions":  "full-RS A in polarization and couplings; legacy_A retains the pre-switch isotropic reference; unchanged linear-xi B0 and physical sigma cutoff",
+    "elapsed_seconds_including_provenance_tests":  662.1821529,
+    "full_qualification":  false
+}

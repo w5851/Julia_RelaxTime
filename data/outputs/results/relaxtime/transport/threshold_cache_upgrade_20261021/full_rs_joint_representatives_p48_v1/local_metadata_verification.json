@@ -1,0 +1,7 @@
+{
+  "verified_utc": "2026-10-25T12:26:23.8850600Z",
+  "check_kind": "local_metadata_only",
+  "source_snapshots_verified": 608,
+  "source_archive_sha256": "533bbc8dcb13681a3873d6b9e94f5734772311f5f52575ae12f9bbaf6955448a",
+  "returned_archive_sha256": "54b7b9a39968f07c7a262afdf1453b01dc6fb88717125e5213eb195f109ff638"
+}

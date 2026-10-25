@@ -7,27 +7,10 @@ if !isdefined(Main, :run_phase_guided_scan)
 end
 
 @testset "phase-guided transport plan mode a" begin
-    opts = Main.PhaseGuidedTransportScanCLI.PhaseGuidedScanOptions(
-        :mode_a_fixed_muB_phase_scaled,
-        "tmp",
-        "unit_case_a",
-        [-0.5, -0.2, 0.0, 0.2],
-        [0.0, 450.0, 900.0],
-        [1.0, 1.1],
-        Float64[],
-        :match_thermo,
-        :default,
-        nothing,
-        nothing,
-        nothing,
-        nothing,
-        nothing,
-        false,
-        true,
-        true,
-        false,
-        false,
-    )
+    # Historical phase-reference mapping is independent of transport sampling.
+    opts=(mode=:mode_a_fixed_muB_phase_scaled,xi_values=[-0.5,-0.2,0.0,0.2],
+        muB_values=[0.0,450.0,900.0],alpha_T_values=[1.0,1.1],T_values=Float64[],
+        p_num=12,t_num=6,sampling_profile=nothing,phase_anchor_policy=:reference_interpolation)
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
     @test plan.total == 24
     @test unique(p.plot_panel for p in plan.points if p.muB_MeV == 0.0) == ["muB0.0"]
@@ -60,27 +43,8 @@ end
 end
 
 @testset "phase-guided transport plan mode b" begin
-    opts = Main.PhaseGuidedTransportScanCLI.PhaseGuidedScanOptions(
-        :mode_b_fixed_T_sparse_muB,
-        "tmp",
-        "unit_case_b",
-        [-0.5, -0.2, 0.0, 0.2],
-        [0.0, 900.0],
-        Float64[1.0],
-        [120.0, 130.0, 138.0],
-        :match_thermo,
-        :default,
-        nothing,
-        nothing,
-        nothing,
-        nothing,
-        nothing,
-        false,
-        true,
-        true,
-        false,
-        false,
-    )
+    opts=Main.PhaseGuidedCLI.parse_args(["--mode","fixed-T-sparse-muB",
+        "--xi-list","-0.5,-0.2,0,0.2","--muB-list","0,900","--T-list","120,130,138","--dry-run"])
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
     @test plan.total == 24
     @test unique(p.plot_panel for p in plan.points if p.T_MeV == 120.0) == ["T120.0"]
@@ -127,27 +91,7 @@ end
     @test plan.points[1].phase_reference_kind === :first_order
 end
 
-@testset "phase-guided production workflow forwards required CLI args" begin
-    workflow_text = read(_PHASE_GUIDED_PRODUCTION_WORKFLOW, String)
-    canonical_xi_values = "-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5"
-
-    @test occursin("--case-name", workflow_text)
-    @test occursin("xi_list=\"\${{ inputs.xi_list || '$canonical_xi_values' }}\"", workflow_text)
-    @test occursin("--xi-list \"\$xi_list\"", workflow_text)
-    @test occursin("--propagator-xi-policy", workflow_text)
-    @test occursin("--channel-diagnostics", workflow_text)
-    @test occursin("--sigma-grid-n", workflow_text)
-    @test occursin("--p-num", workflow_text)
-    @test occursin("--t-num", workflow_text)
-    @test occursin("--phase-anchor-policy", workflow_text)
-    @test occursin("phase_reference_layer:", workflow_text)
-    @test occursin("phase_reference_mode:", workflow_text)
-    @test occursin("phase_reference_layer=\"\${{ inputs.phase_reference_layer || 'accepted' }}\"", workflow_text)
-    @test occursin("phase_reference_mode=\"\${{ inputs.phase_reference_mode || 'runtime' }}\"", workflow_text)
-    @test occursin("--phase-reference-layer \"\$phase_reference_layer\"", workflow_text)
-    @test occursin("--phase-reference-mode \"\$phase_reference_mode\"", workflow_text)
-    @test occursin("runtime:accepted|strict:strict", workflow_text)
-end
+# Both CLI layers and generated artifacts are exercised by test_transport_sampling_profile_cli.jl.
 
 @testset "phase-guided CLI defaults to direct coexistence anchoring" begin
     opts = Main.PhaseGuidedTransportScanCLI.parse_args([
@@ -157,11 +101,11 @@ end
         "--alphaT-list", "1.0",
         "--dry-run",
     ])
-    @test opts.p_num == 12
-    @test opts.t_num == 6
+    @test opts.p_num == 96
+    @test opts.t_num == 24
     @test opts.phase_anchor_policy === :direct_coexistence
 
-    explicit = Main.PhaseGuidedTransportScanCLI.parse_args([
+    @test_throws ArgumentError Main.PhaseGuidedTransportScanCLI.parse_args([
         "--mode", "fixed-muB-phase-scaled",
         "--xi-list", "0.0",
         "--muB-list", "900",
@@ -169,9 +113,6 @@ end
         "--t-num", "8",
         "--phase-anchor-policy", "reference_interpolation",
     ])
-    @test explicit.p_num == 24
-    @test explicit.t_num == 8
-    @test explicit.phase_anchor_policy === :reference_interpolation
 end
 
 @testset "coexistence certification always uses an independent higher node configuration" begin
