@@ -1,0 +1,807 @@
+{
+  "status": "passed",
+  "verified_at": "2026-10-28T12:11:17.469229+00:00",
+  "original_png_count": 150,
+  "numerical_source_and_acceptance_file_count": 8,
+  "total_checked": 158,
+  "all_hashes_unchanged": true,
+  "raw_bundle": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "original_raw_bundle",
+    "bytes": 5327333,
+    "sha256": "028ad860e7bf5aac86939f11b07142876ee4d65d60f9bd0c153007d05cd62f71"
+  },
+  "records": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/composites/figure1_relaxation_times_comparison.png",
+      "sha256": "994cbfd49e9c0a002d6ebb1137c966f1d68258364fb17120512b2f87cdbf7e2f",
+      "bytes": 699086
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/composites/figure2_transport_coefficients_comparison.png",
+      "sha256": "f8e78e3c3b2bdd8128f4c962e5e45af3995cd38f116917237397efdfeaafd614",
+      "bytes": 762263
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/details/figure1_low_value_details.png",
+      "sha256": "d32c1729a04e67c629c36c69ec2af00693261d66522ebb17dd363ce5d6d1617e",
+      "bytes": 416620
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/composites/figure1_relaxation_times_comparison.png",
+      "sha256": "ae79b49add1e3001fcabe1092d9f2795ed1f2c79e2fba21fd5f36bc46c780672",
+      "bytes": 309289
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/composites/figure2_transport_coefficients_comparison.png",
+      "sha256": "4d75a12073b0c02cb5a303ce79d8fe91eb9db3d10962841a07a6e14430ba2051",
+      "bytes": 345116
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/details/figure1_low_value_details.png",
+      "sha256": "776fa0ab4958f6d4c93d94ddbd4cc78f52a54d2aaccb286ea7f63121efa4edb5",
+      "bytes": 188341
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.png",
+      "sha256": "fdf3bb36a468845b13010370c991100d8a3893a4f5141f7b511996f496ce010f",
+      "bytes": 105592
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi.png",
+      "sha256": "cf96ec6b2b87633b9844273e910653b17c9648ae7a7ba9171da1771b605dc9ac",
+      "bytes": 103594
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
+      "sha256": "80672c4567467766568a73bb9375aabb39395bcd53c67c6a418592cf744476b7",
+      "bytes": 132093
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.png",
+      "sha256": "81a29554217ed22ac5b1eb56eef19dbf0ce489ea4e37af555c9f9b9de871e1a6",
+      "bytes": 124513
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi.png",
+      "sha256": "85ff822cd50506da0578d6059b7a9dad5bd258ef37105fa6b8119cc9c8d39df3",
+      "bytes": 83339
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi.png",
+      "sha256": "1a53b9f759aaacf912ebd6df85273615ba6a2d557d9996b0f805090306800854",
+      "bytes": 83406
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi.png",
+      "sha256": "0e75135ad87345b6dfd6e51c6031bbdbb9d3519f604a5d2e6a56f38aa320fba4",
+      "bytes": 89357
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi.png",
+      "sha256": "81dca10527e815fcfc6c657aa571e11b3a664768df9fba286ded35c9bacc11c4",
+      "bytes": 89393
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi.png",
+      "sha256": "c20e1155d6f8ab28c151c224d96d384fe104b491f405c1b4ee261f76c312acee",
+      "bytes": 83150
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi.png",
+      "sha256": "c4c99fc36883f08dce6453d0c463685ea17ca9228a56b2489f69b5f6fe98c2ec",
+      "bytes": 83197
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
+      "sha256": "d094ada8ead6d84ebf6089ea07cafe5c400efb8261e8ef8a16070e2825142e49",
+      "bytes": 89873
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi.png",
+      "sha256": "b70c95119a6fd61a9fa541167e642de418d39ce1ae9652beea87cc9da25db278",
+      "bytes": 107777
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi.png",
+      "sha256": "52c1933e5718449a96f444432f2ca429a3958329524e150cae602c8f623dd9d5",
+      "bytes": 101865
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi.png",
+      "sha256": "cadd6cf95b16f2f1c1aab2ba0ecb9415afb3ee944a65b5f852ce00240fc90ef9",
+      "bytes": 106485
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
+      "sha256": "95cb492b139ec0fe825e29110ce2ca043839ca83effa57028bc4d67fa00a26b6",
+      "bytes": 125724
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi.png",
+      "sha256": "cdfce68b2c701be12208436c135fd8080680d93c66a08567a611f9ef7648376a",
+      "bytes": 126656
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.png",
+      "sha256": "7ba3e411451122cd02c56a208f1388f5efdd0e5a83a06bbc0792e81511a61e77",
+      "bytes": 82259
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi.png",
+      "sha256": "df8fd140b42b5f511693044aa2e6297663f839395c367cf0263b25f8e11d0408",
+      "bytes": 86589
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi.png",
+      "sha256": "bdbd5cba93b4f2d728ac4ffb0ab1cc76e8b7c05c4752420b3cc3b1734074f605",
+      "bytes": 90123
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi.png",
+      "sha256": "1e3770386a8e213eeafbec23bcb244a7c76054b05cca0236714a91e4c9a3d990",
+      "bytes": 92998
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi.png",
+      "sha256": "fdda74f1510c74bec6e514c65a276bce40f8f3787524783b86b5746c369f89b2",
+      "bytes": 82052
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi.png",
+      "sha256": "0b02633dfec517dd6c4e459c2084821520a0a6aeb5436d7bc820ca04d109ee21",
+      "bytes": 86384
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
+      "sha256": "b30f0b567ba3631753b69016ae368d4ba595566fbe808afa9a59148be840d045",
+      "bytes": 91165
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi.png",
+      "sha256": "21f97492f2f4f0cc0a472af9f359ba4b96b205468ed398fdf6bb46cdcbd3f89d",
+      "bytes": 114518
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.png",
+      "sha256": "4d26ee42973ec4702e53f09331d43f20c3d09340fdba083dfbcbe60f0bbe0486",
+      "bytes": 88606
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi.png",
+      "sha256": "a1e632a845f96efe90cf59aea59da74ffba2cf261d9c9602ffb2097a9081c9ef",
+      "bytes": 124662
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+      "sha256": "28172c320f9400ae93014e17426a3ef95387647d438338328ff6c09605a3de01",
+      "bytes": 137049
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi.png",
+      "sha256": "636ffb9c354b835d196a77f6bba6a9cff75646847b5a2dca7a100c23f0388785",
+      "bytes": 135374
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi.png",
+      "sha256": "8b867db693c6b977a8a8033baff90a725bcf7de567103319edd1d48fee360aef",
+      "bytes": 92445
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi.png",
+      "sha256": "0bed72ea3f3f17dd064574428199362f27a78c7f51e1a403f7c968fc1ec44274",
+      "bytes": 96371
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi.png",
+      "sha256": "0dbb64609598377566eed5fd74a80349b4bb9959226e671ad24126a98e3a06a5",
+      "bytes": 95023
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi.png",
+      "sha256": "a445fea8344665c6affe6a93abad1c1ae13761c8a3559531ea072ae58b4f838a",
+      "bytes": 109284
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+      "sha256": "0b323904d7225c9496648d3ffed8ed34dd8759e8e6d53105aa0703bea6c65037",
+      "bytes": 92220
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi.png",
+      "sha256": "5d2c9e627f3712d4fcd5ae38be68883278f71b2b3284c4e32ad6b73db6bb3d83",
+      "bytes": 96166
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "sha256": "e1ea893ebb15505c3ccf9664865be1c93ae8b5d1b7894087fab6dcb7006d5b6d",
+      "bytes": 87766
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi.png",
+      "sha256": "4a4a6835fc587bc22f8cb235ba51acf9e524fe35f9fb591bf0d5f3a9bfbc1883",
+      "bytes": 137728
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.png",
+      "sha256": "676f4e3928b56e99d1ea74a4f77dbf718c1f451031c169a4f01141956a5d54df",
+      "bytes": 94461
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi.png",
+      "sha256": "ec1d1ef737e78dd132215c6caa745a74d5d26b53879fe5b44a30896928620595",
+      "bytes": 113359
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi.png",
+      "sha256": "6d178f880eb910255e97e8cde32c5c1175b94cdf01eb8a2bc3115bd9180e04d9",
+      "bytes": 96154
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi.png",
+      "sha256": "db9cb9e67a2e7921934a12feb8a85e57bda0e23ba85e7f0466579173bc30da4d",
+      "bytes": 96960
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi.png",
+      "sha256": "48cac34fbd1884d915777ad608aa172cd7f820c79db8ca8337b5835f439c66c6",
+      "bytes": 106082
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi.png",
+      "sha256": "7aa63d298e2f586e5e2662909bc4d682fb4ca4017d0727a3925a5d4b85835b3c",
+      "bytes": 96228
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi.png",
+      "sha256": "c79024f75be39e354b4d9e5f855a7a322d6671ebe295374d5672950e2ef47347",
+      "bytes": 104239
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi.png",
+      "sha256": "c799cae2731a47ce08000cae897be44730b5207b9a9f167cce437a1ebae67902",
+      "bytes": 103994
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+      "sha256": "1d918a28f8b5e8cd4ca032faa0f47d9c6373e90f97dc3f49b6e37223f9475d6d",
+      "bytes": 105854
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.png",
+      "sha256": "1ac2b615caa25c82f3ab8a84551f7ecd2c9922530233dd9db65d078f8cb15381",
+      "bytes": 96014
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.png",
+      "sha256": "3cf4fc48d35da813080df8a7b67b941be8033a0d1bf4662ea3ac5cfaa89abfc9",
+      "bytes": 89766
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi.png",
+      "sha256": "7e8d1791734f36436d274a03652401154e45eee386a1cb2e8d08c7842336af59",
+      "bytes": 140519
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi.png",
+      "sha256": "6c9578cf7541986b8d051e564ff9a0e255c345d1bdadc009030aad7bce986a4e",
+      "bytes": 95062
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi.png",
+      "sha256": "cc9795ed69cc94ca168f91eb3bea9d54b6ac6ac364d35bbbbae26199f4dfd98e",
+      "bytes": 102566
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi.png",
+      "sha256": "19cdd94568d18610a35221a3e41314d394cb04f1e739e00660e2741836270014",
+      "bytes": 96469
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi.png",
+      "sha256": "9638fd80794ee6541942cf5375facb37b4ed6f54227a466f60625e5e377c57bb",
+      "bytes": 101894
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi.png",
+      "sha256": "30658124d9883345230c163ab62571385c28cb6d019341f1e95ff5085fce12f7",
+      "bytes": 98107
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi.png",
+      "sha256": "c109052c6e84ea0853a21b11d1ec7ad9814a2dbd512df502647278905cf0fc99",
+      "bytes": 88426
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi.png",
+      "sha256": "20ba01290bed9e23e3cf40cb40eedaf0bb9b8028a23315879797eac5f59d82b7",
+      "bytes": 96954
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi.png",
+      "sha256": "573b724801d19db94c2abbb82b8dd991a1a8c976a5f1c41e9fc7f3cc179502ff",
+      "bytes": 93389
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi.png",
+      "sha256": "648fac24fcb5dae9493a0522f804c415448b7e851a4416bd41aa40410311ec36",
+      "bytes": 97879
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.png",
+      "sha256": "8ad37a1fee61970d58f48ae53b36419002405c3cd990161b0ed14014405b901c",
+      "bytes": 88182
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+      "sha256": "fd913b33eb768039bd6f6a88cdcd9f4393ded6ca3ec49ba8982cff2f6d00bb4f",
+      "bytes": 86740
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi.png",
+      "sha256": "1068882c0776f7fece388dba93351ca603dcb89a563fc116a3bec6d0a9f3a021",
+      "bytes": 107572
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi.png",
+      "sha256": "7a7a224321634944d29f89b3d2aa5bce1bec87684a351c2f614a5fe02892a240",
+      "bytes": 100050
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi.png",
+      "sha256": "b44051b492fcf0844e76b87ed176797ede4fefcd4a57e0c69040e1f2c32b7b7a",
+      "bytes": 93869
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+      "sha256": "83b5e98c285f073bc1bb619f0be48b1f3ecd824ba3298957fb0ac444c5266ee5",
+      "bytes": 103893
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi.png",
+      "sha256": "d5f4f2a7e1625e4bb36bfefb891df7bce52f955836ee134fa081d2d71c6f233f",
+      "bytes": 102013
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi.png",
+      "sha256": "f9e9a02017e6dbe3ef777ec194e54b0d1445ef16eadd19b47d3becbd8a3d2da3",
+      "bytes": 101100
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi.png",
+      "sha256": "b0b07f55f651607bbea095910e4868a2ca110e58472ec9f2b0bba30a8e3c7075",
+      "bytes": 95332
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi.png",
+      "sha256": "5ff7040d580dc52e9af78bcc8c61e3f23dafa0958f9e2f7f2546b35e74b86742",
+      "bytes": 100374
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi.png",
+      "sha256": "6d2ded8427685614de78b1d74347320d4e90a26066961de6270186aebd62ebe0",
+      "bytes": 90433
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi.png",
+      "sha256": "9e1e6c5f33f65a7df158ba2cc76f96995506236aae27c86ebe1ea2b9a07d73c2",
+      "bytes": 100879
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi.png",
+      "sha256": "40e3da04ebeb411ce39ff73e42d27fb0571098dbd0f1e9fd6e0569d69867eb42",
+      "bytes": 95135
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.png",
+      "sha256": "6fd335d14fe298e392ad4db5266f3fbb336f75727d8566354e2f5841c8db94d1",
+      "bytes": 115678
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi.png",
+      "sha256": "7e89a51a907fc3070ad3895f90d3f605919fe569da76cf98a96b95598972f205",
+      "bytes": 109179
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_over_s_vs_xi.png",
+      "sha256": "a539435f6903715f518861f8a796acc674e908942cfb67eecd44575588b9d47d",
+      "bytes": 242377
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/eta_vs_xi.png",
+      "sha256": "c87c5a717187b4a6c4611f0f26097bf83db6490fdb53e536666b36193046e876",
+      "bytes": 240351
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
+      "sha256": "a0aa82a2b7862a4a88f7f149f01f6c3a0fddbe9820cc59b4129de11bfa511ac7",
+      "bytes": 306021
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.png",
+      "sha256": "44d7d58c4d4cca4216adcc5f90e1a7dd4bfbfe7476605f4a3e0fee34e29f864a",
+      "bytes": 288619
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_d_vs_xi.png",
+      "sha256": "5776789a152884c15cdae8ef3213dda8e46795499abcef6966f3e15f48f91f6e",
+      "bytes": 193142
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_dbar_vs_xi.png",
+      "sha256": "a3b41a0028e0aa3df862bb9054fb31218d4cec0066bc1d988b7a6fdf8e712ffd",
+      "bytes": 193215
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_s_vs_xi.png",
+      "sha256": "d08fc93d4e218cfa1a89a6f4d1aa16506f9599f5a571e4621d8fa77df266be13",
+      "bytes": 204918
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_sbar_vs_xi.png",
+      "sha256": "33c26cb9c40c91626c62d853d38677fb7aa5822952a961271718b401a03423d8",
+      "bytes": 205018
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_u_vs_xi.png",
+      "sha256": "26609340d076b886d45d220537dbfacd61c8e7fa9b95b4b1023c86d1284f1a9a",
+      "bytes": 192715
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/tau_ubar_vs_xi.png",
+      "sha256": "5985ff4a90d3ebb990eb5e0c88d1724ce133fe0485a468e2cf72c495e3e23fc3",
+      "bytes": 192825
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
+      "sha256": "d0f7aacfb6e3262e1dbb0b6e82f78335439b40578c2f1dbd64a412e857aa8348",
+      "bytes": 205199
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/zeta_vs_xi.png",
+      "sha256": "63d098e4b78d5e5d7684f3a28a531f33b21bf820a16c3db41d9a927c251009a6",
+      "bytes": 245495
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_over_s_vs_xi.png",
+      "sha256": "edd3da58dfe6c633b1e9d6769085195f3acfb5d66887d840ea0348b029675a28",
+      "bytes": 234487
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/eta_vs_xi.png",
+      "sha256": "c41e275d8bc833e42b8cfbf5eea445d1809ff845dab011775064143fddd67646",
+      "bytes": 246877
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
+      "sha256": "0203f1e6048e456d096630a5550fe2328dc23d7c755ed283ad653bb5d439cff7",
+      "bytes": 293005
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_vs_xi.png",
+      "sha256": "895d1d8d5901d0e1f6bcebe247531817261daffe90dee997b5c16e88e589e2a5",
+      "bytes": 294479
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.png",
+      "sha256": "0be3f73101fe897f52a821d89021e8bb95783588d08ea325d7f8d28922a81fd3",
+      "bytes": 190864
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_dbar_vs_xi.png",
+      "sha256": "bd79aa00bd3524f335825c5938fc0f27b485b48ad4b145052acb441c63e36154",
+      "bytes": 201397
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_s_vs_xi.png",
+      "sha256": "9ec6aa00019332720bb54fadae07c0e671346d32357ac306a1ba86689df31643",
+      "bytes": 207584
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_sbar_vs_xi.png",
+      "sha256": "b10508703b79821e90f8e00d1b03681c0739dc5c7b48d24b16776765d324beda",
+      "bytes": 213559
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_u_vs_xi.png",
+      "sha256": "60abe8a9416bf09280edcf8e28b33c739b10b85fdeaf455476f23acfb03ef6e5",
+      "bytes": 190440
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_ubar_vs_xi.png",
+      "sha256": "0da532d6339fbdd6f3c89918f30d8f3c5523a9ff8bcd061102b423b22f4331e5",
+      "bytes": 200961
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
+      "sha256": "c1f9beb33d425002129ec8a118a2aa452d49b0d1385690978b7a69e7f4590236",
+      "bytes": 209061
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/zeta_vs_xi.png",
+      "sha256": "3a19adb1cf0a9cbeefb36afe48d48c044035a826a6147ef8460cd9240e8a7309",
+      "bytes": 261612
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_over_s_vs_xi.png",
+      "sha256": "4a6739ad813002fc5346cc7723bee566d8897ce2714c27e9465a3247bc76c830",
+      "bytes": 200977
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/eta_vs_xi.png",
+      "sha256": "134034cf68754703cb47980e3dea3d049ccdadd523e56aeb626c5327e2dbe46a",
+      "bytes": 290746
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+      "sha256": "99437df562c03a9b7b60b50bde438d0f3b37cd7578650d71546c732d1a3f69d9",
+      "bytes": 312204
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/sigma_vs_xi.png",
+      "sha256": "fa4512b0e8836e072c89eaca026afb2f42c962efd25ec498978b241be75c0d2d",
+      "bytes": 314763
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_d_vs_xi.png",
+      "sha256": "c5f179c627df2e0287c955f256007e8e2988a4e0be76193ac073eea541ff6718",
+      "bytes": 207638
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_dbar_vs_xi.png",
+      "sha256": "094149e2335134abe8753fc65ea8f118b4026bd25b5695e993ca7c7cbd16f4f8",
+      "bytes": 216474
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_s_vs_xi.png",
+      "sha256": "b2db177e3a6513ff889473ab6ca4b2df7379613062ee7389e70967d7435a64cb",
+      "bytes": 213806
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_sbar_vs_xi.png",
+      "sha256": "1dce49211da6a9bc2a3ee11ba2f5bf263cfd8d866499290a8f503249dd70fbae",
+      "bytes": 246121
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_u_vs_xi.png",
+      "sha256": "f7eb55bc62484abb229184ace8a012b13cc4ba08b12a2962758f05bebecc576f",
+      "bytes": 207201
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/tau_ubar_vs_xi.png",
+      "sha256": "2019c86c316077a5e577d8a451e57536f8afc7cb2052be7fdc29a941071c906a",
+      "bytes": 216064
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "sha256": "187055aba0e20feecf195bb9ef6ef899647509b62542ccf2068cb68049e514d0",
+      "bytes": 199261
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB900.0/zeta_vs_xi.png",
+      "sha256": "8a8609c3b7c6818734d2c3bfd76bdcd667491ba02c1b406adaf42ca846c9a483",
+      "bytes": 315440
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_over_s_vs_xi.png",
+      "sha256": "76e11754327e0d9a9f6dd1c774ed7189475535adaf0111448b114e7960b3617c",
+      "bytes": 209991
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/eta_vs_xi.png",
+      "sha256": "0298e7a35bcfdfb79f1fc5383411fe9e5e82b361febec6e22fa8d643af04f23e",
+      "bytes": 254986
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_over_T_vs_xi.png",
+      "sha256": "4694c1ff047a29580ee47af11e3816b6bd2a135b4248d68d41010df0a595842d",
+      "bytes": 212210
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/sigma_vs_xi.png",
+      "sha256": "12badf0e26acf4a3dff2ddd05b9007bc920d1b849c344ea778ab91196610502c",
+      "bytes": 213897
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_d_vs_xi.png",
+      "sha256": "3fd59146c8132d0c38603276ede2c1aa39416d9eb492b0647138496072314909",
+      "bytes": 233736
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_dbar_vs_xi.png",
+      "sha256": "01d0cc7e9df2f6434d274e99762c6db9223911b93829247df9c637cb701c829d",
+      "bytes": 210766
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_s_vs_xi.png",
+      "sha256": "54d0af8d505ec0e950611c0369a12e27cfb30d111c98fff7d2edd56c1afa0f51",
+      "bytes": 229458
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_sbar_vs_xi.png",
+      "sha256": "727587b739f924d154e674ff7857f48f1e08be2b552b041f1c204f2c95022af5",
+      "bytes": 228006
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_u_vs_xi.png",
+      "sha256": "524c59a856a1ecf6f95045e2f5a982a1b98cd975adc1955b6108768c2f391aca",
+      "bytes": 233264
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.png",
+      "sha256": "034e88d84684039c641880a67674a4ca87f59196a333afd65844c7c2aa4dc0ba",
+      "bytes": 210301
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_over_s_vs_xi.png",
+      "sha256": "8100bb7d27dddc2c404b821113e606883a1f41e82d01fe26133b58b604d33ec0",
+      "bytes": 197272
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/zeta_vs_xi.png",
+      "sha256": "6450149c3126869b7a5b9bd177b8d1b42a37a5b8107f9157a37951a3b231545d",
+      "bytes": 322621
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_over_s_vs_xi.png",
+      "sha256": "50168470a0dad950cc86ad6ce6866cd72abbf955a18e42f7519d1a6af6bc993b",
+      "bytes": 216669
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/eta_vs_xi.png",
+      "sha256": "e73f620e53c36d4bdbc67cb2e8ec7b585be0cc5e014f7553370a054e661c595b",
+      "bytes": 231910
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_over_T_vs_xi.png",
+      "sha256": "1753529e587eb0fc7f231f79e655c19e5ea3c97bf69c9d1098b5699b13d14c4c",
+      "bytes": 217375
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/sigma_vs_xi.png",
+      "sha256": "0e86d52a844319702d17adb03a62c9986aff05391f1092843888b230eae87cb8",
+      "bytes": 229196
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_d_vs_xi.png",
+      "sha256": "fddaef9a6a58870d8c1df220dc461b693b3a4c8c5cf9d084930338ad9635a1cb",
+      "bytes": 223686
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_dbar_vs_xi.png",
+      "sha256": "723df67dbb9742ac1afb840637caa74331ba5c9b3af4441ed0adf05cbbdaad89",
+      "bytes": 199235
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_s_vs_xi.png",
+      "sha256": "38675292b0a9f8dcb18fc32bfc09452a03774da250f793fa3ac92550e02493e5",
+      "bytes": 221389
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_sbar_vs_xi.png",
+      "sha256": "c27dfe58530e47fbf323d1918cf4202780bd03d46c4c1e8b1f39d54fcab5ccde",
+      "bytes": 210483
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_u_vs_xi.png",
+      "sha256": "5456804bc5c59a3ab2f44552c1effba1fc4356ef6bad176093dcfb5573d1b96c",
+      "bytes": 223198
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/tau_ubar_vs_xi.png",
+      "sha256": "96bf546e42617e98371012655eb68ff54c34df997d3eb16c87c17dfd463a36ad",
+      "bytes": 198840
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+      "sha256": "6041a360ffeac67e4209209b576663cbd462373b4a0d951f228773f67a9cab94",
+      "bytes": 194058
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T160.0/zeta_vs_xi.png",
+      "sha256": "a9b26e9d142633b71fd4b2430669790e1a88de15e9184c751686fae675ca5075",
+      "bytes": 246298
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_over_s_vs_xi.png",
+      "sha256": "2e553fa4d0ab364a66d72a350436c073f611e08c177e95c185b5086aae6d4b9b",
+      "bytes": 225997
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/eta_vs_xi.png",
+      "sha256": "74526cf37814e3f10036b889a4cded9dbd20203d83318c98b38ad9ac89ccef77",
+      "bytes": 213508
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+      "sha256": "195f8d2ef4acfc27184263216f566f4f67c645c8496065a34f798c3bb5efb341",
+      "bytes": 230903
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_vs_xi.png",
+      "sha256": "b073101f34d703a68ddf5e5d5ac86e8daba78896aacb6b4280797a3e82bb3c14",
+      "bytes": 227897
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_d_vs_xi.png",
+      "sha256": "64ddbee07489131764414e9a300714a72bfafdc67949f5c29bcfc345bf5cc19b",
+      "bytes": 232596
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_dbar_vs_xi.png",
+      "sha256": "2f2f93bc16cd011e0aebcbb27bf0deb30259b3ebe6ae8d0aa789b2204ef46bba",
+      "bytes": 217176
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_s_vs_xi.png",
+      "sha256": "901bfd2cc2060b810aa1d045bee9064bf83dd46d4a20c7a50ce774ae720d578f",
+      "bytes": 229208
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_sbar_vs_xi.png",
+      "sha256": "a79ae926df69380d162fc550f7012ac9f844cf8593ef30f1cb509bc885c1c44e",
+      "bytes": 207724
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_u_vs_xi.png",
+      "sha256": "b7723c940963728bc8e61eb457a2987e08997a6717f4ccab79414f2e5bead8a0",
+      "bytes": 232148
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/tau_ubar_vs_xi.png",
+      "sha256": "ed5d479bff0dec30309aeeeb5f6b89323d19e503b789d21de700d5b10a26f54e",
+      "bytes": 216738
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_over_s_vs_xi.png",
+      "sha256": "587e52eba19a1079ced750cf045d7b2734996c01a80b30fdb4bb598b6e818ccf",
+      "bytes": 261310
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/zeta_vs_xi.png",
+      "sha256": "7ed915ef2fd777dde98af71b28227e4961321b00f9506f39eb4b620b9e412770",
+      "bytes": 249856
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/background/background_audit.json",
+      "sha256": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807",
+      "bytes": 19744
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json",
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283",
+      "bytes": 2867
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan.csv",
+      "sha256": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4",
+      "bytes": 1082613
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan_sampling.csv",
+      "sha256": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66",
+      "bytes": 2888911
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan.csv",
+      "sha256": "5cddbeeb7944271071d08ce0a1ec6e5e32068bf09eaa3a9db473767df02ab2f8",
+      "bytes": 1053127
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan_sampling.csv",
+      "sha256": "2ccdd0b9186132879edf856076a7139969fadb9e004d18a8b096b1b04723aa5a",
+      "bytes": 2758040
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/point_provenance.csv",
+      "sha256": "b44374b756b8113acb344d935b1860b630de859dbd0883b59bffd4da033e8e51",
+      "bytes": 779547
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/reviewed_grid.json",
+      "sha256": "2e8d4934e50e61fa398ed0a7496c7171dcca58753485f9e42a8ab415b9606103",
+      "bytes": 626900
+    }
+  ]
+}

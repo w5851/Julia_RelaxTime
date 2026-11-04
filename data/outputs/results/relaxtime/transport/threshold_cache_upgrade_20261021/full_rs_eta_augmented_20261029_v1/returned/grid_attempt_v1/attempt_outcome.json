@@ -1,0 +1,6 @@
+﻿{
+    "status":  "failed_before_review",
+    "error":  "unexpected first-order boundary count",
+    "cause":  "old audit repeats each physical pair by observable; assembler incorrectly counted rows",
+    "numerical_output_accepted":  false
+}

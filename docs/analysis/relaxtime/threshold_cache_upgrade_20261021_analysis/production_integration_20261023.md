@@ -2,8 +2,8 @@
 
 工作树为 `D:/w/meson-freezeout-defaults`，分支 `codex/meson-freezeout-defaults`，
 HEAD 基底为 `dffe4070eb5c0788e9c8a1e227cf40978b51ce3e`。
-数值实现尚未提交，各批次 `source/` 与 manifest 保存实际代码。
-当前进度与待办由[生产接入任务](../../../dev/active/2026-10-23_输运采样生产接入与重跑合同.md)维护。
+本文保留完整 A^xi 切换前的接入验收；生成时的数值实现尚未提交，各批次 `source/` 与 manifest 保存实际代码。
+后续完整 A^xi、整批重算及交付状态由[统一状态说明](production_plan_20261023.md)维护；[生产接入任务](../../../dev/archived/2026-10-23_输运采样生产接入与重跑合同.md)保留实施记录。
 此前代表集的 1% 收敛资格和完整性能比较见[采样验收报告](production_sampling_20261022.md)。
 
 本报告中的数值验收和 Julia--Fortran 对齐均记录完整 \(A^\xi\) 切换前的生产候选；

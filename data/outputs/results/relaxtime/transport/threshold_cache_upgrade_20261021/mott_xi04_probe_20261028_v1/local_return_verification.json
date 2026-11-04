@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "archive_sha256": "ee30ef1dc5d262cc4fedf21d12a221538e4974ee35517bd001b097c477244c3d",
+  "archive_bytes": 10381677,
+  "files_verified": 179,
+  "source_files_checked_before_after_each_stage": 340,
+  "analysis_source_copies_match": true,
+  "original_grid_unchanged": true
+}

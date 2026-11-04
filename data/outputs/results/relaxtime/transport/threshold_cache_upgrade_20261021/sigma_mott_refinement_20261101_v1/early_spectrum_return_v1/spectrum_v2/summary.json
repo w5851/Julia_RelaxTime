@@ -1,0 +1,72 @@
+{
+    "status": "completed_diagnostic",
+    "points": 9,
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "production_kernel_changed": false,
+    "max_reconstruction_relative": 5.566838676209749e-16,
+    "interpretation": "Real-axis roots are resonance anchors, not complex meson poles. Peak areas integrate dx and are not thermal rates. Mixed scalar removal includes sigma and sigma-prime and their interference.",
+    "profile": {
+        "id": "sigma_center_s6",
+        "source_path": "D:\\CodexCompute\\trsigma-mott-20261101-v1\\inputs\\s6.toml",
+        "source_sha256": "20e693d461c31d1eb86f17d7fce534da3ad5a5b32ea5c88676bc2fb160729103",
+        "algorithm": "thermal_weighted",
+        "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1.0e-8
+        },
+        "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+        },
+        "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+        },
+        "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+        },
+        "sampling": {
+            "rtol": 1.0e-6,
+            "atol": 1.0e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 320000,
+            "max_nodes": 96000,
+            "max_rounds": 50,
+            "max_events": 30000000,
+            "relative_velocity": "cm"
+        },
+        "a_polarization": "full_RS",
+        "a_coupling": "full_RS",
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+        },
+        "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+    },
+    "script_sha256": "11f1a938ad5e6d0f001a1fd2b79127d0244ab7971c047f292ebed8696b3722ed",
+    "library_sha256": "dc1f199f66297d728678c5495816b91fdb18235d4bdea86e5f7906f751cec403",
+    "files": {
+        "cross_section_spectrum.csv": "b49debfbd4666a968d29aad46aab7c3c52d287a050b1ac83c7c49f5744610234",
+        "real_axis_roots.csv": "2a6e93ddb18a739c7ffea54088e7656067cf0894d9fa8146ab9440bf6c083f4c",
+        "background.csv": "92b3ffe776d320d63f1889f901b2345bbc4ade355ec980df12b08cd43d2fb962",
+        "peak_areas.csv": "2f2f6a0407709e4e04bcf1fe27ab852b22d0db93cb4ee7ad55674896ca6dedd4",
+        "inverse_spectrum.csv": "4f5eda33cef1ed88522db2b17481aed71b5f2dc7ddbac36c5f58d3a89181c381",
+        "thermal_support.csv": "61ab404714e8c5ecc4bbe4085d30da207ba771b63969663d1b7de6bb8b01488c"
+    }
+}

@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.plotting.plot_bundle import build_bundle, expand_bundle, load_chart_records
 from scripts.plotting.plot_manifest import input_record, sha256_file, write_manifest
-from scripts.plotting.plot_provenance import git_source, is_code_record, read_manifest_record
+from scripts.plotting.plot_provenance import git_source, is_code_record, read_manifest_record, validate_hash_record
 
 BASE = ROOT / "data/outputs/figures/relaxtime/transport/phase_guided"
 ANALYSIS = ROOT / "docs/analysis/relaxtime/phase_guided_transport"
@@ -160,9 +160,9 @@ def apply_migration() -> dict:
 
 def check_migration() -> dict:
     report = json.loads(REPORT.read_text(encoding="utf-8"))
+    code_ref = tomllib.loads((ROOT / "config/plotting/historical_snapshots.toml").read_text(encoding="utf-8"))["publication_clean_v11_stage"]["code_commit"]
     for record in [report["original_manifest_archive"], *report["bundles"], *report["protected"]]:
-        path = ROOT / record["path"]
-        if sha256_file(path) != record["sha256"] or path.stat().st_size != record["bytes"]:
+        if validate_hash_record(record, root=ROOT, label="migration", code_ref=code_ref):
             raise ValueError(f"migration integrity failure: {record['path']}")
     archive = ROOT / report["original_manifest_archive"]["path"]
     with zipfile.ZipFile(archive) as snapshot:

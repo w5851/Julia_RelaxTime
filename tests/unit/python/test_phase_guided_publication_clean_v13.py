@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import tomllib
 
 import matplotlib.pyplot as plt
 import pytest
@@ -17,7 +18,7 @@ from scripts.plotting.validate_plot_artifact import _check_declared_legends, val
 
 @pytest.fixture(scope="module")
 def plot_inputs():
-    points, _, _, _, gaps, _ = v13.V11.PARENT.load_v5_inputs()
+    points, _, _, _, gaps, _ = v13.V11.PARENT.load_v5_inputs(require_current=False)
     grouped, gap_map = v13.V11.V10.group_inputs(points, gaps)
     profile = load_profile("candidate_aps_v2")
     configure_matplotlib(profile)
@@ -136,7 +137,9 @@ def test_artifact_bundle_has_verified_color_gray_pairs_and_unchanged_sources():
             assert ImageOps.grayscale(a.convert("RGB")).tobytes() == b.tobytes()
     package = json.loads((v13.ANALYSIS_ROOT / "manifest.json").read_text(encoding="utf-8"))
     for record in package["inputs"]:
-        assert validate_hash_record(record, root=root, label="inputs") == []
+        pointer_ref = (tomllib.loads((root / "config/plotting/historical_snapshots.toml").read_text(encoding="utf-8"))["publication_clean_v11_stage"]["code_commit"]
+                       if Path(record["path"]).name == "publication_clean_current.json" else None)
+        assert validate_hash_record(record, root=root, label="inputs", code_ref=pointer_ref) == []
     for record in package["outputs"]:
         assert validate_hash_record(record, root=root, label="outputs", allow_historical=False) == []
     assert package["author_acceptance"] is None

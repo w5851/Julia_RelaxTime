@@ -1,0 +1,21 @@
+{
+  "status": "verified_phase_return",
+  "files_verified": 449,
+  "archive": {
+    "archive": "pilot_precision_snapshot_v1.zip",
+    "bytes": 35783177,
+    "sha256": "2435399f6fa2752e5b8763df6720f2df5aeaa03939d6c0dbd816d14469bb81c6",
+    "manifest_files": 449,
+    "package_manifest_sha256": "ffa6d681babe843ae41eda1ab08489a9c6df860cc91024894d2560e7bc0b3710"
+  },
+  "completed_runs": [
+    "survey_v1",
+    "endpoint_checks_v1",
+    "locate_v1",
+    "midpoint_screen_v1",
+    "fine_pilot_other01_v1",
+    "tighter_pilot_other01_v1"
+  ],
+  "whole_task_complete": false,
+  "local_scope": "archive, file identity and metadata only"
+}

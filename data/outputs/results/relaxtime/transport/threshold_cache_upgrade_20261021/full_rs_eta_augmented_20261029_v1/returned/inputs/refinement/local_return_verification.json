@@ -1,0 +1,19 @@
+{
+  "status": "verified_return",
+  "received_utc": "2026-10-29T07:11:26.538252+00:00",
+  "archive": {
+    "archive": "eta_refinement_results_v1.zip",
+    "bytes": 1697418,
+    "sha256": "8d3961b1af46284a45ff62e283fd541cf5219bab9d7f1eb706b1feff5a139e24",
+    "package_manifest_sha256": "a3329c6919634eef279e35d9c7f3d7dba4a06290142c62ebf0a37ca39fd36bf0",
+    "manifest_files": 157
+  },
+  "files_verified": 157,
+  "final_status_sha256": "3618f61766c580d734109f248d8ba57becaaee63409e27cc1f6268799b078655",
+  "validation_sha256": "c6f79d61cce06d7254990db30e29260781211df32b833b8f579f6f8e9831fac8",
+  "final_review_sha256": "a65c45972ce6405d31eb53525edc4aa0ca40a8afd8488d624c11125895753c7e",
+  "fine_points": 51,
+  "reference_evaluations": 18,
+  "local_scope": "Archive integrity, metadata and source receipts; no local numerical analysis or solve",
+  "scientific_convergence_review": "separate"
+}

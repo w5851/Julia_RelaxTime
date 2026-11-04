@@ -1,0 +1,53 @@
+{
+  "schema": "phase_guided_v14_delivery_execution_v1",
+  "status": "completed",
+  "recorded_at": "2026-10-28T12:26:47.152494+00:00",
+  "vector_command": "python -X utf8 scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py --vector-delivery --authorization data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/author_authorization.json",
+  "execution_host": "local Windows, Python-only rendering",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "renderer": {
+    "path": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py",
+    "role": "unchanged_v14_renderer",
+    "bytes": 25565,
+    "sha256": "ae916543fe5ee709361ec2347584320b565cff6b2c2242ff7a7ba77ae4438a17"
+  },
+  "renderer_snapshot": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/source/scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py",
+    "role": "accepted_frozen_renderer",
+    "bytes": 25565,
+    "sha256": "ae916543fe5ee709361ec2347584320b565cff6b2c2242ff7a7ba77ae4438a17"
+  },
+  "explanation": "The delivered plot manifest retains the accepted PNG generator record to bind the renderer. This external receipt records the actual vector-export command and its separately verified outputs.",
+  "current_pointer": {
+    "path": "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json",
+    "role": "current_selection_after_LF_normalization",
+    "bytes": 2744,
+    "sha256": "48915f56f04e0ab52e7c30f9a543848dfa04c53a531e94fb0fb14e6d4f8069b3"
+  },
+  "validation": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/final_integrity_review.json",
+    "role": "complete_bundle_and_evidence_validation",
+    "bytes": 463,
+    "sha256": "0dadc48aafc44977c3207f7751a24c1186856a6b2e8c8fb4e08221f5a9aac403"
+  },
+  "test_history": [
+    {
+      "scope": "current selector and historical figure packages",
+      "initial_passed": 51,
+      "initial_failed": 2,
+      "failed_reason": "v12/v13 package checks did not supply the immutable historical pointer reference",
+      "fix": "Supply the previously registered full code reference only for the current-selector record",
+      "targeted_rerun_passed": 2,
+      "targeted_rerun_failed": 0,
+      "final_distinct_tests_passed": 53
+    },
+    {
+      "scope": "v14 renderer behavior",
+      "passed": 7,
+      "basis": "Earlier successful run in this same task; renderer and test bytes retained in the accepted PNG source snapshot"
+    }
+  ],
+  "frozen_data_and_images_modified": false,
+  "manuscript_files_modified": false,
+  "legacy_files_deleted_or_moved": false
+}

@@ -1,0 +1,223 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_01",
+  "job_fingerprint": "7346be2e9394422ac7853499e08386b88905a36ef99105bfb45a08cae72a585c",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_01",
+    "plots": [
+      {
+        "plot": "other01_eta_over_s.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图横轴 ξ−ξ_Mott 附近",
+            "description": "曲线在Mott位置附近陡升，不同符号在转折处紧密聚集；联系表缩图下难以分辨各标记是否完全重合。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      },
+      {
+        "plot": "other01_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图 ξ−ξ_Mott 附近",
+            "description": "曲线在Mott位置附近呈台阶状转折，转折处符号密集，缩图下分辨度有限。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      },
+      {
+        "plot": "other01_tau_sbar.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图 ξ−ξ_Mott 附近",
+            "description": "曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      },
+      {
+        "plot": "other01_tau_ubar.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图 ξ−ξ_Mott 附近",
+            "description": "曲线在Mott位置附近出现局部峰，峰顶附近符号密集，缩图下分辨率有限。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      },
+      {
+        "plot": "other01_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图 ξ−ξ_Mott 附近",
+            "description": "曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      },
+      {
+        "plot": "other02_eta_over_s.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图横轴正区间",
+            "description": "曲线在 ξ−ξ_Mott>0 一侧快速下降，采样点较稀疏；未见裁切或标签缺失。"
+          }
+        ],
+        "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+      }
+    ],
+    "notes": "六个子图版面均未发现明显裁切、图例碰撞或标签缺失；Mott灰竖线可见，部分转折处标记密集程度在缩图下不确定。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "687137228a749294d0bc6287379c8b8c3b15a6c14656c5e5645b3646c15e8ce8",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_01.png",
+          "sha256": "97e94740697a8f97bd5cd2d7c3031d18016b0fe9e6570ee582dad5fc317b6d92",
+          "bytes": 331375
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 549,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.05,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1275,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1275,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1824
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_01\",\"plots\":[{\"plot\":\"other01_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图横轴 ξ−ξ_Mott 附近\",\"description\":\"曲线在Mott位置附近陡升，不同符号在转折处紧密聚集；联系表缩图下难以分辨各标记是否完全重合。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"},{\"plot\":\"other01_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图 ξ−ξ_Mott 附近\",\"description\":\"曲线在Mott位置附近呈台阶状转折，转折处符号密集，缩图下分辨度有限。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"},{\"plot\":\"other01_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图 ξ−ξ_Mott 附近\",\"description\":\"曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"},{\"plot\":\"other01_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图 ξ−ξ_Mott 附近\",\"description\":\"曲线在Mott位置附近出现局部峰，峰顶附近符号密集，缩图下分辨率有限。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"},{\"plot\":\"other01_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图 ξ−ξ_Mott 附近\",\"description\":\"曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"},{\"plot\":\"other02_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图横轴正区间\",\"description\":\"曲线在 ξ−ξ_Mott>0 一侧快速下降，采样点较稀疏；未见裁切或标签缺失。\"}],\"marker_check\":\"灰竖线可见，位于 ξ−ξ_Mott=0 附近\"}],\"notes\":\"六个子图版面均未发现明显裁切、图例碰撞或标签缺失；Mott灰竖线可见，部分转折处标记密集程度在缩图下不确定。\"}",
+      "parsed": {
+        "image_id": "overview_01",
+        "plots": [
+          {
+            "plot": "other01_eta_over_s.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图横轴 ξ−ξ_Mott 附近",
+                "description": "曲线在Mott位置附近陡升，不同符号在转折处紧密聚集；联系表缩图下难以分辨各标记是否完全重合。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          },
+          {
+            "plot": "other01_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图 ξ−ξ_Mott 附近",
+                "description": "曲线在Mott位置附近呈台阶状转折，转折处符号密集，缩图下分辨度有限。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          },
+          {
+            "plot": "other01_tau_sbar.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图 ξ−ξ_Mott 附近",
+                "description": "曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          },
+          {
+            "plot": "other01_tau_ubar.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图 ξ−ξ_Mott 附近",
+                "description": "曲线在Mott位置附近出现局部峰，峰顶附近符号密集，缩图下分辨率有限。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          },
+          {
+            "plot": "other01_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图 ξ−ξ_Mott 附近",
+                "description": "曲线在Mott位置附近陡升，转折处符号密集，缩图下难以逐一分辨。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          },
+          {
+            "plot": "other02_eta_over_s.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图横轴正区间",
+                "description": "曲线在 ξ−ξ_Mott>0 一侧快速下降，采样点较稀疏；未见裁切或标签缺失。"
+              }
+            ],
+            "marker_check": "灰竖线可见，位于 ξ−ξ_Mott=0 附近"
+          }
+        ],
+        "notes": "六个子图版面均未发现明显裁切、图例碰撞或标签缺失；Mott灰竖线可见，部分转折处标记密集程度在缩图下不确定。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 17.14,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 18.154,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

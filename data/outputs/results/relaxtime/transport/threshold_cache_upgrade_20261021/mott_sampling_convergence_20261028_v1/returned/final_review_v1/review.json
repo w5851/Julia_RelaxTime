@@ -1,0 +1,143 @@
+{
+  "status": "completed_diagnostic_review",
+  "finished_utc": "2026-10-28T08:06:26.245830+00:00",
+  "source_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "review_script_sha256": "1c6b5f0b231c9d3c2370ae5da491589e133bbf74a9c00da4e02883f5787c6b6e",
+  "s_jobs": 24,
+  "outer_jobs": 12,
+  "formal_replay_passed": true,
+  "all_reference_checks_passed": true,
+  "all_base_l1_within_production_rtol": true,
+  "max_channel_signed_percent": 0.012902446722717897,
+  "max_channel_l1_percent": 0.024160316457497194,
+  "max_tight2_channel_signed_percent": 0.00041351132936684465,
+  "max_tight2_channel_l1_percent": 0.0006792358103855793,
+  "all_outer_converged": true,
+  "max_outer_change_percent": 0.34727943639421,
+  "max_outer_last_step_percent": 0.03535165819739117,
+  "observable_maxima": {
+    "outer_joint1": {
+      "sigma_change_percent": 0.015047040858306993,
+      "eta_change_percent": 0.013908393457684465
+    },
+    "outer_joint2": {
+      "sigma_change_percent": 0.016895526626481416,
+      "eta_change_percent": 0.015617002823764548
+    },
+    "reference": {
+      "sigma_change_percent": 0.0012065466731048247,
+      "eta_change_percent": 0.001144165387523266
+    }
+  },
+  "peaks": [
+    {
+      "window": "alpha1.0",
+      "configuration": "reference",
+      "center_xi": -0.04,
+      "formal_center_sigma_over_T": 0.10157198724940854,
+      "current_center_sigma_over_T": 0.10157266097652123,
+      "center_change_percent": 0.0006633001193856458,
+      "formal_height_above_neighbor_chord": 0.0017808388320472018,
+      "current_height_above_neighbor_chord": 0.0017807127878036316,
+      "height_change_percent": -0.007077801837085396,
+      "formal_center_minus_right": 0.0002262403482930081,
+      "current_center_minus_right": 0.0002264998025181264,
+      "center_is_local_max": true,
+      "sampled_max_xi": -0.04
+    },
+    {
+      "window": "alpha1.0",
+      "configuration": "outer_joint1",
+      "center_xi": -0.04,
+      "formal_center_sigma_over_T": 0.10157198724940854,
+      "current_center_sigma_over_T": 0.10157061606649857,
+      "center_change_percent": -0.0013499616844159235,
+      "formal_height_above_neighbor_chord": 0.0017808388320472018,
+      "current_height_above_neighbor_chord": 0.001779386481853898,
+      "height_change_percent": -0.08155427471414622,
+      "formal_center_minus_right": 0.0002262403482930081,
+      "current_center_minus_right": 0.00022450497080629683,
+      "center_is_local_max": true,
+      "sampled_max_xi": -0.04
+    },
+    {
+      "window": "alpha1.0",
+      "configuration": "outer_joint2",
+      "center_xi": -0.04,
+      "formal_center_sigma_over_T": 0.10157198724940854,
+      "current_center_sigma_over_T": 0.10156987373299352,
+      "center_change_percent": -0.0020808064036703655,
+      "formal_height_above_neighbor_chord": 0.0017808388320472018,
+      "current_height_above_neighbor_chord": 0.0017784947218160846,
+      "height_change_percent": -0.13162955506885732,
+      "formal_center_minus_right": 0.0002262403482930081,
+      "current_center_minus_right": 0.0002237654465146316,
+      "center_is_local_max": true,
+      "sampled_max_xi": -0.04
+    },
+    {
+      "window": "alpha1.1",
+      "configuration": "reference",
+      "center_xi": 0.2,
+      "formal_center_sigma_over_T": 0.07326445543699073,
+      "current_center_sigma_over_T": 0.0732648670638442,
+      "center_change_percent": 0.0005618370477522561,
+      "formal_height_above_neighbor_chord": 0.0010175232117513727,
+      "current_height_above_neighbor_chord": 0.0010173840170507736,
+      "height_change_percent": -0.013679756785056618,
+      "formal_center_minus_right": 0.00019363403905291177,
+      "current_center_minus_right": 0.0001938046348186201,
+      "center_is_local_max": true,
+      "sampled_max_xi": 0.2
+    },
+    {
+      "window": "alpha1.1",
+      "configuration": "outer_joint1",
+      "center_xi": 0.2,
+      "formal_center_sigma_over_T": 0.07326445543699073,
+      "current_center_sigma_over_T": 0.07326455734677766,
+      "center_change_percent": 0.00013909853873173006,
+      "formal_height_above_neighbor_chord": 0.0010175232117513727,
+      "current_height_above_neighbor_chord": 0.0010229057294058735,
+      "height_change_percent": 0.5289822966531021,
+      "formal_center_minus_right": 0.00019363403905291177,
+      "current_center_minus_right": 0.00019355011010462053,
+      "center_is_local_max": true,
+      "sampled_max_xi": 0.2
+    },
+    {
+      "window": "alpha1.1",
+      "configuration": "outer_joint2",
+      "center_xi": 0.2,
+      "formal_center_sigma_over_T": 0.07326445543699073,
+      "current_center_sigma_over_T": 0.0732644816746637,
+      "center_change_percent": 3.581228145144166e-05,
+      "formal_height_above_neighbor_chord": 0.0010175232117513727,
+      "current_height_above_neighbor_chord": 0.00102349266962444,
+      "height_change_percent": 0.5866655231179019,
+      "formal_center_minus_right": 0.00019363403905291177,
+      "current_center_minus_right": 0.0001934794178696797,
+      "center_is_local_max": true,
+      "sampled_max_xi": 0.2
+    }
+  ],
+  "limits": [
+    "Only six original backgrounds and four light channels were studied for s interpolation.",
+    "Outer study, if present, refines two charged-pion-sensitive channels and fixes incoming density normalization.",
+    "Direct event audits cover only the recorded subsets, not every thermal event.",
+    "No new t/B0/background/terminal convergence claim and no meson-amplitude removal experiment.",
+    "No formal CSV, PNG, production parameter or paper artifact was changed."
+  ],
+  "input_hashes": {
+    "D:\\CodexCompute\\trmott-sampling-20261028-v1\\pilot_v1\\channels.csv": "1e9964ad24250561450d44a601012a2c84463d464d97564d1dfcca4f94e79738",
+    "D:\\CodexCompute\\trmott-sampling-20261028-v1\\remaining_v1\\channels.csv": "67ad73cb0e220f0bbfd351a01c2ba8cc5b0ac384db2e404e436ca2d3097ab39b",
+    "D:\\CodexCompute\\trmott-sampling-20261028-v1\\outer_v1\\channels.csv": "cf25a9b431cfb34e51961dabc651276f4956cd147188168cd25b46370aabbc6b"
+  },
+  "propagation_summary_sha256": "dae60246bb6515b951fee04fe6ed5d1bed9e09b3e65a5442e6b86a4c4ccde4ff",
+  "files": {
+    "channel_comparison.csv": "5374abfcebbcc98033cccf5c297f66dd25f60a0cc71bbdb33c154ed72f8f0abc",
+    "observable_changes.csv": "6752cfcf3200140640d57967d72a6bb836f7bbc946d3ccd5e996c5d91161a0bc",
+    "outer_comparison.csv": "97374ddfae2a1324aaa6b754f8380a1af22cc196780683c275cbbf370a9747c9",
+    "peak_comparison.csv": "12dd40eceff03f996ac3625f36f9503bf6cc375ab109892913126a5d2ee66ba0"
+  }
+}

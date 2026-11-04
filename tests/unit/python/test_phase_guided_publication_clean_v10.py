@@ -5,11 +5,13 @@ from functools import lru_cache
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.plotting.plot_manifest import sha256_file
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
 from scripts.plotting.validate_plot_artifact import validate_manifest_record
 from scripts.plotting.plot_bundle import load_chart_records
-from scripts.plotting.plot_provenance import validate_hash_record
+from scripts.plotting.plot_provenance import git_source, validate_hash_record
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -134,7 +136,7 @@ def test_v10_review_package_counts_hashes_and_layout_contract():
     assert figure2["rendering"]["legend_font_size_pt"] == 10.5
 
 
-def test_v10_preserves_v5_tables_and_current_pointer():
+def test_v10_preserves_v5_tables_and_historical_current_pointer():
     module = _module()
     package_path = module.ANALYSIS_ROOT / "manifest.json"
     package = json.loads(package_path.read_text(encoding="utf-8"))
@@ -148,7 +150,8 @@ def test_v10_preserves_v5_tables_and_current_pointer():
     for name, expected in package["inherited_table_hashes"].items():
         assert sha256_file(module.V5_TABLE_ROOT / name) == expected
         assert sha256_file(module.TABLE_ROOT / name) == expected
-    pointer = json.loads(module.CURRENT_POINTER.read_text(encoding="utf-8"))
+    pointer = json.loads(git_source(str(ROOT), _stage_module().FROZEN_CODE_REF,
+                                    module.CURRENT_POINTER.relative_to(ROOT).as_posix()))
     assert pointer["current_analysis_package"].endswith("publication_clean_v5")
     assert pointer["manuscript_eligible"] is True
 
@@ -166,7 +169,7 @@ def test_v10_plot_coordinates_preserve_every_frozen_point_and_phase_gap():
     import matplotlib.pyplot as plt
 
     module = _module()
-    points, _, _, _, gaps, _ = module.PARENT.load_v5_inputs()
+    points, _, _, _, gaps, _ = module.PARENT.load_v5_inputs(require_current=False)
     grouped, gap_map = module.group_inputs(points, gaps)
     profile = load_profile("candidate_aps_v2")
     configure_matplotlib(profile)
@@ -185,3 +188,16 @@ def test_v10_plot_coordinates_preserve_every_frozen_point_and_phase_gap():
                 assert list(line.get_ydata()) == [float(row["clean_value"]) for row in segment]
     finally:
         plt.close(figure)
+
+
+def test_historical_v5_read_keeps_live_selection_guard_and_pointer(tmp_path, monkeypatch):
+    parent = _module().PARENT
+    pointer = tmp_path / "current.json"
+    pointer.write_text(json.dumps({"current_analysis_package": "new_formal_layer", "manuscript_eligible": True}), encoding="utf-8")
+    original = pointer.read_bytes()
+    monkeypatch.setattr(parent, "CURRENT_POINTER", pointer)
+    with pytest.raises(ValueError, match="v5 is not the current"):
+        parent.load_v5_inputs()
+    points, *_ = parent.load_v5_inputs(require_current=False)
+    assert points
+    assert pointer.read_bytes() == original

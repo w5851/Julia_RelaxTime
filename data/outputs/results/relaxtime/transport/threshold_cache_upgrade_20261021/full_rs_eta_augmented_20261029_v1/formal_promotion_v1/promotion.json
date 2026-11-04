@@ -1,0 +1,120 @@
+{
+  "schema": "transport_eta_augmented_formal_promotion_v1",
+  "status": "formal_numerical_data_accepted",
+  "formal_production_promoted": true,
+  "numerical_data_use_approved": true,
+  "publication_use_approved": false,
+  "new_figure_author_acceptance": "pending_v15_png_review",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_ref": "full-rs-eta-refinement-20261029-v1",
+  "promoted_utc": "2026-10-29T08:57:05.582645+00:00",
+  "grid_review_sha256": "06e03334a9d5836a3a3f2493adc004798dfa45939d77f48dfe66f1e2be5f0b4d",
+  "assembly_verification_sha256": "47e6d08099a835dceb33797727499dfc1defa5097072fe225c710ddffd93b970",
+  "return_verification_sha256": "ef53f0f843e6d0deb196916f7eac480c47683bc3b1e54be307281213eb05fb13",
+  "authorization": {
+    "author_instruction": "1. 同意你的补入建议",
+    "accepted_scope": "48 added xi samples plus 9 original-coordinate recomputations; new data version and v14-shaped PNG review",
+    "original_grid_frozen": true
+  },
+  "scope": {
+    "points": 1867,
+    "channels": 31739,
+    "mode_a": 942,
+    "mode_b": 925,
+    "retained_original_values": 1810,
+    "recomputed_original_values": 9,
+    "added_xi_points": 48,
+    "quality_flags_retained": 470,
+    "first_order_gaps_retained": 2
+  },
+  "sampling_selection": {
+    "retained": 1810,
+    "fine_rtol_1e_5": 39,
+    "tighter_rtol_1e_6": 18,
+    "actual_background_residual_norm_max": 1e-10,
+    "actual_background_max_iter": 80,
+    "stable_multiseed": true
+  },
+  "new_validation": {
+    "eos_and_rate_replay": "passed",
+    "max_relative_reconstruction_errors": {
+      "entropy_relative_error": 0,
+      "tau_relative_error": 0,
+      "ratios_relative_error": 0,
+      "omega_relative_error": 0,
+      "mass_relative_error": 0,
+      "rates_relative_error": 0
+    },
+    "selected_values_and_unchanged_values_checked": "passed",
+    "source_files_checked": 340,
+    "return_files_verified": 66,
+    "boundary_scope": "Raw log secants with adjacent-interval context; no sign reversals. This is not a bound on derivative quadrature error."
+  },
+  "inherited_gates": [
+    {
+      "gate": "independent_layers",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/independent_layers.json",
+      "sha256": "ed730e974d69914bb1a22a23b42655aee983e653cbf2316421facdfbf024e59a",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "joint_representatives",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/joint_representatives.json",
+      "sha256": "4f65fc0fd99152a65090ddc10c85d3b2b1989c19913bff2f1f9191d76f5cc01a",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "production_and_fortran_replay",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/production_and_fortran_replay.json",
+      "sha256": "098bad19d930241a933acd5ee1c7edbd11eee9495800c80fa8c5f9cbcd56129c",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "baseline_and_default_entrypoint",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/baseline_and_default_entrypoint.json",
+      "sha256": "1d01d1975b48f28ca9a875d79185b371a0a28e504041173f282bef4d112c4a2a",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "mode_a_background",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/mode_a_background.json",
+      "sha256": "2ac9b502b3cd3cca8ce448b0a290648450a802233740593e33948ea2a7e44934",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "mode_b_qualification",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/mode_b_qualification.json",
+      "sha256": "37d717697c66c524e11a48c985c70255ea2f5ba2e3a3950a9b0ae36fdbbe669a",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "full_grid",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/full_grid.json",
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    },
+    {
+      "gate": "xi04_local_integrals",
+      "status": "reused_passed",
+      "evidence_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/inputs/qualification/xi04_local_integrals.json",
+      "sha256": "ceb3e69e3b92d49f86dc8149307bd0a9917760d5e9b64193be1e4d9bd3fba253",
+      "reuse_basis": "same frozen numerical source and physical conventions; local refinement uses stricter s quadrature on existing parameter curves"
+    }
+  ],
+  "numerical_host": "quote-remote",
+  "retained_production_host": "GitHub Actions",
+  "local_scope": "file metadata, transfer, hashing and Python plotting",
+  "numerical_processing": "explicit selection of computed values; no smoothing, interpolation, fitting, blending or deletion",
+  "metadata_limits": {
+    "iterations": "not retained by the diagnostic driver; empty for its 57 selected points",
+    "phase_tracker": "old labels retained at 9 original coordinates; unknown/empty at 48 new coordinates; no new phase classification claimed"
+  },
+  "limits": "inherits qualified production settings and local xi/s evidence; no new all-channel outer/t/B0 convergence or eta amplitude ablation"
+}

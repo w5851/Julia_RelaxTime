@@ -1,0 +1,163 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_04",
+  "job_fingerprint": "af8905c4d4eb28f178a67d2ca5e2b61cb74523680403d04523472662dd03df21",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_04",
+    "plots": [
+      {
+        "plot": "other04_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应K Mott"
+      },
+      {
+        "plot": "other04_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应K Mott"
+      },
+      {
+        "plot": "other05_eta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+      },
+      {
+        "plot": "other05_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+      },
+      {
+        "plot": "other05_tau_sbar.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图以0为界的两侧纵轴范围不对称",
+            "description": "该面板Y轴在上侧突然跳至约4.2、在下侧约4.1，下方蓝色曲线呈明显V形，导致局部放大；在联系表缩略图中仅依据可见版面记录为异常尺度，记为uncertain，不据此判断数值问题。"
+          }
+        ],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+      },
+      {
+        "plot": "other05_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+      }
+    ],
+    "notes": "缩略联系表中小字和符号横杠细节不可辨，上下标/反粒子横杠按uncertain处理；未将图中采样标记重合判为错误。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "e54ea310086f99f7895e51b965eae576b710012985bc259c0d418e50c2c4493d",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_04.png",
+          "sha256": "f5d8dd1fdd591d56629c27665181d3d3e2fbf983920835d5b2c01d06832185e2",
+          "bytes": 318361
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 368,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.04,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1276,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1276,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1644
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_04\",\"plots\":[{\"plot\":\"other04_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应K Mott\"},{\"plot\":\"other04_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应K Mott\"},{\"plot\":\"other05_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应π Mott\"},{\"plot\":\"other05_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应π Mott\"},{\"plot\":\"other05_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图以0为界的两侧纵轴范围不对称\",\"description\":\"该面板Y轴在上侧突然跳至约4.2、在下侧约4.1，下方蓝色曲线呈明显V形，导致局部放大；在联系表缩略图中仅依据可见版面记录为异常尺度，记为uncertain，不据此判断数值问题。\"}],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应π Mott\"},{\"plot\":\"other05_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖直虚线标记Mott位置，图例中对应π Mott\"}],\"notes\":\"缩略联系表中小字和符号横杠细节不可辨，上下标/反粒子横杠按uncertain处理；未将图中采样标记重合判为错误。\"}",
+      "parsed": {
+        "image_id": "overview_04",
+        "plots": [
+          {
+            "plot": "other04_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应K Mott"
+          },
+          {
+            "plot": "other04_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应K Mott"
+          },
+          {
+            "plot": "other05_eta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+          },
+          {
+            "plot": "other05_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+          },
+          {
+            "plot": "other05_tau_sbar.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图以0为界的两侧纵轴范围不对称",
+                "description": "该面板Y轴在上侧突然跳至约4.2、在下侧约4.1，下方蓝色曲线呈明显V形，导致局部放大；在联系表缩略图中仅依据可见版面记录为异常尺度，记为uncertain，不据此判断数值问题。"
+              }
+            ],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+          },
+          {
+            "plot": "other05_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖直虚线标记Mott位置，图例中对应π Mott"
+          }
+        ],
+        "notes": "缩略联系表中小字和符号横杠细节不可辨，上下标/反粒子横杠按uncertain处理；未将图中采样标记重合判为错误。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 17.711,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 18.067,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

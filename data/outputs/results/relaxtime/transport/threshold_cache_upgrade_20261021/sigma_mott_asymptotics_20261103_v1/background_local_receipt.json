@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "archive_bytes": 24371,
+  "archive_sha256": "ece646ce244f2637a3d4ea5743f2a118fc67811ef0cecb048d172b4cd5719db3",
+  "scope": "Transfer and byte verification only; all numerical calculations on quote-remote",
+  "files_verified": 15
+}

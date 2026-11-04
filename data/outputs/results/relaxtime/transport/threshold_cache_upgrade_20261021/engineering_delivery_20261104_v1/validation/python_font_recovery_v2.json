@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "tests/unit/python/test_phase_guided_full_rs_raw.py::test_completed_artifact_bundle",
+    "tests/unit/python/test_plot_font_sources.py",
+    "tests/unit/python/test_plot_provenance.py",
+    "-q",
+    "--disable-warnings"
+  ],
+  "exit_code": 0,
+  "seconds": 48.51197266578674,
+  "font_sources": "historical_font_sources.json"
+}

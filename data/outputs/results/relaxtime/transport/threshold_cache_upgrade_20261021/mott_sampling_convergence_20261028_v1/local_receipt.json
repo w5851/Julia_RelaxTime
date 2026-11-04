@@ -1,0 +1,91 @@
+{
+  "status": "verified",
+  "checked_utc": "2026-10-28T08:22:03.599466+00:00",
+  "case_id": "mott_sampling_convergence_20261028_v1",
+  "compute_host": "quote-remote",
+  "local_scope": "archive, hash, metadata and source identity verification only; no numerical rerun",
+  "archive": "trmott-sampling-20261028-v1-results.zip",
+  "archive_sha256": "fde6e075a6e0371fb31ead4fab91009403a9b4d6f1732b20ce1ec0fca4169172",
+  "archive_bytes": 35808414,
+  "package_manifest_sha256": "073cdc0223e71b9729f549cf99036141ae39da555d4f37b50aef1fd035c67fe4",
+  "verified_files": 406,
+  "all_file_sizes_and_hashes_match": true,
+  "no_missing_or_extra_returned_files": true,
+  "initial_archive_members_verified": 8,
+  "input_upload_hashes_match": true,
+  "original_calculation_archive_and_csv_hashes_match": true,
+  "source_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "postrun_source_verification": {
+    "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+    "source_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "checked_files": 340,
+    "all_match": true,
+    "checked_utc": "2026-10-28T08:06:57.8449674Z"
+  },
+  "canonical_script_identity": {
+    "run_transport_mott_sampling_convergence.jl": {
+      "executed_snapshot": "source/run_transport_mott_sampling_convergence.jl",
+      "sha256": "4f1c627c45c31d298bcdaf1a8c4f74366c43b94dbdb686053dc7e7638c60f84e",
+      "match": true
+    },
+    "run_transport_mott_outer_convergence.jl": {
+      "executed_snapshot": "source/run_transport_mott_outer_convergence.jl",
+      "sha256": "dc022325d6b14a59fc2767262a30b5d370c7ad1cce2d93349fca7e6097ff0811",
+      "match": true
+    },
+    "propagate_transport_mott_sampling_convergence.jl": {
+      "executed_snapshot": "source/propagate_transport_mott_sampling_convergence_v3.jl",
+      "sha256": "dc51f915995e4e9a8592cbbc7e1b044fb67592181e27178e3b2712040052f390",
+      "match": true
+    },
+    "review_transport_mott_sampling_convergence.py": {
+      "executed_snapshot": "source/review_transport_mott_sampling_convergence.py",
+      "sha256": "1c6b5f0b231c9d3c2370ae5da491589e133bbf74a9c00da4e02883f5787c6b6e",
+      "match": true
+    }
+  },
+  "runs": {
+    "pilot_v1": {
+      "exit_code": 0,
+      "frozen_source_files_verified": 340,
+      "status_sha256": "33e966ea8539a4fd898ee76e9a3d59b968ca9fd6c52238d9e6597c533d9edb4f",
+      "source_check_sha256": "115c25db7868479fd946bff68ffe2cd13212e491284c148d2c40ae45811f2497",
+      "completed_jobs": 1
+    },
+    "remaining_v1": {
+      "exit_code": 0,
+      "frozen_source_files_verified": 340,
+      "status_sha256": "78429836509e8304fc6736d8581a264a027fcf846af18fc7cf2333ba20bf70a2",
+      "source_check_sha256": "115c25db7868479fd946bff68ffe2cd13212e491284c148d2c40ae45811f2497",
+      "completed_jobs": 23
+    },
+    "outer_v1": {
+      "exit_code": 0,
+      "frozen_source_files_verified": 340,
+      "status_sha256": "e5b14a675fd230e75949a35db0afbb5f8e6bbdf01e48efe87436add6f40e6b35",
+      "source_check_sha256": "115c25db7868479fd946bff68ffe2cd13212e491284c148d2c40ae45811f2497",
+      "completed_jobs": 12
+    },
+    "propagate_s_v1": {
+      "exit_code": 0,
+      "frozen_source_files_verified": 340,
+      "status_sha256": "3286b71dccdff1c6ba7009c169fce6df441603ef8099177868554b8d13c58745",
+      "source_check_sha256": "115c25db7868479fd946bff68ffe2cd13212e491284c148d2c40ae45811f2497"
+    },
+    "propagate_full_v1": {
+      "exit_code": 0,
+      "frozen_source_files_verified": 340,
+      "status_sha256": "c1824b352f4140523277ffe94addb17f4d3fa3a1299ec0404090cfce036c0911",
+      "source_check_sha256": "115c25db7868479fd946bff68ffe2cd13212e491284c148d2c40ae45811f2497"
+    }
+  },
+  "final_review": "returned/final_review_v1/review.json",
+  "final_review_sha256": "36ef7a2a0ecd094d9bda3edc45d611f1ff33e88aabdbac42ef340799d8ad71f0",
+  "final_review_status": "completed_diagnostic_review",
+  "final_review_flags_passed": true,
+  "original_artifact_check": {
+    "path": "original_artifact_check.json",
+    "sha256": "56060a87e5eee2a4b7245d6614825ce5645af6825353cdfc4289538751a4d232",
+    "files_checked": 158
+  }
+}

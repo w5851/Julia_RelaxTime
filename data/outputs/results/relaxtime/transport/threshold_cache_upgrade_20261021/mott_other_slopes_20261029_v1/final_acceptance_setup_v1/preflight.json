@@ -1,0 +1,8 @@
+{
+  "transferred_file_hashes_match": true,
+  "frozen_source_files_verified": 340,
+  "expected_reference_evaluations": 175,
+  "config_sha256": "19daa57336ed011a1841d22164a82fa4f906ae6d26c84b38b1491bf42bc006c1",
+  "source_files_modified": false,
+  "recovery_controller_modified": false
+}

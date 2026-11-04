@@ -1,0 +1,11 @@
+{
+  "status": "verified",
+  "archive_sha256": "4c445ca175038a682fca6af44803e0e32d73c4fc22899c8fba0cb92ac468d383",
+  "files_checked": 74,
+  "returned_input_and_script_identity_passed": true,
+  "original_A_B_tables_unchanged": true,
+  "original_plot_manifest_unchanged": true,
+  "other_ledger_semantics_before": "9a6361ca69d7c6dce94cb9ac7243e0b464828ec5e4334e47259b9bdfe91817eb",
+  "other_ledger_semantics_after": "9a6361ca69d7c6dce94cb9ac7243e0b464828ec5e4334e47259b9bdfe91817eb",
+  "ledger_status_and_author_approval_fields_unchanged": true
+}

@@ -1,0 +1,28 @@
+{
+  "host": "W",
+  "identity_checks": 24,
+  "maximum_coupling_identity_relative": 2.0351271624468254e-16,
+  "backgrounds": 24,
+  "density_comparisons": 576,
+  "pair_bounds": 48,
+  "moment_comparisons": 144,
+  "A_comparisons": 216,
+  "kernel_rates": 48,
+  "kernel_comparisons": 40,
+  "outer_rates": 36,
+  "outer_comparisons": 33,
+  "layer_targets_passed": true,
+  "maximum_background_replay_relative": 0.0,
+  "numpy": "2.2.4",
+  "maximum_numpy_julia_density_relative": 1.509903313490213e-14,
+  "maximum_pair_normalization_error": 3.23257277046185e-06,
+  "maximum_terminal_bound": 7.56985152737237e-06,
+  "maximum_A_relative": 1.2531737247911678e-07,
+  "maximum_layer_relative_changes": {
+    "kernel": 1.4948956650329137e-06,
+    "outer": 0.0038631677936057374
+  },
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "source_files_verified": 1602,
+  "full_qualification": false
+}

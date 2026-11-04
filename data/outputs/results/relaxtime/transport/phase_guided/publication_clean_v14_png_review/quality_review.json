@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "figures": 76,
+  "png_count": 152,
+  "original_vertices_verified": 32138,
+  "no_postprocessing": true,
+  "validation_errors": [],
+  "manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "validated_review_bundle",
+    "bytes": 5838899,
+    "sha256": "fa2ae9c1f55fd006217a5466330289703287897e8d90ae6ae64ca672868e7508"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "host": "quote-remote",
+  "tests": 59,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 0.34123826026916504,
+  "source_files": 168,
+  "source_all_match": true,
+  "passed": true,
+  "scope": "synthetic derivative/decomposition tests and disposable I/O/controller fixtures; no production calculations"
+}

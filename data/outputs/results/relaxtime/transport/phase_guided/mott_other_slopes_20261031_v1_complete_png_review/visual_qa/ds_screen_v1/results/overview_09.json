@@ -1,0 +1,151 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_09",
+  "job_fingerprint": "e9454a57b4eda8b80891952e63409495503dce21e90a642934e9e7f8c3dba3d4",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_09",
+    "plots": [
+      {
+        "plot": "other10_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      },
+      {
+        "plot": "other10_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      },
+      {
+        "plot": "other11_eta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      },
+      {
+        "plot": "other11_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      },
+      {
+        "plot": "other11_tau_sbar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      },
+      {
+        "plot": "other11_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置"
+      }
+    ],
+    "notes": "联系表内未见明显裁切、标签缺失或图例碰撞；缩小后小字清晰度不确定但不判为缺陷。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "d2c6f3c3c9ca70c346ef6c08e6f7988ee9a21245c5b540739452f76f41e15f17",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_09.png",
+          "sha256": "dca7e68697aaacf851cb740558c22ebc3b38f9f7cef6104e8ef03189b9cb1539",
+          "bytes": 320591
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 236,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.03,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1276,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1276,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1512
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_09\",\"plots\":[{\"plot\":\"other10_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"},{\"plot\":\"other10_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"},{\"plot\":\"other11_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"},{\"plot\":\"other11_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"},{\"plot\":\"other11_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"},{\"plot\":\"other11_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置\"}],\"notes\":\"联系表内未见明显裁切、标签缺失或图例碰撞；缩小后小字清晰度不确定但不判为缺陷。\"}",
+      "parsed": {
+        "image_id": "overview_09",
+        "plots": [
+          {
+            "plot": "other10_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          },
+          {
+            "plot": "other10_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          },
+          {
+            "plot": "other11_eta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          },
+          {
+            "plot": "other11_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          },
+          {
+            "plot": "other11_tau_sbar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          },
+          {
+            "plot": "other11_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置"
+          }
+        ],
+        "notes": "联系表内未见明显裁切、标签缺失或图例碰撞；缩小后小字清晰度不确定但不判为缺陷。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 15.025,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 15.221,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

@@ -1,0 +1,29 @@
+{
+  "status": "verified",
+  "checked_utc": "2026-10-28T08:53:00.364211+00:00",
+  "host": "quote-remote",
+  "files_verified": 6,
+  "all_returned_sizes_and_hashes_match": true,
+  "all_input_hashes_match_previous_verified_package": true,
+  "executed_script_matches_current": true,
+  "executed_script_sha256": "34d31c5de64496845b63da1388e3303ab4af01ae9e65afc3f987628ce2aaf303",
+  "summary_sha256": "87cc7c5083856485c7d60bcc9cf0440015cec8d6829307d1c056d29379821e8c",
+  "remote_manifest_sha256": "4818cc5af32e054cd962aaab0fe3bfbc66f71ff8d42228f6e21456f6b61a6358",
+  "historical_sources": [
+    {
+      "original_path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\relaxtime\\transport_review_followup_20261013_analysis\\README.md",
+      "snapshot": "historical_inputs/README.md",
+      "sha256": "d841d38cb334359ed3b265a032a8071a7d7868d27529a1f2a1de316c82bd694c",
+      "scope": "Historical pre-full-RS-coupling convention; not current-production calibration"
+    },
+    {
+      "original_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\review_followup_20261013\\run_20261014\\tables\\channel_threshold_evidence.csv",
+      "snapshot": "historical_inputs/channel_threshold_evidence.csv",
+      "sha256": "7be3ebeb85be7928b8b14308c1a77c51c38028b6db9f990e49158cb7bdc806f5",
+      "scope": "Historical pre-full-RS-coupling convention; not current-production calibration"
+    }
+  ],
+  "initial_attempt": "initial_attempt.json",
+  "scope": "Existing 21 points, 19 adjacent pairs and 84 species-rate consistency checks; no new Julia, meson roots, integration, smoothing or production changes",
+  "local_work": "file transfer, byte/hash checks and metadata only"
+}

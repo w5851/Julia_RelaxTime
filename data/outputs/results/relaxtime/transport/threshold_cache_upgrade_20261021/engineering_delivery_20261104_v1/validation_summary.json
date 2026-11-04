@@ -1,0 +1,66 @@
+{
+  "schema": "transport_engineering_validation_v1",
+  "scope": "Current-state documentation, analysis/plotting tools and evidence recovery; no new physical calculation",
+  "remote_analysis_tests": {
+    "passed": 59,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "source_files": 168,
+    "source_identity_verified": true,
+    "record": "validation/review.json"
+  },
+  "initial_plotting_io_suite": {
+    "total": 92,
+    "passed": 91,
+    "failed": 1,
+    "record": "validation/python_plotting.json",
+    "resolved_by": "validation/python_font_recovery_v2.json"
+  },
+  "final_compatibility_tests": {
+    "passed": 19,
+    "failed": 0,
+    "record": "validation/python_font_recovery_v2.json",
+    "note": "Focused rerun includes the previously failing raw artifact case; overlaps initial suite, do not sum counts"
+  },
+  "governance": {
+    "checks": 5,
+    "passed": true,
+    "record": "validation/final_governance.json"
+  },
+  "source_and_links": {
+    "python_source_files": 79,
+    "syntax_passed": true,
+    "remote_source_files": 168,
+    "remote_sources_unchanged": true,
+    "document_links_checked": 302,
+    "broken_links": [],
+    "selected_ledger_blob": "44227ffeafbcbaf8ce6374bf8000280ca69368e1"
+  },
+  "evidence_archive": {
+    "files": 43645,
+    "restored_and_verified": true,
+    "record": "restore_verification.json"
+  },
+  "engineering_source": {
+    "files": 3734,
+    "restored_and_verified": true,
+    "record": "engineering_source_restore.json"
+  },
+  "staged_original_artifacts": {
+    "files": 3490,
+    "raw_bytes_preserved": true,
+    "record": "validation/staged_artifact_bytes.json"
+  },
+  "numerical_source_or_baseline_modified": false,
+  "production_regression": "Reuse accepted 314/314 full-RS v3 and layered/representative/full-grid acceptance; no numerical code changes",
+  "scientific_status": {
+    "original_points": 1819,
+    "latest_formal_points": 1867,
+    "current_figure_layer": "v14",
+    "v15_png": "author_reviewed",
+    "v15_pdf": "deferred",
+    "full_transport_C1_not_C2": "not_unconditionally_certified"
+  },
+  "preserved_other_work": "validation/scope_and_preservation.json"
+}

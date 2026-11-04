@@ -3,7 +3,7 @@
 `Models.TransportSamplingProfiles` 把输运计算的背景、A、热平均及末端积分绑定为同一版本配置。
 配置文件位于 `config/models/pnjl/transport_sampling/`。两个扫描 CLI 均默认使用 `thermal_weighted_v1`；
 旧固定网格、扣除/加回、w0cdf/PCHIP 和无身份 CSV 缓存加载实现已移除。
-完整数值验证状态见[生产接入任务](../../../dev/active/2026-10-23_输运采样生产接入与重跑合同.md)。
+完整数值验证状态见[统一状态说明](../../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
 
 ```julia
 profiles = Models.TransportSamplingProfiles

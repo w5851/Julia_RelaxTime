@@ -1,0 +1,151 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_08",
+  "job_fingerprint": "ec998f4a967fbae12c25a4dc9f88d132d3aa0f300be3599231ea40c47e9bee2b",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_08",
+    "plots": [
+      {
+        "plot": "other09_tau_sbar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      },
+      {
+        "plot": "other09_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      },
+      {
+        "plot": "other09_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      },
+      {
+        "plot": "other10_eta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      },
+      {
+        "plot": "other10_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      },
+      {
+        "plot": "other10_tau_sbar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+      }
+    ],
+    "notes": "六个子图版面完整，图例未碰撞，上下标与 τ̄/σ̄ 横杠可见；缩小后小标记重叠较多，但原图分辨性为uncertain。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "8adc6afa1c2beec2e4622d11fb97c01ce9257bede61b8069e06bf958d4f1d78b",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_08.png",
+          "sha256": "3fe3f117923a3d808940caf1f80e65e3f569ea730d4dd9415a198e1d37d7512c",
+          "bytes": 316572
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 327,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.04,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1275,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1275,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1602
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_08\",\"plots\":[{\"plot\":\"other09_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"},{\"plot\":\"other09_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"},{\"plot\":\"other09_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"},{\"plot\":\"other10_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"},{\"plot\":\"other10_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"},{\"plot\":\"other10_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'\"}],\"notes\":\"六个子图版面完整，图例未碰撞，上下标与 τ̄/σ̄ 横杠可见；缩小后小标记重叠较多，但原图分辨性为uncertain。\"}",
+      "parsed": {
+        "image_id": "overview_08",
+        "plots": [
+          {
+            "plot": "other09_tau_sbar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          },
+          {
+            "plot": "other09_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          },
+          {
+            "plot": "other09_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          },
+          {
+            "plot": "other10_eta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          },
+          {
+            "plot": "other10_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          },
+          {
+            "plot": "other10_tau_sbar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰竖线位于 ξ-ξMott≈0 处，图例中可见 'K Mott'"
+          }
+        ],
+        "notes": "六个子图版面完整，图例未碰撞，上下标与 τ̄/σ̄ 横杠可见；缩小后小标记重叠较多，但原图分辨性为uncertain。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 15.757,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 15.973,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

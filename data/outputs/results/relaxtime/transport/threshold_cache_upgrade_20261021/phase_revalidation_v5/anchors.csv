@@ -1,0 +1,4 @@
+muB_MeV,kind,method,old_reference_T_MeV,T_MeV,shift_MeV,refinement_delta_MeV,certified,side_delta_xi,seconds,gc_seconds,allocated_bytes
+0.0,crossover,direct_condensate_derivative_peak,200.08890140807532,200.0898076157829,0.0009062077075725483,0.0,true,NaN,306.9952627,3.9867295,1606375220
+450.0,crossover,direct_condensate_derivative_peak,182.6401249800981,182.72820247485038,0.08807749475226956,0.0,true,NaN,74.1335406,0.0,91069471
+900.0,first_order,direct_two_branch_equal_omega_bisection,125.73406443235267,125.7360002645551,0.0019358322024345398,7.450580596923828e-9,true,0.003,112.4538004,0.4236293,27793881

@@ -1,0 +1,14 @@
+{
+  "returned_files": 48,
+  "all_file_sizes_and_hashes_match": true,
+  "archive_sha256": "4e0127ba0aa4e9149bc8cc4d9c06cf07c9e59b6df29ea4e289b0b38502643cb7",
+  "source_snapshots_match": [
+    "finish_review.py",
+    "run_remote_survey.ps1",
+    "run_transport_eta_mott_survey.jl",
+    "run_transport_mott_probe.jl",
+    "survey_transport_eta_mott.py"
+  ],
+  "accepted_local_mode_a_and_b_hashes_unchanged": true,
+  "local_actions": "file transfer, extraction, byte identity and metadata checks only; no numerical analysis"
+}

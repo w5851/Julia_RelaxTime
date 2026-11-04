@@ -1,0 +1,125 @@
+{
+  "status": "completed_side_curvature_diagnostic",
+  "source": "D:\\CodexCompute\\trsigma-mott-20261101-v1\\asym_full_v2\\summary.json",
+  "source_sha256": "8d5543a476f061db92f532f115a3d33aa49e78158663c966b914961820fbd9fb",
+  "scope": "Continuum near-threshold mixed-scalar square; both mixed poles; no other-amplitude interference or full transport reconstruction.",
+  "xi_mott": 0.015327819866955281,
+  "tests": {
+    "passed": true,
+    "count": 5
+  },
+  "executions": {
+    "asym_full_v2": {
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340
+    },
+    "asym_checks_v1": {
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340
+    }
+  },
+  "derivative": "Second xi derivative of continuous near-threshold mixed-scalar positive-square rate, not complete tau or terminal transport.",
+  "error_semantics": "Numerical comparison envelope, not a certified bound. Loop/representation and continuous thermal-weight references at four distances on both sides.",
+  "guards": "The guarded variant applies the existing determinant threshold exactly, including its discontinuous activation.",
+  "left_last3": [
+    {
+      "side": "left",
+      "h": 7.8125e-07,
+      "delta_xi": -7.8125e-07,
+      "curvature_wide": 77.61414912224596,
+      "curvature_fine": 77.38331184170555,
+      "curvature": 77.30636608152541,
+      "scaled_curvature": 0.06832981960642041,
+      "step_defect": 0.07694576018013777,
+      "quadrature_defect": 1.974917729532559e-08,
+      "empirical_relative_defect": 0.0009953356214955171,
+      "effective_exponent": 0.4981526979049237,
+      "point_ids": "asym_041;asym_043;asym_045;asym_042;asym_044"
+    },
+    {
+      "side": "left",
+      "h": 3.90625e-07,
+      "delta_xi": -3.90625e-07,
+      "curvature_wide": 109.6536062450415,
+      "curvature_fine": 109.32741489888542,
+      "curvature": 109.21868445016673,
+      "scaled_curvature": 0.06826167778135421,
+      "step_defect": 0.10873044871868842,
+      "quadrature_defect": 7.603933549493442e-08,
+      "empirical_relative_defect": 0.0009955304379044637,
+      "effective_exponent": 0.49856055635767016,
+      "point_ids": "asym_046;asym_048;asym_050;asym_047;asym_049"
+    },
+    {
+      "side": "left",
+      "h": 1.953125e-07,
+      "delta_xi": -1.953125e-07,
+      "curvature_wide": 154.9528052424698,
+      "curvature_fine": 154.49022323643646,
+      "curvature": 154.33602923442535,
+      "scaled_curvature": 0.06820753303316714,
+      "step_defect": 0.1541940020111099,
+      "quadrature_defect": 3.0291694512071543e-07,
+      "empirical_relative_defect": 0.0009990817159993466,
+      "effective_exponent": 0.49885520897597035,
+      "point_ids": "asym_051;asym_053;asym_055;asym_052;asym_054"
+    }
+  ],
+  "right_last3": [
+    {
+      "side": "right",
+      "h": 7.8125e-07,
+      "delta_xi": 7.8125e-07,
+      "curvature_wide": 0.32311527481398983,
+      "curvature_fine": 0.3229144757144198,
+      "curvature": 0.3228475426812298,
+      "scaled_curvature": 0.00028535960839913863,
+      "step_defect": 6.693303318999755e-05,
+      "quadrature_defect": 1.2961308206700266e-08,
+      "empirical_relative_defect": 0.00020736101610754635,
+      "effective_exponent": 0.14457985816676303,
+      "point_ids": "asym_066;asym_068;asym_070;asym_067;asym_069"
+    },
+    {
+      "side": "right",
+      "h": 3.90625e-07,
+      "delta_xi": 3.90625e-07,
+      "curvature_wide": 0.3538777937350801,
+      "curvature_fine": 0.3537084625193643,
+      "curvature": 0.35365201878079233,
+      "scaled_curvature": 0.0002210325117379952,
+      "step_defect": 5.644373857194296e-05,
+      "quadrature_defect": 5.8450536209702894e-08,
+      "empirical_relative_defect": 0.00015976775504616866,
+      "effective_exponent": 0.13147745056946405,
+      "point_ids": "asym_061;asym_063;asym_065;asym_062;asym_064"
+    },
+    {
+      "side": "right",
+      "h": 1.953125e-07,
+      "delta_xi": 1.953125e-07,
+      "curvature_wide": 0.3845771923138841,
+      "curvature_fine": 0.38300722593476166,
+      "curvature": 0.38248390380838754,
+      "scaled_curvature": 0.00016903560129850873,
+      "step_defect": 0.0005233221263741261,
+      "quadrature_defect": 1.235629635890227e-07,
+      "empirical_relative_defect": 0.0013685430527292073,
+      "effective_exponent": 0.11306853890815448,
+      "point_ids": "asym_056;asym_058;asym_060;asym_057;asym_059"
+    }
+  ],
+  "maximum_reference_relative_change": {
+    "loop256": 4.4418429157033756e-08,
+    "weight_fine": 1.588725859469342e-05,
+    "guarded": 343.6276100788787
+  },
+  "files": {
+    "precision_comparison.csv": "3d56128d234b769b58d5a088a8c71a244a6378bbdf97863967b6e4af2b5eddd8",
+    "side_curvatures.csv": "8285eaf4b49226119d6921874b76edd89c2189cea274d71cc97e93be7e28171a",
+    "tests.stderr.log": "46a59d823d772c3809446eba836399e2612ba33924b6c71abe8e15b736b8f4b7",
+    "tests.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "status": "restored_and_verified",
+  "files": 43645,
+  "destination": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/restored_verification",
+  "archive_sha256": "0cffb26b3fc06b724da31be80ddde636a1f9719a62f56bc2aa273b07624aabc8",
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "scripts/analysis/relaxtime/transport_delivery_archive.py",
+    "restore",
+    "--archive",
+    "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/transport_evidence.zip",
+    "--receipt",
+    "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\engineering_delivery_20261104_v1\\archive_receipt.json",
+    "--destination",
+    "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/restored_verification"
+  ],
+  "seconds": 1808.3608784675598
+}

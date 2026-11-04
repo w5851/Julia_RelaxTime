@@ -1,0 +1,24 @@
+{
+  "status": "agent_review_with_overlap_limit",
+  "manifest_sha256": "a3c8320ebfe717cbfa2fc4ddf8f58f7e2bfcf26fc5dba683d88859b057f5b3dd",
+  "machine_validation": {
+    "passed": true,
+    "errors": []
+  },
+  "external_model": "cn:deepseek-v4.1-flash",
+  "external_model_candidate_pass": false,
+  "source_review": "ds_review_v1/sigma-spectrum-review.json",
+  "main_agent_image_loaded": false,
+  "author_accepted": false,
+  "scientific_conclusion_source": "remote CSV and mathematical checks, not model image interpretation",
+  "findings": [
+    {
+      "issue": "Near-threshold continuum-side peaks are visually resolved; Delta xi=0 and +2e-5 overlap at low cross section.",
+      "disposition": "Retained as an explicit limitation of the common log scale; no false vertical offsets or independent distinguishability claim."
+    },
+    {
+      "issue": "Candidate clipping or reaction-label occlusion.",
+      "disposition": "Machine geometry finds no clipped text, text overlap, or legend/curve intersection; candidate screen does not certify absence of every label/curve overlap."
+    }
+  ]
+}

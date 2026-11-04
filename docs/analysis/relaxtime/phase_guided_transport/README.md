@@ -1,13 +1,23 @@
 # Phase-guided transport evidence line
 
-本目录收纳 phase-guided relaxation-time transport 的连续诊断证据包。它们都位于 `docs/analysis` 的 diagnostic 边界内，不是新的 production result root，也不改变 `data/outputs` 中的正式 CSV、figure 或 registry。
+本目录维护 phase-guided relaxation-time transport 的当前图件入口与历史诊断索引。正式数值和新图像位于 `data/outputs`；旧证据包保留其生成时的资格和哈希。
 
-最新已接受排版为 **v13**：从[PDF 图件索引](phase_guided_transport_publication_clean_v13_pdf/pdf_index.md)查看 75 份矢量图，从[案例合同](plotting_case_contract.md)查看版式与物理标签规则。当前正式文稿图层仍为 **v5**；v13 的 PNG 接受和 PDF 交付记录不自动更改 current 或论文资格。
+**当前正式图层为 publication_clean_v14**，入口为 [current 指针](publication_clean_current.json)和[交付索引](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/README.md)。1819 个 full-RS 原始点直接生成 76 张彩色 PNG、76 张灰度 PNG 和 76 份单页矢量 PDF，无平滑、插值、删点或局部替换；包含 mode-B／FIG4。作者的条件授权已通过 75 张 v13 对应形式及指定 fixed-T 形式核验，数值、PDF 和论文使用资格见[正式化记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json)。
+
+新 FIG4 采用作者指定的 20261021 面板内图例版。论文 `main.tex` 仍引用 v13 的 Figure 1/2 和更早的顶部图例 FIG4，本次不修改论文工程。旧包已被 v14 取代为默认选用来源；[旧资产清单](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/legacy_cleanup/README.md)记录引用和归档条件，目前未物理删除。
+
+最新正式数值版本为[η阈值局部加密的1867点网格](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：
+1810个v14原值、9个原坐标重算值及48个新增ξ点，全部数值验收在quote-remote完成。
+对应图像为[publication_clean_v15 PNG审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/)，
+沿用v14的76图形式。新PNG已由作者审阅；PDF按作者要求暂缓，图层资格仍为png_review，尚未替换current。冻结生成记录中的pending保留当时状态，当前决策见[生产计划](../threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
 
 ## Stages
 
 | 阶段 | 当前路径 | 角色 |
 | --- | --- | --- |
+| publication-clean v15 PNG review | [新审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/) | 1867点正式数据直出，沿用v14形式；manuscript_eligible=false；作者已审阅，PDF暂缓，未晋升current |
+| publication-clean v14 current | [正式 PNG/PDF 包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/) | 新 full-RS 原始数据正式图层，76 图；manuscript_eligible=true |
+| publication-clean v14 PNG snapshot | [冻结审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/) | 原 PNG 阶段记录不回写；独立条件接受记录衔接正式 PDF |
 | publication-clean v13 accepted layout | [`publication_clean_v13_png_acceptance_v1.json`](publication_clean_v13_png_acceptance_v1.json) | 作者版本级 PNG 接受及对应 PDF 导出授权；不声称逐文件人工审查或数值生产晋升 |
 | publication-clean v13 PDF delivery | [`phase_guided_transport_publication_clean_v13_pdf/`](phase_guided_transport_publication_clean_v13_pdf/) | 72 单图、2 主复合图、1 局部图，共 75 份单页矢量 PDF；完成 vector_delivery，manuscript_eligible=false |
 | publication-clean v13 PNG snapshot | [`phase_guided_transport_publication_clean_v13_png_review/`](phase_guided_transport_publication_clean_v13_png_review/) | 75 对彩色／灰度 PNG、冻结 renderer、点表和图例声明；原生成时 manifest 与审查记录保持不变，接受状态见独立记录 |
@@ -20,11 +30,11 @@
 | publication-clean v11 PNG snapshot | [`phase_guided_transport_publication_clean_v11_png_review/`](phase_guided_transport_publication_clean_v11_png_review/) | 不可变 PNG 审查快照及 v5 点表继承链 |
 | publication-clean v11 PDF companions | [`phase_guided_transport_publication_clean_v11_pdf_review/`](phase_guided_transport_publication_clean_v11_pdf_review/) | 相同冻结 renderer 的真正矢量补充，保留复合图字高 preflight 未通过项 |
 | publication-clean v11 paper-size review | [`phase_guided_transport_publication_clean_v11_paper_size_review/`](phase_guided_transport_publication_clean_v11_paper_size_review/) | Letter 插入和 A4 打印缩放实测；论文临时 PDF 不入计算仓库 |
-| publication-clean current | [`phase_guided_transport_publication_clean_v5/`](phase_guided_transport_publication_clean_v5/) | 正式文稿采用的当前 publication figure layer；只更新图内单位和分支端点措辞，不改变 raw/production 数值 |
+| publication-clean v5 previous selection | [`phase_guided_transport_publication_clean_v5/`](phase_guided_transport_publication_clean_v5/) | 曾经接受的显示图层；已由 v14 取代，保留原资格记录和显示派生证据 |
 | publication-clean accepted parent | [`phase_guided_transport_publication_clean_v4/`](phase_guided_transport_publication_clean_v4/) | v5 的已接受显示父级；保留 v4 的局部显示调整与 raw/display provenance |
 | publication-clean intermediate | [`phase_guided_transport_publication_clean_v3/`](phase_guided_transport_publication_clean_v3/) | v4 的不可变父级和中间版本，仅保留 provenance，不作为当前 publication layer |
 
-版本共存按用途区分：v13 是最新已接受排版，v5 是 current，v10–v12 是保留快照，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，renderer 也保留历史生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。
+版本共存按用途区分：v14 是当前正式产物，v1–v13 是被取代的历史数据／显示层，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，历史 renderer 保留生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。`production_registry.json` 保留旧批次登记，新批次资格以 current 指针所链接的 full-RS 晋升记录为准。
 
 v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_window_summary.csv`；v2 是连续审计阶段，不覆盖、不合并、也不重写 v1。
 
@@ -39,11 +49,13 @@ v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_
 - 本次整理只改变物理 namespace、分组入口和 live 脚本默认路径。
 - 两个包内的 CSV、JSON、PNG、生成时 manifest、图 manifest、旧路径快照、execution/provenance 记录均按字节保持。
 - v1 root `manifest.json` 在迁移前已经存在 2/21 个 `outputs` hash mismatch；这不是本次目录移动造成的变化，也不在本批修复。
-- metadata 修复已登记为独立 follow-up：[`2026-08-19_docs-analysis-metadata-repair-task.md`](../../../dev/active/2026-08-19_docs-analysis-metadata-repair-task.md)。
+- metadata 修复的历史任务记录：[`2026-08-19_docs-analysis-metadata-repair-task.md`](../../../dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md)。
 
-## Publication promotion boundary
+## Current promotion and historical boundary
 
-v5 已由作者明确用于正式文稿，并成为当前 publication-clean **图层**。该接受只覆盖
+v14 的晋升同时绑定新网格收敛、回归、完整 provenance、失败点与局部结构审计，以及作者条件授权。PNG 重绘逐字节一致，PDF 的字体、矢量和物理尺寸检查通过，原始表与原始 PNG 未被覆盖。
+
+下述 v5–v13 说明保留各阶段当时的边界；其中“current=v5”只描述历史状态，不是当前入口。v5 当时由作者明确用于正式文稿，成为 publication-clean **图层**。该接受只覆盖
 `author_accepted_formal_layout` 的显示产物，不晋升 phase reference，不修改
 solver、transport kernel 或 production registry，也不把显示派生值解释为新的
 production-grade 数值结果或 convergence certificate。v5 的
@@ -108,7 +120,7 @@ log 标签；匹配的 mode-A tau 单图也采用 log-y。Figure 2（三行输�
 `publication_clean_v11_stage_acceptance_v1.json`，不重写上述审查 manifest。
 验收只覆盖显示版式与同 renderer 的 PDF 补充；上下标字高、实际插入宽度
 和 numerical qualification 的未通过/未运行边界继续保留。
-`manuscript_eligible=false`，`publication_clean_current.json` 仍为 v5。
+`manuscript_eligible=false`；当时的 v5 指针由冻结元数据恢复检查，当前指针可以经新的作者授权推进。
 
 v11 阶段保留了完整 v10 父级和 v11 PNG/PDF/版面审计，以及 v6-v11 生成器
 导入依赖。当时记录的 v10 原 SOP/skill hash 与活动合同存在两处漂移；历史快照

@@ -1,0 +1,65 @@
+{
+  "schema": "image_only_comparison_preview_v1",
+  "created_utc": "2026-10-31T16:20:41.133684+00:00",
+  "source_manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+    "sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65"
+  },
+  "sources": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_ubar.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 371425,
+      "sha256": "e7118f9e0d6e9f7210c60098ef5594839a4a21a0722baf9687f003144f9f587d",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          3600
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          6.000012000024
+        ]
+      }
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_sigma_over_T.png",
+      "path_kind": "repository_relative",
+      "format": "png",
+      "dpi": 600,
+      "vector": false,
+      "bytes": 409931,
+      "sha256": "b6d971def78ef25639d51125d8370464b1396ad9d0f94ed67ad390c675b245ab",
+      "inspection": {
+        "size_pixels": [
+          4050,
+          3600
+        ],
+        "actual_dpi": [
+          599.9988,
+          599.9988
+        ],
+        "physical_size_inches": [
+          6.750013500027,
+          6.000012000024
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png",
+    "bytes": 279482,
+    "sha256": "440c7be6d2b500b7eeafc64faf4b1ab36141781d34534c1da262224a1d314760"
+  },
+  "transform": "Each frozen PNG resized from 4050x3600 to 1350x1200 and composed side-by-side with a filename banner. Axes and data are unchanged.",
+  "purpose": "Reading preview only; original figures require 6.75-inch width each.",
+  "scientific_values_modified": false,
+  "new_numerical_analysis": false
+}

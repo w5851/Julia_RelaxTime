@@ -1,0 +1,26 @@
+{
+  "kind": "bounded_external_ds_batch_summary",
+  "generated_utc": "2026-11-01T08:13:51.747952+00:00",
+  "manifest": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_spectrum_20261101_v2_png_review\\visual_qa_inputs\\jobs.jsonl",
+  "manifest_sha256": "46d0984b66ddc1299f72c58f172b40451b9d759c77727e4c34b43fcc4f113d50",
+  "model": "cn:deepseek-v4.1-flash",
+  "jobs": 1,
+  "reused_jobs": 0,
+  "ok_jobs": 1,
+  "failed_ids": [],
+  "validation_failed_ids": [],
+  "development_label_jobs": 0,
+  "development_label_matches": 0,
+  "label_mismatch_ids": [],
+  "wall_seconds": 18.319,
+  "median_job_seconds": 18.304,
+  "ds_usage_total_all_saved_attempts": {
+    "prompt_tokens": 1137,
+    "completion_tokens": 631,
+    "total_tokens": 1768,
+    "credit": 0.05,
+    "cached_tokens": 0
+  },
+  "note": "Development observations only; not a blind accuracy estimate. Usage includes reused jobs when resuming.",
+  "output_dir": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_spectrum_20261101_v2_png_review\\ds_review_v1"
+}

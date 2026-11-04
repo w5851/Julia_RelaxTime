@@ -1,0 +1,66 @@
+{
+  "status": "machine_passed_external_visual_candidates_reviewed",
+  "generated_utc": "2026-11-03T03:22:16.943028+00:00",
+  "manifest_sha256": "141fdd41b97fe17e94971efff94b6c5d03cf7e518d62d9f1827144249bb536ac",
+  "machine_validation": {
+    "passed": true,
+    "errors": []
+  },
+  "quality": [
+    {
+      "asset_id": "sigma_mott_slopes",
+      "minimum_glyph_height_mm": 2.096211067708333,
+      "minimum_linewidth_pt": 1.2,
+      "clipped_text": 0,
+      "text_overlap_pairs": 0,
+      "legend_curve_overlap_count": 0
+    },
+    {
+      "asset_id": "sigma_mott_areas",
+      "minimum_glyph_height_mm": 2.096211067708333,
+      "minimum_linewidth_pt": 1.2,
+      "clipped_text": 0,
+      "text_overlap_pairs": 0,
+      "legend_curve_overlap_count": 0
+    }
+  ],
+  "external_model": "cn:deepseek-v4.1-flash",
+  "external_reviews": [
+    {
+      "kind": "slopes",
+      "report": "ds_review_v1\\sigma-slopes-review.json",
+      "sha256": "f9df333ac80eb888c69307b95accb674c5ee29578486e1d880871236e2e582e8",
+      "pass_candidate": true,
+      "model_output_verified": false
+    },
+    {
+      "kind": "areas",
+      "report": "ds_review_v1\\sigma-areas-review.json",
+      "sha256": "737ebcb2797657caee2194b726f08c59a303cf98a5ff6617a6043719035afc46",
+      "pass_candidate": true,
+      "model_output_verified": false
+    }
+  ],
+  "main_agent_image_loaded": false,
+  "author_accepted": false,
+  "manuscript_eligible": false,
+  "scientific_conclusion_source": "Frozen remote numerical evidence and analytic checks; not external model visual inference.",
+  "findings": [
+    {
+      "issue": "DS suggests similar dashed styles in the slope plot.",
+      "disposition": "Source registry confirms original dash-dot with square, near-threshold solid with diamond, and combined dashed with diamond; noncolor encodings differ. Source/geometry checks do not replace author visual acceptance."
+    },
+    {
+      "issue": "DS reports a black-cross cluster near h=1e-4.",
+      "disposition": "Remote selected s7 rows exist only at h=2e-5; h localization is not confirmed. Near-threshold and combined curves can approach at h=1e-4, and precision crosses coincide with h=2e-5 points by design. Retain true coordinates without cosmetic offsets."
+    },
+    {
+      "issue": "Precision improvements are too small to separate at the plotted scale.",
+      "disposition": "Crosses remain at their actual values. Quantitative comparison is provided in precision_comparison.csv; the plot does not assert distinguishable shifts."
+    },
+    {
+      "issue": "Areas diagram candidate review reports no layout defect.",
+      "disposition": "Agrees with zero clipped text, overlap and legend-curve intersections in machine geometry; remains a PNG review candidate."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+restored 5000/43645 files
+restored 10000/43645 files
+restored 15000/43645 files
+restored 20000/43645 files
+restored 25000/43645 files
+restored 30000/43645 files
+restored 35000/43645 files
+restored 40000/43645 files
+{"status": "restored_and_verified", "files": 43645, "destination": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/restored_verification", "archive_sha256": "0cffb26b3fc06b724da31be80ddde636a1f9719a62f56bc2aa273b07624aabc8"}

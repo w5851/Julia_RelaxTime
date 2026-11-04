@@ -90,7 +90,8 @@ def _check_png_dpi(path: Path, declared_dpi: Any, *, label: str, errors: list[st
         errors.append(f"{label} PNG inspection failed: {exc}")
 
 
-def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_ROOT, code_ref: str | None = None) -> list[str]:
+def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_ROOT, code_ref: str | None = None,
+                      font_sources: dict[str, str] | None = None) -> list[str]:
     """Return all contract violations; an empty list means the artifact passes."""
 
     path = Path(manifest_path).resolve()
@@ -111,7 +112,8 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
         outputs_seen = set()
         for entry, (_, record) in zip(manifest["figures"], pairs):
             if record.get("schema_version") == MANIFEST_SCHEMA:
-                issues = validate_manifest_record(record, repo_root=repo_root, code_ref=reference, hash_cache=hash_cache)
+                issues = validate_manifest_record(record, repo_root=repo_root, code_ref=reference,
+                                                  hash_cache=hash_cache, font_sources=font_sources)
             elif record.get("delivery_stage") == "pdf_review_preflight":
                 issues = validate_review_companion(record, repo_root=repo_root, code_ref=reference)
             else:
@@ -128,11 +130,12 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
             if field in counts and counts[field] != actual:
                 errors.append(f"bundle {field} mismatch")
         return errors
-    return validate_manifest_record(manifest, repo_root=repo_root, code_ref=reference)
+    return validate_manifest_record(manifest, repo_root=repo_root, code_ref=reference, font_sources=font_sources)
 
 
 def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJECT_ROOT,
-                             code_ref: str | None = None, hash_cache: dict | None = None) -> list[str]:
+                             code_ref: str | None = None, hash_cache: dict | None = None,
+                             font_sources: dict[str, str] | None = None) -> list[str]:
     """Validate a single record, whether standalone or expanded from a bundle."""
     errors: list[str] = []
     profile = None
@@ -279,7 +282,7 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
     if isinstance(rendering, dict):
         font = rendering.get("font")
         if isinstance(font, dict) and "schema" in font:
-            _check_font_evidence(rendering, profile, repo_root, errors)
+            _check_font_evidence(rendering, profile, repo_root, errors, font_sources=font_sources)
         if "series_styles" in rendering:
             errors.extend(validate_series_styles(rendering["series_styles"], series or [],
                 rendering.get("quality", {}).get("series_styles", [])))
@@ -317,7 +320,8 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
     return errors
 
 
-def _check_font_evidence(rendering: dict[str, Any], profile: Any, root: Path, errors: list[str]) -> None:
+def _check_font_evidence(rendering: dict[str, Any], profile: Any, root: Path, errors: list[str],
+                         *, font_sources: dict[str, str] | None = None) -> None:
     """New font records are checked without migrating historical manifests."""
     from matplotlib.font_manager import FontProperties
 
@@ -347,10 +351,15 @@ def _check_font_evidence(rendering: dict[str, Any], profile: Any, root: Path, er
         if not any(item.get("sha256") == font["sha256"] for item in actual_fonts):
             raise ValueError("resolved font is absent from the measured glyph sources")
         for item in [font, *actual_fonts]:
-            issues = validate_hash_record(item, root=root, label="font source", allow_historical=False)
+            # Relocate an exact historical font without changing the bound hash,
+            # byte count, family name, or the immutable manifest itself.
+            source = dict(item)
+            if font_sources and item["path"] in font_sources:
+                source["path"] = font_sources[item["path"]]
+            issues = validate_hash_record(source, root=root, label="font source", allow_historical=False)
             errors.extend(issues)
             if not issues:
-                path = _resolve_artifact_path(item["path"], root)
+                path = _resolve_artifact_path(source["path"], root)
                 if FontProperties(fname=str(path)).get_name() != item["resolved"]:
                     raise ValueError("resolved font name differs from the measured source file")
     except (KeyError, TypeError, ValueError, OSError) as exc:
@@ -617,14 +626,29 @@ def main() -> int:
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--repo-root", type=Path, default=PROJECT_ROOT)
     parser.add_argument("--code-ref", help="full commit SHA for historical code/contract records")
+    parser.add_argument("--font-sources", type=Path,
+                        help="JSON map from original font paths to identical retained files; hashes remain required")
     parser.add_argument("--snapshot", action="store_true", help="verify a retained manifest graph against its committed snapshot")
     args = parser.parse_args()
+    font_sources = None
+    if args.font_sources:
+        try:
+            font_sources = json.loads(args.font_sources.read_text(encoding="utf-8"))
+            if not isinstance(font_sources, dict) or not all(
+                    isinstance(key, str) and isinstance(value, str) and key and value
+                    for key, value in font_sources.items()):
+                raise ValueError("font source map must contain non-empty path strings")
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+        if args.snapshot:
+            parser.error("--font-sources applies to artifact validation, not --snapshot")
     if args.snapshot:
         if not args.code_ref:
             parser.error("--snapshot requires --code-ref")
         errors = validate_snapshot(args.manifest, root=args.repo_root.resolve(), code_ref=args.code_ref)
     else:
-        errors = validate_manifest(args.manifest, repo_root=args.repo_root.resolve(), code_ref=args.code_ref)
+        errors = validate_manifest(args.manifest, repo_root=args.repo_root.resolve(), code_ref=args.code_ref,
+                                   font_sources=font_sources)
     if errors:
         print(f"[plot-validator] FAILED: {len(errors)} violation(s)")
         for error in errors:

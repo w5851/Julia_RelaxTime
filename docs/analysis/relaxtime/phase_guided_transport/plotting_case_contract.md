@@ -1,8 +1,76 @@
 # Phase-guided transport 绘图案例合同
 
-本页保存 v13 的当前审查布局，以及 v11/v12 的历史布局。公共 APS v2 规则见
+本页保存当前 v14 full-RS 原始图族、v15 同构加密审阅，以及 v13 的沿用布局和 v11/v12 的历史布局。公共 APS v2 规则见
 [绘图 SOP](../../../guides/sop/workflows/figure_production.md)，逐图 panel specs、caption 与
 冻结输入仍以各版本 manifest 为准。历史产物字节和审核资格不随新布局改变。
+
+## v15：η 阈值局部加密 PNG 审阅
+
+入口为 `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v15.py --png-review`，
+输出同级 `publication_clean_v15_png_review`。数值源为
+`full_rs_eta_augmented_20261029_v1/returned/grid` 的已验收1867点，mode A/B分别942/925。
+保留1810个v14原值，9原坐标采用本轮更严格积分的重算值，新增48个ξ点；逐点精度与来源单独记录。
+这些变更在数值版本中显式完成，绘图仅读取12个原始列，不平滑、插值、删点或重算比值。
+
+- 直接复用v14的renderer：72单图、Figure 1/2/4三组合、1低值细节图，彩色与灰度各76张。
+  尺寸、面板顺序、轴类型、标签、图例、蓝红绿配色、参数线型与一阶断线语义均沿用v14。
+- 同坐标结果按已验收的更严格精度选用；新增点的相态字段为unknown，未记录的迭代数留空。
+  此元数据不生成新断线或新物理相态标签；只保留v14原有的两处已审计断线。
+- 数值资格及接缝审查在quote-remote完成，本机执行Python绘图、原始顶点一致性及全部PNG质量检查。
+  bundle记录新数值来源、冻结renderer、v14形式参考和实际输出hash。
+- 新图阶段为png_review，manuscript_eligible=false、current_publication_layer=false；
+  新PNG已由作者审阅；PDF依作者指示暂缓，未进入正式图层晋升，当前仍由v14指针管理。
+
+## v14 正式交付
+
+当前入口为 [publication_clean_current.json](publication_clean_current.json)，正式包为
+`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf`，
+审阅 PNG 保留于同级 `publication_clean_v14_png_review`。沿用 publication_clean_vN 序号，
+不复用已有 v1 名称。结果目录下的 [正式化记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json)
+绑定新数值资格、作者条件授权及 PDF 验收；未改旧冻结 manifest。
+
+- 1819 原始点、12 同名列、全部有限 τ 比值提示原样保留；无数值后处理或局部替换。
+  保留以下 raw 图族的两处已审计一阶断线与最近采样端点语义。
+- 对应 v13 的 75 张图逐一核对尺寸、面板顺序、轴类型、图例位置、颜色和线型。
+  恢复旧绿色 `#009e73`、μB=0 的 σ、σ/T 单图图例角落，以及 T=160 的 η/s 单图线性轴。
+  数字刻度和 y 范围适配新原始值；细节图前两窗仍为 0.57–0.66 fm。
+- 新 FIG4 为固定 T 的 3×3 面板：列 T=120/160/200 MeV，行 η/s、ζ/s、σ/T；
+  前两行 log-y、第三行 linear-y。μB=0/450/900 的参数 key 放在 (g)，
+  一阶端点 key 放在 (a)，沿用作者指定的 20261021 版，尺寸 6.75×7.4 in。
+  T=200 的 ζ/s 对数轴采用间隔足够的普通数字刻度，避免狭窄范围内的刻度文字相撞。
+  论文当前更早的顶部图例 FIG4 与此布局不同，不能称二者逐项同构。
+- 76 对彩色／灰度 PNG、76 份 PDF。采用 strict APS v2 的实测字形、线宽、marker、
+  四侧刻度与遮挡门槛；原生宽度为 171.45 mm，实际缩放须遵守各图 placement_limits。
+  所有 PDF 来自同一冻结 renderer，重绘 PNG 字节必须完全一致；PDF 检查单页、嵌入非 Type-3
+  字体及矢量曲线。另实际渲染查看三张主复合图、细节图和两张单图。
+- 条件接受记录引用作者真实指令与形式核验，不声称作者逐文件看过新 PNG 或亲自审阅过新 PDF。
+  本次完成计算项目中的图层晋升，未修改论文文件，也未删除历史资产。
+
+历史 v10/v11 审计读取其记录的冻结 v5 选择合同，而非要求 live current 永久停在 v5。
+旧点表的测试重放显式设置 `load_v5_inputs(require_current=False)`；默认入口仍检查当前选择。
+数值 CSV 与图像哈希继续要求原始字节，不能借历史合同回退绕过数据损坏。
+
+## Full-RS 原始数据 PNG 图族
+
+入口为 `scripts/analysis/relaxtime/build_phase_guided_full_rs_raw.py --png-review`。
+以 `full_rs_full_grid_v1` 已验收的 mode-A 910 点和 mode-B 909 点为唯一曲线来源，
+先核对最终验收、背景审计和输入 CSV 的哈希。所有 12 个绘图量直接读取同名列，
+包括已有比值列；不平滑、插值、拟合、替换或删除原始点。有限 τ 比值提示点也保留。
+
+- 沿用 v13 的 72 张单图、两张主图和四面板细节图相对路径；逐张提供 600 dpi
+  彩色及同尺寸灰度 PNG。新 case 与 results 下同名证据目录均拒绝覆盖。
+- 只在本次背景审计确认的两处一阶不连续之间断开连线：A 的
+  `muB900.0/alpha1.0`，ξ=−0.003/+0.003；B 的 `T120.0/muB900.0`，
+  ξ=−0.13/−0.12。两侧原点全部保留，crossover 不因此断线。
+  圆圈和方块表示已采样的手征恢复/破缺侧点，不把它们解释为外推的共存端点。
+- 参数身份先完整登记，跨 panel 复用；每条实际曲线另记 panel、物理量、
+  原始 CSV 列与行号。关闭 Matplotlib 路径简化，逐图核对实际 artist 的全部顶点。
+- 主图、单图按新数据选择完整 y 范围。细节图仍对应 Figure 1 的 (a)/(g)/(h)/(i)，
+  线性窗口为 0.57–0.66、0.57–0.66、0.375–0.43、0.27–0.41 fm；
+  前两格比 v13 下延 0.01 fm，以显示新 αT=1.2 低值曲线。窗口外顶点仍保留。
+- 使用当前 `candidate_aps_v2`，声明可访问性、固定曲线身份、图例几何与字体来源。
+  本阶段为 `png_review`；作者接受、PDF、论文资格与 current-layer 晋升分别处理。
+  图像与数值筛查通过不能单独证明所有非物理尖峰已消除。
 
 ## v13 图内共享／分置图例布局
 

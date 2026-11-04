@@ -1,0 +1,40 @@
+{
+  "status": "source_verified_visual_candidates_reconciled",
+  "generated_utc": "2026-11-03T04:14:42.284869+00:00",
+  "figures": [
+    "other_mott_other01_tau_sbar",
+    "other_mott_other07_tau_ubar",
+    "other_mott_other07_tau_sbar"
+  ],
+  "source_plot_manifest_sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65",
+  "source_tables_sha256": {
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/complete_acceptance_snapshot_v1/returned/acceptance_review_complete_v1/slopes.csv": "576282ffbd624ac915e3984d36e7000e3e548100fb8f499277636c2730655eff",
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/complete_acceptance_snapshot_v1/returned/acceptance_review_complete_v1/slope_convergence.csv": "5d571ad2612e89e08441320e456ab3d1bc1cda1ec81f96cadfe93267ae59424d",
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/complete_acceptance_snapshot_v1/returned/acceptance_review_complete_v1/reference_slopes.csv": "d6dbc1ea6c86a9ec8a788cd0a3713fa1ef9ecd1f52f2773a1941bfcf5dc31285"
+  },
+  "external_review_sha256": "709c6e3ad3cdd63f95336d0b8cb6c53a8db4de818754dcd6f6ece101c6c2a4ee",
+  "external_model": "cn:deepseek-v4.1-flash",
+  "main_agent_image_loaded": false,
+  "numerical_analysis_rerun": false,
+  "interpretation": [
+    {
+      "claim": "K tau_sbar rises steeply across the local Mott window, reaches a right-side local maximum, then decreases.",
+      "evidence": "Stored log_slope rows in slopes.csv and matched reference_slopes.csv; DS shape candidate is consistent."
+    },
+    {
+      "claim": "Sigma tau_sbar and tau_ubar decrease across the same displayed offset window, without a comparable local maximum.",
+      "evidence": "Stored finite-interval log_slope rows agree with the broad DS shape description."
+    },
+    {
+      "claim": "DS terms jump, valley, and continuous smooth are not mathematical conclusions.",
+      "evidence": "No local K minimum is established in the selected +/-0.004 rows; the series shows an increasing shoulder and right-side maximum. Finite secants and visual connections do not certify continuity or derivative limits."
+    },
+    {
+      "claim": "This is a comparison of different physical backgrounds, not a controlled parity-only replacement.",
+      "evidence": "K: T=200.0898076157829 MeV, muB=0; sigma: T=125.7360002645551 MeV, muB=900."
+    }
+  ],
+  "physical_classification": "Mott spectral threshold rearrangement; transport derivative order is not an Ehrenfest classification of thermodynamic free energy.",
+  "author_accepted": false,
+  "manuscript_eligible": false
+}

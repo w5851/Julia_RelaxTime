@@ -1,0 +1,78 @@
+{
+    "status": "completed_diagnostic",
+    "curve_id": "other05",
+    "variant": "tighter_budget_v1",
+    "points": 14,
+    "channels": 238,
+    "species_weights": 84,
+    "point_selection": "other05_p03,other05_p04,other05_p06,other05_p07,other05_p08,other05_p09,other05_p10,other05_p11,other05_p12,other05_x01,other05_x02,other05_x03,other05_x04,other05_x05",
+    "production_kernel_changed": false,
+    "effective_profile": {
+        "id": "other_mott_tighter_budget_v1",
+        "source_path": "D:\\CodexCompute\\trmott-other-slopes-20261029-v1\\inputs\\tighter_budget_v1.toml",
+        "source_sha256": "47573f22931999f69c0b37266d897087251aa062a98e7c7b61b19a0cbecb1b80",
+        "algorithm": "thermal_weighted",
+        "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1.0e-8
+        },
+        "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+        },
+        "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+        },
+        "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+        },
+        "sampling": {
+            "rtol": 1.0e-6,
+            "atol": 1.0e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 320000,
+            "max_nodes": 96000,
+            "max_rounds": 50,
+            "max_events": 30000000,
+            "relative_velocity": "cm"
+        },
+        "a_polarization": "full_RS",
+        "a_coupling": "full_RS",
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+        },
+        "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+    },
+    "background_actual": {
+        "residual_norm_max": 1.0e-10,
+        "max_iter": 80
+    },
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "script_sha256": "bae3f4be79c98a4edea5878bd2cfadc5596b9ca26cb20230ef66a685d8bb1ec7",
+    "plan_sha256": "b098531a5c2634ae01513befc8b40957cad7e58898384278a0e19c3f0f3bd30b",
+    "targets_sha256": "5481400fb38d72d51aa3b10a13b84d506d21502da16b12d821e6b915d02153ba",
+    "files": {
+        "channel_contributions.csv": "990adb2ef38d91398ac2a97394d5c6843444095fda1ada5b72cf9f4f2c2cc960",
+        "rates.csv": "1dd3060eff2c40ff7b79fb685098be33a1787657152f7a800bdabdc1aac83fb0",
+        "species_weights.csv": "bc29b8fe2b8a06fbc9e8cef2915e6880027f3044e2c77c73d1abc2c77b272223",
+        "observables.csv": "2a639aee790c7812b8809124d243aaea5b0839b114edf45e7c482e9b1c48a4b4"
+    }
+}

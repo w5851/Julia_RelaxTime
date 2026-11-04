@@ -1,0 +1,14 @@
+[
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_curvature_20261103_v1_png_review\\sigma_curvature.png",
+    "source_sha256": "74f862e23f680c3b8aa8f01cbe137ad3e92e5341f1aa54d4a76508e0902e53fb",
+    "qa_file": "visual_qa_inputs\\sigma_curvature.png",
+    "qa_sha256": "4a7145001385d033ea8b9679fba1de0ea03cd12318d098be265dc7a149e8d66d"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_curvature_20261103_v1_png_review\\sigma_curvature_gray.png",
+    "source_sha256": "bcfec4430773be8e9a6b7dec1c41fd7f2e8d61ff43881c4f587f03fbf9b88532",
+    "qa_file": "visual_qa_inputs\\sigma_curvature_gray.png",
+    "qa_sha256": "f38a22705ef0d17695e28066cbfe723f888d98addc9d709663f01cb446650a14"
+  }
+]

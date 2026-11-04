@@ -1,0 +1,11 @@
+{
+    "status": "passed_diagnostic_identity_checks",
+    "points": 13,
+    "direct_quadrature_nodes": 512,
+    "pair_nodes": 256,
+    "source_rows_sha256": "135d55e03daa4c3bb0ffd985ac6b09a02144904e85f23d4aefcb2c81810f7911",
+    "max_stable_direct_difference": 1.9984014443252818e-15,
+    "max_native_stable_difference": 1.2529443289555076e-5,
+    "production_kernel_changed": false,
+    "script_sha256": "664d30d889c7123323586f51c65c78642217d48a5413fd631cde581cd700c54c"
+}

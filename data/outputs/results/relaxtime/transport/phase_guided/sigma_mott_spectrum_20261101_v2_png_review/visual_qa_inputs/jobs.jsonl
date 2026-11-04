@@ -1,0 +1,1 @@
+{"id": "sigma-spectrum-review", "images": ["spectrum_review.png"], "max_tokens": 1400, "prompt": "请仅审阅这张科研图的版面与可读性，勿推断物理结论。检查两面板、横纵轴、曲线图例、四个尖峰、上下标与单位是否可见，是否裁切或遮挡。图例表示六个 Δξ 值；如重合曲线无法区分，说明位置与不确定性。只返回一个 JSON 对象：{pass_candidate:boolean,issues:[{location:string,observation:string,severity:string}],visible_labels:[string],unknowns:[string]}。不要把模型候选当作者接受。"}

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "tests\\unit\\python\\test_plot_provenance.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v10.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v11.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v11_pdf_review.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v12.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v13.py",
+    "tests\\unit\\python\\test_phase_guided_full_rs_raw.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v14.py",
+    "tests\\unit\\python\\test_phase_guided_publication_clean_v15.py",
+    "tests\\unit\\python\\test_transport_delivery_archive.py",
+    "-q",
+    "--disable-warnings"
+  ],
+  "exit_code": 1,
+  "seconds": 438.24757194519043,
+  "scope": "Python plotting and evidence I/O; no physical calculation"
+}

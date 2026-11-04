@@ -1,0 +1,180 @@
+{
+  "schema": "image_only_contact_sheet_v1",
+  "created_utc": "2026-10-31T10:15:08.946421+00:00",
+  "source_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+  "source_manifest_sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65",
+  "source_values_modified": false,
+  "numerical_analysis_performed": false,
+  "contact_sheets": [
+    {
+      "path": "overview_01.png",
+      "originals": [
+        "other01_eta_over_s.png",
+        "other01_sigma_over_T.png",
+        "other01_tau_sbar.png",
+        "other01_tau_ubar.png",
+        "other01_zeta_over_s.png",
+        "other02_eta_over_s.png"
+      ]
+    },
+    {
+      "path": "overview_02.png",
+      "originals": [
+        "other02_sigma_over_T.png",
+        "other02_tau_sbar.png",
+        "other02_tau_ubar.png",
+        "other02_zeta_over_s.png",
+        "other03_eta_over_s.png",
+        "other03_sigma_over_T.png"
+      ]
+    },
+    {
+      "path": "overview_03.png",
+      "originals": [
+        "other03_tau_sbar.png",
+        "other03_tau_ubar.png",
+        "other03_zeta_over_s.png",
+        "other04_eta_over_s.png",
+        "other04_sigma_over_T.png",
+        "other04_tau_sbar.png"
+      ]
+    },
+    {
+      "path": "overview_04.png",
+      "originals": [
+        "other04_tau_ubar.png",
+        "other04_zeta_over_s.png",
+        "other05_eta_over_s.png",
+        "other05_sigma_over_T.png",
+        "other05_tau_sbar.png",
+        "other05_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_05.png",
+      "originals": [
+        "other05_zeta_over_s.png",
+        "other06_eta_over_s.png",
+        "other06_sigma_over_T.png",
+        "other06_tau_sbar.png",
+        "other06_tau_ubar.png",
+        "other06_zeta_over_s.png"
+      ]
+    },
+    {
+      "path": "overview_06.png",
+      "originals": [
+        "other07_eta_over_s.png",
+        "other07_sigma_over_T.png",
+        "other07_tau_sbar.png",
+        "other07_tau_ubar.png",
+        "other07_zeta_over_s.png",
+        "other08_eta_over_s.png"
+      ]
+    },
+    {
+      "path": "overview_07.png",
+      "originals": [
+        "other08_sigma_over_T.png",
+        "other08_tau_sbar.png",
+        "other08_tau_ubar.png",
+        "other08_zeta_over_s.png",
+        "other09_eta_over_s.png",
+        "other09_sigma_over_T.png"
+      ]
+    },
+    {
+      "path": "overview_08.png",
+      "originals": [
+        "other09_tau_sbar.png",
+        "other09_tau_ubar.png",
+        "other09_zeta_over_s.png",
+        "other10_eta_over_s.png",
+        "other10_sigma_over_T.png",
+        "other10_tau_sbar.png"
+      ]
+    },
+    {
+      "path": "overview_09.png",
+      "originals": [
+        "other10_tau_ubar.png",
+        "other10_zeta_over_s.png",
+        "other11_eta_over_s.png",
+        "other11_sigma_over_T.png",
+        "other11_tau_sbar.png",
+        "other11_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_10.png",
+      "originals": [
+        "other11_zeta_over_s.png",
+        "other12_eta_over_s.png",
+        "other12_sigma_over_T.png",
+        "other12_tau_sbar.png",
+        "other12_tau_ubar.png",
+        "other12_zeta_over_s.png"
+      ]
+    },
+    {
+      "path": "overview_11.png",
+      "originals": [
+        "other13_eta_over_s.png",
+        "other13_sigma_over_T.png",
+        "other13_tau_sbar.png",
+        "other13_tau_ubar.png",
+        "other13_zeta_over_s.png"
+      ]
+    }
+  ],
+  "details": [
+    {
+      "path": "detail_other01_tau_sbar.png",
+      "original": "other01_tau_sbar.png"
+    },
+    {
+      "path": "detail_other03_eta_over_s.png",
+      "original": "other03_eta_over_s.png"
+    },
+    {
+      "path": "detail_other07_sigma_over_T.png",
+      "original": "other07_sigma_over_T.png"
+    },
+    {
+      "path": "detail_other07_tau_ubar.png",
+      "original": "other07_tau_ubar.png"
+    },
+    {
+      "path": "detail_other08_tau_ubar.png",
+      "original": "other08_tau_ubar.png"
+    },
+    {
+      "path": "detail_other05_tau_ubar.png",
+      "original": "other05_tau_ubar.png"
+    },
+    {
+      "path": "detail_other05_sigma_over_T.png",
+      "original": "other05_sigma_over_T.png"
+    },
+    {
+      "path": "detail_other11_tau_sbar.png",
+      "original": "other11_tau_sbar.png"
+    },
+    {
+      "path": "detail_other13_zeta_over_s.png",
+      "original": "other13_zeta_over_s.png"
+    },
+    {
+      "path": "detail_other01_tau_sbar_gray.png",
+      "original": "other01_tau_sbar_gray.png"
+    },
+    {
+      "path": "detail_other05_sigma_over_T_gray.png",
+      "original": "other05_sigma_over_T_gray.png"
+    },
+    {
+      "path": "detail_other07_sigma_over_T_gray.png",
+      "original": "other07_sigma_over_T_gray.png"
+    }
+  ]
+}

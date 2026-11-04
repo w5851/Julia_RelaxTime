@@ -1,0 +1,150 @@
+{
+  "status": "agent_visual_review_passed",
+  "author_acceptance": false,
+  "inspected_utc": "2026-10-29T07:23:31.261487+00:00",
+  "manifest_sha256": "cab4451979914080c989211d3111058349ab11ef7bd7c47bd8330e164a1f5ea4",
+  "reviewed_images": [
+    {
+      "path": "a_mu0_tau_ubar.png",
+      "sha256": "bab27602ff29beaf7b68c90066d468c9397d5e9f4029f892ca65d30950a8547c"
+    },
+    {
+      "path": "a_mu0_sigma_over_T.png",
+      "sha256": "8605e7807e271e73995111f92773d2f0359574206a6b0e39e8ec7810853a166e"
+    },
+    {
+      "path": "a_mu450_tau_ubar.png",
+      "sha256": "bdb6b6ead7b29cc7accb1f1253a9626c2e1705510aa2d010948c133fdf94f1bf"
+    },
+    {
+      "path": "a_mu450_sigma_over_T.png",
+      "sha256": "c35d5afc729f5d510b5aceb160bbefb2b88023c0f1fb4d276a3b2c3bef1d2b7c"
+    },
+    {
+      "path": "b_mu0_tau_ubar.png",
+      "sha256": "d8edbcd9d9de5b231f9262e577ddc9ffc8b0334b16049f1dcc8b306b66c98517"
+    },
+    {
+      "path": "b_mu0_sigma_over_T.png",
+      "sha256": "208905f288d9f2515eb3ccbd5afec3c92a9f3182db48c3d3bcc180da39f1b197"
+    },
+    {
+      "path": "a_mu0_sigma_over_T_gray.png",
+      "sha256": "d492cfd29aeb118a969125b317c9c95fb70c1a4711d0d17e2b1af147708c6e70"
+    },
+    {
+      "path": "a_mu450_sigma_over_T_gray.png",
+      "sha256": "1bbf0588b852df2b4ad369b7fb4fc874546af91b16e8353ad74ed9cd0f70c8d8"
+    },
+    {
+      "path": "b_mu0_sigma_over_T_gray.png",
+      "sha256": "e28862c11b19dbdecd2dacb832a6ef301b677627ec9de71509835a192aee62ce"
+    }
+  ],
+  "scope": "All six color figures and the three electrical-conductivity grayscale figures; all twelve PNG exports passed the artifact validator.",
+  "findings": [
+    "Titles, axes, units and five legend entries are legible and unclipped.",
+    "Native-interval precision comparisons and newly halved intervals have distinct cross and plus markers.",
+    "Refined and coarse grids are distinguishable in grayscale by marker and line style.",
+    "Upper panels show small value changes while lower panels resolve the local slowdown and acceleration; connecting lines are not derivative fits."
+  ],
+  "panel_point_counts_verified": [
+    {
+      "asset_id": "eta_refinement_a_mu0_tau_ubar",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    },
+    {
+      "asset_id": "eta_refinement_a_mu0_sigma_over_T",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    },
+    {
+      "asset_id": "eta_refinement_a_mu450_tau_ubar",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    },
+    {
+      "asset_id": "eta_refinement_a_mu450_sigma_over_T",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    },
+    {
+      "asset_id": "eta_refinement_b_mu0_tau_ubar",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    },
+    {
+      "asset_id": "eta_refinement_b_mu0_sigma_over_T",
+      "panel_point_counts": {
+        "upper": {
+          "fine": 17,
+          "coarse": 3,
+          "tighter": 6
+        },
+        "lower": {
+          "fine": 16,
+          "coarse": 2,
+          "tighter": 2,
+          "xi_halves": 4
+        }
+      }
+    }
+  ],
+  "publication_status": "diagnostic_png_review_only"
+}

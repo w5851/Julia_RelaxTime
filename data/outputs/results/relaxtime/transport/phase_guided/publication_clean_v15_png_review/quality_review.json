@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "figures": 76,
+  "png_count": 152,
+  "original_vertices_verified": 33034,
+  "source_selection": {
+    "v14_retained": 1810,
+    "recomputed_original": 9,
+    "xi_inserted": 48
+  },
+  "no_smoothing_or_interpolation": true,
+  "validation_errors": [],
+  "manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "validated_png_review_bundle",
+    "bytes": 5930744,
+    "sha256": "af22fcc624d5fdb7c9ab6324806cc771482f59160e7b70dc380c55a38e03eee6"
+  }
+}

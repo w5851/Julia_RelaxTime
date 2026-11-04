@@ -1,12 +1,14 @@
 # 输运采样的联合验证、续算与完整计时
 
-这些入口用于算法验收，不启动 Actions、不覆盖原生产 CSV。
+本页包含算法验收、产物复核和显式 Actions 批次调度入口；各入口保留原生产 CSV。
 共享热平均实现及两个生产扫描 CLI 已切换到 `thermal_weighted_v1`，旧固定网格、
 扣除/加回及无身份 CSV 缓存加载实现已清理；本地验证状态由
-[生产接入任务](../../dev/active/2026-10-23_输运采样生产接入与重跑合同.md)记录。
+[统一状态说明](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)记录。
 验收问题、独立分层结果和当前结论见
 [生产采样分析](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md)。
 底层接口见 [AverageScatteringRate](../../api/relaxtime/transport/AverageScatteringRate.md)。
+
+当前完整 A^xi 生产、mode A/B 整批与η加密已完成；最新正式数值为1867点，正式图层仍为v14，v15 PDF暂缓。[生产计划当前入口](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)维护状态与未决研究边界。以下按各批次注明的数值口径保留证据。
 
 切换完整 A^xi 耦合前的历史汇总为 `threshold_cache_upgrade_20261021/joint_complete_summary_v1`：
 十二点、108 项通过 1%，两点各两次完整计时的输出逐值复现候选。
@@ -118,7 +120,7 @@ run_transport_mode_b_background_validation.jl INPUT_DIR NEW_OUTPUT_DIR
 真实入口的 17 点、153 项量和 289 道诊断也已通过；相对候选最大变化为 6.29522e-9。
 [完整返回复核](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json)
 已在 quote-remote 完成，归档及 1584 份源码快照、15 份输入快照已取回核验。
-此资格覆盖该代表点集合，整个 909 点输运网格尚未计算；背景、代表点和整批产物的状态分别保留。
+此记录覆盖该代表点集合；完整 909 点输运网格已通过下述整批验收，背景、代表点和整批产物的证据分别保留。
 
 ## 中断后的检查点恢复
 
@@ -338,7 +340,33 @@ mode-A 的 910 点和 mode-B 的 909 点输入已绑定计算提交
 `2e5c411c716d5cbc524c3fc6cfb335fe05b39444` 和标签 `transport-full-rs-20261026-v1`。
 七个先导 jobs 的 11 点、187 道诊断与成本复核已通过；剩余各 904 点分别按最多 14/15 点分为 72/63 片。
 [实际复核与批次](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/reviewed_pilot.json)
-已取回核验，剩余批次尚未派发。
+已取回核验；作者于 2026-10-26 授权直接执行剩余 135 片，现已全部成功并取回。
+包括七个先导的 1819 点、30923 道诊断通过[完整网格验收](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json)，
+两种模式的合并表与逐点来源见[本批结果](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/README.md)。
+
+本批调度入口为 `scripts/analysis/relaxtime/run_transport_batch_queue.py`：
+`NEW_CASE --prepare-from PILOT_CASE` 将已复核的 135 份请求及先导证据复制到新目录；
+`CASE` 启动或恢复最多 20 个未结束任务的队列。`queue_plan.json` 冻结计算身份与请求，
+`dispatch_manifest.json` 和 `collection_status.json` 记录实际执行；控制器会分页查找已有运行，
+发送前保留 attempt，不自动重发结果不确定的请求。`--once` 执行一次收集和补队列。
+每个 run 的 API 元数据、ZIP、digest 与解压产物独立保留；控制器只做调度和文件身份检查。
+
+在 quote-remote 使用 `review_transport_full_grid.py CASE NEW_REVIEW` 复核全部产物，
+未完成时可用 `--partial` 生成独立的部分报告。复核器沿用逐 run 的实际配置、源码、九项量与
+17 道预算检查，并核对两模式完整点集、复用/剩余重叠、额外诊断和背景残差。
+只有全网格通过时才生成两模式合并 CSV 和 `point_provenance.csv`，保留原始数值字符串。
+`quality_flag` 中有限的 `tau_u_ubar_ratio_high` 是粒子/反粒子比值超过 6 的启发式标记，
+不是积分误差估计；复核器核对其计算和标记一致性，原样保留并交给背景/局部变化审计。
+
+`audit_transport_grid_background.py CASE REVIEW BACKGROUND_INPUTS NEW_AUDIT` 对照已冻结的
+910/909 点背景与稳定分支，沿用质量/熵的 1% 门槛。相邻点变化筛查保留已验证的一阶边界，
+不跨未返回的网格缺口；50% 相邻变化只选取诊断对象，不作为收敛容差。
+完整网格验收报告、数值晋升与论文使用状态分别记录。
+
+本批 1819 点背景全部通过，最大质量/熵相对差为 `2.17057e-8`/`1.91574e-8`；
+筛出的 10 项较大相邻变化均属于已验证的一阶边界，非边界筛查项为零。
+470 条有限 τ 比值标记核对后原样保留。135 个新 jobs 的累计实测为 66.6928 runner 小时，
+最长 job 42.63 分钟；原始计时和内存测量的范围以本批结果及 `runner_accounting.json` 为准。
 
 长数值任务优先在 W 运行。使用现有 SSH 配置的 `quote-remote`、BatchMode 公钥和主机校验，
 源码包解压到任务隔离目录，采用便携 Julia 1.12.5；保留源码包、有效参数和输出身份。

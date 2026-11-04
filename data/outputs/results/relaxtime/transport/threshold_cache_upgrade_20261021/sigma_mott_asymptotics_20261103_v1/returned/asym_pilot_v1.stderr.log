@@ -1,0 +1,93 @@
+ERROR: LoadError: Unresolved continuous integral [-0.546336955684962,-0.5463250906596463], defect=[1.885177192808292e-22, 0.0]
+Stacktrace:
+  [1] error(s::String)
+    @ Base .\error.jl:44
+  [2] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:105
+  [3] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+  [4] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+  [5] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+  [6] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+  [7] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+  [8] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+  [9] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [10] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [11] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [12] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [13] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [14] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+ [15] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [16] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [17] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [18] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [19] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [20] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [21] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [22] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [23] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [24] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+ [25] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [26] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+ [27] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [28] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [29] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [30] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [31] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [32] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+ [33] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [34] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [35] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [36] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:107
+ [37] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [38] asym_integrate(f::Function, a::Float64, b::Float64; atol::Float64, rtol::Float64, depth::Int64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:106
+ [39] asym_integrate
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:98 [inlined]
+ [40] asym_integral(f::var"#run_asymptotics##12#run_asymptotics##13"{Base.RefValue{Int64}, SigmaWeightTable, @NamedTuple{u::Main.RelaxTime.PairLoopQuadrature.PairLoopPlan, s::Main.RelaxTime.PairLoopQuadrature.PairLoopPlan}, @NamedTuple{qp::@NamedTuple{m::@NamedTuple{u::Float64, d::Float64, s::Float64}, μ::@NamedTuple{u::Float64, d::Float64, s::Float64}, A::@NamedTuple{u::Float64, d::Float64, s::Float64}}, tp::@NamedTuple{T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64}, kc::@NamedTuple{K0_plus::Float64, K0_minus::Float64, K123_plus::Float64, K123_minus::Float64, K4567_plus::Float64, K4567_minus::Float64, K8_plus::Float64, K8_minus::Float64, K08_plus::Float64, K08_minus::Float64, det_K_plus::Float64, det_K_minus::Float64}}}, root::@NamedTuple{x::Float64, width::Float64, det_abs::Float64, inverse_zero::Float64, bracket::Float64}, xmax::Float64; atol::Float64, rtol::Float64)
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:124
+ [41] run_asymptotics()
+    @ Main D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:191
+ [42] top-level scope
+    @ D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:224
+ [43] include(mod::Module, _path::String)
+    @ Base .\Base.jl:306
+ [44] exec_options(opts::Base.JLOptions)
+    @ Base .\client.jl:317
+ [45] _start()
+    @ Base .\client.jl:550
+in expression starting at D:\CodexCompute\trsigma-mott-20261101-v1\run_sigma_mott_asymptotics_v1.jl:223

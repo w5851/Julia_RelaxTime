@@ -1,0 +1,279 @@
+{
+  "schema": "other_mott_center_modulation_v1",
+  "status": "completed_derived_diagnostic",
+  "timestamp_utc": "2026-10-31T11:18:16.910522+00:00",
+  "compute_host": "quote-remote",
+  "input_review": "D:\\CodexCompute\\trmott-other-slopes-20261029-v1\\acceptance_review_complete_v1\\summary.json",
+  "input_sha256": {
+    "acceptance_review_complete_v1\\summary.json": "b4169c14cb556ca43ffedadfa9f6f8132021eceeb92fd00070bac99335d2960f",
+    "review_transport_other_mott_slopes_v3.py": "f0968f25651a8a962db7b9b711045f97b1f7f620698ef17eae9614a42ca98e36",
+    "fine_pilot_other01_v1/summary.json": "af17c02a331c817e4cc67ffe82ee74ec97f448de1d95f2e245410788effee4ce",
+    "fine_other07_v1/summary.json": "edafaa7af1ac6720300a1780f11c3a92dceef62003bb479452777fc1f939373e",
+    "fine_other08_v1/summary.json": "b56601017616ce2d05f68a1802e44fc4ed77a1cf5c0dfdfabf42f9099001369d",
+    "fine_other09_v1/summary.json": "909a38c0b3612196348136f14d06deaca8ea60a9e65d93787ced21aecea725ea",
+    "fine_other01_v1/summary.json": "519b6a261300ff1709b899288f966d9ca49f773a3aac4d0a988776a270e6bd83",
+    "fine_other06_v1/summary.json": "c3a24a2152cbd1f329325b4a5f4df2d27f8cc5ba2a0e3cb72c38ea52e84667b5",
+    "fine_other11_v1/summary.json": "df429d8d71aa6426eec8ef408720fb2ae6d497e7cfc9b9ca73bc6073c56cd5a1",
+    "fine_other02_v1/summary.json": "97dc698acc89b24a8112cfd2b2accb7fbe4cd5fec77c405be5d2550d91e1f054",
+    "fine_other04_v1/summary.json": "34e2820b773cfac5048a174fc1a89c7266a13c723131de00bd8cd663d2c8f20e",
+    "fine_other03_v1/summary.json": "d8a0eb25fa162c6bbeb3ddb27b963ad9fad6c5bd866b543ae836625bf362f000",
+    "fine_other12_v1/summary.json": "83f98f355fb9b494797b12a04ae3cdef84744de112a04b470e1d50e5bef8b4f8",
+    "fine_other13_v1/summary.json": "53319b623ab23782f646879c9e3037ca1d09ddf415b4ebf62d9b682a6d25ab91",
+    "fine_other10_v1/summary.json": "ba4b04cfc6a9ecb607be93dcd664c666c3ba05c564245ef6eaad61b8c3d0e3ad",
+    "fine_other05_v1/summary.json": "2e63725a6821af4b0faf9a3051087aea8b97735464ebf14e063c1d2c9bd9e352",
+    "acceptance_review_complete_v1\\centered_slopes.csv": "d911197248331b904fe70173ef19087ea8d3b95eedf5dfbef80408adeb064d48",
+    "tighter_other01_v1/summary.json": "85bdb53d159f0ba6dc90eb1e997c8e63a6b3acb3f9285d021994a7eae4eceffe",
+    "tighter_other02_v1/summary.json": "a71a0d77ae182bbd55ab3e4548d76f66d72da8945978b5570dfd5074369f0b2f",
+    "tighter_other03_v1/summary.json": "5664a373c6354ed82cb8c87828992b308ac427010be65d0fd27ebdbeba3baaf9",
+    "tighter_other04_v1/summary.json": "93eb55ccf67fd321c6df7c4da2415e1e8457b503f9b476782deb3e718001d286",
+    "tighter_other05_budget_probe_v1/summary.json": "25fc5d7bd11afce7faa108dda598ea857c15c31b2a02b8a30ca415740ee6466c",
+    "tighter_other05_recovery_v1/summary.json": "4eadfb3df1a2b30e45b9228cdb5d39ce1233e059a6a7d2bb21dc5eb4d45d8466",
+    "tighter_other06_recovery_v1/summary.json": "f09ff457c94ddda45c8f80b453f80cd3f5bdaa496eb2b102e50c7859d884a346",
+    "tighter_other07_recovery_v1/summary.json": "f9c9f0d0d1f293ccf8ed6fb652a2a90fe2f900a4344c642eced1ec15f82f9bb9",
+    "tighter_other08_recovery_v1/summary.json": "59b942fbf381feae23c929524051f315d055b7d2eb7045a45890ca88788d60bd",
+    "tighter_other09_recovery_v1/summary.json": "6e9a8e1b1a3da54dd59caf1eda8600d27a79bfcfecfdb52ab43232e85ad60234",
+    "tighter_other10_recovery_v1/summary.json": "5714ed4d18222ca37861bc9dd89fe62de8c3c49af66516d1614b409de28b5822",
+    "tighter_other11_recovery_v1/summary.json": "21218e5ae36c8cd88e735dbe43cb1ad2cd3832c004a9114877946da09748adfa",
+    "tighter_other12_recovery_v1/summary.json": "5087bf6c710edf4c0e12c0e16daa766560d947b6d9ef0e1c8e880727cf99359b",
+    "tighter_other13_recovery_v1/summary.json": "f0bbf80ae9ab561ac6e6a2e5e010bae26e2955a4b31c004f3d7ac640f9bbdb8a",
+    "tighter_pilot_other01_v1/summary.json": "4679ec49a06ae9a7bd4db27c0f0d1ae50f440e0ae70c03f5fb99b26a2043946e",
+    "acceptance_review_complete_v1\\reference_centered_slopes.csv": "4ae1cd7b0e3598b6b1704ab376b93e6daa13b549e3a50f94e9065a946c6299bf"
+  },
+  "generator_sha256": "3237bbe5d13cd20d46a3ea62c779362fbf7dfc84163f83d2b0ae2e4777516aab",
+  "definition": "J_y(h)=S_y[xi_M,xi_M+h]-S_y[xi_M-h,xi_M]; S_y=delta(log(y))/delta(xi)",
+  "units": "dimensionless; xi is dimensionless",
+  "half_widths": [
+    0.004,
+    0.002,
+    0.001,
+    0.0005,
+    0.0002,
+    0.0001
+  ],
+  "row_counts": {
+    "centered_modulation": 1035,
+    "process_modulation": 1380,
+    "final_species_modulation": 2070,
+    "centered_precision": 432
+  },
+  "frozen_centered_rows_verified": 1035,
+  "max_difference_from_frozen_centered_table": 4.217781679471955e-11,
+  "max_absolute_decomposition_closure_error": 5.95790083934844e-11,
+  "unavailable_symmetric_triplets": [
+    {
+      "profile": "fine",
+      "curve_id": "other01",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other02",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other03",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other04",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other05",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other06",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other07",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other08",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other09",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other10",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other11",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other12",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "fine",
+      "curve_id": "other13",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other01",
+      "half_width": 0.002
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other01",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other02",
+      "half_width": 0.002
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other02",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other02",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other03",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other03",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other04",
+      "half_width": 0.004
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other04",
+      "half_width": 0.002
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other04",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other04",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other05",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other06",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other06",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other07",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other07",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other08",
+      "half_width": 0.002
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other08",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other09",
+      "half_width": 0.002
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other09",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other09",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other10",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other10",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other11",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other11",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other12",
+      "half_width": 0.0001
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other13",
+      "half_width": 0.0005
+    },
+    {
+      "profile": "tighter",
+      "curve_id": "other13",
+      "half_width": 0.0001
+    }
+  ],
+  "input_values_changed": false,
+  "interpolation": false,
+  "new_physics_solves": false,
+  "scope": "Finite-window modulation, not the xi-continuous derivative limit. s estimates cover interpolation only. Full-process grouping is not an amplitude ablation.",
+  "output_sha256": {
+    "centered_modulation.csv": "ba1765c0b5e402675bdcdd3e342c26b14f4aa6feafde2d4a43c87b4c7c19d7a4",
+    "process_modulation.csv": "66bdcd126fabae75b15c73635370bf798ac62a8d15adbc8626b5e34f71330559",
+    "final_species_modulation.csv": "b0d27e3b48474edc4e410527f950481b966d1a6adc09740e1aa238e3041233d4",
+    "centered_precision.csv": "e7165ad1246be774db4d6f589cf313dbbe25c7ee24aaa6c1e586726a928b1b0e"
+  }
+}

@@ -1,0 +1,1940 @@
+{
+  "probe": "D:\\CodexCompute\\trmott-20261028-v1\\full_v1",
+  "probe_summary": {
+    "status": "completed_diagnostic",
+    "timestamp_utc": "2026-10-28T05:42:12.975",
+    "julia_version": "1.12.5",
+    "julia_threads": 1,
+    "blas_threads": 1,
+    "hbarc_MeV_fm": 197.3269804,
+    "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+    "input_rows_sha256": "ad1aec37566a25dc295e6b12bd01efe5b40a129c93cb50dfe3f188c3d7b760e7",
+    "input_rates_sha256": "615913f939868f54095b8efa2d64a8a1ad95913494fc41a95d42d50aaae609e5",
+    "analysis_script_sha256": "fc9db36c326b7d078a3e93c8ba027530613ac8aeb1fb7480232479621accab25",
+    "effective_profile": {
+      "id": "thermal_weighted_v1",
+      "source_path": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source\\config\\models\\pnjl\\transport_sampling\\thermal_weighted_v1.toml",
+      "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+      "algorithm": "thermal_weighted",
+      "background": {
+        "p_nodes": 96,
+        "cos_nodes": 24,
+        "thermal_p_max_inv_fm": 25,
+        "residual_norm_max": 1e-08
+      },
+      "a_integral": {
+        "p_nodes": 32,
+        "cos_nodes": 16,
+        "scale_inv_fm": 5
+      },
+      "tau_integral": {
+        "p_nodes": 48,
+        "cos_nodes": 36,
+        "phi_nodes": 36,
+        "t_nodes": 24,
+        "scale_inv_fm": 10
+      },
+      "terminal_integral": {
+        "p_nodes": 32,
+        "cos_nodes": 16,
+        "scale_inv_fm": 5
+      },
+      "sampling": {
+        "rtol": 0.001,
+        "atol": 1e-12,
+        "weighted_window": 0.6,
+        "seed_order": 48,
+        "max_evaluations": 40000,
+        "max_nodes": 12000,
+        "max_rounds": 40,
+        "max_events": 30000000,
+        "relative_velocity": "cm"
+      },
+      "a_polarization": "full_RS",
+      "a_coupling": "full_RS",
+      "sigma_cutoff_inv_fm": 3.0522942112582996,
+      "internal_density": {
+        "p_nodes": 32,
+        "scale_inv_fm": 10,
+        "cos_nodes": 36
+      },
+      "external_density": {
+        "p_nodes": 64,
+        "cos_nodes": 8,
+        "p_max_inv_fm": 25
+      },
+      "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+    },
+    "effective_A": {
+      "p_nodes": 32,
+      "cos_nodes": 16,
+      "scale_inv_fm": 5
+    },
+    "background_points": 21,
+    "root_points": 21,
+    "pole_rows": 336,
+    "qualified_pole_rows": 336,
+    "ambiguous_pole_rows": 6,
+    "root_residual_limit": 1e-07,
+    "root_method": "existing real B0 plus width-coupled pole equation",
+    "mixed_identity": "algebraic eigenbranches; multistart and bidirectional diagnostic only",
+    "rate_reconstruction_relative_tolerance": 1e-10,
+    "output_sha256": {
+      "threshold_inverses.csv": "93fe29cfe2ddfa45a81cb41ba92e30c2940c5fe95376e3af9b8754cbff0e965c",
+      "background_A.csv": "5a659c81a919501ae39754ff2e5a25bf63fd32f926a7c4ef3a96648b52e865d1",
+      "channel_contributions.csv": "7e4931ab587b2b5925f76a55874dc7f0369e5e6dd60460e8f5cafe0cd1f2b379",
+      "pole_candidates.csv": "9beb5f55acdbdea9241a9503ea6afd573761eda74e44f5f5c97c465d9ad525f9",
+      "poles.csv": "3f2db46cc9fb0b76f8028b20d7479f2a575944913214630db4d9ce29aa098466"
+    }
+  },
+  "status": "analysis_only",
+  "core_or_production_changes": false,
+  "threshold_crossings": [
+    {
+      "window": "alpha1.0",
+      "meson": "K",
+      "cut": "pair",
+      "xi_left": -0.07,
+      "xi_right": -0.06,
+      "point_left": "p002",
+      "point_right": "p003",
+      "inverse_re_left": 0.014462822341186787,
+      "inverse_re_right": -0.0008028765264898041,
+      "evaluation_offset_inv_fm": -1e-06,
+      "max_endpoint_inverse_im": 0.0,
+      "classification": "threshold_real_part_zero_bracket"
+    },
+    {
+      "window": "alpha1.0",
+      "meson": "pi",
+      "cut": "pair",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "point_left": "p004",
+      "point_right": "p005",
+      "inverse_re_left": 0.008134732812716927,
+      "inverse_re_right": -0.0010528840254881988,
+      "evaluation_offset_inv_fm": -1e-06,
+      "max_endpoint_inverse_im": 0.0,
+      "classification": "threshold_real_part_zero_bracket"
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "K",
+      "cut": "pair",
+      "xi_left": 0.16,
+      "xi_right": 0.17,
+      "point_left": "p011",
+      "point_right": "p012",
+      "inverse_re_left": 0.003078685261491909,
+      "inverse_re_right": -0.008495949657884916,
+      "evaluation_offset_inv_fm": -1e-06,
+      "max_endpoint_inverse_im": 0.0,
+      "classification": "threshold_real_part_zero_bracket"
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "pi",
+      "cut": "pair",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "point_left": "p014",
+      "point_right": "p015",
+      "inverse_re_left": 0.0019231764167445542,
+      "inverse_re_right": -0.005170522672364619,
+      "evaluation_offset_inv_fm": -1e-06,
+      "max_endpoint_inverse_im": 0.0,
+      "classification": "threshold_real_part_zero_bracket"
+    }
+  ],
+  "root_threshold_crossings": [
+    {
+      "window": "alpha1.0",
+      "meson": "pi",
+      "cut": "pair",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "gap_left_MeV": 12.997006189436348,
+      "gap_right_MeV": -0.7869430975104876,
+      "gamma_left_MeV": 7.701090798748819,
+      "gamma_right_MeV": 1.5204272895020377e-10
+    },
+    {
+      "window": "alpha1.0",
+      "meson": "K",
+      "cut": "pair",
+      "xi_left": -0.07,
+      "xi_right": -0.06,
+      "gap_left_MeV": 8.088035449620065,
+      "gap_right_MeV": -0.013446530065948537,
+      "gamma_left_MeV": 26.202774406596994,
+      "gamma_right_MeV": -5.565797799627349e-19
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "pi",
+      "cut": "pair",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "gap_left_MeV": 2.7132381384178643,
+      "gap_right_MeV": -4.528467300280141,
+      "gamma_left_MeV": 4.531280700291021,
+      "gamma_right_MeV": 7.093613739803418e-10
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "K",
+      "cut": "pair",
+      "xi_left": 0.16,
+      "xi_right": 0.17,
+      "gap_left_MeV": 1.6558245167612995,
+      "gap_right_MeV": -0.7874598477292238,
+      "gamma_left_MeV": 12.208393141965376,
+      "gamma_right_MeV": 1.2905381882155864e-08
+    }
+  ],
+  "exact_endpoint_nonfinite_count": 216,
+  "threshold_evaluation": "one-sided M_threshold - 1e-6 fm^-1; exact nonfinite rows retained",
+  "ambiguous_or_disagreeing_roots": [
+    {
+      "point_id": "p007",
+      "window": "alpha1.0",
+      "xi": -0.02,
+      "meson": "sigma_K",
+      "both_qualified": true,
+      "mass_difference_MeV": 1.6366357158403844e-09,
+      "gamma_difference_MeV": 1.6345325093425345e-10,
+      "forward_roots": 2,
+      "reverse_roots": 2
+    },
+    {
+      "point_id": "p009",
+      "window": "alpha1.0",
+      "xi": -0.003,
+      "meson": "K",
+      "both_qualified": true,
+      "mass_difference_MeV": 0.0,
+      "gamma_difference_MeV": 0.0,
+      "forward_roots": 2,
+      "reverse_roots": 2
+    },
+    {
+      "point_id": "p020",
+      "window": "alpha1.1",
+      "xi": 0.25,
+      "meson": "K",
+      "both_qualified": true,
+      "mass_difference_MeV": 1.0012126949732192e-07,
+      "gamma_difference_MeV": 7.644065414883516e-08,
+      "forward_roots": 2,
+      "reverse_roots": 2
+    }
+  ],
+  "top_channel_changes": [
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "udbar_to_udbar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 2.1040546393562147,
+      "rate_right_fm2": 0.9764405071869943,
+      "rate_relative_change": -0.5359243581783792,
+      "contribution_left_inv_fm": 0.008846479323420326,
+      "contribution_right_inv_fm": 0.0040036759279091306,
+      "contribution_change_inv_fm": -0.0048428033955111955,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.5836336681837937
+    },
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "uubar_to_ddbar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 1.0958755495320864,
+      "rate_right_fm2": 0.7951431161996511,
+      "rate_relative_change": -0.27442206686775805,
+      "contribution_left_inv_fm": 0.004607599160516,
+      "contribution_right_inv_fm": 0.0032603065216358714,
+      "contribution_change_inv_fm": -0.0013472926388801289,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.16236986735316974
+    },
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "uubar_to_uubar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 1.0929941352811878,
+      "rate_right_fm2": 0.7983997338166119,
+      "rate_relative_change": -0.2695297183719906,
+      "contribution_left_inv_fm": 0.004595484279506739,
+      "contribution_right_inv_fm": 0.003273659553862067,
+      "contribution_change_inv_fm": -0.0013218247256446725,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.15930058487179266
+    },
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "uu_to_uu",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 0.08697492467370636,
+      "rate_right_fm2": 0.08787267103162794,
+      "rate_relative_change": 0.010321898654003236,
+      "contribution_left_inv_fm": 0.05339968251875537,
+      "contribution_right_inv_fm": 0.05304408403210994,
+      "contribution_change_inv_fm": -0.0003555984866454309,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.04285518783476677
+    },
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "us_to_us",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 0.1797704436838898,
+      "rate_right_fm2": 0.18070247326432748,
+      "rate_relative_change": 0.005184554042023448,
+      "contribution_left_inv_fm": 0.01871022320614427,
+      "contribution_right_inv_fm": 0.01844346963266913,
+      "contribution_change_inv_fm": -0.0002667535734751404,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.03214798410621776
+    },
+    {
+      "window": "alpha1.0",
+      "species": "u",
+      "channel": "ud_to_ud",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 0.10775786256766083,
+      "rate_right_fm2": 0.10935293815774623,
+      "rate_relative_change": 0.014802405616423986,
+      "contribution_left_inv_fm": 0.06615970834812739,
+      "contribution_right_inv_fm": 0.06601058523314755,
+      "contribution_change_inv_fm": -0.00014912311497983222,
+      "total_change_inv_fm": -0.00829767653840377,
+      "fraction_of_total_change": 0.017971671261184055
+    },
+    {
+      "window": "alpha1.0",
+      "species": "ubar",
+      "channel": "dubar_to_dubar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 2.1040546393562063,
+      "rate_right_fm2": 0.976440507186993,
+      "rate_relative_change": -0.5359243581783779,
+      "contribution_left_inv_fm": 1.2918188795822245,
+      "contribution_right_inv_fm": 0.5894254915380983,
+      "contribution_change_inv_fm": -0.7023933880441262,
+      "total_change_inv_fm": -1.099039695102407,
+      "fraction_of_total_change": 0.6390973785334279
+    },
+    {
+      "window": "alpha1.0",
+      "species": "ubar",
+      "channel": "uubar_to_ddbar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 1.0958755495320864,
+      "rate_right_fm2": 0.7951431161996511,
+      "rate_relative_change": -0.27442206686775805,
+      "contribution_left_inv_fm": 0.6728307801888922,
+      "contribution_right_inv_fm": 0.47998584517895315,
+      "contribution_change_inv_fm": -0.19284493500993904,
+      "total_change_inv_fm": -1.099039695102407,
+      "fraction_of_total_change": 0.17546676054495922
+    },
+    {
+      "window": "alpha1.0",
+      "species": "ubar",
+      "channel": "uubar_to_uubar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 1.0929941352811878,
+      "rate_right_fm2": 0.7983997338166119,
+      "rate_relative_change": -0.2695297183719906,
+      "contribution_left_inv_fm": 0.671061688617037,
+      "contribution_right_inv_fm": 0.48195169299610147,
+      "contribution_change_inv_fm": -0.1891099956209355,
+      "total_change_inv_fm": -1.099039695102407,
+      "fraction_of_total_change": 0.17206839431155804
+    },
+    {
+      "window": "alpha1.0",
+      "species": "ubar",
+      "channel": "subar_to_subar",
+      "xi_left": -0.05,
+      "xi_right": -0.04,
+      "rate_left_fm2": 1.1351823465130069,
+      "rate_right_fm2": 1.0160714824961126,
+      "rate_relative_change": -0.10492663525183665,
+      "contribution_left_inv_fm": 0.11814798165754514,
+      "contribution_right_inv_fm": 0.10370573901678633,
+      "contribution_change_inv_fm": -0.014442242640758815,
+      "total_change_inv_fm": -1.099039695102407,
+      "fraction_of_total_change": 0.01314078345406178
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "udbar_to_udbar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 1.456397031060121,
+      "rate_right_fm2": 0.8338824797078416,
+      "rate_relative_change": -0.42743464733593084,
+      "contribution_left_inv_fm": 0.010689452735790157,
+      "contribution_right_inv_fm": 0.006018010236712891,
+      "contribution_change_inv_fm": -0.004671442499077265,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.5817697293741871
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "uubar_to_ddbar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.8902224854923938,
+      "rate_right_fm2": 0.7230130874786203,
+      "rate_relative_change": -0.1878287739736071,
+      "contribution_left_inv_fm": 0.006533926518706117,
+      "contribution_right_inv_fm": 0.005217881737062251,
+      "contribution_change_inv_fm": -0.0013160447816438657,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.16389691548434906
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "uubar_to_uubar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.9205740848362,
+      "rate_right_fm2": 0.7608479232502017,
+      "rate_relative_change": -0.17350712367100662,
+      "contribution_left_inv_fm": 0.006756696807110984,
+      "contribution_right_inv_fm": 0.005490930319468614,
+      "contribution_change_inv_fm": -0.0012657664876423707,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.1576353828848526
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "uu_to_uu",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.10392991375232286,
+      "rate_right_fm2": 0.1047082958489697,
+      "rate_relative_change": 0.007489490451246139,
+      "contribution_left_inv_fm": 0.06641639803759097,
+      "contribution_right_inv_fm": 0.06611161077887666,
+      "contribution_change_inv_fm": -0.00030478725871431467,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.03795744056658128
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "us_to_us",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.18416824612791985,
+      "rate_right_fm2": 0.18481117326530427,
+      "rate_relative_change": 0.0034909771412920954,
+      "contribution_left_inv_fm": 0.028455458809736704,
+      "contribution_right_inv_fm": 0.028169993961346545,
+      "contribution_change_inv_fm": -0.00028546484839015937,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.03555107605982319
+    },
+    {
+      "window": "alpha1.1",
+      "species": "u",
+      "channel": "ud_to_ud",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.12744668903989392,
+      "rate_right_fm2": 0.12873778360750446,
+      "rate_relative_change": 0.010130467706433555,
+      "contribution_left_inv_fm": 0.081444790265281,
+      "contribution_right_inv_fm": 0.08128355230488003,
+      "contribution_change_inv_fm": -0.00016123796040096172,
+      "total_change_inv_fm": -0.008029710490613462,
+      "fraction_of_total_change": 0.020080171083309294
+    },
+    {
+      "window": "alpha1.1",
+      "species": "ubar",
+      "channel": "dubar_to_dubar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 1.456397031060118,
+      "rate_right_fm2": 0.8338824797078417,
+      "rate_relative_change": -0.4274346473359295,
+      "contribution_left_inv_fm": 0.9307103356803531,
+      "contribution_right_inv_fm": 0.5265037835520441,
+      "contribution_change_inv_fm": -0.404206552128309,
+      "total_change_inv_fm": -0.6353343511474914,
+      "fraction_of_total_change": 0.6362107627240092
+    },
+    {
+      "window": "alpha1.1",
+      "species": "ubar",
+      "channel": "uubar_to_ddbar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.8902224854923938,
+      "rate_right_fm2": 0.7230130874786203,
+      "rate_relative_change": -0.1878287739736071,
+      "contribution_left_inv_fm": 0.5688965650388113,
+      "contribution_right_inv_fm": 0.4565021275522055,
+      "contribution_change_inv_fm": -0.11239443748660577,
+      "total_change_inv_fm": -0.6353343511474914,
+      "fraction_of_total_change": 0.1769059665727309
+    },
+    {
+      "window": "alpha1.1",
+      "species": "ubar",
+      "channel": "uubar_to_uubar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.9205740848362,
+      "rate_right_fm2": 0.7608479232502017,
+      "rate_relative_change": -0.17350712367100662,
+      "contribution_left_inv_fm": 0.5882927507019661,
+      "contribution_right_inv_fm": 0.48039060664675015,
+      "contribution_change_inv_fm": -0.10790214405521592,
+      "total_change_inv_fm": -0.6353343511474914,
+      "fraction_of_total_change": 0.16983521174375585
+    },
+    {
+      "window": "alpha1.1",
+      "species": "ubar",
+      "channel": "subar_to_subar",
+      "xi_left": 0.19,
+      "xi_right": 0.2,
+      "rate_left_fm2": 0.9376049087717633,
+      "rate_right_fm2": 0.8811348685785403,
+      "rate_relative_change": -0.06022796986760359,
+      "contribution_left_inv_fm": 0.14486741565009223,
+      "contribution_right_inv_fm": 0.13430770168509756,
+      "contribution_change_inv_fm": -0.010559713964994666,
+      "total_change_inv_fm": -0.6353343511474914,
+      "fraction_of_total_change": 0.01662071938330193
+    }
+  ],
+  "mixed_threshold_gap_ranges": [
+    {
+      "window": "alpha1.0",
+      "meson": "eta",
+      "min_light_gap_MeV": 258.3644405024472,
+      "max_light_gap_MeV": 375.3800159659589,
+      "min_strange_gap_MeV": -406.93038568336766,
+      "max_strange_gap_MeV": -368.26702219106085
+    },
+    {
+      "window": "alpha1.0",
+      "meson": "eta_prime",
+      "min_light_gap_MeV": 460.15802162890697,
+      "max_light_gap_MeV": 535.6470111322301,
+      "min_strange_gap_MeV": -208.0649708762295,
+      "max_strange_gap_MeV": -205.13680455690792
+    },
+    {
+      "window": "alpha1.0",
+      "meson": "sigma",
+      "min_light_gap_MeV": 41.75494616468501,
+      "max_light_gap_MeV": 96.23959174767367,
+      "min_strange_gap_MeV": -647.4963525724836,
+      "max_strange_gap_MeV": -623.5398800211299
+    },
+    {
+      "window": "alpha1.0",
+      "meson": "sigma_prime",
+      "min_light_gap_MeV": 755.1717375210301,
+      "max_light_gap_MeV": 833.126884047774,
+      "min_strange_gap_MeV": 89.44210418143996,
+      "max_strange_gap_MeV": 89.87691133521514
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "eta",
+      "min_light_gap_MeV": 247.7521664386378,
+      "max_light_gap_MeV": 352.2759218076046,
+      "min_strange_gap_MeV": -400.1191433329237,
+      "max_strange_gap_MeV": -362.9356755042163
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "eta_prime",
+      "min_light_gap_MeV": 454.39888322252796,
+      "max_light_gap_MeV": 521.6469703397214,
+      "min_strange_gap_MeV": -194.27203033078354,
+      "max_strange_gap_MeV": -193.47242654903357
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "sigma",
+      "min_light_gap_MeV": 46.60268862100622,
+      "max_light_gap_MeV": 93.0440346936197,
+      "min_strange_gap_MeV": -622.1675626182011,
+      "max_strange_gap_MeV": -601.2686211505553
+    },
+    {
+      "window": "alpha1.1",
+      "meson": "sigma_prime",
+      "min_light_gap_MeV": 741.3388041428307,
+      "max_light_gap_MeV": 808.8951647663405,
+      "min_strange_gap_MeV": 93.41773046750563,
+      "max_strange_gap_MeV": 93.68356745451956
+    }
+  ],
+  "max_bidirectional_mass_difference_MeV": 3.3075878036470385e-07,
+  "max_bidirectional_gamma_difference_MeV": 1.1663743677559069e-06,
+  "A_refinement": {
+    "summary": {
+      "status": "completed_diagnostic",
+      "timestamp_utc": "2026-10-28T05:43:49.659",
+      "julia_version": "1.12.5",
+      "julia_threads": 1,
+      "blas_threads": 1,
+      "hbarc_MeV_fm": 197.3269804,
+      "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+      "input_rows_sha256": "ad1aec37566a25dc295e6b12bd01efe5b40a129c93cb50dfe3f188c3d7b760e7",
+      "input_rates_sha256": "615913f939868f54095b8efa2d64a8a1ad95913494fc41a95d42d50aaae609e5",
+      "analysis_script_sha256": "fc9db36c326b7d078a3e93c8ba027530613ac8aeb1fb7480232479621accab25",
+      "effective_profile": {
+        "id": "thermal_weighted_v1",
+        "source_path": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source\\config\\models\\pnjl\\transport_sampling\\thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "p_nodes": 96,
+          "cos_nodes": 24,
+          "thermal_p_max_inv_fm": 25,
+          "residual_norm_max": 1e-08
+        },
+        "a_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5
+        },
+        "tau_integral": {
+          "p_nodes": 48,
+          "cos_nodes": 36,
+          "phi_nodes": 36,
+          "t_nodes": 24,
+          "scale_inv_fm": 10
+        },
+        "terminal_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5
+        },
+        "sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "cm"
+        },
+        "a_polarization": "full_RS",
+        "a_coupling": "full_RS",
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "internal_density": {
+          "p_nodes": 32,
+          "scale_inv_fm": 10,
+          "cos_nodes": 36
+        },
+        "external_density": {
+          "p_nodes": 64,
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+      },
+      "effective_A": {
+        "p_nodes": 64,
+        "cos_nodes": 32,
+        "scale_inv_fm": 5
+      },
+      "background_points": 21,
+      "root_points": 21,
+      "pole_rows": 336,
+      "qualified_pole_rows": 336,
+      "ambiguous_pole_rows": 6,
+      "root_residual_limit": 1e-07,
+      "root_method": "existing real B0 plus width-coupled pole equation",
+      "mixed_identity": "algebraic eigenbranches; multistart and bidirectional diagnostic only",
+      "rate_reconstruction_relative_tolerance": 1e-10,
+      "output_sha256": {
+        "threshold_inverses.csv": "607364644e6d77851981ea381d1c167d7d1700c285dea8a8e912f0dc9f66649e",
+        "background_A.csv": "f9a301de7e7f22c35b42b32b9df7ef12daeb15f873607959bbfde58a1b12cccb",
+        "channel_contributions.csv": "7e4931ab587b2b5925f76a55874dc7f0369e5e6dd60460e8f5cafe0cd1f2b379",
+        "pole_candidates.csv": "fdb27ab0c59a519bcc3b2106f8582dcfb7d914d7e4c64c76cef31c3e706ce699",
+        "poles.csv": "0cf59d370bb5b8bbdd93644465cfbb3c1307781498f5154e6cb4e0773be63b43"
+      }
+    },
+    "threshold_crossings": [
+      {
+        "window": "alpha1.0",
+        "meson": "K",
+        "cut": "pair",
+        "xi_left": -0.07,
+        "xi_right": -0.06,
+        "point_left": "p002",
+        "point_right": "p003",
+        "inverse_re_left": 0.014462804475129265,
+        "inverse_re_right": -0.0008028960279367059,
+        "evaluation_offset_inv_fm": -1e-06,
+        "max_endpoint_inverse_im": 0.0,
+        "classification": "threshold_real_part_zero_bracket"
+      },
+      {
+        "window": "alpha1.0",
+        "meson": "pi",
+        "cut": "pair",
+        "xi_left": -0.05,
+        "xi_right": -0.04,
+        "point_left": "p004",
+        "point_right": "p005",
+        "inverse_re_left": 0.008134689526359429,
+        "inverse_re_right": -0.0010529283435865011,
+        "evaluation_offset_inv_fm": -1e-06,
+        "max_endpoint_inverse_im": 0.0,
+        "classification": "threshold_real_part_zero_bracket"
+      },
+      {
+        "window": "alpha1.1",
+        "meson": "K",
+        "cut": "pair",
+        "xi_left": 0.16,
+        "xi_right": 0.17,
+        "point_left": "p011",
+        "point_right": "p012",
+        "inverse_re_left": 0.003078683882498656,
+        "inverse_re_right": -0.008495951127927226,
+        "evaluation_offset_inv_fm": -1e-06,
+        "max_endpoint_inverse_im": 0.0,
+        "classification": "threshold_real_part_zero_bracket"
+      },
+      {
+        "window": "alpha1.1",
+        "meson": "pi",
+        "cut": "pair",
+        "xi_left": 0.19,
+        "xi_right": 0.2,
+        "point_left": "p014",
+        "point_right": "p015",
+        "inverse_re_left": 0.0019231732063549334,
+        "inverse_re_right": -0.005170525870865639,
+        "evaluation_offset_inv_fm": -1e-06,
+        "max_endpoint_inverse_im": 0.0,
+        "classification": "threshold_real_part_zero_bracket"
+      }
+    ],
+    "pole_changes": [
+      {
+        "point_id": "p001",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.8794255349093874e-05,
+        "gamma_change_MeV": -1.3583608456713137e-05
+      },
+      {
+        "point_id": "p001",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -8.83428037923295e-06,
+        "gamma_change_MeV": -1.244131077982047e-05
+      },
+      {
+        "point_id": "p001",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -9.382423741044477e-06,
+        "gamma_change_MeV": -1.5950252475249727e-05
+      },
+      {
+        "point_id": "p001",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -4.505840706769959e-06,
+        "gamma_change_MeV": -6.467798385756396e-06
+      },
+      {
+        "point_id": "p001",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.097962058338453e-05,
+        "gamma_change_MeV": -1.6809929377359367e-05
+      },
+      {
+        "point_id": "p001",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.846407020726474e-07,
+        "gamma_change_MeV": 1.2034439897945504e-06
+      },
+      {
+        "point_id": "p001",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.849020168900097e-05,
+        "gamma_change_MeV": -1.215954003441766e-05
+      },
+      {
+        "point_id": "p001",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 4.607613846019376e-08,
+        "gamma_change_MeV": 1.6488398557612527e-07
+      },
+      {
+        "point_id": "p002",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -5.539414834743184e-05,
+        "gamma_change_MeV": -1.559887467372789e-05
+      },
+      {
+        "point_id": "p002",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -9.956908343156101e-06,
+        "gamma_change_MeV": -1.7916009610985384e-05
+      },
+      {
+        "point_id": "p002",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0382493314864405e-05,
+        "gamma_change_MeV": -1.7683611645225028e-05
+      },
+      {
+        "point_id": "p002",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -4.9094871883426094e-06,
+        "gamma_change_MeV": -7.103387162032959e-06
+      },
+      {
+        "point_id": "p002",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.2317836535657989e-05,
+        "gamma_change_MeV": -1.8645474966660913e-05
+      },
+      {
+        "point_id": "p002",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.142709819163429e-07,
+        "gamma_change_MeV": 1.4416811566775323e-06
+      },
+      {
+        "point_id": "p002",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.254352603538791e-05,
+        "gamma_change_MeV": -1.3263009854824759e-05
+      },
+      {
+        "point_id": "p002",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.6216549637611024e-08,
+        "gamma_change_MeV": 2.014101596614637e-07
+      },
+      {
+        "point_id": "p003",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.139878615840644e-05,
+        "gamma_change_MeV": -1.818691946908757e-05
+      },
+      {
+        "point_id": "p003",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.805120508739492e-07,
+        "gamma_change_MeV": -3.5584436269854827e-22
+      },
+      {
+        "point_id": "p003",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.1194360126864922e-05,
+        "gamma_change_MeV": -1.911428387302294e-05
+      },
+      {
+        "point_id": "p003",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.203857767810405e-06,
+        "gamma_change_MeV": -7.597939656989183e-06
+      },
+      {
+        "point_id": "p003",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.3488892818713794e-05,
+        "gamma_change_MeV": -2.0154742173872364e-05
+      },
+      {
+        "point_id": "p003",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.548302048438927e-07,
+        "gamma_change_MeV": 1.6887084264283203e-06
+      },
+      {
+        "point_id": "p003",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.5726394034772966e-05,
+        "gamma_change_MeV": -1.4065590359990665e-05
+      },
+      {
+        "point_id": "p003",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 6.720711098751053e-08,
+        "gamma_change_MeV": 2.4114582686252106e-07
+      },
+      {
+        "point_id": "p004",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.640117484835173e-05,
+        "gamma_change_MeV": -2.3506583020527216e-05
+      },
+      {
+        "point_id": "p004",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.1598682375697535e-06,
+        "gamma_change_MeV": 3.154210013926675e-17
+      },
+      {
+        "point_id": "p004",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.1746177733584773e-05,
+        "gamma_change_MeV": -2.012278378060728e-05
+      },
+      {
+        "point_id": "p004",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.357541681405564e-06,
+        "gamma_change_MeV": -7.90471983691532e-06
+      },
+      {
+        "point_id": "p004",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.4407352409762098e-05,
+        "gamma_change_MeV": -2.1206321974887032e-05
+      },
+      {
+        "point_id": "p004",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.0022029073297745e-06,
+        "gamma_change_MeV": 1.9331898144514525e-06
+      },
+      {
+        "point_id": "p004",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.7715095007561104e-05,
+        "gamma_change_MeV": -1.4476783988470743e-05
+      },
+      {
+        "point_id": "p004",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.874120910855709e-08,
+        "gamma_change_MeV": 2.8305903754244355e-07
+      },
+      {
+        "point_id": "p005",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.504623981915756e-05,
+        "gamma_change_MeV": 5.227226157563721e-15
+      },
+      {
+        "point_id": "p005",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -7.302715857804287e-06,
+        "gamma_change_MeV": -2.3002985206753823e-15
+      },
+      {
+        "point_id": "p005",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.195385095797974e-05,
+        "gamma_change_MeV": -2.056738992450846e-05
+      },
+      {
+        "point_id": "p005",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.336117965271114e-06,
+        "gamma_change_MeV": -7.97035863797646e-06
+      },
+      {
+        "point_id": "p005",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.4967060678827693e-05,
+        "gamma_change_MeV": -2.1644875658921592e-05
+      },
+      {
+        "point_id": "p005",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.1491459872559062e-06,
+        "gamma_change_MeV": 2.1576746931373236e-06
+      },
+      {
+        "point_id": "p005",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.814614305814757e-05,
+        "gamma_change_MeV": -1.4397803763444017e-05
+      },
+      {
+        "point_id": "p005",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.027587566379225e-08,
+        "gamma_change_MeV": 3.2529972315842315e-07
+      },
+      {
+        "point_id": "p006",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.474020636915157e-05,
+        "gamma_change_MeV": -1.9002174856671838e-14
+      },
+      {
+        "point_id": "p006",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -8.619511163487914e-06,
+        "gamma_change_MeV": 6.70665781493901e-14
+      },
+      {
+        "point_id": "p006",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.1716216704371618e-05,
+        "gamma_change_MeV": -2.0274450832857838e-05
+      },
+      {
+        "point_id": "p006",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.10119332375325e-06,
+        "gamma_change_MeV": -7.732264350579499e-06
+      },
+      {
+        "point_id": "p006",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.5031371503937407e-05,
+        "gamma_change_MeV": -2.1282142455447683e-05
+      },
+      {
+        "point_id": "p006",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.2831571893912042e-06,
+        "gamma_change_MeV": 2.335272533571242e-06
+      },
+      {
+        "point_id": "p006",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.6608432342054584e-05,
+        "gamma_change_MeV": -1.3720494173696807e-05
+      },
+      {
+        "point_id": "p006",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.0088706403621472e-07,
+        "gamma_change_MeV": 3.6465104358285316e-07
+      },
+      {
+        "point_id": "p007",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.641532289108909e-05,
+        "gamma_change_MeV": 4.894856347336791e-12
+      },
+      {
+        "point_id": "p007",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -9.259732223654282e-06,
+        "gamma_change_MeV": 3.9565794516033666e-14
+      },
+      {
+        "point_id": "p007",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0904291912083863e-05,
+        "gamma_change_MeV": -1.9017141880794952e-05
+      },
+      {
+        "point_id": "p007",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -4.6077251454335055e-06,
+        "gamma_change_MeV": -7.1125612919331616e-06
+      },
+      {
+        "point_id": "p007",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.4412710470423917e-05,
+        "gamma_change_MeV": -1.987732991892699e-05
+      },
+      {
+        "point_id": "p007",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.3822990467815544e-06,
+        "gamma_change_MeV": 2.4232170972027234e-06
+      },
+      {
+        "point_id": "p007",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -4.2619812006705615e-05,
+        "gamma_change_MeV": -1.2322951024046347e-05
+      },
+      {
+        "point_id": "p007",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.089348415916902e-07,
+        "gamma_change_MeV": 3.953630454134327e-07
+      },
+      {
+        "point_id": "p008",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.204503876006129e-05,
+        "gamma_change_MeV": -5.529699155247577e-13
+      },
+      {
+        "point_id": "p008",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -9.062189292308176e-06,
+        "gamma_change_MeV": 0.0
+      },
+      {
+        "point_id": "p008",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -9.331195542472415e-06,
+        "gamma_change_MeV": -1.645721511067677e-05
+      },
+      {
+        "point_id": "p008",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.7953401488266536e-06,
+        "gamma_change_MeV": -6.000547074336282e-06
+      },
+      {
+        "point_id": "p008",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.2818956633964262e-05,
+        "gamma_change_MeV": -1.7082370277421433e-05
+      },
+      {
+        "point_id": "p008",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.4046263459022157e-06,
+        "gamma_change_MeV": 2.3478606365756605e-06
+      },
+      {
+        "point_id": "p008",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.554613033429632e-05,
+        "gamma_change_MeV": -1.0051662973964426e-05
+      },
+      {
+        "point_id": "p008",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.1127235666208435e-07,
+        "gamma_change_MeV": 4.062279401750857e-07
+      },
+      {
+        "point_id": "p009",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -5.423208622801212e-05,
+        "gamma_change_MeV": 0.0
+      },
+      {
+        "point_id": "p009",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -8.178917028089927e-06,
+        "gamma_change_MeV": 1.5751905986233568e-13
+      },
+      {
+        "point_id": "p009",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -7.597351213917136e-06,
+        "gamma_change_MeV": -1.355704671368585e-05
+      },
+      {
+        "point_id": "p009",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -2.980734166158072e-06,
+        "gamma_change_MeV": -4.8231925404707e-06
+      },
+      {
+        "point_id": "p009",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0828861661593692e-05,
+        "gamma_change_MeV": -1.3965825303330348e-05
+      },
+      {
+        "point_id": "p009",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.32666298213735e-06,
+        "gamma_change_MeV": 2.1210852594322205e-06
+      },
+      {
+        "point_id": "p009",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.8188060241518542e-05,
+        "gamma_change_MeV": -7.806402109622468e-06
+      },
+      {
+        "point_id": "p009",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 1.0586302323645214e-07,
+        "gamma_change_MeV": 3.888604851454147e-07
+      },
+      {
+        "point_id": "p010",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.5125057706864027e-06,
+        "gamma_change_MeV": -1.2844814243351266e-06
+      },
+      {
+        "point_id": "p010",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.98850840308296e-07,
+        "gamma_change_MeV": -1.312469812830841e-06
+      },
+      {
+        "point_id": "p010",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -7.524624834331917e-07,
+        "gamma_change_MeV": -1.292462229685043e-06
+      },
+      {
+        "point_id": "p010",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.356119577802019e-07,
+        "gamma_change_MeV": -5.074915634395438e-07
+      },
+      {
+        "point_id": "p010",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -8.989009074866772e-07,
+        "gamma_change_MeV": -1.3776716514257714e-06
+      },
+      {
+        "point_id": "p010",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.029164640291128e-08,
+        "gamma_change_MeV": 1.1262064347761225e-07
+      },
+      {
+        "point_id": "p010",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.6913763235825172e-06,
+        "gamma_change_MeV": -1.079099760659119e-06
+      },
+      {
+        "point_id": "p010",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 4.426169653015677e-09,
+        "gamma_change_MeV": 1.6073599340415967e-08
+      },
+      {
+        "point_id": "p011",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.872273140359539e-06,
+        "gamma_change_MeV": -1.4597345874278744e-06
+      },
+      {
+        "point_id": "p011",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -7.680108637941885e-07,
+        "gamma_change_MeV": -2.8939743810241225e-06
+      },
+      {
+        "point_id": "p011",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.144310186253279e-07,
+        "gamma_change_MeV": -1.401663837441447e-06
+      },
+      {
+        "point_id": "p011",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.590723736124346e-07,
+        "gamma_change_MeV": -5.464505079544324e-07
+      },
+      {
+        "point_id": "p011",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -9.840128996074782e-07,
+        "gamma_change_MeV": -1.495576839261048e-06
+      },
+      {
+        "point_id": "p011",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.867980235052528e-08,
+        "gamma_change_MeV": 1.2928589043781358e-07
+      },
+      {
+        "point_id": "p011",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.906358531618025e-06,
+        "gamma_change_MeV": -1.155485957582414e-06
+      },
+      {
+        "point_id": "p011",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.147285264683887e-09,
+        "gamma_change_MeV": 1.870941446213692e-08
+      },
+      {
+        "point_id": "p012",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.165081463725073e-06,
+        "gamma_change_MeV": -1.6782134864001819e-06
+      },
+      {
+        "point_id": "p012",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -2.3662732928642072e-07,
+        "gamma_change_MeV": -2.1658813902598817e-12
+      },
+      {
+        "point_id": "p012",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.594577138865134e-07,
+        "gamma_change_MeV": -1.4825725429545855e-06
+      },
+      {
+        "point_id": "p012",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.743414254131494e-07,
+        "gamma_change_MeV": -5.736211505791289e-07
+      },
+      {
+        "point_id": "p012",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0511109849176137e-06,
+        "gamma_change_MeV": -1.5832101212254202e-06
+      },
+      {
+        "point_id": "p012",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 6.685650077997707e-08,
+        "gamma_change_MeV": 1.4481716803516065e-07
+      },
+      {
+        "point_id": "p012",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.057218350477342e-06,
+        "gamma_change_MeV": -1.2051351916397834e-06
+      },
+      {
+        "point_id": "p012",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 5.8460045693209395e-09,
+        "gamma_change_MeV": 2.1270665229167207e-08
+      },
+      {
+        "point_id": "p013",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.3846420965110156e-06,
+        "gamma_change_MeV": -2.0678501204685062e-06
+      },
+      {
+        "point_id": "p013",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -4.009344820588012e-07,
+        "gamma_change_MeV": 9.230028033704453e-20
+      },
+      {
+        "point_id": "p013",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.869105840858538e-07,
+        "gamma_change_MeV": -1.5340264098995249e-06
+      },
+      {
+        "point_id": "p013",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.8138296076795086e-07,
+        "gamma_change_MeV": -5.887540339699626e-07
+      },
+      {
+        "point_id": "p013",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0989266456817859e-06,
+        "gamma_change_MeV": -1.6391515771374543e-06
+      },
+      {
+        "point_id": "p013",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.460698725481052e-08,
+        "gamma_change_MeV": 1.587191569285551e-07
+      },
+      {
+        "point_id": "p013",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.1417012564816105e-06,
+        "gamma_change_MeV": -1.22774034494455e-06
+      },
+      {
+        "point_id": "p013",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 6.504365046566818e-09,
+        "gamma_change_MeV": 2.369405649460532e-08
+      },
+      {
+        "point_id": "p014",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.525525326926072e-06,
+        "gamma_change_MeV": -3.932674101037037e-06
+      },
+      {
+        "point_id": "p014",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.042652446718421e-07,
+        "gamma_change_MeV": -1.8380553013710224e-33
+      },
+      {
+        "point_id": "p014",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.965334927779622e-07,
+        "gamma_change_MeV": -1.5554567198705627e-06
+      },
+      {
+        "point_id": "p014",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.803486379183596e-07,
+        "gamma_change_MeV": -5.918552972161706e-07
+      },
+      {
+        "point_id": "p014",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.126511506299721e-06,
+        "gamma_change_MeV": -1.6626200647351652e-06
+      },
+      {
+        "point_id": "p014",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.169115517375758e-08,
+        "gamma_change_MeV": 1.7052319734034427e-07
+      },
+      {
+        "point_id": "p014",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.1592688856107998e-06,
+        "gamma_change_MeV": -1.2236813340393837e-06
+      },
+      {
+        "point_id": "p014",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.1016756919561885e-09,
+        "gamma_change_MeV": 2.5905791289915214e-08
+      },
+      {
+        "point_id": "p015",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.5838131964283093e-06,
+        "gamma_change_MeV": -2.1288516481891315e-15
+      },
+      {
+        "point_id": "p015",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.746588840338518e-07,
+        "gamma_change_MeV": -7.972574031830165e-15
+      },
+      {
+        "point_id": "p015",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.884903763828333e-07,
+        "gamma_change_MeV": -1.5469531149392424e-06
+      },
+      {
+        "point_id": "p015",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.7159622934268555e-07,
+        "gamma_change_MeV": -5.832194460708706e-07
+      },
+      {
+        "point_id": "p015",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.1333137308611185e-06,
+        "gamma_change_MeV": -1.6535992983790493e-06
+      },
+      {
+        "point_id": "p015",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.784434157860233e-08,
+        "gamma_change_MeV": 1.7971119348203501e-07
+      },
+      {
+        "point_id": "p015",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.1112499527807813e-06,
+        "gamma_change_MeV": -1.194069117360641e-06
+      },
+      {
+        "point_id": "p015",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.616904440510552e-09,
+        "gamma_change_MeV": 2.782921626476309e-08
+      },
+      {
+        "point_id": "p016",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.0015852675878705e-06,
+        "gamma_change_MeV": 1.2015453145942739e-15
+      },
+      {
+        "point_id": "p016",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.202798203958082e-07,
+        "gamma_change_MeV": -1.9757909453546225e-15
+      },
+      {
+        "point_id": "p016",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.634008281660499e-07,
+        "gamma_change_MeV": -1.5093332308424579e-06
+      },
+      {
+        "point_id": "p016",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.55691213371756e-07,
+        "gamma_change_MeV": -5.634417448163731e-07
+      },
+      {
+        "point_id": "p016",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.1192348097210925e-06,
+        "gamma_change_MeV": -1.6128989841490693e-06
+      },
+      {
+        "point_id": "p016",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.278664947487414e-08,
+        "gamma_change_MeV": 1.858155229683689e-07
+      },
+      {
+        "point_id": "p016",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -3.000959736709774e-06,
+        "gamma_change_MeV": -1.1407783091499368e-06
+      },
+      {
+        "point_id": "p016",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.026972864172421e-09,
+        "gamma_change_MeV": 2.9382206889749796e-08
+      },
+      {
+        "point_id": "p017",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.098656006590318e-06,
+        "gamma_change_MeV": -2.875515431962682e-13
+      },
+      {
+        "point_id": "p017",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.443592610594351e-07,
+        "gamma_change_MeV": -4.9729559978431366e-14
+      },
+      {
+        "point_id": "p017",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -8.223757959058275e-07,
+        "gamma_change_MeV": -1.4442060773944831e-06
+      },
+      {
+        "point_id": "p017",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.334091616125079e-07,
+        "gamma_change_MeV": -5.334343029517186e-07
+      },
+      {
+        "point_id": "p017",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0846989084711822e-06,
+        "gamma_change_MeV": -1.54224485982013e-06
+      },
+      {
+        "point_id": "p017",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.623840924177784e-08,
+        "gamma_change_MeV": 1.8839715210106078e-07
+      },
+      {
+        "point_id": "p017",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.8338004653960525e-06,
+        "gamma_change_MeV": -1.0664658347536715e-06
+      },
+      {
+        "point_id": "p017",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.309825716423802e-09,
+        "gamma_change_MeV": 3.04829370634252e-08
+      },
+      {
+        "point_id": "p018",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -4.043560835498283e-06,
+        "gamma_change_MeV": -9.798960355546243e-14
+      },
+      {
+        "point_id": "p018",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.485748826889903e-07,
+        "gamma_change_MeV": -1.445593751677373e-21
+      },
+      {
+        "point_id": "p018",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -7.670408876947477e-07,
+        "gamma_change_MeV": -1.3540229133468529e-06
+      },
+      {
+        "point_id": "p018",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -3.0573039566661464e-07,
+        "gamma_change_MeV": -4.944337490542239e-07
+      },
+      {
+        "point_id": "p018",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -1.0307305160495162e-06,
+        "gamma_change_MeV": -1.4443476175074466e-06
+      },
+      {
+        "point_id": "p018",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.792472610570258e-08,
+        "gamma_change_MeV": 1.871115884455321e-07
+      },
+      {
+        "point_id": "p018",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.617175937302818e-06,
+        "gamma_change_MeV": -9.745165705510317e-07
+      },
+      {
+        "point_id": "p018",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.443748811259866e-09,
+        "gamma_change_MeV": 3.10466248265584e-08
+      },
+      {
+        "point_id": "p019",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.875806555697636e-06,
+        "gamma_change_MeV": 5.610169889631438e-14
+      },
+      {
+        "point_id": "p019",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.342435199258034e-07,
+        "gamma_change_MeV": 4.159841378524847e-15
+      },
+      {
+        "point_id": "p019",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.995426247158321e-07,
+        "gamma_change_MeV": -1.2421098176673695e-06
+      },
+      {
+        "point_id": "p019",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -2.7382395728636766e-07,
+        "gamma_change_MeV": -4.4799551801588677e-07
+      },
+      {
+        "point_id": "p019",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -9.590202694198524e-07,
+        "gamma_change_MeV": -1.322936441283673e-06
+      },
+      {
+        "point_id": "p019",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.760378816281445e-08,
+        "gamma_change_MeV": 1.8174290516981273e-07
+      },
+      {
+        "point_id": "p019",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.3604597458870558e-06,
+        "gamma_change_MeV": -8.6900234386178e-07
+      },
+      {
+        "point_id": "p019",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.410097507294267e-09,
+        "gamma_change_MeV": 3.100703338532185e-08
+      },
+      {
+        "point_id": "p020",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.615447553784179e-06,
+        "gamma_change_MeV": -1.407205746124519e-14
+      },
+      {
+        "point_id": "p020",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -6.028700454407954e-07,
+        "gamma_change_MeV": 4.411892207662679e-14
+      },
+      {
+        "point_id": "p020",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -6.225390052350122e-07,
+        "gamma_change_MeV": -1.1126754770884872e-06
+      },
+      {
+        "point_id": "p020",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -2.3902271095721517e-07,
+        "gamma_change_MeV": -3.959758885230258e-07
+      },
+      {
+        "point_id": "p020",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -8.719812285562512e-07,
+        "gamma_change_MeV": -1.1827460184576921e-06
+      },
+      {
+        "point_id": "p020",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.509574283583788e-08,
+        "gamma_change_MeV": 1.7225812598553603e-07
+      },
+      {
+        "point_id": "p020",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -2.074730332424224e-06,
+        "gamma_change_MeV": -7.545468747593986e-07
+      },
+      {
+        "point_id": "p020",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 8.194774636649527e-09,
+        "gamma_change_MeV": 3.030581297025492e-08
+      },
+      {
+        "point_id": "p021",
+        "meson": "pi",
+        "both_qualified": true,
+        "mass_change_MeV": -3.2793185766877286e-06,
+        "gamma_change_MeV": -1.0470471887212248e-14
+      },
+      {
+        "point_id": "p021",
+        "meson": "K",
+        "both_qualified": true,
+        "mass_change_MeV": -5.564328375839978e-07,
+        "gamma_change_MeV": 2.843026281873622e-14
+      },
+      {
+        "point_id": "p021",
+        "meson": "sigma_pi",
+        "both_qualified": true,
+        "mass_change_MeV": -5.391543709265534e-07,
+        "gamma_change_MeV": -9.70775715813943e-07
+      },
+      {
+        "point_id": "p021",
+        "meson": "sigma_K",
+        "both_qualified": true,
+        "mass_change_MeV": -2.0278253032302018e-07,
+        "gamma_change_MeV": -3.404945800866699e-07
+      },
+      {
+        "point_id": "p021",
+        "meson": "eta",
+        "both_qualified": true,
+        "mass_change_MeV": -7.727950332991895e-07,
+        "gamma_change_MeV": -1.029468251090293e-06
+      },
+      {
+        "point_id": "p021",
+        "meson": "eta_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 9.031055014929734e-08,
+        "gamma_change_MeV": 1.5886013926547093e-07
+      },
+      {
+        "point_id": "p021",
+        "meson": "sigma",
+        "both_qualified": true,
+        "mass_change_MeV": -1.7724154304232798e-06,
+        "gamma_change_MeV": -6.361513058550372e-07
+      },
+      {
+        "point_id": "p021",
+        "meson": "sigma_prime",
+        "both_qualified": true,
+        "mass_change_MeV": 7.790049494360574e-09,
+        "gamma_change_MeV": 2.8910307037222083e-08
+      }
+    ],
+    "max_mass_change_MeV": 6.641532289108909e-05,
+    "max_gamma_change_MeV": 2.3506583020527216e-05,
+    "threshold_brackets_unchanged": true
+  },
+  "files": {
+    "A_refinement_poles.csv": "6b67151b21a1b4b9ccc0c84fdf44cc6dc6b770cce3e6d2be7c613bb5ffc731bc",
+    "bidirectional_root_check.csv": "e4fb8076a7c0cb0cf4f85cfbfd78e53adab57adc852df7983288a7fb4e32bc2c",
+    "channel_changes.csv": "de0d6958c159b8d31110cbb72343a45a782e07f198aaa251152b46344bd67b99",
+    "exact_endpoint_nonfinite.csv": "42eaa4b4a6b7c4b5c5ef4d06641f4165d7975f89c91c7d756f7112e802de5f46",
+    "mixed_threshold_gap_ranges.csv": "abc5f18d684aa675413cbed9d310a3fb6c2f5384332994ba0bc42edb3355290e",
+    "root_threshold_crossings.csv": "95b64f7e67796fd663bf8396020c02033062b487450680ddb0b8e38c3c8df0cf",
+    "threshold_crossing_brackets.csv": "361488fbb7ee4888b72373ac9ac9070d98db781bade4816d5c56d0db40e940e7"
+  }
+}

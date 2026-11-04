@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tomllib
 
-from scripts.plotting.plot_provenance import read_manifest_record, validate_hash_record, validate_snapshot
+from scripts.plotting.plot_provenance import git_source, read_manifest_record, validate_hash_record, validate_snapshot
 from scripts.plotting.plot_bundle import load_chart_records
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -33,7 +33,7 @@ def test_v11_pdf_review_uses_the_frozen_renderer_and_preserves_source_hashes(mod
     assert len(pairs) == 74
     assert validate_snapshot(module.PNG_PACKAGE, root=ROOT, code_ref=CODE_REF) == []
     assert module.V11_SCRIPT.name == "build_phase_guided_publication_clean_v11.py"
-    pointer = module.read_json(module.V11.CURRENT_POINTER)
+    pointer = json.loads(git_source(str(ROOT), CODE_REF, module.V11.CURRENT_POINTER.relative_to(ROOT).as_posix()))
     assert pointer["current_analysis_package"].endswith("publication_clean_v5")
 
 

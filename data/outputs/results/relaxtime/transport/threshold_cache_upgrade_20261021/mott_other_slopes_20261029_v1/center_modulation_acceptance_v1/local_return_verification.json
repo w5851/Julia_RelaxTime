@@ -1,0 +1,13 @@
+{
+  "status": "verified_derived_diagnostic_return",
+  "files_verified": 9,
+  "archive": {
+    "archive": "center_modulation_acceptance_v1.zip",
+    "bytes": 178772,
+    "sha256": "fdee14d0aff48726fc39a9b560019491af84a2b5b5169263cb2204123d4bd2e9",
+    "manifest_files": 9,
+    "package_manifest_sha256": "bba582b264f74f4dc7576ce4b316ab895375cf3f50d6c6956372fa4ba86b3491"
+  },
+  "local_scope": "archive, path safety and file identity only; no physics calculation",
+  "scientific_acceptance": false
+}

@@ -1,0 +1,40 @@
+{
+  "status": "agent_visual_review_complete",
+  "reviewed_utc": "2026-10-29T12:08:16.2417014Z",
+  "author_review": "pending",
+  "numeric_scope": "Six completed K pilot points; tighter and xi controls not yet accepted",
+  "quality_validation": "validation.json",
+  "reviewed_files": [
+    {
+      "path": "other01_tau_ubar.png",
+      "sha256": "b4e80e4234ffe49c6b304451de70fccf553ea74d99772ea717f63eaa8edede3d"
+    },
+    {
+      "path": "other01_tau_sbar.png",
+      "sha256": "aa6054dc35e49de170ba59afce9d8e47b5365238b41a5e29c70a985aa744299e"
+    },
+    {
+      "path": "other01_eta_over_s.png",
+      "sha256": "539024c6416e61ec9fdd29ed516c0a91a442638f2392ceb95b3c3de69e041dbc"
+    },
+    {
+      "path": "other01_zeta_over_s.png",
+      "sha256": "d58360fa230173ef0d8714037535c563f736833bfb6af2b869a8174ce47c99ef"
+    },
+    {
+      "path": "other01_sigma_over_T.png",
+      "sha256": "1a77cfff9d86dd86d24c5815c696d38f9ca2f0b313ac492426a796f7d7541c73"
+    },
+    {
+      "path": "other01_tau_sbar_gray.png",
+      "sha256": "28b447a8375afb4b1857e99def27fd60fab8129984e06540cc0fce4f9741f4e6"
+    }
+  ],
+  "observations": [
+    "Labels, antiparticle bars, parameter units and ticks are readable.",
+    "No visible clipping or overlapping labels.",
+    "Upper raw values and lower remote log secants retain all supplied points.",
+    "Gray representative preserves the distinction between observations and the Mott locator."
+  ],
+  "manuscript_eligible": false
+}

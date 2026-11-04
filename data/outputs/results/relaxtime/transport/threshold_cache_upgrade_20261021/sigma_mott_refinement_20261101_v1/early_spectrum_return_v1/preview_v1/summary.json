@@ -1,0 +1,21 @@
+{
+  "status": "partial_diagnostic",
+  "source_s6_points": 3,
+  "source_s7_points": 0,
+  "spectral": {
+    "width_power_vs_peak_x": 1.4998168493199169,
+    "height_power_vs_peak_x": -0.9995818262512263,
+    "area_power_vs_peak_x": 0.5003179217654866,
+    "max_amplitude_reconstruction_relative": 5.566838676209749e-16
+  },
+  "thermal": {},
+  "physical_kernel_changed": false,
+  "manuscript_eligible": false,
+  "interpretation": "Finite-window slopes and a local integration-variable control; not a proof of differentiability. Hybrid observables replace only the indicated near-threshold bands of two light annihilation channels and are diagnostic.",
+  "script_sha256": "9a9e20619d910ba956b947f3bbae870c6e1285546cdb0b283af3b3f1d80e1f95",
+  "files": {
+    "centered_slopes.csv": "d63314188b164b8b48b60c7a4f23353f83330c9687eaa1175dad68fcf16177f9",
+    "observables.csv": "89f836e4417388bcc07e42671fe18f476c4460bb39881b6afebf120614c64c47",
+    "peak_scaling.csv": "1b12118babf2c1973c99dcc2676e6081a12a89c2f3987e8c008c6cc5c3382566"
+  }
+}

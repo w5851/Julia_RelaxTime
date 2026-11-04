@@ -1,0 +1,9 @@
+{
+  "status": "restored_and_verified",
+  "files": 3734,
+  "destination": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/engineering_source_v2_restored",
+  "archive_sha256": "926ee91f1b721896bd8c74d8e0684df6980d54f49816d1f9ca90d3a2bf142874",
+  "seconds": 140.11738228797913,
+  "source": "engineering_source_receipt.json",
+  "method": "Independent copy of verified full v1 extraction, changed v2 members extracted, every file rehashed against final v2 manifest"
+}

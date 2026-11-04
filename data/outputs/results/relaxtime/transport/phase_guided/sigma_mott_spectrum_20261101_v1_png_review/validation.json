@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "errors": [
+    "sigma_mott_spectrum: series_styles: measured curve style differs from registered series_id: sig_m200",
+    "sigma_mott_spectrum: v2 declared external legend intersects data axes",
+    "sigma_mott_spectrum: v2 legend_outside disagrees with measured placement",
+    "sigma_mott_spectrum: v2 requires inward major/minor ticks on all four sides"
+  ]
+}

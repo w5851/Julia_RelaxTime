@@ -1,0 +1,94 @@
+{
+  "schema": "transport_v15_agent_visual_review_v1",
+  "status": "agent_review_passed_author_review_pending",
+  "reviewed_utc": "2026-10-29T09:18:59.463461+00:00",
+  "author_accepted": false,
+  "method": "Actual PNGs viewed with view_image; 7 color and 3 grayscale images",
+  "files": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/composites/figure1_relaxation_times_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 698351,
+      "sha256": "1c49336ba62f0124ef610f6c73f3f52fd5815cf05c85094dc42f1a0ffa9f6f81"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/composites/figure2_transport_coefficients_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 761959,
+      "sha256": "caf7435bb5e40327fd50124786e038fafec26b1d718543d3e2ae484a0cfa0ec9"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/composites/figure4_transport_fixed_T.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 687408,
+      "sha256": "c6daaa8750d767f5ba1f20fa1f685cb60a25540fe5f8b7265e0e2f506797ccdd"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/details/figure1_low_value_details.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 416895,
+      "sha256": "b304539219698c28b6fd013bcfb05775e36dfaf45e601fad319ec2d7fb47eeeb"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 300164,
+      "sha256": "a4088a41a01b3056e54a21c00cb34d33cb224dcbf75a9c2c56a8dca11607775e"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 292736,
+      "sha256": "01df83f28d8f6a8e7a57036da3d3a81dd7169455a12e6170b52527105dc7dd24"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 230765,
+      "sha256": "845a306d810443bde8a21f52715694d4fcdbcd0de5f03ae675341eac797abefb"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/grayscale_review/composites/figure2_transport_coefficients_comparison.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 344840,
+      "sha256": "6715db68b538e989421ccd2c2e59532b7fdb1f6914aa0bd961e0d063eb3d1dcf"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/grayscale_review/composites/figure4_transport_fixed_T.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 311894,
+      "sha256": "8a08c3966ffa67fcfcafa26cf43dc40c8d9db28a35304806af4a8f7f54c49417"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/grayscale_review/mode_b_fixed_T_sparse_muB/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+      "path_kind": "repository_relative",
+      "role": "visually_inspected_png",
+      "bytes": 103796,
+      "sha256": "b10b53167f5195a29815353bd33acbeda6b96076414c3ce9b21fa0ce0a255771"
+    }
+  ],
+  "findings": [
+    "Labels, units, legends and first-order endpoint symbols are legible and unobstructed.",
+    "Solid, dashed and dash-dotted parameter identities remain distinguishable in the viewed grayscale figures.",
+    "The refined curves show no visible artificial join at their interfaces in these full-range views.",
+    "No smoothing or scientific mechanism claim is inferred from visual appearance."
+  ],
+  "bundle": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "reviewed_bundle",
+    "bytes": 5930744,
+    "sha256": "af22fcc624d5fdb7c9ab6324806cc771482f59160e7b70dc380c55a38e03eee6"
+  },
+  "minimum_capital_numeral_height_mm": 2.096211067708333,
+  "automated_quality": "passed"
+}

@@ -1,0 +1,33 @@
+{
+  "host": "W",
+  "mode": "B",
+  "mode_b_background_qualified": true,
+  "background_grid_points": 909,
+  "mode_b_transport_representatives_qualified": true,
+  "representative_points": 17,
+  "observable_comparisons": 153,
+  "qualified_production_channels": 289,
+  "joint_channel_rates": 578,
+  "independent_reference_rates": 289,
+  "layer_targets_passed": true,
+  "maximum_numpy_julia_density_relative": 1.7763568394002505e-14,
+  "maximum_background_replay_relative": 0.0,
+  "maximum_layer_relative_changes": {
+    "kernel": 1.3201789617056647e-06,
+    "outer": 0.00010521854678324782
+  },
+  "maximum_joint_relative_change": 0.0007207566231377527,
+  "maximum_production_replay_relative_change": 6.29521712536274e-09,
+  "maximum_production_reference_relative_change": 0.0007207566231368645,
+  "source_archive_sha256": "4b30436a7d84ce7089b5f7379b69c51e0c51b2eedf8654f40f76a7bc34afa123",
+  "source_files_verified": 1636,
+  "source_snapshots_verified": 1584,
+  "python_tests_passed": 6,
+  "selection_assertions_passed": 7,
+  "runner_inputs_sha256": "91011906b28d7e9a7b3efd7847c00e02c3131cefac07f44429c5e885363348ad",
+  "reviewer_sha256": "c271393e1ea12ba05ddbf1739849ac826baeffee393b9003a977da4d925a9bc1",
+  "calculation_commit": null,
+  "whole_grid_transport_calculated": false,
+  "runner_cost_qualified": false,
+  "formal_production_promoted": false
+}

@@ -1,0 +1,12 @@
+{
+  "host": "quote-remote",
+  "files": {
+    "full_grid_acceptance.json": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283",
+    "runner_accounting.csv": "534897436d4d3f984b3ba04f644ce3374f886ed7a8ee5d3450ed0f71151d7f5e",
+    "runner_accounting.json": "c8390efb743bc67e3125b4aa3a7505434efc46760fcb5118e9333d58f5b227b7",
+    "background/adjacent_changes.csv": "accc76a439f4c1e62f3d2745501a34249541495b12653dd362f51562987c9df9",
+    "background/background_audit.json": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807",
+    "background/background_comparisons.csv": "2320150c8159ee42527d080eab9c57d7b3b4a63635cde7aa7ce917b77508f1bc",
+    "background/screened_changes.csv": "73b948d49922c7fc72b801af9d218ad64df5042fad2145e9de408682bd8f128c"
+  }
+}

@@ -1,0 +1,1260 @@
+{
+  "case_id": "mott_local_probe_20261028_v1",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "calculation_archive": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\calculation-source.zip",
+  "calculation_archive_sha256": "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f",
+  "source_csv": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\returned\\transfer_090\\reviews\\transfer_090\\mode_a\\phase_guided_transport_scan.csv",
+  "source_csv_sha256": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4",
+  "source_rates_csv": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\returned\\transfer_090\\reviews\\transfer_090\\mode_a\\phase_guided_transport_scan_sampling.csv",
+  "source_rates_sha256": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66",
+  "source_background_preserved": true,
+  "points": 21,
+  "channels": 357,
+  "original_figure_bundle_unmodified": true,
+  "configs": [
+    {
+      "point_id": "p001",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p002",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p003",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p004",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p005",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\pilot_runs\\40224212631\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "18eccabc74e0533211e78b95888d42c2420954b10ddaef6b81ecd2e54acb7e86",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p006",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p007",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p008",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40269592076\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "6e58e0c8125bc429db52b4fe56e9d8d91eb1b5b92d4d836a5b8c98893ec040bb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p009",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\pilot_runs\\40224212631\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "18eccabc74e0533211e78b95888d42c2420954b10ddaef6b81ecd2e54acb7e86",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p010",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40271828397\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "ad59e0022ad456add30fa047a65e2647bac6098e1f3b2e9080857617068beceb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p011",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40271828397\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "ad59e0022ad456add30fa047a65e2647bac6098e1f3b2e9080857617068beceb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p012",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40271828397\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "ad59e0022ad456add30fa047a65e2647bac6098e1f3b2e9080857617068beceb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p013",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40271828397\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "ad59e0022ad456add30fa047a65e2647bac6098e1f3b2e9080857617068beceb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p014",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40271828397\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "ad59e0022ad456add30fa047a65e2647bac6098e1f3b2e9080857617068beceb",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p015",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p016",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p017",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p018",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p019",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p020",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    },
+    {
+      "point_id": "p021",
+      "config_path": "data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\full_rs_full_grid_v1\\runs\\40272405990\\artifact\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\thermal_weighted_full_rs_20261025\\effective_config.json",
+      "config_sha256": "3b7847958ab1d14e9539cd7b04201036871ac8dcddfa1f0c7367b42a8135ff49",
+      "sampling_profile": {
+        "a_coupling": "full_RS",
+        "a_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        },
+        "a_polarization": "full_RS",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "cos_nodes": 24,
+          "p_nodes": 96,
+          "residual_norm_max": 1e-08,
+          "thermal_p_max_inv_fm": 25.0
+        },
+        "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel",
+        "external_density": {
+          "cos_nodes": 8,
+          "p_max_inv_fm": 25.0,
+          "p_nodes": 64
+        },
+        "id": "thermal_weighted_v1",
+        "internal_density": {
+          "cos_nodes": 36,
+          "p_nodes": 32,
+          "scale_inv_fm": 10.0
+        },
+        "sampling": {
+          "atol": 1e-12,
+          "max_evaluations": 40000,
+          "max_events": 30000000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "relative_velocity": "cm",
+          "rtol": 0.001,
+          "seed_order": 48,
+          "weighted_window": 0.6
+        },
+        "sigma_cutoff_inv_fm": 3.0522942112582996,
+        "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/config/models/pnjl/transport_sampling/thermal_weighted_v1.toml",
+        "source_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+        "tau_integral": {
+          "cos_nodes": 36,
+          "p_nodes": 48,
+          "phi_nodes": 36,
+          "scale_inv_fm": 10.0,
+          "t_nodes": 24
+        },
+        "terminal_integral": {
+          "cos_nodes": 16,
+          "p_nodes": 32,
+          "scale_inv_fm": 5.0
+        }
+      }
+    }
+  ],
+  "files": {
+    "point_provenance.csv": "8bf85b5b23b8b4cd77538f07b23ca44ecf221cb13148ecff93dd66b7951b4ff3",
+    "source_rates.csv": "615913f939868f54095b8efa2d64a8a1ad95913494fc41a95d42d50aaae609e5",
+    "source_rows.csv": "ad1aec37566a25dc295e6b12bd01efe5b40a129c93cb50dfe3f188c3d7b760e7"
+  }
+}

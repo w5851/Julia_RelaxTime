@@ -1,0 +1,22 @@
+{
+    "status": "completed_diagnostic",
+    "mode": "pilot",
+    "points": 9,
+    "xi_mott": 0.015327819866955281,
+    "steps": [
+        0.0002,
+        2.0e-5,
+        2.0e-6,
+        2.0e-7
+    ],
+    "xmax_inv_fm2": 0.01,
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "scope": "Continuum near-threshold mixed-scalar square; both mixed poles; no other-amplitude interference or full transport reconstruction.",
+    "numerical_representation": "192-bit smooth kernel coefficients with independent-node checks, pair PV quadrature, exact x^2 numerator and continuous weight; determinant guard omitted only in this isolated diagnostic.",
+    "production_kernel_changed": false,
+    "files": {
+        "center.json": "6cbf702b7fbca951cb944f62fd153be4319a966addf8af5a878283cc67f816df",
+        "kernel_checks.csv": "dca38f988b28e07f55115be2ab5807b7890ca8de2eb4c0246d78ccc1d6039b75",
+        "integrals.csv": "8ebc7e5f6724d891aa34e9bdc326f275f1ed86fe3e0f47f9670a20fd13d8da2e"
+    }
+}

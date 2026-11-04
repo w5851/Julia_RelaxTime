@@ -1,0 +1,91 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "detail_other05_sigma_over_T",
+  "job_fingerprint": "2b1570daeb586ddaaa76fa4e555b805bfd8216ad97ea2989ca9fffd35df9b78d",
+  "ok": true,
+  "answer": {
+    "image_id": "detail_other05_sigma_over_T",
+    "plots": [
+      {
+        "plot": "other05_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "灰色点线在上下两图均可见并标记 Mott 位置；蓝圆、橙方块、黑叉、绿加号整体可分辨，Mott 附近下图中局部标记较密但未见明显不可分辨。"
+      }
+    ],
+    "notes": "未发现裁切、文字或图例碰撞、标签缺失或异常空白；仅下图中 Mott 附近标记较密集，是否可接受需以原图为准。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "d2260aa2a2c2f7bf4ce766118eb3867a2df17da472c8bb637cd5d2d69edd3bbd",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\detail_other05_sigma_over_T.png",
+          "sha256": "dcf20af4dcded1a194c59591842b246606d1ff41ee2094eae2f2c4fba6c94027",
+          "bytes": 172172
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 128,
+        "cached_tokens": 128,
+        "completion_thinking_tokens": 421,
+        "completion_tokens": 548,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 421,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.05,
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 1156,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1284,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 128,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1832
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"detail_other05_sigma_over_T\",\"plots\":[{\"plot\":\"other05_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"灰色点线在上下两图均可见并标记 Mott 位置；蓝圆、橙方块、黑叉、绿加号整体可分辨，Mott 附近下图中局部标记较密但未见明显不可分辨。\"}],\"notes\":\"未发现裁切、文字或图例碰撞、标签缺失或异常空白；仅下图中 Mott 附近标记较密集，是否可接受需以原图为准。\"}",
+      "parsed": {
+        "image_id": "detail_other05_sigma_over_T",
+        "plots": [
+          {
+            "plot": "other05_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "灰色点线在上下两图均可见并标记 Mott 位置；蓝圆、橙方块、黑叉、绿加号整体可分辨，Mott 附近下图中局部标记较密但未见明显不可分辨。"
+          }
+        ],
+        "notes": "未发现裁切、文字或图例碰撞、标签缺失或异常空白；仅下图中 Mott 附近标记较密集，是否可接受需以原图为准。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 1753,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 7.003,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 7.187,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

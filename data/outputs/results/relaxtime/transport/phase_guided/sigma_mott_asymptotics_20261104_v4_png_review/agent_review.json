@@ -1,0 +1,89 @@
+{
+  "machine_validation": {
+    "passed": true,
+    "errors": []
+  },
+  "findings": [
+    {
+      "issue": "v3 coefficient marker distinction and upper margin",
+      "disposition": "v4 uses larger open-square and black-cross references, wider margins, no data-coordinate changes. Both color and grayscale receive candidate pass."
+    },
+    {
+      "issue": "DS described the leftmost square as below the original curve.",
+      "disposition": "Reject this positional sentence: the frozen table orders original Q_log=0.04159562 < smaller-step=0.04305312 < finer-background=0.04465875 at the innermost h. Visual feedback is used only for legibility."
+    },
+    {
+      "issue": "Sparse reference logarithmic increments use different previous h.",
+      "disposition": "The caption and input table explicitly retain actual previous_h; these are coefficient comparisons, not identical interval error bars."
+    },
+    {
+      "issue": "The finest right-side interval departs from the logarithmic coefficient.",
+      "disposition": "Retained without smoothing or suppression; background/step comparisons quantify its larger numerical sensitivity."
+    }
+  ],
+  "scope": "Three read-only PNG plots of remote local mixed-scalar integral diagnostics. Complete tau and terminal transport are outside this numerical result.",
+  "coefficient_review": {
+    "path": "ds_review_v1/coefficient-review.json",
+    "sha256": "57da42a8846a50dc6e4bb0c55cabb6699bb4b9ee448bfa8ad8af8b25f0e94e0a",
+    "candidate_pass": true
+  },
+  "status": "machine_passed_external_visual_review_reconciled",
+  "author_accepted": false,
+  "external_model": "cn:deepseek-v4.1-flash",
+  "manifest_sha256": "b4a418b993bd4a59e0bda948445c0dd01a67e8b42849a96bddf72b25dc2ffcbe",
+  "quality": [
+    {
+      "minimum_linewidth_pt": 1.2,
+      "clipped_text_count": 0,
+      "minimum_glyph_mm": 2.096211067708333,
+      "asset_id": "sigma_side_curvature",
+      "text_overlap_count": 0,
+      "legend_curve_overlap_count": 0
+    },
+    {
+      "minimum_linewidth_pt": 1.2,
+      "clipped_text_count": 0,
+      "minimum_glyph_mm": 2.096211067708333,
+      "asset_id": "sigma_side_scaling",
+      "text_overlap_count": 0,
+      "legend_curve_overlap_count": 0
+    },
+    {
+      "minimum_linewidth_pt": 1.2,
+      "clipped_text_count": 0,
+      "minimum_glyph_mm": 2.096211067708333,
+      "asset_id": "sigma_side_coefficients",
+      "text_overlap_count": 0,
+      "legend_curve_overlap_count": 0
+    }
+  ],
+  "main_agent_image_loaded": false,
+  "shape_review": {
+    "reused_only_for_byte_identical_assets": [
+      {
+        "same_bytes": true,
+        "asset": "sigma_side_curvature.png",
+        "sha256": "bb5f64a6d78be94b79126b563cd80747dc9bcda4e4ce1212a6dea29096e2a66a"
+      },
+      {
+        "same_bytes": true,
+        "asset": "sigma_side_scaling.png",
+        "sha256": "7e12add17cbe88b737bdf6da8111f16c71f651260a07ed68e47e133dde477ce2"
+      },
+      {
+        "same_bytes": true,
+        "asset": "sigma_side_curvature_gray.png",
+        "sha256": "8f6c74ee9cd7361d031fd95e7f4a4a4fbac927909e981aa314f6176bc93a7a30"
+      },
+      {
+        "same_bytes": true,
+        "asset": "sigma_side_scaling_gray.png",
+        "sha256": "952f2fcda6862deadfb0ffb18b7ae4b023cdfa1d0e1649588a61591ded43e56d"
+      }
+    ],
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v3_png_review/ds_review_v1/side-shapes.json",
+    "sha256": "474fb3e9b5f115bc534184188db5422850b77c142746f3a7d47521415b71f869"
+  },
+  "external_model_output_verified": false,
+  "manuscript_eligible": false
+}
