@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "retained_original_manifests": 4,
+  "canonical_identical_pngs": 288,
+  "protected_current": [
+    "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json",
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/plot_manifest.json",
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/plot_manifest.json"
+  ],
+  "links_checked": 78,
+  "broken_links": []
+}

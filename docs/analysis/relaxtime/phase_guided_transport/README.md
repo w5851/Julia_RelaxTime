@@ -34,6 +34,8 @@
 | publication-clean accepted parent | [`phase_guided_transport_publication_clean_v4/`](phase_guided_transport_publication_clean_v4/) | v5 的已接受显示父级；保留 v4 的局部显示调整与 raw/display provenance |
 | publication-clean intermediate | [`phase_guided_transport_publication_clean_v3/`](phase_guided_transport_publication_clean_v3/) | v4 的不可变父级和中间版本，仅保留 provenance，不作为当前 publication layer |
 
+v1–v4公共目录的288张重复PNG已按[退役记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/legacy_display_retirement_20261104_v1/README.md)归档迁出；同字节分析图片和原manifest保留，旧验证器需先恢复公共路径。v5及其后的来源依赖继续保留。
+
 版本共存按用途区分：v14 是当前正式产物，v1–v13 是被取代的历史数据／显示层，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，历史 renderer 保留生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。`production_registry.json` 保留旧批次登记，新批次资格以 current 指针所链接的 full-RS 晋升记录为准。
 
 v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_window_summary.csv`；v2 是连续审计阶段，不覆盖、不合并、也不重写 v1。

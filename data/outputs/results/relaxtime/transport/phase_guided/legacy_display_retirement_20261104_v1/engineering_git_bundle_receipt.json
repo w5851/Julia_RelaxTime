@@ -1,0 +1,10 @@
+{
+  "path": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/engineering_delivery.bundle",
+  "bytes": 177329842,
+  "sha256": "6eea94faf2dd2cc0c5d9f90898eafb77cc28367c079108acbd0c0f98446748b0",
+  "commit": "4b7c285226d6d0546fb3f03007856c1976074c4f",
+  "requires_commit": "3a07a0e2a6082011bc72ea3f9e02cdf55e1bb4b5",
+  "verified": true,
+  "verification": "The bundle contains this ref:\n4b7c285226d6d0546fb3f03007856c1976074c4f HEAD\nThe bundle requires this ref:\n3a07a0e2a6082011bc72ea3f9e02cdf55e1bb4b5 \nThe bundle uses this hash algorithm: sha1\nD:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/engineering_delivery.bundle is okay\n",
+  "seconds": 133.77942419052124
+}
