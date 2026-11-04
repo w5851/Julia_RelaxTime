@@ -1,0 +1,59 @@
+{
+  "schema": "transport_pr_path_validation_v1",
+  "initial_data_output_guard": {
+    "status": "failed",
+    "result_png_files": 70,
+    "figure_readme_files": 4,
+    "resolution": "Archive original image and documentation bytes; relocate current notes without relaxing guard."
+  },
+  "checks": [
+    {
+      "name": "data_output_guard_staged",
+      "command": [
+        "julia",
+        "--project=.",
+        "scripts/dev/check_data_output_path_guard.jl",
+        "--staged"
+      ],
+      "exit_code": 0,
+      "seconds": 2.6034651000081794,
+      "log": "data_output_guard_staged.log",
+      "log_sha256": "bea28495efd9512428cff8686d64cd3a4c5908fcfcd3de1e6d1911869f75abd9"
+    },
+    {
+      "name": "docs_consistency",
+      "command": [
+        "julia",
+        "--project=.",
+        "scripts/dev/check_docs_consistency.jl"
+      ],
+      "exit_code": 0,
+      "seconds": 2.4402452999929665,
+      "log": "docs_consistency.log",
+      "log_sha256": "c882feb6dcb1879ae442882196c30174b3c05a6730b6297f29cc3e98872c4c66"
+    },
+    {
+      "name": "archive_roundtrip",
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/unit/python/test_transport_delivery_archive.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "seconds": 2.2456964000011794,
+      "log": "archive_roundtrip.log",
+      "log_sha256": "aff626f83bfcebfed7e819780100b143d536f27d7df0e8e08e868709dac87d0d"
+    }
+  ],
+  "archive_members_restored": 76,
+  "archive_tool_tests_passed": 11,
+  "public_plot_manifests_unchanged": 35,
+  "production_src_tree": "274f43ac44348e3a52ce9a5f5bf136c5f585aa2d",
+  "production_src_identical_to": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "updated_markdown_local_links": "passed",
+  "full_pr_range_guard": "run after committing; see PR checks",
+  "physical_numerical_recalculation": false,
+  "ci": "pending; unit, integration, regression and validation must run on the PR"
+}

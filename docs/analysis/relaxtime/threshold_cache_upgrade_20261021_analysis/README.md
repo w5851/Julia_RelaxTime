@@ -57,7 +57,7 @@ Mott 阈值积分连续性的条件、x≈0.23 小峰的混合标量贡献分解
 
 中心点相对两侧点均值的偏离从 −6.53% 减至约 −0.064%。这是重新计算截面缓存后的两通道贡献替换，未对 τ 曲线做平滑。该对照支持此处存在显著数值凹陷；它不能证明所有其他突变都有同一来源，也不是所有通道的生产重算。
 
-![四格误差与两通道替换后的弛豫时间](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/ablation_tau.png)
+[四格误差与两通道替换后的弛豫时间（原PNG及路径恢复）](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md#历史图片定位与恢复)；原成员：`analysis_v2/ablation_tau.png`。
 
 ## 2. 阈值尺度、自适应误差和 xσ
 
@@ -158,7 +158,7 @@ B_0(s_0+x)=B_0(s_0)+i\frac{\pi F(0)}2\sqrt{x}+O(x).
 
 截面层也能直接看到输入误差：ξ=0.37、uū→uū，在 `x=4.63995e−10 fm⁻²`，旧环函数的直算 σ 约为 `41307.4 fm²`，新 PV 候选约为 `12538.1 fm²`。下图保留这处极小 x 的差别；“直算”本身不能作为输入正确的保证。
 
-![旧环函数、自适应节点与稳定主值候选](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/weighted_threshold_shape.png)
+[旧环函数、自适应节点与稳定主值候选（原PNG及路径恢复）](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md#历史图片定位与恢复)；原成员：`analysis_v2/weighted_threshold_shape.png`。
 
 但这个极窄区域的热权重很小。在六个主消融背景/通道上，只将 `x≤0.6` 内的 s 道极化替成该 PV 候选，热平均最大相对变化为 `6.06e−8`，远小于稀疏缓存造成的变化。因此本例的凹陷修复主要来自取点；端点升级独立提高了输入的可靠性。这个局部替换实验不约束其他背景或极点位置的敏感性。
 

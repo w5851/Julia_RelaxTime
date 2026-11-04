@@ -5,6 +5,9 @@
 本阶段的输运重计算、正式数值验收及计划内有限窗口分析已完成。工程交付的范围、验证和
 恢复方式见[交付入口](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 本地工程交付已提交为`4b7c285226d6d0546fb3f03007856c1976074c4f`，提交内容与清单及恢复包一致。
+PR 收尾使用独立分支 `codex/transport-recalculation-wrapup`，原工作树的介子冻结线及其他未提交工作保留。
+SSH 读取、fetch 和推送预演已恢复；分支来源映射、历史审阅图片的路径整理与恢复见
+[PR 交付整理](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md)。
 随后按[首批退役记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/legacy_display_retirement_20261104_v1/README.md)归档迁出v1–v4的288张公共PNG副本，原manifest和同字节分析图片保留；有依赖的旧资产继续保留。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。
 
@@ -27,7 +30,7 @@
 | research | 混合谱支未决、严格退耦和采样间双穿越/切触零尚未全面排除；“未见 Mott”只在已查扫描分辨率下成立 |
 | research | 认证极细窗口高阶导数时，处理生产行列式保护的人工曲率、离散热权重/硬边界及右侧最内层精度；此次未改变生产核 |
 | independent | [A 解析降维](full_rs_a_reduction_20261025.md)原型已验，生产接入与端到端收益仍独立待办 |
-| independent | v15 PDF 继续暂缓；论文附件替换另行处理。首批v1–v4公共镜像退役完成；v5、v10–v13、旧raw/收敛证据及另一checkout在消费者迁移前继续保留 |
+| independent | 下一阶段依次完成 v15 PDF 检查与图层晋升、current 和论文附件替换及编译核对，再复核旧资产的消费者与恢复链。首批v1–v4公共镜像退役完成；v5、v10–v13、旧raw/收敛证据及另一checkout在消费者迁移前继续保留 |
 
 以下保留各批次的实施与验收依据；涉及历史图层或准备阶段的语句不代替上表的当前状态。
 

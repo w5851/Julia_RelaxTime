@@ -1,0 +1,10 @@
+{
+  "schema": "transport_delivery_archive_receipt_v1",
+  "archive": "D:/w/transport-recalculation-wrapup/data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/review_path_migration.zip",
+  "archive_bytes": 15930941,
+  "archive_sha256": "d3b0d5fd0a61416d45172f62fb03d30e68a1124696a6148c4059d24f27304580",
+  "manifest_sha256": "25dff4c9e06d0e67fa54a7e19848576c33ad15b1f2c00f81fb2b0e9c98d78976",
+  "files": 76,
+  "uncompressed_bytes": 16984683,
+  "archive_verified": true
+}
