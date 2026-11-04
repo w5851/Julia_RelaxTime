@@ -1,0 +1,4 @@
+Test Summary:                                                | Pass  Total  Time
+Mott diagnostics resolve repository and frozen library names |   40     40  3.7s
+Test Summary:                                                | Pass  Total  Time
+Mott midpoint screening honors the explicit library override |    9      9  0.5s

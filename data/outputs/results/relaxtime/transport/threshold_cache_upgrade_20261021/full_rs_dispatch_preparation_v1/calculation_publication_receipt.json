@@ -1,0 +1,10 @@
+{
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "branch": "codex/meson-freezeout-defaults",
+  "tag": "transport-full-rs-20261026-v1",
+  "remote": "git@github.com:w5851/Julia_RelaxTime.git",
+  "published": true,
+  "remote_ref_verified": true,
+  "verification": "git ls-remote and GitHub git/ref API identify the same commit",
+  "verified_utc": "2026-10-25T19:01:44.186132+00:00"
+}

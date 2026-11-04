@@ -1,0 +1,723 @@
+{
+  "schema": "transport_pr_path_migration_v1",
+  "source_commit": "1ea2778e9ed9474592b8a3bfae5a17c63321b905",
+  "original_source_commit": "08db84bbe26256e5c93760dcb394bb4569b1ddb6",
+  "archive": "review_path_migration.zip",
+  "image_paths": [
+    "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure1_relaxation_times_comparison.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure2_transport_coefficients_comparison.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/details/figure1_low_value_details.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other03_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other07_sigma_over_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_sigma_over_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_tau_ubar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_01.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_02.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_03.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_04.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_05.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_06.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_07.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v2/fig4_failed_layout.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/composites/figure4_transport_fixed_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/single_muB0.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/01_figure1_relaxation_times_comparison.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/02_figure2_transport_coefficients_comparison.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/03_figure4_transport_fixed_T.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/04_figure1_low_value_details.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/05_sigma_vs_xi.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/06_tau_ubar_vs_xi.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_01.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_02.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_03.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_04.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_05.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_06.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other01_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_sbar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_ubar.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature_gray.png",
+    "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/visual_qa_inputs/spectrum_review.png",
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/ablation_tau.png",
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/weighted_threshold_shape.png",
+    "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/followup_analysis_v1/finite_x_resonance.png"
+  ],
+  "image_bytes": 16952773,
+  "retired_readme_paths": [
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/README.md",
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v2/README.md",
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/README.md",
+    "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4/README.md"
+  ],
+  "reading_notes_with_archived_originals": [
+    "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/README.md",
+    "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/followup_20261022.md"
+  ],
+  "reference_scan": {
+    "scope": "tracked UTF-8 text; normalized absolute or repository-relative full image paths",
+    "references": [
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/agent_review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png"
+        ],
+        "sha256_before": "0564cb34c2ba6363e791a4be493cbcd5eaa6d6ff9ae0e1d7ce9e2115146c0232"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/input_manifest.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png"
+        ],
+        "sha256_before": "f095e46190361e8e181e7ad890aca2092eff5ff743c1682eb8c99ef99a62c193"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other01_tau_sbar.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png"
+        ],
+        "sha256_before": "525533dff055046ebf5d0d62fcbf43bb1b6f7940e7b5c9c3e83219b16636ecb0"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other01_tau_sbar_gray.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png"
+        ],
+        "sha256_before": "25307354fd4ab2e1e37df060cf15338946db2c68bef2641329a1f844a16a25b1"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other03_eta_over_s.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png"
+        ],
+        "sha256_before": "05bf6b9d747e268ae4d71ef4d04f8b3b5fa3211fc5c5a87ed18cb94df14e8259"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_sigma_over_T.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png"
+        ],
+        "sha256_before": "140d24e9a88ad2952d308507d4f96688b9382acb06b147a6bf01965b8d3cdbc8"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_sigma_over_T_gray.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png"
+        ],
+        "sha256_before": "f17d8f996a8c4a9788689814e47fced3ef5ea5e4da0cca5bf6560e2f1c4ee2bd"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_tau_ubar.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png"
+        ],
+        "sha256_before": "9b37f232c39ac7893bd71039a885d5faaa48165b4432b7e255890226a449415f"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_sigma_over_T.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png"
+        ],
+        "sha256_before": "33e58188d09837dd66a8121a6b14b02c6340b11bcc51e42389d65d1b114a7338"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_sigma_over_T_gray.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png"
+        ],
+        "sha256_before": "8e182d44562e0b0c9a2d821d30ca8f4e6887400104ebde5b812f5960fa8f33b7"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_tau_ubar.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png"
+        ],
+        "sha256_before": "80aa779dc43346be3996a4927395f338a70b3d40d08f4424a3facfb32a14860c"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other08_tau_ubar.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png"
+        ],
+        "sha256_before": "36a908267b7a4fc0de9a21d51a921a2e777832930db79851b0d6526eecdcfa7e"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other11_tau_sbar.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png"
+        ],
+        "sha256_before": "d6b80e912d78193ac2d9a728f2281658af9b3bb0370a432293633e9f4401560e"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other13_zeta_over_s.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png"
+        ],
+        "sha256_before": "fd4283996f6292d7cd0ebc78f91e99d4331fd305997f26627b3052cddbd215cf"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_01.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png"
+        ],
+        "sha256_before": "014f23354ffb8eb4511878e6376fb982b2ea0ed4dd2752ee4ec21e167b2ce84c"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_02.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png"
+        ],
+        "sha256_before": "696a7ee96c7f842d8a706640e4d22cf0ab27e31e6aa02a719d47228292a7c66e"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_03.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png"
+        ],
+        "sha256_before": "f2d09db8632481fef2a6f3f7db92ac4ab9b972e52d07694cce5034bb9fc8ad43"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_04.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png"
+        ],
+        "sha256_before": "a2455ac5c5a685ec07d0d8813c68603e35fa3958141ec070d8a5672fb4f16ea3"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_05.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png"
+        ],
+        "sha256_before": "f5aac74e3211dad6c19c0c7940a43ec81d23be12da54356bc88710a3a446d344"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_06.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png"
+        ],
+        "sha256_before": "4e6f073093664e4015d08e309c572ccc8d70808f78e3b6db43d0e65183e81277"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_07.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png"
+        ],
+        "sha256_before": "2f6d548062560edb702df5402140621be4e4f78a26c29eacdcfe36bb648ada71"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_08.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png"
+        ],
+        "sha256_before": "80c9b28f6f7bab9e4e62ef3fe685ec3155039f684a6005f51559caefe59470db"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_09.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png"
+        ],
+        "sha256_before": "9d72d66118e084c11f3c447674f86f4f48af104c4bfe13edf0c54a0ef278e347"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_10.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png"
+        ],
+        "sha256_before": "b230b8e693bd947515cdf3ab3f37e1ddc0a19462f95ba539744a543a0cec1365"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_11.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png"
+        ],
+        "sha256_before": "6a760e110c1a45246be4e19c0bcd83e595fd1ef3a5cc4cd5011f92c84d18ea29"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_focus_v1.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png"
+        ],
+        "sha256_before": "570554a356e35953a6264da5b2bd8ac61225a6319d8d99299a3dc7055adc1c24"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/ds_description.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png"
+        ],
+        "sha256_before": "0535d8a0263a72711efbad7ff324946da15e4d6eec389f799842191d5cbf181e"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/source_manifest.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png"
+        ],
+        "sha256_before": "1e9cadf42b0f779ca98d239347d19780446085d77955b1c22a98527819c753e3"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_render_manifest.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/01_figure1_relaxation_times_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/02_figure2_transport_coefficients_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/03_figure4_transport_fixed_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/04_figure1_low_value_details.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/05_sigma_vs_xi.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/06_tau_ubar_vs_xi.png"
+        ],
+        "sha256_before": "d967ed050c006e283ab773e332f7e23fe7f6e6eda062ec1486ac8f19064adddd"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/agent_review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_06.png"
+        ],
+        "sha256_before": "6b58146de6ab888e83b0311c4adfe1a72a66eb9eec90d17fa6b4f5e7243650f3"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/ds_review_v1/sigma-areas-review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas_gray.png"
+        ],
+        "sha256_before": "737ebcb2797657caee2194b726f08c59a303cf98a5ff6617a6043719035afc46"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/ds_review_v1/sigma-slopes-review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes_gray.png"
+        ],
+        "sha256_before": "f9df333ac80eb888c69307b95accb674c5ee29578486e1d880871236e2e582e8"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/ds_review/k-sigma-shapes.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_ubar.png"
+        ],
+        "sha256_before": "709c6e3ad3cdd63f95336d0b8cb6c53a8db4de818754dcd6f6ece101c6c2a4ee"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/manifest.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes_gray.png"
+        ],
+        "sha256_before": "963cfdab2d794f60591c35515a0acfcd6288a605528b86763baaac7ba6b21846"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/ds_review_v1/sigma-curvature-review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature_gray.png"
+        ],
+        "sha256_before": "5e227cf30b93ddfb444a561b89ebfdd0438886970c061177a49be692ba0fa0b0"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/ds_review_v1/sigma-spectrum-review.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/visual_qa_inputs/spectrum_review.png"
+        ],
+        "sha256_before": "7f2c153d93557e26ad19e78c73d7694e6f96756bdf9881bb3e7dbfc78dee8036"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/file_manifest.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure1_relaxation_times_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure2_transport_coefficients_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/details/figure1_low_value_details.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other03_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other07_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_07.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v2/fig4_failed_layout.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/composites/figure4_transport_fixed_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/single_muB0.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/01_figure1_relaxation_times_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/02_figure2_transport_coefficients_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/03_figure4_transport_fixed_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/04_figure1_low_value_details.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/05_sigma_vs_xi.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/06_tau_ubar_vs_xi.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/visual_qa_inputs/spectrum_review.png"
+        ],
+        "sha256_before": "821eb14f37f4c2fb052853c42b7f5ed8bb66e46e4ef99c60747765ee94ee5500"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/git_paths.txt",
+        "images": [
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure1_relaxation_times_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/composites/figure2_transport_coefficients_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/details/figure1_low_value_details.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other03_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other07_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/detail_other08_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/visual_qa/overview_07.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/sigma_local_explanation_20261101_v1/sigma_local_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v2/fig4_failed_layout.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/composites/figure4_transport_fixed_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/single_muB0.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/01_figure1_relaxation_times_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/02_figure2_transport_coefficients_comparison.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/03_figure4_transport_fixed_T.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/04_figure1_low_value_details.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/05_sigma_vs_xi.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/06_tau_ubar_vs_xi.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_01.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_02.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_03.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_04.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_05.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/visual_review/singles_06.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other01_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_sbar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/visual_qa_inputs/other07_tau_ubar.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_areas_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/visual_qa_inputs/sigma_slopes_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/visual_qa_inputs/sigma_curvature_gray.png",
+          "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/visual_qa_inputs/spectrum_review.png"
+        ],
+        "sha256_before": "d5f099724ed0ba6d3fe6cb348d8c9cc9cbbcf7754450e2ccbc3021591ae643c1"
+      },
+      {
+        "file": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_dispatch_preparation_v1/calculation-preview-v3.json",
+        "images": [
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/ablation_tau.png",
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/weighted_threshold_shape.png",
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/followup_analysis_v1/finite_x_resonance.png"
+        ],
+        "sha256_before": "454a993391d38293ffefd5550fa24eee20e6c473b68239d13f63deb10f12b832"
+      },
+      {
+        "file": "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/README.md",
+        "images": [
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/ablation_tau.png",
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/analysis_v2/weighted_threshold_shape.png"
+        ],
+        "sha256_before": "e36312ed071516dbba11c9053c99a9feed4af5ce40a630edc0829d89b7ce5dbe"
+      },
+      {
+        "file": "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/followup_20261022.md",
+        "images": [
+          "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/followup_analysis_v1/finite_x_resonance.png"
+        ],
+        "sha256_before": "7c09343b721b84ceb9bc9eca288cfcf3147a3c4de6b3ee363d5d3c477af79652"
+      }
+    ]
+  },
+  "unchanged_public_plot_manifests": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_fine_png_review/plot_manifest.json",
+      "sha256": "3ad950d932864d04ff5adcec0ae46c7bf5f47de3ab79cefa64cb006640f86175"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review/plot_manifest.json",
+      "sha256": "cab4451979914080c989211d3111058349ab11ef7bd7c47bd8330e164a1f5ea4"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/plot_manifest.json",
+      "sha256": "028ad860e7bf5aac86939f11b07142876ee4d65d60f9bd0c153007d05cd62f71"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_png_review/plot_manifest.json",
+      "sha256": "6639bdd5e9bbc36ffaf97059125add48c36b3b79113077cb59a9eac530142f3e"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_precision_png_review/plot_manifest.json",
+      "sha256": "601930b41cfe7e3511bb639a90dafe8b0cd32b572509d0948f6e5fdc0eabe244"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/plot_manifest.json",
+      "sha256": "74e024ca4bc16380b4995d22de3b6b543b378c3c5284afa0059f30606f129bd0"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+      "sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/plot_manifest.json",
+      "sha256": "4259c5144187de8f6b02308c798fcac9d6c75b51fc2e70acdfd5d891fce1ae09"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v10_png_review/plot_manifest.json",
+      "sha256": "574355528a141b5862fbd3ac4420953e8b85d879459f4be5fb39ed52f1a72b7c"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_pdf_review/plot_manifest.json",
+      "sha256": "01c59cb5a372629bcdf051da24a2d4d56a9297060ac938ac3a0324023bb91079"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v11_png_review/plot_manifest.json",
+      "sha256": "dccb1ae5716d17ce248990435f11fd8687fd2f7657d214ae1606b4c858516593"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v12_png_review/plot_manifest.json",
+      "sha256": "d28fad59c25cf2a2c4fa181b7bd876e08b8bc41bd3a621473e6dae5bbc68b20a"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf/plot_manifest.json",
+      "sha256": "8c363043909c7b40557d43d1174d9e5566cefe7519a0b7daec0b369cadb7306f"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_png_review/plot_manifest.json",
+      "sha256": "b68def4e0dd8f7706baa1691bb4f1cdbae7f693a5e1649835b9f6bc9c2e22574"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/plot_manifest.json",
+      "sha256": "76fac7cb002e69e275f217b5ee991d8673846678bfa1230fba4bb76a3bcb6f64"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/plot_manifest.json",
+      "sha256": "fa2ae9c1f55fd006217a5466330289703287897e8d90ae6ae64ca672868e7508"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/plot_manifest.json",
+      "sha256": "af22fcc624d5fdb7c9ab6324806cc771482f59160e7b70dc380c55a38e03eee6"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v2/plot_manifest.json",
+      "sha256": "cb97c398718947cf3ab75d7630e8c654c7b2c166bbfae8d3d9a3176c89b8503f"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v3/plot_manifest.json",
+      "sha256": "b023a30dbc33d918beae4a994f5bc44137f67307470259943b9326c801510e9f"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v4/plot_manifest.json",
+      "sha256": "64b426eb4dea4dae202647e6f104ed776d5656c6f25d4c6eb806703100b64cee"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5/plot_manifest.json",
+      "sha256": "b59c0ea8895567c2360ad4a10b33a8c3ec22f55639b0d280d2c89c3df1a027f9"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v1_png_review/plot_manifest.json",
+      "sha256": "9663520e0ca7a2c376302426b5bda8c4af3753a575612c55841c0528300b4d4d"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v2_png_review/plot_manifest.json",
+      "sha256": "c13a8f3e45b6b4e6f84fd84503a47e14b69894c1f8ad30f5259e9767bd64702d"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v3_png_review/plot_manifest.json",
+      "sha256": "d5927b0bac071c691a912ba9147d5b53b0ac50ab1edbde85a209a1a455169253"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/plot_manifest.json",
+      "sha256": "b4a418b993bd4a59e0bda948445c0dd01a67e8b42849a96bddf72b25dc2ffcbe"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/plot_manifest.json",
+      "sha256": "141fdd41b97fe17e94971efff94b6c5d03cf7e518d62d9f1827144249bb536ac"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/plot_manifest.json",
+      "sha256": "746903354b24de753f483d3cdb5d21a1e0095e34d1c0d354e9bc51ae78bf5396"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v1_png_review/plot_manifest.json",
+      "sha256": "e14f52ed7a82fbcae81e74cc98073f21d2d58e193dd0cf2006517eab12ebc0dc"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/plot_manifest.json",
+      "sha256": "a3c8320ebfe717cbfa2fc4ddf8f58f7e2bfcf26fc5dba683d88859b057f5b3dd"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
+      "sha256": "2a742515ce3921f2e021ee8ae5dfe2d1d46165b6b5a226aa7d6226617f607424"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/plot_manifest.json",
+      "sha256": "8a214e5eacc4b040fae5856142c2eca91e91c8b18e7cd3426faf4dcc250b734f"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/plot_manifest.json",
+      "sha256": "d454940d9c7505cc4096fa7063718a28c1c7e569617ba48de2e99cd43ac55917"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
+      "sha256": "2611e47fcf55617ab5e30c8806f452b337f09602560a9479104bce8e0673c1b5"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/plot_manifest.json",
+      "sha256": "5226430b7c0a998ed450f5ce915f41e41abc65fe0f3524fe790a3241f2040fbf"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/plot_manifest.json",
+      "sha256": "53b4b26411d683e4d6269d33026f0ee824fd4b5a1831fed9d93ef58c53535a80"
+    }
+  ],
+  "reading_note_updates": [
+    {
+      "path": "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/README.md",
+      "archive_sha256": "e36312ed071516dbba11c9053c99a9feed4af5ce40a630edc0829d89b7ce5dbe",
+      "current_sha256": "80be580c00a60c104e946b4e12d34ebf78d7a7b48fb6b0cb3daa212180219794",
+      "change": "Replace archived inline image links with the restoration index; original note bytes are in review_path_migration.zip."
+    },
+    {
+      "path": "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/followup_20261022.md",
+      "archive_sha256": "7c09343b721b84ceb9bc9eca288cfcf3147a3c4de6b3ee363d5d3c477af79652",
+      "current_sha256": "7a384f2d90706b638f9ff6507db2cf6434b39e844e776d822a23aa9879b33ef2",
+      "change": "Replace archived inline image links with the restoration index; original note bytes are in review_path_migration.zip."
+    }
+  ],
+  "completed": true,
+  "image_storage": "archive members at original repository-relative paths; no new plot or qualification",
+  "new_retirement_readmes": [
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v1/README.md",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v2/README.md",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v3/README.md",
+    "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v4/README.md"
+  ]
+}

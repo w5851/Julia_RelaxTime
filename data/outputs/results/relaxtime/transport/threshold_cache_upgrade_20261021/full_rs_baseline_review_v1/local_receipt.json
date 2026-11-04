@@ -1,0 +1,7 @@
+{
+  "archive_sha256": "c0246d2220de5deeb9fea24b28a85af6ff7ce5b830004c164ef05850f42d3e40",
+  "archive_files": 25,
+  "baseline_sha256": "c33fcb0dfe5db1ed49205465fa427f0d07b7214e3aab3847a9e7744ba65f3eec",
+  "canonical_files_copied_without_byte_changes": true,
+  "checked_utc": "2026-10-25T14:23:13.324165+00:00"
+}

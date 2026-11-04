@@ -1,0 +1,1346 @@
+{
+  "definition": "J=right log-secant minus left log-secant, at identical half-width h; final groups sum exact species modulation contributions",
+  "half_width": 0.0002,
+  "window_table": [
+    {
+      "curve_id": "other01",
+      "meson": "K",
+      "window": "mode_a:muB0.0_alpha1.0",
+      "T_MeV": "200.0898076157829",
+      "muB_MeV": "0.0",
+      "xi_mott": "-0.18245168350636962",
+      "tau_u": 0.056975375420823315,
+      "tau_d": 0.056975375420823315,
+      "tau_s": 0.39727107386240634,
+      "tau_ubar": 0.05697537541606268,
+      "tau_dbar": 0.05697537541606268,
+      "tau_sbar": 0.39727107386240634,
+      "eta_over_s": 0.15709290085914285,
+      "zeta_over_s": 0.15109533636683103,
+      "sigma_over_T": 0.09164422831481556,
+      "precision_max_abs_J_change": 0.0006560593131470505
+    },
+    {
+      "curve_id": "other02",
+      "meson": "K",
+      "window": "mode_a:muB0.0_alpha1.1",
+      "T_MeV": "220.0987883773612",
+      "muB_MeV": "0.0",
+      "xi_mott": "0.47343873791396607",
+      "tau_u": -0.03750211820838345,
+      "tau_d": -0.03750211820838345,
+      "tau_s": 0.09979522043134481,
+      "tau_ubar": -0.037502118204289836,
+      "tau_dbar": -0.037502118204289836,
+      "tau_sbar": 0.09979522045526057,
+      "eta_over_s": 0.007657840369116986,
+      "zeta_over_s": 0.013667152851442488,
+      "sigma_over_T": -0.020620512910093147,
+      "precision_max_abs_J_change": 0.0002522285779262834
+    },
+    {
+      "curve_id": "other03",
+      "meson": "K",
+      "window": "mode_a:muB450.0_alpha1.0",
+      "T_MeV": "182.72820247485038",
+      "muB_MeV": "450.0",
+      "xi_mott": "-0.18582026682794098",
+      "tau_u": 0.010361820250397002,
+      "tau_d": 0.010361820250397002,
+      "tau_s": 0.14814348540088362,
+      "tau_ubar": 0.08266791215024583,
+      "tau_dbar": 0.08266791215024583,
+      "tau_sbar": 0.41375151025068835,
+      "eta_over_s": 0.05443464111315999,
+      "zeta_over_s": 0.05216352946938407,
+      "sigma_over_T": 0.02806370627004373,
+      "precision_max_abs_J_change": 0.00020917659197206007
+    },
+    {
+      "curve_id": "other04",
+      "meson": "K",
+      "window": "mode_a:muB450.0_alpha1.1",
+      "T_MeV": "201.00102272233542",
+      "muB_MeV": "450.0",
+      "xi_mott": "0.34374650500714765",
+      "tau_u": -0.12223099757175593,
+      "tau_d": -0.12223099757175593,
+      "tau_s": 0.09448490755862182,
+      "tau_ubar": -0.164374569600497,
+      "tau_dbar": -0.164374569600497,
+      "tau_sbar": 0.2087332921036884,
+      "eta_over_s": -0.057148719513761215,
+      "zeta_over_s": -0.05565006425250196,
+      "sigma_over_T": -0.10100311268230566,
+      "precision_max_abs_J_change": 0.000915073514673459
+    },
+    {
+      "curve_id": "other05",
+      "meson": "pi",
+      "window": "mode_a:muB900.0_alpha1.0",
+      "T_MeV": "125.7360002645551",
+      "muB_MeV": "900.0",
+      "xi_mott": "-0.04107930220663549",
+      "tau_u": 54.0318570474901,
+      "tau_d": 54.0318570474901,
+      "tau_s": -0.00228333515405299,
+      "tau_ubar": 619.7478155230187,
+      "tau_dbar": 619.7478155230187,
+      "tau_sbar": 0.00055633818710632,
+      "eta_over_s": 50.81804646614827,
+      "zeta_over_s": 50.71374781726206,
+      "sigma_over_T": 53.53465437534187,
+      "precision_max_abs_J_change": 0.0034321897057907336
+    },
+    {
+      "curve_id": "other06",
+      "meson": "K",
+      "window": "mode_a:muB900.0_alpha1.0",
+      "T_MeV": "125.7360002645551",
+      "muB_MeV": "900.0",
+      "xi_mott": "-0.06056895904242992",
+      "tau_u": 0.025388734730770635,
+      "tau_d": 0.025388734730770635,
+      "tau_s": 0.006776885279152989,
+      "tau_ubar": 0.3148615810241271,
+      "tau_dbar": 0.3148615810241271,
+      "tau_sbar": 0.43322960548941936,
+      "eta_over_s": 0.023145549280845223,
+      "zeta_over_s": 0.02839265029114646,
+      "sigma_over_T": 0.022135692154709896,
+      "precision_max_abs_J_change": 0.0012801527035222193
+    },
+    {
+      "curve_id": "other07",
+      "meson": "sigma",
+      "window": "mode_a:muB900.0_alpha1.0",
+      "T_MeV": "125.7360002645551",
+      "muB_MeV": "900.0",
+      "xi_mott": "0.015327819995582102",
+      "tau_u": -0.03190630615492562,
+      "tau_d": -0.03190630615492562,
+      "tau_s": -0.04258863606530028,
+      "tau_ubar": -0.05977285313888281,
+      "tau_dbar": -0.05977285313888281,
+      "tau_sbar": -0.020124547336442866,
+      "eta_over_s": -0.024744993647840108,
+      "zeta_over_s": -0.030735360463436834,
+      "sigma_over_T": -0.0012467655681092094,
+      "precision_max_abs_J_change": 0.00029020702260407205
+    },
+    {
+      "curve_id": "other08",
+      "meson": "pi",
+      "window": "mode_a:muB900.0_alpha1.1",
+      "T_MeV": "138.3096002910106",
+      "muB_MeV": "900.0",
+      "xi_mott": "0.1927638740092516",
+      "tau_u": 36.560873117073,
+      "tau_d": 36.560873117073,
+      "tau_s": 0.0009191032231030682,
+      "tau_ubar": 310.8105951504067,
+      "tau_dbar": 310.8105951504067,
+      "tau_sbar": -0.001972634331116385,
+      "eta_over_s": 33.24298020380199,
+      "zeta_over_s": 33.24557510264781,
+      "sigma_over_T": 35.945436306407224,
+      "precision_max_abs_J_change": 0.002619682295517123
+    },
+    {
+      "curve_id": "other09",
+      "meson": "K",
+      "window": "mode_a:muB900.0_alpha1.1",
+      "T_MeV": "138.3096002910106",
+      "muB_MeV": "900.0",
+      "xi_mott": "0.16261476553976537",
+      "tau_u": 0.007687197604030693,
+      "tau_d": 0.007687197604030693,
+      "tau_s": 0.002586700265608255,
+      "tau_ubar": 0.07088804568858009,
+      "tau_dbar": 0.07088804568858009,
+      "tau_sbar": 0.1037323146624125,
+      "eta_over_s": 0.006912628645862173,
+      "zeta_over_s": 0.008649430603202113,
+      "sigma_over_T": 0.0065077034221601715,
+      "precision_max_abs_J_change": 0.0005152667873318251
+    },
+    {
+      "curve_id": "other10",
+      "meson": "K",
+      "window": "mode_a:muB900.0_alpha1.2",
+      "T_MeV": "150.8832003174661",
+      "muB_MeV": "900.0",
+      "xi_mott": "0.4681342189759016",
+      "tau_u": 0.005913287396616784,
+      "tau_d": 0.005913287396616784,
+      "tau_s": 0.016723974121047203,
+      "tau_ubar": 0.14479225158581466,
+      "tau_dbar": 0.14479225158581466,
+      "tau_sbar": 0.3893968482891288,
+      "eta_over_s": 0.007968888588915368,
+      "zeta_over_s": 0.008956110623572489,
+      "sigma_over_T": 0.006439976459995389,
+      "precision_max_abs_J_change": 0.0011584231564287784
+    },
+    {
+      "curve_id": "other11",
+      "meson": "K",
+      "window": "mode_b:T120.0_muB900.0",
+      "T_MeV": "120.0",
+      "muB_MeV": "900.0",
+      "xi_mott": "-0.1391614671051502",
+      "tau_u": 0.039642260276826935,
+      "tau_d": 0.039642260276826935,
+      "tau_s": 0.01672000051953426,
+      "tau_ubar": 0.6722298308924888,
+      "tau_dbar": 0.6722298308924888,
+      "tau_sbar": 1.2280896913330066,
+      "eta_over_s": 0.03680709525329495,
+      "zeta_over_s": 0.04504066105893578,
+      "sigma_over_T": 0.03491462918013749,
+      "precision_max_abs_J_change": 0.0015775673546469804
+    },
+    {
+      "curve_id": "other12",
+      "meson": "K",
+      "window": "mode_b:T200.0_muB0.0",
+      "T_MeV": "200.0",
+      "muB_MeV": "0.0",
+      "xi_mott": "-0.18474891953170297",
+      "tau_u": 0.06006736296668702,
+      "tau_d": 0.06006736296668702,
+      "tau_s": 0.42187040340532134,
+      "tau_ubar": 0.0600673629518389,
+      "tau_dbar": 0.0600673629518389,
+      "tau_sbar": 0.42187040340532134,
+      "eta_over_s": 0.16646342144270454,
+      "zeta_over_s": 0.15989208148441492,
+      "sigma_over_T": 0.09692017444432466,
+      "precision_max_abs_J_change": 0.0007156245884454293
+    },
+    {
+      "curve_id": "other13",
+      "meson": "K",
+      "window": "mode_b:T200.0_muB450.0",
+      "T_MeV": "200.0",
+      "muB_MeV": "450.0",
+      "xi_mott": "0.30883841954171665",
+      "tau_u": -0.08831602077859113,
+      "tau_d": -0.08831602077859113,
+      "tau_s": 0.07938310116266689,
+      "tau_ubar": -0.11419252777505662,
+      "tau_dbar": -0.11419252777505662,
+      "tau_sbar": 0.17992251987105234,
+      "eta_over_s": -0.037744357783622284,
+      "zeta_over_s": -0.036978870444789536,
+      "sigma_over_T": -0.07152749597696939,
+      "precision_max_abs_J_change": 0.0007411509325012666
+    }
+  ],
+  "K_process_table": [
+    {
+      "curve_id": "other01",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.06792335910216951",
+      "delta_log_slope_from_density": "-4.9875051764361467e-05",
+      "delta_log_slope_contribution": "0.06787348405040516"
+    },
+    {
+      "curve_id": "other01",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.3975786223065083",
+      "delta_log_slope_from_density": "-0.00015011413158716458",
+      "delta_log_slope_contribution": "0.39742850817492137"
+    },
+    {
+      "curve_id": "other02",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.017749368530003473",
+      "delta_log_slope_from_density": "1.4534820187511732e-05",
+      "delta_log_slope_contribution": "0.017763903350190957"
+    },
+    {
+      "curve_id": "other02",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.09650162923993943",
+      "delta_log_slope_from_density": "-6.444973361952044e-05",
+      "delta_log_slope_contribution": "0.09643717950631991"
+    },
+    {
+      "curve_id": "other03",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.10904296035168415",
+      "delta_log_slope_from_density": "-6.018630787346657e-05",
+      "delta_log_slope_contribution": "0.10898277404381063"
+    },
+    {
+      "curve_id": "other03",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.41756327636383883",
+      "delta_log_slope_from_density": "6.235074428417864e-05",
+      "delta_log_slope_contribution": "0.41762562710812334"
+    },
+    {
+      "curve_id": "other04",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.05757478702195906",
+      "delta_log_slope_from_density": "7.377037686462362e-05",
+      "delta_log_slope_contribution": "0.057648557398823685"
+    },
+    {
+      "curve_id": "other04",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.21119186497363351",
+      "delta_log_slope_from_density": "-4.98641882060169e-05",
+      "delta_log_slope_contribution": "0.21114200078542744"
+    },
+    {
+      "curve_id": "other05",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.01643839229320998",
+      "delta_log_slope_from_density": "0.0037631697323129293",
+      "delta_log_slope_contribution": "0.020201562025522923"
+    },
+    {
+      "curve_id": "other05",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "-0.004808176537026032",
+      "delta_log_slope_from_density": "0.0036335967877658693",
+      "delta_log_slope_contribution": "-0.0011745797492603849"
+    },
+    {
+      "curve_id": "other06",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.14047301949031477",
+      "delta_log_slope_from_density": "-6.22687936985139e-05",
+      "delta_log_slope_contribution": "0.14041075069661624"
+    },
+    {
+      "curve_id": "other06",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.43064982991120004",
+      "delta_log_slope_from_density": "0.0018931707360871908",
+      "delta_log_slope_contribution": "0.43254300064728746"
+    },
+    {
+      "curve_id": "other07",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "-0.0010956265906123253",
+      "delta_log_slope_from_density": "-0.001148122588359335",
+      "delta_log_slope_contribution": "-0.0022437491789717434"
+    },
+    {
+      "curve_id": "other07",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "-0.0068011415470727865",
+      "delta_log_slope_from_density": "-0.0207880210626028",
+      "delta_log_slope_contribution": "-0.02758916260967581"
+    },
+    {
+      "curve_id": "other08",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.005630029902856826",
+      "delta_log_slope_from_density": "0.00149188633923103",
+      "delta_log_slope_contribution": "0.0071219162420878"
+    },
+    {
+      "curve_id": "other08",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "-0.0033137348301492953",
+      "delta_log_slope_from_density": "0.000894227136747805",
+      "delta_log_slope_contribution": "-0.0024195076934017123"
+    },
+    {
+      "curve_id": "other09",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.029221652711830526",
+      "delta_log_slope_from_density": "-6.87583073614162e-05",
+      "delta_log_slope_contribution": "0.029152894404469"
+    },
+    {
+      "curve_id": "other09",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.10148677598387135",
+      "delta_log_slope_from_density": "0.0005607169580390536",
+      "delta_log_slope_contribution": "0.10204749294191062"
+    },
+    {
+      "curve_id": "other10",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.12964955903716824",
+      "delta_log_slope_from_density": "-5.191153819486538e-05",
+      "delta_log_slope_contribution": "0.1295976474989734"
+    },
+    {
+      "curve_id": "other10",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.3859346450876675",
+      "delta_log_slope_from_density": "0.0001227017105078776",
+      "delta_log_slope_contribution": "0.3860573467981756"
+    },
+    {
+      "curve_id": "other11",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.3631117816246957",
+      "delta_log_slope_from_density": "-3.239163664633948e-05",
+      "delta_log_slope_contribution": "0.36307938998804934"
+    },
+    {
+      "curve_id": "other11",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "1.2242140846294638",
+      "delta_log_slope_from_density": "0.0030665623968502143",
+      "delta_log_slope_contribution": "1.2272806470263138"
+    },
+    {
+      "curve_id": "other12",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.0707783219889016",
+      "delta_log_slope_from_density": "-5.0304597534911455e-05",
+      "delta_log_slope_contribution": "0.0707280173913668"
+    },
+    {
+      "curve_id": "other12",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.41450255096085264",
+      "delta_log_slope_from_density": "-0.00015075372609463233",
+      "delta_log_slope_contribution": "0.4143517972347581"
+    },
+    {
+      "curve_id": "other13",
+      "species": "ubar",
+      "delta_log_slope_from_rate": "0.04988256264889024",
+      "delta_log_slope_from_density": "6.050348982859777e-05",
+      "delta_log_slope_contribution": "0.049943066138718906"
+    },
+    {
+      "curve_id": "other13",
+      "species": "sbar",
+      "delta_log_slope_from_rate": "0.18001298240389496",
+      "delta_log_slope_from_density": "-5.053034380908539e-05",
+      "delta_log_slope_contribution": "0.179962452060086"
+    }
+  ],
+  "final_groups": [
+    {
+      "curve_id": "other01",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.04022165521643373,
+      "light_delta_log_slope_from_coefficient": 2.9108222773466252e-05,
+      "light_delta_log_slope_contribution": 0.04025076343920719,
+      "strange_delta_log_slope_from_tau": 0.11677003519081719,
+      "strange_delta_log_slope_from_coefficient": 7.210221536996242e-05,
+      "strange_delta_log_slope_contribution": 0.11684213740618721
+    },
+    {
+      "curve_id": "other01",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.0416082500897601,
+      "light_delta_log_slope_from_coefficient": 0.00233647698419831,
+      "light_delta_log_slope_contribution": 0.04394472707395847,
+      "strange_delta_log_slope_from_tau": 0.10703938042606015,
+      "strange_delta_log_slope_from_coefficient": 0.00011122886854114666,
+      "strange_delta_log_slope_contribution": 0.1071506092946013
+    },
+    {
+      "curve_id": "other01",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.05109869007334872,
+      "light_delta_log_slope_from_coefficient": -0.00036740230535527163,
+      "light_delta_log_slope_contribution": 0.05073128776799332,
+      "strange_delta_log_slope_from_tau": 0.04091365922454204,
+      "strange_delta_log_slope_from_coefficient": -7.186875352824251e-07,
+      "strange_delta_log_slope_contribution": 0.04091294053700674
+    },
+    {
+      "curve_id": "other02",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": -0.024653219720462527,
+      "light_delta_log_slope_from_coefficient": -3.120849139992554e-05,
+      "light_delta_log_slope_contribution": -0.024684428211862675,
+      "strange_delta_log_slope_from_tau": 0.03227043441537508,
+      "strange_delta_log_slope_from_coefficient": 7.183415989513164e-05,
+      "strange_delta_log_slope_contribution": 0.03234226857527017
+    },
+    {
+      "curve_id": "other02",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": -0.022977137343070053,
+      "light_delta_log_slope_from_coefficient": 0.00034521416836039154,
+      "light_delta_log_slope_contribution": -0.022631923174709523,
+      "strange_delta_log_slope_from_tau": 0.036414227214568384,
+      "strange_delta_log_slope_from_coefficient": -0.0001151511841024494,
+      "strange_delta_log_slope_contribution": 0.03629907603046595
+    },
+    {
+      "curve_id": "other02",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": -0.03263417966387777,
+      "light_delta_log_slope_from_coefficient": -6.203214284814657e-05,
+      "light_delta_log_slope_contribution": -0.03269621180672583,
+      "strange_delta_log_slope_from_tau": 0.012030947074777767,
+      "strange_delta_log_slope_from_coefficient": 4.475180053652855e-05,
+      "strange_delta_log_slope_contribution": 0.012075698875314275
+    },
+    {
+      "curve_id": "other03",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.011626665784852636,
+      "light_delta_log_slope_from_coefficient": -6.915367592391641e-05,
+      "light_delta_log_slope_contribution": 0.011557512108928955,
+      "strange_delta_log_slope_from_tau": 0.04278600580789685,
+      "strange_delta_log_slope_from_coefficient": 9.11232223479233e-05,
+      "strange_delta_log_slope_contribution": 0.04287712903024474
+    },
+    {
+      "curve_id": "other03",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.012185802273986995,
+      "light_delta_log_slope_from_coefficient": 0.0020902783844299585,
+      "light_delta_log_slope_contribution": 0.01427608065841704,
+      "strange_delta_log_slope_from_tau": 0.03752953232932474,
+      "strange_delta_log_slope_from_coefficient": 0.000357916468935144,
+      "strange_delta_log_slope_contribution": 0.03788744879825999
+    },
+    {
+      "curve_id": "other03",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.014429879905423854,
+      "light_delta_log_slope_from_coefficient": -0.0006809119214075329,
+      "light_delta_log_slope_contribution": 0.013748967984016106,
+      "strange_delta_log_slope_from_tau": 0.014307148329557005,
+      "strange_delta_log_slope_from_coefficient": 7.58995836095365e-06,
+      "strange_delta_log_slope_contribution": 0.01431473828791796
+    },
+    {
+      "curve_id": "other04",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": -0.08778207153687073,
+      "light_delta_log_slope_from_coefficient": -7.016697302794639e-05,
+      "light_delta_log_slope_contribution": -0.08785223850989915,
+      "strange_delta_log_slope_from_tau": 0.030594232639692298,
+      "strange_delta_log_slope_from_coefficient": 0.00010928634883010206,
+      "strange_delta_log_slope_contribution": 0.03070351898852238
+    },
+    {
+      "curve_id": "other04",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": -0.08719828732667395,
+      "light_delta_log_slope_from_coefficient": 0.00036715864840924754,
+      "light_delta_log_slope_contribution": -0.08683112867826498,
+      "strange_delta_log_slope_from_tau": 0.031235084771133514,
+      "strange_delta_log_slope_from_coefficient": -5.402036481859038e-05,
+      "strange_delta_log_slope_contribution": 0.031181064406314962
+    },
+    {
+      "curve_id": "other04",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": -0.11195356657176564,
+      "light_delta_log_slope_from_coefficient": -0.0001402822550320773,
+      "light_delta_log_slope_contribution": -0.11209384882679826,
+      "strange_delta_log_slope_from_tau": 0.011020614675904268,
+      "strange_delta_log_slope_from_coefficient": 7.012148813164386e-05,
+      "strange_delta_log_slope_contribution": 0.0110907361640359
+    },
+    {
+      "curve_id": "other05",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 50.82073356629718,
+      "light_delta_log_slope_from_coefficient": -0.0024124233858736194,
+      "light_delta_log_slope_contribution": 50.8183211429113,
+      "strange_delta_log_slope_from_tau": -0.0003884602950445235,
+      "strange_delta_log_slope_from_coefficient": 0.0001137835526464643,
+      "strange_delta_log_slope_contribution": -0.00027467674239806616
+    },
+    {
+      "curve_id": "other05",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 50.70967193462589,
+      "light_delta_log_slope_from_coefficient": 0.003975493051602283,
+      "light_delta_log_slope_contribution": 50.7136474276775,
+      "strange_delta_log_slope_from_tau": -0.00047287677739790723,
+      "strange_delta_log_slope_from_coefficient": 0.0005732663699889314,
+      "strange_delta_log_slope_contribution": 0.00010038959259103548
+    },
+    {
+      "curve_id": "other05",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 53.54053711922228,
+      "light_delta_log_slope_from_coefficient": -0.00582110536947421,
+      "light_delta_log_slope_contribution": 53.534716013852815,
+      "strange_delta_log_slope_from_tau": -0.00010585277643800891,
+      "strange_delta_log_slope_from_coefficient": 4.4214256290364576e-05,
+      "strange_delta_log_slope_contribution": -6.163852014764781e-05
+    },
+    {
+      "curve_id": "other06",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.023779534565055577,
+      "light_delta_log_slope_from_coefficient": -0.0012057118375420957,
+      "light_delta_log_slope_contribution": 0.02257382272751337,
+      "strange_delta_log_slope_from_tau": 0.0005817846126585835,
+      "strange_delta_log_slope_from_coefficient": -1.0058043260312315e-05,
+      "strange_delta_log_slope_contribution": 0.0005717265693982643
+    },
+    {
+      "curve_id": "other06",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.02369149971717739,
+      "light_delta_log_slope_from_coefficient": 0.0036192922964453306,
+      "light_delta_log_slope_contribution": 0.027310792013622277,
+      "strange_delta_log_slope_from_tau": 0.0007141396776802621,
+      "strange_delta_log_slope_from_coefficient": 0.00036771861178028047,
+      "strange_delta_log_slope_contribution": 0.001081858289460549
+    },
+    {
+      "curve_id": "other06",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.02508943040764199,
+      "light_delta_log_slope_from_coefficient": -0.0030707624074348444,
+      "light_delta_log_slope_contribution": 0.022018668000207197,
+      "strange_delta_log_slope_from_tau": 0.00015106962599088254,
+      "strange_delta_log_slope_from_coefficient": -3.404548117437724e-05,
+      "strange_delta_log_slope_contribution": 0.00011702414481651224
+    },
+    {
+      "curve_id": "other07",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": -0.02923787082379172,
+      "light_delta_log_slope_from_coefficient": 0.008029789201084103,
+      "light_delta_log_slope_contribution": -0.02120808162270806,
+      "strange_delta_log_slope_from_tau": -0.0036724860714710695,
+      "strange_delta_log_slope_from_coefficient": 0.00013557403580557914,
+      "strange_delta_log_slope_contribution": -0.0035369120356654633
+    },
+    {
+      "curve_id": "other07",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": -0.029070801194488065,
+      "light_delta_log_slope_from_coefficient": 0.002521751090364753,
+      "light_delta_log_slope_contribution": -0.026549050104123756,
+      "strange_delta_log_slope_from_tau": -0.0038731771946732864,
+      "strange_delta_log_slope_from_coefficient": -0.000313133147544374,
+      "strange_delta_log_slope_contribution": -0.004186310342217729
+    },
+    {
+      "curve_id": "other07",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": -0.03124824147906207,
+      "light_delta_log_slope_from_coefficient": 0.03045750888527545,
+      "light_delta_log_slope_contribution": -0.0007907325937862313,
+      "strange_delta_log_slope_from_tau": -0.0009684173616417273,
+      "strange_delta_log_slope_from_coefficient": 0.0005123843881606157,
+      "strange_delta_log_slope_contribution": -0.0004560329734810961
+    },
+    {
+      "curve_id": "other08",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 33.24360432552709,
+      "light_delta_log_slope_from_coefficient": -0.0006435950385175349,
+      "light_delta_log_slope_contribution": 33.242960730488576,
+      "strange_delta_log_slope_from_tau": -6.880561113424685e-05,
+      "strange_delta_log_slope_from_coefficient": 8.827893587330378e-05,
+      "strange_delta_log_slope_contribution": 1.947332473906365e-05
+    },
+    {
+      "curve_id": "other08",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 33.244791828996824,
+      "light_delta_log_slope_from_coefficient": 0.0006058587584193628,
+      "light_delta_log_slope_contribution": 33.24539768775524,
+      "strange_delta_log_slope_from_tau": -0.0001024655750684186,
+      "strange_delta_log_slope_from_coefficient": 0.00027988049621324295,
+      "strange_delta_log_slope_contribution": 0.00017741492114482782
+    },
+    {
+      "curve_id": "other08",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 35.94711743572145,
+      "light_delta_log_slope_from_coefficient": -0.0017085412931214603,
+      "light_delta_log_slope_contribution": 35.945408894428326,
+      "strange_delta_log_slope_from_tau": -2.3561417367126876e-05,
+      "strange_delta_log_slope_from_coefficient": 5.097341989865746e-05,
+      "strange_delta_log_slope_contribution": 2.7412002531530583e-05
+    },
+    {
+      "curve_id": "other09",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.006953985664278123,
+      "light_delta_log_slope_from_coefficient": -0.0003666391188987208,
+      "light_delta_log_slope_contribution": 0.0065873465453793745,
+      "strange_delta_log_slope_from_tau": 0.0003234261387474466,
+      "strange_delta_log_slope_from_coefficient": 1.8559725792697667e-06,
+      "strange_delta_log_slope_contribution": 0.00032528211132670944
+    },
+    {
+      "curve_id": "other09",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.006952165707572543,
+      "light_delta_log_slope_from_coefficient": 0.0010800977162548067,
+      "light_delta_log_slope_contribution": 0.00803226342382746,
+      "strange_delta_log_slope_from_tau": 0.0003603913759951719,
+      "strange_delta_log_slope_from_coefficient": 0.00025677579173804307,
+      "strange_delta_log_slope_contribution": 0.000617167167733208
+    },
+    {
+      "curve_id": "other09",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.0075362627558183065,
+      "light_delta_log_slope_from_coefficient": -0.0011025396076516922,
+      "light_delta_log_slope_contribution": 0.00643372314816651,
+      "strange_delta_log_slope_from_tau": 9.093017456346245e-05,
+      "strange_delta_log_slope_from_coefficient": -1.694989839908637e-05,
+      "strange_delta_log_slope_contribution": 7.398027616437952e-05
+    },
+    {
+      "curve_id": "other10",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.005287129974051223,
+      "light_delta_log_slope_from_coefficient": -9.850982031709516e-05,
+      "light_delta_log_slope_contribution": 0.005188620153734128,
+      "strange_delta_log_slope_from_tau": 0.0027743692369020224,
+      "strange_delta_log_slope_from_coefficient": 5.899223777255805e-06,
+      "strange_delta_log_slope_contribution": 0.002780268460679275
+    },
+    {
+      "curve_id": "other10",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.005407946178705044,
+      "light_delta_log_slope_from_coefficient": 0.00022206113435929362,
+      "light_delta_log_slope_contribution": 0.005630007313064338,
+      "strange_delta_log_slope_from_tau": 0.0031853830356531913,
+      "strange_delta_log_slope_from_coefficient": 0.00014072026359000702,
+      "strange_delta_log_slope_contribution": 0.003326103299243192
+    },
+    {
+      "curve_id": "other10",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.005944629049184383,
+      "light_delta_log_slope_from_coefficient": -0.00034610257510830954,
+      "light_delta_log_slope_contribution": 0.0055985264740760115,
+      "strange_delta_log_slope_from_tau": 0.0008471222800348852,
+      "strange_delta_log_slope_from_coefficient": -5.672311558893779e-06,
+      "strange_delta_log_slope_contribution": 0.0008414499684759827
+    },
+    {
+      "curve_id": "other11",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.037654286438436456,
+      "light_delta_log_slope_from_coefficient": -0.0019800683687043485,
+      "light_delta_log_slope_contribution": 0.03567421806973211,
+      "strange_delta_log_slope_from_tau": 0.0011504561562376745,
+      "strange_delta_log_slope_from_coefficient": -1.7578995686126674e-05,
+      "strange_delta_log_slope_contribution": 0.0011328771605515495
+    },
+    {
+      "curve_id": "other11",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.03750837867557096,
+      "light_delta_log_slope_from_coefficient": 0.0056774321787748565,
+      "light_delta_log_slope_contribution": 0.04318581085434582,
+      "strange_delta_log_slope_from_tau": 0.0014838865742573392,
+      "strange_delta_log_slope_from_coefficient": 0.00037096362834095845,
+      "strange_delta_log_slope_contribution": 0.001854850202598293
+    },
+    {
+      "curve_id": "other11",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.03932065233973593,
+      "light_delta_log_slope_from_coefficient": -0.004653454141985138,
+      "light_delta_log_slope_contribution": 0.03466719819775101,
+      "strange_delta_log_slope_from_tau": 0.0002891192252843193,
+      "strange_delta_log_slope_from_coefficient": -4.1688255597375104e-05,
+      "strange_delta_log_slope_contribution": 0.0002474309696869425
+    },
+    {
+      "curve_id": "other12",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": 0.042410924016402785,
+      "light_delta_log_slope_from_coefficient": 2.932335307750944e-05,
+      "light_delta_log_slope_contribution": 0.042440247369480044,
+      "strange_delta_log_slope_from_tau": 0.1239508729572325,
+      "strange_delta_log_slope_from_coefficient": 7.230111180916987e-05,
+      "strange_delta_log_slope_contribution": 0.12402317406904173
+    },
+    {
+      "curve_id": "other12",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": 0.043884857338278405,
+      "light_delta_log_slope_from_coefficient": 0.0023595183848104107,
+      "light_delta_log_slope_contribution": 0.046244375723088704,
+      "strange_delta_log_slope_from_tau": 0.11353306227303611,
+      "strange_delta_log_slope_from_coefficient": 0.0001146434978232802,
+      "strange_delta_log_slope_contribution": 0.11364770577085936
+    },
+    {
+      "curve_id": "other12",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": 0.053876145815151266,
+      "light_delta_log_slope_from_coefficient": -0.00037140546104437455,
+      "light_delta_log_slope_contribution": 0.05350474035410724,
+      "strange_delta_log_slope_from_tau": 0.04341642644124766,
+      "strange_delta_log_slope_from_coefficient": -9.923574439962835e-07,
+      "strange_delta_log_slope_contribution": 0.04341543408380366
+    },
+    {
+      "curve_id": "other13",
+      "observable": "eta_over_s",
+      "light_delta_log_slope_from_tau": -0.0633398509784261,
+      "light_delta_log_slope_from_coefficient": -6.145780323573054e-05,
+      "light_delta_log_slope_contribution": -0.06340130878166156,
+      "strange_delta_log_slope_from_tau": 0.025556444744346374,
+      "strange_delta_log_slope_from_coefficient": 0.00010050624737331822,
+      "strange_delta_log_slope_contribution": 0.025656950991719683
+    },
+    {
+      "curve_id": "other13",
+      "observable": "zeta_over_s",
+      "light_delta_log_slope_from_tau": -0.06315103269048722,
+      "light_delta_log_slope_from_coefficient": 0.0003772251703917113,
+      "light_delta_log_slope_contribution": -0.06277380752009537,
+      "strange_delta_log_slope_from_tau": 0.02583887709516261,
+      "strange_delta_log_slope_from_coefficient": -4.3940009183455336e-05,
+      "strange_delta_log_slope_contribution": 0.025794937085979186
+    },
+    {
+      "curve_id": "other13",
+      "observable": "sigma_over_T",
+      "light_delta_log_slope_from_tau": -0.08061309145117454,
+      "light_delta_log_slope_from_coefficient": -0.00014179136954773144,
+      "light_delta_log_slope_contribution": -0.08075488282072207,
+      "strange_delta_log_slope_from_tau": 0.009165524954260804,
+      "strange_delta_log_slope_from_coefficient": 6.186190077436989e-05,
+      "strange_delta_log_slope_contribution": 0.009227386855035172
+    }
+  ],
+  "sigma_scales": [
+    {
+      "curve_id": "other07",
+      "half_width": "0.004",
+      "observable": "tau_ubar",
+      "left_log_slope": "8.99838844351312",
+      "right_log_slope": "8.091548274080468",
+      "right_minus_left": "-0.9068401694326518"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.004",
+      "observable": "tau_sbar",
+      "left_log_slope": "7.526992924566994",
+      "right_log_slope": "6.853778191387774",
+      "right_minus_left": "-0.6732147331792202"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.004",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.191506329663661",
+      "right_log_slope": "3.8634774162695846",
+      "right_minus_left": "-0.3280289133940766"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.004",
+      "observable": "zeta_over_s",
+      "left_log_slope": "5.08693132100977",
+      "right_log_slope": "4.638601791529213",
+      "right_minus_left": "-0.4483295294805565"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.004",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-1.250997844068763",
+      "right_log_slope": "-1.1151687548112472",
+      "right_minus_left": "0.1358290892575158"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.002",
+      "observable": "tau_ubar",
+      "left_log_slope": "8.754696862618278",
+      "right_log_slope": "8.285893030566694",
+      "right_minus_left": "-0.4688038320515844"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.002",
+      "observable": "tau_sbar",
+      "left_log_slope": "7.34145278932825",
+      "right_log_slope": "7.00111218975279",
+      "right_minus_left": "-0.3403405995754598"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.002",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.099772808488195",
+      "right_log_slope": "3.9349801296850235",
+      "right_minus_left": "-0.16479267880317172"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.002",
+      "observable": "zeta_over_s",
+      "left_log_slope": "4.9608069389320395",
+      "right_log_slope": "4.736313187278211",
+      "right_minus_left": "-0.2244937516538288"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.002",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-1.2111170850168558",
+      "right_log_slope": "-1.145424086176025",
+      "right_minus_left": "0.0656929988408308"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.001",
+      "observable": "tau_ubar",
+      "left_log_slope": "8.626691232767332",
+      "right_log_slope": "8.390708187238069",
+      "right_minus_left": "-0.23598304552926308"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.001",
+      "observable": "tau_sbar",
+      "left_log_slope": "7.248288147635781",
+      "right_log_slope": "7.07102984276491",
+      "right_minus_left": "-0.1772583048708718"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.001",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.057286403733482",
+      "right_log_slope": "3.9746830720729487",
+      "right_minus_left": "-0.08260333166053302"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.001",
+      "observable": "zeta_over_s",
+      "left_log_slope": "4.90235533113344",
+      "right_log_slope": "4.789956672956028",
+      "right_minus_left": "-0.1123986581774119"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.001",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-1.192063011170174",
+      "right_log_slope": "-1.1595668411452587",
+      "right_minus_left": "0.03249617002491534"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.0002",
+      "observable": "tau_ubar",
+      "left_log_slope": "8.531001578500161",
+      "right_log_slope": "8.471228725361279",
+      "right_minus_left": "-0.05977285313888281"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.0002",
+      "observable": "tau_sbar",
+      "left_log_slope": "7.178025773858143",
+      "right_log_slope": "7.1579012265217",
+      "right_minus_left": "-0.020124547336442866"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.0002",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.0225710067098435",
+      "right_log_slope": "3.9978260130620034",
+      "right_minus_left": "-0.024744993647840108"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.0002",
+      "observable": "zeta_over_s",
+      "left_log_slope": "4.855472345046518",
+      "right_log_slope": "4.824736984583081",
+      "right_minus_left": "-0.030735360463436834"
+    },
+    {
+      "curve_id": "other07",
+      "half_width": "0.0002",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-1.1807982151563317",
+      "right_log_slope": "-1.1820449807244409",
+      "right_minus_left": "-0.0012467655681092094"
+    }
+  ],
+  "pi_scales": [
+    {
+      "curve_id": "other05",
+      "half_width": "0.004",
+      "observable": "tau_ubar",
+      "left_log_slope": "50.2782553539492",
+      "right_log_slope": "72.52018928454942",
+      "right_minus_left": "22.24193393060022"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.004",
+      "observable": "tau_sbar",
+      "left_log_slope": "4.094872488845901",
+      "right_log_slope": "4.092697369934938",
+      "right_minus_left": "-0.002175118910963114"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.004",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.387761804077285",
+      "right_log_slope": "5.129645168868285",
+      "right_minus_left": "0.7418833647909997"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.004",
+      "observable": "zeta_over_s",
+      "left_log_slope": "7.125427769594832",
+      "right_log_slope": "8.014210586973766",
+      "right_minus_left": "0.8887828173789343"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.004",
+      "observable": "sigma_over_T",
+      "left_log_slope": "3.3869305048811245",
+      "right_log_slope": "4.096346621031271",
+      "right_minus_left": "0.7094161161501469"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.002",
+      "observable": "tau_ubar",
+      "left_log_slope": "56.67570179766979",
+      "right_log_slope": "115.64715847787427",
+      "right_minus_left": "58.97145668020448"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.002",
+      "observable": "tau_sbar",
+      "left_log_slope": "4.087086668551386",
+      "right_log_slope": "4.085089514577865",
+      "right_minus_left": "-0.001997153973521293"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.002",
+      "observable": "eta_over_s",
+      "left_log_slope": "4.776964083031858",
+      "right_log_slope": "8.582282745315789",
+      "right_minus_left": "3.8053186622839306"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.002",
+      "observable": "zeta_over_s",
+      "left_log_slope": "7.54817503112558",
+      "right_log_slope": "11.425684617808948",
+      "right_minus_left": "3.8775095866833675"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.002",
+      "observable": "sigma_over_T",
+      "left_log_slope": "3.780145705186228",
+      "right_log_slope": "7.752446077224654",
+      "right_minus_left": "3.972300372038426"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.001",
+      "observable": "tau_ubar",
+      "left_log_slope": "47.97751220119279",
+      "right_log_slope": "181.58272431120892",
+      "right_minus_left": "133.60521211001614"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.001",
+      "observable": "tau_sbar",
+      "left_log_slope": "4.085364409417166",
+      "right_log_slope": "4.083898546503279",
+      "right_minus_left": "-0.0014658629138875057"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.001",
+      "observable": "eta_over_s",
+      "left_log_slope": "3.871893342418023",
+      "right_log_slope": "13.953081666937662",
+      "right_minus_left": "10.081188324519639"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.001",
+      "observable": "zeta_over_s",
+      "left_log_slope": "6.664065896105975",
+      "right_log_slope": "16.768059861715262",
+      "right_minus_left": "10.103993965609288"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.001",
+      "observable": "sigma_over_T",
+      "left_log_slope": "2.817599798764801",
+      "right_log_slope": "13.41951565544848",
+      "right_minus_left": "10.601915856683679"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0002",
+      "observable": "tau_ubar",
+      "left_log_slope": "-132.4443946276563",
+      "right_log_slope": "487.3034208953625",
+      "right_minus_left": "619.7478155230187"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0002",
+      "observable": "tau_sbar",
+      "left_log_slope": "4.085032053181119",
+      "right_log_slope": "4.085588391368225",
+      "right_minus_left": "0.00055633818710632"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0002",
+      "observable": "eta_over_s",
+      "left_log_slope": "-11.428895784888661",
+      "right_log_slope": "39.38915068125961",
+      "right_minus_left": "50.81804646614827"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0002",
+      "observable": "zeta_over_s",
+      "left_log_slope": "-8.583589280685054",
+      "right_log_slope": "42.13015853657701",
+      "right_minus_left": "50.71374781726206"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0002",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-13.310188063901672",
+      "right_log_slope": "40.2244663114402",
+      "right_minus_left": "53.53465437534187"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0001",
+      "observable": "tau_ubar",
+      "left_log_slope": "-283.75598450191654",
+      "right_log_slope": "699.9577049601692",
+      "right_minus_left": "983.7136894620858"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0001",
+      "observable": "tau_sbar",
+      "left_log_slope": "4.08497809615103",
+      "right_log_slope": "4.085091535736404",
+      "right_minus_left": "0.00011343958537413101"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0001",
+      "observable": "eta_over_s",
+      "left_log_slope": "-24.129168687145256",
+      "right_log_slope": "57.406120690341",
+      "right_minus_left": "81.53528937748625"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0001",
+      "observable": "zeta_over_s",
+      "left_log_slope": "-21.250924813152253",
+      "right_log_slope": "60.09888074151969",
+      "right_minus_left": "81.34980555467195"
+    },
+    {
+      "curve_id": "other05",
+      "half_width": "0.0001",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-26.691493096012724",
+      "right_log_slope": "59.20778185769294",
+      "right_minus_left": "85.89927495370567"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.004",
+      "observable": "tau_ubar",
+      "left_log_slope": "28.466398321827516",
+      "right_log_slope": "50.14090052795709",
+      "right_minus_left": "21.674502206129578"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.004",
+      "observable": "tau_sbar",
+      "left_log_slope": "2.9433477032118875",
+      "right_log_slope": "2.9036951836292837",
+      "right_minus_left": "-0.03965251958260385"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.004",
+      "observable": "eta_over_s",
+      "left_log_slope": "3.0983878292711866",
+      "right_log_slope": "4.866556022085714",
+      "right_minus_left": "1.7681681928145272"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.004",
+      "observable": "zeta_over_s",
+      "left_log_slope": "5.040876855153012",
+      "right_log_slope": "6.846358321773044",
+      "right_minus_left": "1.8054814666200318"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.004",
+      "observable": "sigma_over_T",
+      "left_log_slope": "2.439126029648035",
+      "right_log_slope": "4.325779984517229",
+      "right_minus_left": "1.8866539548691943"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.001",
+      "observable": "tau_ubar",
+      "left_log_slope": "16.98386213786651",
+      "right_log_slope": "109.60367080655156",
+      "right_minus_left": "92.61980866868505"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.001",
+      "observable": "tau_sbar",
+      "left_log_slope": "2.925070120328879",
+      "right_log_slope": "2.916687488343754",
+      "right_minus_left": "-0.008382631985125233"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.001",
+      "observable": "eta_over_s",
+      "left_log_slope": "1.709945298204252",
+      "right_log_slope": "11.233300510957383",
+      "right_minus_left": "9.523355212753131"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.001",
+      "observable": "zeta_over_s",
+      "left_log_slope": "3.6657562366297425",
+      "right_log_slope": "13.203058640420931",
+      "right_minus_left": "9.537302403791188"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.001",
+      "observable": "sigma_over_T",
+      "left_log_slope": "0.9285999686308447",
+      "right_log_slope": "11.218796618832414",
+      "right_minus_left": "10.290196650201569"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0002",
+      "observable": "tau_ubar",
+      "left_log_slope": "-70.82973118529401",
+      "right_log_slope": "239.98086396511272",
+      "right_minus_left": "310.8105951504067"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0002",
+      "observable": "tau_sbar",
+      "left_log_slope": "2.921388902253832",
+      "right_log_slope": "2.9194162679227156",
+      "right_minus_left": "-0.001972634331116385"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0002",
+      "observable": "eta_over_s",
+      "left_log_slope": "-7.812107831062451",
+      "right_log_slope": "25.43087237273954",
+      "right_minus_left": "33.24298020380199"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0002",
+      "observable": "zeta_over_s",
+      "left_log_slope": "-5.85165583642447",
+      "right_log_slope": "27.393919266223342",
+      "right_minus_left": "33.24557510264781"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0002",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-9.37082531323608",
+      "right_log_slope": "26.574610993171145",
+      "right_minus_left": "35.945436306407224"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0001",
+      "observable": "tau_ubar",
+      "left_log_slope": "-93.96165774081062",
+      "right_log_slope": "289.07382144844104",
+      "right_minus_left": "383.03547918925165"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0001",
+      "observable": "tau_sbar",
+      "left_log_slope": "2.919955782803089",
+      "right_log_slope": "2.9188733483836966",
+      "right_minus_left": "-0.0010824344193922641"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0001",
+      "observable": "eta_over_s",
+      "left_log_slope": "-10.333959883703182",
+      "right_log_slope": "30.91391111917781",
+      "right_minus_left": "41.24787100288099"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0001",
+      "observable": "zeta_over_s",
+      "left_log_slope": "-8.372506704995946",
+      "right_log_slope": "32.87288269022273",
+      "right_minus_left": "41.24538939521868"
+    },
+    {
+      "curve_id": "other08",
+      "half_width": "0.0001",
+      "observable": "sigma_over_T",
+      "left_log_slope": "-12.098417542683753",
+      "right_log_slope": "32.50531652478225",
+      "right_minus_left": "44.60373406746601"
+    }
+  ],
+  "input_sha256": {
+    "centered_modulation.csv": "ba1765c0b5e402675bdcdd3e342c26b14f4aa6feafde2d4a43c87b4c7c19d7a4",
+    "process_modulation.csv": "66bdcd126fabae75b15c73635370bf798ac62a8d15adbc8626b5e34f71330559",
+    "final_species_modulation.csv": "b0d27e3b48474edc4e410527f950481b966d1a6adc09740e1aa238e3041233d4",
+    "centered_precision.csv": "e7165ad1246be774db4d6f589cf313dbbe25c7ee24aaa6c1e586726a928b1b0e"
+  }
+}

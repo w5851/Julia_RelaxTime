@@ -1,0 +1,16 @@
+{
+  "ref": "transport-full-rs-20261026-v1",
+  "inputs": {
+    "case_name": "thermal_weighted_full_rs_20261025",
+    "shard_label": "full_modeA_muB0_alpha1_006",
+    "sampling_profile": "thermal_weighted_v1",
+    "mode": "fixed-muB-phase-scaled",
+    "muB_list": "0",
+    "alpha_t_list": "1",
+    "xi_list": "0.35,0.36,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+    "t_list": "200",
+    "run_tier": "production",
+    "render_plots": "false",
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+  }
+}

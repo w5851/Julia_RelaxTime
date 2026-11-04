@@ -1,0 +1,9 @@
+{
+  "return_archive_sha256": "ef685164fcbdbb006d5198d06c20c6cc9a38273f618bbef566c31f7756c4f887",
+  "returned_files": 165,
+  "all_returned_file_bytes_verified": true,
+  "control_bytes_match_local": true,
+  "dispatch_and_source_manifests_match": true,
+  "pilot_archive_hashes_match": true,
+  "verified_utc": "2026-10-25T19:25:51.284659+00:00"
+}

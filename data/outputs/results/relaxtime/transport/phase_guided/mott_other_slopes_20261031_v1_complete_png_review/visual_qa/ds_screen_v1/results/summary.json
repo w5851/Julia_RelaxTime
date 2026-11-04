@@ -1,0 +1,29 @@
+{
+  "kind": "bounded_external_ds_batch_summary",
+  "generated_utc": "2026-10-31T15:18:23.013940+00:00",
+  "manifest": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\ds_screen_v1\\jobs.jsonl",
+  "manifest_sha256": "b96034a65c9f63c959d24c0b5c126e9867de24ac3b06debeed638319d8aaa315",
+  "model": "cn:deepseek-v4.1-flash",
+  "jobs": 23,
+  "reused_jobs": 0,
+  "ok_jobs": 21,
+  "failed_ids": [
+    "detail_other03_eta_over_s",
+    "detail_other08_tau_ubar"
+  ],
+  "validation_failed_ids": [],
+  "development_label_jobs": 0,
+  "development_label_matches": 0,
+  "label_mismatch_ids": [],
+  "wall_seconds": 182.222,
+  "median_job_seconds": 15.851,
+  "ds_usage_total_all_saved_attempts": {
+    "prompt_tokens": 29244,
+    "completion_tokens": 10225,
+    "total_tokens": 39469,
+    "credit": 1.0100000000000005,
+    "cached_tokens": 640
+  },
+  "note": "Development observations only; not a blind accuracy estimate. Usage includes reused jobs when resuming.",
+  "output_dir": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\ds_screen_v1\\results"
+}

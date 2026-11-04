@@ -1,0 +1,32 @@
+[
+  {
+    "path": "data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\primary_failed_details_v1.png",
+    "sha256": "10cc6ca109d7052c6f4b149dd1aecda55ad4ba729adbd9a91375a85d3e590771",
+    "sources": [
+      {
+        "path": "detail_other03_eta_over_s.png",
+        "sha256": "ac91e20ddde43cbda7620af2fcfe0d465c672b5813deaf2dc9b5968c94aeaad8"
+      },
+      {
+        "path": "detail_other08_tau_ubar.png",
+        "sha256": "87b4176e541b77f3b1b3adb80792a112a85336143f459e4806731a4b1a9a632f"
+      }
+    ],
+    "transform": "unscaled side-by-side composition with filename banner; source pixels unchanged"
+  },
+  {
+    "path": "data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\primary_k_sigma_gray_v1.png",
+    "sha256": "2c25cad4df02a0363212f1ac0e367f1310673a6ef6659ab50f6c4e4856925463",
+    "sources": [
+      {
+        "path": "detail_other01_tau_sbar_gray.png",
+        "sha256": "ab89ee55a459530843292b916645d2e7af25e706818829ed68716cb137543b58"
+      },
+      {
+        "path": "detail_other07_sigma_over_T_gray.png",
+        "sha256": "4240c9e8ccd6c1934333364fcd7d0702097b76e35e30264dff77f5cdc3bf7a01"
+      }
+    ],
+    "transform": "unscaled side-by-side composition with filename banner; source pixels unchanged"
+  }
+]

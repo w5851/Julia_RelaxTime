@@ -1,0 +1,277 @@
+{
+  "schema": "transport_eta_augmented_inputs_v1",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "case": "full_rs_eta_augmented_20261029_v1",
+  "created_utc": "2026-10-29T08:42:01.547182+00:00",
+  "files": [
+    {
+      "path": "inputs/base/mode_a/phase_guided_transport_scan.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan.csv",
+      "role": "v14_accepted_grid",
+      "bytes": 1082613,
+      "sha256": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4"
+    },
+    {
+      "path": "inputs/base/mode_a/phase_guided_transport_scan_sampling.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan_sampling.csv",
+      "role": "v14_accepted_grid",
+      "bytes": 2888911,
+      "sha256": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66"
+    },
+    {
+      "path": "inputs/base/mode_b/phase_guided_transport_scan.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan.csv",
+      "role": "v14_accepted_grid",
+      "bytes": 1053127,
+      "sha256": "5cddbeeb7944271071d08ce0a1ec6e5e32068bf09eaa3a9db473767df02ab2f8"
+    },
+    {
+      "path": "inputs/base/mode_b/phase_guided_transport_scan_sampling.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan_sampling.csv",
+      "role": "v14_accepted_grid",
+      "bytes": 2758040,
+      "sha256": "2ccdd0b9186132879edf856076a7139969fadb9e004d18a8b096b1b04723aa5a"
+    },
+    {
+      "path": "inputs/base/point_provenance.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/point_provenance.csv",
+      "role": "v14_accepted_grid",
+      "bytes": 779547,
+      "sha256": "b44374b756b8113acb344d935b1860b630de859dbd0883b59bffd4da033e8e51"
+    },
+    {
+      "path": "inputs/base/reviewed_grid.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/reviewed_grid.json",
+      "role": "v14_grid_review",
+      "bytes": 626900,
+      "sha256": "2e8d4934e50e61fa398ed0a7496c7171dcca58753485f9e42a8ab415b9606103"
+    },
+    {
+      "path": "inputs/base/acceptance.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json",
+      "role": "v14_numerical_acceptance",
+      "bytes": 2867,
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283"
+    },
+    {
+      "path": "inputs/base/background_audit.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/background/background_audit.json",
+      "role": "v14_background_audit",
+      "bytes": 19744,
+      "sha256": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807"
+    },
+    {
+      "path": "inputs/base/promotion.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/formal_promotion_v1/promotion.json",
+      "role": "v14_formal_promotion",
+      "bytes": 11643,
+      "sha256": "f72afa4094f65b86492e51d7a2d2a40fbb0c0757cbad32f98d7a1ab74a4679b7"
+    },
+    {
+      "path": "inputs/qualification/independent_layers.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/returned/reviewed_result.json",
+      "role": "inherited_independent_layers",
+      "bytes": 953,
+      "sha256": "ed730e974d69914bb1a22a23b42655aee983e653cbf2316421facdfbf024e59a"
+    },
+    {
+      "path": "inputs/qualification/joint_representatives.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_joint_representatives_p48_v1/returned/reviewed_result.json",
+      "role": "inherited_joint_representatives",
+      "bytes": 519,
+      "sha256": "4f65fc0fd99152a65090ddc10c85d3b2b1989c19913bff2f1f9191d76f5cc01a"
+    },
+    {
+      "path": "inputs/qualification/production_and_fortran_replay.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_production_replay_v3/returned/reviewed_result.json",
+      "role": "inherited_production_and_fortran_replay",
+      "bytes": 923,
+      "sha256": "098bad19d930241a933acd5ee1c7edbd11eee9495800c80fa8c5f9cbcd56129c"
+    },
+    {
+      "path": "inputs/qualification/baseline_and_default_entrypoint.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/returned/reviewed_result.json",
+      "role": "inherited_baseline_and_default_entrypoint",
+      "bytes": 1174,
+      "sha256": "1d01d1975b48f28ca9a875d79185b371a0a28e504041173f282bef4d112c4a2a"
+    },
+    {
+      "path": "inputs/qualification/mode_a_background.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_phase_validation_v1/returned/reviewed_result.json",
+      "role": "inherited_mode_a_background",
+      "bytes": 2407,
+      "sha256": "2ac9b502b3cd3cca8ce448b0a290648450a802233740593e33948ea2a7e44934"
+    },
+    {
+      "path": "inputs/qualification/mode_b_qualification.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json",
+      "role": "inherited_mode_b_qualification",
+      "bytes": 1383,
+      "sha256": "37d717697c66c524e11a48c985c70255ea2f5ba2e3a3950a9b0ae36fdbbe669a"
+    },
+    {
+      "path": "inputs/qualification/full_grid.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json",
+      "role": "inherited_full_grid",
+      "bytes": 2867,
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283"
+    },
+    {
+      "path": "inputs/qualification/xi04_local_integrals.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/returned/convergence_review_v1/review.json",
+      "role": "inherited_xi04_local_integrals",
+      "bytes": 4206,
+      "sha256": "ceb3e69e3b92d49f86dc8149307bd0a9917760d5e9b64193be1e4d9bd3fba253"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/config.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/inputs_v2/config.json",
+      "role": "eta_frozen_evidence",
+      "bytes": 9785,
+      "sha256": "06e0ac4f51f1bc35b4d9464694229b3a9a4cf4127dcbb732517cbf665f105f1e"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/base.toml",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/inputs_v2/base.toml",
+      "role": "eta_frozen_evidence",
+      "bytes": 590,
+      "sha256": "ed38595ddd9e684330c861067514e17b43e2fcc199d10e7aeb871a4efddcf7d3"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/fine.toml",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/inputs_v2/fine.toml",
+      "role": "eta_frozen_evidence",
+      "bytes": 586,
+      "sha256": "af0577495f7d16c0db10d5dfeff782950faf5ab94f45949329e93ebc2f7c20ad"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/tighter.toml",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/inputs_v2/tighter.toml",
+      "role": "eta_frozen_evidence",
+      "bytes": 589,
+      "sha256": "cad34d475b91bc6a9380caace66ed29afea52567cef1c4bc2bc00f8064897ddc"
+    },
+    {
+      "path": "inputs/refinement/expected_source_hashes.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/expected_source_hashes.json",
+      "role": "eta_frozen_evidence",
+      "bytes": 40247,
+      "sha256": "7d8ff10cdd8d418396ad70e7ae1819f55f20d44ed2a9a7a78a94245487fb4f46"
+    },
+    {
+      "path": "inputs/refinement/package_manifest.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/package_manifest.json",
+      "role": "eta_frozen_evidence",
+      "bytes": 27138,
+      "sha256": "a3329c6919634eef279e35d9c7f3d7dba4a06290142c62ebf0a37ca39fd36bf0"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/channels.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/channels.csv",
+      "role": "eta_frozen_review",
+      "bytes": 183303,
+      "sha256": "fb4274073807b8a119174ee461dff677fa57455d2819bfa2faa311a4d9c884e1"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/coarse_chord.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/coarse_chord.csv",
+      "role": "eta_frozen_review",
+      "bytes": 36391,
+      "sha256": "b39f760d9796bd2a68f8156ee0804f669e9343e38dc42d20c80892286c5d449f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/coarse_slopes.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/coarse_slopes.csv",
+      "role": "eta_frozen_review",
+      "bytes": 3292,
+      "sha256": "d57b685b308d5e0ca18699e8f2a2f989b40147033ba1fae5a7ee344e84601bcd"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/fine_slopes.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/fine_slopes.csv",
+      "role": "eta_frozen_review",
+      "bytes": 24477,
+      "sha256": "01fcc1f93c6466e1e2e865738dcd281e84f43bf9ea97baaca6d1d70b49e32a6f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/observables.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/observables.csv",
+      "role": "eta_frozen_review",
+      "bytes": 44980,
+      "sha256": "656d2a79974a17090e94845eea045e53d23ec2cc536e4a9d1d3d4de43b5e99a2"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/original_controls.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/original_controls.csv",
+      "role": "eta_frozen_review",
+      "bytes": 8120,
+      "sha256": "c9892bddf8272755edc90b1380aaeecbec967e5637e6455fe960b186356a3c91"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/review.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/review.json",
+      "role": "eta_frozen_review",
+      "bytes": 17074,
+      "sha256": "a65c45972ce6405d31eb53525edc4aa0ca40a8afd8488d624c11125895753c7e"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/slope_convergence.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/slope_convergence.csv",
+      "role": "eta_frozen_review",
+      "bytes": 12982,
+      "sha256": "fb1e37756f34aa73a743fab89297f1dec9f68765cc8dd3a33fe201b1f274ffd5"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_comparison.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/tighter_comparison.csv",
+      "role": "eta_frozen_review",
+      "bytes": 11623,
+      "sha256": "7d4e18c462fc2e45031dac9afc5fb53f78e61a044745893aa205dd5433007182"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_observables.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/tighter_observables.csv",
+      "role": "eta_frozen_review",
+      "bytes": 16167,
+      "sha256": "16b0bcfd00bbfd6043e532c7304b4e930e2ec4f4e7174107348b9db84a06314a"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_slopes.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/tighter_slopes.csv",
+      "role": "eta_frozen_review",
+      "bytes": 8253,
+      "sha256": "8cb5bfeed99e1fe46590fa2f3204a98e4f313733f127a2822147ecf087da872f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/xi_refinement.csv",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/xi_refinement.csv",
+      "role": "eta_frozen_review",
+      "bytes": 10400,
+      "sha256": "86f28ae7f0b9fa4f25d7987827be651c99a1aa833700d1c2c6d50f948beea809"
+    },
+    {
+      "path": "inputs/refinement/local_return_verification.json",
+      "original_path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/local_return_verification.json",
+      "role": "eta_return_integrity",
+      "bytes": 911,
+      "sha256": "19f052d6ccfea112db766b1387b49bfaeee2256c01d611116a9af00826af527b"
+    }
+  ],
+  "authorization": {
+    "author_instruction": "1. 同意你的补入建议",
+    "accepted_scope": "48 added xi samples plus 9 original-coordinate recomputations; new data version and v14-shaped PNG review",
+    "original_grid_frozen": true
+  },
+  "expected_scope": {
+    "original": 1819,
+    "retained": 1810,
+    "recomputed": 9,
+    "added": 48,
+    "total": 1867
+  },
+  "refinement_archive": {
+    "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/eta_refinement_results_v1.zip",
+    "sha256": "8d3961b1af46284a45ff62e283fd541cf5219bab9d7f1eb706b1feff5a139e24"
+  },
+  "local_role": "metadata, file transfer and plotting; all physical replay and derived numerical review on quote-remote"
+}

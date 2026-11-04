@@ -1,0 +1,64 @@
+{
+  "files": {
+    "asym_background_checks_v1/background_reference.csv": {
+      "bytes": 13809,
+      "sha256": "f2357356984256b261b8e53f1af90fa964bb29d9593d8fdc57af0747fe0ceb7e"
+    },
+    "asym_background_checks_v1/summary.json": {
+      "bytes": 1137,
+      "sha256": "9acb83067876bae32e92ed486075afbdb2e4253109bca47bd4cfb60569413473"
+    },
+    "asym_background_review_v1/background_step_comparison.csv": {
+      "bytes": 3289,
+      "sha256": "82f8b43f6099c84e9c05009b103296c6c72a829d6901f981dc1d7b9c0ecb412f"
+    },
+    "asym_background_review_v1/reference_curvatures.csv": {
+      "bytes": 5439,
+      "sha256": "a4ea5b020b3fe1fc9f78134b5f6fe21ddc59e7439e8fc079804bc2f1ec781014"
+    },
+    "asym_background_review_v1/right_log_coefficient.csv": {
+      "bytes": 1631,
+      "sha256": "6a010e0b79a5ddebe16510ae038a3df20518da005240c0d7d31570704fb6815b"
+    },
+    "asym_background_review_v1/summary.json": {
+      "bytes": 13760,
+      "sha256": "a9e2e28796c2fe748dad76510abc98e11bac82c0874d149aa5ccc6000b72e58f"
+    },
+    "asym_background_review_v1/tests.stderr.log": {
+      "bytes": 110,
+      "sha256": "7a14a6b7a78ab0c73959601709b293818678a1cfb496728a9dcd17340f008027"
+    },
+    "asym_background_review_v1/tests.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "check_sigma_mott_background_asymptotics_v1.jl": {
+      "bytes": 4517,
+      "sha256": "a555fb3b5d057cb4915b8753ea6b5e59677f750e38ef3a6b7b1a9d48bbe9ee80"
+    },
+    "review_sigma_mott_background_asymptotics.py": {
+      "bytes": 6295,
+      "sha256": "a13cee6eaf98c61a4608c65988adb8ace3c450ce7f44a2c77084aaa7c39c1711"
+    },
+    "review_sigma_mott_asymptotics_v2.py": {
+      "bytes": 4955,
+      "sha256": "4890831f49b2331082dd58b15b30e4cb225212633964450b9d2838cff09465b9"
+    },
+    "test_sigma_mott_asymptotics_v4.py": {
+      "bytes": 3509,
+      "sha256": "541d6ed555a66e42596041e24908b1411ddb1091cabefc47c886bcdb9993d5fd"
+    },
+    "asym_background_checks_v1.status.json": {
+      "bytes": 3211,
+      "sha256": "881d4c3e87332c610a626404ab65889d69a5be276ff13097701d17a6d10f0896"
+    },
+    "asym_background_checks_v1.stdout.log": {
+      "bytes": 111,
+      "sha256": "4bfbb378d67c57f42359a66f28312b62463dae9c69e86bfb060887724e92dd65"
+    },
+    "asym_background_checks_v1.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

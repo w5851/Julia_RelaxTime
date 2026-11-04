@@ -1,0 +1,36 @@
+schema_version = 1
+id = "thermal_weighted_v1"
+algorithm = "thermal_weighted"
+
+[background]
+thermal_p_max_inv_fm = 25.0
+p_nodes = 96
+cos_nodes = 24
+residual_norm_max = 1.0e-8
+
+[a_integral]
+p_nodes = 32
+cos_nodes = 16
+scale_inv_fm = 5.0
+
+[tau_integral]
+p_nodes = 48
+cos_nodes = 36
+phi_nodes = 36
+t_nodes = 24
+scale_inv_fm = 10.0
+
+[terminal_integral]
+p_nodes = 32
+cos_nodes = 16
+scale_inv_fm = 5.0
+
+[sampling]
+rtol = 1.0e-3
+atol = 1.0e-12
+weighted_window = 0.6
+seed_order = 48
+max_evaluations = 40000
+max_nodes = 12000
+max_rounds = 40
+max_events = 30000000

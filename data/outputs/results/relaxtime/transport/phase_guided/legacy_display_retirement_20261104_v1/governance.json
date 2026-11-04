@@ -1,0 +1,11 @@
+{
+  "command": [
+    "julia",
+    "--project=.",
+    "scripts/dev/check_task_ledger.jl",
+    "--track",
+    "transport-threshold-upgrade"
+  ],
+  "exit_code": 0,
+  "seconds": 54.900161027908325
+}

@@ -1,0 +1,13 @@
+{
+  "status": "verified_received_diagnostic",
+  "received_utc": "2026-11-03T03:16:22.505243+00:00",
+  "source_host": "quote-remote",
+  "archive_sha256": "288e18c9b23b9f5adee65495758839acd90e3fefc17759d66535ea4e50fef982",
+  "archive_bytes": 2692057,
+  "manifest_sha256": "6b312665d799722b05093bff817d4355a6be86a0f16cb597c5bb298083707ddc",
+  "files_verified": 269,
+  "completed_run_summaries_verified": 13,
+  "authoritative_review": "review_uniform_with_cutoff_v1",
+  "local_scope": "Transfer, archive safety, byte/hash and metadata checks only; no physical or derived numerical analysis.",
+  "production_kernel_changed": false
+}

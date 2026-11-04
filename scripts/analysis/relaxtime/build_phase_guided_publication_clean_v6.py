@@ -130,7 +130,8 @@ def label_map_rows() -> list[dict[str, str]]:
     ]
 
 
-def load_v5_inputs() -> tuple[list[dict[str, str]], dict[str, Any], dict[str, Any], dict[str, Any], list[dict[str, Any]], dict[str, str]]:
+def load_v5_inputs(*, require_current: bool = True) -> tuple[list[dict[str, str]], dict[str, Any], dict[str, Any], dict[str, Any], list[dict[str, Any]], dict[str, str]]:
+    """Read frozen v5 values; historical replay may explicitly bypass live selection."""
     required = (V5_MANIFEST, V5_PLOT_MANIFEST, V5_FIGURE_LAYER_MANIFEST, CURRENT_POINTER)
     if not all(path.is_file() for path in required):
         raise FileNotFoundError("publication_clean_v5 must exist before building v6")
@@ -150,9 +151,9 @@ def load_v5_inputs() -> tuple[list[dict[str, str]], dict[str, Any], dict[str, An
         for manifest in (package_manifest, plot_manifest, figure_layer_manifest)
     ):
         raise ValueError("accepted v5 parent must remain manuscript_eligible=true")
-    if current_pointer.get("current_analysis_package") != relpath(V5_ROOT):
+    if require_current and current_pointer.get("current_analysis_package") != relpath(V5_ROOT):
         raise ValueError("v5 is not the current publication-clean analysis package")
-    if current_pointer.get("manuscript_eligible") is not True:
+    if require_current and current_pointer.get("manuscript_eligible") is not True:
         raise ValueError("current publication pointer no longer accepts v5")
     if len(plot_manifest.get("figures", [])) != 72:
         raise ValueError("publication_clean_v5 must contain exactly 72 figures")

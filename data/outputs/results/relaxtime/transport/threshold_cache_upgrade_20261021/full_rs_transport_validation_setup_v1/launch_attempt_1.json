@@ -1,0 +1,8 @@
+{
+  "attempt": 1,
+  "stage": "launcher_before_wrapper",
+  "exit_code": 1,
+  "error": "Remote PowerShell default execution policy rejected run_remote_validation.ps1",
+  "numerical_process_started": false,
+  "retry": "Use -ExecutionPolicy Bypass for this PowerShell process only"
+}

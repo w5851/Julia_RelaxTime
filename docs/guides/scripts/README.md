@@ -182,13 +182,23 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v12.py --png-review`
   - 保留 v12 历史 PNG 审查入口：72 张双栏单图、2 张复合图、1 张低值局部图，各含彩色／灰度版本和图外 key；原始源码／合同有独立快照，不覆盖已存在的 case。
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v13.py --png-review`
-  - 当前 PNG 审查入口：同一冻结点表生成 75 对彩色／灰度图，主图把参数／端点 key 分放 (a)/(c)，单图逐份选择并检查所有图例；按 600 dpi 测量真实遮挡、最终字高和缩放区间，保留 v12 低值局部窗口。不补 PDF 或晋升资格。试排使用 `--preview <new-directory>`。
+  - 保留 v13 显示点表的 PNG 审查入口：同一冻结点表生成 75 对彩色／灰度图，主图把参数／端点 key 分放 (a)/(c)，单图逐份选择并检查所有图例；按 600 dpi 测量真实遮挡、最终字高和缩放区间，保留 v12 低值局部窗口。不补 PDF 或晋升资格。试排使用 `--preview <new-directory>`。
+- `scripts/analysis/relaxtime/build_phase_guided_full_rs_raw.py --png-review --case <new-case>`
+  - 从本次已验收 full-RS 原始 CSV 直接生成与 v13 同构的 75 对彩色／灰度 PNG；保留全部 1819 点和有限质量提示，不平滑、插值、删点或替换。仅在新背景审计确认的一阶不连续处分段，逐图核对实际原始顶点、固定参数样式及 600 dpi 几何。图像与 results 下同名证据目录拒绝覆盖；默认 case 为 `full_rs_raw_20261027_png_review`。只读试排用 `--preview <new-directory>`；`--reference-root` 可指定旧 v13 图包的位置，旧数据只用于核对图版目录结构。
+- `scripts/analysis/relaxtime/transport_delivery_archive.py pack|verify|restore --archive <zip> --receipt <json>`
+  - 按显式文件清单保存输运证据，校验ZIP和逐成员SHA-256；恢复目标必须不存在。命令、范围及当前恢复包见[工程交付](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
+- `scripts/plotting/validate_plot_artifact.py <manifest> --font-sources <json>`
+  - 仅在历史字体文件换址时提供“原路径→恢复路径”的JSON映射；仍检查原字节数、SHA-256及字体族。默认直接检查原路径，不替换字体或重写manifest。
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py --png-review --case <new-case>`
+  - 1819点原网格的76图布局，含固定T的Figure 4；当前正式PNG/PDF由v14管理，恢复入口见[输运交付](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
+- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v15.py --png-review --case <new-case>`
+  - 1867点η加密正式数值复用v14布局。已有PNG已审阅，PDF暂缓；指定新目录才可重绘，不覆盖旧包。
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v13_pdf.py`
   - 从已接受的 v13 PNG 与冻结 renderer 导出 75 张矢量 PDF；核对全部重绘 PNG 像素、panel/legend 声明、嵌入字体、单页及无栅格包裹。`--check` 只验证已有 PDF 包和接受记录，不重绘、不更新 publication 指针。
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
   - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
 - `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`
-  - 按 `config/plotting/historical_snapshots.toml` 中固定的代码 commit 验证已接受的 v11 manifest graph、renderer/合同来源和现存数据、PNG/PDF、current=v5 字节；历史 SOP/skill 不与当前正文绑定。该检查不重跑历史 renderer、不补数值 gate、不晋升论文资格；`--apply` 只创建新验收记录并拒绝覆盖
+  - 按 `config/plotting/historical_snapshots.toml` 中固定的代码 commit 验证已接受的 v11 manifest graph、renderer/合同来源和现存数据、PNG/PDF、冻结的历史v5选择合同；live current可继续前进，历史 SOP/skill 不与当前正文绑定。该检查不重跑历史 renderer、不补数值 gate、不晋升论文资格；`--apply` 只创建新验收记录并拒绝覆盖
 - `scripts/analysis/relaxtime/migrate_phase_guided_plot_manifest_bundles.py --check`
   - 检查作者授权的 v10/v11 manifest 存储迁移：三个图包各只有一份总 manifest，222 条逐图记录无损，225 份旧图谱在登记的 ZIP/hash 中保留，315 个受保护文件字节不变；不重绘、不求解、不修改资格或 current。`--archive-only` / `--apply` 仅用于首次迁移，拒绝覆盖迁移报告
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py --check`
@@ -298,36 +308,20 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
-  - mode a 的一阶区域默认使用 `--phase-anchor-policy direct_coexistence`：旧 phase reference 只作为初始 bracket，再按 `--p-num` / `--t-num`（默认 `12/6`）直接求两分支等热力学势温度；`reference_interpolation` 仅用于显式复现旧计划口径。
+  - 默认 `--sampling-profile thermal_weighted_v1` 将背景、A、τ 缓存和末端积分绑定。mode a 以旧 phase reference 为初始 bracket，按 profile 的热上限 25 fm⁻¹、`96/24` 节点重新求锚点；crossover 求凝聚温度导数峰，一阶区求两分支等 Ω。当前 profile 不接受 `reference_interpolation` 代替新背景锚定。
   - 一阶可能区每点都使用稳定多初值选优，continuation 只作为候选 seed。bulk 复用主扫描已解析的热力学节点和同一点 equilibrium；导数路径若跨支会显式失败。
-  - 直接锚定的 `alpha_T=1` 一阶共存切片不计算严格 `xi=0` 的唯一输运量，而是写入经主热力学节点和独立更高节点共同认证的负/正近零点，分别表示夸克侧/强子侧极限；`sampling_plan.csv` 同步记录 anchor bracket、相别和节点收敛证据。`12/6` 主节点使用 `24/8` 认证；`24/8` 主节点自动使用 `32/10` 认证，禁止同节点自比较。
-  - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；也可传 `--sigma-cache-policy validated_anchored` 诊断 threshold-subtraction 与 σ-cache 插值放大效应。默认 `match_thermo` / `default` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
-  - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
+  - 直接锚定的 `alpha_T=1` 一阶共存切片使用经认证的负/正近零点表示两侧极限；`sampling_plan.csv` 记录 bracket、相别和收敛证据。默认 profile 的独立参考提高到热上限 30 fm⁻¹、`128/32`，同时检验锚点和共存两侧。
+  - 异常诊断仍可显式用 `--propagator-xi-policy isotropic`。默认传播子为 `match_thermo`；σ 缓存只支持 `thermal_weighted`，旧固定网格/扣除参数已退役。独立及联合资格、历史源码重放和当前验证入口见[输运采样指南](transport_sampling_qualification.md)。
+  - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 默认 `run_tier=dry-run`；数值 tier 使用同一 profile，核对完整计算 SHA、实际配置、完整点集和 17 道预算。结果作为可审阅 artifact 上传，正式数据导入另行记录。
   - 高精度长任务应优先通过 action shard 触发：mode a 可用 `muB_list` + `alpha_t_list` 分片，mode b 可用 `t_list` + `muB_list` 分片，二者都可用 `xi_list` 缩小窗口，并用 `shard_label` 区分 artifact。workflow 会把扫描/绘图日志写入 result artifact；失败或取消时仍尽量上传 partial CSV、`failed_points.csv`、`channel_diagnostics.csv` 和日志，供本地合并与 convergence gate 使用。
-  - 当前 phase-guided transport formal raw case：
-    - 高 xi 分辨率、onshell-kernel、p128 validated-anchored 积分精度：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
-      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`
-      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`
-      - shared import/audit evidence: `docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/` and each case's `convergence/`
-      - registry status: `approved` for raw result; publication-clean filtering remains a separate derived layer
-      - author-accepted `publication_clean_v1` figure-layer snapshot (display-only, byte-preserving; 6 panels × 12 observables = 72 PNGs) is browsable at `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v1/`; its tables and derivation provenance remain under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`, with the mirror manifest under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v1/`
-      - rebuild the solver-free analysis layer and mirror it with hash verification using `python scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py` followed by `python scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer.py`; tau/absolute-transport plots use the reviewed phase-gated display-window map while retaining raw values and provenance
-      - `publication_clean_v2` is a separate semantic-correction snapshot at `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v2/`; its analysis/provenance package is under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v2/`. It breaks curves across audited first-order endpoints, suppresses historical CEP/phase-switch midpoint stars, and records endpoint phase labels without modifying v1 or raw results.
-      - rebuild and mirror v2 with `python scripts/analysis/relaxtime/build_phase_guided_publication_clean_v2.py` followed by `python scripts/analysis/relaxtime/sync_phase_guided_publication_clean_figure_layer_v2.py`; v2 remains display-only and `manuscript_eligible=false` pending author review.
-      - the current author-accepted publication-clean figure layer is `publication_clean_v5` at `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v5/`; its accepted analysis/provenance package is under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v5/` and the figure-layer record is under `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_figure_layer_v5/`.
-      - v5 is an author-accepted manuscript display layer: `numerical_status=author_accepted_display_only`, `manuscript_eligible=true` for the v5 display derivative only. It adds `[fm]` to the six relaxation-time axes and uses chirally restored/broken branch endpoint wording. The raw source remains `diagnostic_only` and `raw_manuscript_eligible=false`; this does not assert a high-rate convergence pass. The inherited raw/display point and adjustment tables remain part of manuscript provenance.
-      - v4 remains the accepted parent display layer and is retained unchanged. To formalize a newly reviewed v5 candidate, build and mirror it, then run `python scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v5.py --apply`. This metadata-only step validates the v4 parent, all 72 v5 figures and hashes, the label map, and inherited CSV bytes; it does not run a solver or high-rate gate.
-      - the v5 formalization and manuscript display eligibility records are `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_formalization_v1.json` and `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v5_manuscript_eligibility_v1.json`; the current-layer pointer is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json`. The v4 records remain retained as parent provenance.
-      - v6-v9 are superseded review snapshots, retained in a locally verified ZIP indexed by `docs/analysis/relaxtime/phase_guided_transport/publication_review_history_v6_v9_archive_v1.json`; their full figure packages and old artifact tests are not part of the current Git checkout. Their renderer dependencies remain in source for v11. Historical shared-input hash drift is recorded, not repaired by rewriting old manifests.
-      - v11 is the author-accepted stage display result. The Git checkout retains v10 parent snapshots, v11 PNG/PDF packages and the paper-size report; the additive acceptance record is `docs/analysis/relaxtime/phase_guided_transport/publication_clean_v11_stage_acceptance_v1.json`. Each format contains 72 singles and two composites. PNG/PDF bytes and acceptance remain immutable and non-manuscript-eligible; current=v5 and all numerical provenance are unchanged. The author-authorized metadata-only migration stores one total `plot_manifest.json` per v10/v11 format package and retains original manifest bytes/hashes in `publication_plot_manifest_migration_v1/`. Stage acceptance is not final APS delivery or numerical production promotion.
-    - 低 xi 分辨率 anchor / p104-vs-p128 convergence 依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
-      - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
-      - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
-      - shared convergence evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/`
-  - 旧 `first_canonical_v1` 已从仓库数据树移除。它缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；历史对照请通过 git history / PR #122 查看，局部 `xi` 结构的 production-grade 解读应优先使用当前 `prod_v2` raw case。旧高密度 `prod_v1` 不再占用 mode 的 canonical 根路径，而是保留在版本化 snapshot：
-    - result/figure snapshot 已在 path-retirement 后由独立 deletion proposal 处理，当前不提供 RS `prod_v1` fallback/rollback。
-    - 删除 allowlist、删除前 tree/manifest hash 与 Git 恢复引用见 `docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/`。
-    - path-retirement merge `74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 保留删除前 snapshot 的 Git 历史恢复边界；这不是外部数值备份。当前 approved `prod_v2` 仍位于各 mode canonical 目录；PNJL phase-reference 的 `legacy_phase_reference_v1` fallback 不受此 RS 删除影响。
+  - 当前已验收数据和图层以[统一状态说明](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)及[绘图专题入口](../../analysis/relaxtime/phase_guided_transport/README.md)为准：
+    - 原1819点完整网格：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/`。
+    - 最新η加密正式数值1867点：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/`。
+    - 当前正式图层v14：`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/`，对应1819点，含76对PNG和76份PDF。
+    - v15对应1867点，76对PNG已由作者审阅；PDF暂缓，未替换current或论文附件。
+  - 历史`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`、低分辨率anchor及v1–v13图层不再是当前计算/图像入口；其原始数据、审阅状态和恢复依据保留于专题索引。
+    - 旧prod_v1的退役/删除依据见`docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/`；不能将历史Git恢复误记为现有fallback。
+    - 旧图包renderer、manifest和收敛证据在依赖复核前继续保留。下一阶段按明确文件范围和已验证的恢复来源退役旧资产。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`
@@ -356,6 +350,9 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - 开发期导出、迁移、一次性工具
 - `scripts/analysis/`
   - 后处理与分析脚本
+  - [输运采样联合验证、检查点恢复与完整计时](transport_sampling_qualification.md) 是算法验收入口，不是正式生产入口。
+  - σ Mott 诊断脚本在仓库内使用无版本后缀的 spectrum/asymptotics 入口；独立历史包中的 `run_sigma_mott_spectrum_v2.jl` 或 `run_sigma_mott_asymptotics_v3.jl` 存在时优先使用该冻结文件。热权重审计记录实际加载文件的 SHA-256。midpoint 筛查保留 `MOTT_REFINEMENT_LIBRARY` 显式路径覆盖；这些入口仍只用于隔离诊断，不改变生产核。
+  - [版本化输运采样配置](../../api/relaxtime/transport/TransportSamplingProfiles.md) 说明 `--sampling-profile` 的积分层次、逐道诊断和续算身份校验。
 - `scripts/debug/`
   - 排障脚本
 - `scripts/perf/`

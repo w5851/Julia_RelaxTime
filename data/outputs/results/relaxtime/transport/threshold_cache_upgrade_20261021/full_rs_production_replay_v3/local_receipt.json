@@ -1,0 +1,9 @@
+{
+  "received_archive_sha256": "7aebeb168137d9cd9f416c8b5427de736b578c95e0b9574977c0c5bbf3bb8ce5",
+  "received_archive_bytes": 2590896,
+  "archive_files": 942,
+  "source_snapshots_verified": 712,
+  "phase_reference_input_sha256": "2df44b801ebaee7f48a88bb59840f9bd99aaff520d06e05cd5af692404e022d7",
+  "local_metadata_checks_only": true,
+  "checked_utc": "2026-10-25T14:05:06.527186+00:00"
+}

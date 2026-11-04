@@ -1,0 +1,24 @@
+{
+  "created_utc": "2026-10-25T19:24:10.830314+00:00",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "controller_sha256": "bcd15a6b13b8a2bc34a7039584c4e6335c7b8a36a12f6776facb13dddcc627a4",
+  "review_sha256": "ae014caf965178e05590352ecade9b4866d2223784b4065e8922740529ae639d",
+  "modes": {
+    "A": {
+      "required_total_points": 910,
+      "reused_pilot_points": 6,
+      "remaining_points": 904,
+      "jobs": 72,
+      "max_points_per_shard": 14
+    },
+    "B": {
+      "required_total_points": 909,
+      "reused_pilot_points": 5,
+      "remaining_points": 904,
+      "jobs": 63,
+      "max_points_per_shard": 15
+    }
+  },
+  "full_jobs_dispatched": false,
+  "merge_contract": "Preserve each run artifact and its actual coordinates; verify each curve/xi key exactly once across reused pilot and remaining runs before any promotion"
+}

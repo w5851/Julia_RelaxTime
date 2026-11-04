@@ -1,0 +1,25 @@
+{
+  "schema": "image_comparison_review_v1",
+  "reviewed_utc": "2026-10-31T16:27:41.739720+00:00",
+  "scope": "Two pre-existing sigma-window plots displayed in one image-only preview; no new scientific plot or numerical calculation.",
+  "preview_sha256": "440c7be6d2b500b7eeafc64faf4b1ab36141781d34534c1da262224a1d314760",
+  "source_png_hashes_verified": true,
+  "primary_agent_image_review": true,
+  "ds_status": "truncated_invalid_json",
+  "ds_finish_reason": "length",
+  "ds_response_adopted": false,
+  "ds_evidence_retained": "ds_description.json",
+  "observations": [
+    "tau_ubar values increase monotonically; tabulated log-secants decrease through the center without a local maximum or minimum in the inspected central intervals.",
+    "Electrical conductivity values decrease monotonically. Its log-secant trend rises overall, with a small dip around the sigma Mott line.",
+    "Markers for tighter s sampling coincide closely with native points/intervals; image appearance alone is not a convergence proof.",
+    "No visible clipping or legend obstruction in the two-plot preview; original figures should be read at their declared width."
+  ],
+  "numerical_evidence": {
+    "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/center_modulation_acceptance_v1/returned/interpretation_views.json",
+    "sha256": "591ed30c9c1d964f43e0c1806a9d969ebb80cb92658df16982afbcbc80fc9675"
+  },
+  "mechanism_scope": "Weak central details are observed under the inherited integration settings. Their exclusive attribution to sigma Mott is unresolved.",
+  "new_numerical_analysis": false,
+  "formal_promotion": false
+}

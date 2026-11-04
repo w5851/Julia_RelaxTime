@@ -1,0 +1,43 @@
+{
+  "status": "machine_passed_external_visual_candidate_reviewed",
+  "generated_utc": "2026-11-03T04:29:53.660606+00:00",
+  "manifest_sha256": "746903354b24de753f483d3cdb5d21a1e0095e34d1c0d354e9bc51ae78bf5396",
+  "machine_validation": {
+    "passed": true,
+    "errors": []
+  },
+  "quality": [
+    {
+      "asset_id": "sigma_mott_curvature",
+      "minimum_glyph_mm": 2.096211067708333,
+      "linewidth_pt": 1.2,
+      "clipped_text": 0,
+      "text_overlaps": 0,
+      "legend_curve_overlaps": 0
+    }
+  ],
+  "external_model": "cn:deepseek-v4.1-flash",
+  "external_review": "ds_review_v1/sigma-curvature-review.json",
+  "external_review_sha256": "5e227cf30b93ddfb444a561b89ebfdd0438886970c061177a49be692ba0fa0b0",
+  "external_candidate_pass": true,
+  "external_model_output_verified": false,
+  "main_agent_image_loaded": false,
+  "author_accepted": false,
+  "manuscript_eligible": false,
+  "new_numerical_computation": false,
+  "scope": "Read-only plotting of remote frozen jump and jump_over_h fields for tau_ubar; no pointwise derivative reconstruction or fit.",
+  "findings": [
+    {
+      "issue": "Inner s7 markers overlap raw and continuum-control s6 markers.",
+      "disposition": "Expected from their actual values. No cosmetic coordinate offsets; the precomputed precision comparison retains the numerical differences."
+    },
+    {
+      "issue": "Second-difference magnitude increases at the smallest available h.",
+      "disposition": "This does not certify an h^(-1/2) asymptote or a physical second-derivative singularity; the comparison uses four widths and only one inner precision reference."
+    },
+    {
+      "issue": "Visual clarity candidate passed.",
+      "disposition": "Source/geometry checks confirm distinct line styles and markers and no clipped text or legend intersections; external visual feedback is not author acceptance or mathematical proof."
+    }
+  ]
+}

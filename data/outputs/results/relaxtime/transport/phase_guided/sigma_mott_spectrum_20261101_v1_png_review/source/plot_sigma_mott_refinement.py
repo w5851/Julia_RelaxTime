@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+"""Plot hash-verified sigma diagnostics. No numerical physics is evaluated here."""
+from pathlib import Path
+import argparse
+import csv
+import json
+import shutil
+import sys
+
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.ticker import MaxNLocator
+from PIL import Image
+from scripts.plotting.plot_accessibility import accessibility_record
+from scripts.plotting.plot_bundle import build_bundle
+from scripts.plotting.plot_manifest import (build_manifest, generator_record, input_record,
+    output_record, runtime_record, sha256_file, write_manifest)
+from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
+from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
+from scripts.plotting.plot_style import load_profile, style_context, configure_axis_ticks
+from scripts.plotting.validate_plot_artifact import validate_manifest
+
+SHARED = ("plot_style.py", "plot_series.py", "plot_manifest.py", "plot_quality.py",
+    "plot_accessibility.py", "plot_bundle.py", "plot_provenance.py", "plot_delivery.py", "validate_plot_artifact.py")
+STYLES = SeriesStyleRegistry("sigma_mott_checks_v1", (
+    SeriesStyle("sig_m200", "#0072B2", "-", "o"),
+    SeriesStyle("sig_m100", "#D55E00", "--", "s"),
+    SeriesStyle("sig_m050", "#008565", "-.", "D"),
+    SeriesStyle("sig_m020", "#AD5E8D", ":", "^"),
+    SeriesStyle("sig_c000", "#000000", "-", ""),
+    SeriesStyle("sig_p020", "#666666", "--", ""),
+    SeriesStyle("s6", "#D55E00", "-.", "s"),
+    SeriesStyle("s7", "#000000", "None", "x"),
+    SeriesStyle("hybrid_fine_x0.001", "#0072B2", "-", "D"),
+    SeriesStyle("hybrid_base_x0.001", "#008565", "None", "+"),
+    SeriesStyle("peak_area", "#AD5E8D", "-", "D"),
+    SeriesStyle("continuous", "#0072B2", "--", "o"),
+    SeriesStyle("discrete", "#D55E00", ":", "s"),
+))
+LABELS = {
+    "sig_m200": r"$\Delta\xi=-2\times10^{-4}$", "sig_m100": r"$\Delta\xi=-10^{-4}$",
+    "sig_m050": r"$\Delta\xi=-5\times10^{-5}$", "sig_m020": r"$\Delta\xi=-2\times10^{-5}$",
+    "sig_c000": r"$\Delta\xi=0$", "sig_p020": r"$\Delta\xi=+2\times10^{-5}$",
+    "s6": r"Original thermal grid, $s$ tol. $10^{-6}$",
+    "s7": r"Same grid, $s$ tol. $10^{-7}$",
+    "hybrid_fine_x0.001": "Continuum near-threshold control",
+    "hybrid_base_x0.001": "Continuum weight quadrature control",
+    "peak_area": "Unweighted peak area", "continuous": "Continuum thermal weight",
+    "discrete": "Original discrete thermal weight",
+}
+
+
+def read_csv(path):
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        return list(csv.DictReader(stream))
+
+
+def verify_folder(folder):
+    summary = json.loads((folder/"summary.json").read_text(encoding="utf-8-sig"))
+    for name, digest in summary["files"].items():
+        if sha256_file(folder/name) != digest:
+            raise ValueError("Frozen input changed: " + str(folder/name))
+    return summary
+
+
+def lines(ax, rows, xfield, yfield, style, *, markers=True):
+    rows = sorted(rows, key=lambda r: float(r[xfield]))
+    kwargs = style.plot_kwargs()
+    if not markers:
+        kwargs["marker"] = ""
+    ax.plot([float(r[xfield]) for r in rows], [float(r[yfield]) for r in rows],
+            **kwargs, linewidth=1.2, markersize=5.2, markerfacecolor="white", markeredgewidth=1.0)
+
+
+def draw(kind, data, args, profile, inputs):
+    size = (6.75, 6.7)
+    if kind == "spectrum":
+        selected = ["sig_m200", "sig_m100", "sig_m050", "sig_m020", "sig_c000", "sig_p020"]
+        scope = "Both scattering-channel panels; markers identify sampled mixed-scalar peak positions."
+        xlabel = r"$x=s-4M_l^2\;(\mathrm{fm}^{-2})$"
+        ylabels = [r"$\Sigma\;(\mathrm{fm}^{2})$"]*2
+        title = r"$\sigma$ threshold: full scattering cross sections"
+        count = len(data["spectrum"])
+        units = ("fm^-2", "fm^2")
+    elif kind == "slopes":
+        selected = [key for key in ("s6", "s7", "hybrid_fine_x0.001", "hybrid_base_x0.001")
+                    if any(r["variant"] == key for r in data["slopes"])]
+        scope = "Both observables; s-precision controls have identical endpoint coordinates."
+        xlabel = r"$h$"
+        ylabels = [r"$J_{\tau_{\bar u}}(h)$", r"$J_{\sigma_{\rm el}/T}(h)$"]
+        title = r"$\sigma$ threshold: local log-slope difference"
+        count = len(data["slopes"])
+        units = ("dimensionless", "dimensionless")
+    elif kind == "areas":
+        selected = ["peak_area", "continuous", "discrete"]
+        scope = "Unweighted area applies to upper panel; thermal weights apply to lower panel."
+        xlabel = r"$x_r\;(\mathrm{fm}^{-2})$"
+        ylabels = [r"$A_{\rm peak}$", r"$R_{\rm peak}\;(\mathrm{fm}^{2})$"]
+        title = r"$\sigma$ peak: area and thermal contribution"
+        count = len(data["peaks"])+len(data["thermal_peaks"])
+        units = ("fm^-2", "dimensionless; fm^2")
+    else:
+        raise ValueError(kind)
+    styles = {s.series_id:s for s in STYLES.select(selected)}
+    labels = [LABELS[key] for key in selected]
+    if kind=="spectrum":
+        counts={k:sum(r["point_id"]==k and r["channel"] in ("uubar_to_uubar","uubar_to_ddbar")
+            and 1e-6<=float(r["x_inv_fm2"])<=1e-3 for r in data["spectrum"]) for k in selected}
+    elif kind=="slopes":
+        counts={k:sum(r["variant"]==k and r["observable"] in ("tau_ubar","sigma_over_T")
+                      for r in data["slopes"]) for k in selected}
+    else:
+        counts={k:sum(r["channel"]=="uubar_to_uubar" for r in
+                      (data["peaks"] if k=="peak_area" else data["thermal_peaks"])) for k in selected}
+    with style_context(profile) as context:
+        figure, axes = plt.subplots(2, 1, figsize=size, sharex=True)
+        context.bind(figure)
+        figure.subplots_adjust(left=.17, right=.965, bottom=.11, top=.735, hspace=.18)
+        if kind == "spectrum":
+            for ax, channel, text in zip(axes,("uubar_to_uubar","uubar_to_ddbar"),
+                                        (r"$u\bar u\to u\bar u$",r"$u\bar u\to d\bar d$")):
+                for key in selected:
+                    rows = [r for r in data["spectrum"] if r["point_id"] == key and r["channel"] == channel
+                            and 1e-6 <= float(r["x_inv_fm2"]) <= 1e-3]
+                    lines(ax,rows,"x_inv_fm2","native_sigma_fm2",styles[key],markers=False)
+                    landmarks = [r for r in data["peaks"] if r["point_id"] == key and r["channel"] == channel]
+                    if landmarks:
+                        s = styles[key]
+                        ax.plot([float(r["peak_x_inv_fm2"]) for r in landmarks],
+                                [float(r["full_peak_height_fm2"]) for r in landmarks],
+                                color=s.color,marker=s.marker,linestyle="None",markersize=5.2,
+                                markerfacecolor="white",markeredgewidth=1.0)
+                ax.set_xscale("log");ax.set_yscale("log")
+                ax.set_xlim(1e-6,1e-3)
+                ax.text(.035,.90,text,transform=ax.transAxes,ha="left",va="top")
+        elif kind == "slopes":
+            for ax, observable in zip(axes,("tau_ubar","sigma_over_T")):
+                for key in selected:
+                    rows = [r for r in data["slopes"] if r["variant"] == key and r["observable"] == observable]
+                    lines(ax,rows,"h","jump",styles[key])
+                ax.set_xscale("log")
+                ax.yaxis.set_major_locator(MaxNLocator(nbins=4))
+                ax.ticklabel_format(axis="y",style="plain",useOffset=False)
+        else:
+            raw = [r for r in data["peaks"] if r["channel"] == "uubar_to_uubar"]
+            thermal = [r for r in data["thermal_peaks"] if r["channel"] == "uubar_to_uubar"]
+            lines(axes[0],raw,"peak_x_inv_fm2","mixed_area_dimensionless",styles["peak_area"])
+            lines(axes[1],thermal,"x_peak_inv_fm2","continuous_mixed_square_rate_fm2",styles["continuous"])
+            lines(axes[1],thermal,"x_peak_inv_fm2","discrete_exact_mixed_square_rate_fm2",styles["discrete"])
+            for ax in axes:
+                ax.set_xscale("log");ax.set_yscale("log")
+        for ax, label in zip(axes,ylabels):
+            ax.set_ylabel(label,labelpad=9)
+            configure_axis_ticks(ax,profile)
+        axes[-1].set_xlabel(xlabel)
+        figure.text(.55,.98,title,ha="center",va="top",fontsize=13)
+        figure.text(.55,.925,r"$T=125.736\;\mathrm{MeV},\quad\mu_B=900\;\mathrm{MeV}$",ha="center",va="top",fontsize=13)
+        handles = [Line2D([],[],**styles[key].plot_kwargs(),markersize=5.2,markerfacecolor="white") for key in selected]
+        figure.legend(handles,labels,loc="upper center",bbox_to_anchor=(.55,.87),ncol=2 if kind!="areas" else 1,
+                      handlelength=2.1,columnspacing=1.1,labelspacing=.30,borderaxespad=0,frameon=False)
+        stem=args.output/("sigma_"+kind)
+        outputs,quality=export_figure(figure,stem,profile,formats=["png"],intended_width_inches=size[0])
+    color=stem.with_suffix(".png");gray=stem.with_name(stem.name+"_gray").with_suffix(".png")
+    with Image.open(color) as im:
+        im.convert("L").convert("RGB").save(gray,dpi=(profile.dpi,profile.dpi))
+    gray_record=output_record(gray,fmt="png",dpi=profile.dpi,vector=False)
+    gray_record["inspection"]=inspect_export(gray);outputs.append(gray_record)
+    record=build_manifest(asset_id="sigma_mott_"+kind,figure_family="sigma_mott_refinement",
+        case_slug=args.output.name,figure_mode="audit",semantic_status="sigma_mott_numerical_diagnostic",
+        style_profile=profile.profile_id,publication_scope="internal_review",
+        generator=generator_record(__file__,command=" ".join(sys.argv),
+            source_snapshot=args.results/"source"/Path(__file__).name,
+            runtime=runtime_record({"matplotlib":matplotlib.__version__})),inputs=inputs,
+        axes=[dict(field="x_inv_fm2" if kind!="slopes" else "h",source_unit=units[0],display_unit=units[0],scale="log",label=xlabel),
+              *[dict(field=kind+"_panel_"+str(i),source_unit=u,display_unit=u,
+                      scale="linear" if kind=="slopes" else "log",label=label) for i,(label,u) in
+                enumerate(zip(ylabels,("dimensionless","fm^2") if kind=="areas" else (units[1],units[1])))]],
+        series=[dict(series_id=k,state="numerical_diagnostic",support_rule="frozen completed spectrum or explicitly qualified finite-window analysis",
+                     mask_rule="none",point_count=counts[k]) for k in selected],outputs=outputs,
+        selection_rule="Declared two-channel near-threshold spectra" if kind=="spectrum" else "Declared observables and completed same-window diagnostics",
+        interpolation_policy="none",connector_policy="forbidden",missing_value_policy="required sources fail; no imputation",
+        validation=dict(finite=True,duplicate_keys=True,support=True,solver_called=False,
+                        canonical_data_modified=False,author_review="pending"),
+        calculation_sha="2e5c411c716d5cbc524c3fc6cfb335fe05b39444",source_run_id="trsigma-mott-20261101-v1",
+        rendering=dict(delivery_stage="png_review",vector_delivery_pending=True,review_contract="prd_review_v1",
+            figure_size_inches=list(size),column="double_column",font=dict(context.font),
+            size_override_reason="Paired scientific diagnostics with shared parameter and curve identity keys",
+            typography_exception="dense_composite_review_compact_typography",
+            typography_exception_reason="Internal PNG review of two panels and nested physics subscripts; minimum 1.5 mm remains enforced",
+            series_styles=STYLES.record(selected),legend_policy="declared_geometry_checked",legend_outside=True,
+            legend_placements=[dict(legend_index=0,host_axes_index=None,title="",labels=labels,
+                placement="outside_axes",location="upper center",scope=scope)],
+            legend_layout_reason="Shared key avoids obstructing threshold peaks and small slope differences",
+            color_route="undecided_review",quality=quality,placement_limits=placement_limits(quality,profile,outputs),
+            accessibility=accessibility_record([dict(value=k,color=styles[k].color,
+                noncolor_encoding=f"{styles[k].linestyle}; {styles[k].marker or 'line'}") for k in selected],
+                backgrounds=["#FFFFFF"],background_scope="white axes without fills"),
+            connections="Straight guides between supplied samples; precision controls are marker-only; no fitted derivative",
+            coordinate_transform="All physical coordinates, areas, thermal rates and log-secant differences are precomputed on quote-remote",
+            grayscale=dict(method="Pillow L then RGB",color_sha256=sha256_file(color),gray_sha256=sha256_file(gray))))
+    record.update(delivery_stage="png_review",manuscript_eligible=False,current_publication_layer=False,
+                  vector_delivery_pending=True,caption=input_record(args.results/"caption.md",role="figure_caption"))
+    plt.close(figure)
+    return record
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("case",type=Path)
+    parser.add_argument("review")
+    parser.add_argument("output",type=Path)
+    parser.add_argument("results",type=Path)
+    parser.add_argument("--figures",default="spectrum,slopes,areas")
+    args=parser.parse_args()
+    chosen=args.figures.split(",")
+    assert set(chosen)<={"spectrum","slopes","areas"} and len(chosen)==len(set(chosen))
+    review_dir=args.case/args.review
+    summary=verify_folder(review_dir)
+    if set(chosen)-{"spectrum"}:
+        assert summary["status"]=="completed_diagnostic_review"
+    verify_folder(args.case/"spectrum_v2")
+    data=dict(spectrum=read_csv(args.case/"spectrum_v2/cross_section_spectrum.csv"),
+              peaks=read_csv(review_dir/"peak_scaling.csv"),slopes=[],thermal_peaks=[])
+    files=[args.case/"contract.json",args.case/"spectrum_v2/summary.json",
+           args.case/"spectrum_v2/cross_section_spectrum.csv",review_dir/"summary.json",review_dir/"peak_scaling.csv"]
+    if "slopes" in chosen:
+        data["slopes"]=read_csv(review_dir/"centered_slopes.csv");files.append(review_dir/"centered_slopes.csv")
+    if "areas" in chosen:
+        verify_folder(args.case/"thermal_audit_v1")
+        data["thermal_peaks"]=read_csv(args.case/"thermal_audit_v1/thermal_peak_areas.csv")
+        files.extend((args.case/"thermal_audit_v1/summary.json",args.case/"thermal_audit_v1/thermal_peak_areas.csv"))
+    args.output.mkdir(parents=True,exist_ok=False);args.results.mkdir(parents=True,exist_ok=False)
+    (args.results/"source").mkdir()
+    shutil.copyfile(__file__,args.results/"source"/Path(__file__).name)
+    (args.results/"caption.md").write_text(
+        "# Sigma Mott neighborhood diagnostics\n\n"
+        "Mode A, mu_B=900 MeV, T=125.7360002645551 MeV, xi_M=0.015327819995582102. "
+        "The original frozen kernel is unchanged. Delta xi is xi-xi_M; x=s-4M_l^2. The spectrum panels "
+        "show the full blocked cross section in the two light quark-antiquark channels; markers identify "
+        "sampled mixed-scalar resonance peaks. The mixed scalar contains both sigma and sigma-prime. "
+        "Peak areas integrate the positive mixed-scalar square over x_r plus/minus 32 half-widths. "
+        "A_peak=integral Sigma_mixed dx is dimensionless; R_peak includes the recorded continuum or "
+        "original discrete incoming thermal weight and has units fm^2. The slope diagnostic is "
+        "J_y(h)=ln[y(xi_M+h)/y(xi_M)]/h-ln[y(xi_M)/y(xi_M-h)]/h. The continuum near-threshold "
+        "control replaces only x<0.001 fm^-2 in two light annihilation channels; it is a diagnostic "
+        "and does not promote a new production quadrature. Lines are sample guides, not interpolation "
+        "for numerical analysis. Finite-window slopes are not proof of differentiability. Full insertion "
+        "width 6.75 inches, PNG review only. Numerical conclusions and figure author acceptance are separate.\n",
+        encoding="utf-8")
+    inputs=[input_record(p,role="frozen_sigma_diagnostic") for p in files]
+    for path in [ROOT/"config/plotting/candidate_aps_v2.toml",*[ROOT/"scripts/plotting"/name for name in SHARED]]:
+        target=args.results/"source"/path.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(path,target)
+        entry=input_record(path,role="plot_style_contract" if path.suffix==".toml" else "shared_plotting_code")
+        entry["source_snapshot"]=input_record(target,role="plotting_source_snapshot");inputs.append(entry)
+    profile=load_profile("candidate_aps_v2")
+    records=[draw(kind,data,args,profile,inputs) for kind in chosen]
+    bundle=build_bundle(dict(case_slug=args.output.name,delivery_stage="png_review",manuscript_eligible=False,
+        current_publication_layer=False,charts=[dict(asset_id=r["asset_id"]) for r in records]),records)
+    manifest=args.output/"plot_manifest.json";write_manifest(manifest,bundle)
+    errors=validate_manifest(manifest,repo_root=ROOT)
+    (args.results/"validation.json").write_text(json.dumps(dict(passed=not errors,errors=errors),indent=2)+"\n",encoding="utf-8")
+    if errors:
+        raise ValueError("; ".join(errors))
+    print(json.dumps(dict(figures=len(records),passed=True,manifest=str(manifest))))
+
+
+if __name__=="__main__":
+    main()

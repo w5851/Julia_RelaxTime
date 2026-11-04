@@ -1,0 +1,270 @@
+{
+  "schema": "transport_full_rs_formal_promotion_v1",
+  "status": "formal_production_accepted",
+  "promoted_at": "2026-10-28T12:11:17.469229+00:00",
+  "formal_production_promoted": true,
+  "publication_use_approved": true,
+  "manuscript_eligible": true,
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_ref": "transport-full-rs-20261026-v1",
+  "numerical_production_hosts": [
+    "GitHub Actions"
+  ],
+  "numerical_qualification_and_followup_host": "quote-remote",
+  "local_role": "file identity, metadata review and Python plotting only",
+  "scope": {
+    "points": 1819,
+    "modes": {
+      "A": {
+        "expected": 910,
+        "completed": 910
+      },
+      "B": {
+        "expected": 909,
+        "completed": 909
+      }
+    },
+    "channels": 30923,
+    "successful_runs": 142,
+    "quality_flags_retained": 470,
+    "all_source_values_retained": true,
+    "numerical_postprocessing": "none"
+  },
+  "gates": [
+    {
+      "gate": "independent_layers",
+      "status": "passed",
+      "required_true_fields": [
+        "layer_targets_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "independent_layers",
+        "bytes": 953,
+        "sha256": "ed730e974d69914bb1a22a23b42655aee983e653cbf2316421facdfbf024e59a"
+      }
+    },
+    {
+      "gate": "joint_representatives",
+      "status": "passed",
+      "required_true_fields": [
+        "joint_target_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_joint_representatives_p48_v1/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "joint_representatives",
+        "bytes": 519,
+        "sha256": "4f65fc0fd99152a65090ddc10c85d3b2b1989c19913bff2f1f9191d76f5cc01a"
+      }
+    },
+    {
+      "gate": "production_and_fortran_replay",
+      "status": "passed",
+      "required_true_fields": [
+        "production_replay_passed",
+        "fortran_comparison_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_production_replay_v3/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "production_and_fortran_replay",
+        "bytes": 923,
+        "sha256": "098bad19d930241a933acd5ee1c7edbd11eee9495800c80fa8c5f9cbcd56129c"
+      }
+    },
+    {
+      "gate": "baseline_and_default_entrypoint",
+      "status": "passed",
+      "required_true_fields": [
+        "default_entrypoint_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "baseline_and_default_entrypoint",
+        "bytes": 1174,
+        "sha256": "1d01d1975b48f28ca9a875d79185b371a0a28e504041173f282bef4d112c4a2a"
+      }
+    },
+    {
+      "gate": "mode_a_background",
+      "status": "passed",
+      "required_true_fields": [
+        "phase_plan_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_phase_validation_v1/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "mode_a_background",
+        "bytes": 2407,
+        "sha256": "2ac9b502b3cd3cca8ce448b0a290648450a802233740593e33948ea2a7e44934"
+      }
+    },
+    {
+      "gate": "mode_b_qualification",
+      "status": "passed",
+      "required_true_fields": [
+        "mode_b_background_qualified",
+        "mode_b_transport_representatives_qualified",
+        "layer_targets_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json",
+        "path_kind": "repository_relative",
+        "role": "mode_b_qualification",
+        "bytes": 1383,
+        "sha256": "37d717697c66c524e11a48c985c70255ea2f5ba2e3a3950a9b0ae36fdbbe669a"
+      }
+    },
+    {
+      "gate": "full_grid",
+      "status": "passed",
+      "required_true_fields": [
+        "full_grid_numerical_acceptance_passed",
+        "artifact_contract_passed",
+        "backgrounds_passed"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json",
+        "path_kind": "repository_relative",
+        "role": "full_grid",
+        "bytes": 2867,
+        "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283"
+      }
+    },
+    {
+      "gate": "xi04_local_integrals",
+      "status": "passed",
+      "required_true_fields": [
+        "formal_replay_passed",
+        "reference_checks_passed",
+        "all_outer_converged",
+        "all_selected_final_changes_within_one_percent"
+      ],
+      "evidence": {
+        "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/returned/convergence_review_v1/review.json",
+        "path_kind": "repository_relative",
+        "role": "xi04_local_integrals",
+        "bytes": 4206,
+        "sha256": "ceb3e69e3b92d49f86dc8149307bd0a9917760d5e9b64193be1e4d9bd3fba253"
+      }
+    }
+  ],
+  "grid_files": [
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan.csv",
+      "path_kind": "repository_relative",
+      "role": "accepted_grid_file",
+      "bytes": 1082613,
+      "sha256": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_a/phase_guided_transport_scan_sampling.csv",
+      "path_kind": "repository_relative",
+      "role": "accepted_grid_file",
+      "bytes": 2888911,
+      "sha256": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan.csv",
+      "path_kind": "repository_relative",
+      "role": "accepted_grid_file",
+      "bytes": 1053127,
+      "sha256": "5cddbeeb7944271071d08ce0a1ec6e5e32068bf09eaa3a9db473767df02ab2f8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/mode_b/phase_guided_transport_scan_sampling.csv",
+      "path_kind": "repository_relative",
+      "role": "accepted_grid_file",
+      "bytes": 2758040,
+      "sha256": "2ccdd0b9186132879edf856076a7139969fadb9e004d18a8b096b1b04723aa5a"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/point_provenance.csv",
+      "path_kind": "repository_relative",
+      "role": "accepted_grid_file",
+      "bytes": 779547,
+      "sha256": "b44374b756b8113acb344d935b1860b630de859dbd0883b59bffd4da033e8e51"
+    }
+  ],
+  "author_authorization": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/author_authorization.json",
+    "path_kind": "repository_relative",
+    "role": "explicit_conditional_formalization_authorization",
+    "bytes": 2909,
+    "sha256": "b9cf10dfee356a535398d0406f693caf5f724bb4227f9fcb69200884a7dfbd34"
+  },
+  "identity_chain": [
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_dispatch_preparation_v1/calculation_commit_receipt.json",
+      "path_kind": "repository_relative",
+      "role": "qualified_source_to_calculation_commit",
+      "bytes": 481,
+      "sha256": "7c15c8b531d97d44e0eeb1a6c7d9f6968c613c099fddfcb44983a6a7272f2078"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_dispatch_preparation_v1/calculation_publication_receipt.json",
+      "path_kind": "repository_relative",
+      "role": "published_calculation_identity",
+      "bytes": 411,
+      "sha256": "5c47396b2c680c0a25bb0098871e2fac32becd8a457de8e75b3396b00e89f795"
+    }
+  ],
+  "additional_evidence": [
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_local_probe_20261028_v1/returned/final_review_v2/review.json",
+      "path_kind": "repository_relative",
+      "role": "pi_mott_diagnosis",
+      "bytes": 63354,
+      "sha256": "23c5621fc9906407b70e440504ee08c456875355803c63de5afc8e4d4f9e76b7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_sampling_convergence_20261028_v1/returned/final_review_v1/review.json",
+      "path_kind": "repository_relative",
+      "role": "pi_local_integral_convergence",
+      "bytes": 6657,
+      "sha256": "36ef7a2a0ecd094d9bda3edc45d611f1ff33e88aabdbac42ef340799d8ad71f0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/returned/review_v2/review.json",
+      "path_kind": "repository_relative",
+      "role": "eta_mott_diagnosis",
+      "bytes": 4590,
+      "sha256": "11ea0d64ed158b49236fdb6a3bdb2d7e33f788e4ec328daabe0039bd0a682ab7"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/local_return_verification.json",
+      "path_kind": "repository_relative",
+      "role": "remote_return_identity",
+      "bytes": 306,
+      "sha256": "12ee64c39c1cb215d26353426fa13df144dc30619cb62eb4d00d94aa2ce83281"
+    }
+  ],
+  "historical_records_preserved": true,
+  "closed_historical_pending_fields": {
+    "joint.independent_layers_pending": "independent_layers",
+    "joint.production_replay_pending": "production_and_fortran_replay",
+    "replay.phase_revalidation_pending": "mode_a_background and mode_b_qualification",
+    "replay.baseline_pending": "baseline_and_default_entrypoint",
+    "mode_b.whole_grid_transport_calculated_false": "full_grid",
+    "earlier.formal_production_promoted_false": "this author-authorized external promotion record"
+  },
+  "limits": [
+    "The 1 percent target is supported by independent layers, selected joint representatives and full-grid validity audits; it is not a proof of an error bound at every unsampled parameter point.",
+    "The additional xi=0.42/0.43/0.44 probe covers two complete channels and fixed backgrounds, not pure eta amplitude removal or a new all-channel t/B0/background/bulk-derivative study.",
+    "Fortran alignment covers the four qualified xi=0 points.",
+    "The finite tau-ratio flags remain in the original tables.",
+    "Global phase-diagram certification is not claimed."
+  ],
+  "global_phase_diagram_certified": false,
+  "local_replacement_performed": false,
+  "original_artifact_verification": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/original_artifact_verification.json",
+    "path_kind": "repository_relative",
+    "role": "original_artifact_verification",
+    "bytes": 47105,
+    "sha256": "30d0383399f42ccc86ef1234245d9cc6df1e506f54d31a6c89002233dd3e9f0f"
+  }
+}

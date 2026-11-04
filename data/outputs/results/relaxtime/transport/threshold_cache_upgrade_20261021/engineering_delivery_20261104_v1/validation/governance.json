@@ -1,0 +1,35 @@
+[
+  {
+    "name": "task_ledger",
+    "exit_code": 0,
+    "seconds": 22.300786018371582,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_task_ledger.jl",
+      "--preflight",
+      "--track",
+      "transport-threshold-upgrade"
+    ]
+  },
+  {
+    "name": "active_docs",
+    "exit_code": 0,
+    "seconds": 3.108583688735962,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_active_docs_governance.jl"
+    ]
+  },
+  {
+    "name": "script_governance",
+    "exit_code": 0,
+    "seconds": 5.914705991744995,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_relaxtime_script_governance.jl"
+    ]
+  }
+]

@@ -12,7 +12,7 @@ from scripts.plotting.plot_quality import measure_figure
 from scripts.plotting.plot_style import configure_matplotlib, load_profile
 from scripts.plotting.validate_plot_artifact import validate_manifest, validate_manifest_record
 from scripts.plotting.plot_bundle import load_chart_records
-from scripts.plotting.plot_provenance import validate_hash_record
+from scripts.plotting.plot_provenance import git_source, validate_hash_record
 import tomllib
 
 
@@ -32,7 +32,7 @@ def module():
 
 @pytest.fixture(scope="module")
 def plot_inputs(module):
-    points, _, _, _, gaps, _ = module.PARENT.load_v5_inputs()
+    points, _, _, _, gaps, _ = module.PARENT.load_v5_inputs(require_current=False)
     grouped, gap_map = module.V10.group_inputs(points, gaps)
     profile = load_profile("candidate_aps_v2")
     configure_matplotlib(profile)
@@ -224,7 +224,7 @@ def test_v11_package_preserves_v5_v10_raw_and_current_and_records_caption_scope(
     for name, expected in package["inherited_table_hashes"].items():
         assert sha256_file(module.V5_TABLE_ROOT / name) == expected
         assert sha256_file(module.TABLE_ROOT / name) == expected
-    pointer = json.loads(module.CURRENT_POINTER.read_text(encoding="utf-8"))
+    pointer = json.loads(git_source(str(ROOT), CODE_REF, module.CURRENT_POINTER.relative_to(ROOT).as_posix()))
     assert pointer["current_analysis_package"].endswith("publication_clean_v5")
     text = module.CAPTION_HANDOFF.read_text(encoding="utf-8")
     assert "Do not say both legends apply to all panels" in text

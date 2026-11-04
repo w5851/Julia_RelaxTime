@@ -1,0 +1,42 @@
+{
+  "status": "agent_visual_review_passed",
+  "author_acceptance": false,
+  "inspected_utc": "2026-10-29T05:52:12.523141+00:00",
+  "manifest_sha256": "3ad950d932864d04ff5adcec0ae46c7bf5f47de3ab79cefa64cb006640f86175",
+  "reviewed_images": [
+    {
+      "path": "a_mu0_tau_ubar.png",
+      "sha256": "2561b1d233096f0b23f31953bbd1a0346141a022eb83cf5a1f303eff187b3c2a"
+    },
+    {
+      "path": "a_mu0_sigma_over_T.png",
+      "sha256": "cbf4130d079107dee006c11743ffec8f30e2a685305cd62015c0cd68e883fd18"
+    },
+    {
+      "path": "a_mu450_tau_ubar.png",
+      "sha256": "3efa9feda1f4b7a1eb1cf793fbc9887c39d880deb01c7c4dfab8de4b9bcdd9b2"
+    },
+    {
+      "path": "a_mu450_sigma_over_T.png",
+      "sha256": "7d866470b5582697a0c7e56dc18f67463e4cd221682f3970044d3da8936c644d"
+    },
+    {
+      "path": "b_mu0_tau_ubar.png",
+      "sha256": "1169499afaa6f8febf9ad183c20c8fe43d2c1bbb1fb14edd956f3250af231546"
+    },
+    {
+      "path": "b_mu0_sigma_over_T.png",
+      "sha256": "93aaf36be28a9980a54fbba1f443466ccecd2e50df40296c3a9998766115e05d"
+    },
+    {
+      "path": "a_mu450_sigma_over_T_gray.png",
+      "sha256": "1fbd54338d07149061e4082e0e51b97e7df362f60fc1d2f508c72e74f1b8963d"
+    }
+  ],
+  "findings": [
+    "Titles, axes, units and legend are legible and unclipped.",
+    "Near-threshold samples and secant modulation remain visible without smoothing.",
+    "The inspected grayscale example distinguishes refined and coarse samples by markers and line style."
+  ],
+  "scope": "All six color figures and one representative grayscale figure; numerical precision checks are separate."
+}

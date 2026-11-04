@@ -134,7 +134,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.check:
         record = validate_acceptance()
-        print(f"[v11-stage] verified: {record['status']}; manuscript_eligible=false; current=v5")
+        print(f"[v11-stage] verified: {record['status']}; manuscript_eligible=false; historical_current=v5")
         return
     if ACCEPTANCE.exists():
         raise FileExistsError("refusing to overwrite a stage acceptance record")

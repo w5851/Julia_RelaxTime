@@ -1,0 +1,146 @@
+{
+  "status": "layout_preview_only",
+  "checks": [
+    {
+      "name": "composites/figure1_relaxation_times_comparison",
+      "raw_vertices": 3640,
+      "placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves",
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        },
+        {
+          "role": "endpoints",
+          "placement": "in_axes",
+          "host_axes_index": 2,
+          "location": "upper left",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "listed sampled first-order branch pairs only",
+          "applies_to": [
+            {
+              "mode_key": "mode_a",
+              "plot_panel": "muB900.0",
+              "plot_series": "alpha1.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "glyph_mm": 2.096211067708333,
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_curve_overlap_count": 0,
+      "legend_landmark_overlap_count": 0,
+      "legend_in_axes_overflow_count": 0,
+      "legend_pair_overlap_count": 0
+    },
+    {
+      "name": "composites/figure2_transport_coefficients_comparison",
+      "raw_vertices": 2730,
+      "placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves",
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        },
+        {
+          "role": "endpoints",
+          "placement": "in_axes",
+          "host_axes_index": 2,
+          "location": "upper left",
+          "title": "First-order",
+          "labels": [
+            "restored",
+            "broken"
+          ],
+          "scope": "listed sampled first-order branch pairs only",
+          "applies_to": [
+            {
+              "mode_key": "mode_a",
+              "plot_panel": "muB900.0",
+              "plot_series": "alpha1.0"
+            }
+          ],
+          "legend_index": 1,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "glyph_mm": 2.096211067708333,
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_curve_overlap_count": 0,
+      "legend_landmark_overlap_count": 0,
+      "legend_in_axes_overflow_count": 0,
+      "legend_pair_overlap_count": 0
+    },
+    {
+      "name": "details/figure1_low_value_details",
+      "raw_vertices": 1213,
+      "placements": [
+        {
+          "role": "parameters",
+          "placement": "in_axes",
+          "host_axes_index": 0,
+          "location": "upper left",
+          "title": "$\\alpha_T$",
+          "labels": [
+            "1.0",
+            "1.1",
+            "1.2"
+          ],
+          "scope": "all parameter curves",
+          "series_keys": [
+            "alpha1.0",
+            "alpha1.1",
+            "alpha1.2"
+          ],
+          "legend_index": 0,
+          "selection_reason": "first clear declared corner combination"
+        }
+      ],
+      "glyph_mm": 2.096211067708333,
+      "clipped_text": [],
+      "text_overlap_pairs": [],
+      "legend_curve_overlap_count": 0,
+      "legend_landmark_overlap_count": 0,
+      "legend_in_axes_overflow_count": 0,
+      "legend_pair_overlap_count": 0
+    }
+  ]
+}

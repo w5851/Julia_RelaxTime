@@ -41,6 +41,13 @@ st = Models.solve_gap(model, T_fm, mu_vec)
 
 它是最轻量的统一入口，不承担 CSV、扫描或完整 workflow 打包职责。
 
+NJL/PNJL 家族的 `solve_gap(...; iterations=1000)` 将正整数迭代预算传给每次
+NLsolve 尝试。FixedMu 的 `solve` / `solve_constraint` 同样透传 `iterations`，
+包括 Newton 失败后的 trust-region 尝试；预算不是所有种子的累计上限。
+耗尽预算不能绕过残差和物理性判据。未指定时仍为 NLsolve 原默认的 1000；
+输运扫描显式使用每次 40（底层 CLI 可用 `--max-iter` 覆盖）。
+FixedRho 等其他约束模式继续使用各自既有的联合求解合同。
+
 ## 什么时候用 `solve`
 
 `Models.solve` 适合“我已经确定约束模式，希望拿到完整的求解结果载荷”的场景。

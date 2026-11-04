@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "tests": 14,
+  "subtests": 5,
+  "command": "python -m pytest tests/unit/python/test_transport_eta_merge.py tests/unit/python/test_phase_guided_publication_clean_v15.py -q",
+  "test_sources": [
+    {
+      "path": "tests/unit/python/test_transport_eta_merge.py",
+      "path_kind": "repository_relative",
+      "role": "executed_test_source",
+      "bytes": 5015,
+      "sha256": "8abbbe2c265cfca8b134b41bf950c6ac0e02db6cce58813bfcc6c5afb6b3a53f"
+    },
+    {
+      "path": "tests/unit/python/test_phase_guided_publication_clean_v15.py",
+      "path_kind": "repository_relative",
+      "role": "executed_test_source",
+      "bytes": 2500,
+      "sha256": "201f29d5d053f18748a2c3d1705469828dc42b697531f236c4f33f5df5217094"
+    }
+  ],
+  "numerical_validation_host": "quote-remote",
+  "new_core_solver_behavior": false
+}

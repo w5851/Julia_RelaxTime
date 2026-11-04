@@ -1,0 +1,38 @@
+{
+  "status": "verified_phase_return",
+  "files_verified": 618,
+  "archive": {
+    "archive": "main_grid_snapshot_v1.zip",
+    "bytes": 37479403,
+    "sha256": "496acb77414da969cfac96afa5d82769688cc67223202ebc701b846288d102ad",
+    "manifest_files": 618,
+    "package_manifest_sha256": "370e93f5a5da559735249d92fa114911940f659ee6f64ba8a3a9e8b68fb2d8a3"
+  },
+  "completed_runs": [
+    "survey_v1",
+    "endpoint_checks_v1",
+    "locate_v1",
+    "midpoint_screen_v1",
+    "fine_pilot_other01_v1",
+    "fine_other07_v1",
+    "fine_other08_v1",
+    "fine_other09_v1",
+    "fine_other01_v1",
+    "fine_other06_v1",
+    "fine_other11_v1",
+    "fine_other02_v1",
+    "fine_other04_v1",
+    "fine_other03_v1",
+    "fine_other12_v1",
+    "fine_other13_v1",
+    "fine_other10_v1",
+    "fine_other05_v1",
+    "tighter_other01_v1",
+    "tighter_other02_v1",
+    "tighter_other03_v1",
+    "tighter_other05_budget_probe_v1",
+    "tighter_pilot_other01_v1"
+  ],
+  "whole_task_complete": false,
+  "local_scope": "archive, file identity and metadata only"
+}

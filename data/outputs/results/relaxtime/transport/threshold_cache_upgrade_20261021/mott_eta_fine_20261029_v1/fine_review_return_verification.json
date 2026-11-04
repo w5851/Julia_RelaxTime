@@ -1,0 +1,39 @@
+{
+  "status": "verified_fine_grid_return",
+  "remote_source": "quote-remote:D:\\CodexCompute\\trmott-eta-fine-20261029-v1\\review_fine_v1",
+  "received_utc": "2026-10-29T05:42:44.566988+00:00",
+  "review_sha256": "519ab52712a57f12e7d5a982ec96b999d51a94f1da058d84e3d5c113158521e6",
+  "files": [
+    {
+      "path": "channels.csv",
+      "bytes": 183303,
+      "sha256": "fb4274073807b8a119174ee461dff677fa57455d2819bfa2faa311a4d9c884e1"
+    },
+    {
+      "path": "coarse_chord.csv",
+      "bytes": 36391,
+      "sha256": "b39f760d9796bd2a68f8156ee0804f669e9343e38dc42d20c80892286c5d449f"
+    },
+    {
+      "path": "coarse_slopes.csv",
+      "bytes": 3292,
+      "sha256": "d57b685b308d5e0ca18699e8f2a2f989b40147033ba1fae5a7ee344e84601bcd"
+    },
+    {
+      "path": "fine_slopes.csv",
+      "bytes": 24477,
+      "sha256": "01fcc1f93c6466e1e2e865738dcd281e84f43bf9ea97baaca6d1d70b49e32a6f"
+    },
+    {
+      "path": "observables.csv",
+      "bytes": 44980,
+      "sha256": "656d2a79974a17090e94845eea045e53d23ec2cc536e4a9d1d3d4de43b5e99a2"
+    },
+    {
+      "path": "original_controls.csv",
+      "bytes": 8120,
+      "sha256": "c9892bddf8272755edc90b1380aaeecbec967e5637e6455fe960b186356a3c91"
+    }
+  ],
+  "scope": "Transferred complete fine-grid review; tighter and threshold-point checks remain in progress"
+}

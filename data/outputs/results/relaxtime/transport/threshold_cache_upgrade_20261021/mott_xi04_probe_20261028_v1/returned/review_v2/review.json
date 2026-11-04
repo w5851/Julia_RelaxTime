@@ -1,0 +1,133 @@
+{
+  "schema": "transport_mott_window_review_v1",
+  "status": "diagnostic_only",
+  "host": "quote-remote",
+  "probe_summary_sha256": "a7b015d96f8154d0dd7d57f8830484ce468298439e88fcba48915fd30b712d10",
+  "root_points": 9,
+  "qualified_pole_rows": 144,
+  "pole_rows": 144,
+  "threshold_crossings": [
+    {
+      "window": "muB900_alpha1.1_xi0.3_0.5",
+      "meson": "eta",
+      "cut": "uu",
+      "xi_left": 0.42,
+      "xi_right": 0.43,
+      "point_left": "x04p013",
+      "point_right": "x04p014",
+      "inverse_re_left": 0.0031118285632158182,
+      "inverse_re_right": -0.00030341809709942547,
+      "evaluation_offset_inv_fm": -1e-06,
+      "max_endpoint_inverse_im": 0.0,
+      "classification": "threshold_real_part_zero_bracket"
+    }
+  ],
+  "root_threshold_crossings": [
+    {
+      "window": "muB900_alpha1.1_xi0.3_0.5",
+      "meson": "eta",
+      "cut": "light",
+      "xi_left": 0.42,
+      "xi_right": 0.43,
+      "gap_left_MeV": 8.754039581882353,
+      "gap_right_MeV": -0.040009445434009194,
+      "gamma_left_MeV": 32.97141612188862,
+      "gamma_right_MeV": 7.670708117731662e-11
+    }
+  ],
+  "ambiguous_or_disagreeing_roots": [],
+  "exact_endpoint_nonfinite_count": 236,
+  "max_bidirectional_mass_difference_MeV": 1.9854223864967935e-07,
+  "max_bidirectional_gamma_difference_MeV": 5.542922494328195e-07,
+  "top_ubar_channel_changes": [
+    {
+      "species": "ubar",
+      "channel": "uubar_to_uubar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.5776900907285212,
+      "rate_right_fm2": 0.5075386707819111,
+      "rate_change_percent": -12.143434874941795,
+      "inverse_tau_change_inv_fm": -0.035156452534879284,
+      "fraction_of_inverse_tau_change": 0.46839951713278705,
+      "fraction_left": 0.42234824235063967,
+      "fraction_right": 0.41401027556934605
+    },
+    {
+      "species": "ubar",
+      "channel": "uubar_to_ddbar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.3625802935564687,
+      "rate_right_fm2": 0.30508070295442724,
+      "rate_change_percent": -15.858443391404665,
+      "inverse_tau_change_inv_fm": -0.026620399162884237,
+      "fraction_of_inverse_tau_change": 0.3546712257559646,
+      "fraction_left": 0.2650818356628479,
+      "fraction_right": 0.2488609305503069
+    },
+    {
+      "species": "ubar",
+      "channel": "dubar_to_dubar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.32646920788797007,
+      "rate_right_fm2": 0.3156336415553463,
+      "rate_change_percent": -3.3190163331857203,
+      "inverse_tau_change_inv_fm": -0.0101260908233166,
+      "fraction_of_inverse_tau_change": 0.13491281713871953,
+      "fraction_left": 0.23868108237620195,
+      "fraction_right": 0.25746919090513265
+    },
+    {
+      "species": "ubar",
+      "channel": "subar_to_subar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.32366291636695915,
+      "rate_right_fm2": 0.30914597310743075,
+      "rate_change_percent": -4.485204367085894,
+      "inverse_tau_change_inv_fm": -0.0026959568643639166,
+      "fraction_of_inverse_tau_change": 0.03591900781872266,
+      "fraction_left": 0.05920034379923753,
+      "fraction_right": 0.06341562354877713
+    },
+    {
+      "species": "ubar",
+      "channel": "uubar_to_ssbar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.013107294581943986,
+      "rate_right_fm2": 0.013216317006057491,
+      "rate_change_percent": 0.8317690842448044,
+      "inverse_tau_change_inv_fm": -0.00022257520464490522,
+      "fraction_of_inverse_tau_change": 0.002965433394565981,
+      "fraction_left": 0.009582720765860617,
+      "fraction_right": 0.010780835748456452
+    },
+    {
+      "species": "ubar",
+      "channel": "ubardbar_to_ubardbar",
+      "xi_left": 0.42,
+      "xi_right": 0.44,
+      "rate_left_fm2": 0.34189330858428446,
+      "rate_right_fm2": 0.328253510249723,
+      "rate_change_percent": -3.9894897010536057,
+      "inverse_tau_change_inv_fm": -0.00011938070005267543,
+      "fraction_of_inverse_tau_change": 0.001590543363388847,
+      "fraction_left": 0.0025306863589916488,
+      "fraction_right": 0.0027009070771820804
+    }
+  ],
+  "A_refinement": {
+    "effective_A": {
+      "p_nodes": 64,
+      "cos_nodes": 32,
+      "scale_inv_fm": 5
+    },
+    "all_qualified": true,
+    "max_mass_change_MeV": 1.9487271174511989e-07,
+    "max_gamma_change_MeV": 4.030107945141026e-07,
+    "threshold_brackets_unchanged": true
+  }
+}

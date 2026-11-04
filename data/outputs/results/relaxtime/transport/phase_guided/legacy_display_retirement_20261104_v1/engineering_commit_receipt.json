@@ -1,0 +1,11 @@
+{
+  "commit": "4b7c285226d6d0546fb3f03007856c1976074c4f",
+  "parent": "3a07a0e2a6082011bc72ea3f9e02cdf55e1bb4b5",
+  "branch": "codex/meson-freezeout-defaults",
+  "manifest_files": 3528,
+  "committed_identity_passed": true,
+  "index_empty": true,
+  "remote_phase": "not_pushed_no_PR_no_merge",
+  "evidence_archive_sha256": "0cffb26b3fc06b724da31be80ddde636a1f9719a62f56bc2aa273b07624aabc8",
+  "source_archive_sha256": "926ee91f1b721896bd8c74d8e0684df6980d54f49816d1f9ca90d3a2bf142874"
+}

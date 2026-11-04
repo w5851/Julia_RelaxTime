@@ -1,0 +1,168 @@
+{
+  "status": "completed_diagnostic_review",
+  "source_s6_points": 9,
+  "source_s7_points": 3,
+  "spectral": {
+    "width_power_vs_peak_x": 1.4998168493199169,
+    "height_power_vs_peak_x": -0.9995818262512263,
+    "area_power_vs_peak_x": 0.5003179217654866,
+    "max_amplitude_reconstruction_relative": 5.566838676209749e-16
+  },
+  "thermal": {
+    "continuum_peak_power_vs_x": 1.5007393755866354,
+    "peak_direct_event_checks": 2458,
+    "maximum_weight_quadrature_relative": 3.2374103398069565e-13
+  },
+  "precision_policy": "Every raw or hybrid slope uses three endpoints from one precision tier; missing s7 endpoints are not filled with s6.",
+  "precision_tiers": {
+    "s6": {
+      "s_rtol": 1e-06,
+      "points": 9
+    },
+    "s7": {
+      "s_rtol": 1e-07,
+      "points": 3
+    }
+  },
+  "physical_kernel_changed": false,
+  "manuscript_eligible": false,
+  "interpretation": "Finite-window slopes and a local integration-variable control; not a proof of differentiability. Hybrid observables replace only the indicated near-threshold bands of two light annihilation channels and are diagnostic.",
+  "script_sha256": "216ecd63195a962b9a14524bcd21aa4cad6f2ff8655a300c4629f1eab70ebe6d",
+  "files": {
+    "centered_channel_decomposition.csv": "02eaab4698624a29cf78aceee23faa28744391073a3e49f3609865e80369bced",
+    "centered_slopes.csv": "c099bce9c31c0e91b4582233a1e762ed3039803ad6a07952ec999a55003fecb9",
+    "centered_terminal_decomposition.csv": "749e70ae9bb246539b9e4bba3fb39d0dc679b167de020b98cbbfc8ba2b05446d",
+    "cutoff_effect.csv": "7f5df5a9124f805bf14db2470d165509775fc85991a3b15b3008fe1d042828a4",
+    "cutoff_events.csv": "f9c2a74408d1ad2d5b7690f7a8199ae6ff0d1f9bfb8dcb709c91e52f126963bd",
+    "cutoff_event_validation.json": "0f8db03d21ac4d67a881cb8ee2b8874ce19bed32424250999381b97022daf192",
+    "cutoff_membership_rate_corrections.csv": "53a250d2710bbe9e502b46571569d6770bec59c0c802dacbf536290efa61fa0a",
+    "interpolation_error_estimates.csv": "4aff531a7ea419048742f4c160fc0becacee3bdae446e219935fb46f8a30c88e",
+    "near_band_rate_corrections.csv": "5454d73f3bc1fb6857f2fde15d1f550cc2c8a0a0f27a28df174dda63950de76b",
+    "observables.csv": "a328c8fba081d357a0a747feab94dd8087ebeac0f06bf18b3265da8811badd87",
+    "peak_scaling.csv": "1b12118babf2c1973c99dcc2676e6081a12a89c2f3987e8c008c6cc5c3382566",
+    "precision_comparison.csv": "3b47bb32280b26f1bd6be51f7be341073cdf1096bb2acc11d0c29f581945d481"
+  },
+  "finalization": "Uniform s6 curves and an independent uniform inner s7 triplet; cutoff control added",
+  "cutoff_audit_sha256": "da198a8ae45518482c9e425f0d644a1998fcaa3c0dc233b3cc6a713e07a77bfe",
+  "base_review": "review_uniform_v1",
+  "original_review_sha256": "02aaa088703e6ed70ed912b9faad271b5dd350e2d495361b777df98a10c25834",
+  "finalizer_sha256": "f3a0230558f65d4bcf846741f73ad42568ac4544c25a66f5c31feace1d27c1b7",
+  "cutoff_event_validation": {
+    "status": "passed",
+    "cases": 8,
+    "events": 2424,
+    "max_sum_absolute_error_fm2": 1.5881867761018131e-22
+  },
+  "cutoff_interpretation": "The physical cutoff is retained. Holding discrete event membership at the center attributes quadrature staircase terms; this is not a new continuum solution.",
+  "comparison_scope": "Near-threshold two-channel replacement and fixed-cutoff counterfactual are applied independently within each precision tier. All other rates, densities and terminal coefficients retain their frozen values.",
+  "selected_inner_slopes": [
+    {
+      "variant": "s6",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.517020942298707",
+      "right_slope": "8.490097267949515",
+      "jump": "-0.02692367434919163",
+      "jump_over_h": "-1346.1837174595814"
+    },
+    {
+      "variant": "s6",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.1728222709527616",
+      "right_slope": "-1.1862256640702873",
+      "jump": "-0.013403393117525697",
+      "jump_over_h": "-670.1696558762848"
+    },
+    {
+      "variant": "s7",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.51701235317212",
+      "right_slope": "8.49014041319514",
+      "jump": "-0.026871939976979675",
+      "jump_over_h": "-1343.5969988489837"
+    },
+    {
+      "variant": "s7",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.172828703490687",
+      "right_slope": "-1.186196741636621",
+      "jump": "-0.013368038145934014",
+      "jump_over_h": "-668.4019072967006"
+    },
+    {
+      "variant": "hybrid_s6_fine_x0.001",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.502594809529311",
+      "right_slope": "8.489886777946108",
+      "jump": "-0.01270803158320355",
+      "jump_over_h": "-635.4015791601774"
+    },
+    {
+      "variant": "hybrid_s6_fine_x0.001",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.173139735517943",
+      "right_slope": "-1.1862303004137753",
+      "jump": "-0.01309056489583238",
+      "jump_over_h": "-654.5282447916189"
+    },
+    {
+      "variant": "hybrid_s7_fine_x0.001",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.502586220180365",
+      "right_slope": "8.489929923200432",
+      "jump": "-0.012656296979933757",
+      "jump_over_h": "-632.8148489966878"
+    },
+    {
+      "variant": "hybrid_s7_fine_x0.001",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.1731461679532513",
+      "right_slope": "-1.1862013780382419",
+      "jump": "-0.013055210084990554",
+      "jump_over_h": "-652.7605042495277"
+    },
+    {
+      "variant": "combined_s6_x0.001",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.502594809529311",
+      "right_slope": "8.489886777946108",
+      "jump": "-0.01270803158320355",
+      "jump_over_h": "-635.4015791601774"
+    },
+    {
+      "variant": "combined_s6_x0.001",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.1854286355653159",
+      "right_slope": "-1.1862419248630087",
+      "jump": "-0.0008132892976928652",
+      "jump_over_h": "-40.66446488464326"
+    },
+    {
+      "variant": "combined_s7_x0.001",
+      "h": "2e-05",
+      "observable": "tau_ubar",
+      "left_slope": "8.502586220180365",
+      "right_slope": "8.489929923200432",
+      "jump": "-0.012656296979933757",
+      "jump_over_h": "-632.8148489966878"
+    },
+    {
+      "variant": "combined_s7_x0.001",
+      "h": "2e-05",
+      "observable": "sigma_over_T",
+      "left_slope": "-1.1854350670714915",
+      "right_slope": "-1.1862130024979147",
+      "jump": "-0.0007779354264232374",
+      "jump_over_h": "-38.89677132116187"
+    }
+  ]
+}

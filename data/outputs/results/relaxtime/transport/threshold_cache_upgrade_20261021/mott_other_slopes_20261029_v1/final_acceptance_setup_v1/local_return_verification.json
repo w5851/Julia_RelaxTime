@@ -1,0 +1,15 @@
+{
+  "status": "verified_setup_return",
+  "files_verified": 9,
+  "local_scope": "bytes and metadata only",
+  "timestamp_utc": "2026-10-30T04:25:46.891275+00:00",
+  "initial_state": {
+    "status": "waiting_for_reference_recovery",
+    "pid": 23392,
+    "started_utc": "2026-10-30T04:20:26.101502+00:00",
+    "whole_task_complete": false,
+    "config_sha256": "19daa57336ed011a1841d22164a82fa4f906ae6d26c84b38b1491bf42bc006c1",
+    "updated_utc": "2026-10-30T04:20:26.140838+00:00"
+  },
+  "manifest_sha256": "fb678faea0de968dfe3cb267f0db9295e18f8a745e43efab8d65f6228f31d818"
+}

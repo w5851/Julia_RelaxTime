@@ -1,0 +1,58 @@
+{
+    "status": "completed_diagnostic",
+    "points": 9,
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "production_kernel_changed": false,
+    "interpretation": "Continuum equal-mass thermal weight versus the retained p48/c36/phi36 discrete measure. Kernel, CM relative velocity, blocking and density normalization are identical. This is a diagnostic; no production quadrature is replaced.",
+    "continuous_weight_quadratures": [
+        [
+            64,
+            16,
+            12,
+            12
+        ],
+        [
+            96,
+            24,
+            20,
+            20
+        ]
+    ],
+    "x_range_inv_fm2": [
+        1.0e-9,
+        0.01
+    ],
+    "omitted_endpoint_interval_inv_fm2": [
+        0,
+        1.0e-9
+    ],
+    "script_sha256": "492a6a7d4560e9844fe4f6bca2db5c52a9141f91717f9663c910bd49174a07ff",
+    "spectrum_sha256": "11f1a938ad5e6d0f001a1fd2b79127d0244ab7971c047f292ebed8696b3722ed",
+    "library_sha256": "dc1f199f66297d728678c5495816b91fdb18235d4bdea86e5f7906f751cec403",
+    "files": {
+        "thermal_peak_areas.csv": "f528936ba7a07b5910900480282a1579dfdd54ea21fa3774f2ab7e499546ac9c",
+        "sig_m200__uubar_to_ddbar__near_table.csv": "ffdeb1df9062d8da732d00e6e974747c3b26d02c0b0edd5ee818902b54ebb7e9",
+        "sig_p050__uubar_to_uubar__near_table.csv": "8405a71fbc09ed0e15b630b5fd508eaae6dc8b9a4bb0bf24397024c5f9bd4135",
+        "sig_p020__uubar_to_ddbar__near_table.csv": "8e969465dc4cebabbb8548d9d1b441e925e574b152243876d48e55a7a82ca2ea",
+        "sig_c000__uubar_to_ddbar__near_table.csv": "5d725b867961c86f862c43c00f4304ed39ef7704d016e1f13e10b5444b5a7a92",
+        "sig_m020__uubar_to_ddbar__near_table.csv": "2388d0772112a2de9881605951286b93558d67c94de636dc407b81bd5cada119",
+        "discrete_cache_history.csv": "a14f4d71b0532e8875f3be775db948bdd961eac287db8c38f54283e33e12d3d0",
+        "sig_c000__uubar_to_uubar__near_table.csv": "2cc17eb5e534d9a28aea5841246a7a930a389162aa054c43e3af83c66eafc547",
+        "thermal_band_comparison.csv": "8c580ec5799fcab7a5456c2755c6e11801f472827c8cd4e87bad0f39ef86e103",
+        "sig_m050__uubar_to_uubar__near_table.csv": "f35631dcfaf36ad1dc9b4f8c288b2aa682630d37b3f5d56dafeeabdffd03bdb2",
+        "verification.csv": "6eecb78613dc4963f4227d1e2b4cce3bd1dc1e07368b44686141c455aa36b36d",
+        "sig_m020__uubar_to_uubar__near_table.csv": "6541d23297e5da1c1a3e233caf007166455eb854f490eed0aaec2605381e757a",
+        "sig_p050__uubar_to_ddbar__near_table.csv": "e1e2b6f0053abbf5e49c182ec9924dceadb22f34c4a24e75141ab48f1a4979fe",
+        "sig_m200__uubar_to_uubar__near_table.csv": "75d48ee971a9254c63d124b90c7d9ad29fc3b235dfce2895209f16ff63e9199f",
+        "direct_peak_events.csv": "b1c8a42eefaad00b2f2f54bce291775db7434a54647775ae42eb22701c66fb36",
+        "sig_p100__uubar_to_ddbar__near_table.csv": "38792ea7fbb0c1cef74043525272972aad336abfc0ecfd80650f021fd2d30c7e",
+        "sig_p200__uubar_to_ddbar__near_table.csv": "788c4ae917a8c45cd9e7f2f731c5138552011ab658ab626752adde5f0a02ba8e",
+        "sig_p100__uubar_to_uubar__near_table.csv": "0ea5601c1a738fe6720785de49cae7dc4be8d380204e8f31d72d0a78ffb35182",
+        "sig_p200__uubar_to_uubar__near_table.csv": "6beba503904bd30bd6aa7174d6569b5d6a2dbe7e8635a1118d983defca866ae8",
+        "sig_m100__uubar_to_ddbar__near_table.csv": "b755e8eb3f752b5ffb05f821151310a9a0970acfb935172fc430528992220cf1",
+        "sig_p020__uubar_to_uubar__near_table.csv": "f8e15ef236226a478bd93db4f89f04fc5378022456d15d7509aa0237e7c2c2e1",
+        "sig_m050__uubar_to_ddbar__near_table.csv": "c8b38b18fec3642c8f166275e1f0bc0a7ee958baa99ebd38538f4c68140ae3a8",
+        "continuous_weight.csv": "d425ecde3300fb5aa94e522fa29853843f4d607a2ee9b8f52a678b0bc01e37fb",
+        "sig_m100__uubar_to_uubar__near_table.csv": "c477fe855161856f9d2e4954adbd060ddc95d5433f5a84f5de50fc1c6aeb960b"
+    }
+}

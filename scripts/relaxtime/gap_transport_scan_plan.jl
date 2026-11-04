@@ -1,8 +1,10 @@
 module GapTransportScanPlan
 
-function build_scan_plan(opts)
+function build_scan_plan(opts;muB_values=nothing)
     T_values = collect(range(opts.tmin_mev; stop=opts.tmax_mev, step=opts.tstep_mev))
-    muB_values = unique(sort(Float64.(collect(range(opts.mubmin_mev; stop=opts.mubmax_mev, step=opts.mubstep_mev)))))
+    muB_values = muB_values===nothing ? collect(range(opts.mubmin_mev;stop=opts.mubmax_mev,step=opts.mubstep_mev)) : collect(muB_values)
+    muB_values = sort!(unique!(Float64.(muB_values)))
+    !isempty(muB_values) && all(isfinite,muB_values) || throw(ArgumentError("muB_values must be finite and nonempty"))
     xi_continuity_mode = length(T_values) == 1 && length(muB_values) == 1 && length(opts.xi_values) > 1
     total = length(opts.xi_values) * length(T_values) * length(muB_values)
     return (

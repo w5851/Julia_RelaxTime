@@ -1,0 +1,2 @@
+point_id,xi,delta_xi,mixed_square_rate_fm2,quadrature_error_fm2,root_x_inv_fm2,half_width_inv_fm2,root_det_abs,guard_active_at_peak,root_bracket_inv_fm2,inverse_at_threshold,background_residual,leaves,evaluations,seconds
+asym_001,0.01512781986695528,-0.0002,4.305722274749959e-7,4.247621684532842e-17,0.00031445316430976796,1.1431925648079575e-6,2.943886831773255e-9,false,7.150313327541902e-17,8.906839396805033e-6,1.5597546940945414e-15,20,1344,2.499000072479248

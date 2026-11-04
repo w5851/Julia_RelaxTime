@@ -1,0 +1,61 @@
+[
+  {
+    "name": "final_ledger_live",
+    "exit_code": 0,
+    "seconds": 14.438390731811523,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_task_ledger.jl",
+      "--preflight",
+      "--track",
+      "transport-threshold-upgrade"
+    ]
+  },
+  {
+    "name": "final_ledger_selected",
+    "exit_code": 0,
+    "seconds": 12.055876731872559,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_task_ledger.jl",
+      "--ledger",
+      "tmp/transport_delivery_20261104_v1/staged_task_tracks.toml",
+      "--track",
+      "transport-threshold-upgrade"
+    ]
+  },
+  {
+    "name": "final_archive_doc",
+    "exit_code": 0,
+    "seconds": 6.255869150161743,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/archive_docs.jl",
+      "--check",
+      "2026-10-23_输运采样生产接入与重跑合同.md"
+    ]
+  },
+  {
+    "name": "final_active_docs",
+    "exit_code": 0,
+    "seconds": 2.5565226078033447,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_active_docs_governance.jl"
+    ]
+  },
+  {
+    "name": "final_script_governance",
+    "exit_code": 0,
+    "seconds": 6.190703392028809,
+    "command": [
+      "julia",
+      "--project=.",
+      "scripts/dev/check_relaxtime_script_governance.jl"
+    ]
+  }
+]

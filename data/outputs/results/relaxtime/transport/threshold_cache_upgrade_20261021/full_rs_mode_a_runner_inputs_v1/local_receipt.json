@@ -1,0 +1,18 @@
+{
+  "verified_utc": "2026-10-25T15:45:08.414783+00:00",
+  "archive": {
+    "sha256": "db47413ea79c115fe8a85ff825039732acffd5ca4f4c47e9902d00b49ad627dc",
+    "bytes": 7481,
+    "files": 3
+  },
+  "files_verified": 3,
+  "runner_inputs_sha256": "1d2537394d5b5dd1bb52fc66b9e23a6128ff33113a44012f262a4da69f3db059",
+  "source_archive_sha256": "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031",
+  "pilot_points": 6,
+  "pilot_jobs": 4,
+  "full_points": 910,
+  "provisional_full_jobs": 54,
+  "calculation_sha": null,
+  "runner_cost_qualified": false,
+  "local_check_scope": "Archive bytes, all archived files, preparer and input hashes, and prepared job metadata; no local numerical execution"
+}

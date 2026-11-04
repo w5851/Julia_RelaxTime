@@ -1,0 +1,1 @@
+julia --startup-file=no --project=. --heap-size-hint=1200M benchmark/relaxtime/transport_runner_timing.jl --mode fixed-T-sparse-muB --case-name thermal_weighted_full_rs_mode_b_20261025 --sampling-profile thermal_weighted_v1 --xi-list -0.5\,-0.13\,-0.12 --muB-list 900 --channel-diagnostics --T-list 120 

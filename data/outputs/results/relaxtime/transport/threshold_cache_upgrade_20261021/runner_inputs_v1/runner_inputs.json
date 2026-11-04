@@ -1,0 +1,1014 @@
+{
+  "schema_version": 1,
+  "case_name": "thermal_weighted_v1_reanchored_20261023",
+  "sampling_profile": "thermal_weighted_v1",
+  "sampling_profile_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+  "calculation_sha": null,
+  "numerical_source_sha256": "dad101b9e567eed9e4fb64a48e5a7f4e39149b7a4817d1fde5e0096b83fe2dd6",
+  "reference_comparisons_sha256": "c7e43976259e103291ed3b066d64098da2d11bae7b8a6b7f72998430235c9e26",
+  "phase_source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\phase_revalidation_v5",
+  "sampling_plan_sha256": "654e54cc2d40086529b4062a70158ca1afd4b4435b4d6258d215f9b92d87b2f4",
+  "replay_evidence": [
+    {
+      "directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\production_replay_all_v2",
+      "comparisons_sha256": "9072470ed3644e458725cfa82e290dd80f1038a2ef1db414c6c1160d6b11e81f"
+    }
+  ],
+  "pilot_jobs": [
+    {
+      "label": "pilot_muB0_alpha1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "pilot_muB0_alpha1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "-0.22,0.37",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 2,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "pilot_muB0_alpha1.2_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "pilot_muB0_alpha1.2_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "pilot_muB450_alpha1.1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "pilot_muB450_alpha1.1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.35",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "pilot_muB900_alpha1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "pilot_muB900_alpha1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "-0.04,-0.003",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 2,
+      "expected_T_MeV": 125.7360002645551
+    }
+  ],
+  "provisional_full_jobs": [
+    {
+      "label": "full_muB0_alpha1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 200.0898076157829
+    },
+    {
+      "label": "full_muB0_alpha1.1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 220.0987883773612
+    },
+    {
+      "label": "full_muB0_alpha1.2_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB0_alpha1.2_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB0_alpha1.2_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB0_alpha1.2_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB0_alpha1.2_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB0_alpha1.2_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB0_alpha1.2_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "0",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 240.10776913893946
+    },
+    {
+      "label": "full_muB450_alpha1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 182.72820247485038
+    },
+    {
+      "label": "full_muB450_alpha1.1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 201.00102272233542
+    },
+    {
+      "label": "full_muB450_alpha1.2_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB450_alpha1.2_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB450_alpha1.2_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB450_alpha1.2_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB450_alpha1.2_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB450_alpha1.2_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB450_alpha1.2_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "450",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 219.27384296982044
+    },
+    {
+      "label": "full_muB900_alpha1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,-0.003,0.003,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "0.29,0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1",
+        "xi_list": "0.49,0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 2,
+      "expected_T_MeV": 125.7360002645551
+    },
+    {
+      "label": "full_muB900_alpha1.1_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.1_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.1_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.1_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.1_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.1_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.1_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.1",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 138.3096002910106
+    },
+    {
+      "label": "full_muB900_alpha1.2_00",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_00",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.5,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.4,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 150.8832003174661
+    },
+    {
+      "label": "full_muB900_alpha1.2_01",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_01",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.3,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.2,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 150.8832003174661
+    },
+    {
+      "label": "full_muB900_alpha1.2_02",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_02",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 150.8832003174661
+    },
+    {
+      "label": "full_muB900_alpha1.2_03",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_03",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 150.8832003174661
+    },
+    {
+      "label": "full_muB900_alpha1.2_04",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_04",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 20,
+      "expected_T_MeV": 150.8832003174661
+    },
+    {
+      "label": "full_muB900_alpha1.2_05",
+      "inputs": {
+        "case_name": "thermal_weighted_v1_reanchored_20261023",
+        "shard_label": "full_muB900_alpha1.2_05",
+        "sampling_profile": "thermal_weighted_v1",
+        "mode": "fixed-muB-phase-scaled",
+        "muB_list": "900",
+        "alpha_t_list": "1.2",
+        "xi_list": "0.5",
+        "t_list": "200",
+        "run_tier": "production",
+        "render_plots": false
+      },
+      "expected_points": 1,
+      "expected_T_MeV": 150.8832003174661
+    }
+  ],
+  "full_points": 910,
+  "pilot_input_ready": false,
+  "full_dispatch_ready": false,
+  "remaining_before_dispatch": [
+    "select the commit containing the reviewed implementation"
+  ],
+  "full_shard_policy": "provisional; calibrate startup, complete point time and peak memory on the six-point runner pilot before full dispatch"
+}

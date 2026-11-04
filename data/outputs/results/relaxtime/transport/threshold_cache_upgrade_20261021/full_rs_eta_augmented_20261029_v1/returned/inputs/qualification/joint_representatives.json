@@ -1,0 +1,16 @@
+{
+  "host": "W",
+  "points": 12,
+  "comparisons": 108,
+  "channel_rate_rows": 408,
+  "channels_per_point": 17,
+  "joint_target_passed": true,
+  "maximum_absolute_relative_change": 0.001375330450347212,
+  "source_archive_sha256": "533bbc8dcb13681a3873d6b9e94f5734772311f5f52575ae12f9bbaf6955448a",
+  "source_files_verified": 1600,
+  "source_snapshots_verified": 608,
+  "calculation_commit": null,
+  "independent_layers_pending": true,
+  "production_replay_pending": true,
+  "full_qualification": false
+}

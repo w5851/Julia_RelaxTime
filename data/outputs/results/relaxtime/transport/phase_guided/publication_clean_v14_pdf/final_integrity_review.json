@@ -1,0 +1,22 @@
+{
+  "vector": {
+    "counts": {
+      "png": 152,
+      "pdf": 76
+    },
+    "manifest_validation_passed": true
+  },
+  "png": {
+    "counts": {
+      "png": 152,
+      "pdf": 0
+    },
+    "manifest_validation_passed": true
+  },
+  "current_pointer_verified": true,
+  "evidence_file_records_verified": 188,
+  "task_track_records_verified": 2,
+  "primary_track_unchanged": true,
+  "python_syntax_passed": true,
+  "local_julia_invoked": false
+}

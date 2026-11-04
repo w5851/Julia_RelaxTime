@@ -1,0 +1,59 @@
+{
+  "checked_utc": "2026-10-23T10:45:54.358536+00:00",
+  "local_stage_complete": true,
+  "worktree": "D:\\w\\meson-freezeout-defaults",
+  "branch": "codex/meson-freezeout-defaults",
+  "head_base": "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+  "implementation_committed": false,
+  "production_replay": {
+    "points": 12,
+    "observables": 108,
+    "channels": 204,
+    "maximum_relative_to_reference": 0.006863883254695113
+  },
+  "fresh_default_replay": {
+    "points": 2,
+    "observables": 18,
+    "channels": 34,
+    "maximum_relative_to_baseline": 0.0
+  },
+  "phase": {
+    "points": 910,
+    "cold_seed_audits": 18,
+    "anchors": 3
+  },
+  "fortran": {
+    "points": 4,
+    "external_relative_target": 0.05
+  },
+  "verification": {
+    "python_checks_passed": 34,
+    "unit_assertions_passed": 284,
+    "integration_assertions_passed": 37,
+    "production_v2_regression_assertions_passed": 314,
+    "fresh_default_assertions_passed": 44,
+    "fresh_core_regression_assertions_passed": 28,
+    "prior_v1_regression_failures_retained_and_diagnosed": 9,
+    "both_task_ledgers_passed": true,
+    "docs_consistency_passed": true,
+    "script_entrypoints_passed": 334,
+    "local_links_checked": 20,
+    "both_git_diff_checks_passed": true,
+    "actionlint": "1.7.12 passed both modified workflows"
+  },
+  "runner_inputs": {
+    "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\runner_inputs_v1\\runner_inputs.json",
+    "pilot_points": 6,
+    "pilot_jobs": 4,
+    "provisional_full_points": 910,
+    "provisional_full_shards": 54,
+    "pilot_input_ready": false,
+    "full_dispatch_ready": false
+  },
+  "remaining": [
+    "bind the reviewed implementation to its actual calculation commit",
+    "run the six-point runner pilot and validate its artifacts, complete time and peak memory",
+    "calibrate full-production sharding before dispatch"
+  ],
+  "actions_dispatched": false
+}

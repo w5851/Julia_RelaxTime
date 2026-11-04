@@ -105,10 +105,14 @@ def is_code_record(path: Path, root: Path) -> bool:
     except ValueError:
         return False
     return ((rel.startswith("scripts/") and path.suffix in {".py", ".jl", ".sh", ".ps1"})
+            or (rel.startswith("tests/") and path.suffix in {".py", ".jl"})
             or (rel.startswith("config/plotting/") and path.suffix == ".toml")
             or (rel.startswith("docs/guides/sop/") and path.suffix == ".md")
             or (rel.startswith(".agents/skills/") and path.name == "SKILL.md")
-            or (rel.startswith("docs/analysis/") and path.name == "plotting_case_contract.md"))
+            or (rel.startswith("docs/analysis/") and path.name == "plotting_case_contract.md")
+            # This mutable selection contract can advance after author approval.
+            # Historical reviews still bind its exact archived bytes, not data.
+            or rel == "docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json")
 
 
 def working_tree_source(path: Path, expected: str, root: Path) -> bytes | None:

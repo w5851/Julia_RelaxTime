@@ -1,54 +1,33 @@
-using Test
-using JSON3
-using SHA
+using Test, JSON3, SHA
 
-const REPO_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guided_transport_scan.jl")
+if !isdefined(Main,:PhaseGuidedCLI)
+    include(joinpath(@__DIR__,"..","..","..","scripts","relaxtime","run_phase_guided_transport_scan.jl"))
+end
 
-@testset "phase guided transport scan dry-run smoke" begin
-    @test isfile(SCRIPT_PATH)
-
-    outdir = mktempdir()
-    cmd = `julia --project=. $SCRIPT_PATH --mode fixed-muB-phase-scaled --outdir $outdir --case-name smoke_case --xi-list -0.2,0.0,0.2 --muB-list 150,400 --alphaT-list 1.0,1.1 --propagator-xi-policy isotropic --sigma-cache-policy validated_anchored --tau-p-nodes 6 --tau-angle-nodes 2 --tau-phi-nodes 2 --tau-n-sigma 4 --sigma-grid-n 12 --channel-diagnostics --dry-run --overwrite`
-    run(cmd)
-
-    plan_csv = joinpath(outdir, "sampling_plan.csv")
-    readme = joinpath(outdir, "README.md")
-    eff_cfg = joinpath(outdir, "effective_config.json")
-    manifest = joinpath(outdir, "run_manifest.json")
-
-    @test isfile(plan_csv)
-    @test isfile(readme)
-    @test isfile(eff_cfg)
-    @test isfile(manifest)
-
-    plan_text = read(plan_csv, String)
-    @test occursin("phase_reference_kind", plan_text)
-    @test occursin("mode_a_fixed_muB_phase_scaled", plan_text)
-
-    readme_text = read(readme, String)
-    @test occursin("phase-guided transport canonical case", readme_text)
-    @test occursin("sampling_plan.csv", readme_text)
-    @test occursin("smoke_case", readme_text)
-    @test occursin("propagator xi policy: `isotropic`", readme_text)
-    @test occursin("channel diagnostics: `true`", readme_text)
-
-    cfg_text = read(eff_cfg, String)
-    @test occursin("\"mode\":\"mode_a_fixed_muB_phase_scaled\"", cfg_text)
-    @test occursin("\"propagator_xi_policy\":\"isotropic\"", cfg_text)
-    @test occursin("\"sigma_cache_policy\":\"validated_anchored\"", cfg_text)
-    @test occursin("\"tau_p_nodes\":6", cfg_text)
-    @test occursin("\"tau_angle_nodes\":2", cfg_text)
-    @test occursin("\"tau_phi_nodes\":2", cfg_text)
-    @test occursin("\"tau_n_sigma_points\":4", cfg_text)
-    @test occursin("\"sigma_grid_n\":12", cfg_text)
-    @test occursin("\"channel_diagnostics\":true", cfg_text)
-
-    manifest_obj = JSON3.read(read(manifest, String))
-    @test String(manifest_obj["script"]) == "scripts/relaxtime/run_phase_guided_transport_scan.jl"
-    for entry in manifest_obj["artifacts"]
-        artifact_path = joinpath(outdir, basename(String(entry["path"])))
-        @test isfile(artifact_path)
-        @test String(entry["sha256"]) == bytes2hex(SHA.sha256(read(artifact_path)))
+@testset "phase guided transport dry-run artifacts" begin
+    mktempdir() do outdir
+        args=["--mode","fixed-T-sparse-muB","--outdir",outdir,"--case-name","smoke_case",
+            "--xi-list","-0.2,0,0.2","--muB-list","150,400","--T-list","160,200",
+            "--propagator-xi-policy","isotropic","--channel-diagnostics","--dry-run"]
+        opts=Main.PhaseGuidedCLI.parse_args(args)
+        ctx=Main.ProvenanceMetadata.new_run_context("scripts/relaxtime/run_phase_guided_transport_scan.jl",args)
+        reference=Main._load_runtime_phase_reference(opts)
+        plan=Main.run_phase_guided_scan(opts,ctx;phase_reference=reference)
+        @test plan.total==12
+        @test isfile(joinpath(outdir,"sampling_plan.csv"))
+        @test isfile(joinpath(outdir,"README.md"))
+        config=JSON3.read(read(joinpath(outdir,"effective_config.json"),String))["options"]
+        @test config["mode"]=="mode_b_fixed_T_sparse_muB"
+        @test config["propagator_xi_policy"]=="isotropic"
+        @test config["sigma_cache_policy"]=="thermal_weighted"
+        @test config["sampling_profile"]["tau_integral"]["p_nodes"]==48
+        @test config["channel_diagnostics"]
+        manifest=JSON3.read(read(joinpath(outdir,"run_manifest.json"),String))
+        @test manifest["script"]=="scripts/relaxtime/run_phase_guided_transport_scan.jl"
+        for entry in manifest["artifacts"]
+            path=joinpath(outdir,basename(String(entry["path"])))
+            @test isfile(path)
+            @test entry["sha256"]==bytes2hex(sha256(read(path)))
+        end
     end
 end

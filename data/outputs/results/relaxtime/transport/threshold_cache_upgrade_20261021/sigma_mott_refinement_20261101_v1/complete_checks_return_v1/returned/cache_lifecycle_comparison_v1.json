@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "channel": "uu_to_uu",
+      "native_rate": 0.10421423135925416,
+      "fresh_s_rate": 0.10421423135925416,
+      "relative_difference": 0.0,
+      "combined_estimated_error": 1.6487878201689235e-08,
+      "passed": true
+    },
+    {
+      "channel": "ud_to_ud",
+      "native_rate": 0.14694589784164755,
+      "fresh_s_rate": 0.14694589784164755,
+      "relative_difference": 0.0,
+      "combined_estimated_error": 2.239985982985576e-08,
+      "passed": true
+    },
+    {
+      "channel": "us_to_us",
+      "native_rate": 0.19749950715202588,
+      "fresh_s_rate": 0.19749950715097786,
+      "relative_difference": -5.306457695964651e-12,
+      "combined_estimated_error": 3.063402172587094e-08,
+      "passed": true
+    },
+    {
+      "channel": "udbar_to_udbar",
+      "native_rate": 0.27728550981579203,
+      "fresh_s_rate": 0.27728550981579203,
+      "relative_difference": 0.0,
+      "combined_estimated_error": 5.4656309723264234e-08,
+      "passed": true
+    },
+    {
+      "channel": "dubar_to_dubar",
+      "native_rate": 0.27728550981579203,
+      "fresh_s_rate": 0.27728550981579203,
+      "relative_difference": 0.0,
+      "combined_estimated_error": 5.4656309723264234e-08,
+      "passed": true
+    }
+  ],
+  "interpretation": "Original retained five-channel pilot versus fresh-s reference; errors cover interpolation only."
+}

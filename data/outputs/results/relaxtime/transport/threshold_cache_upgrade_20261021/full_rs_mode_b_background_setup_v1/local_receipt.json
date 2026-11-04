@@ -1,0 +1,13 @@
+{
+  "received_utc": "2026-10-25T15:07:30.690787+00:00",
+  "archive": {
+    "sha256": "038beb374adffc64e0598e54f2550a8af52011ea45173cd9592e84232edd3dbc",
+    "bytes": 1464837,
+    "files": 410
+  },
+  "source_archive_sha256": "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031",
+  "source_snapshots_verified": 357,
+  "input_snapshots_verified": 2,
+  "remote_review_complete": true,
+  "local_check_scope": "Archive bytes, frozen source and input snapshot hashes, and remote review metadata; no local numerical execution"
+}

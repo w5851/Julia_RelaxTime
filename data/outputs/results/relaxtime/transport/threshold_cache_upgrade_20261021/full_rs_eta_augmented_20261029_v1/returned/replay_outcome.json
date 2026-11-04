@@ -1,0 +1,15 @@
+﻿{
+    "status":  "completed",
+    "exit_code":  0,
+    "started_utc":  "2026-10-29T08:47:28.9004737Z",
+    "completed_utc":  "2026-10-29T08:48:11.9318481Z",
+    "arguments":  [
+                      "--startup-file=no",
+                      "--threads=1",
+                      "--project=D:/CodexCompute/trfull-20261026-v1/case/source",
+                      "D:/CodexCompute/trfull-eta-augmented-20261029-v1/complete_transport_eta_thermo.jl",
+                      "D:/CodexCompute/trfull-20261026-v1/case/source",
+                      "D:/CodexCompute/trfull-eta-augmented-20261029-v1",
+                      "D:/CodexCompute/trmott-eta-fine-20261029-v1"
+                  ]
+}

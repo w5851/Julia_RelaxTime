@@ -1,0 +1,139 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_11",
+  "job_fingerprint": "5f9cdd5a3e8c740296b67b28a6e7b2d6be0f6f0eed95fbe6edbeb072a774b70c",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_11",
+    "plots": [
+      {
+        "plot": "other13_eta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+      },
+      {
+        "plot": "other13_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+      },
+      {
+        "plot": "other13_tau_sbar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+      },
+      {
+        "plot": "other13_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+      },
+      {
+        "plot": "other13_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+      }
+    ],
+    "notes": "联系表整体版面清晰，各子图图例、标签与标记未见明显裁切或碰撞；小字在缩小后偏小，但原图清晰度无法据此判定。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "9b41d97d1d59ca9ded53cd7d731291d38957ab3ec9a95d557283cc5f152a5194",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_11.png",
+          "sha256": "ea70456c2a73538574c5ae8d062039f723336ab5aaf4ff1ed096e0a02ce7f5b9",
+          "bytes": 274267
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 265,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.03,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1266,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1266,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1531
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_11\",\"plots\":[{\"plot\":\"other13_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处\"},{\"plot\":\"other13_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处\"},{\"plot\":\"other13_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处\"},{\"plot\":\"other13_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处\"},{\"plot\":\"other13_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处\"}],\"notes\":\"联系表整体版面清晰，各子图图例、标签与标记未见明显裁切或碰撞；小字在缩小后偏小，但原图清晰度无法据此判定。\"}",
+      "parsed": {
+        "image_id": "overview_11",
+        "plots": [
+          {
+            "plot": "other13_eta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+          },
+          {
+            "plot": "other13_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+          },
+          {
+            "plot": "other13_tau_sbar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+          },
+          {
+            "plot": "other13_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+          },
+          {
+            "plot": "other13_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "可见灰色竖向虚线标记Mott位置，位于每幅子图x≈0处"
+          }
+        ],
+        "notes": "联系表整体版面清晰，各子图图例、标签与标记未见明显裁切或碰撞；小字在缩小后偏小，但原图清晰度无法据此判定。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 15.281,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 15.462,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

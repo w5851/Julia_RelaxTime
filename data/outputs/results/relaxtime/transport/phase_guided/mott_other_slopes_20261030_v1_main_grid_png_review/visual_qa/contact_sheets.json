@@ -1,0 +1,110 @@
+{
+  "schema": "image_only_contact_sheet_v1",
+  "created_utc": "2026-10-30T03:56:43.376435+00:00",
+  "source_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/plot_manifest.json",
+  "source_manifest_sha256": "74e024ca4bc16380b4995d22de3b6b543b378c3c5284afa0059f30606f129bd0",
+  "source_values_modified": false,
+  "numerical_analysis_performed": false,
+  "contact_sheets": [
+    {
+      "path": "overview_01.png",
+      "originals": [
+        "other01_sigma_over_T.png",
+        "other01_tau_sbar.png",
+        "other01_tau_ubar.png",
+        "other02_sigma_over_T.png",
+        "other02_tau_sbar.png",
+        "other02_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_02.png",
+      "originals": [
+        "other03_sigma_over_T.png",
+        "other03_tau_sbar.png",
+        "other03_tau_ubar.png",
+        "other04_sigma_over_T.png",
+        "other04_tau_sbar.png",
+        "other04_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_03.png",
+      "originals": [
+        "other05_sigma_over_T.png",
+        "other05_tau_sbar.png",
+        "other05_tau_ubar.png",
+        "other06_sigma_over_T.png",
+        "other06_tau_sbar.png",
+        "other06_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_04.png",
+      "originals": [
+        "other07_sigma_over_T.png",
+        "other07_tau_sbar.png",
+        "other07_tau_ubar.png",
+        "other08_sigma_over_T.png",
+        "other08_tau_sbar.png",
+        "other08_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_05.png",
+      "originals": [
+        "other09_sigma_over_T.png",
+        "other09_tau_sbar.png",
+        "other09_tau_ubar.png",
+        "other10_sigma_over_T.png",
+        "other10_tau_sbar.png",
+        "other10_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_06.png",
+      "originals": [
+        "other11_sigma_over_T.png",
+        "other11_tau_sbar.png",
+        "other11_tau_ubar.png",
+        "other12_sigma_over_T.png",
+        "other12_tau_sbar.png",
+        "other12_tau_ubar.png"
+      ]
+    },
+    {
+      "path": "overview_07.png",
+      "originals": [
+        "other13_sigma_over_T.png",
+        "other13_tau_sbar.png",
+        "other13_tau_ubar.png"
+      ]
+    }
+  ],
+  "details": [
+    {
+      "path": "detail_other01_tau_sbar.png",
+      "original": "other01_tau_sbar.png"
+    },
+    {
+      "path": "detail_other03_tau_sbar.png",
+      "original": "other03_tau_sbar.png"
+    },
+    {
+      "path": "detail_other07_sigma_over_T.png",
+      "original": "other07_sigma_over_T.png"
+    },
+    {
+      "path": "detail_other08_tau_ubar.png",
+      "original": "other08_tau_ubar.png"
+    },
+    {
+      "path": "detail_other08_sigma_over_T.png",
+      "original": "other08_sigma_over_T.png"
+    },
+    {
+      "path": "detail_other01_tau_sbar_gray.png",
+      "original": "other01_tau_sbar_gray.png"
+    }
+  ]
+}

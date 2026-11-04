@@ -71,6 +71,33 @@ def test_contract_history_does_not_substitute_historical_data(frozen):
     assert validate_hash_record(original, root=root, label="inputs[0]", code_ref=commit)
 
 
+@pytest.mark.parametrize("relative,is_selector", [
+    ("docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json", True),
+    ("docs/analysis/relaxtime/phase_guided_transport/numerical_result.json", False),
+    ("data/outputs/results/publication_clean_current.json", False),
+])
+def test_archived_publication_selector_requires_exact_path_and_hash(tmp_path, relative, is_selector):
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b'{"selected":"old"}\n')
+    record = input_record(path, role="historical_input", root=tmp_path)
+    archive = tmp_path / "metadata.zip"
+    with zipfile.ZipFile(archive, "w") as snapshot:
+        snapshot.write(path, relative)
+    registry = tmp_path / "config/plotting/historical_snapshots.toml"
+    registry.parent.mkdir(parents=True)
+    commit = "a" * 40
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    registry.write_text(f'[[code_snapshots]]\ncode_commit="{commit}"\narchive="metadata.zip"\nsha256="{digest}"\n', encoding="utf-8")
+    path.write_bytes(b'{"selected":"new"}\n')
+    assert bool(validate_hash_record(record, root=tmp_path, label="inputs", code_ref=commit)) is not is_selector
+    assert validate_hash_record(record, root=tmp_path, label="outputs", code_ref=commit, allow_historical=False)
+    assert validate_hash_record({**record, "sha256": "0" * 64}, root=tmp_path, label="inputs", code_ref=commit)
+    archive.write_bytes(b"damaged metadata archive")
+    git_source.cache_clear()
+    assert validate_hash_record(record, root=tmp_path, label="inputs", code_ref=commit)
+
+
 def test_registered_legacy_case_selects_its_retained_code(frozen):
     root, _, _, _, _, _, commit = frozen
     registry = root / "config/plotting/historical_snapshots.toml"
@@ -156,3 +183,21 @@ def test_uncommitted_source_archive_matches_exact_hash_and_preserves_artifact_ch
     assert validate_hash_record({**records[0], "sha256": "0" * 64}, root=tmp_path, label="inputs")
     archive.write_bytes(b"tampered source archive")
     assert validate_hash_record(records[0], root=tmp_path, label="inputs")
+
+
+@pytest.mark.parametrize("relative,is_code", [("tests/unit/test_plot.py", True),
+                                            ("tests/baselines/result.csv", False)])
+def test_test_source_snapshot_does_not_relax_baseline_identity(tmp_path, relative, is_code):
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b"original\n")
+    record = input_record(path, role="test_source", root=tmp_path)
+    snapshot = tmp_path / "frozen" / Path(relative).name
+    snapshot.parent.mkdir()
+    snapshot.write_bytes(path.read_bytes())
+    record["source_snapshot"] = input_record(snapshot, role="immutable_source_copy", root=tmp_path)
+    path.write_bytes(b"updated\n")
+    assert bool(validate_hash_record(record, root=tmp_path, label="inputs")) is not is_code
+    assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False)
+    snapshot.write_bytes(b"damaged\n")
+    assert validate_hash_record(record, root=tmp_path, label="inputs")

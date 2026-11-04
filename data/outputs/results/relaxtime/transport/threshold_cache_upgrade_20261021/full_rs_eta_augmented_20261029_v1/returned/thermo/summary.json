@@ -1,0 +1,39 @@
+{
+    "status": "passed",
+    "points": 57,
+    "channels": 969,
+    "rows_sha256": "a56c0b91d90930b6540f9fbae24766c8dd448c69d78eef16bfad10e30eca095e",
+    "checks_sha256": "3b6b7296a754801fec0bcf7d44fe4798de9d83ffea927a643c55e1e453fae748",
+    "selection_sha256": "4147f7f97d24c62e915ea38a244e52c8cda95af573739e5ebce9d2147fdf8570",
+    "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+    "source_files_checked": 340,
+    "source_manifest_sha256": "7d8ff10cdd8d418396ad70e7ae1819f55f20d44ed2a9a7a78a94245487fb4f46",
+    "script_sha256": "15edefe960417ce86d640b9cf300fd50c0fdc74aa62bbbf9617fc547a1efedf7",
+    "julia_version": "1.12.5",
+    "hostname": "W",
+    "completed_utc": "2026-10-29T08:48:10.710",
+    "tolerance": 1.0e-10,
+    "maximum_relative_errors": {
+        "entropy_relative_error": 0,
+        "tau_relative_error": 0,
+        "ratios_relative_error": 0,
+        "omega_relative_error": 0,
+        "mass_relative_error": 0,
+        "rates_relative_error": 0
+    },
+    "effective_thermo": {
+        "p_nodes": 96,
+        "cos_nodes": 24,
+        "thermal_p_max_inv_fm": 25
+    },
+    "original_solver": {
+        "residual_norm_max": 1.0e-10,
+        "max_iter": 80,
+        "stable_multiseed": true
+    },
+    "plotted_values_recomputed": false,
+    "gap_solver_called": false,
+    "scattering_integration_called": false,
+    "scope": "EOS replay from saved condensates and Polyakov fields; mass/entropy/omega and rate-to-tau/ratio reconstruction checks"
+}

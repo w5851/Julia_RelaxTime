@@ -1,0 +1,22 @@
+{
+    "status": "completed_diagnostic",
+    "xi_mott": 0.015327819866955281,
+    "source_summary_sha256": "8d5543a476f061db92f532f115a3d33aa49e78158663c966b914961820fbd9fb",
+    "steps": [
+        0.0002,
+        1.25e-5,
+        7.8125e-7,
+        1.953125e-7
+    ],
+    "variants": [
+        "loop256",
+        "weight_fine",
+        "guarded"
+    ],
+    "scope": "Continuum near-threshold mixed-scalar square; both mixed poles; no other-amplitude interference or full transport reconstruction.",
+    "production_kernel_changed": false,
+    "files": {
+        "checks.csv": "2439d633db69a61cc1374383d625565a47c5f5a21fa754361047c47388770279",
+        "reference_integrals.csv": "88312095ae3b64de82d4793fc69897e7be6ca7ce5ebdd1a12e0d26a0f7a8cd45"
+    }
+}

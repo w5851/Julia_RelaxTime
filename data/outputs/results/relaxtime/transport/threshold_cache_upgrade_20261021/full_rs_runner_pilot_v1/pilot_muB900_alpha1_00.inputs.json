@@ -1,0 +1,13 @@
+{
+  "case_name": "thermal_weighted_full_rs_20261025",
+  "shard_label": "pilot_muB900_alpha1_00",
+  "sampling_profile": "thermal_weighted_v1",
+  "mode": "fixed-muB-phase-scaled",
+  "muB_list": "900",
+  "alpha_t_list": "1",
+  "xi_list": "-0.04,-0.003",
+  "t_list": "200",
+  "run_tier": "production",
+  "render_plots": false,
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+}

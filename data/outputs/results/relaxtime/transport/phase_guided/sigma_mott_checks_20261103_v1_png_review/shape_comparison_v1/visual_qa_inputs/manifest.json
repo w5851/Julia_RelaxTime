@@ -1,0 +1,20 @@
+[
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\other01_tau_sbar.png",
+    "source_sha256": "2ff81c3a7903b39d1429eb86706385abf4e5b1421df11c115c86117416d6de2e",
+    "qa_file": "visual_qa_inputs\\other01_tau_sbar.png",
+    "qa_sha256": "e501878d39d21ea5d64010a3ad58bd1920476b0e5e9e99d2d981971f55f321f0"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\other07_tau_sbar.png",
+    "source_sha256": "51efa44f66b8fe42db12ca4f356130b59f14bc15be3feeb256d1714d76a9143a",
+    "qa_file": "visual_qa_inputs\\other07_tau_sbar.png",
+    "qa_sha256": "be8cc0d9e67fbf636a62ee3dd52be93511484ede6c54099c9043e670e9f182f1"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\other07_tau_ubar.png",
+    "source_sha256": "e7118f9e0d6e9f7210c60098ef5594839a4a21a0722baf9687f003144f9f587d",
+    "qa_file": "visual_qa_inputs\\other07_tau_ubar.png",
+    "qa_sha256": "1237e006f7c4f119c258f0ec14031ec2978a32bcb0a5f6cdbf25afa9b8ec91a8"
+  }
+]

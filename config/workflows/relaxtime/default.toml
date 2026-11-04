@@ -2,6 +2,7 @@ schema_version = "v1"
 profile_name = "default"
 
 [scan.transport]
+sampling_profile = "thermal_weighted_v1"
 muB_MeV = 0.0
 xi_list = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3]
 tmin_MeV = 120.0
@@ -11,22 +12,20 @@ resume = true
 overwrite = false
 
 [scan.transport.solver]
-p_num = 12
-t_num = 6
+p_num = 96
+t_num = 24
 max_iter = 40
 
 [scan.transport.tau]
-mode = "finite_15"
-tau_p_nodes = 20
-tau_angle_nodes = 4
-tau_phi_nodes = 8
-tau_n_sigma = 6
-sigma_grid_n = 60
+mode = "semi_infinite"
+tau_p_nodes = 48
+tau_angle_nodes = 36
+tau_phi_nodes = 36
+tau_n_sigma = 24
 
 [scan.transport.transport]
 compute_bulk = true
-tr_p_nodes = 24
-tr_p_max_fm = 8.0
+tr_p_nodes = 32
 
 [scan.cross_section]
 muB_MeV = 0.0

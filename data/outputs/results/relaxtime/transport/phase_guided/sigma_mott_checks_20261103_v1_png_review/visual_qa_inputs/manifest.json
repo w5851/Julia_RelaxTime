@@ -1,0 +1,46 @@
+[
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\sigma_slopes.png",
+    "source_sha256": "ab3b9edde31277f577ca1b4c95c45bad2b46181679ce9b2bf777287fddfbc207",
+    "qa_file": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\visual_qa_inputs\\sigma_slopes.png",
+    "qa_sha256": "646199e03f16183d53aceb4861acab64ce0bed31acd2523143eef63ed69f7322",
+    "size": [
+      1750,
+      1737
+    ],
+    "transform": "Pillow LANCZOS thumbnail for bounded visual review; not delivery artifact"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\sigma_slopes_gray.png",
+    "source_sha256": "3e5fdcfbc8dd7dcd39e3c9cb0f2a339a844d952a649a6114be93114b28320dec",
+    "qa_file": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\visual_qa_inputs\\sigma_slopes_gray.png",
+    "qa_sha256": "993080f399267134b59914225b6d477d85209405cf6f4267e7e79cad474062c0",
+    "size": [
+      1750,
+      1737
+    ],
+    "transform": "Pillow LANCZOS thumbnail for bounded visual review; not delivery artifact"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\sigma_areas.png",
+    "source_sha256": "7591de8859efa5890385e2ddbf6b161c57eb651bebb70062e753d6f5397df2d5",
+    "qa_file": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\visual_qa_inputs\\sigma_areas.png",
+    "qa_sha256": "e2a6ac64254508090c6e2be3aef47e3c0b1ffe57bf29cfab3ceb789c86f08857",
+    "size": [
+      1750,
+      1737
+    ],
+    "transform": "Pillow LANCZOS thumbnail for bounded visual review; not delivery artifact"
+  },
+  {
+    "source": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\sigma_areas_gray.png",
+    "source_sha256": "f2693f57d3c6bf52ff5c06bf2aad77b16991d8981006b8ceb73ba179bf6ab936",
+    "qa_file": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_checks_20261103_v1_png_review\\visual_qa_inputs\\sigma_areas_gray.png",
+    "qa_sha256": "e62ece6b13e17938ec1cd403293fc68705c976080ef35646b9415fcf09723ef5",
+    "size": [
+      1750,
+      1737
+    ],
+    "transform": "Pillow LANCZOS thumbnail for bounded visual review; not delivery artifact"
+  }
+]

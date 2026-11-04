@@ -9,6 +9,11 @@
 
 当前 CI Julia 固定版本：`1.12.5`。调整该版本时，必须同步更新 workflow 与 `Manifest.toml`，避免出现跨版本解析导致的安装或预编译漂移。
 
+大量产物文件同批进入 PR 时，GitHub 的 `paths` 过滤只查看差异的前 300 个文件，可能遗漏后面的源码变更。
+合并前按完整 Git 差异核对实际触发的工作流；对缺席但适用的 unit、integration、regression/validation、
+dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终分支上使用 `workflow_dispatch` 补跑，
+核对每次运行的 `headSha`，并在 PR 保存结果链接。未触发的检查不能视为通过；已有检查必须正常通过。
+
 ---
 
 ## 目录分层（必须遵守）

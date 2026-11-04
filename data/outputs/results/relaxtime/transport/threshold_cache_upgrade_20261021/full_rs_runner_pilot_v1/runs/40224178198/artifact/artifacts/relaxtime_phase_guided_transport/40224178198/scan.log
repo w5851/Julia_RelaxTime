@@ -1,0 +1,7 @@
+WARNING: Detected access to binding `Main.main` in a world prior to its definition world.
+  Julia 1.12 has introduced more strict world age semantics for global bindings.
+  !!! This code may malfunction under Revise.
+  !!! This code will error in future versions of Julia.
+Hint: Add an appropriate `invokelatest` around the access to this binding.
+To make this warning an error, and hence obtain a stack trace, use `julia --depwarn=error`.
+Phase-guided transport scan finished. Output: data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/thermal_weighted_full_rs_20261025/phase_guided_transport_scan.csv

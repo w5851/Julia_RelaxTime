@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "D:\CodexCompute\Julia_RelaxTime\full-rs-runner-pilot-review-20261026-v1\review_transport_runner_pilot.py", line 283, in <module>
+    print(json.dumps(review(args.directory.resolve()), indent=2))
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodexCompute\Julia_RelaxTime\full-rs-runner-pilot-review-20261026-v1\review_transport_runner_pilot.py", line 266, in review
+    runs = [review_run(child(directory, e["directory"]), e, specification, source_root) for e in entries]
+            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodexCompute\Julia_RelaxTime\full-rs-runner-pilot-review-20261026-v1\review_transport_runner_pilot.py", line 206, in review_run
+    require({item["path"] for item in contract["sources"]} == present, "incomplete numerical source identity")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodexCompute\Julia_RelaxTime\full-rs-runner-pilot-review-20261026-v1\review_transport_runner_pilot.py", line 25, in require
+    raise ValueError(message)
+ValueError: incomplete numerical source identity

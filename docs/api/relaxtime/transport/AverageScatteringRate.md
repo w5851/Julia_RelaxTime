@@ -1,127 +1,71 @@
-# AverageScatteringRate.jl
+# 平均散射率与热权重缓存
 
-平均散射率计算模块（支持各向异性）。
+`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; ...)`
+默认使用热权重自适应采样和精确角度合并。外层默认 p48/cos36/phi36，截面的 t 积分默认 24 点；
+完整生产配置还包括背景、A 和末端积分，见 [TransportSamplingProfiles](TransportSamplingProfiles.md)。
 
-## 概述
+## 积分与角度合并
 
-- 入口：`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; ...)`
-- 依赖：`TotalCrossSection.total_cross_section`（通过 **w0cdf 取点 + PCHIP 插值**预计算成 σ(s) 表）
-- 默认节点：动量 20 点、角度 4 点、方位角 8 点
-- 各向异性：`ξ=0` 时退化为各向同性；`ξ≠0` 时使用 `quark_distribution_aniso`
+平均散射率是分布加权的相对速度与截面平均。将整体方位角积分提出后，系数为
+`d_q²/(32π⁵ n_i n_j)`，其余积分为
+`∫dp_i dp_j p_i²p_j² ∫dc_i dc_j dφ f_i f_j v_rel σ(s)`。
+数密度默认在半无穷动量区间积分；各向异性分布对极角余弦为偶函数。
 
-## 动量积分模式
+外层动量使用 `p=scale*t/(1-t)`，默认 scale=10；
+截面的物理支持仍由模型 Λ 决定，二者不是同一个截断。
+严格等质量入射态使用 `v_rel=2sqrt((s-4m²)/s)`，其他情况使用一般表达式。
+单位：s 为 fm⁻²，截面和平均散射率为 fm²。
 
-### 默认行为（推荐）
+角度合并只合并**完全相同的相对夹角**，把各自的分布和求积权重相加。
+它保留各向异性占据数，不要求等质量、相同化学势或对称的自定义网格。
+热权重采样在此离散测度上分配截面插值误差；两项优化同时使用。
 
-通过 `RelaxationTime.relaxation_times` 调用时，默认截断、数密度积分与 σ(s) 缓存口径应遵循 `RelaxationTime.md` 的统一说明；本页只补充平均散射率这一单过程积分层的细节。
-
-### 有限截断模式（与 C++ 一致）
-
-传入 `p_grid`/`p_w` 和 `sigma_cutoff` 参数：
-```julia
-p_grid, p_w = gauleg(0.0, 15.0, 64)
-ω = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs;
-    p_grid=p_grid, p_w=p_w,
-    sigma_cutoff=Λ_inv_fm)
-```
-
-## 核心公式
-
-详见 `docs/reference/formula/relaxtime/scattering/AverageScatteringRate_FromCrossSection.md`。
-
-平均散射率：
-$$\omega_{ij} = \frac{d_q^2}{32\pi^5\rho_i\rho_j} \int d^3p_i\,d^3p_j\, f_i f_j \, v_{\text{rel}} \, \sigma_{ij}(s)$$
-
-数密度（**必须**使用半无穷积分）：
-$$\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p,\cos\theta)$$
-
-
-## 主要 API
-
-- `CrossSectionCache(process::Symbol)`: 创建空截面缓存
-- `precompute_cross_section!(cache, s_grid, ...)`: 预计算 σ(s) 表
-- `design_w0cdf_s_grid(process, ...; p_cutoff=nothing)`: 设计 σ(s) 采样网格
-  - `p_cutoff=nothing`: 半无穷积分权重设计
-  - `p_cutoff=Λ_inv_fm`: 有限截断权重设计（**推荐**）
-- `build_w0cdf_pchip_cache(process, ...; p_cutoff=nothing)`: 构建 σ(s) 缓存
-- `average_scattering_rate(process, ...; sigma_cutoff=nothing, sigma_grid_n=60)`: 计算平均散射率；未传入 `cs_cache` 时，`sigma_grid_n` 控制自动构建的 w0cdf σ(s) 缓存点数
-- `number_density(flavor, ...)`: 计算数密度（始终使用半无穷积分）
-
-## 诊断性传播子 ξ 策略
-
-`average_scattering_rate` 默认使用 `propagator_xi_policy=:match_thermo`，即 σ(s)/propagator 与外层分布、密度、平衡态使用同一个 `thermo_params.ξ` 口径。
-
-为排查各向异性进入传播子/截面层后对 τ 的影响，可以显式传入 `propagator_xi_policy=:isotropic`。该分支只把 σ(s)/propagator 计算上下文解析为 `ξ=0`，并在未显式给出 `propagator_quark_params` 时用各向同性 A 场补齐传播子所需的 `quark_params.A`；外层动量分布、数密度、平衡态输入仍使用真实 `ξ`。
-
-这一路径是诊断性反事实口径，不改变默认行为，也不应在完成同网格复算、channel diagnostics 与节点/σ-grid/interpolation 收敛检查前写成正式修复结论。
-
-## 诊断性 σ-cache 策略
-
-`sigma_cache_policy=:default` 保持既有 w0cdf σ(s) cache 行为。为诊断阈值减法与稀疏 σ-grid 插值对局部通道波动的放大效应，可以显式使用 `sigma_cache_policy=:validated_anchored`。
-
-该策略只改变 σ(s) cache 构建/求值口径：在 w0cdf 网格中合并固定 `s-s_th` 锚点，并把 threshold-subtraction 的解析渐近项限定为局部加回（在 `asym_window` 到 `2*asym_window` 平滑衰减至 0）。为避免近阈值 oversubtraction 把锚点信息截断，该策略允许缓存中的 regularized residual `raw - asym` 为负；最终返回的 σ(s) 仍保持非负。外层分布、密度、平衡态和默认生产口径不变。
-
-该分支是诊断候选口径。通过 direct-vs-cache、节点数/σ-grid/interpolation 收敛和 channel diagnostics 审查前，不应将其表述为正式修复。
-
-## 截面缓存指纹（fingerprint）
-
-`CrossSectionCache` 会在通过 `precompute_cross_section!` 或 `build_w0cdf_pchip_cache` 生成 σ(s) 表时写入 `fingerprint` 元数据。该元数据记录过程名、夸克质量/化学势/A、热力学参数、`K_coeffs`、σ 积分点数、`sigma_cache_policy`、阈值渐近正则化参数，以及 σ 网格摘要（长度、端点和哈希）。w0cdf 构建路径还记录 `N`、设计节点数、`p_cutoff` 与 `scale`，其中 `N` 与设计节点数用于溯源，不要求等于 `average_scattering_rate` 的当前默认值。
-
-当调用方把已填充的 `cs_cache` 传给 `average_scattering_rate` 时，默认会校验当前参数上下文与缓存指纹。若过程、物理参数、`K_coeffs`、`n_sigma_points`、有效 `threshold_subtraction` 相关参数，或 w0cdf 的 `p_cutoff`/`scale` 口径不一致，会抛出 `ArgumentError`，避免静默复用不同参数点生成的 σ(s) 表。自定义 `N` 或设计节点数生成的 w0cdf 缓存可以复用，但缓存自身的 s-grid 摘要必须与已存表一致。
-
-兼容策略：
-
-- `CrossSectionCache(process, s_vals, sigma_vals)` 和手工 `insert_sigma!` 填充的旧缓存默认没有 `fingerprint`；调用时允许复用，但会发出 warning。
-- `load_cross_section_caches_from_dir` 读取的两列 CSV 旧表同样没有 `fingerprint`；默认允许但 warning。
-- 若希望严格拒绝无指纹缓存，传入 `require_cache_fingerprint=true`。
-- 多个参数点之间只应复用同一生成指纹下的缓存；跨 `quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、`sigma_cache_policy`、有效 `threshold_subtraction`、`p_cutoff` 或 `scale` 复用时，应重新构建缓存。
-
-## 阈值渐近正则化（threshold_subtraction）
-
-- 新增字段与参数（2026-01-29 提交引入）：
-    - `CrossSectionCache` 字段：`asym_enabled::Bool`, `asym_s0::Float64`, `asym_A::Float64`, `asym_requested::Bool`, `asym_taper_start::Float64`, `asym_taper_end::Float64`。
-    - `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points, threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10, sigma_cache_policy=:default)`：关键字参数用于启用阈值附近的额外采样与拟合，检测并减去形如 $A/\sqrt{s-s_0}$ 的渐近项，再把已正则化的值缓存起来。
-    - `build_w0cdf_pchip_cache(...; threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10, sigma_cache_policy=:default)`：构建缓存时会采用与 `average_scattering_rate` 相同的自动阈值减法判定；若初态质量平方和大于末态质量平方和，实际写入 fingerprint 的 `threshold_subtraction` 会被解析为 `true`，并传给 `precompute_cross_section!`。
-
-- 查询与返回语义：
-    - 默认策略下，当查询点 `s` 在缓存外且 `asym_enabled` 时，`get_sigma(cache,s)` 会返回仅由解析渐近项给出的近似值 $A/\sqrt{s-s_0}$（若适用）。
-    - `sigma_cache_policy=:validated_anchored` 下，解析渐近项只在局部 taper 窗口内加回；远离阈值的缓存外查询不会继续返回全局 $A/\sqrt{s-s_0}$。缓存内允许负 residual，以保证锚点处 `residual + addback` 可还原 raw σ。
-    - 当查询点在缓存内且缓存为已正则化的 `sigma_vals = raw - asym`，`get_sigma` 会把插值结果与解析渐近项相加后返回最终的 σ(s)。
-
-- 其他行为：
-    - 若在构建缓存时为阈值附近额外采样（`asym_extra_points`），这些点会加入缓存以改善插值质量；默认不开启以保证向后兼容性。
-
-
-## 使用示例
+## 缓存接口
 
 ```julia
 using .AverageScatteringRate
-using .Constants_PNJL: Λ_inv_fm
-
-# 方式1：使用默认行为（Λ 截断，推荐）
-ω = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs;
-    sigma_cutoff=Λ_inv_fm)
-
-# 方式2：有限截断积分（与 C++ 一致）
-p_grid, p_w = gauleg(0.0, 15.0, 64)
-ω = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs;
-    p_grid=p_grid, p_w=p_w,
-    sigma_cutoff=Λ_inv_fm)
+config = ThermalSamplingConfig(rtol=1e-3)
+options = (p_nodes=48, angle_nodes=36, phi_nodes=36,
+           n_sigma_points=24, sampling_config=config)
+cache = build_thermal_weighted_cache(:uubar_to_uubar,
+    quark_params, thermo_params, K_coeffs; options...)
+rate = average_scattering_rate(:uubar_to_uubar,
+    quark_params, thermo_params, K_coeffs; options..., cs_cache=cache)
+sigma = get_sigma(cache, s)
+direct_sigma = get_sigma(cache, s; direct=true)
 ```
 
-## 与 C++ 实现对比
+未传 `cs_cache` 时自动构建；已构建的 `ThermalWeightedCache` 保存小表、平均速率、误差估计和统计，
+释放构建时的大型离散热测度。复用时强制核对物理参数、传播子输入、A、耦合、
+全部有效节点及权重、物理截断、t 节点和误差预算。上下文改变必须重建，表数组应当只读。
 
-与 C++ 的默认口径对齐方式与 `RelaxationTime.md` 相同：
+`get_sigma` 在物理区间外返回 0；在物理区间内但超出已认证表支持时抛出 `DomainError`。
+`direct=true` 可局部直算，不改变表、速率或认证状态。它不是另一套完整热积分。
 
-- 通过 `p_grid=gauleg(0,15,n)` 指定有限截断积分
-- 通过 `sigma_cutoff=Λ_inv_fm` 固定 σ(s) 有效范围
-- 数密度仍保持半无穷积分
+## 误差与失败语义
 
-如果你关心的是 τ 聚合层面的默认行为与 C++ 总体对齐，请直接看 `RelaxationTime.md`；本页不再重复完整对比表。
+`ThermalSamplingConfig` 默认 `rtol=1e-3, atol=1e-12`。
+阈值窗口 `weighted_window=0.6` 的单位为 fm⁻²，在该窗口插值 `(s-s_th)σ`。
+取点结合阈值、传播子实轴特征、热积分贡献及两轮错位探测，不使用 ξ 例外清单。
 
-## 注意事项
+误差估计只控制**给定外层求积下的截面插值误差**，不认证外层、t 积分、B₀、背景或末端积分。
+评估数、节点、轮数或事件预算耗尽时抛出异常，不能得到有效缓存。
+入射密度必须有限且正；自定义网格必须成对提供，权重必须为正。
 
-- 截断 Λ 取自 `Constants_PNJL.Λ_inv_fm`（约 3.05 fm⁻¹）
-- 数密度积分**必须**使用半无穷积分，这是物理要求
-- 近阈值处若 ρ_i 或 ρ_j 为 0，返回 0 以避免数值不稳定
-- 当质心能量 s 超出 σ(s) 缓存覆盖区间时，对应贡献按 0 处理（不会把 s 钳制到边界）
+`sigma_cache_policy=:thermal_weighted` 是唯一策略；
+`interpolation_mode=:auto|:thermal_weighted` 和 `angular_reduction=:grouped` 仅保留输入校验。
+旧 `CrossSectionCache`、w0cdf/PCHIP 建表、阈值扣除/加回、无身份 CSV 表加载和旧网格参数已移除。
+历史实验使用各自保存的源码快照重现，不能以新默认运行后覆盖旧结果。
+
+## 传播子与密度
+
+默认 `propagator_xi_policy=:match_thermo` 使传播子和外层分布使用同一 ξ。
+诊断选项 `:isotropic` 只把传播子上下文置为 ξ=0，外层分布和密度仍用真实 ξ；
+可显式提供 `propagator_quark_params`。未给 A 时沿用独立的 A 构造默认值（角度 4 点），
+完整生产配置则显式提供已验证的 A，避免把外层角度节点误当作 A 节点。
+
+`number_density` 默认 p32、极角 36、scale=10。也接受显式的成对网格；
+有限动量区间必须独立检查尾项。τ 聚合所用外部密度由调用方负责，见 [RelaxationTime](RelaxationTime.md)。
+
+分层收敛、同点复现、源码快照和性能证据见
+[输运采样验收](../../../guides/scripts/transport_sampling_qualification.md)。

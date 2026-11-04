@@ -1,0 +1,12 @@
+{
+  "host": "W",
+  "passed": false,
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "reviewer_exit_code": 1,
+  "planner_exit_code": null,
+  "started_utc": "2026-10-25T19:20:23.934952+00:00",
+  "controller_sha256": "a706d63d44779c8e7257868256022be962f0f6b06f9bd42815b6e70b54f584b6",
+  "numerical_calculation_performed": false,
+  "error": "Traceback (most recent call last):\n  File \"D:\\CodexCompute\\Julia_RelaxTime\\full-rs-runner-pilot-review-20261026-v1\\run_remote_pilot_review.py\", line 109, in run\n    require(result.returncode == 0, name + \" failed; inspect retained logs\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\CodexCompute\\Julia_RelaxTime\\full-rs-runner-pilot-review-20261026-v1\\run_remote_pilot_review.py\", line 20, in require\n    raise ValueError(message)\nValueError: reviewer failed; inspect retained logs\n",
+  "finished_utc": "2026-10-25T19:20:24.848363+00:00"
+}

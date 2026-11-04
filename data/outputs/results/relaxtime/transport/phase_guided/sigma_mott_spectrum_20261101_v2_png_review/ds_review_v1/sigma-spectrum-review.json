@@ -1,0 +1,155 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "sigma-spectrum-review",
+  "job_fingerprint": "9f635ccfe32171ec8c7551a98ca429986edc3196f2bbe84ff639e92e92ca0290",
+  "ok": true,
+  "answer": {
+    "pass_candidate": false,
+    "issues": [
+      {
+        "location": "上部面板，图例与曲线",
+        "observation": "图例列出六个 Δξ 值；黑实线 (Δξ=0) 和灰虚线 (Δξ=+2×10⁻⁵) 都贴近纵轴底部、与彩色峰曲线重合，无法与其余曲线单独区分；被标识符号的四个峰（紫、绿、橙、蓝）清晰可辨。",
+        "severity": "medium"
+      },
+      {
+        "location": "上部面板，纵轴标题",
+        "observation": "纵轴标签 'Σ (fm²)' 在图像左边缘附近，上标 '²' 与括号和单位一起可见，未见被裁切；纵轴刻度范围 10⁰–10⁴ 可读。",
+        "severity": "low"
+      },
+      {
+        "location": "下部面板，标题与轴标签",
+        "observation": "反应标签 'uū → dd̄' 位于面板内左上角并有遮挡风险区域，尚可辨认。横轴标签 'x = s − 4M_l² (fm⁻²)' 的下标 'l' 与上标 '²' 清晰，横轴为对数刻度 10⁻⁶–10⁻³。",
+        "severity": "low"
+      },
+      {
+        "location": "图首部与轴标签",
+        "observation": "上标 '²' 与下标 'μ_B = 900 MeV' 清晰可见；'T = 125.736 MeV' 和标题未被裁切，左右留白足够。",
+        "severity": "low"
+      },
+      {
+        "location": "坐标轴刻度标签",
+        "observation": "两个面板右侧的刻度线较短，读取时较难与相邻线区分；无缺刻度标签被裁切。",
+        "severity": "low"
+      }
+    ],
+    "visible_labels": [
+      "图标题：σ threshold: full scattering cross sections",
+      "T = 125.736 MeV, μ_B = 900 MeV",
+      "图例六个 Δξ 值：−2×10⁻⁴、−10⁻⁴、−5×10⁻⁵、−2×10⁻⁵、0、+2×10⁻⁵",
+      "上方面板：uu̅ → uu̅",
+      "下方面板：uu̅ → dd̅",
+      "纵轴 Σ (fm²)，对数刻度 10⁰–10⁴",
+      "横轴 x = s − 4M_l² (fm⁻²)，对数刻度 10⁻⁶–10⁻³"
+    ],
+    "unknowns": [
+      "黑实线 Δξ=0 与灰虚线 Δξ=+2×10⁻⁵ 在底部与峰附近的具体重合程度无法仅凭图像量化",
+      "四个被标识峰对应图例的 Δξ 值身份无可疑，但底部两条未标识曲线的相对位置未独立确认",
+      "下方面板反应标签是否完全不受相邻曲线遮挡不能确定"
+    ]
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "bde60f61eeb1efa422aaf7ecd299806fa5aae30b209718fe3f484a8c53d94436",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_spectrum_20261101_v2_png_review\\visual_qa_inputs\\spectrum_review.png",
+          "sha256": "61c20f1dfca33923ac24aa56d5d2b8887429b24237107a40834cf5706e017a6f",
+          "bytes": 297710
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 631,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.05,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1137,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1137,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1768
+      },
+      "finish_reason": "stop",
+      "answer": "{\"pass_candidate\": false, \"issues\": [{\"location\": \"上部面板，图例与曲线\", \"observation\": \"图例列出六个 Δξ 值；黑实线 (Δξ=0) 和灰虚线 (Δξ=+2×10⁻⁵) 都贴近纵轴底部、与彩色峰曲线重合，无法与其余曲线单独区分；被标识符号的四个峰（紫、绿、橙、蓝）清晰可辨。\", \"severity\": \"medium\"}, {\"location\": \"上部面板，纵轴标题\", \"observation\": \"纵轴标签 'Σ (fm²)' 在图像左边缘附近，上标 '²' 与括号和单位一起可见，未见被裁切；纵轴刻度范围 10⁰–10⁴ 可读。\", \"severity\": \"low\"}, {\"location\": \"下部面板，标题与轴标签\", \"observation\": \"反应标签 'uū → dd̄' 位于面板内左上角并有遮挡风险区域，尚可辨认。横轴标签 'x = s − 4M_l² (fm⁻²)' 的下标 'l' 与上标 '²' 清晰，横轴为对数刻度 10⁻⁶–10⁻³。\", \"severity\": \"low\"}, {\"location\": \"图首部与轴标签\", \"observation\": \"上标 '²' 与下标 'μ_B = 900 MeV' 清晰可见；'T = 125.736 MeV' 和标题未被裁切，左右留白足够。\", \"severity\": \"low\"}, {\"location\": \"坐标轴刻度标签\", \"observation\": \"两个面板右侧的刻度线较短，读取时较难与相邻线区分；无缺刻度标签被裁切。\", \"severity\": \"low\"}], \"visible_labels\": [\"图标题：σ threshold: full scattering cross sections\", \"T = 125.736 MeV, μ_B = 900 MeV\", \"图例六个 Δξ 值：−2×10⁻⁴、−10⁻⁴、−5×10⁻⁵、−2×10⁻⁵、0、+2×10⁻⁵\", \"上方面板：uu̅ → uu̅\", \"下方面板：uu̅ → dd̅\", \"纵轴 Σ (fm²)，对数刻度 10⁰–10⁴\", \"横轴 x = s − 4M_l² (fm⁻²)，对数刻度 10⁻⁶–10⁻³\"], \"unknowns\": [\"黑实线 Δξ=0 与灰虚线 Δξ=+2×10⁻⁵ 在底部与峰附近的具体重合程度无法仅凭图像量化\", \"四个被标识峰对应图例的 Δξ 值身份无可疑，但底部两条未标识曲线的相对位置未独立确认\", \"下方面板反应标签是否完全不受相邻曲线遮挡不能确定\"]}",
+      "parsed": {
+        "pass_candidate": false,
+        "issues": [
+          {
+            "location": "上部面板，图例与曲线",
+            "observation": "图例列出六个 Δξ 值；黑实线 (Δξ=0) 和灰虚线 (Δξ=+2×10⁻⁵) 都贴近纵轴底部、与彩色峰曲线重合，无法与其余曲线单独区分；被标识符号的四个峰（紫、绿、橙、蓝）清晰可辨。",
+            "severity": "medium"
+          },
+          {
+            "location": "上部面板，纵轴标题",
+            "observation": "纵轴标签 'Σ (fm²)' 在图像左边缘附近，上标 '²' 与括号和单位一起可见，未见被裁切；纵轴刻度范围 10⁰–10⁴ 可读。",
+            "severity": "low"
+          },
+          {
+            "location": "下部面板，标题与轴标签",
+            "observation": "反应标签 'uū → dd̄' 位于面板内左上角并有遮挡风险区域，尚可辨认。横轴标签 'x = s − 4M_l² (fm⁻²)' 的下标 'l' 与上标 '²' 清晰，横轴为对数刻度 10⁻⁶–10⁻³。",
+            "severity": "low"
+          },
+          {
+            "location": "图首部与轴标签",
+            "observation": "上标 '²' 与下标 'μ_B = 900 MeV' 清晰可见；'T = 125.736 MeV' 和标题未被裁切，左右留白足够。",
+            "severity": "low"
+          },
+          {
+            "location": "坐标轴刻度标签",
+            "observation": "两个面板右侧的刻度线较短，读取时较难与相邻线区分；无缺刻度标签被裁切。",
+            "severity": "low"
+          }
+        ],
+        "visible_labels": [
+          "图标题：σ threshold: full scattering cross sections",
+          "T = 125.736 MeV, μ_B = 900 MeV",
+          "图例六个 Δξ 值：−2×10⁻⁴、−10⁻⁴、−5×10⁻⁵、−2×10⁻⁵、0、+2×10⁻⁵",
+          "上方面板：uu̅ → uu̅",
+          "下方面板：uu̅ → dd̅",
+          "纵轴 Σ (fm²)，对数刻度 10⁰–10⁴",
+          "横轴 x = s − 4M_l² (fm⁻²)，对数刻度 10⁻⁶–10⁻³"
+        ],
+        "unknowns": [
+          "黑实线 Δξ=0 与灰虚线 Δξ=+2×10⁻⁵ 在底部与峰附近的具体重合程度无法仅凭图像量化",
+          "四个被标识峰对应图例的 Δξ 值身份无可疑，但底部两条未标识曲线的相对位置未独立确认",
+          "下方面板反应标签是否完全不受相邻曲线遮挡不能确定"
+        ]
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 18.083,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 18.304,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

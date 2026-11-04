@@ -262,7 +262,11 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
     delete!(local_kwargs, :work_telemetry)
 
-    solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
+    # The generic stripping step removes seed_candidates because the other
+    # modes consume it in their orchestrator. FixedMu passes its explicit pool
+    # to the local root solver instead.
+    solved = _solve_constraint_fixedmu(model, T_fm, μ_fm;
+        seed_candidates=get(kwargs, :seed_candidates, nothing), pairs(local_kwargs)...)
     result = solved
     if diagnostic_level === :none
         return result

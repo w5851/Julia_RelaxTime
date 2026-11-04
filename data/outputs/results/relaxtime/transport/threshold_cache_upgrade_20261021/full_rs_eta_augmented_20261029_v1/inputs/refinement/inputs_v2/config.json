@@ -1,0 +1,285 @@
+{
+  "schema": "transport_eta_xi_refinement_inputs_v1",
+  "host": "quote-remote",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "targets": [
+    {
+      "curve_id": "a_mu0",
+      "event_id": "event01",
+      "window": "mode_a:muB0.0_alpha1.0",
+      "mode": "mode_a",
+      "T_MeV": 200.0898076157829,
+      "muB_MeV": 0.0,
+      "alpha_T": 1.0,
+      "cut": "light",
+      "direction": "reverse",
+      "first_order_gap": false,
+      "gap_left_MeV": 1.8605120866019433,
+      "gap_right_MeV": -0.00801381946462243,
+      "gamma_left_MeV": 24.05465701813472,
+      "gamma_right_MeV": -7.56318961776193e-18,
+      "point_left": "a0087",
+      "point_right": "a0088",
+      "xi_left": 0.36,
+      "xi_right": 0.37,
+      "tau_u_change_percent": 1.1479139888944223,
+      "tau_d_change_percent": 1.1479139888944223,
+      "tau_s_change_percent": 0.865702010328917,
+      "tau_ubar_change_percent": 1.1479139888944445,
+      "tau_dbar_change_percent": 1.1479139888944445,
+      "tau_sbar_change_percent": 0.865702010328917,
+      "eta_over_s_change_percent": 0.6263840635062579,
+      "zeta_over_s_change_percent": 0.555682562041393,
+      "sigma_over_T_change_percent": 0.2647386861227341,
+      "two_step_xi_right": 0.38,
+      "two_step_tau_u_change_percent": 2.400431981222173,
+      "two_step_tau_d_change_percent": 2.400431981222173,
+      "two_step_tau_s_change_percent": 1.7258044062701927,
+      "two_step_tau_ubar_change_percent": 2.4004319812221953,
+      "two_step_tau_dbar_change_percent": 2.4004319812221953,
+      "two_step_tau_sbar_change_percent": 1.7258044062701927,
+      "two_step_eta_over_s_change_percent": 1.322967618609261,
+      "two_step_zeta_over_s_change_percent": 1.1863834705067466,
+      "two_step_sigma_over_T_change_percent": 0.6187934026853581
+    },
+    {
+      "curve_id": "a_mu450",
+      "event_id": "event02",
+      "window": "mode_a:muB450.0_alpha1.0",
+      "mode": "mode_a",
+      "T_MeV": 182.72820247485038,
+      "muB_MeV": 450.0,
+      "alpha_T": 1.0,
+      "cut": "light",
+      "direction": "reverse",
+      "first_order_gap": false,
+      "gap_left_MeV": 2.433581045557503,
+      "gap_right_MeV": -0.018702114263192016,
+      "gamma_left_MeV": 26.486967157955956,
+      "gamma_right_MeV": -1.1990019161481298e-24,
+      "point_left": "a0379",
+      "point_right": "a0380",
+      "xi_left": 0.25,
+      "xi_right": 0.26,
+      "tau_u_change_percent": 1.3273217283846561,
+      "tau_d_change_percent": 1.3273217283846561,
+      "tau_s_change_percent": 1.0524412860339227,
+      "tau_ubar_change_percent": 1.8124593745342477,
+      "tau_dbar_change_percent": 1.8124593745342477,
+      "tau_sbar_change_percent": 1.2242613334790597,
+      "eta_over_s_change_percent": 0.8040662815858468,
+      "zeta_over_s_change_percent": 0.924577227808765,
+      "sigma_over_T_change_percent": 0.20505828721490982,
+      "two_step_xi_right": 0.27,
+      "two_step_tau_u_change_percent": 2.7112465378373196,
+      "two_step_tau_d_change_percent": 2.7112465378373196,
+      "two_step_tau_s_change_percent": 2.1015640098181354,
+      "two_step_tau_ubar_change_percent": 3.7826952871354624,
+      "two_step_tau_dbar_change_percent": 3.7826952871354624,
+      "two_step_tau_sbar_change_percent": 2.442952345262972,
+      "two_step_eta_over_s_change_percent": 1.6533602303919093,
+      "two_step_zeta_over_s_change_percent": 1.8999288871484499,
+      "two_step_sigma_over_T_change_percent": 0.46623778359535795
+    },
+    {
+      "curve_id": "b_mu0",
+      "event_id": "event06",
+      "window": "mode_b:T200.0_muB0.0",
+      "mode": "mode_b",
+      "T_MeV": 200.0,
+      "muB_MeV": 0.0,
+      "alpha_T": null,
+      "cut": "light",
+      "direction": "reverse",
+      "first_order_gap": false,
+      "gap_left_MeV": 0.5975966517510187,
+      "gap_right_MeV": -0.052213589756775036,
+      "gamma_left_MeV": 13.62923761263121,
+      "gamma_right_MeV": -2.7406054427850824e-21,
+      "point_left": "b0693",
+      "point_right": "b0694",
+      "xi_left": 0.36,
+      "xi_right": 0.37,
+      "tau_u_change_percent": 1.2359092966892415,
+      "tau_d_change_percent": 1.2359092966892415,
+      "tau_s_change_percent": 0.8630836700527222,
+      "tau_ubar_change_percent": 1.2359092966891971,
+      "tau_dbar_change_percent": 1.2359092966891971,
+      "tau_sbar_change_percent": 0.8630836700527444,
+      "eta_over_s_change_percent": 0.6889333788528074,
+      "zeta_over_s_change_percent": 0.6216483319095856,
+      "sigma_over_T_change_percent": 0.34323711004395907,
+      "two_step_xi_right": 0.38,
+      "two_step_tau_u_change_percent": 2.4631140268030594,
+      "two_step_tau_d_change_percent": 2.4631140268030594,
+      "two_step_tau_s_change_percent": 1.7219505881149733,
+      "two_step_tau_ubar_change_percent": 2.4631140268030594,
+      "two_step_tau_dbar_change_percent": 2.4631140268030594,
+      "two_step_tau_sbar_change_percent": 1.7219505881149733,
+      "two_step_eta_over_s_change_percent": 1.3672501704596884,
+      "two_step_zeta_over_s_change_percent": 1.2347605331795242,
+      "two_step_sigma_over_T_change_percent": 0.6748278312426192
+    }
+  ],
+  "source_rows_sha256": "95d2d2fd03d7ae483cb04e686e9db93251295404769ab3926e3fcc934819256a",
+  "previous_review_sha256": "480821e4439c3a0bdecd202ed5ea619b0a659eff745fcc616757e91483fd04ca",
+  "original_profile_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+  "profiles": {
+    "base": {
+      "path": "base.toml",
+      "sha256": "ed38595ddd9e684330c861067514e17b43e2fcc199d10e7aeb871a4efddcf7d3",
+      "effective": {
+        "schema_version": 1,
+        "id": "thermal_weighted_v1",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "thermal_p_max_inv_fm": 25.0,
+          "p_nodes": 96,
+          "cos_nodes": 24,
+          "residual_norm_max": 1e-08
+        },
+        "a_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "tau_integral": {
+          "p_nodes": 48,
+          "cos_nodes": 36,
+          "phi_nodes": 36,
+          "t_nodes": 24,
+          "scale_inv_fm": 10.0
+        },
+        "terminal_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000
+        }
+      }
+    },
+    "fine": {
+      "path": "fine.toml",
+      "sha256": "af0577495f7d16c0db10d5dfeff782950faf5ab94f45949329e93ebc2f7c20ad",
+      "effective": {
+        "schema_version": 1,
+        "id": "eta_xi_fine_v1",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "thermal_p_max_inv_fm": 25.0,
+          "p_nodes": 96,
+          "cos_nodes": 24,
+          "residual_norm_max": 1e-08
+        },
+        "a_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "tau_integral": {
+          "p_nodes": 48,
+          "cos_nodes": 36,
+          "phi_nodes": 36,
+          "t_nodes": 24,
+          "scale_inv_fm": 10.0
+        },
+        "terminal_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "sampling": {
+          "rtol": 1e-05,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 80000,
+          "max_nodes": 24000,
+          "max_rounds": 50,
+          "max_events": 30000000
+        }
+      }
+    },
+    "tighter": {
+      "path": "tighter.toml",
+      "sha256": "cad34d475b91bc6a9380caace66ed29afea52567cef1c4bc2bc00f8064897ddc",
+      "effective": {
+        "schema_version": 1,
+        "id": "eta_xi_tighter_v1",
+        "algorithm": "thermal_weighted",
+        "background": {
+          "thermal_p_max_inv_fm": 25.0,
+          "p_nodes": 96,
+          "cos_nodes": 24,
+          "residual_norm_max": 1e-08
+        },
+        "a_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "tau_integral": {
+          "p_nodes": 48,
+          "cos_nodes": 36,
+          "phi_nodes": 36,
+          "t_nodes": 24,
+          "scale_inv_fm": 10.0
+        },
+        "terminal_integral": {
+          "p_nodes": 32,
+          "cos_nodes": 16,
+          "scale_inv_fm": 5.0
+        },
+        "sampling": {
+          "rtol": 1e-06,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 80000,
+          "max_nodes": 24000,
+          "max_rounds": 50,
+          "max_events": 30000000
+        }
+      }
+    }
+  },
+  "mass_offsets_inv_fm": [
+    0.0001,
+    1e-06,
+    1e-07
+  ],
+  "xi_bisection_tolerance": 1e-09,
+  "location_method": "exact endpoint-subtracted equal-mass loop; original finite-offset controls",
+  "endpoint_loop_node_controls": [
+    128,
+    256
+  ],
+  "xi_offsets": [
+    -0.008,
+    -0.004,
+    -0.002,
+    -0.001,
+    -0.0005,
+    -0.0002,
+    -0.0001,
+    0.0001,
+    0.0002,
+    0.0005,
+    0.001,
+    0.002,
+    0.004,
+    0.008
+  ],
+  "original_controls": "bracket left, bracket right, and next original point",
+  "limits": "diagnostic only; all new backgrounds and all 17 transport rates are solved; original grid remains frozen",
+  "preparation_script_sha256": "99dc449b6efee4b280111ddd8b7121b7ca249addd994a8a1eb9150042f38f059"
+}

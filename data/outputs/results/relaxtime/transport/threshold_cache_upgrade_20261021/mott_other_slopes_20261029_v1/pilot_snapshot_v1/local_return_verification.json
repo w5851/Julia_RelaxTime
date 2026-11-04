@@ -1,0 +1,19 @@
+{
+  "status": "verified_phase_return",
+  "files_verified": 410,
+  "archive": {
+    "archive": "pilot_snapshot_v1.zip",
+    "bytes": 34497027,
+    "sha256": "402af2540c41010c7cf038e06aac6a25451e00d6974fc534c702cf3379b36e8f",
+    "manifest_files": 410,
+    "package_manifest_sha256": "00e00053c63d84ad8d4a6a02e0c88ab1700c91ddac591392794cb72212d7d7cd"
+  },
+  "completed_runs": [
+    "survey_v1",
+    "endpoint_checks_v1",
+    "locate_v1",
+    "fine_pilot_other01_v1"
+  ],
+  "whole_task_complete": false,
+  "local_scope": "archive, file identity and metadata only"
+}

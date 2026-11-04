@@ -1,0 +1,1964 @@
+{
+  "schema": "delegated_plot_screen_inputs_v1",
+  "source_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+  "source_manifest_sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65",
+  "model": "cn:deepseek-v4.1-flash",
+  "scope": "layout screening only; model outputs are unverified candidates",
+  "jobs": [
+    {
+      "id": "overview_01",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_01.png",
+      "bytes": 331375,
+      "sha256": "97e94740697a8f97bd5cd2d7c3031d18016b0fe9e6570ee582dad5fc317b6d92",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 403943,
+          "sha256": "cda7bdd62c43832feb7909ccf4c0595242c84b9f5944bb1be2f31485a161db51",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 434299,
+          "sha256": "3f57b8a6a1f45cb47e40a4f9ec084b3f380abef534079539514ed7c3b913d376",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 392136,
+          "sha256": "2ff81c3a7903b39d1429eb86706385abf4e5b1421df11c115c86117416d6de2e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 407043,
+          "sha256": "4321f0d8e247a4da72a316e7b46afd1dfe6efa6a5307ebbd6351eba662ba875c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 414273,
+          "sha256": "b4822021d41aac68292a947568f725513026a062c0a17383bfbabd1b4a7baaa5",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other02_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 379942,
+          "sha256": "31bd2cd6eae84b10ec9d4283ed7cf219098ada5f5dea11a450f60b5aaee9fd43",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_02",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_02.png",
+      "bytes": 319942,
+      "sha256": "eb0495ee2d422034bd213b483d453f1b001a1a035ad144de7ecd3f0ff07966f0",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other02_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 407876,
+          "sha256": "f9e94217cc57d2488d087696eb1048e0021dcab0d80a3b23d032bb8365bdd033",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other02_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 373748,
+          "sha256": "46525481c8fd44120338cbafa2971fd83382aba8c12aa381a6dce37d3521317a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other02_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 384814,
+          "sha256": "666ec3b94591f32dd6cb81bcfe846b0bcb687a32c54699160fc979d992e75bab",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other02_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 390984,
+          "sha256": "356958eebae45ee8831b1cba3e745df0640ece402e739b07a384b78b3d9b01be",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 398314,
+          "sha256": "1be000ac230b10e0f3c5bd7aa1cce7a343e1c7fb913eb147a26c0953242ed5a4",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 418570,
+          "sha256": "0b3c3c70b478d7fd036647e0bde68582309479d0e76969c72ef0c1249d9f0000",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_03",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_03.png",
+      "bytes": 314800,
+      "sha256": "d12a14c561fd15270c6bf3d20b752c5cb7a10384416a4dc9b22b1ca451e11478",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 388530,
+          "sha256": "f42e2624ff62be60c57e7c2fa6342263c72ddf0ba0dc26658867b536ae044b55",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 388819,
+          "sha256": "af4f8d219d10fd0d0cbbf706a1ac7fd055840362bdfe747c36c8603f9bbc7851",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 394442,
+          "sha256": "608dd59bffc540725d211921febdb64a43deed048b03f169530013f81c1a3b45",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other04_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 400305,
+          "sha256": "120e51fbfdbe0a1b23fb5c04b1817d98ec3cf13d43858f7153c5b53be552c42e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other04_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 402957,
+          "sha256": "bff591cdd9dc7d72d2dd38d88a74c10a9d048615a5ee8acfe06f2cb05359b13a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other04_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 385802,
+          "sha256": "5c6cc67650ca7caa2897ef24a4b9aab197e05a7e98290c38e9f3bd797a625523",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_04",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_04.png",
+      "bytes": 318361,
+      "sha256": "f5d8dd1fdd591d56629c27665181d3d3e2fbf983920835d5b2c01d06832185e2",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other04_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 391994,
+          "sha256": "ea349a7a2dcca2c15a937510ccb7e569973e384c011e43aeebd973144ab20d2a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other04_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 391091,
+          "sha256": "55e3971dcc3421d684711f67913b03a5b720e987597b5924176cc0232df87ca6",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 357682,
+          "sha256": "b26de9e498c9c2e82230385a56f591e8c41bcb02bfc611e5363cfc5d47e8e817",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 377353,
+          "sha256": "e736f281dbdb0ebbaecf6c1ef708cbebce9d5091ee1c42a5e968030d04263a36",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 385628,
+          "sha256": "f5b2ad0389a779ba054a98c95516b17cfe19ca992c473e191f4d373017fe8ef1",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 372762,
+          "sha256": "bece6fd57275e8a9d5ca51cbbe9853691dce0e8faa682e28a428c08676bbfbf8",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_05",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_05.png",
+      "bytes": 315995,
+      "sha256": "474413e257a959030cea49de3f3c46838889abf49628213310ae49b91787a4c1",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 375524,
+          "sha256": "68b021486a81a692234c157373b2d529d55c72ddf8dff82f8b6fb47eab01ca63",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other06_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 387424,
+          "sha256": "c7791e42e6746ddb914597d25032a357bf0c076a2821c3ea84d7a8721f8a9466",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other06_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 403570,
+          "sha256": "fb5b986529faee49a322c495477996bc37001722b78a20295d38836e4c2f0cd9",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other06_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 394018,
+          "sha256": "e943b080d718e9f7d4140e5d78621abe0ffe23d659fd50354a57130d8d06002a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other06_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 382578,
+          "sha256": "d90443fb56bc2ccb2dde617d27c8d4d34efa2e23ebab71072bc5658807174f93",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other06_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 377973,
+          "sha256": "223f9d34c7a03264dba70efa1ef8d13f9ff9d1d2681b6949bcf147fff94511ce",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_06",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_06.png",
+      "bytes": 302046,
+      "sha256": "711cca5ac7dad8895574920d63b622307229c53380ad915fdbf49257828c6d53",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 380280,
+          "sha256": "4e23be7e913f5037bd81c03c1b5b29396dfc78c6b2fd9a964b3f70252c8c3ce1",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 409931,
+          "sha256": "b6d971def78ef25639d51125d8370464b1396ad9d0f94ed67ad390c675b245ab",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 385371,
+          "sha256": "51efa44f66b8fe42db12ca4f356130b59f14bc15be3feeb256d1714d76a9143a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 371425,
+          "sha256": "e7118f9e0d6e9f7210c60098ef5594839a4a21a0722baf9687f003144f9f587d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 381109,
+          "sha256": "613101c9f3667d2f1a9c8e7c2746664eee3e8826918793f9dec3db418a3aaa1d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 373864,
+          "sha256": "4def0cb235a1f0c29244635f72a66c807164fc0920fd6318276f0fbae66d9824",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_07",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_07.png",
+      "bytes": 314436,
+      "sha256": "582b62feadbf95f1b6d3cfdd640946b889ecf85d6d20e84773ae94c67fcba481",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 378416,
+          "sha256": "a88b50e6e3bd46252185f499bec4f77158bc06d7a85e90505d8272f98a124764",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 403958,
+          "sha256": "6ab4dfdb3fe199ac2d5c1c4f533196e6394da4426c406cba703596fd4d2d9040",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 370602,
+          "sha256": "6f512eaac9c5250ae63951a1f7a7d2290c063885c8b716d32e1b599e29f61ee1",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 363728,
+          "sha256": "1a105df076ab0833a682dc25c103861a71f4f527a56045beda6fe9daec7dffc3",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other09_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 394727,
+          "sha256": "0e131c3177b938f1cef43019ce6ed1de311c5f1088c2a359c0488f0736bd7c18",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other09_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 401525,
+          "sha256": "42ab74c145a79464b1b01eb8c9bc5e72bdfc02ab2fa9725084da9cabb8b7a1f2",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_08",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_08.png",
+      "bytes": 316572,
+      "sha256": "3fe3f117923a3d808940caf1f80e65e3f569ea730d4dd9415a198e1d37d7512c",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other09_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 387641,
+          "sha256": "263bd17a3519b84a40e84b32927f5889bf74d0fe49629a7860ef853d9d2ee8ad",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other09_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 399193,
+          "sha256": "d1dc429d0b1eeaec73c89053b7845ce078c3f0d4d6648c41dcf1cca8efd013e3",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other09_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 399319,
+          "sha256": "2cdcd6e33fe773afef2699333aca13a774558aa9a5f9936c7794e43a6bee9739",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other10_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 402373,
+          "sha256": "d81a444d6c67349a2bb422fc026fe2e9aab09ab1543eb0dcaf8be1b6785819b0",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other10_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 415311,
+          "sha256": "c29246c0630883061cfd83ffdb5603b122ae48371c1fb03d3a7f7fc7225e2078",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other10_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 377775,
+          "sha256": "a3510d4444db5a931dedd0df951b42229b48cfa987d053c66b0910d8692f4ae5",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_09",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_09.png",
+      "bytes": 320591,
+      "sha256": "dca7e68697aaacf851cb740558c22ebc3b38f9f7cef6104e8ef03189b9cb1539",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other10_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 390315,
+          "sha256": "33c712ae8e8fc03fc8b12edaadf20317bedcf875ce68889be34edd6a236c4813",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other10_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 388657,
+          "sha256": "5d8bf800440b0202b46e2555e7bcae3d4bf5e67c0d0540e6e1dbc9a2dc2e7f9c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 373833,
+          "sha256": "0400bef4cb5c219911100fd29da8d0235778a7e54feb482aeb5706d2ac9bd016",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 389872,
+          "sha256": "4b72a1601a8d732432cfade47fd235cfd8ea390acad912973fe3be8a217c760a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 375790,
+          "sha256": "77dbad4242d44a24f7668c4abe83829e952614100961493d2c3c625521591c9a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 373642,
+          "sha256": "62800acf2ff9e6b0ccc2ce314beba868dfca0edaa2f3125eb1c062908467ade4",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_10",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_10.png",
+      "bytes": 334660,
+      "sha256": "b6f0aafe45463fe1414bfe0d9e8dff1dada3a05d4f13ee077b494a8200e108dd",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 382374,
+          "sha256": "f973556bd9b0dc3f52cf65c0a91728198549de49d6e46cda2dece2f768b0128b",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other12_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 392571,
+          "sha256": "38509da13795ceca21bbb4c3eca92fe3e0ce509e3c645e23c6cea7f5d54c0b94",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other12_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 412475,
+          "sha256": "cdcf39801b3cbab2fcc1f4c320db3c6bc19d0cd64cad012744b400969223b67d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other12_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 383742,
+          "sha256": "59db2a009684f7c02cb8f824b8deac1f52c00ba2d7a17c59eb4fb3b9e93c847c",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other12_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 402705,
+          "sha256": "4a32bb5342070cea910c59ef29f3fa060b6bf655f96d6874c3979cabb6c87d11",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other12_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 409504,
+          "sha256": "c1b240a32ce757c196b7c50d32bf7691223a7490b4726555a65879cb791c754d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "overview_11",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/overview_11.png",
+      "bytes": 274267,
+      "sha256": "ea70456c2a73538574c5ae8d062039f723336ab5aaf4ff1ed096e0a02ce7f5b9",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 392655,
+          "sha256": "3b8a681cd0945ed9c62e3a1cb4457156f91cae5126d2a6435ef379f41487a3e0",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 390771,
+          "sha256": "dbb51b996e083c12fc6eefcd42c1b5fff11cdcda621087251ffbfaed7c374060",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 369106,
+          "sha256": "4f591eec6a34df82e9ec6b648d0b13e5eda46377895eb75421347cf3b94a348a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 388432,
+          "sha256": "ed0f2e62c6d1629d22bb96ad21b6230e24f12939e12aec89303c2d51ab764a75",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        },
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 395822,
+          "sha256": "127adc56257ba8a7b558b46b7cdf6665d8f0501879f217cdeabb100298e8d711",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other01_tau_sbar",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar.png",
+      "bytes": 173425,
+      "sha256": "c909be1bc9d418d3d12062df42771b8af8915c7077e9e78f2416b31d6ceaaaf8",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 392136,
+          "sha256": "2ff81c3a7903b39d1429eb86706385abf4e5b1421df11c115c86117416d6de2e",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other03_eta_over_s",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other03_eta_over_s.png",
+      "bytes": 170727,
+      "sha256": "ac91e20ddde43cbda7620af2fcfe0d465c672b5813deaf2dc9b5968c94aeaad8",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_eta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 398314,
+          "sha256": "1be000ac230b10e0f3c5bd7aa1cce7a343e1c7fb913eb147a26c0953242ed5a4",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other07_sigma_over_T",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T.png",
+      "bytes": 177263,
+      "sha256": "434a1dbd7a489f0441514a2f15ac2d92e33eb03044d3296ec1874c2833bad22b",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 409931,
+          "sha256": "b6d971def78ef25639d51125d8370464b1396ad9d0f94ed67ad390c675b245ab",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other07_tau_ubar",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_tau_ubar.png",
+      "bytes": 162904,
+      "sha256": "f96c9ea68528cc38721a2d28a73a4bd7d74d026115e7b094dab90eb648152c24",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 371425,
+          "sha256": "e7118f9e0d6e9f7210c60098ef5594839a4a21a0722baf9687f003144f9f587d",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other08_tau_ubar",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other08_tau_ubar.png",
+      "bytes": 165267,
+      "sha256": "87b4176e541b77f3b1b3adb80792a112a85336143f459e4806731a4b1a9a632f",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 370602,
+          "sha256": "6f512eaac9c5250ae63951a1f7a7d2290c063885c8b716d32e1b599e29f61ee1",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other05_tau_ubar",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_tau_ubar.png",
+      "bytes": 170517,
+      "sha256": "5e3b3906ced28ee53705207666a8a611d72c83c5fbb01a6ef54f130cd28601d7",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_tau_ubar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 372762,
+          "sha256": "bece6fd57275e8a9d5ca51cbbe9853691dce0e8faa682e28a428c08676bbfbf8",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other05_sigma_over_T",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T.png",
+      "bytes": 172172,
+      "sha256": "dcf20af4dcded1a194c59591842b246606d1ff41ee2094eae2f2c4fba6c94027",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_sigma_over_T.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 377353,
+          "sha256": "e736f281dbdb0ebbaecf6c1ef708cbebce9d5091ee1c42a5e968030d04263a36",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other11_tau_sbar",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other11_tau_sbar.png",
+      "bytes": 168913,
+      "sha256": "fcd60c6cd73289a779fd1b73eeb44dad7dd3a32b1a0ec6c773d75c199888f1e4",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other11_tau_sbar.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 375790,
+          "sha256": "77dbad4242d44a24f7668c4abe83829e952614100961493d2c3c625521591c9a",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other13_zeta_over_s",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+      "bytes": 177770,
+      "sha256": "a14959d68e964f6c5d0afa0f51e6275cd2f430039d547f530257898a2a30bde0",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_zeta_over_s.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 395822,
+          "sha256": "127adc56257ba8a7b558b46b7cdf6665d8f0501879f217cdeabb100298e8d711",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other01_tau_sbar_gray",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other01_tau_sbar_gray.png",
+      "bytes": 165726,
+      "sha256": "ab89ee55a459530843292b916645d2e7af25e706818829ed68716cb137543b58",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_sbar_gray.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 360913,
+          "sha256": "ed010b441a938f93566f6a298b7110106c5bbe5b5d4ef7d061803ccaa7fc49fe",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other05_sigma_over_T_gray",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other05_sigma_over_T_gray.png",
+      "bytes": 162934,
+      "sha256": "e7a6b5206c542374d44263278a5cb1abb76aa2c13bc20ee0a6571e81a055f93e",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other05_sigma_over_T_gray.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 350029,
+          "sha256": "ab72b6125ca7cb1955140dbb1b15ef4e9de022c5f4692896676c4eb0e77e7549",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "detail_other07_sigma_over_T_gray",
+      "image": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other07_sigma_over_T_gray.png",
+      "bytes": 169530,
+      "sha256": "4240c9e8ccd6c1934333364fcd7d0702097b76e35e30264dff77f5cdc3bf7a01",
+      "originals": [
+        {
+          "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_sigma_over_T_gray.png",
+          "path_kind": "repository_relative",
+          "format": "png",
+          "dpi": 600,
+          "vector": false,
+          "bytes": 378958,
+          "sha256": "a29bc7bd6681d67204b5d6245f32d52b8fd9554388662a0bdfe080ff66157930",
+          "inspection": {
+            "size_pixels": [
+              4050,
+              3600
+            ],
+            "actual_dpi": [
+              599.9988,
+              599.9988
+            ],
+            "physical_size_inches": [
+              6.750013500027,
+              6.000012000024
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

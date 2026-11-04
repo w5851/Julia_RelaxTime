@@ -56,12 +56,7 @@ struct Options
     overwrite::Bool
     make_plots::Bool
     python_cmd::String
-    integration_mode::String
-    tau_p_nodes::Int
-    tau_angle_nodes::Int
-    tau_phi_nodes::Int
-    tau_n_sigma_points::Int
-    sigma_grid_n::Int
+    sampling_profile::String
     compute_bulk::Bool
     xs_T_mev::Float64
     xs_muB_mev::Float64
@@ -89,12 +84,7 @@ function print_usage()
     println("  --overwrite            overwrite existing CSVs/figures")
     println("  --no-plots             only write CSVs")
     println("  --python <cmd>         python executable (default python)")
-    println("  --mode <mode>          semi_infinite|finite_15|finite_lambda (default finite_15)")
-    println("  --tau-p-nodes <int>    τ 平均散射率动量节点 (default 20)")
-    println("  --tau-angle-nodes <int> τ 平均散射率 cosθ 节点 (default 4)")
-    println("  --tau-phi-nodes <int>  τ 平均散射率 φ 节点 (default 8)")
-    println("  --tau-n-sigma <int>    τ 使用的 σ(s) 积分点数 (default 6)")
-    println("  --sigma-grid-n <int>   τ 使用的 σ(s) 预计算网格点数 (default 60)")
+    println("  --sampling-profile <name|path>  背景、A、τ 及末端积分的版本化配置 (default thermal_weighted_v1)")
     println("  --no-bulk              disable bulk-viscosity calculation")
     println("  --xs-T <MeV>           cross section T (default 200)")
     println("  --xs-muB <MeV>         cross section mu_B (default 0)")
@@ -140,12 +130,7 @@ function parse_args(args::Vector{String})::Options
         :overwrite => false,
         :make_plots => true,
         :python_cmd => "python",
-        :integration_mode => "finite_15",
-        :tau_p_nodes => 20,
-        :tau_angle_nodes => 4,
-        :tau_phi_nodes => 8,
-        :tau_n_sigma_points => 6,
-        :sigma_grid_n => 60,
+        :sampling_profile => "thermal_weighted_v1",
         :compute_bulk => true,
         :xs_T_mev => 200.0,
         :xs_muB_mev => 0.0,
@@ -178,20 +163,10 @@ function parse_args(args::Vector{String})::Options
             opts[:make_plots] = false
         elseif arg == "--python"
             opts[:python_cmd] = require_value()
-        elseif arg == "--mode"
-            mode = require_value()
-            mode in ("semi_infinite", "finite_15", "finite_lambda") || error("unknown mode: $mode")
-            opts[:integration_mode] = mode
-        elseif arg == "--tau-p-nodes"
-            opts[:tau_p_nodes] = parse(Int, require_value())
-        elseif arg == "--tau-angle-nodes"
-            opts[:tau_angle_nodes] = parse(Int, require_value())
-        elseif arg == "--tau-phi-nodes"
-            opts[:tau_phi_nodes] = parse(Int, require_value())
-        elseif arg == "--tau-n-sigma"
-            opts[:tau_n_sigma_points] = parse(Int, require_value())
-        elseif arg == "--sigma-grid-n"
-            opts[:sigma_grid_n] = parse(Int, require_value())
+        elseif arg in ("--mode","--tau-p-nodes","--tau-angle-nodes","--tau-phi-nodes","--tau-n-sigma","--sigma-grid-n")
+            throw(ArgumentError("$arg is configured through --sampling-profile in this workflow"))
+        elseif arg == "--sampling-profile"
+            opts[:sampling_profile] = require_value()
         elseif arg == "--no-bulk"
             opts[:compute_bulk] = false
         elseif arg == "--xs-T"
@@ -233,12 +208,7 @@ function parse_args(args::Vector{String})::Options
         Bool(opts[:overwrite]),
         Bool(opts[:make_plots]),
         String(opts[:python_cmd]),
-        String(opts[:integration_mode]),
-        Int(opts[:tau_p_nodes]),
-        Int(opts[:tau_angle_nodes]),
-        Int(opts[:tau_phi_nodes]),
-        Int(opts[:tau_n_sigma_points]),
-        Int(opts[:sigma_grid_n]),
+        String(opts[:sampling_profile]),
         Bool(opts[:compute_bulk]),
         Float64(opts[:xs_T_mev]),
         Float64(opts[:xs_muB_mev]),
@@ -441,6 +411,14 @@ function _csv_stats(path::String)
 end
 
 function _annotate_csv_with_run_id(path::String, run_id::String)
+    # Shared transport CSVs already carry their numerical producer run_id.
+    # Keep that identity so channel diagnostics remain joined to the same run.
+    for line in eachline(path)
+        s=strip(line)
+        (isempty(s) || startswith(s,"#")) && continue
+        "run_id" in split(s,",") && return
+        break
+    end
     tmp = path * ".tmp"
     open(path, "r") do src
         open(tmp, "w") do dst
@@ -734,15 +712,10 @@ function run_temperature_scan(opts::Options, ctx::RunContext)
         "--mubmax", "0",
         "--mubstep", "1",
         "--xi-list", "0.0",
-        "--mode", opts.integration_mode,
-        "--tau-p-nodes", string(opts.tau_p_nodes),
-        "--tau-angle-nodes", string(opts.tau_angle_nodes),
-        "--tau-phi-nodes", string(opts.tau_phi_nodes),
-        "--tau-n-sigma", string(opts.tau_n_sigma_points),
-        "--sigma-grid-n", string(opts.sigma_grid_n),
+        "--sampling-profile", string(opts.sampling_profile),
         "--output", out_csv,
     ]
-    opts.compute_bulk && push!(args, "--compute-bulk")
+    push!(args, opts.compute_bulk ? "--compute-bulk" : "--no-compute-bulk")
     opts.overwrite && push!(args, "--overwrite")
     run_cmd(julia_cmd(args))
     _annotate_csv_with_run_id(out_csv, ctx.run_id)
@@ -758,12 +731,7 @@ function run_temperature_scan(opts::Options, ctx::RunContext)
         "temperature_scan_Tmin_mev" => opts.temperature_scan_Tmin_mev,
         "temperature_scan_Tmax_mev" => opts.temperature_scan_Tmax_mev,
         "temperature_scan_Tstep_mev" => opts.temperature_scan_Tstep_mev,
-        "integration_mode" => opts.integration_mode,
-        "tau_p_nodes" => opts.tau_p_nodes,
-        "tau_angle_nodes" => opts.tau_angle_nodes,
-        "tau_phi_nodes" => opts.tau_phi_nodes,
-        "tau_n_sigma_points" => opts.tau_n_sigma_points,
-        "sigma_grid_n" => opts.sigma_grid_n,
+        "sampling_profile" => opts.sampling_profile,
         "compute_bulk" => opts.compute_bulk,
         "seed_policy" => "phase_aware_xi_T_continuity",
     )
@@ -837,15 +805,10 @@ function run_fixed_temperature_xi_scan(opts::Options, ctx::RunContext)
             "--mubmax", "0",
             "--mubstep", "1",
             "--xi-list", xi_list,
-            "--mode", opts.integration_mode,
-            "--tau-p-nodes", string(opts.tau_p_nodes),
-            "--tau-angle-nodes", string(opts.tau_angle_nodes),
-            "--tau-phi-nodes", string(opts.tau_phi_nodes),
-            "--tau-n-sigma", string(opts.tau_n_sigma_points),
-            "--sigma-grid-n", string(opts.sigma_grid_n),
+            "--sampling-profile", string(opts.sampling_profile),
             "--output", csv_path,
         ]
-        opts.compute_bulk && push!(args, "--compute-bulk")
+        push!(args, opts.compute_bulk ? "--compute-bulk" : "--no-compute-bulk")
         opts.overwrite && push!(args, "--overwrite")
         run_cmd(julia_cmd(args))
         _annotate_csv_with_run_id(csv_path, ctx.run_id)
@@ -889,12 +852,7 @@ function run_fixed_temperature_xi_scan(opts::Options, ctx::RunContext)
         "xi_min" => opts.xi_min,
         "xi_max" => opts.xi_max,
         "xi_step" => opts.xi_step,
-        "integration_mode" => opts.integration_mode,
-        "tau_p_nodes" => opts.tau_p_nodes,
-        "tau_angle_nodes" => opts.tau_angle_nodes,
-        "tau_phi_nodes" => opts.tau_phi_nodes,
-        "tau_n_sigma_points" => opts.tau_n_sigma_points,
-        "sigma_grid_n" => opts.sigma_grid_n,
+        "sampling_profile" => opts.sampling_profile,
         "compute_bulk" => opts.compute_bulk,
         "seed_policy" => "phase_aware_xi_T_continuity",
     )

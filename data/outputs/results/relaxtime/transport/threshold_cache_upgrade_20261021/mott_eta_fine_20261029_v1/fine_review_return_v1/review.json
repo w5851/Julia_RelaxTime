@@ -1,0 +1,339 @@
+{
+  "status": "completed_diagnostic_review",
+  "points": 51,
+  "channels": 867,
+  "curves": [
+    {
+      "curve_id": "a_mu0",
+      "points": 17,
+      "coarse_controls": 3,
+      "xi_mott": 0.36714957281947136,
+      "A64_xi_shift": 0.0,
+      "background_xi_shift": 2.682209010451686e-09,
+      "pair_quadrature_xi_shift": 0,
+      "observables": {
+        "tau_u": {
+          "fine_max_log_slope": 1.3623308165661163,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2297813927967753,
+          "peak_over_coarse": 1.1077829153585552,
+          "max_abs_coarse_chord_deviation_percent": 0.055568359907964826
+        },
+        "tau_d": {
+          "fine_max_log_slope": 1.3623308165661163,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2297813927967753,
+          "peak_over_coarse": 1.1077829153585552,
+          "max_abs_coarse_chord_deviation_percent": 0.055568359907964826
+        },
+        "tau_s": {
+          "fine_max_log_slope": 0.8680346044931313,
+          "xi_left": 0.35914957281947135,
+          "xi_right": 0.36,
+          "point_left": "a_mu0_p15",
+          "point_right": "a_mu0_p14",
+          "recomputed_coarse_max_log_slope": 0.8610385984487409,
+          "peak_over_coarse": 1.0081250783147173,
+          "max_abs_coarse_chord_deviation_percent": 0.0008898487946940037
+        },
+        "tau_ubar": {
+          "fine_max_log_slope": 1.3623308165665602,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2297813927967536,
+          "peak_over_coarse": 1.1077829153589358,
+          "max_abs_coarse_chord_deviation_percent": 0.055568359907964826
+        },
+        "tau_dbar": {
+          "fine_max_log_slope": 1.3623308165665602,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2297813927967536,
+          "peak_over_coarse": 1.1077829153589358,
+          "max_abs_coarse_chord_deviation_percent": 0.055568359907964826
+        },
+        "tau_sbar": {
+          "fine_max_log_slope": 0.8680346044907832,
+          "xi_left": 0.35914957281947135,
+          "xi_right": 0.36,
+          "point_left": "a_mu0_p15",
+          "point_right": "a_mu0_p14",
+          "recomputed_coarse_max_log_slope": 0.8610385984487409,
+          "peak_over_coarse": 1.0081250783119902,
+          "max_abs_coarse_chord_deviation_percent": 0.0008898487946940037
+        },
+        "eta_over_s": {
+          "fine_max_log_slope": 0.7836338938400359,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.6894123492470258,
+          "peak_over_coarse": 1.136669360065741,
+          "max_abs_coarse_chord_deviation_percent": 0.039421890366220236
+        },
+        "zeta_over_s": {
+          "fine_max_log_slope": 0.7198542115120807,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.6247642125865979,
+          "peak_over_coarse": 1.1522014177665507,
+          "max_abs_coarse_chord_deviation_percent": 0.04105292104018554
+        },
+        "sigma_over_T": {
+          "fine_max_log_slope": 0.46474140906254285,
+          "xi_left": 0.36764957281947136,
+          "xi_right": 0.36814957281947136,
+          "point_left": "a_mu0_p06",
+          "point_right": "a_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.35175311168797024,
+          "peak_over_coarse": 1.3212147771269787,
+          "max_abs_coarse_chord_deviation_percent": 0.04946736865689694
+        }
+      }
+    },
+    {
+      "curve_id": "a_mu450",
+      "points": 17,
+      "coarse_controls": 3,
+      "xi_mott": 0.2568765999376774,
+      "A64_xi_shift": 0.0,
+      "background_xi_shift": 0.0,
+      "pair_quadrature_xi_shift": 0,
+      "observables": {
+        "tau_u": {
+          "fine_max_log_slope": 1.494404087549906,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 1.35612669866506,
+          "peak_over_coarse": 1.1019649484233023,
+          "max_abs_coarse_chord_deviation_percent": 0.042735541776772745
+        },
+        "tau_d": {
+          "fine_max_log_slope": 1.494404087549906,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 1.35612669866506,
+          "peak_over_coarse": 1.1019649484233023,
+          "max_abs_coarse_chord_deviation_percent": 0.042735541776772745
+        },
+        "tau_s": {
+          "fine_max_log_slope": 1.0750557220907366,
+          "xi_left": 0.2569765999376774,
+          "xi_right": 0.2570765999376774,
+          "point_left": "a_mu450_p02",
+          "point_right": "a_mu450_p04",
+          "recomputed_coarse_max_log_slope": 1.046683426274283,
+          "peak_over_coarse": 1.0271068549517843,
+          "max_abs_coarse_chord_deviation_percent": 0.0012132581837853706
+        },
+        "tau_ubar": {
+          "fine_max_log_slope": 2.255589249833471,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 1.9161619474679177,
+          "peak_over_coarse": 1.1771391519459429,
+          "max_abs_coarse_chord_deviation_percent": 0.11028197852929189
+        },
+        "tau_dbar": {
+          "fine_max_log_slope": 2.255589249833471,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 1.9161619474679177,
+          "peak_over_coarse": 1.1771391519459429,
+          "max_abs_coarse_chord_deviation_percent": 0.11028197852929189
+        },
+        "tau_sbar": {
+          "fine_max_log_slope": 1.2287210264314008,
+          "xi_left": 0.2488765999376774,
+          "xi_right": 0.25,
+          "point_left": "a_mu450_p15",
+          "point_right": "a_mu450_p14",
+          "recomputed_coarse_max_log_slope": 1.2166973758131086,
+          "peak_over_coarse": 1.009882203132276,
+          "max_abs_coarse_chord_deviation_percent": 0.0008952427427599829
+        },
+        "eta_over_s": {
+          "fine_max_log_slope": 0.9545525276631607,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 0.8384399716180306,
+          "peak_over_coarse": 1.138486427145231,
+          "max_abs_coarse_chord_deviation_percent": 0.0366122447814865
+        },
+        "zeta_over_s": {
+          "fine_max_log_slope": 1.0775103348268522,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 0.9612343080526337,
+          "peak_over_coarse": 1.120965331553534,
+          "max_abs_coarse_chord_deviation_percent": 0.03777507523216039
+        },
+        "sigma_over_T": {
+          "fine_max_log_slope": 0.3925989492035705,
+          "xi_left": 0.2573765999376774,
+          "xi_right": 0.2578765999376774,
+          "point_left": "a_mu450_p06",
+          "point_right": "a_mu450_p08",
+          "recomputed_coarse_max_log_slope": 0.259831253398062,
+          "peak_over_coarse": 1.5109766206689084,
+          "max_abs_coarse_chord_deviation_percent": 0.04435382344194494
+        }
+      }
+    },
+    {
+      "curve_id": "b_mu0",
+      "points": 17,
+      "coarse_controls": 3,
+      "xi_mott": 0.362296135276556,
+      "A64_xi_shift": 0.0,
+      "background_xi_shift": 2.682209010451686e-09,
+      "pair_quadrature_xi_shift": 0,
+      "observables": {
+        "tau_u": {
+          "fine_max_log_slope": 1.3685154757051303,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2273320399032115,
+          "peak_over_coarse": 1.11503279569973,
+          "max_abs_coarse_chord_deviation_percent": 0.04736303384120788
+        },
+        "tau_d": {
+          "fine_max_log_slope": 1.3685154757051303,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2273320399032115,
+          "peak_over_coarse": 1.11503279569973,
+          "max_abs_coarse_chord_deviation_percent": 0.04736303384120788
+        },
+        "tau_s": {
+          "fine_max_log_slope": 0.8728870909531539,
+          "xi_left": 0.362396135276556,
+          "xi_right": 0.362496135276556,
+          "point_left": "b_mu0_p02",
+          "point_right": "b_mu0_p04",
+          "recomputed_coarse_max_log_slope": 0.8589046044565716,
+          "peak_over_coarse": 1.0162794406084585,
+          "max_abs_coarse_chord_deviation_percent": 0.0002954536037380606
+        },
+        "tau_ubar": {
+          "fine_max_log_slope": 1.3685154757046865,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2273320399031675,
+          "peak_over_coarse": 1.1150327956994082,
+          "max_abs_coarse_chord_deviation_percent": 0.04736303384120788
+        },
+        "tau_dbar": {
+          "fine_max_log_slope": 1.3685154757046865,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 1.2273320399031675,
+          "peak_over_coarse": 1.1150327956994082,
+          "max_abs_coarse_chord_deviation_percent": 0.04736303384120788
+        },
+        "tau_sbar": {
+          "fine_max_log_slope": 0.8728870909531539,
+          "xi_left": 0.362396135276556,
+          "xi_right": 0.362496135276556,
+          "point_left": "b_mu0_p02",
+          "point_right": "b_mu0_p04",
+          "recomputed_coarse_max_log_slope": 0.8589046044565716,
+          "peak_over_coarse": 1.0162794406084585,
+          "max_abs_coarse_chord_deviation_percent": 0.0002954536037380606
+        },
+        "eta_over_s": {
+          "fine_max_log_slope": 0.7866880352674807,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.6857216048264896,
+          "peak_over_coarse": 1.1472411394512485,
+          "max_abs_coarse_chord_deviation_percent": 0.033730907042572866
+        },
+        "zeta_over_s": {
+          "fine_max_log_slope": 0.7227010139647554,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.618859689408141,
+          "peak_over_coarse": 1.1677946169929492,
+          "max_abs_coarse_chord_deviation_percent": 0.03510681958737161
+        },
+        "sigma_over_T": {
+          "fine_max_log_slope": 0.4665177508230415,
+          "xi_left": 0.362796135276556,
+          "xi_right": 0.363296135276556,
+          "point_left": "b_mu0_p06",
+          "point_right": "b_mu0_p08",
+          "recomputed_coarse_max_log_slope": 0.3417036032885751,
+          "peak_over_coarse": 1.3652702117661268,
+          "max_abs_coarse_chord_deviation_percent": 0.04210630189438458
+        }
+      }
+    }
+  ],
+  "input_hashes": {
+    "fine_a_mu0_v1\\partial_summary.json": "fd99a60ff91e35b4557f53de52dcb07e71fb9bd1aa7a6f4e38eca822a846a9e6",
+    "fine_a_mu0_v1\\observables.csv": "40ffe990c98112084f257be63d941affdfefb1b99e8efb3b2742909f9539b482",
+    "fine_a_mu450_v1\\partial_summary.json": "b3685f455926359ecba5a1864cac627dded047a82c76d1501113eec03d1b4568",
+    "fine_a_mu450_v1\\observables.csv": "f1b26cffa306490fb9a70f0090f84fe0f00c55597b30a3732bee0c723c083810",
+    "fine_a_mu0_v2\\summary.json": "d2dc81b90d7e6a6313d76e1380c106e70ae18fe6ed4c56ca51e7d9c01f9dd3d4",
+    "fine_a_mu0_v2\\observables.csv": "74e01a230d36de62a593660705061d4820bbbb8474d257a48a3993e75d1b7458",
+    "fine_a_mu450_v2\\summary.json": "093a32b0856842f0da1d837f409c58484e272b3fcb8d03f90ac1aa10e9628741",
+    "fine_a_mu450_v2\\observables.csv": "2d2c170d4d8464151d5d6767719b13c9c2c1e8a54d1048271cbb070eea5ba5da",
+    "fine_b_mu0_v2\\summary.json": "ac9018c5f90bbfb3bc3d188d603126b94071be60c1132ed0c9423f57cfaf316b",
+    "fine_b_mu0_v2\\observables.csv": "4a5070288a67e3502045290255b18a95858af804f8d33c1045c85fa31a372b71"
+  },
+  "location_summary_sha256": "5fbee348205ae2cb3fcfe0eeb33d11114a5930394b170e272270d2d4e2ad3235",
+  "script_sha256": "2acb52e3be886460f13585366c7faf8d468aa375a63a3d8afe21b1c84380fd28",
+  "comparison_points": 0,
+  "definitions": {
+    "log_slope": "ln(y_right/y_left)/(xi_right-xi_left)",
+    "chord": "explicit straight chord between recomputed original nodes, used only for comparison",
+    "peak": "largest observed secant slope on supplied grid, not a proven continuous supremum"
+  },
+  "limits": "No smoothing or formal-data replacement; eta association is not an amplitude ablation",
+  "output_sha256": {
+    "channels.csv": "fb4274073807b8a119174ee461dff677fa57455d2819bfa2faa311a4d9c884e1",
+    "coarse_chord.csv": "b39f760d9796bd2a68f8156ee0804f669e9343e38dc42d20c80892286c5d449f",
+    "coarse_slopes.csv": "d57b685b308d5e0ca18699e8f2a2f989b40147033ba1fae5a7ee344e84601bcd",
+    "fine_slopes.csv": "01fcc1f93c6466e1e2e865738dcd281e84f43bf9ea97baaca6d1d70b49e32a6f",
+    "observables.csv": "656d2a79974a17090e94845eea045e53d23ec2cc536e4a9d1d3d4de43b5e99a2",
+    "original_controls.csv": "c9892bddf8272755edc90b1380aaeecbec967e5637e6455fe960b186356a3c91"
+  }
+}

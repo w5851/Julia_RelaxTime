@@ -1,0 +1,80 @@
+{
+  "schema": "plot_agent_visual_review_v1",
+  "reviewed_utc": "2026-10-31T15:23:59.146207+00:00",
+  "status": "assisted_layout_review_completed_with_declared_scope",
+  "plot_manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+    "bytes": 1343972,
+    "sha256": "979cc1835b8207839002708bb703442532801d9055f9e3429fea24af00e3ba65"
+  },
+  "machine_validation": {
+    "passed": true,
+    "command": "python -X utf8 scripts/plotting/validate_plot_artifact.py data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/plot_manifest.json",
+    "color_plots": 65,
+    "grayscale_plots": 65,
+    "source_and_output_hashes_verified": true,
+    "geometry_font_units_and_accessibility_checks_passed": true
+  },
+  "delegated_screening": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/assessment.json",
+    "bytes": 9906,
+    "sha256": "3646fc52fd7c77dba93fd8022c2b2d5c4df577756d4b36e2551a9af1891f8fba"
+  },
+  "primary_visual_artifacts": [
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/detail_other13_zeta_over_s.png",
+      "bytes": 177770,
+      "sha256": "a14959d68e964f6c5d0afa0f51e6275cd2f430039d547f530257898a2a30bde0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_failed_details_v1.png",
+      "bytes": 282795,
+      "sha256": "10cc6ca109d7052c6f4b149dd1aecda55ad4ba729adbd9a91375a85d3e590771"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/primary_k_sigma_gray_v1.png",
+      "bytes": 288146,
+      "sha256": "2c25cad4df02a0363212f1ac0e367f1310673a6ef6659ab50f6c4e4856925463"
+    }
+  ],
+  "primary_reviewed_originals": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other03_eta_over_s.png",
+      "bytes": 398314,
+      "sha256": "1be000ac230b10e0f3c5bd7aa1cce7a343e1c7fb913eb147a26c0953242ed5a4"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other08_tau_ubar.png",
+      "bytes": 370602,
+      "sha256": "6f512eaac9c5250ae63951a1f7a7d2290c063885c8b716d32e1b599e29f61ee1"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other13_zeta_over_s.png",
+      "bytes": 395822,
+      "sha256": "127adc56257ba8a7b558b46b7cdf6665d8f0501879f217cdeabb100298e8d711"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_sbar_gray.png",
+      "bytes": 360913,
+      "sha256": "ed010b441a938f93566f6a298b7110106c5bbe5b5d4ef7d061803ccaa7fc49fe"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_sigma_over_T_gray.png",
+      "bytes": 378958,
+      "sha256": "a29bc7bd6681d67204b5d6245f32d52b8fd9554388662a0bdfe080ff66157930"
+    }
+  ],
+  "primary_review_scope": "Five original plots reviewed through three image-only detail/composite previews; all other color plots received auxiliary contact-sheet screening, not direct primary-agent visual inspection. Three grayscale representatives received auxiliary detail screening, of which two were also reviewed by the primary agent; all other grayscale plots received machine checks only.",
+  "observations": [
+    "No clipping or legend obstruction in the primary inspected views; the reported clipped green marker is fully inside its panel.",
+    "Antiparticle bars, Delta ln(y)/Delta xi labels, Mott line styles and noncolor marker shapes are consistent in inspected examples.",
+    "Dense central markers intentionally retain coincident precision controls; no jitter, smoothing, point removal or redraw was introduced."
+  ],
+  "full_resolution_visual_review_of_all_plots": false,
+  "author_review_status": "pending",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true,
+  "source_values_modified": false,
+  "formal_data_modified": false
+}

@@ -1,0 +1,1 @@
+请描述这张并排科研局部图的可见形状。左图是反u弛豫时间，上面为值、下面为Delta ln(tau)/Delta xi；右图是电导率sigma_el/T，上面为值、下面为Delta ln(sigma_el/T)/Delta xi。这里研究的介子为sigma，两边灰虚线都是其Mott位置x=0。只描述：整体趋势，x=0附近是否有窄的小凸/凹/折点，是否在上方直接值图中也明显。不要把纵轴误读为二阶导数，不做物理归因，不声称数值已收敛，不要求平滑。允许uncertain。只返回一个简短JSON对象，字段left_upper,left_lower,right_upper,right_lower,layout_issues,uncertainties；每个描述不超过80中文字。

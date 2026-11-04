@@ -1,0 +1,12 @@
+{
+  "result": "failed_before_scan",
+  "attempted_points": 12,
+  "completed_points": 0,
+  "failed_points": 12,
+  "process_exit_code": 1,
+  "cause": "frozen source bundle omitted default phase-reference runtime inputs",
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "source_snapshots_verified": 356,
+  "original_logs_preserved": true,
+  "numerical_tolerances_changed": false
+}

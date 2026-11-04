@@ -1,0 +1,50 @@
+{
+  "schema": "derived_diagnostic_package_v1",
+  "files": [
+    {
+      "path": "centered_modulation.csv",
+      "bytes": 219403,
+      "sha256": "ba1765c0b5e402675bdcdd3e342c26b14f4aa6feafde2d4a43c87b4c7c19d7a4"
+    },
+    {
+      "path": "centered_precision.csv",
+      "bytes": 38443,
+      "sha256": "e7165ad1246be774db4d6f589cf313dbbe25c7ee24aaa6c1e586726a928b1b0e"
+    },
+    {
+      "path": "final_species_modulation.csv",
+      "bytes": 425975,
+      "sha256": "b0d27e3b48474edc4e410527f950481b966d1a6adc09740e1aa238e3041233d4"
+    },
+    {
+      "path": "interpretation_views.json",
+      "bytes": 51180,
+      "sha256": "591ed30c9c1d964f43e0c1806a9d969ebb80cb92658df16982afbcbc80fc9675"
+    },
+    {
+      "path": "process_modulation.csv",
+      "bytes": 285967,
+      "sha256": "66bdcd126fabae75b15c73635370bf798ac62a8d15adbc8626b5e34f71330559"
+    },
+    {
+      "path": "source/inspect_center_modulation_v1.py",
+      "bytes": 3995,
+      "sha256": "0bc85b6fbebcd9a2140632f42868add09d31b97b8e665872a5f512a5721d519d"
+    },
+    {
+      "path": "source/review_transport_other_mott_slopes_v3.py",
+      "bytes": 16747,
+      "sha256": "f0968f25651a8a962db7b9b711045f97b1f7f620698ef17eae9614a42ca98e36"
+    },
+    {
+      "path": "source/summarize_transport_other_mott_centers_v1.py",
+      "bytes": 9575,
+      "sha256": "3237bbe5d13cd20d46a3ea62c779362fbf7dfc84163f83d2b0ae2e4777516aab"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 9579,
+      "sha256": "661e4c3d1ba15c413cc19c954c457012bdfda886f1ca1cd36afc6817438f358d"
+    }
+  ]
+}

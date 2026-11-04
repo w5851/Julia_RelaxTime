@@ -1,0 +1,243 @@
+{
+  "host": "quote-remote",
+  "groups": {
+    "new_batch": {
+      "jobs": 135,
+      "points": 1808,
+      "channels": 30736,
+      "first_job_started_utc": "2026-10-26T02:10:21+00:00",
+      "last_job_completed_utc": "2026-10-26T07:08:31+00:00",
+      "execution_span_seconds": 17890.0,
+      "job_seconds": {
+        "minimum": 286.0,
+        "median": 1912.0,
+        "maximum": 2558.0,
+        "total": 240094.0
+      },
+      "runner_job_hours": 66.69277777777778,
+      "process_wall_seconds": {
+        "minimum": 240.82,
+        "median": 1836.48,
+        "maximum": 2151.33,
+        "total": 222003.23
+      },
+      "load_seconds": {
+        "minimum": 17.332265707,
+        "median": 29.339604347,
+        "maximum": 32.05991578,
+        "total": 3567.521931276
+      },
+      "scan_seconds": {
+        "minimum": 209.530785709,
+        "median": 1805.549739074,
+        "maximum": 2118.696768299,
+        "total": 218245.140930391
+      },
+      "maximum_peak_scan_process_rss_bytes": 1945735168.0,
+      "maximum_peak_rss_run_id": 40267626795,
+      "maximum_peak_rss_fraction_of_host_memory": 0.11605673925206017,
+      "longest_job_run_id": 40271155838,
+      "cpu_job_counts": {
+        "znver3": 69,
+        "znver5": 31,
+        "znver4": 18,
+        "sapphirerapids": 11,
+        "icelake-server": 3,
+        "graniterapids": 3
+      },
+      "jobs_exceeding_180_minute_planning_target": [],
+      "jobs_exceeding_360_minute_timeout": []
+    },
+    "reused_pilot": {
+      "jobs": 7,
+      "points": 11,
+      "channels": 187,
+      "first_job_started_utc": "2026-10-25T19:03:14+00:00",
+      "last_job_completed_utc": "2026-10-25T19:16:43+00:00",
+      "execution_span_seconds": 809.0,
+      "job_seconds": {
+        "minimum": 452.0,
+        "median": 649.0,
+        "maximum": 809.0,
+        "total": 4631.0
+      },
+      "runner_job_hours": 1.2863888888888888,
+      "process_wall_seconds": {
+        "minimum": 164.78,
+        "median": 272.83,
+        "maximum": 373.16,
+        "total": 1955.73
+      },
+      "load_seconds": {
+        "minimum": 19.407982853,
+        "median": 27.381320866,
+        "maximum": 32.097027361,
+        "total": 183.21619059
+      },
+      "scan_seconds": {
+        "minimum": 144.064106464,
+        "median": 239.017811936,
+        "maximum": 341.929444478,
+        "total": 1762.5846566989999
+      },
+      "maximum_peak_scan_process_rss_bytes": 1808244736.0,
+      "maximum_peak_rss_run_id": 40224250574,
+      "maximum_peak_rss_fraction_of_host_memory": 0.1078492183566422,
+      "longest_job_run_id": 40224161650,
+      "cpu_job_counts": {
+        "znver3": 3,
+        "znver5": 2,
+        "sapphirerapids": 2
+      },
+      "jobs_exceeding_180_minute_planning_target": [],
+      "jobs_exceeding_360_minute_timeout": []
+    },
+    "all_runs": {
+      "jobs": 142,
+      "points": 1819,
+      "channels": 30923,
+      "first_job_started_utc": "2026-10-25T19:03:14+00:00",
+      "last_job_completed_utc": "2026-10-26T07:08:31+00:00",
+      "execution_span_seconds": 43517.0,
+      "job_seconds": {
+        "minimum": 286.0,
+        "median": 1888.0,
+        "maximum": 2558.0,
+        "total": 244725.0
+      },
+      "runner_job_hours": 67.97916666666667,
+      "process_wall_seconds": {
+        "minimum": 164.78,
+        "median": 1797.375,
+        "maximum": 2151.33,
+        "total": 223958.96
+      },
+      "load_seconds": {
+        "minimum": 17.332265707,
+        "median": 29.273222895,
+        "maximum": 32.097027361,
+        "total": 3750.738121866
+      },
+      "scan_seconds": {
+        "minimum": 144.064106464,
+        "median": 1773.148137232,
+        "maximum": 2118.696768299,
+        "total": 220007.72558709
+      },
+      "maximum_peak_scan_process_rss_bytes": 1945735168.0,
+      "maximum_peak_rss_run_id": 40267626795,
+      "maximum_peak_rss_fraction_of_host_memory": 0.11605673925206017,
+      "longest_job_run_id": 40271155838,
+      "cpu_job_counts": {
+        "znver3": 72,
+        "znver5": 33,
+        "znver4": 18,
+        "sapphirerapids": 13,
+        "icelake-server": 3,
+        "graniterapids": 3
+      },
+      "jobs_exceeding_180_minute_planning_target": [],
+      "jobs_exceeding_360_minute_timeout": []
+    },
+    "new_batches_by_mode": {
+      "A": {
+        "jobs": 72,
+        "points": 904,
+        "channels": 15368,
+        "first_job_started_utc": "2026-10-26T02:10:21+00:00",
+        "last_job_completed_utc": "2026-10-26T05:56:17+00:00",
+        "execution_span_seconds": 13556.0,
+        "job_seconds": {
+          "minimum": 286.0,
+          "median": 1883.0,
+          "maximum": 2558.0,
+          "total": 122469.0
+        },
+        "runner_job_hours": 34.01916666666666,
+        "process_wall_seconds": {
+          "minimum": 240.82,
+          "median": 1756.22,
+          "maximum": 2151.33,
+          "total": 113246.75
+        },
+        "load_seconds": {
+          "minimum": 17.332265707,
+          "median": 28.325473586,
+          "maximum": 31.696796432,
+          "total": 1868.309974352
+        },
+        "scan_seconds": {
+          "minimum": 209.530785709,
+          "median": 1728.9152303975002,
+          "maximum": 2118.696768299,
+          "total": 111277.9466334
+        },
+        "maximum_peak_scan_process_rss_bytes": 1937297408.0,
+        "maximum_peak_rss_run_id": 40257802172,
+        "maximum_peak_rss_fraction_of_host_memory": 0.11554631240864785,
+        "longest_job_run_id": 40271155838,
+        "cpu_job_counts": {
+          "znver3": 34,
+          "znver5": 20,
+          "znver4": 9,
+          "icelake-server": 2,
+          "sapphirerapids": 7
+        },
+        "jobs_exceeding_180_minute_planning_target": [],
+        "jobs_exceeding_360_minute_timeout": []
+      },
+      "B": {
+        "jobs": 63,
+        "points": 904,
+        "channels": 15368,
+        "first_job_started_utc": "2026-10-26T02:10:25+00:00",
+        "last_job_completed_utc": "2026-10-26T07:08:31+00:00",
+        "execution_span_seconds": 17886.0,
+        "job_seconds": {
+          "minimum": 1000.0,
+          "median": 1951.0,
+          "maximum": 2523.0,
+          "total": 117625.0
+        },
+        "runner_job_hours": 32.673611111111114,
+        "process_wall_seconds": {
+          "minimum": 958.26,
+          "median": 1870.62,
+          "maximum": 2115.01,
+          "total": 108756.48
+        },
+        "load_seconds": {
+          "minimum": 17.65652183,
+          "median": 29.431625139,
+          "maximum": 32.05991578,
+          "total": 1699.211956924
+        },
+        "scan_seconds": {
+          "minimum": 938.999913533,
+          "median": 1838.933064778,
+          "maximum": 2083.700225985,
+          "total": 106967.194296991
+        },
+        "maximum_peak_scan_process_rss_bytes": 1945735168.0,
+        "maximum_peak_rss_run_id": 40267626795,
+        "maximum_peak_rss_fraction_of_host_memory": 0.11605673925206017,
+        "longest_job_run_id": 40267434477,
+        "cpu_job_counts": {
+          "znver5": 11,
+          "znver4": 9,
+          "znver3": 35,
+          "sapphirerapids": 4,
+          "icelake-server": 1,
+          "graniterapids": 3
+        },
+        "jobs_exceeding_180_minute_planning_target": [],
+        "jobs_exceeding_360_minute_timeout": []
+      }
+    }
+  },
+  "scope": "Observed successful Actions job durations and measured scan-process RSS; not account billing data.",
+  "compile_time_included_in_elapsed": true,
+  "peak_rss_covers": "Timed Julia scan process only, not all job steps",
+  "per_point_steady_timing_available": false,
+  "grid_review_sha256": "2e8d4934e50e61fa398ed0a7496c7171dcca58753485f9e42a8ab415b9606103"
+}

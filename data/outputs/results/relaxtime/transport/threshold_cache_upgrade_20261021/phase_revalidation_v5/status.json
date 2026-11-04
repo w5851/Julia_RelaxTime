@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "finished_utc": "2026-10-23T06:56:53.014",
+  "points": 910,
+  "completed_points": 910,
+  "failures": 0,
+  "phase_plan_passed": true,
+  "first_order_boundaries": 1,
+  "cold_seed_audits": 18,
+  "cold_seed_audits_passed": true
+}

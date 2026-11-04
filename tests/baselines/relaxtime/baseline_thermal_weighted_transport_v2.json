@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "purpose": "stable-background production entrypoint regression; independently qualified against retained joint references",
+  "profile_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+  "qualified_directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_complete_summary_v1",
+  "sources": [
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_complete_summary_v1\\summary.json",
+      "sha256": "4387fb9ffa16b660f3fdbcb777118fd94c468f24f7c6f189b49b83001a981c37"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\joint_complete_summary_v1\\comparisons.csv",
+      "sha256": "c7e43976259e103291ed3b066d64098da2d11bae7b8a6b7f72998430235c9e26"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\convergence_selection_v1\\review_points.csv",
+      "sha256": "a4784f56add30b3822fa5f46def6012273eb06cdf183b5d762d5537be468c894"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\production_replay_all_v2\\status.json",
+      "sha256": "f0236e45a5535ea67f8b6a6911f9610259121eec9787f75b173ef1fc96d0f03c"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\production_replay_all_v2\\manifest.json",
+      "sha256": "b3abc45fa37415ef149ab66c0cf0aa3359a86fb73ac998a890e3a2780c9d6bb3"
+    },
+    {
+      "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\production_replay_all_v2\\comparisons.csv",
+      "sha256": "9072470ed3644e458725cfa82e290dd80f1038a2ef1db414c6c1160d6b11e81f"
+    }
+  ],
+  "configurations": {
+    "candidate": {
+      "name": "candidate",
+      "bg_limit": 25.0,
+      "bg_p": 96,
+      "bg_c": 24,
+      "a_p": 32,
+      "a_c": 16,
+      "p": 48,
+      "c": 36,
+      "phi": 36,
+      "t": 24,
+      "tr_p": 32,
+      "tr_c": 16
+    },
+    "reference": {
+      "name": "reference",
+      "bg_limit": 30.0,
+      "bg_p": 128,
+      "bg_c": 32,
+      "a_p": 64,
+      "a_c": 32,
+      "p": 128,
+      "c": 48,
+      "phi": 54,
+      "t": 48,
+      "tr_p": 64,
+      "tr_c": 32
+    }
+  },
+  "points": 12,
+  "comparisons": 108,
+  "regression_rtol": 1e-06,
+  "regression_atol": 1e-08,
+  "independent_relative_target": 0.01,
+  "baseline_semantics": "production_entrypoint",
+  "production_replay_directory": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\threshold_cache_upgrade_20261021\\production_replay_all_v2",
+  "qualification_replay_relative_limit": 0.0001,
+  "maximum_qualified_candidate_change": 1.4572978535021264e-06,
+  "baseline_sha256": "429da23a4476422128949e0bce8c3965b606f9781bfb07040b8703b2d5ed73fb"
+}

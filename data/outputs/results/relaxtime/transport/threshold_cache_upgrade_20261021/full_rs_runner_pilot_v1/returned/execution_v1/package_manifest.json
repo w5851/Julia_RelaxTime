@@ -1,0 +1,37 @@
+{
+  "files": {
+    "execution_v1/input_receipt.json": {
+      "sha256": "2ced845d01d1507b27e6e414c270e6b5e56533ac1af0d2c51de69bf405def5bc",
+      "bytes": 269
+    },
+    "execution_v1/remote_status.json": {
+      "sha256": "4fb85af999c3e33b898bf10dbe2cf392a27d2ceef1d7b7ab8fd8d51654d771e0",
+      "bytes": 961
+    },
+    "execution_v1/reviewer.stderr.log": {
+      "sha256": "8cc0d052e5d310ba313aa752239753f8f59d3ca01da732642a5c5893ec8c4cd9",
+      "bytes": 1209
+    },
+    "execution_v1/reviewer.stdout.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "pilot_review_execution_manifest.json": {
+      "sha256": "867ddbd41edae1d3f1239d109ec7867e4412ebdf6ec036f614911cc3ec31d9a1",
+      "bytes": 866
+    },
+    "plan_remaining_batches.py": {
+      "sha256": "bcd15a6b13b8a2bc34a7039584c4e6335c7b8a36a12f6776facb13dddcc627a4",
+      "bytes": 8636
+    },
+    "run_remote_pilot_review.py": {
+      "sha256": "a706d63d44779c8e7257868256022be962f0f6b06f9bd42815b6e70b54f584b6",
+      "bytes": 7135
+    },
+    "runner_results_manifest.json": {
+      "sha256": "c15d39aba03b631791fa23de1579c8b6b38fe9cb7da55ac7ea5d3e988c290265",
+      "bytes": 23577
+    }
+  },
+  "passed": false
+}

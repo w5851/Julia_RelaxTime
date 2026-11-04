@@ -1,0 +1,41 @@
+{
+    "status": "completed_diagnostic",
+    "steps": [
+        0.0002,
+        1.25e-5,
+        7.8125e-7,
+        1.953125e-7
+    ],
+    "original_center": 0.015327819866955281,
+    "fine_center": 0.01532782024324199,
+    "fine_center_shift": 3.7628670838951717e-10,
+    "fine_center_root_residual_inv_fm2": -2.083218226510261e-15,
+    "left_sqrt_h_coefficient": 0.06803745983821693,
+    "right_log_coefficient": 0.04448658425728616,
+    "root_slope": -1.567082206306182,
+    "coefficient_origin": "Independent threshold kernel/weight values; not fitted to curvature or rates.",
+    "derivative_steps": [
+        0.125,
+        0.0625
+    ],
+    "backgrounds": {
+        "base": {
+            "p": 96,
+            "c": 24,
+            "A_p": 32,
+            "A_c": 16,
+            "thermal_cutoff": 25
+        },
+        "fine": {
+            "p": 128,
+            "c": 32,
+            "A_p": 64,
+            "A_c": 32,
+            "thermal_cutoff": 30
+        }
+    },
+    "production_kernel_changed": false,
+    "files": {
+        "background_reference.csv": "f2357356984256b261b8e53f1af90fa964bb29d9593d8fdc57af0747fe0ceb7e"
+    }
+}

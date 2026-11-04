@@ -1,0 +1,26 @@
+{
+  "verified_utc": "2026-10-26T08:35:45.199073+00:00",
+  "archive_sha256": "398225ff14feb4fcdd50da72796844a1491a61e5efdf9493e85cc18203e8b031",
+  "return_files": {
+    "input_manifest.json": "10ee7585767c50af95f6434c1e9584957b6cd7c48003c824568c64484d4d7920",
+    "ledger.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ledger.stdout.log": "341166a365546eec111e7c24d55968ddf9d9cab1ae1f880a9c498598da1127e2",
+    "return_manifest.json": "47e49944dd6d3d1de80775a6cf929d49654c8cb2a6ec621d286de6114abf128d",
+    "reviewed_checks.json": "8d06ac8624c34af32b53636cf33df9645e2cdfe526a4eefbf320d0c3518477c4"
+  },
+  "current_documents_match_checked_snapshot": true,
+  "current_working_and_selected_ledgers_match": true,
+  "remote_report": {
+    "host": "W",
+    "ledger_exit_code": 0,
+    "links_checked": 85,
+    "working_and_selected_ledgers_passed": true,
+    "source_files_unchanged": true,
+    "verified_files": 263,
+    "input_manifest_sha256": "10ee7585767c50af95f6434c1e9584957b6cd7c48003c824568c64484d4d7920",
+    "numerical_tests_rerun": false,
+    "numerical_sources_changed": false,
+    "reason": "Only batch orchestration, offline review tooling and current-state records changed; the fixed calculation and existing convergence/regression remain applicable.",
+    "completed_utc": "2026-10-26T08:29:21.058801+00:00"
+  }
+}

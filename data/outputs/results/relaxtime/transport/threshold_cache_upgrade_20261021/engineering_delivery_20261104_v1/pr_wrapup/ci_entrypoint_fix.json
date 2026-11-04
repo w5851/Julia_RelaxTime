@@ -1,0 +1,44 @@
+{
+  "schema": "transport_pr_entrypoint_fix_v1",
+  "failed_head": "827fb01eaf52aa279af1a3a129a66caaa537d987",
+  "failed_run": 41841577271,
+  "failed_job": 126614247601,
+  "initial_log": "initial_ci_entrypoints.zip#initial_ci_entrypoints.log",
+  "root_causes": [
+    "cutoff audit required an untracked historical spectrum filename",
+    "inline ternary and ENV literals were misread as include path segments by the static guard",
+    "thermal audit summary hashed the historical name even when the canonical spectrum was selected"
+  ],
+  "resolution": "Resolve the actual dependency path before include and hash the selected spectrum; preserve historical and ENV selection behavior.",
+  "behavior_tests": {
+    "command": [
+      "julia",
+      "--project=.",
+      "--depwarn=error",
+      "tests/unit/relaxtime/test_mott_diagnostic_entrypoints.jl"
+    ],
+    "passed": 49,
+    "failed": 0,
+    "log": "mott_entrypoint_fixture.log",
+    "physical_numerics_run": false
+  },
+  "script_entrypoints": {
+    "files": 363,
+    "status": "passed",
+    "log": "script_entrypoints.log"
+  },
+  "production_src_changed": false,
+  "ci_dispatch": "Check all applicable workflows on final PR head; large artifact diffs can hide source changes beyond the first 300 paths.",
+  "log_sha256": {
+    "initial_ci_entrypoints.log": "650b492cb7c94b1065099664a641ca7a5dfff336da2972feb7b84b30c86206b4",
+    "mott_entrypoint_fixture.log": "84819a559cb2383403896ccafdf0b09c942e46f04da95774fa5614091ec1bf6c",
+    "script_entrypoints.log": "691765127d896638f5a401779f3d4999e4b3e3a5f66036b857497aef48bcefcb"
+  },
+  "initial_log_archive": {
+    "path": "initial_ci_entrypoints.zip",
+    "sha256": "13068cf3fde17ebdd21ee01acdf3e2c09dfb5a3211d019a1a35c4d4e9102cc75",
+    "member": "initial_ci_entrypoints.log",
+    "member_sha256": "650b492cb7c94b1065099664a641ca7a5dfff336da2972feb7b84b30c86206b4",
+    "bytes_preserved": true
+  }
+}

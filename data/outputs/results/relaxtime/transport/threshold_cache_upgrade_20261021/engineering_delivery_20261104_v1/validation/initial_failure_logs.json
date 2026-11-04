@@ -1,0 +1,17 @@
+{
+  "archive": "initial_failure_logs.zip",
+  "sha256": "78ff0567bce05dd92e28492fec110bf26db8b19c23c1c47591038ec73ea58c11",
+  "files": [
+    {
+      "path": "python_font_recovery.stdout.log",
+      "bytes": 1442,
+      "sha256": "bce0826a9e7d8fdd840b9f08dd641664343358584e2ac991fe6f70cc4e8edbb4"
+    },
+    {
+      "path": "python_plotting.stdout.log",
+      "bytes": 1340,
+      "sha256": "c3c0541d67c19381430f995f338a9779c77fafbe677846698c088e584957362b"
+    }
+  ],
+  "reason": "Preserve exact pytest failure output including trailing spaces without treating the text as source formatting"
+}

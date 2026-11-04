@@ -1,0 +1,76 @@
+{
+  "host": "W",
+  "mode": "A",
+  "phase_plan_passed": true,
+  "points": 910,
+  "groups": 9,
+  "anchors": [
+    {
+      "muB_MeV": "0.0",
+      "kind": "crossover",
+      "method": "direct_condensate_derivative_peak",
+      "old_reference_T_MeV": "200.08890140807532",
+      "T_MeV": "200.0898076157829",
+      "shift_MeV": "0.0009062077075725483",
+      "refinement_delta_MeV": "0.0",
+      "certified": "true",
+      "side_delta_xi": "NaN",
+      "seconds": "53.1689391",
+      "gc_seconds": "0.6122874",
+      "allocated_bytes": "1606416685"
+    },
+    {
+      "muB_MeV": "450.0",
+      "kind": "crossover",
+      "method": "direct_condensate_derivative_peak",
+      "old_reference_T_MeV": "182.6401249800981",
+      "T_MeV": "182.72820247485038",
+      "shift_MeV": "0.08807749475226956",
+      "refinement_delta_MeV": "0.0",
+      "certified": "true",
+      "side_delta_xi": "NaN",
+      "seconds": "15.2870245",
+      "gc_seconds": "0.0",
+      "allocated_bytes": "91077352"
+    },
+    {
+      "muB_MeV": "900.0",
+      "kind": "first_order",
+      "method": "direct_two_branch_equal_omega_bisection",
+      "old_reference_T_MeV": "125.73406443235267",
+      "T_MeV": "125.7360002645551",
+      "shift_MeV": "0.0019358322024345398",
+      "refinement_delta_MeV": "7.450580596923828e-9",
+      "certified": "true",
+      "side_delta_xi": "0.003",
+      "seconds": "36.088797",
+      "gc_seconds": "0.0",
+      "allocated_bytes": "27743842"
+    }
+  ],
+  "cold_seed_audits": 18,
+  "continuation_files": 36,
+  "continuation_rows": 3640,
+  "maximum_mass_relative_change": 2.8035154520100747e-06,
+  "maximum_entropy_relative_change": 2.9745013802151554e-05,
+  "first_order_boundaries": [
+    {
+      "T_MeV": "125.7360002645551",
+      "muB_MeV": "900.0",
+      "alpha_T": "1.0",
+      "xi": "-1.7881393432617188e-10",
+      "refined_xi": "-1.7881393432617188e-10",
+      "refinement_delta_xi": "0.0",
+      "bracket_lower_xi": "-0.003",
+      "bracket_upper_xi": "0.003"
+    }
+  ],
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "numerical_sources_verified": 322,
+  "source_snapshots_verified": 356,
+  "calculation_commit": null,
+  "reused_historical_anchors": false,
+  "mode_B_qualified": false,
+  "global_phase_diagram_qualified": false,
+  "formal_production_promoted": false
+}

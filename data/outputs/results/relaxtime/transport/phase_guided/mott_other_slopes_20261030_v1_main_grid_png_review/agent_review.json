@@ -1,0 +1,230 @@
+{
+  "schema": "plot_agent_visual_review_v1",
+  "reviewed_utc": "2026-10-30T04:08:53.540751+00:00",
+  "status": "layout_review_passed_with_declared_scope",
+  "plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/plot_manifest.json",
+  "plot_manifest_bytes": 762052,
+  "plot_manifest_sha256": "74e024ca4bc16380b4995d22de3b6b543b378c3c5284afa0059f30606f129bd0",
+  "machine_validation_passed": true,
+  "output_files_hash_verified": 78,
+  "color_overview_figures": 39,
+  "detailed_color_figures": 5,
+  "detailed_grayscale_figures": 1,
+  "reviewed_outputs": [
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other01_tau_ubar.png",
+      "sha256": "4321f0d8e247a4da72a316e7b46afd1dfe6efa6a5307ebbd6351eba662ba875c",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other01_tau_sbar.png",
+      "sha256": "2ff81c3a7903b39d1429eb86706385abf4e5b1421df11c115c86117416d6de2e",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other01_tau_sbar_gray.png",
+      "sha256": "ed010b441a938f93566f6a298b7110106c5bbe5b5d4ef7d061803ccaa7fc49fe",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other01_sigma_over_T.png",
+      "sha256": "3f57b8a6a1f45cb47e40a4f9ec084b3f380abef534079539514ed7c3b913d376",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other02_tau_ubar.png",
+      "sha256": "666ec3b94591f32dd6cb81bcfe846b0bcb687a32c54699160fc979d992e75bab",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other02_tau_sbar.png",
+      "sha256": "46525481c8fd44120338cbafa2971fd83382aba8c12aa381a6dce37d3521317a",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other02_sigma_over_T.png",
+      "sha256": "f9e94217cc57d2488d087696eb1048e0021dcab0d80a3b23d032bb8365bdd033",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other03_tau_ubar.png",
+      "sha256": "af4f8d219d10fd0d0cbbf706a1ac7fd055840362bdfe747c36c8603f9bbc7851",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other03_tau_sbar.png",
+      "sha256": "f42e2624ff62be60c57e7c2fa6342263c72ddf0ba0dc26658867b536ae044b55",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other03_sigma_over_T.png",
+      "sha256": "0b3c3c70b478d7fd036647e0bde68582309479d0e76969c72ef0c1249d9f0000",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other04_tau_ubar.png",
+      "sha256": "e289f1755e6930370371e83b973a0b2c0147ba3c12a0efe762de8f3b9be1afb9",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other04_tau_sbar.png",
+      "sha256": "83b4a92e9572b8e846117d3a8829345bd475c94f19f3a0c51cadee80d2d7a321",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other04_sigma_over_T.png",
+      "sha256": "5feae62e1a36326afa8d4e61f6deacd7c8dc3c02e97d5c3f135a894f6f2c187a",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other05_tau_ubar.png",
+      "sha256": "c5db820bf9e2734968cfbfcbba9b80901bf5fc26694380ad159cd9d42539fe9b",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other05_tau_sbar.png",
+      "sha256": "2c045267995d0a8d3c88b67ca8992afa6109b52adc67e4ce817cbf54ef952ba0",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other05_sigma_over_T.png",
+      "sha256": "436787e2ed2a1d5902908646baaca1721dde2f115fd719d6a2bc776490395caf",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other06_tau_ubar.png",
+      "sha256": "d708781b15a7e2990b8fb758cf2e2d04dd101980c49f4f7fc37a768fc07b4bed",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other06_tau_sbar.png",
+      "sha256": "1e950cf173a31fa7784cca59ae36baf7638a9bffa6f4fcc47380f263ae77c7e4",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other06_sigma_over_T.png",
+      "sha256": "d196c3c0ab5f165b0cbee2d729a36dfd0e2f208dcc5af97ae3306be196750f02",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other07_tau_ubar.png",
+      "sha256": "8eb39c2d596fbe7267d64629c7d23593982f2bef56f18681d5db0bad82d0beb3",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other07_tau_sbar.png",
+      "sha256": "33bf4247244269e201d566e7512d49868a99b60855b722f862e62a07c12be01a",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other07_sigma_over_T.png",
+      "sha256": "77c931a958bf64077d9e27edbc1efdd8de21857ecc83c820163675a0328252b9",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other08_tau_ubar.png",
+      "sha256": "bbb0818e7ec55fa93f750f2308ec49fdf6ce783fa28795725297723c5bd0c9eb",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other08_tau_sbar.png",
+      "sha256": "c9f50255d47edc3402615fa790cb40fc9c2de77b0e9fb9008463ac475acb2c7e",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other08_sigma_over_T.png",
+      "sha256": "9184c991bbce5901699efba1bbb96350819f0c40abbaa99ce0e8c4ee6bb2681c",
+      "review_scope": "detailed"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other09_tau_ubar.png",
+      "sha256": "c69b475af9b150408ec7ae493a73bcaed9e51d700c52193bd5e2cf44de7c16eb",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other09_tau_sbar.png",
+      "sha256": "965a5c345c2ab23386d9b2f7a50c2c9554884ff2a9e29c57d7095425cf8566b3",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other09_sigma_over_T.png",
+      "sha256": "a745467de67f747ce5809b7c7a151b0b0120c05856d0bd3e116840be0488ffd0",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other10_tau_ubar.png",
+      "sha256": "26313b7c1463f9b7d14491b5770b9e925d6f4762fc43b6138c360db480be4318",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other10_tau_sbar.png",
+      "sha256": "b1021c53b1d540f607ca394a8705388a9a259bf9c5c5dcafe01998f8c340f6f7",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other10_sigma_over_T.png",
+      "sha256": "a064e807815efdacd4c42de300cbd481f4c3003042fbec1454191ea979ded166",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other11_tau_ubar.png",
+      "sha256": "3b7bcf1c34234ea1c2a4e794938ff311cb0edace822aa026be7176d6ab10b70d",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other11_tau_sbar.png",
+      "sha256": "932857b7d78b1d0538befc5ce7fa76667ee6bcae1910e2fc30df3c9ecee50715",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other11_sigma_over_T.png",
+      "sha256": "38dd12601f440294c250ac8383dd05f052f5b37323bd64aeaa12094e07bea031",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other12_tau_ubar.png",
+      "sha256": "179faba5ad026b572750cf9f370267d487f9a677e36d4ff39afcc3db15c01ae7",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other12_tau_sbar.png",
+      "sha256": "59c31af7b64d845f467f1530856095e85851a9c3d1bea101f7eacbaf6c31b7e3",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other12_sigma_over_T.png",
+      "sha256": "44963c47ad6b7d5147dfe7f53d90c264eb5b218af801e67a8f1a3a9c1ef6601e",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other13_tau_ubar.png",
+      "sha256": "75ae6786b6494ea4b3b230e118a69b428758ae02e6c9bcc182ffcb3746503f24",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other13_tau_sbar.png",
+      "sha256": "e984219708bbd2cdabf38b5fe796d78a91f4e8685b101fa104655a50b201d837",
+      "review_scope": "contact_sheet_overview"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/other13_sigma_over_T.png",
+      "sha256": "d4aee02e151bb2814b1ed59d6508cef0b51b97e3feebbb029be8821310d78a25",
+      "review_scope": "contact_sheet_overview"
+    }
+  ],
+  "qa_contact_index": "visual_qa/contact_sheets.json",
+  "observations": [
+    "All 39 color plots were inspected in seven contact sheets; axes, parameter titles and external legends remain readable without visible clipping or legend obstruction.",
+    "Detailed K-window inspection covered other01 and other03 tau_sbar, including matched-endpoint tighter controls and split-interval markers.",
+    "Detailed sigma-window inspection covered other07 sigma_over_T; a broad slope trend must not be equated with a local threshold response.",
+    "Detailed pi-control inspection covered other08 tau_ubar and sigma_over_T. Narrow central value and secant structures remain visible and unmodified; complete precision and xi controls are pending.",
+    "One representative grayscale plot, other01 tau_sbar, retains distinct circle, square, cross and plus encodings. The other 38 grayscale plots were machine checked but not individually visually reviewed."
+  ],
+  "geometry_findings": [],
+  "author_acceptance": "pending",
+  "numerical_scope": "195 main-grid points and 43 of 175 planned reference evaluations in the frozen returned snapshot",
+  "scientific_acceptance": "complete-reference comparison pending; this visual record is not a convergence verdict",
+  "manuscript_eligible": false,
+  "current_publication_layer": false,
+  "vector_delivery_pending": true
+}

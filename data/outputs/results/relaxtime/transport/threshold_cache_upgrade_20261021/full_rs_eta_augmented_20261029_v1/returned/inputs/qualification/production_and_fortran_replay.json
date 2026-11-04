@@ -1,0 +1,25 @@
+{
+  "host": "W",
+  "source_archive_sha256": "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5",
+  "source_files_verified": 1602,
+  "source_snapshots_verified": 712,
+  "phase_reference_input_sha256": "2df44b801ebaee7f48a88bb59840f9bd99aaff520d06e05cd5af692404e022d7",
+  "phase_reference_files_verified": 24,
+  "production_replay_passed": true,
+  "production_points": 12,
+  "production_comparisons": 108,
+  "qualified_channels": 204,
+  "maximum_candidate_replay_relative": 2.729806589663042e-06,
+  "maximum_independent_reference_relative": 0.0013753303978383258,
+  "fortran_comparison_passed": true,
+  "fortran_points": 4,
+  "fortran_channels": 68,
+  "fortran_xi_scope": [
+    0.0
+  ],
+  "maximum_external_digitized_relative": 0.04019665568448372,
+  "calculation_commit": null,
+  "phase_revalidation_pending": true,
+  "baseline_pending": true,
+  "formal_production_promoted": false
+}

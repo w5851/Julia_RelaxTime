@@ -1,0 +1,35 @@
+{
+  "host": "W",
+  "baseline": "baseline_thermal_weighted_transport_v3",
+  "baseline_sha256": "c33fcb0dfe5db1ed49205465fa427f0d07b7214e3aab3847a9e7744ba65f3eec",
+  "source_archive_sha256": "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031",
+  "source_files_verified": 1631,
+  "source_snapshots_verified": 358,
+  "regression_assertions_passed": 314,
+  "replay_identity_assertions_passed": 13,
+  "default_entrypoint_passed": true,
+  "actual_runs": 5,
+  "steady_measurements": 4,
+  "warmups": 1,
+  "observable_comparisons": 45,
+  "qualified_channels": 85,
+  "steady_timings": [
+    {
+      "point_id": "muB0.0_alpha1.0_xi-0.2200",
+      "repeats": 2,
+      "median_wall_seconds": 143.0869641,
+      "median_cpu_seconds": 142.21875
+    },
+    {
+      "point_id": "muB900.0_alpha1.0_xi-0.0400",
+      "repeats": 2,
+      "median_wall_seconds": 147.33093415000002,
+      "median_cpu_seconds": 146.390625
+    }
+  ],
+  "maximum_baseline_relative_change": 0.0,
+  "maximum_independent_reference_relative": 0.0013753303978383258,
+  "calculation_commit": null,
+  "runner_cost_qualified": false,
+  "formal_production_promoted": false
+}

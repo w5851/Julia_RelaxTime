@@ -1,0 +1,192 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "side-shapes",
+  "job_fingerprint": "642006805eef4b4c0bc583470cbebbec416f5746c1a5d1fb414e41b29c259ef8",
+  "ok": true,
+  "answer": {
+    "pass_candidate": true,
+    "findings": [
+      {
+        "figure": "图1（彩版，上下曲率）",
+        "location": "整体/图例与标题",
+        "description": "彩色线型/标记可与图例映射区分：Resonant side 为实线+空心圆，Bound side 为虚线+空心方框；标题与参数行完整，无裁切。",
+        "severity": "info"
+      },
+      {
+        "figure": "图1（彩版，上下曲率）",
+        "location": "上/下方面板纵轴标签",
+        "description": "纵轴标签 I_S''(ξ_M∓h) 可读，括号与单位 (fm²) 未被裁切，也未与刻度重叠。",
+        "severity": "info"
+      },
+      {
+        "figure": "图1（彩版，上下曲率）",
+        "location": "共享横轴",
+        "description": "横轴刻度 10^-6、10^-5、10^-4 与轴标签可辨，注释 (Mott limit toward left) 完整可见，提示极限方向向左。",
+        "severity": "info"
+      },
+      {
+        "figure": "图2（彩版，sqrt(h) 乘曲率与 p_eff）",
+        "location": "图例",
+        "description": "图例三项（Resonant side 实线圆、Bound side 虚线方框、Reference exponent 1/2 点线）清晰可辨，无重叠。",
+        "severity": "info"
+      },
+      {
+        "figure": "图2（彩版，sqrt(h) 乘曲率与 p_eff）",
+        "location": "下方面板 p_eff 曲线",
+        "description": "右侧 Bound side 的 p_eff 随 h 减小而下降（向右上升），与 1/2 参考线明显分离；标签和参考线均可见，无可读性导致的误读为“向 1/2 收敛”的风险。",
+        "severity": "info"
+      },
+      {
+        "figure": "图3（灰度版，上下曲率）",
+        "location": "图例与两面板曲线",
+        "description": "灰度下圆点实线与方框虚线仍靠标记形状可区分，但两者灰度接近，仅靠线型/标记区分；属于可辨认但对比偏弱。",
+        "severity": "low"
+      },
+      {
+        "figure": "图4（灰度版，sqrt(h) 乘曲率与 p_eff）",
+        "location": "图例与下方面板",
+        "description": "灰度下 p_eff 两条曲线主要靠标记形状（圆 vs 方框）区分，1/2 参考点线也与蓝/橙原色版相比对比减弱；仍可读，但灰度可辨识性较彩版差。",
+        "severity": "low"
+      },
+      {
+        "figure": "图1–图4",
+        "location": "整体排版",
+        "description": "标题、参数行、图例、轴标签均未见明显裁切或重叠；未发现需报告的标签遮挡问题。",
+        "severity": "info"
+      }
+    ],
+    "visible_behavior": "图1与图3上下分别为共振侧/束缚侧曲率随 h 变化，横轴为对数坐标且向左趋近 Mott 点；图2与图4上部为 sqrt(h) 乘曲率，下部为有效幂指数 p_eff，含 1/2 参考线。灰版（图3、图4）中曲线主要依赖标记形状区分，对比度低于彩版。",
+    "uncertainty": "仅审可读性，未推断数学证明或数值精度；未对 p_eff 的具体数值做额外估读。灰度版是否满足印刷/投影标准取决于最终输出介质，此处仅给出可辨识性偏弱的主观判断。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "e1d449d73d0a829c147f79123330c1f46700781a8bcae47e8c16de100eebce33",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_asymptotics_20261104_v3_png_review\\sigma_side_curvature.png",
+          "sha256": "bb5f64a6d78be94b79126b563cd80747dc9bcda4e4ce1212a6dea29096e2a66a",
+          "bytes": 381391
+        },
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_asymptotics_20261104_v3_png_review\\sigma_side_scaling.png",
+          "sha256": "7e12add17cbe88b737bdf6da8111f16c71f651260a07ed68e47e133dde477ce2",
+          "bytes": 357348
+        },
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_asymptotics_20261104_v3_png_review\\sigma_side_curvature_gray.png",
+          "sha256": "8f6c74ee9cd7361d031fd95e7f4a4a4fbac927909e981aa314f6176bc93a7a30",
+          "bytes": 351371
+        },
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\sigma_mott_asymptotics_20261104_v3_png_review\\sigma_side_scaling_gray.png",
+          "sha256": "952f2fcda6862deadfb0ffb18b7ae4b023cdfa1d0e1649588a61591ded43e56d",
+          "bytes": 332922
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 806,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.21,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 4167,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 4167,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 4973
+      },
+      "finish_reason": "stop",
+      "answer": "{\"pass_candidate\": true, \"findings\": [{\"figure\": \"图1（彩版，上下曲率）\", \"location\": \"整体/图例与标题\", \"description\": \"彩色线型/标记可与图例映射区分：Resonant side 为实线+空心圆，Bound side 为虚线+空心方框；标题与参数行完整，无裁切。\", \"severity\": \"info\"}, {\"figure\": \"图1（彩版，上下曲率）\", \"location\": \"上/下方面板纵轴标签\", \"description\": \"纵轴标签 I_S''(ξ_M∓h) 可读，括号与单位 (fm²) 未被裁切，也未与刻度重叠。\", \"severity\": \"info\"}, {\"figure\": \"图1（彩版，上下曲率）\", \"location\": \"共享横轴\", \"description\": \"横轴刻度 10^-6、10^-5、10^-4 与轴标签可辨，注释 (Mott limit toward left) 完整可见，提示极限方向向左。\", \"severity\": \"info\"}, {\"figure\": \"图2（彩版，sqrt(h) 乘曲率与 p_eff）\", \"location\": \"图例\", \"description\": \"图例三项（Resonant side 实线圆、Bound side 虚线方框、Reference exponent 1/2 点线）清晰可辨，无重叠。\", \"severity\": \"info\"}, {\"figure\": \"图2（彩版，sqrt(h) 乘曲率与 p_eff）\", \"location\": \"下方面板 p_eff 曲线\", \"description\": \"右侧 Bound side 的 p_eff 随 h 减小而下降（向右上升），与 1/2 参考线明显分离；标签和参考线均可见，无可读性导致的误读为“向 1/2 收敛”的风险。\", \"severity\": \"info\"}, {\"figure\": \"图3（灰度版，上下曲率）\", \"location\": \"图例与两面板曲线\", \"description\": \"灰度下圆点实线与方框虚线仍靠标记形状可区分，但两者灰度接近，仅靠线型/标记区分；属于可辨认但对比偏弱。\", \"severity\": \"low\"}, {\"figure\": \"图4（灰度版，sqrt(h) 乘曲率与 p_eff）\", \"location\": \"图例与下方面板\", \"description\": \"灰度下 p_eff 两条曲线主要靠标记形状（圆 vs 方框）区分，1/2 参考点线也与蓝/橙原色版相比对比减弱；仍可读，但灰度可辨识性较彩版差。\", \"severity\": \"low\"}, {\"figure\": \"图1–图4\", \"location\": \"整体排版\", \"description\": \"标题、参数行、图例、轴标签均未见明显裁切或重叠；未发现需报告的标签遮挡问题。\", \"severity\": \"info\"}], \"visible_behavior\": \"图1与图3上下分别为共振侧/束缚侧曲率随 h 变化，横轴为对数坐标且向左趋近 Mott 点；图2与图4上部为 sqrt(h) 乘曲率，下部为有效幂指数 p_eff，含 1/2 参考线。灰版（图3、图4）中曲线主要依赖标记形状区分，对比度低于彩版。\", \"uncertainty\": \"仅审可读性，未推断数学证明或数值精度；未对 p_eff 的具体数值做额外估读。灰度版是否满足印刷/投影标准取决于最终输出介质，此处仅给出可辨识性偏弱的主观判断。\"}",
+      "parsed": {
+        "pass_candidate": true,
+        "findings": [
+          {
+            "figure": "图1（彩版，上下曲率）",
+            "location": "整体/图例与标题",
+            "description": "彩色线型/标记可与图例映射区分：Resonant side 为实线+空心圆，Bound side 为虚线+空心方框；标题与参数行完整，无裁切。",
+            "severity": "info"
+          },
+          {
+            "figure": "图1（彩版，上下曲率）",
+            "location": "上/下方面板纵轴标签",
+            "description": "纵轴标签 I_S''(ξ_M∓h) 可读，括号与单位 (fm²) 未被裁切，也未与刻度重叠。",
+            "severity": "info"
+          },
+          {
+            "figure": "图1（彩版，上下曲率）",
+            "location": "共享横轴",
+            "description": "横轴刻度 10^-6、10^-5、10^-4 与轴标签可辨，注释 (Mott limit toward left) 完整可见，提示极限方向向左。",
+            "severity": "info"
+          },
+          {
+            "figure": "图2（彩版，sqrt(h) 乘曲率与 p_eff）",
+            "location": "图例",
+            "description": "图例三项（Resonant side 实线圆、Bound side 虚线方框、Reference exponent 1/2 点线）清晰可辨，无重叠。",
+            "severity": "info"
+          },
+          {
+            "figure": "图2（彩版，sqrt(h) 乘曲率与 p_eff）",
+            "location": "下方面板 p_eff 曲线",
+            "description": "右侧 Bound side 的 p_eff 随 h 减小而下降（向右上升），与 1/2 参考线明显分离；标签和参考线均可见，无可读性导致的误读为“向 1/2 收敛”的风险。",
+            "severity": "info"
+          },
+          {
+            "figure": "图3（灰度版，上下曲率）",
+            "location": "图例与两面板曲线",
+            "description": "灰度下圆点实线与方框虚线仍靠标记形状可区分，但两者灰度接近，仅靠线型/标记区分；属于可辨认但对比偏弱。",
+            "severity": "low"
+          },
+          {
+            "figure": "图4（灰度版，sqrt(h) 乘曲率与 p_eff）",
+            "location": "图例与下方面板",
+            "description": "灰度下 p_eff 两条曲线主要靠标记形状（圆 vs 方框）区分，1/2 参考点线也与蓝/橙原色版相比对比减弱；仍可读，但灰度可辨识性较彩版差。",
+            "severity": "low"
+          },
+          {
+            "figure": "图1–图4",
+            "location": "整体排版",
+            "description": "标题、参数行、图例、轴标签均未见明显裁切或重叠；未发现需报告的标签遮挡问题。",
+            "severity": "info"
+          }
+        ],
+        "visible_behavior": "图1与图3上下分别为共振侧/束缚侧曲率随 h 变化，横轴为对数坐标且向左趋近 Mott 点；图2与图4上部为 sqrt(h) 乘曲率，下部为有效幂指数 p_eff，含 1/2 参考线。灰版（图3、图4）中曲线主要依赖标记形状区分，对比度低于彩版。",
+        "uncertainty": "仅审可读性，未推断数学证明或数值精度；未对 p_eff 的具体数值做额外估读。灰度版是否满足印刷/投影标准取决于最终输出介质，此处仅给出可辨识性偏弱的主观判断。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 25.057,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 26.502,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

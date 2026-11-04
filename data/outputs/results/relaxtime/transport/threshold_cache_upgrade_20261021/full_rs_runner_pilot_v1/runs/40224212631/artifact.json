@@ -1,0 +1,20 @@
+{
+  "id": 12611091471,
+  "node_id": "MDg6QXJ0aWZhY3QxMjYxMTA5MTQ3MQ==",
+  "name": "transport-thermal_weighted_full_rs_20261025-pilot_muB900_alpha1_00",
+  "size_in_bytes": 32410,
+  "url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611091471",
+  "archive_download_url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611091471/zip",
+  "expired": false,
+  "digest": "sha256:5bfa8bf5bc694e573f0d6f116389de00185a614a0c7e469f58bec779bf2f4c00",
+  "created_at": "2026-10-25T19:15:52Z",
+  "updated_at": "2026-10-25T19:15:52Z",
+  "expires_at": "2026-11-24T19:15:51Z",
+  "workflow_run": {
+    "id": 40224212631,
+    "repository_id": 1097528528,
+    "head_repository_id": 1097528528,
+    "head_branch": "transport-full-rs-20261026-v1",
+    "head_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+  }
+}

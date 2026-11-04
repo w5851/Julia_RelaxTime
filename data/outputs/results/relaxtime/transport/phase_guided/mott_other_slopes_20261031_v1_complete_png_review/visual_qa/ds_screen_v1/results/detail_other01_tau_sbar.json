@@ -1,0 +1,103 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "detail_other01_tau_sbar",
+  "job_fingerprint": "d85461e277bfbce60e883386aa5c685ca058df951a108f467617615ac74567f6",
+  "ok": true,
+  "answer": {
+    "image_id": "detail_other01_tau_sbar",
+    "plots": [
+      {
+        "plot": "other01_tau_sbar.png",
+        "layout": "clear",
+        "issues": [
+          {
+            "severity": "uncertain",
+            "location": "下图（对数割线面板）的灰点状竖线附近，约 y=3.0–4.3",
+            "description": "Mott 竖线附近有许多小标记密集重叠（蓝圆、橙方块、黑叉、绿加号），在联系表缩放下个别标记难以逐个分辨；是否在原图中可分辨为 uncertain。"
+          }
+        ],
+        "marker_check": "两幅图均在 x≈0 处可见灰色点状竖直 Mott 标记，穿过上下两个面板；图例中对应为 'K Mott' 虚点样条。"
+      }
+    ],
+    "notes": "版面未见裁切、标签缺失或明显文字/图例碰撞；上下标与下标 ξ_Mott 可辨，横杠/反粒子标记未见异常。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "d543640ce1ab2c127bb774b2a78713fa8485a6561e3955d7aa00b5bf9e4fcdc2",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\detail_other01_tau_sbar.png",
+          "sha256": "c909be1bc9d418d3d12062df42771b8af8915c7077e9e78f2416b31d6ceaaaf8",
+          "bytes": 173425
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 197,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.03,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1259,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1259,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1456
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"detail_other01_tau_sbar\",\"plots\":[{\"plot\":\"other01_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[{\"severity\":\"uncertain\",\"location\":\"下图（对数割线面板）的灰点状竖线附近，约 y=3.0–4.3\",\"description\":\"Mott 竖线附近有许多小标记密集重叠（蓝圆、橙方块、黑叉、绿加号），在联系表缩放下个别标记难以逐个分辨；是否在原图中可分辨为 uncertain。\"}],\"marker_check\":\"两幅图均在 x≈0 处可见灰色点状竖直 Mott 标记，穿过上下两个面板；图例中对应为 'K Mott' 虚点样条。\"}],\"notes\":\"版面未见裁切、标签缺失或明显文字/图例碰撞；上下标与下标 ξ_Mott 可辨，横杠/反粒子标记未见异常。\"}",
+      "parsed": {
+        "image_id": "detail_other01_tau_sbar",
+        "plots": [
+          {
+            "plot": "other01_tau_sbar.png",
+            "layout": "clear",
+            "issues": [
+              {
+                "severity": "uncertain",
+                "location": "下图（对数割线面板）的灰点状竖线附近，约 y=3.0–4.3",
+                "description": "Mott 竖线附近有许多小标记密集重叠（蓝圆、橙方块、黑叉、绿加号），在联系表缩放下个别标记难以逐个分辨；是否在原图中可分辨为 uncertain。"
+              }
+            ],
+            "marker_check": "两幅图均在 x≈0 处可见灰色点状竖直 Mott 标记，穿过上下两个面板；图例中对应为 'K Mott' 虚点样条。"
+          }
+        ],
+        "notes": "版面未见裁切、标签缺失或明显文字/图例碰撞；上下标与下标 ξ_Mott 可辨，横杠/反粒子标记未见异常。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 14.834,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 15.072,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

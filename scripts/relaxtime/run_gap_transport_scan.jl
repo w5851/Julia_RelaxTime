@@ -8,7 +8,7 @@
 - 输出同时包含 MeV 与 fm⁻¹ 的关键量。
 
 示例：
-    julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi-list -0.6,-0.4,-0.2,0.0,0.2,0.4,0.6 --mode finite_15 --overwrite --output data/outputs/results/relaxtime/scan/gap_transport_scan_xi-0p6to0p6.csv
+    julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --sampling-profile thermal_weighted_v1 --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi-list -0.6,-0.4,-0.2,0.0,0.2,0.4,0.6 --output data/outputs/results/relaxtime/scan/gap_transport_scan_new.csv
 
 注意：
 - compute_bulk 默认开启；若需要更快的预览扫描，可显式传 `--no-compute-bulk`。
@@ -64,10 +64,9 @@ function _load_runtime_phase_reference(opts)
     return PhaseReferenceAdapter.load_phase_reference_accepted_runtime(root)
 end
 
-const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
-const MODULE_DEFAULT_ANGLE_NODES = RT_ASR.DEFAULT_ANGLE_NODES   # 4
-const MODULE_DEFAULT_PHI_NODES = RT_ASR.DEFAULT_PHI_NODES       # 8
-const MODULE_DEFAULT_SIGMA_GRID_N = RT_ASR.DEFAULT_SIGMA_GRID_N # 60
+const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES
+const MODULE_DEFAULT_ANGLE_NODES = RT_ASR.DEFAULT_ANGLE_NODES
+const MODULE_DEFAULT_PHI_NODES = RT_ASR.DEFAULT_PHI_NODES
 const PHASE_BOUNDARY_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 const PHASE_CROSSOVER_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_cli.jl"))
@@ -262,53 +261,12 @@ function integration_grids(opts::ScanOptions)
     end
 end
 
-function safe_total_cross_section(process::Symbol, s::Float64,
-    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_points::Int, max_tries::Int=4)
-    s_try = s
-    last_err = nothing
-    for _ in 1:max_tries
-        try
-            σ = RT_TCS.total_cross_section(process, s_try, quark_params, thermo_params, K_coeffs; n_points=n_points)
-            isfinite(σ) && return σ
-        catch err
-            last_err = err
-        end
-        s_try = s_try * (1.0 + 1e-6) + 1e-10
-    end
-    @warn "failed to compute sigma; returning NaN" process=process s=s last_error=last_err
-    return NaN
-end
-
-function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_sigma_points::Int, sigma_grid_n::Int)
-    caches = Dict{Symbol,RT_ASR.CrossSectionCache}()
-    for process in processes
-        s_grid = RT_ASR.design_w0cdf_s_grid(process, quark_params, thermo_params;
-            N=sigma_grid_n, p_cutoff=Λ_inv_fm)
-
-        cache = RT_ASR.CrossSectionCache(process)
-        n_ok, n_bad = 0, 0
-        for s in s_grid
-            σ = safe_total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-            if !isfinite(σ)
-                n_bad += 1
-                continue
-            end
-            RT_ASR.insert_sigma!(cache, s, σ)
-            n_ok += 1
-        end
-        n_bad > 0 && @warn "sigma grid had non-finite points" process=process n_ok=n_ok n_bad=n_bad
-        n_ok >= 2 || error("sigma cache has too few valid points for $process (n_ok=$n_ok)")
-        caches[process] = cache
-    end
-    return caches
-end
-
 function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
     phase_reference=nothing,
     phase_reference_mode::Symbol=opts.phase_reference_mode,
+    muB_values=nothing,
 )
+    plan = build_scan_plan(opts;muB_values=muB_values)
     ensure_parent_dir(opts.output)
     if opts.channel_diagnostics_output !== nothing
         ensure_parent_dir(opts.channel_diagnostics_output)
@@ -318,6 +276,8 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
     end
     provenance_dir = isnothing(opts.provenance_dir) ? dirname(opts.output) : opts.provenance_dir
     mkpath(provenance_dir)
+
+    TransportSamplingScanConfig.prepare_sampling_output!(opts)
 
     if opts.resume && isfile(opts.output) && !opts.overwrite
         ensure_output_header_compatible(opts.output)
@@ -345,7 +305,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
     stats_skipped = 0
     try
         if new_file
-            ScanCSV.write_metadata(io, Dict(
+            metadata = Dict(
                 "schema" => "scan_csv_v1",
                 "title" => "gap_transport_scan",
                 "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
@@ -354,21 +314,15 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
                 "provenance.equilibrium_backend" => "models.solve_constraint(FixedMu) with phase-aware xi/T continuity",
                 "provenance.tau_path" => "TransportWorkflow.solve_gap_and_transport",
                 "provenance.integration_mode" => string(opts.integration_mode),
-                "sigma_grid_n" => string(opts.sigma_grid_n),
                 "integration_mode" => string(opts.integration_mode),
+                "muB_values_MeV" => join(plan.muB_values,','),
                 "gc_every_n" => string(opts.gc_every_n),
                 "tau_p_nodes" => string(opts.tau_p_nodes),
                 "tau_angle_nodes" => string(opts.tau_angle_nodes),
                 "tau_phi_nodes" => string(opts.tau_phi_nodes),
                 "tau_n_sigma_points" => string(opts.tau_n_sigma_points),
-                "tau_threshold_subtraction" => string(opts.tau_threshold_subtraction),
-                "tau_asym_window" => string(opts.tau_asym_window),
-                "tau_asym_fit_min_points" => string(opts.tau_asym_fit_min_points),
-                "tau_asym_extra_points" => string(opts.tau_asym_extra_points),
-                "tau_interpolation_mode" => string(opts.tau_interpolation_mode),
                 "propagator_xi_policy" => string(opts.propagator_xi_policy),
                 "sigma_cache_policy" => string(opts.sigma_cache_policy),
-                "note.tau_threshold_hint" => "for near-threshold sharp channels, linear+threshold_subtraction often more robust than pchip",
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
                 "phase_reference_source" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_kind(phase_reference)),
@@ -387,7 +341,15 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
                 "y_label.sigma_over_T" => "σ/T",
                 "y_label.sigma_over_T_over_eta_over_s" => "(σ/T)/(η/s)",
                 "y_label.zeta_over_s_over_eta_over_s" => "(ζ/s)/(η/s)",
-            ))
+            )
+            if runtime.profile !== nothing
+                delete!(metadata,"tr_p_max_fm")
+                metadata["sampling_profile"] = runtime.profile.id
+                metadata["sampling_profile_sha256"] = runtime.profile.source_sha256
+                metadata["tr_integration_mode"] = "semi_infinite"
+                metadata["provenance.tau_path"] = "TransportSamplingProfiles.solve_profile_transport"
+            end
+            ScanCSV.write_metadata(io,metadata)
             write_header_if_needed(io)
         end
         if channel_io !== nothing
@@ -417,7 +379,6 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
             end
         end
 
-        plan = build_scan_plan(opts)
         stats = execute_scan_plan!(
             (T_mev, muB_mev, xi, previous_solution, previous_phase) ->
                 execute_gap_transport_scan_point!(
@@ -452,7 +413,8 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
         end
     end
 
-    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped; phase_reference=phase_reference)
+    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped;
+        phase_reference=phase_reference,muB_values=plan.muB_values)
 
     println("Scan finished. Output: $(opts.output)")
 end

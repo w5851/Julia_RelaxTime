@@ -1,0 +1,31 @@
+{
+  "host": "W",
+  "mode": "B",
+  "mode_b_background_qualified": true,
+  "points": 909,
+  "groups": 9,
+  "cold_seed_audits": 94,
+  "continuation_files": 36,
+  "continuation_rows": 3636,
+  "maximum_mass_relative_change": 4.2610965933498335e-07,
+  "maximum_entropy_relative_change": 3.4728025546382213e-06,
+  "first_order_boundaries": [
+    {
+      "scan_group": "T120.0_muB900.0",
+      "T_MeV": "120.0",
+      "muB_MeV": "900.0",
+      "xi": "-0.12697792321443563",
+      "refined_xi": "-0.12697792321443563",
+      "refinement_delta_xi": "0.0",
+      "bracket_lower_xi": "-0.13",
+      "bracket_upper_xi": "-0.12"
+    }
+  ],
+  "source_archive_sha256": "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031",
+  "numerical_sources_verified": 322,
+  "source_snapshots_verified": 357,
+  "calculation_commit": null,
+  "transport_qualified": false,
+  "global_phase_diagram_qualified": false,
+  "formal_production_promoted": false
+}

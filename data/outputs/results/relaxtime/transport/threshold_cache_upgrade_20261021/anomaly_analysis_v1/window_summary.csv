@@ -1,0 +1,12 @@
+window_id,muB,alpha_T,left_xi,right_xi,diagnostic_species,jobs,expected_jobs,replay_failures,reference_unresolved,adaptive_unresolved,selected_channels_complete,selected_channels_validated,raw_log_curvature,recomputed_log_curvature,max_tau_relative_change,interpretation
+mode_a_muB0p0_alpha1p0_xip0p37_manual,muB0.0,alpha1.0,0.36,0.38,u,6,6,0,0,0,True,True,0.06745332492510964,0.0005766520815536635,0.06486653354082605,assess convergence before physical attribution
+mode_a_muB450p0_alpha1p0_xip0p26_2,muB450.0,alpha1.0,0.25,0.27,u,6,6,0,0,0,True,True,0.8212667776355084,0.0005436924241395413,1.2690697047137385,assess convergence before physical attribution
+mode_a_muB0p0_alpha1p1_xip0p48_1,muB0.0,alpha1.1,0.47,0.49,u,12,12,0,0,0,True,True,0.004672258875845256,0.004023111435323315,0.01744291624297689,assess convergence before physical attribution
+mode_a_muB450p0_alpha1p1_xip0p35_1,muB450.0,alpha1.1,0.34,0.36,u,18,18,0,0,0,True,True,0.05511437670007832,0.00499338421808046,0.04512813955699979,assess convergence before physical attribution
+mode_a_muB450p0_alpha1p0_xim0p20_1,muB450.0,alpha1.0,-0.21,-0.19,u,18,18,0,0,0,True,True,0.03965807782539027,0.03236453295687486,0.010025683129944118,assess convergence before physical attribution
+mode_a_muB0p0_alpha1p2_xim0p47_supplement,muB0.0,alpha1.2,-0.48,-0.46,s,6,6,0,0,0,True,True,0.19147046531574405,0.000989914739961767,0.20721220870208934,assess convergence before physical attribution
+mu900_a1_strange_and_branch,muB900.0,alpha1.0,-0.07,-0.01,u,63,63,0,0,0,True,True,0.012977114337990758,0.01263012804462249,0.006613175978840147,assess convergence before physical attribution
+mu900_a11_rise,muB900.0,alpha1.1,0.16,0.22,u,42,42,0,0,0,True,True,0.01476158860207788,0.014513164422030211,0.000555120078642446,assess convergence before physical attribution
+mu900_a11_late_rise,muB900.0,alpha1.1,0.41,0.46,u,30,30,0,0,0,True,True,0.0007563300412798402,0.0008878432432737338,0.0009448305024609693,assess convergence before physical attribution
+mu900_a12_endpoint,muB900.0,alpha1.2,0.47,0.5,u,24,24,0,0,0,True,True,0.0012610721598886876,0.0013288093436205628,0.0005491456492955349,assess convergence before physical attribution
+mu0_a1_rapid_control,muB0.0,alpha1.0,-0.24,-0.18,u,24,24,0,0,0,True,True,0.04638741688126939,0.05503683331293792,0.022080501045453227,rapid-change control

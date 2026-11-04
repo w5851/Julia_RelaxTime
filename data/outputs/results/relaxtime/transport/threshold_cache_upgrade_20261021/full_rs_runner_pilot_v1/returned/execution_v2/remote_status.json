@@ -1,0 +1,14 @@
+{
+  "host": "W",
+  "passed": true,
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "reviewer_exit_code": 0,
+  "planner_exit_code": 0,
+  "started_utc": "2026-10-25T19:24:07.803933+00:00",
+  "controller_sha256": "025504e501121dabb15a341fae174bf50a96a9ce23daf7a7dd3145ee15960085",
+  "numerical_calculation_performed": false,
+  "tests_exit_code": 0,
+  "reviewer_tests_passed": 7,
+  "inputs_unchanged_after_review": true,
+  "finished_utc": "2026-10-25T19:24:11.242876+00:00"
+}

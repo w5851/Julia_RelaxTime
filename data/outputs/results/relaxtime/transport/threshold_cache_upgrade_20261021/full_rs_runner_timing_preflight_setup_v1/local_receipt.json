@@ -1,0 +1,19 @@
+{
+  "received_utc": "2026-10-25T18:50:56.238045+00:00",
+  "archive": {
+    "sha256": "9832b714e9d655058fa51a4264ed735b527bf6c52996add0f2a40c65dea4b67e",
+    "bytes": 128544,
+    "files": 22
+  },
+  "extracted_files_verified": 22,
+  "pre_run_manifests_verified": {
+    "package_manifest.json": "a4ee1dbf48fd39afe37d39e811241015bcf13bcb18dd3244c5f61324527909a9",
+    "control_manifest.json": "cf0fa0b4080ab64a3902beb6139e883f4564187338fd53e2ca8c7fcb7cc42a35"
+  },
+  "source_snapshots_verified": 0,
+  "input_snapshots_verified": 0,
+  "remote_review_sha256": "ae2b460ee0e83b980a53c0a4973527e696b5080d7f2a9686063a93967f11b5eb",
+  "remote_reviewer": "review_preflight_v2.py",
+  "receiver_sha256": "071949ea9c35879dc321b08a2f69cfbf4b6a2ac77a6f720b6c9c3eb0ab48c1af",
+  "check_scope": "Archive bytes, frozen snapshots and metadata only; numerical review ran on quote-remote"
+}

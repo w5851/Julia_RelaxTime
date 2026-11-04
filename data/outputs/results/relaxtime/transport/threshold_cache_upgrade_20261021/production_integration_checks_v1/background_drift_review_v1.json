@@ -1,0 +1,54 @@
+{
+  "frozen_background_diagnosis_passed": true,
+  "channels": [
+    {
+      "directory": "production_background_replay_v1",
+      "channel": "uubar_to_ddbar",
+      "maximum_frozen_replay_relative_change": 0.0,
+      "repeat_identical": true,
+      "between_backgrounds_relative_change": -9.237641829584753e-06,
+      "equal_ud_qualified_relative_to_production": -4.302198153283143e-09,
+      "table_nodes": {
+        "qualified_background": 355,
+        "production_background": 353,
+        "production_background_repeat": 353,
+        "qualified_background_equal_ud": 352
+      }
+    },
+    {
+      "directory": "production_background_replay_muB900_udbar_v1",
+      "channel": "udbar_to_udbar",
+      "maximum_frozen_replay_relative_change": 2.220446049250313e-16,
+      "repeat_identical": true,
+      "between_backgrounds_relative_change": 2.7827580255657125e-06,
+      "equal_ud_qualified_relative_to_production": 4.4648551522641355e-10,
+      "table_nodes": {
+        "qualified_background": 487,
+        "production_background": 487,
+        "production_background_repeat": 487,
+        "qualified_background_equal_ud": 487
+      }
+    },
+    {
+      "directory": "production_background_replay_muB900_dubar_v1",
+      "channel": "dubar_to_dubar",
+      "maximum_frozen_replay_relative_change": 1.1102230246251565e-16,
+      "repeat_identical": true,
+      "between_backgrounds_relative_change": 2.782758022457088e-06,
+      "equal_ud_qualified_relative_to_production": 4.464866254494382e-10,
+      "table_nodes": {
+        "qualified_background": 487,
+        "production_background": 487,
+        "production_background_repeat": 487,
+        "qualified_background_equal_ud": 487
+      }
+    }
+  ],
+  "production_fixture_semantics": "stable-background production entrypoint, rather than the locally seeded joint candidate",
+  "preserve_qualified_candidate": true,
+  "regression_rtol": 1e-06,
+  "regression_atol": 1e-08,
+  "migration_relative_limit": 0.0001,
+  "independent_relative_limit": 0.01,
+  "decision": "generate a separate production-entrypoint v2 fixture and verify fresh default-CLI outputs; retain v1 and its nine failures"
+}

@@ -1,0 +1,87 @@
+{
+  "runs": [
+    {
+      "run": "tail_feature_v1",
+      "status": {
+        "complete": true,
+        "finished_utc": "2026-10-21T13:43:30.144",
+        "points": 221,
+        "max_t_relative_change": 9.324696570445212e-11,
+        "max_paired_relative_change": 4.4872215498870105e-08,
+        "max_paired_order_relative_change": 3.9968028886505635e-14,
+        "maximum_reconstruction_relative_error": 4.440892098500626e-16
+      },
+      "manifest_sha256": "6f8cd136bfa405c1926b9615dae8af8caa4d80e2feb67bca4a6a17e4acb58f6c",
+      "source_files_verified": 293,
+      "input_files_verified": 2,
+      "input_hashes": [
+        "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+        "ddaa8d4124eb8075edcf1919dd56dbb29f93193736b0628dfb5dc7d6ec9c9470"
+      ],
+      "branch": "codex/meson-freezeout-defaults",
+      "head": "698feaf8fada670fde81c93bab6093b50093935f",
+      "artifacts": [
+        {
+          "path": "denominator_roots.csv",
+          "sha256": "138613c87a02a3e044aa6022f155dfda3b1ed3bf632fa84cea824433cbf11fdc"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "6f8cd136bfa405c1926b9615dae8af8caa4d80e2feb67bca4a6a17e4acb58f6c"
+        },
+        {
+          "path": "status.json",
+          "sha256": "84b1c5f757882c4cfa8c9a1741aca2d8a13e50202bc2ef06418dc2e1ab6133b1"
+        },
+        {
+          "path": "tail_feature.csv",
+          "sha256": "69783ced734b051f1f4dded1b1f77279e15c768649c8e6e1134a8fe55f47e0c5"
+        }
+      ]
+    },
+    {
+      "run": "baseline_cost_v2",
+      "status": {
+        "complete": true,
+        "finished_utc": "2026-10-21T22:53:01.345",
+        "measurements": 9,
+        "original_retained_rate_reproduced": true,
+        "accurate_candidates_meet_target": true,
+        "stock_meets_target": false
+      },
+      "manifest_sha256": "458d95a4a31b491bc85dade05130d6d0c9215f096124f0503d25a30d73ee90d3",
+      "source_files_verified": 294,
+      "input_files_verified": 2,
+      "input_hashes": [
+        "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+        "ddaa8d4124eb8075edcf1919dd56dbb29f93193736b0628dfb5dc7d6ec9c9470"
+      ],
+      "branch": "codex/meson-freezeout-defaults",
+      "head": "698feaf8fada670fde81c93bab6093b50093935f",
+      "artifacts": [
+        {
+          "path": "manifest.json",
+          "sha256": "458d95a4a31b491bc85dade05130d6d0c9215f096124f0503d25a30d73ee90d3"
+        },
+        {
+          "path": "reference.json",
+          "sha256": "605cac79884c2eb65265094be548c466bb92786ead3997dc2357c51d725228df"
+        },
+        {
+          "path": "status.json",
+          "sha256": "50c0f833479ccc278b2b7e33ee6d75c53951c790dd0538667c36514064efc083"
+        },
+        {
+          "path": "timings.csv",
+          "sha256": "83810b507dd633621865b5c5876881fca9c104e23244a960bd7e3bce14fdab59"
+        }
+      ]
+    }
+  ],
+  "excluded_failed_run": {
+    "complete": false,
+    "stage": "warmup",
+    "failure": "Benchmark original consumer omitted explicit threshold_subtraction and sigma_cache_policy; cache fingerprint validation correctly rejected mismatched settings before timing.",
+    "superseded_by": "baseline_cost_v2"
+  }
+}

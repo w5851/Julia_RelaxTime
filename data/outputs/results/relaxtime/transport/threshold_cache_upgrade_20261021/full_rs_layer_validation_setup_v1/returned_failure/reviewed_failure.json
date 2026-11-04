@@ -1,0 +1,39 @@
+{
+  "original_layer_target_passed": false,
+  "complete": false,
+  "reason": "Bitwise K identity guard rejected one-ULP cross-call rounding; A values match exactly",
+  "diagnostic": {
+    "created_utc": "2026-10-25T12:29:35.994",
+    "julia": "1.12.5",
+    "host": "W",
+    "source_archive_sha256": "9fc7dac27790bf73c2b6cb9f57196067f078ca39fb2da7790de2e61962b4fddc",
+    "source_files_verified": 1601,
+    "diagnostic_script_sha256": "094147b2afc4b71d408d8453a0dc94841bbb3fb96b7dc390ac1b1aa42b676924",
+    "backgrounds": 24,
+    "fields": 360,
+    "unequal_fields": 12,
+    "unequal_A_fields": 0,
+    "maximum_relative_difference": 2.0351271624468254e-16,
+    "maximum_ulp_distance": 1,
+    "repeats_exact": true
+  },
+  "original_failure_status": {
+    "complete": true,
+    "finished_utc": "2026-10-25T12:24:40.552",
+    "layer": "cheap",
+    "points": 12,
+    "rates": 0,
+    "comparisons": 0,
+    "backgrounds": 20,
+    "densities": 480,
+    "pair_bounds": 40,
+    "moments": 120,
+    "A_checks": 135,
+    "failures": 5,
+    "all_cases_complete": false,
+    "layer_target_passed": false,
+    "final_transport_qualification": false
+  },
+  "production_numerical_parameters_changed": false,
+  "next_run": "full-rs-layer-validation-20261025-v2"
+}

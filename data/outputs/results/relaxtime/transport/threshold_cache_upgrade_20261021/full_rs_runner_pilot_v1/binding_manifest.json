@@ -1,0 +1,73 @@
+{
+  "created_utc": "2026-10-25T19:00:22.279149+00:00",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow": ".github/workflows/relaxtime-phase-guided-transport-production.yml",
+  "workflow_ref": "transport-full-rs-20261026-v1",
+  "workflow_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_file_sha256": "56209b3ac35ece3d30c206d1488140009fc652c1dc6d214d910cca3d4675d0c8",
+  "execution_files": {
+    ".github/workflows/relaxtime-phase-guided-transport-production.yml": {
+      "committed_sha256": "56209b3ac35ece3d30c206d1488140009fc652c1dc6d214d910cca3d4675d0c8",
+      "worktree_sha256": "56209b3ac35ece3d30c206d1488140009fc652c1dc6d214d910cca3d4675d0c8"
+    },
+    "benchmark/relaxtime/transport_runner_timing.jl": {
+      "committed_sha256": "6868db442fd1c827c919ab97d40aaf50b4971965a69490ba7d0470d6e7bd4f26",
+      "worktree_sha256": "6868db442fd1c827c919ab97d40aaf50b4971965a69490ba7d0470d6e7bd4f26"
+    }
+  },
+  "timing_preflight": {
+    "received_archive": {
+      "sha256": "9832b714e9d655058fa51a4264ed735b527bf6c52996add0f2a40c65dea4b67e",
+      "bytes": 128544,
+      "files": 22
+    },
+    "review_sha256": "ae2b460ee0e83b980a53c0a4973527e696b5080d7f2a9686063a93967f11b5eb",
+    "unit_assertions": 29,
+    "actual_dry_run_planned_points": 2
+  },
+  "controller_sha256": "842df518d337940ddeab1cdb32140e9be56da2030e9b49b4288d7520de2167af",
+  "evidence": {
+    "A": {
+      "received_archive": {
+        "sha256": "db47413ea79c115fe8a85ff825039732acffd5ca4f4c47e9902d00b49ad627dc",
+        "bytes": 7481,
+        "files": 3
+      },
+      "draft_sha256": "1d2537394d5b5dd1bb52fc66b9e23a6128ff33113a44012f262a4da69f3db059",
+      "source_manifest_sha256": "cfd29e135eb9d35e292385873c06e70675bcd0cc91b883905790b62ff1eb3e65",
+      "numerical_sources": 322,
+      "pilot_points": 6,
+      "pilot_jobs": 4,
+      "full_points": 910
+    },
+    "B": {
+      "received_archive": {
+        "sha256": "ee69a5206643d1b6eece71134d0ddbe2cfc68d66de5de24188529b8b7a9912c6",
+        "bytes": 21267527,
+        "files": 2824
+      },
+      "draft_sha256": "91011906b28d7e9a7b3efd7847c00e02c3131cefac07f44429c5e885363348ad",
+      "source_manifest_sha256": "4543f9fa053eb300f39255f43cf5b51a54d2ffb89b272bbe193aceeafdee8ae7",
+      "numerical_sources": 322,
+      "pilot_points": 5,
+      "pilot_jobs": 3,
+      "full_points": 909
+    }
+  },
+  "files": {
+    "mode_a_runner_inputs.json": "2f60487875152e7249ad6ca05a93edd77868bce7cc1e6d2dead9b79e4e9c875c",
+    "pilot_muB0_alpha1_00.inputs.json": "1537fc07f59ab033101c47954eb00614412be2e1124cc5115a41fcae4933e707",
+    "pilot_muB0_alpha1.2_00.inputs.json": "363498b1a355463cc5a4d8ddf85b6b86b5a3ac17666d81cc54d1cb7996318319",
+    "pilot_muB450_alpha1.1_00.inputs.json": "1d6a0e39c2ee08c6f4fcd105c8988b16325545b88cde153f5479be73e01dafa3",
+    "pilot_muB900_alpha1_00.inputs.json": "de6366c8069152fab960c710a427aeafbaac81460a0f42e140b8d1495890e9d3",
+    "mode_b_runner_inputs.json": "fb21294be105ba6dffb18ac01f723677058c41e8fea27a2474e564e798926777",
+    "pilot_modeB_T120_muB0_00.inputs.json": "5f014f9fb4f1e2f94dc699d4c59bc027a387c95d4142e7eb86175f717a621a38",
+    "pilot_modeB_T120_muB900_00.inputs.json": "1b252dc066c2b47b6e627ddd6b9a1c5c771d261283f09738ce4c6486941a1ad4",
+    "pilot_modeB_T200_muB900_00.inputs.json": "36d2cfc9d1c34f5b529e925d447a7ad8b78f1a0e3f66d5bddcc2c39fa9ef9c10"
+  },
+  "actions_dispatched": false,
+  "remote_ref_verified": false,
+  "full_dispatch_ready": false,
+  "runner_cost_qualified": false,
+  "check_scope": "Received bytes, source/profile hashes, Git content and job metadata; no numerical execution"
+}

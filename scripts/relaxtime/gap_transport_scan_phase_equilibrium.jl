@@ -486,9 +486,11 @@ function _normalize_equilibrium_result(raw; solver_backend::Symbol=:models)
     )
 end
 
+gap_iteration_limit(opts) = hasproperty(opts, :max_iter) ? opts.max_iter : 40
+
 function _solve_fixedmu_via_models_solve(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts)
     return Main.Models.solve(
-        Main.PNJL_MODEL,
+        Main.TransportSamplingScanConfig.model_for_options(opts),
         Main.Models.FixedMu(),
         T_fm,
         muq_fm;
@@ -496,13 +498,14 @@ function _solve_fixedmu_via_models_solve(T_fm::Float64, muq_fm::Float64, xi::Flo
         xi=xi,
         p_num=opts.p_num,
         t_num=opts.t_num,
-        residual_norm_max=1e-4,
+        residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts),
+        iterations=gap_iteration_limit(opts),
     )
 end
 
 function _solve_fixedmu_via_models_constraint(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts)
     return Main.Models.solve_constraint(
-        Main.PNJL_MODEL,
+        Main.TransportSamplingScanConfig.model_for_options(opts),
         Main.Models.FixedMu(),
         T_fm;
         μ_fm=muq_fm,
@@ -510,7 +513,8 @@ function _solve_fixedmu_via_models_constraint(T_fm::Float64, muq_fm::Float64, xi
         xi=xi,
         p_num=opts.p_num,
         t_num=opts.t_num,
-        residual_norm_max=1e-4,
+        residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts),
+        iterations=gap_iteration_limit(opts),
         physicality_check=Main.Models.is_physical_solution,
     )
 end
@@ -522,13 +526,15 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
         eq = _normalize_equilibrium_result(raw; solver_backend=:models)
         eq !== nothing && return eq
     catch err
+        err isa InterruptException && rethrow()
         models_err = err
     end
 
     try
         raw = _solve_fixedmu_via_models_constraint(T_fm, muq_fm, xi, seed_state, opts)
         return _normalize_equilibrium_result(raw; solver_backend=:models)
-    catch
+    catch err
+        err isa InterruptException && rethrow()
         if models_err !== nothing
             rethrow(models_err)
         end
@@ -547,7 +553,7 @@ function solve_with_multiseed_governance(T_fm::Float64, muq_fm::Float64, xi::Flo
     push!(seeds, Float64.(Main.Models.QUARK_SEED_5))
     result = try
         Main.Models.solve_multi(
-            Main.PNJL_MODEL,
+            Main.TransportSamplingScanConfig.model_for_options(opts),
             Main.Models.FixedMu(),
             T_fm,
             muq_fm;
@@ -555,14 +561,39 @@ function solve_with_multiseed_governance(T_fm::Float64, muq_fm::Float64, xi::Flo
             xi=xi,
             p_num=opts.p_num,
             t_num=opts.t_num,
-            residual_norm_max=1e-4,
+            residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts),
+            iterations=gap_iteration_limit(opts),
             evaluate_all_attempts=true,
         )
-    catch
+    catch err
+        err isa InterruptException && rethrow()
         nothing
     end
     result === nothing && return nothing
     return _normalize_equilibrium_result(result; solver_backend=:models_multi)
+end
+
+# Phase branches need an explicit local seed. The general solver otherwise
+# evaluates eight additional perturbations even when the first root converges.
+# Keep that local perturbation pool as a failure recovery, and compare the two
+# physical branches separately before selecting their minimum grand potential.
+function solve_phase_branch(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts)
+    seed = _seed_state_5(seed_state)
+    model = Main.TransportSamplingScanConfig.model_for_options(opts)
+    common = (μ_fm=muq_fm,seed_guess=seed,xi=xi,p_num=opts.p_num,t_num=opts.t_num,
+        iterations=gap_iteration_limit(opts),
+        residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts),
+        physicality_check=Main.Models.is_physical_solution)
+    raw = Main.Models.solve_constraint(model,Main.Models.FixedMu(),T_fm;
+        common...,seed_candidates=[seed])
+    eq = _normalize_equilibrium_result(raw;solver_backend=:models_local_seed)
+    eq !== nothing && return eq
+    raw = Main.Models.solve_constraint(model,Main.Models.FixedMu(),T_fm;common...)
+    eq = _normalize_equilibrium_result(raw;solver_backend=:models_local_perturbed_seeds)
+    eq !== nothing && return eq
+    # A cold seed can leave the physical basin even in a crossover. Retain the
+    # existing global recovery if neither local attempt yields a physical root.
+    return solve_models_equilibrium(T_fm,muq_fm,xi,seed_state,opts)
 end
 
 function classify_phase_from_solution(eq)
@@ -583,9 +614,10 @@ function solve_two_branch_candidates(
     branch_mass_rel_tol::Real=1e-3,
     hadron_seed=Main.Models.HADRON_SEED_5,
     quark_seed=Main.Models.QUARK_SEED_5,
+    branch_solver=solve_phase_branch,
 )
-    candidate_h = solve_models_equilibrium(T_fm, muq_fm, xi, hadron_seed, opts)
-    candidate_q = solve_models_equilibrium(T_fm, muq_fm, xi, quark_seed, opts)
+    candidate_h = branch_solver(T_fm, muq_fm, xi, hadron_seed, opts)
+    candidate_q = branch_solver(T_fm, muq_fm, xi, quark_seed, opts)
     (candidate_h === nothing || candidate_q === nothing) &&
         throw(ArgumentError("failed to obtain both PNJL phase-branch candidates"))
 
@@ -604,6 +636,55 @@ function solve_two_branch_candidates(
         stable=stable,
         stable_phase=stable_phase,
     )
+end
+
+# Locate the same light-condensate derivative peak as the phase reference,
+# but solve every background with the explicitly supplied numerical model.
+function direct_crossover_anchor(muB_MeV::Real, reference_T_MeV::Real, opts;
+    xi::Real=0.0, half_width_MeV::Real=15.0, derivative_step_MeV::Real=0.05,
+    temperature_tolerance_MeV::Real=0.002, on_evaluation=nothing)
+    half_width_MeV>1 && derivative_step_MeV>0 && temperature_tolerance_MeV>0 ||
+        throw(ArgumentError("invalid crossover search intervals"))
+    muq_fm=Float64(muB_MeV)/(3Main.ħc_MeV_fm)
+    solved_temperatures=Float64[]
+    solved_states=Vector{Float64}[]
+    function condensate(T)
+        seed = isempty(solved_temperatures) ? Main.Models.HADRON_SEED_5 :
+            solved_states[argmin(abs.(solved_temperatures.-T))]
+        measured=@timed solve_phase_branch(T/Main.ħc_MeV_fm,muq_fm,Float64(xi),seed,opts)
+        eq=measured.value
+        eq===nothing && error("crossover background failed at T=$T")
+        push!(solved_temperatures,T);push!(solved_states,collect(eq.x_state))
+        on_evaluation===nothing || on_evaluation((T_MeV=T,seconds=measured.time,
+            gc_seconds=measured.gctime,allocated_bytes=measured.bytes,
+            residual_norm=eq.residual_norm,solver_backend=eq.solver_backend))
+        return eq.x_state[1]
+    end
+    function slope(T)
+        return abs((condensate(T+derivative_step_MeV)-condensate(T-derivative_step_MeV))/(2derivative_step_MeV))
+    end
+    temperatures=collect(range(Float64(reference_T_MeV-half_width_MeV),
+        Float64(reference_T_MeV+half_width_MeV);length=31))
+    slopes=slope.(temperatures)
+    k=argmax(slopes)
+    1<k<length(slopes) || error("crossover peak lies outside the search bracket")
+    a,b=temperatures[k-1],temperatures[k+1]
+    ratio=(sqrt(5.0)-1)/2
+    x1=b-ratio*(b-a);x2=a+ratio*(b-a)
+    y1=slope(x1);y2=slope(x2)
+    while b-a>temperature_tolerance_MeV
+        if y1<y2
+            a=x1;x1=x2;y1=y2;x2=a+ratio*(b-a);y2=slope(x2)
+        else
+            b=x2;x2=x1;y2=y1;x1=b-ratio*(b-a);y1=slope(x1)
+        end
+    end
+    midpoint=(a+b)/2
+    branches=solve_two_branch_candidates(midpoint/Main.ħc_MeV_fm,muq_fm,Float64(xi),opts)
+    branches.distinct && error("crossover candidate contains distinct phase branches; reclassify the transition")
+    return (T_mid_MeV=midpoint,T_lower_MeV=a,T_upper_MeV=b,
+        method=:direct_condensate_derivative_peak,reference_xi=Float64(xi),
+        p_num=Int(opts.p_num),t_num=Int(opts.t_num),derivative_step_MeV=Float64(derivative_step_MeV))
 end
 
 function direct_coexistence_anchor(
@@ -699,10 +780,14 @@ function certify_coexistence_side_points(
     delta_xi_candidates=(0.003, 0.005, 0.007, 0.01, 0.015, 0.02),
     convergence_p_num::Int=_default_coexistence_convergence_numerics(opts).p_num,
     convergence_t_num::Int=_default_coexistence_convergence_numerics(opts).t_num,
+    convergence_model=Main.TransportSamplingScanConfig.model_for_options(opts),
     anchor_convergence_tol_MeV::Real=0.1,
 )
-    base_config = (p_num=Int(opts.p_num), t_num=Int(opts.t_num))
-    convergence_config = (p_num=convergence_p_num, t_num=convergence_t_num)
+    base_config = (p_num=Int(opts.p_num), t_num=Int(opts.t_num),
+        model=Main.TransportSamplingScanConfig.model_for_options(opts),
+        residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts))
+    convergence_config = (p_num=convergence_p_num, t_num=convergence_t_num,
+        model=convergence_model,residual_norm_max=base_config.residual_norm_max)
     if convergence_config.p_num < base_config.p_num ||
        convergence_config.t_num < base_config.t_num ||
        convergence_config == base_config
@@ -714,7 +799,7 @@ function certify_coexistence_side_points(
     ]
     muq_fm = (Float64(muB_MeV) / 3.0) / Main.ħc_MeV_fm
     convergence_cfg = last(node_configs)
-    convergence_anchor = if convergence_cfg.p_num == anchor.p_num && convergence_cfg.t_num == anchor.t_num
+    convergence_anchor = if convergence_cfg == base_config
         anchor
     else
         direct_coexistence_anchor(
@@ -734,7 +819,7 @@ function certify_coexistence_side_points(
         evidence = NamedTuple[]
         certified = true
         for cfg in node_configs
-            numerics = (p_num=cfg.p_num, t_num=cfg.t_num)
+            numerics = cfg
             for T_MeV in (anchor.T_lower_MeV, anchor.T_upper_MeV)
                 minus = solve_two_branch_candidates(
                     T_MeV / Main.ħc_MeV_fm,
@@ -810,7 +895,8 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     phase_curr = phase_curr_hint
     models_err = nothing
 
-    stable_multiseed_required = structure === :first_order_possible
+    profile_background = Main.TransportSamplingScanConfig.profile_for_options(opts) !== nothing
+    stable_multiseed_required = profile_background || structure === :first_order_possible
     hinted_switch_multiseed = tracker.previous_solution !== nothing &&
         is_phase_transition(phase_prev, phase_curr_hint) &&
         phase_curr_hint in (:hadron, :quark)
@@ -828,13 +914,14 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
             eq = eq_multi
             phase_curr = classify_phase_from_solution(eq)
             selection_policy = :pressure_max_under_constraints
-            seed_source = stable_multiseed_required ?
+            seed_source = profile_background ? "profile_background_stable_multiseed_$(String(phase_curr))" : stable_multiseed_required ?
                 "first_order_stable_multiseed_$(String(phase_curr))" :
                 "phase_aware_multiseed_governance_$(String(phase_curr))"
         end
     end
 
     if eq === nothing
+        profile_background && error("sampling profile requires successful stable multiseed background selection")
         try
             eq = solve_models_equilibrium(T_fm, muq_fm, xi, seed_state, opts)
         catch err

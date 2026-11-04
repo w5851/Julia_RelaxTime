@@ -1,0 +1,2 @@
+T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,plot_panel,plot_panel_label,plot_series,plot_series_label,T_phase_base_MeV,alpha_T,phase_anchor_method,coexistence_side,coexistence_certified,coexistence_delta_xi,coexistence_T_lower_MeV,coexistence_T_upper_MeV,anchor_p_num,anchor_t_num,anchor_convergence_delta_MeV,anchor_convergence_certified
+120.0,0.0,0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",T120.0,"T=120.0 MeV",muB0.0,"muB=0.0 MeV",120.0,NaN,reference_classification,none,false,NaN,NaN,NaN,96,24,NaN,false

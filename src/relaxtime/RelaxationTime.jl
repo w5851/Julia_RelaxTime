@@ -66,10 +66,11 @@ using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input,
     normalize_symbol_mapping_input, lookup_symbol_value
 using Main.ValidationUtils: validate_grid_weight_pair
 
-using ..AverageScatteringRate: average_scattering_rate, CrossSectionCache,
+using ..AverageScatteringRate: average_scattering_rate,
+    ThermalWeightedCache, ThermalSamplingConfig, DEFAULT_THERMAL_SAMPLING_CONFIG,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
-    DEFAULT_SIGMA_GRID_N, build_w0cdf_pchip_cache
-using ..TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
+    DEFAULT_N_SIGMA_POINTS, DEFAULT_A_COS_NODES
+using ..PolarizationCache: reset_cache!
 using Main.Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 using ..AFieldBuilder: ensure_quark_params_has_A as _ensure_A
 
@@ -93,7 +94,7 @@ const RATE_ALIASES = (
     thermo_params;
     p_nodes::Int=16,
     p_max::Float64=20.0,
-    cos_nodes::Int=DEFAULT_ANGLE_NODES,
+    cos_nodes::Int=DEFAULT_A_COS_NODES,
     use_aniso::Bool=true,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
@@ -218,14 +219,11 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `cs_caches`: Dictionary of cross-section caches for performance
 - `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
-- `n_sigma_points`: Number of points for cross-section interpolation
-- `sigma_grid_n`: Number of w0cdf sample points when building σ(s) caches automatically
+- `n_sigma_points`: Number of t integration nodes in each cross-section evaluation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range (defaults to Λ)
-- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
-- `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 - `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
-- `sigma_cache_policy`: σ(s) cache construction/evaluation policy; `:default` preserves the existing strategy, `:validated_anchored` enables a diagnostic anchored grid with local threshold addback
+- `sigma_cache_policy`: `:thermal_weighted`; the only supported cache algorithm
 
 # Returns
 A NamedTuple containing average scattering rates for all required processes.
@@ -249,7 +247,7 @@ function compute_average_rates(
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
-    cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
+    cs_caches::AbstractDict{Symbol,<:ThermalWeightedCache}=Dict{Symbol,ThermalWeightedCache}(),
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
     phi_nodes::Int=DEFAULT_PHI_NODES,
@@ -259,18 +257,13 @@ function compute_average_rates(
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
-    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
+    n_sigma_points::Int=DEFAULT_N_SIGMA_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing,  # σ(s)有效范围的动量截断，默认使用 Λ
-    threshold_subtraction::Bool=false,
-    asym_window::Float64=0.6,
-    asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10,
-    interpolation_mode::Symbol=:pchip,
-    require_cache_fingerprint::Bool=false,
+    interpolation_mode::Symbol=:auto,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
-    sigma_cache_policy::Symbol=:default,
+    sigma_cache_policy::Symbol=:thermal_weighted,
+    sampling_config::ThermalSamplingConfig=DEFAULT_THERMAL_SAMPLING_CONFIG,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -292,17 +285,12 @@ function compute_average_rates(
         phi_grid=phi_grid,
         phi_w=phi_w,
         n_sigma_points=n_sigma_points,
-        sigma_grid_n=sigma_grid_n,
         sigma_cutoff=sigma_cutoff,
-        threshold_subtraction=threshold_subtraction,
-        asym_window=asym_window,
-        asym_fit_min_points=asym_fit_min_points,
-        asym_extra_points=asym_extra_points,
         interpolation_mode=interpolation_mode,
-        require_cache_fingerprint=require_cache_fingerprint,
         propagator_xi_policy=propagator_xi_policy,
         propagator_quark_params=propagator_quark_params,
         sigma_cache_policy=sigma_cache_policy,
+        sampling_config=sampling_config,
     )
 end
 
@@ -311,7 +299,7 @@ function _compute_average_rates_core(
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple;
     existing_rates::Union{Nothing,NamedTuple}=nothing,
-    cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
+    cs_caches::AbstractDict{Symbol,<:ThermalWeightedCache}=Dict{Symbol,ThermalWeightedCache}(),
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
     phi_nodes::Int=DEFAULT_PHI_NODES,
@@ -321,18 +309,13 @@ function _compute_average_rates_core(
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
-    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
+    n_sigma_points::Int=DEFAULT_N_SIGMA_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing,
-    threshold_subtraction::Bool=false,
-    asym_window::Float64=0.6,
-    asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10,
-    interpolation_mode::Symbol=:pchip,
-    require_cache_fingerprint::Bool=false,
+    interpolation_mode::Symbol=:auto,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
-    sigma_cache_policy::Symbol=:default,
+    sigma_cache_policy::Symbol=:thermal_weighted,
+    sampling_config::ThermalSamplingConfig=DEFAULT_THERMAL_SAMPLING_CONFIG,
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -357,15 +340,19 @@ function _compute_average_rates_core(
     # 动量积分不再使用截断，p_grid保持为nothing以触发半无穷积分
     # if p_grid === nothing: 将在 average_scattering_rate 中使用半无穷积分
 
-    for process in REQUIRED_PROCESSES
+    for process in REQUIRED_RATE_KEYS_FOR_TAU
         if haskey(rates, process)
             continue
         end
         # Reuse an existing populated cache if available; otherwise do NOT build it here.
         # Passing `nothing` as `cs_cache` allows `average_scattering_rate` to auto-build
-        # the cache with the appropriate threshold-subtraction logic when needed.
+        # the cache under its thermal interpolation error budget.
         cache = haskey(cs_caches, process) ? cs_caches[process] : nothing
-        cs_cache_arg = (cache === nothing || isempty(cache.s_vals)) ? nothing : cache
+        cs_cache_arg = cache
+        if cache === nothing
+            GC.gc()
+            reset_cache!()
+        end
 
         rates[process] = average_scattering_rate(
             process,
@@ -383,17 +370,12 @@ function _compute_average_rates_core(
             phi_w=phi_w,
             cs_cache=cs_cache_arg,
             n_sigma_points=n_sigma_points,
-            sigma_grid_n=sigma_grid_n,
             sigma_cutoff=effective_sigma_cutoff,
-            threshold_subtraction=threshold_subtraction,
-            asym_window=asym_window,
-            asym_fit_min_points=asym_fit_min_points,
-            asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
-            require_cache_fingerprint=require_cache_fingerprint,
             propagator_xi_policy=propagator_xi_policy,
             propagator_quark_params=propagator_quark_params,
             sigma_cache_policy=sigma_cache_policy,
+            sampling_config=sampling_config,
         )
     end
 
@@ -496,14 +478,11 @@ and the averaged rates for reuse.
 - `cs_caches`: Dictionary of cross-section caches for performance
 - `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
-- `n_sigma_points`: Number of points for cross-section interpolation
-- `sigma_grid_n`: Number of w0cdf sample points when building σ(s) caches automatically
+- `n_sigma_points`: Number of t integration nodes in each cross-section evaluation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range
-- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
-- `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 - `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
-- `sigma_cache_policy`: σ(s) cache construction/evaluation policy; `:default` preserves the existing strategy, `:validated_anchored` enables a diagnostic anchored grid with local threshold addback
+- `sigma_cache_policy`: `:thermal_weighted`; the only supported cache algorithm
 
 # Returns
 A NamedTuple with fields:
@@ -532,7 +511,7 @@ function relaxation_times(
     K_coeffs::NamedTuple;
     densities::Union{NamedTuple,AbstractDict},
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
-    cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
+    cs_caches::AbstractDict{Symbol,<:ThermalWeightedCache}=Dict{Symbol,ThermalWeightedCache}(),
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
     phi_nodes::Int=DEFAULT_PHI_NODES,
@@ -542,18 +521,13 @@ function relaxation_times(
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
-    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
+    n_sigma_points::Int=DEFAULT_N_SIGMA_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing,
-    threshold_subtraction::Bool=false,
-    asym_window::Float64=0.6,
-    asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10,
-    interpolation_mode::Symbol=:pchip,
-    require_cache_fingerprint::Bool=false,
+    interpolation_mode::Symbol=:auto,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
-    sigma_cache_policy::Symbol=:default,
+    sigma_cache_policy::Symbol=:thermal_weighted,
+    sampling_config::ThermalSamplingConfig=DEFAULT_THERMAL_SAMPLING_CONFIG,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -579,17 +553,12 @@ function relaxation_times(
             phi_grid=phi_grid,
             phi_w=phi_w,
             n_sigma_points=n_sigma_points,
-            sigma_grid_n=sigma_grid_n,
             sigma_cutoff=sigma_cutoff,
-            threshold_subtraction=threshold_subtraction,
-            asym_window=asym_window,
-            asym_fit_min_points=asym_fit_min_points,
-            asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
-            require_cache_fingerprint=require_cache_fingerprint,
             propagator_xi_policy=propagator_xi_policy,
             propagator_quark_params=propagator_quark_params,
             sigma_cache_policy=sigma_cache_policy,
+            sampling_config=sampling_config,
         )
     end
 
@@ -606,79 +575,5 @@ function relaxation_times(
     return (tau=tau, tau_inv=tau_inv, rates=rates)
 end
 
-function _read_sigma_table_csv(path::AbstractString)
-    s_vals = Float64[]
-    sigma_vals = Float64[]
-    for raw in eachline(path)
-        line = strip(raw)
-        isempty(line) && continue
-        startswith(line, "#") && continue
-        # Support either comma-separated or whitespace-separated formats.
-        line = replace(line, ',' => ' ')
-        parts = split(line)
-        length(parts) < 2 && continue
-        s_try = tryparse(Float64, parts[1])
-        σ_try = tryparse(Float64, parts[2])
-        (s_try === nothing || σ_try === nothing) && continue
-        s = s_try
-        σ = σ_try
-        push!(s_vals, s)
-        push!(sigma_vals, σ)
-    end
-
-    isempty(s_vals) && error("sigma table file has no data rows: $(path)")
-
-    p = sortperm(s_vals)
-    s_sorted = s_vals[p]
-    σ_sorted = sigma_vals[p]
-
-    # De-duplicate identical s values by keeping the last occurrence.
-    s_out = Float64[]
-    σ_out = Float64[]
-    for (s, σ) in zip(s_sorted, σ_sorted)
-        if !isempty(s_out) && s == s_out[end]
-            σ_out[end] = σ
-        else
-            push!(s_out, s)
-            push!(σ_out, σ)
-        end
-    end
-    return (s_out, σ_out)
-end
-
-"""
-    load_cross_section_caches_from_dir(dir) -> Dict{Symbol,CrossSectionCache}
-
-从目录加载每个散射过程的 σ(s) 表（CSV），并构造 `cs_caches` 以注入到 `relaxation_times`。
-
-本仓库的生产默认策略固定为 w0cdf+PCHIP，因此这里加载出的缓存会用 PCHIP 插值；当质心能量 s 超出缓存覆盖区间时，σ(s) 直接返回 0（而不是钳制到边界）。
-运行时不会触发任何新的 σ(s) 计算。
-
-目录内每个过程支持以下文件名之一：
-- `sigma_<process>.csv`（推荐）
-- `<process>.csv`
-
-每个 CSV 的数据行格式为：
-- `s,sigma` 或 `s sigma`（允许 # 开头注释行）
-"""
-function load_cross_section_caches_from_dir(dir::AbstractString)::Dict{Symbol,CrossSectionCache}
-    isdir(dir) || error("sigma cache directory not found: $(dir)")
-
-    cs_caches = Dict{Symbol,CrossSectionCache}()
-    for process in REQUIRED_PROCESSES
-        path1 = joinpath(dir, "sigma_$(process).csv")
-        path2 = joinpath(dir, "$(process).csv")
-        path = isfile(path1) ? path1 : (isfile(path2) ? path2 : "")
-        isempty(path) && error("missing sigma table for $(process) under $(dir) (expected $(path1) or $(path2))")
-
-        s_vals, σ_vals = _read_sigma_table_csv(path)
-        cache = CrossSectionCache(process)
-        cache.s_vals = s_vals
-        cache.sigma_vals = σ_vals
-        cache.pchip_dirty = true
-        cs_caches[process] = cache
-    end
-    return cs_caches
-end
 
 end # module RelaxationTime

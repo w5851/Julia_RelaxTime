@@ -1,0 +1,10 @@
+{
+  "original_path": "C:\\Windows\\Fonts\\times.ttf",
+  "expected_sha256": "931c5de5c70401d9324d5014c123802b4fb753000360ceb2f56c589403cd58c5",
+  "retained_path": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/fonts/times_26100_8521.ttf",
+  "bytes": 1190736,
+  "source": "C:/Windows/WinSxS/amd64_microsoft-windows-f..etype-timesnewroman_31bf3856ad364e35_10.0.26100.8521_none_79288d624964556a/times.ttf",
+  "system_font_modified": false,
+  "font_redistribution": "local recovery copy only; not committed to Git",
+  "reason": "Windows component version changed from 26100.8521 to 26100.9818"
+}

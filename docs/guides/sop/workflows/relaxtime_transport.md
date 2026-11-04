@@ -16,7 +16,7 @@ equilibrium -> A/B0 -> polarization -> propagator -> |M|^2
 - 不负责 phase-guided transport 的专题 canonical production 口径；该流程仍以现有脚本指南和正式产物 README 为准。
 - 不负责 Beth-Uhlenbeck 介子热力学或介子数密度。
 - 不把低节点单点 pilot 作为回归 baseline。
-- 不把 `isotropic` propagator 或 `validated_anchored` cache 诊断策略自动升格为默认修复。
+- `isotropic` propagator 仍是显式诊断选项。旧 `validated_anchored` 缓存已退役，当前生产只使用 thermal-weighted。
 
 ## 3. 权威入口
 
@@ -34,24 +34,21 @@ equilibrium -> A/B0 -> polarization -> propagator -> |M|^2
 - CLI `mubmin/mubmax/mubstep`：重子化学势 `mu_B`，MeV。
 - 兼容参数 `mumin/mumax/mustep` 表示 `mu_q`，脚本按 `mu_B = 3 mu_q` 转换；新命令优先使用 `mub*`。
 - `xi`：无量纲。
-- `tr-p-max`：`fm^-1`。
+- profile 中的动量上限和映射尺度单位为 `fm^-1`；末端默认采用半无穷积分。
 - 输出中 `tau` 为 fm，`eta/zeta` 为 `fm^-3`，`sigma` 为 `fm^-1`；派生无量纲比值按列合同解释。
-- 默认 `propagator_xi_policy=match_thermo`、`sigma_cache_policy=default`，保持当前主线语义。
+- 默认 `propagator_xi_policy=match_thermo`、`sampling_profile=thermal_weighted_v1`。
 
 所有节点数和步长必须为有效正值；非有限 tau 或上游失败不得静默进入输运积分。
 
 ## 5. 输入配置及优先级
 
-`run_gap_transport_scan.jl` 当前以 CLI 参数为主要扫描合同。未显式传入时使用 `gap_transport_scan_cli.jl` 中的默认值；有效参数写入 `effective_config.json` 和 `run_manifest.json`。
+`run_gap_transport_scan.jl` 以 CLI 选择扫描坐标，数值参数默认由 `config/models/pnjl/transport_sampling/thermal_weighted_v1.toml` 统一配置。与 profile 冲突的参数会被拒绝；有效参数写入 `effective_config.json` 和 `run_manifest.json`，数值源码和逐道预算另有 sampling sidecar。
 
 与单点 workflow 相关的物理默认值仍可能来自 `config/physics/<profile>.toml`。正式 case 必须同时记录 physics profile、CLI argv 和 effective config，不能只依赖默认值的文字描述。
 
-Issue #130 phase-reference runtime 默认使用仓库内 `strict` candidate 的 certified-only view；
-candidate 缺失或 unresolved 的键逐键回退到 legacy reference。可用
-`--phase-reference-root <dir>` 指定 candidate，`--phase-reference-layer strict|derived` 选择层，
-或以 `--phase-reference-mode legacy` 显式回滚。`--phase-reference-mode diagnostic` 仅用于显式
-candidate 的审计，`render` layer 始终不可作 runtime 输入。source、fallback 原因、candidate
-manifest hash 会写入 `effective_config.json` 和 `run_manifest.json`，切换与回滚不得覆盖旧 legacy 文件。
+Issue #130 runtime 使用 accepted reference，显式 strict 模式使用 strict layer。
+旧参考仅提供起始提示，稳定分支和 mode-A 温度锚点由当前 profile 的背景模型重算。
+legacy runtime 已退役，诊断视图需显式提供 reference root；render 层不作为正式 runtime 输入。
 
 ## 6. 环境与版本冻结
 
@@ -79,13 +76,13 @@ julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
 julia --project=. -e 'ENV["UNIT_FILES"]="relaxtime/test_run_gap_transport_scan_solver_entry.jl"; include("tests/unit/runtests.jl")'
 ```
 
-再执行单点低成本 diagnostic pilot。Windows 示例：
+需要检查实际数值主链时，执行同一 profile 的单点 pilot。Windows 示例：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl --tmin 150 --tmax 150 --tstep 1 --mubmin 0 --mubmax 0 --mubstep 1 --xi-list 0.0 --no-compute-bulk --p-num 8 --t-num 4 --max-iter 10 --tau-p-nodes 8 --tau-angle-nodes 2 --tau-phi-nodes 4 --tau-n-sigma 4 --sigma-grid-n 16 --tr-p-nodes 8 --tr-p-max 6.0 --output data/outputs/results/sop_smoke/relaxtime_transport/scan.csv --failed-points-output data/outputs/results/sop_smoke/relaxtime_transport/failed_points.csv --provenance-dir data/outputs/results/sop_smoke/relaxtime_transport --overwrite
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl --tmin 150 --tmax 150 --tstep 1 --mubmin 0 --mubmax 0 --mubstep 1 --xi-list 0.0 --no-compute-bulk --sampling-profile thermal_weighted_v1 --output data/outputs/results/sop_smoke/relaxtime_transport/scan.csv --failed-points-output data/outputs/results/sop_smoke/relaxtime_transport/failed_points.csv --provenance-dir data/outputs/results/sop_smoke/relaxtime_transport --overwrite
 ```
 
-该 pilot 只验证联合主链和 provenance；节点明显低于正式精度，不得用于 baseline、论文图或物理趋势结论。
+该 pilot 使用默认采样精度但关闭 bulk，只检查这一点的 η/σ/τ 主链与 provenance。完整资格还需 ζ 和代表点独立收敛检查；只测试参数和输出合同可改用 phase-guided mode-B 的 `--dry-run`。
 
 ## 8. 收敛性验证
 
@@ -93,27 +90,26 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 
 - 平衡层 `p_num/t_num/max_iter`；
 - tau 层 `tau_p_nodes/tau_angle_nodes/tau_phi_nodes/tau_n_sigma`；
-- `sigma_grid_n` 与插值模式；
-- transport 层 `tr_p_nodes/tr_p_max`；
+- 热权重缓存的误差预算、阈值/共振发现和独立直算参考；
+- A 与末端输运的半无穷映射尺度、径向和角度节点；
 - T、`mu_B`、`xi` 网格步长；
-- threshold-subtraction 参数；
 - 失败点与 continuation/seed 稳定性。
 
 比较量至少包括质量/序参量、代表通道 sigma、tau 六分量、`eta/s`、`zeta/s`、`sigma/T`、失败率和局部跳变。局部共振或阈值区域应额外补点，不能只看全局最大相对误差。
 
-`propagator_xi_policy=isotropic` 和 `sigma_cache_policy=validated_anchored` 当前属于显式诊断分支；在完成复算、收敛和回归前，不得写成正式修复口径。
+缓存插值预算不等于完整输运误差。默认 profile 的代表集以最终六种 τ、η/s、ζ/s、σ/T 的 1% 为目标；当前资格及适用范围见[输运采样指南](../../scripts/transport_sampling_qualification.md)。
 
 ## 9. 正式计算命令
 
 正式命令使用 case 目录，并显式保存 channel diagnostics、failed points 和 provenance：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl <由收敛性证据确定的网格与积分参数> --propagator-xi-policy match_thermo --sigma-cache-policy default --output data/outputs/results/relaxtime/transport/<case_id>/scan.csv --channel-diagnostics-output data/outputs/results/relaxtime/transport/<case_id>/channel_diagnostics.csv --failed-points-output data/outputs/results/relaxtime/transport/<case_id>/failed_points.csv --provenance-dir data/outputs/results/relaxtime/transport/<case_id>
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl <由收敛性证据确定的网格与积分参数> --propagator-xi-policy match_thermo --sampling-profile thermal_weighted_v1 --output data/outputs/results/relaxtime/transport/<case_id>/scan.csv --channel-diagnostics-output data/outputs/results/relaxtime/transport/<case_id>/channel_diagnostics.csv --failed-points-output data/outputs/results/relaxtime/transport/<case_id>/failed_points.csv --provenance-dir data/outputs/results/relaxtime/transport/<case_id>
 ```
 
 这里不提供通用“正式节点数”，因为正式参数必须来自该 case 的收敛性证据。实际生效值以 `effective_config.json` 为准。
 
-默认 resume 会跳过已有点；若改变任何数值口径，应创建新 case 或显式 `--overwrite` 重建，不能向旧配置 CSV 追加。
+显式 `--resume` 会跳过已有点并校验数值源码/profile 身份；若改变数值口径，应创建新 case，不能向旧配置 CSV 追加。
 
 ## 10. 输出目录与产物合同
 

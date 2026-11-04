@@ -1,0 +1,180 @@
+{
+  "schema": "delegated_plot_screen_assessment_v1",
+  "reviewed_utc": "2026-10-31T15:23:59.146207+00:00",
+  "status": "reconciled_with_machine_checks_and_limited_primary_visual_review",
+  "model_requested": "cn:deepseek-v4.1-flash",
+  "jobs": 23,
+  "valid_json_jobs": 21,
+  "failed_jobs": [
+    {
+      "id": "detail_other03_eta_over_s",
+      "finish_reason": "length",
+      "parse_error": "Unterminated string starting at: line 1 column 227 (char 226)",
+      "disposition": "covered by primary-agent detailed image review; original failed reply retained, no retry"
+    },
+    {
+      "id": "detail_other08_tau_ubar",
+      "finish_reason": "stop",
+      "parse_error": "Expecting ':' delimiter: line 1 column 181 (char 180)",
+      "disposition": "covered by primary-agent detailed image review; original failed reply retained, no retry"
+    }
+  ],
+  "input_manifest": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/input_manifest.json",
+    "bytes": 66231,
+    "sha256": "f095e46190361e8e181e7ad890aca2092eff5ff743c1682eb8c99ef99a62c193"
+  },
+  "batch_summary": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/summary.json",
+    "bytes": 1282,
+    "sha256": "92134bd61c42afc432f41d87ae7732edb2ca66079c86a319e0991a605a34a402"
+  },
+  "raw_reports": [
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_01.json",
+      "bytes": 10647,
+      "sha256": "014f23354ffb8eb4511878e6376fb982b2ea0ed4dd2752ee4ec21e167b2ce84c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_02.json",
+      "bytes": 9439,
+      "sha256": "696a7ee96c7f842d8a706640e4d22cf0ab27e31e6aa02a719d47228292a7c66e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_03.json",
+      "bytes": 6087,
+      "sha256": "f2d09db8632481fef2a6f3f7db92ac4ab9b972e52d07694cce5034bb9fc8ad43"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_04.json",
+      "bytes": 7731,
+      "sha256": "a2455ac5c5a685ec07d0d8813c68603e35fa3958141ec070d8a5672fb4f16ea3"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_05.json",
+      "bytes": 9386,
+      "sha256": "f5aac74e3211dad6c19c0c7940a43ec81d23be12da54356bc88710a3a446d344"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_06.json",
+      "bytes": 9704,
+      "sha256": "4e6f073093664e4015d08e309c572ccc8d70808f78e3b6db43d0e65183e81277"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_07.json",
+      "bytes": 9411,
+      "sha256": "2f6d548062560edb702df5402140621be4e4f78a26c29eacdcfe36bb648ada71"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_08.json",
+      "bytes": 6454,
+      "sha256": "80c9b28f6f7bab9e4e62ef3fe685ec3155039f684a6005f51559caefe59470db"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_09.json",
+      "bytes": 5998,
+      "sha256": "9d72d66118e084c11f3c447674f86f4f48af104c4bfe13edf0c54a0ef278e347"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_10.json",
+      "bytes": 6691,
+      "sha256": "b230b8e693bd947515cdf3ab3f37e1ddc0a19462f95ba539744a543a0cec1365"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/overview_11.json",
+      "bytes": 6044,
+      "sha256": "6a760e110c1a45246be4e19c0bcd83e595fd1ef3a5cc4cd5011f92c84d18ea29"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other01_tau_sbar.json",
+      "bytes": 4949,
+      "sha256": "525533dff055046ebf5d0d62fcbf43bb1b6f7940e7b5c9c3e83219b16636ecb0"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other03_eta_over_s.json",
+      "bytes": 2819,
+      "sha256": "05bf6b9d747e268ae4d71ef4d04f8b3b5fa3211fc5c5a87ed18cb94df14e8259"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_sigma_over_T.json",
+      "bytes": 4019,
+      "sha256": "33e58188d09837dd66a8121a6b14b02c6340b11bcc51e42389d65d1b114a7338"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_tau_ubar.json",
+      "bytes": 6365,
+      "sha256": "80aa779dc43346be3996a4927395f338a70b3d40d08f4424a3facfb32a14860c"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other08_tau_ubar.json",
+      "bytes": 2781,
+      "sha256": "36a908267b7a4fc0de9a21d51a921a2e777832930db79851b0d6526eecdcfa7e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_tau_ubar.json",
+      "bytes": 5566,
+      "sha256": "9b37f232c39ac7893bd71039a885d5faaa48165b4432b7e255890226a449415f"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_sigma_over_T.json",
+      "bytes": 4035,
+      "sha256": "140d24e9a88ad2952d308507d4f96688b9382acb06b147a6bf01965b8d3cdbc8"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other11_tau_sbar.json",
+      "bytes": 6302,
+      "sha256": "d6b80e912d78193ac2d9a728f2281658af9b3bb0370a432293633e9f4401560e"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other13_zeta_over_s.json",
+      "bytes": 5083,
+      "sha256": "fd4283996f6292d7cd0ebc78f91e99d4331fd305997f26627b3052cddbd215cf"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other01_tau_sbar_gray.json",
+      "bytes": 5326,
+      "sha256": "25307354fd4ab2e1e37df060cf15338946db2c68bef2641329a1f844a16a25b1"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other05_sigma_over_T_gray.json",
+      "bytes": 4871,
+      "sha256": "f17d8f996a8c4a9788689814e47fced3ef5ea5e4da0cca5bf6560e2f1c4ee2bd"
+    },
+    {
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/visual_qa/ds_screen_v1/results/detail_other07_sigma_over_T_gray.json",
+      "bytes": 3756,
+      "sha256": "8e182d44562e0b0c9a2d821d30ca8f4e6887400104ebde5b812f5960fa8f33b7"
+    }
+  ],
+  "successful_contact_sheets": 11,
+  "color_plots_in_contact_sheets": 65,
+  "candidate_issue_counts": {
+    "uncertain": 26,
+    "warning": 9
+  },
+  "raw_model_outputs_verified": false,
+  "dispositions": [
+    {
+      "candidate": "green plus clipped above the lower panel in other13_zeta_over_s",
+      "verdict": "not_confirmed",
+      "basis": "Primary-agent view of detail_other13_zeta_over_s.png shows the complete green plus below the upper frame, with visible margin."
+    },
+    {
+      "candidate": "horizontal dotted legend sample differs from vertical Mott line, or sigma/pi labels differ between windows",
+      "verdict": "not_a_defect",
+      "basis": "Mott is intentionally a vertical dotted reference with a horizontal legend sample. Meson labels follow each selected window; renderer and displayed examples agree."
+    },
+    {
+      "candidate": "Delta xi squared, extra s subscripts, or missing antiparticle bars reported by the auxiliary model",
+      "verdict": "unreliable_transcription",
+      "basis": "Frozen renderer uses Delta ln(y)/Delta xi. Primary detailed examples retain antiparticle bars and correct first-order labels; model OCR was not used as scientific evidence."
+    },
+    {
+      "candidate": "dense markers and small text in resized previews",
+      "verdict": "declared_preview_limitation",
+      "basis": "Full artifact requires 6.75-inch width. Same-endpoint fine/tighter traces intentionally overlap. Physical glyph, legend and clipping checks pass; inspected examples retain marker shapes. Contact sheets do not establish full-size legibility of every point."
+    }
+  ],
+  "scientific_conclusions_from_ds": false,
+  "author_acceptance": false
+}

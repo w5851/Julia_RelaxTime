@@ -156,20 +156,48 @@ function _mode_a_anchor(opts, muB_MeV::Float64;
     )
     isfinite(interpolated_T_MeV) || error("no phase reference temperature for mode a point: muB=$(muB_MeV)")
 
+    profile = Main.TransportSamplingScanConfig.profile_for_options(opts)
+    profile !== nothing && opts.phase_anchor_policy !== :direct_coexistence &&
+        throw(ArgumentError("a sampling profile requires phase anchors recomputed with its background model"))
+    numerics = profile === nothing ? (p_num=opts.p_num,t_num=opts.t_num) :
+        (p_num=opts.p_num,t_num=opts.t_num,model=Main.TransportSamplingScanConfig.model_for_options(opts),
+         residual_norm_max=Main.TransportSamplingScanConfig.residual_norm_max(opts))
+    reference_numerics = if profile === nothing
+        nothing
+    else
+        (p_num=max(opts.p_num+32,128),t_num=max(opts.t_num+8,32),
+            model=Main.Models.TransportSamplingProfiles.profile_model(profile;
+                thermal_p_max_inv_fm=max(profile.background.thermal_p_max_inv_fm+5,30.0)),
+            residual_norm_max=numerics.residual_norm_max)
+    end
+    if profile !== nothing && phase_reference_kind === :crossover
+        phase=Main.GapTransportScanPhaseEquilibrium
+        anchor=phase.direct_crossover_anchor(muB_MeV,interpolated_T_MeV,numerics;xi=MODE_A_REFERENCE_XI)
+        reference=phase.direct_crossover_anchor(muB_MeV,anchor.T_mid_MeV,reference_numerics;
+            xi=MODE_A_REFERENCE_XI,derivative_step_MeV=0.025)
+        delta=reference.T_mid_MeV-anchor.T_mid_MeV
+        abs(delta)<=0.1 || error("crossover anchor failed the independent 0.1 MeV check: $delta")
+        anchor=merge(anchor,(convergence_delta_MeV=delta,convergence_certified=true))
+        return (phase_reference_kind=phase_reference_kind,T_phase_base_MeV=anchor.T_mid_MeV,
+            phase_anchor_method=anchor.method,anchor=anchor,certification=nothing)
+    end
     if phase_reference_kind === :first_order && opts.phase_anchor_policy === :direct_coexistence
-        numerics = (p_num=opts.p_num, t_num=opts.t_num)
         anchor = Main.GapTransportScanPhaseEquilibrium.direct_coexistence_anchor(
             muB_MeV,
             interpolated_T_MeV,
             numerics;
             xi=MODE_A_REFERENCE_XI,
         )
-        certification = if any(isapprox(xi, 0.0; atol=1e-12, rtol=0.0) for xi in opts.xi_values) &&
-                           any(isapprox(alpha, 1.0; atol=1e-12, rtol=0.0) for alpha in opts.alpha_T_values)
+        certification = if profile !== nothing ||
+                           (any(isapprox(xi, 0.0; atol=1e-12, rtol=0.0) for xi in opts.xi_values) &&
+                            any(isapprox(alpha, 1.0; atol=1e-12, rtol=0.0) for alpha in opts.alpha_T_values))
             Main.GapTransportScanPhaseEquilibrium.certify_coexistence_side_points(
                 anchor,
                 muB_MeV,
-                numerics,
+                numerics;
+                (reference_numerics === nothing ? (;) :
+                    (convergence_p_num=reference_numerics.p_num,convergence_t_num=reference_numerics.t_num,
+                     convergence_model=reference_numerics.model))...,
             )
         else
             nothing
@@ -199,6 +227,9 @@ function _mode_a_xi_values(opts, anchor_info, alpha_T::Float64)
         isapprox(alpha_T, 1.0; atol=1e-12, rtol=0.0) &&
         certification !== nothing && certification.certified
     exact_coexistence_slice || return opts.xi_values
+    # Certification is required for every profile anchor, but extra side points
+    # replace a requested coexistence point only; a sparse shard stays sparse.
+    any(isapprox(xi, 0.0; atol=1e-12, rtol=0.0) for xi in opts.xi_values) || return opts.xi_values
 
     values = [xi for xi in opts.xi_values if !isapprox(xi, 0.0; atol=1e-12, rtol=0.0)]
     append!(values, (certification.minus_xi, certification.plus_xi))
@@ -251,12 +282,12 @@ function build_plan(opts; phase_reference=nothing, phase_reference_mode::Symbol=
                         coexistence_side,
                         certification !== nothing && certification.certified,
                         certification === nothing ? NaN : certification.delta_xi,
-                        anchor === nothing ? NaN : anchor.T_lower_MeV,
-                        anchor === nothing ? NaN : anchor.T_upper_MeV,
+                        anchor === nothing || phase_reference_kind !== :first_order ? NaN : anchor.T_lower_MeV,
+                        anchor === nothing || phase_reference_kind !== :first_order ? NaN : anchor.T_upper_MeV,
                         opts.p_num,
                         opts.t_num,
-                        certification === nothing ? NaN : certification.anchor_convergence_delta_MeV,
-                        certification !== nothing && certification.anchor_convergence_certified,
+                        certification === nothing ? (anchor !== nothing && hasproperty(anchor,:convergence_delta_MeV) ? anchor.convergence_delta_MeV : NaN) : certification.anchor_convergence_delta_MeV,
+                        certification !== nothing ? certification.anchor_convergence_certified : (anchor !== nothing && hasproperty(anchor,:convergence_certified) && anchor.convergence_certified),
                     ))
                 end
             end

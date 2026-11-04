@@ -1,0 +1,16 @@
+{
+  "schema": "transport_delivery_archive_receipt_v1",
+  "archive": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/engineering_source.zip",
+  "archive_bytes": 27522328,
+  "archive_sha256": "7a97a22b03a15966a5f4c1352167a0f3a81bbc655e4465cd678e7bec4bf10525",
+  "manifest_sha256": "dd66bdf73d785fab7d82f8c4f6475b4b870f361642f95646113fd5baab971a2b",
+  "files": 3734,
+  "uncompressed_bytes": 179733017,
+  "archive_verified": true,
+  "base_commit": "3a07a0e2a6082011bc72ea3f9e02cdf55e1bb4b5",
+  "calculation_commit": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "branch": "codex/meson-freezeout-defaults",
+  "source": "Selected Git index; unrelated dirty paths use their committed bytes",
+  "scope": "All non-data tracked files; docs limited to source/text formats. Historical binary docs/data require the base Git checkout and evidence archive.",
+  "pack_seconds": 223.1277403831482
+}

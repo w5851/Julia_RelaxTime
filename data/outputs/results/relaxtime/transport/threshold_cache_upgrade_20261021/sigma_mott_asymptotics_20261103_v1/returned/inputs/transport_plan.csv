@@ -1,0 +1,10 @@
+point_id,curve_id,meson,cut,window,T_MeV,muB_MeV,xi,xi_mott,delta_xi,kind,original_point_id
+sig_m200,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015127819995582102,0.015327819995582102,-0.0002,explicit_center_refinement,
+sig_m100,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015227819995582103,0.015327819995582102,-0.0001,explicit_center_refinement,
+sig_m050,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015277819995582103,0.015327819995582102,-5e-05,explicit_center_refinement,
+sig_m020,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015307819995582103,0.015327819995582102,-2e-05,explicit_center_refinement,
+sig_c000,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015327819995582102,0.015327819995582102,0.0,explicit_center_refinement,
+sig_p020,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015347819995582102,0.015327819995582102,2e-05,explicit_center_refinement,
+sig_p050,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015377819995582102,0.015327819995582102,5e-05,explicit_center_refinement,
+sig_p100,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015427819995582102,0.015327819995582102,0.0001,explicit_center_refinement,
+sig_p200,other07,sigma,uu,mode_a:muB900.0_alpha1.0,125.7360002645551,900.0,0.015527819995582103,0.015327819995582102,0.0002,explicit_center_refinement,

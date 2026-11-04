@@ -1,0 +1,11 @@
+﻿{
+    "host":  "W",
+    "exit_code":  0,
+    "tests":  6,
+    "passed":  true,
+    "source_verified_before_and_after":  true,
+    "source_zip_sha256":  "6fd0d7cad0e87c2c72c7221f4f1aabcc9d4eaad64d3d220414a50e14f3ca3622",
+    "controller_sha256":  "c81181450ee6dc9b5ff4e043863ea2e85a2ef5b69e2d8472087144a42c065cd5",
+    "julia_started":  false,
+    "updated_utc":  "2026-10-25T18:27:14.8571222Z"
+}

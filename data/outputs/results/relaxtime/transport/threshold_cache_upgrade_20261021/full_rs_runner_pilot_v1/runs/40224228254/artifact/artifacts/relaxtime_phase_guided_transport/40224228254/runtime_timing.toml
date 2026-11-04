@@ -1,0 +1,42 @@
+acceptance_scope = "Entry point return is not numerical acceptance; check the actual transport artifact separately"
+allocation_semantics = "Cumulative bytes allocated, not peak resident memory"
+argv = ["--mode", "fixed-T-sparse-muB", "--case-name", "thermal_weighted_full_rs_mode_b_20261025", "--sampling-profile", "thermal_weighted_v1", "--xi-list", "0.5", "--muB-list", "0", "--channel-diagnostics", "--T-list", "120"]
+blas_threads_after_load = 1
+blas_threads_at_end = 1
+blas_threads_at_start = 1
+calculation_sha = "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+compile_time_included_in_elapsed = true
+cpu_name = "znver3"
+cpu_threads = 4
+entrypoint = "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/scripts/relaxtime/run_phase_guided_transport_scan.jl"
+entrypoint_returned = true
+entrypoint_sha256 = "9673afec66bf0535e05f7971c7edf6d7e7acda57e7c1c5a703e56eb722271229"
+finished_utc = "2026-10-25T19:14:38.590"
+free_memory_bytes_at_start = 15476748288
+github_run_id = "40224228254"
+julia_threads = 1
+julia_version = "1.12.5"
+measured_wrapper_seconds = 208.59418173
+process_scope = "GNU time supplies total process wall/CPU time and peak RSS; these phases exclude Julia startup and final report serialization"
+schema_version = 1
+started_utc = "2026-10-25T19:11:09.996"
+timing_script_sha256 = "6868db442fd1c827c919ab97d40aaf50b4971965a69490ba7d0470d6e7bd4f26"
+total_memory_bytes = 16766410752
+workflow_sha = "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+wrapper_initialization_seconds = 1.044312261
+
+[load]
+allocated_bytes = 2240196712
+compile_seconds = 19.905320436
+compile_timing_available = true
+elapsed_seconds = 29.692000718
+gc_seconds = 0.825367977
+recompile_seconds = 6.911268406
+
+[scan]
+allocated_bytes = 32497155640
+compile_seconds = 62.697241056
+compile_timing_available = true
+elapsed_seconds = 178.879052231
+gc_seconds = 20.459852154
+recompile_seconds = 2.632242749

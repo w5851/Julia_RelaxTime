@@ -5,6 +5,8 @@ module GapTransportScanOrchestration
 end
 
 function build_scan_runtime(opts)
+    profile = Main.TransportSamplingScanConfig.profile_for_options(opts)
+    profile === nothing || return Main.Models.TransportSamplingProfiles.build_runtime(profile)
     p_grid, p_w, sigma_cutoff = Main.integration_grids(opts)
     cos_grid, cos_w = Main.gauleg(-1.0, 1.0, opts.tau_angle_nodes)
     phi_grid, phi_w = Main.gauleg(0.0, 2 * pi, opts.tau_phi_nodes)
@@ -13,6 +15,8 @@ function build_scan_runtime(opts)
         p_max=opts.tr_p_max_fm,
     )
     return (
+        profile=nothing,
+        model=Main.PNJL_MODEL,
         p_grid=p_grid,
         p_w=p_w,
         sigma_cutoff=sigma_cutoff,
@@ -32,12 +36,6 @@ function build_scan_runtime(opts)
             phi_grid=phi_grid,
             phi_w=phi_w,
             sigma_cutoff=sigma_cutoff,
-            threshold_subtraction=opts.tau_threshold_subtraction,
-            asym_window=opts.tau_asym_window,
-            asym_fit_min_points=opts.tau_asym_fit_min_points,
-            asym_extra_points=opts.tau_asym_extra_points,
-            interpolation_mode=opts.tau_interpolation_mode,
-            sigma_grid_n=opts.sigma_grid_n,
             propagator_xi_policy=opts.propagator_xi_policy,
             sigma_cache_policy=opts.sigma_cache_policy,
         ),
@@ -45,47 +43,31 @@ function build_scan_runtime(opts)
     )
 end
 
-function _solve_transport_with_bulk_retry(eq, T_fm::Float64, muq_fm::Float64, xi::Float64, opts, runtime, K_coeffs)
-    compute_bulk_this_point = opts.compute_bulk
-    result = try
-        Main.Models.solve_transport_from_equilibrium(
+function _solve_transport(eq, T_fm::Float64, muq_fm::Float64, xi::Float64, opts, runtime, K_coeffs; run_id="")
+    if runtime.profile !== nothing
+        callback = row -> _write_sampling_diagnostic(opts,T_fm,muq_fm,xi,row;run_id=run_id)
+        result = Main.Models.TransportSamplingProfiles.solve_profile_transport(runtime,eq,T_fm,muq_fm;
+            xi=xi,compute_bulk=opts.compute_bulk,propagator_xi_policy=opts.propagator_xi_policy,on_channel=callback)
+        return result, opts.compute_bulk
+    end
+    result = Main.Models.solve_transport_from_equilibrium(
             eq,
             T_fm,
             muq_fm;
             xi=xi,
             compute_tau=true,
             K_coeffs=K_coeffs,
-            compute_bulk=compute_bulk_this_point,
+            compute_bulk=opts.compute_bulk,
             p_num=opts.p_num,
             t_num=opts.t_num,
             tau_kwargs=runtime.tau_kwargs,
             transport_config=runtime.transport_config,
         )
-    catch bulk_err
-        if compute_bulk_this_point
-            @warn "transport with bulk failed, retrying without bulk" T_mev=(T_fm * Main.ħc_MeV_fm) muB_mev=(3.0 * muq_fm * Main.ħc_MeV_fm) xi=xi err=bulk_err
-            compute_bulk_this_point = false
-            Main.Models.solve_transport_from_equilibrium(
-                eq,
-                T_fm,
-                muq_fm;
-                xi=xi,
-                compute_tau=true,
-                K_coeffs=K_coeffs,
-                compute_bulk=false,
-                p_num=opts.p_num,
-                t_num=opts.t_num,
-                tau_kwargs=runtime.tau_kwargs,
-                transport_config=runtime.transport_config,
-            )
-        else
-            rethrow(bulk_err)
-        end
-    end
-    return result, compute_bulk_this_point
+    return result, opts.compute_bulk
 end
 
-function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, point_meta)
+function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, point_meta;
+    model=Main.PNJL_MODEL)
     T_fm = T_mev / Main.ħc_MeV_fm
     muq_mev = muB_mev / 3.0
     muq_fm = muq_mev / Main.ħc_MeV_fm
@@ -101,7 +83,7 @@ function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Fl
     rates = res.rates
 
     P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Main.Models.model_thermo(
-        Main.PNJL_MODEL,
+        model,
         eq.x_state,
         eq.mu_vec,
         T_fm,
@@ -115,7 +97,7 @@ function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Fl
     rho_norm = rho_baryon / Main.ρ0_inv_fm3
 
     omega_fm4inv = Main.Models.omega(
-        Main.PNJL_MODEL,
+        model,
         eq.x_state,
         T_fm,
         eq.mu_vec;
@@ -200,9 +182,11 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
         muq_mev = muB_mev / 3.0
         muq_fm = muq_mev / Main.ħc_MeV_fm
         masses = (u=Float64(eq.masses[1]), d=Float64(eq.masses[2]), s=Float64(eq.masses[3]))
-        ktmp = Main.build_K_data(T_fm, muq_fm, masses, Float64(eq.x_state[4]), Float64(eq.x_state[5]))
-        res, _ = _solve_transport_with_bulk_retry(eq, T_fm, muq_fm, xi, opts, runtime, ktmp.K_coeffs)
-        payload = _build_scan_row(eq, diag, res, T_mev, muB_mev, xi, opts, ctx, point_meta)
+        ktmp = runtime.profile === nothing ?
+            Main.build_K_data(T_fm, muq_fm, masses, Float64(eq.x_state[4]), Float64(eq.x_state[5])) :
+            (K_coeffs=nothing,)
+        res, _ = _solve_transport(eq, T_fm, muq_fm, xi, opts, runtime, ktmp.K_coeffs;run_id=ctx.run_id)
+        payload = _build_scan_row(eq, diag, res, T_mev, muB_mev, xi, opts, ctx, point_meta;model=runtime.model)
 
         println(io, payload.row)
         flush(io)
@@ -228,6 +212,7 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
             next_phase=next_phase,
         )
     catch point_err
+        point_err isa InterruptException && rethrow()
         @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
         if failed_io !== nothing
             Main.write_failed_point_row!(failed_io, T_mev, muB_mev, xi, diag_hint, point_err)
@@ -242,5 +227,17 @@ end
 
 export build_scan_runtime
 export execute_gap_transport_scan_point!
+
+function _write_sampling_diagnostic(opts,T_fm,muq_fm,xi,row;run_id="")
+    path = Main.TransportSamplingScanConfig.sampling_diagnostics_path(opts)
+    Main.ensure_parent_dir(path)
+    needs_header = !isfile(path) || filesize(path)==0
+    open(path,"a") do io
+        needs_header && println(io,"T_MeV,muB_MeV,xi,channel,seconds,rate,estimated_error,nodes,evaluations,events,converged,reason,guard_phase,feature_count,run_id")
+        println(io,join((T_fm*Main.ħc_MeV_fm,3muq_fm*Main.ħc_MeV_fm,xi,row.channel,row.seconds,
+            row.rate,row.estimated_error,row.nodes,row.evaluations,row.events,true,row.reason,row.guard_phase,row.feature_count,run_id),','))
+    end
+    return nothing
+end
 
 end # module GapTransportScanOrchestration

@@ -1,0 +1,133 @@
+{
+  "status": "completed_diagnostic_acceptance",
+  "generated_utc": "2026-11-03T03:15:28.367424+00:00",
+  "source_host": "quote-remote",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "current_frozen_source_files": 340,
+  "authoritative_review": "review_uniform_with_cutoff_v1",
+  "authoritative_review_sha256": "4d39321633e80c34c59315665855b2f12676d6407d4e6a06d688d4aa75c840ce",
+  "completed_runs": [
+    {
+      "run": "left_s6_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "3cd8186875fade87e6737c87a721b4d59c193d73ebbeb68ef26a526e67a1a6d0"
+    },
+    {
+      "run": "right_s6_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "66d4d76d893a8b8a3f71c69f21afecf7931881c3f8c0c217a6fb720c7dcf2db8"
+    },
+    {
+      "run": "spectrum_v2",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "d4945c9a39b23a05cc4afd92f019910a598352ab9355cc4c014d8abfc11d491b"
+    },
+    {
+      "run": "thermal_audit_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "92f14167851eb36fdd57770b2b036d0dcb5e5b8f5556e4859f707dcc967fb059"
+    },
+    {
+      "run": "weight_checks_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "7193c0318e2360efad65a26eb90cd2be94401e62f099aabcab7ced6097a8ff9a"
+    },
+    {
+      "run": "reference_center_s7_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "28a4cd9d4b4003bb55f40d20fb3e94068cfc2889d34d5d72919c1d6fa41bae2e"
+    },
+    {
+      "run": "reference_left_s7_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "48a68663e7637183a48a064daabf2a0dd56b43aeb9272f85d66d1a4a6d509980"
+    },
+    {
+      "run": "reference_right_s7_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "076a3747600f51983e781b0d56fd07511942194c7908b615666701cd0960b21e"
+    },
+    {
+      "run": "cutoff_audit_v1",
+      "exit_code": 0,
+      "source_files_checked_before": 340,
+      "source_files_checked_after": 340,
+      "source_all_match": true,
+      "status_sha256": "dce6a0aada5c67bc37cb79627d3343396f27faccc725ba312b9eb157def65458"
+    }
+  ],
+  "analysis_checks": "passed",
+  "cutoff_event_validation": {
+    "status": "passed",
+    "cases": 8,
+    "events": 2424,
+    "max_sum_absolute_error_fm2": 1.5881867761018131e-22
+  },
+  "maximum_s6_s7_jump_change": 8.709800472495033e-05,
+  "spectrum_max_pair_native_root_relative_difference": 1.2542437606288814e-06,
+  "maximum_peak_area_order_relative_difference": 4.413587273432995e-10,
+  "maximum_near_band_cutoff_sensitivity_selected_J": 2.4706936297747006e-05,
+  "inner_conductivity": {
+    "raw_s7_jump": -0.013368038145934014,
+    "near_continuum_s7_jump": -0.013055210084990554,
+    "combined_s7_jump": -0.0007779354264232374,
+    "cutoff_removal_fraction_relative_to_near_residual": 0.9404118799039762,
+    "combined_removal_fraction_relative_to_raw_residual": 0.9418063130931555
+  },
+  "thermal_peak_discrete_to_continuous_ratios": [
+    {
+      "point_id": "sig_m200",
+      "ratio": 4.72457131374194
+    },
+    {
+      "point_id": "sig_m100",
+      "ratio": 46.898336670709504
+    },
+    {
+      "point_id": "sig_m050",
+      "ratio": 28.91264893683603
+    },
+    {
+      "point_id": "sig_m020",
+      "ratio": 15.170045689386676
+    }
+  ],
+  "scientific_limits": [
+    "Complete source grid uses one s-tolerance per curve.",
+    "Only the innermost triplet has s7 values.",
+    "Fixed cutoff membership is an attribution counterfactual, not a converged continuum production result.",
+    "Peak exponents refer to a finite sampled range and the positive mixed-scalar square; full-amplitude interference is not an independent sigma rate.",
+    "Complete transport differentiability is not certified."
+  ],
+  "historical_controller_statuses": {
+    "cutoff_queue_v1": "Historical waiting status; superseded by completed cutoff_audit_v1 direct task; no case worker is running.",
+    "reference_controls_v1": "Historical waiting status; explicit reference_controls_v1_superseded.json links to completed reference_controls_v2."
+  },
+  "production_kernel_changed": false,
+  "manuscript_eligible": false,
+  "pdf_exported": false
+}

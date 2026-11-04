@@ -1,0 +1,49 @@
+{
+  "rendered_at": "2026-10-28T11:53:13.766055+00:00",
+  "renderer": "Poppler pdftoppm",
+  "status": "rendered_pending_visual_review",
+  "samples": [
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/composites/figure1_relaxation_times_comparison.pdf",
+      "pdf_sha256": "25b3359c57fa258e38dfdc12a364178fb9526c2f2b98a7fbacf7947512addfda",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/01_figure1_relaxation_times_comparison.png",
+      "render_sha256": "6ead26b989c8da85cc712e6f2c80c8ebf1b72ea1552b49e5aa94f9864515d714",
+      "dpi": 160
+    },
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/composites/figure2_transport_coefficients_comparison.pdf",
+      "pdf_sha256": "41e2554de9336179f2582b487302b88e6119f342fb56bce99ae4b66fd7951eaf",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/02_figure2_transport_coefficients_comparison.png",
+      "render_sha256": "fc7f452912de09bda5094c306188825b9b54d48b976b82f105d0a248b4cbc285",
+      "dpi": 160
+    },
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/composites/figure4_transport_fixed_T.pdf",
+      "pdf_sha256": "52e3d6765545928340d81c4c1791643d15913ffa4d83803c237e18fa7bbba55f",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/03_figure4_transport_fixed_T.png",
+      "render_sha256": "2f1ee4313b8a2b24871e45c834a73f25826d7c3882039a6d41a82086c6e30aa6",
+      "dpi": 160
+    },
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/details/figure1_low_value_details.pdf",
+      "pdf_sha256": "3c1c2f4908d0418d450f09ef6b7dd2b1829616a766a09752c2a42f16cf695064",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/04_figure1_low_value_details.png",
+      "render_sha256": "0b2b427975e388a60f93acd68a54d09bbf7335863e1321e7c9a54cf6765829a4",
+      "dpi": 160
+    },
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/mode_a_fixed_muB_phase_scaled/plot_panel=muB0.0/sigma_vs_xi.pdf",
+      "pdf_sha256": "fc2b571094e758215b173cfb1483d0794d55b78b63919b9fa6369534ef2b9f8c",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/05_sigma_vs_xi.png",
+      "render_sha256": "4fcd9174f950a00a7492ebc9ce1c7fa74d062be61c89697334af78be5bbb5f87",
+      "dpi": 160
+    },
+    {
+      "pdf": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/mode_b_fixed_T_sparse_muB/plot_panel=T120.0/tau_ubar_vs_xi.pdf",
+      "pdf_sha256": "6d0bea4a7ebd625094594d1f37f2bc9eaf4d86ef58a5e57ef434d1f9cf07573f",
+      "render": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/pdf_visual_review/06_tau_ubar_vs_xi.png",
+      "render_sha256": "3e7b8b9f083ffae18d0dfcd6d06d9313e163828c011f71181030574bf354c305",
+      "dpi": 160
+    }
+  ]
+}

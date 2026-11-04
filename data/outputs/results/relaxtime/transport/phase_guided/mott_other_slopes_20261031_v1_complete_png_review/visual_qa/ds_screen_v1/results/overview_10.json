@@ -1,0 +1,151 @@
+{
+  "kind": "external_ds_batch_job",
+  "id": "overview_10",
+  "job_fingerprint": "e439a23acd5514e0084ee4e568a6983237470b4fd70a40d623e34f2e78131406",
+  "ok": true,
+  "answer": {
+    "image_id": "overview_10",
+    "plots": [
+      {
+        "plot": "other11_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在上下两幅中均可见，接近但未触及图例或数据标签"
+      },
+      {
+        "plot": "other12_eta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区，未见遮挡"
+      },
+      {
+        "plot": "other12_sigma_over_T.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+      },
+      {
+        "plot": "other12_tau_sbar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+      },
+      {
+        "plot": "other12_tau_ubar.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+      },
+      {
+        "plot": "other12_zeta_over_s.png",
+        "layout": "clear",
+        "issues": [],
+        "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+      }
+    ],
+    "notes": "缩略联系表整体版面清晰，图例、轴标签与灰色竖线未见明显碰撞或裁切；个别小号符号在缩略图中分辨率有限，原图可辨性uncertain。"
+  },
+  "attempts": [
+    {
+      "kind": "bounded_external_model_task",
+      "model_requested": "cn:deepseek-v4.1-flash",
+      "model_returned": "deepseek-v4.1-flash",
+      "prompt_sha256": "b594208bae52e863c7519c2637972a4014dcc033ab6740d50caa36fe74e73b1a",
+      "images": [
+        {
+          "path": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mott_other_slopes_20261031_v1_complete_png_review\\visual_qa\\overview_10.png",
+          "sha256": "b6f0aafe45463fe1414bfe0d9e8dff1dada3a05d4f13ee077b494a8200e108dd",
+          "bytes": 334660
+        }
+      ],
+      "reasoning_effort": "low",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cached_tokens": 0,
+        "completion_thinking_tokens": 0,
+        "completion_tokens": 298,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "credit": 0.04,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1275,
+        "prompt_cache_write_tokens": 0,
+        "prompt_tokens": 1275,
+        "prompt_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "cached_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "total_tokens": 1573
+      },
+      "finish_reason": "stop",
+      "answer": "{\"image_id\":\"overview_10\",\"plots\":[{\"plot\":\"other11_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在上下两幅中均可见，接近但未触及图例或数据标签\"},{\"plot\":\"other12_eta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在两幅中可见，靠近陡变区，未见遮挡\"},{\"plot\":\"other12_sigma_over_T.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在两幅中可见，靠近陡变区\"},{\"plot\":\"other12_tau_sbar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在两幅中可见，靠近陡变区\"},{\"plot\":\"other12_tau_ubar.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在两幅中可见，靠近陡变区\"},{\"plot\":\"other12_zeta_over_s.png\",\"layout\":\"clear\",\"issues\":[],\"marker_check\":\"虚线竖向K Mott标记在两幅中可见，靠近陡变区\"}],\"notes\":\"缩略联系表整体版面清晰，图例、轴标签与灰色竖线未见明显碰撞或裁切；个别小号符号在缩略图中分辨率有限，原图可辨性uncertain。\"}",
+      "parsed": {
+        "image_id": "overview_10",
+        "plots": [
+          {
+            "plot": "other11_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在上下两幅中均可见，接近但未触及图例或数据标签"
+          },
+          {
+            "plot": "other12_eta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区，未见遮挡"
+          },
+          {
+            "plot": "other12_sigma_over_T.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+          },
+          {
+            "plot": "other12_tau_sbar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+          },
+          {
+            "plot": "other12_tau_ubar.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+          },
+          {
+            "plot": "other12_zeta_over_s.png",
+            "layout": "clear",
+            "issues": [],
+            "marker_check": "虚线竖向K Mott标记在两幅中可见，靠近陡变区"
+          }
+        ],
+        "notes": "缩略联系表整体版面清晰，图例、轴标签与灰色竖线未见明显碰撞或裁切；个别小号符号在缩略图中分辨率有限，原图可辨性uncertain。"
+      },
+      "parse_error": null,
+      "json_wrapper_removed": false,
+      "reasoning_characters": 0,
+      "tool_calls_returned": false,
+      "model_output_verified": false,
+      "http_status": 200,
+      "seconds": 15.625,
+      "attempt": 1
+    }
+  ],
+  "validation": "none",
+  "validation_issues": [],
+  "eligible_for_review": true,
+  "seconds": 15.842,
+  "expected": null,
+  "expected_label_scope": null,
+  "development_label_match": null,
+  "model_output_verified": false
+}

@@ -1,0 +1,20 @@
+{
+  "id": 12611170705,
+  "node_id": "MDg6QXJ0aWZhY3QxMjYxMTE3MDcwNQ==",
+  "name": "transport-thermal_weighted_full_rs_20261025-pilot_muB450_alpha1.1_00",
+  "size_in_bytes": 30373,
+  "url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611170705",
+  "archive_download_url": "https://api.github.com/repos/w5851/Julia_RelaxTime/actions/artifacts/12611170705/zip",
+  "expired": false,
+  "digest": "sha256:611ac1588a4421ac5a8bb2ed25c97293693172a63b0df3cbee73df1b3362cfa4",
+  "created_at": "2026-10-25T19:11:01Z",
+  "updated_at": "2026-10-25T19:11:01Z",
+  "expires_at": "2026-11-24T19:11:00Z",
+  "workflow_run": {
+    "id": 40224194586,
+    "repository_id": 1097528528,
+    "head_repository_id": 1097528528,
+    "head_branch": "transport-full-rs-20261026-v1",
+    "head_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+  }
+}

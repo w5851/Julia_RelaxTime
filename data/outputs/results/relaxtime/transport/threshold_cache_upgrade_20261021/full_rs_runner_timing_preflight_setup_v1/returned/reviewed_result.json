@@ -1,0 +1,17 @@
+{
+  "host": "W",
+  "timing_contract_passed": true,
+  "unit_assertions": 29,
+  "unit_summary_label": "Unit",
+  "unit_selector": "relaxtime/test_transport_runner_timing.jl",
+  "reviewer_revision_sha256": "52a062178f5631c741e1374059265b03b0067e01af0a837b0227976f50c1268f",
+  "actual_dry_run_planned_points": 2,
+  "source_files_verified": 1639,
+  "base_source_archive_sha256": "4b30436a7d84ce7089b5f7379b69c51e0c51b2eedf8654f40f76a7bc34afa123",
+  "overlay_archive_sha256": "81bb76785d84d586bd95f062e985c405210ea6b6bfffdc599f44d7304af15a35",
+  "timing_file_sha256": "32cf236f6becdece3f3814cd4823272857f0765ce0db89441a9d77c7d35f1733",
+  "reviewer_sha256": "73c81409432440a4a2cd345c4623f7f55cf0a67a2beaf64df02f4142b82209f6",
+  "numerical_sources_unchanged": true,
+  "runner_cost_qualified": false,
+  "scope": "CLI timing and failure semantics only; W dry-run timings are not GitHub runner costs"
+}

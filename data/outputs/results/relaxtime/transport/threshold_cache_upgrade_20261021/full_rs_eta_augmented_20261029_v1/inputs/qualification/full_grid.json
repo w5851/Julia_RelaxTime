@@ -1,0 +1,80 @@
+{
+  "host": "quote-remote",
+  "completed_utc": "2026-10-26T07:10:45.225153+00:00",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_ref": "transport-full-rs-20261026-v1",
+  "full_grid_numerical_acceptance_passed": true,
+  "artifact_contract_passed": true,
+  "points": 1819,
+  "channels": 30923,
+  "runs": 142,
+  "modes": {
+    "A": {
+      "expected": 910,
+      "completed": 910
+    },
+    "B": {
+      "expected": 909,
+      "completed": 909
+    }
+  },
+  "backgrounds_passed": true,
+  "unexplained_screened_observable_pairs": 0,
+  "known_first_order_screened_observable_pairs": 10,
+  "quality_flags_retained": 470,
+  "quality_flag_counts_by_curve": [
+    {
+      "mode": "A",
+      "muB_MeV": "900.0",
+      "T_MeV": "125.7360002645551",
+      "points": 51
+    },
+    {
+      "mode": "A",
+      "muB_MeV": "900.0",
+      "T_MeV": "138.3096002910106",
+      "points": 78
+    },
+    {
+      "mode": "A",
+      "muB_MeV": "900.0",
+      "T_MeV": "150.8832003174661",
+      "points": 101
+    },
+    {
+      "mode": "B",
+      "muB_MeV": "900.0",
+      "T_MeV": "120.0",
+      "points": 38
+    },
+    {
+      "mode": "B",
+      "muB_MeV": "900.0",
+      "T_MeV": "160.0",
+      "points": 101
+    },
+    {
+      "mode": "B",
+      "muB_MeV": "900.0",
+      "T_MeV": "200.0",
+      "points": 101
+    }
+  ],
+  "quality_flag_review": "Finite tau ratio flags were verified against the source definition and retained; backgrounds and adjacent changes are audited separately.",
+  "scope": "Full-grid output validity, per-channel budgets, frozen-input identity, background replay and local-change audit; existing representative convergence and regression evidence remain applicable.",
+  "global_phase_diagram_certified": false,
+  "formal_production_promoted": false,
+  "publication_use_approved": false,
+  "grid_review_relative_path": "reviews/transfer_090/reviewed_grid.json",
+  "grid_review_sha256": "2e8d4934e50e61fa398ed0a7496c7171dcca58753485f9e42a8ab415b9606103",
+  "merged_files": {
+    "mode_a/phase_guided_transport_scan.csv": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4",
+    "mode_a/phase_guided_transport_scan_sampling.csv": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66",
+    "mode_b/phase_guided_transport_scan.csv": "5cddbeeb7944271071d08ce0a1ec6e5e32068bf09eaa3a9db473767df02ab2f8",
+    "mode_b/phase_guided_transport_scan_sampling.csv": "2ccdd0b9186132879edf856076a7139969fadb9e004d18a8b096b1b04723aa5a",
+    "point_provenance.csv": "b44374b756b8113acb344d935b1860b630de859dbd0883b59bffd4da033e8e51"
+  },
+  "background_audit_sha256": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807",
+  "runner_accounting_sha256": "c8390efb743bc67e3125b4aa3a7505434efc46760fcb5118e9333d58f5b227b7",
+  "finalizer_sha256": "ea82f750d38640c6becf182ad3115a46faa392884e2a877eeaf231ccec46fe27"
+}

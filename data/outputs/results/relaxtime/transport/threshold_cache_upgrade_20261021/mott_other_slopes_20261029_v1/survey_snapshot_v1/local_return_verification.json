@@ -1,0 +1,17 @@
+{
+  "status": "verified_phase_return",
+  "files_verified": 376,
+  "archive": {
+    "archive": "survey_snapshot_v1.zip",
+    "bytes": 34278755,
+    "sha256": "faddfa0a2e8b3c1ff70edeb3ecbbf992a92b5ef009ded762ee96ad2bdba30621",
+    "manifest_files": 376,
+    "package_manifest_sha256": "144f9e648217061b72326c48a0e39adb0da99cc56c5a8d1347e8415e9430ab0f"
+  },
+  "completed_runs": [
+    "survey_v1",
+    "endpoint_checks_v1"
+  ],
+  "whole_task_complete": false,
+  "local_scope": "archive, file identity and metadata only"
+}

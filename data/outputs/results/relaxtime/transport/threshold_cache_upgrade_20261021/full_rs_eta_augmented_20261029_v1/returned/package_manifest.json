@@ -1,0 +1,342 @@
+{
+  "schema": "transport_eta_augmented_package_v1",
+  "status": "numerically_accepted_augmented_grid",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "points": 1867,
+  "channels": 31739,
+  "grid_review_sha256": "06e03334a9d5836a3a3f2493adc004798dfa45939d77f48dfe66f1e2be5f0b4d",
+  "source_files_checked": 340,
+  "all_source_hashes_match": true,
+  "files": [
+    {
+      "path": "assembly_verification.json",
+      "bytes": 11976,
+      "sha256": "47e6d08099a835dceb33797727499dfc1defa5097072fe225c710ddffd93b970"
+    },
+    {
+      "path": "complete_transport_eta_thermo.jl",
+      "bytes": 8469,
+      "sha256": "15edefe960417ce86d640b9cf300fd50c0fdc74aa62bbbf9617fc547a1efedf7"
+    },
+    {
+      "path": "grid/base_background_audit.json",
+      "bytes": 19744,
+      "sha256": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807"
+    },
+    {
+      "path": "grid/boundary_secants.csv",
+      "bytes": 3829,
+      "sha256": "919a49acdfaa3e6686a1fe6bdab920389526c4f5660de36c6df63c296dc809e9"
+    },
+    {
+      "path": "grid/mode_a/phase_guided_transport_grid.csv",
+      "bytes": 1191577,
+      "sha256": "52ac5215ec33884366bcab02b86f91d110f362cbca9db1bd7345e700c9ee8ccc"
+    },
+    {
+      "path": "grid/mode_a/phase_guided_transport_grid_sampling.csv",
+      "bytes": 3025130,
+      "sha256": "55b58fe880cb22f5e3d64ec2146d735422b42d9be5a520756e3e9125ffa1c208"
+    },
+    {
+      "path": "grid/mode_b/phase_guided_transport_grid.csv",
+      "bytes": 1140168,
+      "sha256": "e6ebbd861b097de3b26621d4a05784295704b39ee3954cbfc645f0086461a16c"
+    },
+    {
+      "path": "grid/mode_b/phase_guided_transport_grid_sampling.csv",
+      "bytes": 2828933,
+      "sha256": "09a9ea3354fbee1ac1d6bbc2bec191ca62cc2dc380e71d3046b2fa780aab19b4"
+    },
+    {
+      "path": "grid/point_provenance.csv",
+      "bytes": 203787,
+      "sha256": "efc34059b354c8f78249958da9880634a69b484fcd45f997ca7ef180066b0ea9"
+    },
+    {
+      "path": "grid/recomputed_original_changes.csv",
+      "bytes": 9557,
+      "sha256": "883c3b27f483ff66d2ca6d66ba98edde07fea04e9bed76e64c6d9fe7ef0cbe44"
+    },
+    {
+      "path": "grid/review.json",
+      "bytes": 14902,
+      "sha256": "06e03334a9d5836a3a3f2493adc004798dfa45939d77f48dfe66f1e2be5f0b4d"
+    },
+    {
+      "path": "grid_attempt_v1/attempt_outcome.json",
+      "bytes": 251,
+      "sha256": "53291e2137f145d4e0fabed979b5452836af47c45dc1481969204c1c1691eaa1"
+    },
+    {
+      "path": "grid_attempt_v1/mode_a/phase_guided_transport_grid.csv",
+      "bytes": 1191577,
+      "sha256": "52ac5215ec33884366bcab02b86f91d110f362cbca9db1bd7345e700c9ee8ccc"
+    },
+    {
+      "path": "grid_attempt_v1/mode_a/phase_guided_transport_grid_sampling.csv",
+      "bytes": 3025130,
+      "sha256": "55b58fe880cb22f5e3d64ec2146d735422b42d9be5a520756e3e9125ffa1c208"
+    },
+    {
+      "path": "grid_attempt_v1/mode_b/phase_guided_transport_grid.csv",
+      "bytes": 1140168,
+      "sha256": "e6ebbd861b097de3b26621d4a05784295704b39ee3954cbfc645f0086461a16c"
+    },
+    {
+      "path": "grid_attempt_v1/mode_b/phase_guided_transport_grid_sampling.csv",
+      "bytes": 2828933,
+      "sha256": "09a9ea3354fbee1ac1d6bbc2bec191ca62cc2dc380e71d3046b2fa780aab19b4"
+    },
+    {
+      "path": "input_manifest.json",
+      "bytes": 15320,
+      "sha256": "72f087b26bff254dc232b9c066c0403c482007266df27fba4eea6f55aaf9857a"
+    },
+    {
+      "path": "inputs/base/acceptance.json",
+      "bytes": 2867,
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283"
+    },
+    {
+      "path": "inputs/base/background_audit.json",
+      "bytes": 19744,
+      "sha256": "9ae0731a3904553671673aa9e7d2eb76cb9e699d8f7d9f1b6ce97a3414ee3807"
+    },
+    {
+      "path": "inputs/base/mode_a/phase_guided_transport_scan.csv",
+      "bytes": 1082613,
+      "sha256": "4d812371ddd69678606fb0920813a274395865c1cd94c28f88cd26ef4a5c68c4"
+    },
+    {
+      "path": "inputs/base/mode_a/phase_guided_transport_scan_sampling.csv",
+      "bytes": 2888911,
+      "sha256": "5990c286aa667ca7c62e750f193984ac44056c2eb3d4c5a90018eaa7b0a9ec66"
+    },
+    {
+      "path": "inputs/base/mode_b/phase_guided_transport_scan.csv",
+      "bytes": 1053127,
+      "sha256": "5cddbeeb7944271071d08ce0a1ec6e5e32068bf09eaa3a9db473767df02ab2f8"
+    },
+    {
+      "path": "inputs/base/mode_b/phase_guided_transport_scan_sampling.csv",
+      "bytes": 2758040,
+      "sha256": "2ccdd0b9186132879edf856076a7139969fadb9e004d18a8b096b1b04723aa5a"
+    },
+    {
+      "path": "inputs/base/point_provenance.csv",
+      "bytes": 779547,
+      "sha256": "b44374b756b8113acb344d935b1860b630de859dbd0883b59bffd4da033e8e51"
+    },
+    {
+      "path": "inputs/base/promotion.json",
+      "bytes": 11643,
+      "sha256": "f72afa4094f65b86492e51d7a2d2a40fbb0c0757cbad32f98d7a1ab74a4679b7"
+    },
+    {
+      "path": "inputs/base/reviewed_grid.json",
+      "bytes": 626900,
+      "sha256": "2e8d4934e50e61fa398ed0a7496c7171dcca58753485f9e42a8ab415b9606103"
+    },
+    {
+      "path": "inputs/qualification/baseline_and_default_entrypoint.json",
+      "bytes": 1174,
+      "sha256": "1d01d1975b48f28ca9a875d79185b371a0a28e504041173f282bef4d112c4a2a"
+    },
+    {
+      "path": "inputs/qualification/full_grid.json",
+      "bytes": 2867,
+      "sha256": "9cec5ecfca27add0cd48ee524f880af5ac2d89b5083815a65500c9069441e283"
+    },
+    {
+      "path": "inputs/qualification/independent_layers.json",
+      "bytes": 953,
+      "sha256": "ed730e974d69914bb1a22a23b42655aee983e653cbf2316421facdfbf024e59a"
+    },
+    {
+      "path": "inputs/qualification/joint_representatives.json",
+      "bytes": 519,
+      "sha256": "4f65fc0fd99152a65090ddc10c85d3b2b1989c19913bff2f1f9191d76f5cc01a"
+    },
+    {
+      "path": "inputs/qualification/mode_a_background.json",
+      "bytes": 2407,
+      "sha256": "2ac9b502b3cd3cca8ce448b0a290648450a802233740593e33948ea2a7e44934"
+    },
+    {
+      "path": "inputs/qualification/mode_b_qualification.json",
+      "bytes": 1383,
+      "sha256": "37d717697c66c524e11a48c985c70255ea2f5ba2e3a3950a9b0ae36fdbbe669a"
+    },
+    {
+      "path": "inputs/qualification/production_and_fortran_replay.json",
+      "bytes": 923,
+      "sha256": "098bad19d930241a933acd5ee1c7edbd11eee9495800c80fa8c5f9cbcd56129c"
+    },
+    {
+      "path": "inputs/qualification/xi04_local_integrals.json",
+      "bytes": 4206,
+      "sha256": "ceb3e69e3b92d49f86dc8149307bd0a9917760d5e9b64193be1e4d9bd3fba253"
+    },
+    {
+      "path": "inputs/refinement/expected_source_hashes.json",
+      "bytes": 40247,
+      "sha256": "7d8ff10cdd8d418396ad70e7ae1819f55f20d44ed2a9a7a78a94245487fb4f46"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/base.toml",
+      "bytes": 590,
+      "sha256": "ed38595ddd9e684330c861067514e17b43e2fcc199d10e7aeb871a4efddcf7d3"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/config.json",
+      "bytes": 9785,
+      "sha256": "06e0ac4f51f1bc35b4d9464694229b3a9a4cf4127dcbb732517cbf665f105f1e"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/fine.toml",
+      "bytes": 586,
+      "sha256": "af0577495f7d16c0db10d5dfeff782950faf5ab94f45949329e93ebc2f7c20ad"
+    },
+    {
+      "path": "inputs/refinement/inputs_v2/tighter.toml",
+      "bytes": 589,
+      "sha256": "cad34d475b91bc6a9380caace66ed29afea52567cef1c4bc2bc00f8064897ddc"
+    },
+    {
+      "path": "inputs/refinement/local_return_verification.json",
+      "bytes": 911,
+      "sha256": "19f052d6ccfea112db766b1387b49bfaeee2256c01d611116a9af00826af527b"
+    },
+    {
+      "path": "inputs/refinement/package_manifest.json",
+      "bytes": 27138,
+      "sha256": "a3329c6919634eef279e35d9c7f3d7dba4a06290142c62ebf0a37ca39fd36bf0"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/channels.csv",
+      "bytes": 183303,
+      "sha256": "fb4274073807b8a119174ee461dff677fa57455d2819bfa2faa311a4d9c884e1"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/coarse_chord.csv",
+      "bytes": 36391,
+      "sha256": "b39f760d9796bd2a68f8156ee0804f669e9343e38dc42d20c80892286c5d449f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/coarse_slopes.csv",
+      "bytes": 3292,
+      "sha256": "d57b685b308d5e0ca18699e8f2a2f989b40147033ba1fae5a7ee344e84601bcd"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/fine_slopes.csv",
+      "bytes": 24477,
+      "sha256": "01fcc1f93c6466e1e2e865738dcd281e84f43bf9ea97baaca6d1d70b49e32a6f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/observables.csv",
+      "bytes": 44980,
+      "sha256": "656d2a79974a17090e94845eea045e53d23ec2cc536e4a9d1d3d4de43b5e99a2"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/original_controls.csv",
+      "bytes": 8120,
+      "sha256": "c9892bddf8272755edc90b1380aaeecbec967e5637e6455fe960b186356a3c91"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/review.json",
+      "bytes": 17074,
+      "sha256": "a65c45972ce6405d31eb53525edc4aa0ca40a8afd8488d624c11125895753c7e"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/slope_convergence.csv",
+      "bytes": 12982,
+      "sha256": "fb1e37756f34aa73a743fab89297f1dec9f68765cc8dd3a33fe201b1f274ffd5"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_comparison.csv",
+      "bytes": 11623,
+      "sha256": "7d4e18c462fc2e45031dac9afc5fb53f78e61a044745893aa205dd5433007182"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_observables.csv",
+      "bytes": 16167,
+      "sha256": "16b0bcfd00bbfd6043e532c7304b4e930e2ec4f4e7174107348b9db84a06314a"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/tighter_slopes.csv",
+      "bytes": 8253,
+      "sha256": "8cb5bfeed99e1fe46590fa2f3204a98e4f313733f127a2822147ecf087da872f"
+    },
+    {
+      "path": "inputs/refinement/review_final_v1/xi_refinement.csv",
+      "bytes": 10400,
+      "sha256": "86f28ae7f0b9fa4f25d7987827be651c99a1aa833700d1c2c6d50f948beea809"
+    },
+    {
+      "path": "merge_transport_eta_refinement.py",
+      "bytes": 23107,
+      "sha256": "149bc86ab8b229453f9bc082153bddc55898e2e2157ce121b97640f5f51bd293"
+    },
+    {
+      "path": "merge_transport_eta_refinement_v2.py",
+      "bytes": 23529,
+      "sha256": "5ad4c92f9045a6a6eb9e8918f9c3fa7ad3576ec9b8e907e85b4a156bf7a80372"
+    },
+    {
+      "path": "replay.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay.stdout.log",
+      "bytes": 1308,
+      "sha256": "6739fe097b4dd693fa24e3110eb98aa0e49e3aaa2e4f55b6351eac394bb9f5a7"
+    },
+    {
+      "path": "replay_outcome.json",
+      "bytes": 700,
+      "sha256": "70639db42667673666ca42f992af3d942e798127742c9832dfdfdde42a0a63fe"
+    },
+    {
+      "path": "run_replay.ps1",
+      "bytes": 1743,
+      "sha256": "01d53f2e3b8fe720febefea1bc1e2dc2a5d05588bd800f0bf2c4bda1ef8d21c5"
+    },
+    {
+      "path": "selection/channels.csv",
+      "bytes": 228020,
+      "sha256": "37f8ef33e149bcbd35ffc3a59fd786fd3e6b69a7460aff2c9419b6d06a90a625"
+    },
+    {
+      "path": "selection/points.csv",
+      "bytes": 59176,
+      "sha256": "71837534a63b4a40537b3d6b785bcf245480f78e5357dc82ac3f89208663a396"
+    },
+    {
+      "path": "selection/selection.json",
+      "bytes": 5554,
+      "sha256": "4147f7f97d24c62e915ea38a244e52c8cda95af573739e5ebce9d2147fdf8570"
+    },
+    {
+      "path": "thermo/replay_checks.csv",
+      "bytes": 2141,
+      "sha256": "3b6b7296a754801fec0bcf7d44fe4798de9d83ffea927a643c55e1e453fae748"
+    },
+    {
+      "path": "thermo/rows.csv",
+      "bytes": 15518,
+      "sha256": "a56c0b91d90930b6540f9fbae24766c8dd448c69d78eef16bfad10e30eca095e"
+    },
+    {
+      "path": "thermo/summary.json",
+      "bytes": 1562,
+      "sha256": "5542ba070207e534a9dd7019ea5aabe375bbb314c80aee5c001786f180aa8ea8"
+    },
+    {
+      "path": "verify_transport_eta_augmented.py",
+      "bytes": 6926,
+      "sha256": "8303b69a5f0571de683678ae89c9a82b8ae842b5c84296fd0a19b1e5ba3b2459"
+    }
+  ]
+}

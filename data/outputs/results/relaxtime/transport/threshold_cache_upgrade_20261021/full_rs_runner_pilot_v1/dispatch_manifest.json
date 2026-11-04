@@ -1,0 +1,377 @@
+{
+  "created_utc": "2026-10-25T19:01:43.130308+00:00",
+  "repository": "w5851/Julia_RelaxTime",
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "workflow_ref": "transport-full-rs-20261026-v1",
+  "workflow_id": 291078197,
+  "workflow_path": ".github/workflows/relaxtime-phase-guided-transport-production.yml",
+  "bound_inputs": {
+    "A": "mode_a_runner_inputs.json",
+    "B": "mode_b_runner_inputs.json"
+  },
+  "bound_file_hashes": {
+    "mode_a_runner_inputs.json": "2f60487875152e7249ad6ca05a93edd77868bce7cc1e6d2dead9b79e4e9c875c",
+    "pilot_muB0_alpha1_00.inputs.json": "1537fc07f59ab033101c47954eb00614412be2e1124cc5115a41fcae4933e707",
+    "pilot_muB0_alpha1.2_00.inputs.json": "363498b1a355463cc5a4d8ddf85b6b86b5a3ac17666d81cc54d1cb7996318319",
+    "pilot_muB450_alpha1.1_00.inputs.json": "1d6a0e39c2ee08c6f4fcd105c8988b16325545b88cde153f5479be73e01dafa3",
+    "pilot_muB900_alpha1_00.inputs.json": "de6366c8069152fab960c710a427aeafbaac81460a0f42e140b8d1495890e9d3",
+    "mode_b_runner_inputs.json": "fb21294be105ba6dffb18ac01f723677058c41e8fea27a2474e564e798926777",
+    "pilot_modeB_T120_muB0_00.inputs.json": "5f014f9fb4f1e2f94dc699d4c59bc027a387c95d4142e7eb86175f717a621a38",
+    "pilot_modeB_T120_muB900_00.inputs.json": "1b252dc066c2b47b6e627ddd6b9a1c5c771d261283f09738ce4c6486941a1ad4",
+    "pilot_modeB_T200_muB900_00.inputs.json": "36d2cfc9d1c34f5b529e925d447a7ad8b78f1a0e3f66d5bddcc2c39fa9ef9c10"
+  },
+  "binding_manifest_sha256": "1ef563d2ecdb939b36b77940198aa13cf0d981db47a1fda40ad5a5e76f7d8b04",
+  "source_archive_sha256": "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f",
+  "remote_ref_verified": true,
+  "remote_ref": "refs/tags/transport-full-rs-20261026-v1",
+  "planned_runs": [
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB0_alpha1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB0_alpha1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "0",
+          "alpha_t_list": "1",
+          "xi_list": "-0.22,0.37",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 2,
+        "expected_T_MeV": 200.0898076157829
+      },
+      "request_file": "pilot_muB0_alpha1_00.request.json",
+      "request_sha256": "456e7913f9ceca5965fd1af2950b0ad011f8fc536f3364f40a390f1a46ccf255"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB0_alpha1.2_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB0_alpha1.2_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "0",
+          "alpha_t_list": "1.2",
+          "xi_list": "-0.5",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 1,
+        "expected_T_MeV": 240.10776913893946
+      },
+      "request_file": "pilot_muB0_alpha1.2_00.request.json",
+      "request_sha256": "286d453c6ecec6325dbb121aeedceeddf35686bcf4e2368b139728458e680b12"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB450_alpha1.1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB450_alpha1.1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "450",
+          "alpha_t_list": "1.1",
+          "xi_list": "0.35",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 1,
+        "expected_T_MeV": 201.00102272233542
+      },
+      "request_file": "pilot_muB450_alpha1.1_00.request.json",
+      "request_sha256": "0fccde18470a317185402cadd9ad8399bde599b69a2b7aa70e9200f4fe6dea41"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB900_alpha1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB900_alpha1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "900",
+          "alpha_t_list": "1",
+          "xi_list": "-0.04,-0.003",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 2,
+        "expected_T_MeV": 125.7360002645551
+      },
+      "request_file": "pilot_muB900_alpha1_00.request.json",
+      "request_sha256": "9834ec0f9654752a27a3ffa2d4bf3710e9ebc211a5b16e17395628be162f0230"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T120_muB0_00",
+        "expected_points": 1,
+        "expected_T_MeV": 120.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T120_muB0_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "120",
+          "muB_list": "0",
+          "alpha_t_list": "1.0",
+          "xi_list": "0.5",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "request_file": "pilot_modeB_T120_muB0_00.request.json",
+      "request_sha256": "766ed9bd0cb49fd98e5b1cc65b99e0fd558289b867d742c74e63ba24559ee2f3"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T120_muB900_00",
+        "expected_points": 3,
+        "expected_T_MeV": 120.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T120_muB900_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "120",
+          "muB_list": "900",
+          "alpha_t_list": "1.0",
+          "xi_list": "-0.5,-0.13,-0.12",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "request_file": "pilot_modeB_T120_muB900_00.request.json",
+      "request_sha256": "b29c780e638156be32849276b93ad28154523f8fb97dc40eee396685113a862e"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T200_muB900_00",
+        "expected_points": 1,
+        "expected_T_MeV": 200.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T200_muB900_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "200",
+          "muB_list": "900",
+          "alpha_t_list": "1.0",
+          "xi_list": "-0.5",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "request_file": "pilot_modeB_T200_muB900_00.request.json",
+      "request_sha256": "0b06b4288811dba86a0a0287987e5e02fed551d973bff3a8448eda75f1f396d9"
+    }
+  ],
+  "runs": [
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB0_alpha1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB0_alpha1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "0",
+          "alpha_t_list": "1",
+          "xi_list": "-0.22,0.37",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 2,
+        "expected_T_MeV": 200.0898076157829
+      },
+      "run_id": 40224161650,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224161650",
+      "directory": "runs/40224161650",
+      "request_sha256": "456e7913f9ceca5965fd1af2950b0ad011f8fc536f3364f40a390f1a46ccf255"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB0_alpha1.2_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB0_alpha1.2_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "0",
+          "alpha_t_list": "1.2",
+          "xi_list": "-0.5",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 1,
+        "expected_T_MeV": 240.10776913893946
+      },
+      "run_id": 40224178198,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224178198",
+      "directory": "runs/40224178198",
+      "request_sha256": "286d453c6ecec6325dbb121aeedceeddf35686bcf4e2368b139728458e680b12"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB450_alpha1.1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB450_alpha1.1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "450",
+          "alpha_t_list": "1.1",
+          "xi_list": "0.35",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 1,
+        "expected_T_MeV": 201.00102272233542
+      },
+      "run_id": 40224194586,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224194586",
+      "directory": "runs/40224194586",
+      "request_sha256": "0fccde18470a317185402cadd9ad8399bde599b69a2b7aa70e9200f4fe6dea41"
+    },
+    {
+      "mode": "A",
+      "job": {
+        "label": "pilot_muB900_alpha1_00",
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_20261025",
+          "shard_label": "pilot_muB900_alpha1_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-muB-phase-scaled",
+          "muB_list": "900",
+          "alpha_t_list": "1",
+          "xi_list": "-0.04,-0.003",
+          "t_list": "200",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        },
+        "expected_points": 2,
+        "expected_T_MeV": 125.7360002645551
+      },
+      "run_id": 40224212631,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224212631",
+      "directory": "runs/40224212631",
+      "request_sha256": "9834ec0f9654752a27a3ffa2d4bf3710e9ebc211a5b16e17395628be162f0230"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T120_muB0_00",
+        "expected_points": 1,
+        "expected_T_MeV": 120.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T120_muB0_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "120",
+          "muB_list": "0",
+          "alpha_t_list": "1.0",
+          "xi_list": "0.5",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "run_id": 40224228254,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224228254",
+      "directory": "runs/40224228254",
+      "request_sha256": "766ed9bd0cb49fd98e5b1cc65b99e0fd558289b867d742c74e63ba24559ee2f3"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T120_muB900_00",
+        "expected_points": 3,
+        "expected_T_MeV": 120.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T120_muB900_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "120",
+          "muB_list": "900",
+          "alpha_t_list": "1.0",
+          "xi_list": "-0.5,-0.13,-0.12",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "run_id": 40224250574,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224250574",
+      "directory": "runs/40224250574",
+      "request_sha256": "b29c780e638156be32849276b93ad28154523f8fb97dc40eee396685113a862e"
+    },
+    {
+      "mode": "B",
+      "job": {
+        "label": "pilot_modeB_T200_muB900_00",
+        "expected_points": 1,
+        "expected_T_MeV": 200.0,
+        "inputs": {
+          "case_name": "thermal_weighted_full_rs_mode_b_20261025",
+          "shard_label": "pilot_modeB_T200_muB900_00",
+          "sampling_profile": "thermal_weighted_v1",
+          "mode": "fixed-T-sparse-muB",
+          "t_list": "200",
+          "muB_list": "900",
+          "alpha_t_list": "1.0",
+          "xi_list": "-0.5",
+          "run_tier": "production",
+          "render_plots": false,
+          "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+        }
+      },
+      "run_id": 40224267466,
+      "run_attempt": 1,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/40224267466",
+      "directory": "runs/40224267466",
+      "request_sha256": "0b06b4288811dba86a0a0287987e5e02fed551d973bff3a8448eda75f1f396d9"
+    }
+  ],
+  "controller_sha256": "99ce09d6cde132028ebe05c82c16ccfaecd7b25a2d4a032a1fc2149e8337f715",
+  "full_dispatch_ready": false
+}

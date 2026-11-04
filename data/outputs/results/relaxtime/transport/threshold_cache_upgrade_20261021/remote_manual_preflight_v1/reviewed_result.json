@@ -1,0 +1,47 @@
+{
+  "checked_utc": "2026-10-23T12:32:32.261826+00:00",
+  "passed": true,
+  "host": "W",
+  "identity": "W\\82306",
+  "runtime_version": "1.12.5",
+  "threads": 1,
+  "test_assertions_passed": 23,
+  "test_assertions_total": 23,
+  "process_exit_code": 0,
+  "complete_test_process_seconds": 411.9743575,
+  "points": [
+    {
+      "T_MeV": 150.0,
+      "muB_MeV": 0.0,
+      "xi": 0.0,
+      "result": "returned/evidence/retained_manual_outputs/jl_OFNByt/results/relaxtime/temperature_scan_muB0_xi0/gap_transport_vs_T_muB0_xi0.csv",
+      "result_sha256": "b5105bf2e38cd7f4e521b5dc19ac5a76346c469fdaa9145ccd02211be648fada",
+      "channels": 17
+    },
+    {
+      "T_MeV": 190.0,
+      "muB_MeV": 0.0,
+      "xi": -0.5,
+      "result": "returned/evidence/retained_manual_outputs/jl_OFNByt/results/relaxtime/fixed_temperature_xi_scan_muB0/transport_vs_xi_T190_muB0.csv",
+      "result_sha256": "cdbba99c8f8b9231adbc3597505fa13f5b3aeb184738a90b2c271d7b717fcb22",
+      "channels": 17
+    }
+  ],
+  "channel_diagnostics": 34,
+  "source_files_verified_before_and_after": 879,
+  "source_archive_sha256": "bbd540a74d9b2eb8560747fb1e56f9fc2b4713e4bdb3a6ff0f6f4d3db18aa3bb",
+  "returned_archive_sha256": "b78df9e739661d33551828856fd6fddaee0e31e18714b556fc3be13bf4d59297",
+  "production_convergence_claim": false,
+  "runner_timing_claim": false,
+  "metadata_correction": {
+    "raw_file": "returned/evidence/manual_test_result.json",
+    "raw_passed": false,
+    "cause": "Julia top-level try/finally soft scope made assignment local; wrapper serialized the unchanged global false",
+    "evidence": "23/23 test log, exit 0, two successful actual rows, 34 converged channel diagnostics and unchanged source identities",
+    "original_retained": true,
+    "future_driver_fix": "Ref(false) with passed[]=true, avoiding soft-scope assignment",
+    "fixed_flag_runtime_check": "metadata_flag_check.json",
+    "fixed_flag_runtime_check_passed": true
+  },
+  "provenance_note": "Remote run used the frozen source archive; unknown git_commit is intentional and not a calculation commit"
+}

@@ -1,0 +1,8 @@
+{
+  "files": 3490,
+  "bytes": 407675923,
+  "issues": [],
+  "passed": true,
+  "archive_sha256": "0cffb26b3fc06b724da31be80ddde636a1f9719a62f56bc2aa273b07624aabc8",
+  "scope": "Every selected evidence file retains original workspace/archive bytes in the Git index; no EOL normalization"
+}

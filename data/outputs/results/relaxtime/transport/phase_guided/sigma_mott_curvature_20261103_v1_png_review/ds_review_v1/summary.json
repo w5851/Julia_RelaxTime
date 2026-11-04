@@ -1,0 +1,26 @@
+{
+  "kind": "bounded_external_ds_batch_summary",
+  "generated_utc": "2026-11-03T04:28:46.442362+00:00",
+  "manifest": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_curvature_20261103_v1_png_review\\ds_jobs_v1.jsonl",
+  "manifest_sha256": "fd1b8e4ed18dad350479ac8f86a068983e743de4f92b1cb7f16acfe5c339d068",
+  "model": "cn:deepseek-v4.1-flash",
+  "jobs": 1,
+  "reused_jobs": 0,
+  "ok_jobs": 1,
+  "failed_ids": [],
+  "validation_failed_ids": [],
+  "development_label_jobs": 0,
+  "development_label_matches": 0,
+  "label_mismatch_ids": [],
+  "wall_seconds": 12.49,
+  "median_job_seconds": 12.479,
+  "ds_usage_total_all_saved_attempts": {
+    "prompt_tokens": 2250,
+    "completion_tokens": 1284,
+    "total_tokens": 3534,
+    "credit": 0.11,
+    "cached_tokens": 0
+  },
+  "note": "Development observations only; not a blind accuracy estimate. Usage includes reused jobs when resuming.",
+  "output_dir": "D:\\w\\meson-freezeout-defaults\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\sigma_mott_curvature_20261103_v1_png_review\\ds_review_v1"
+}

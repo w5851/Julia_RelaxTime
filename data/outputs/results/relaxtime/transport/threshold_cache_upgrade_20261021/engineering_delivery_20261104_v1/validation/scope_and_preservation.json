@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "unrelated_initial_paths": 7,
+  "unrelated_paths": [
+    "docs/analysis/governance/figure_asset_registry_v1/README.md",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md",
+    "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/parameter_envelope_20261018.md",
+    "docs/dev/active/2026-07-27_partial-feedback性能与冻结线粗扫.md",
+    "docs/dev/active/2026-08-16_历史绘图资产清理与退役任务单.md",
+    "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
+  ],
+  "issues": [],
+  "selected_ledger_blocks": [
+    "transport-threshold-upgrade",
+    "thermal-optimization-anomaly-audit",
+    "thermal-sampling-production-qualification",
+    "thermal-sampling-production-integration",
+    "transport-relative-velocity-convention"
+  ],
+  "primary_track_unchanged": true,
+  "live_ledger_differs_from_index": true,
+  "numerical_source_changes": [],
+  "non_transport_ledger_blocks_compared": 43,
+  "non_transport_ledger_changes": [],
+  "initial_ledger_identity_reconstructed": true
+}

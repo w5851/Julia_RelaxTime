@@ -1,0 +1,67 @@
+{
+  "schema": "transport_eta_mott_survey_validation_v1",
+  "host": "quote-remote",
+  "original_points": 1819,
+  "curves": 18,
+  "selected_pole_equations_qualified": true,
+  "unique_bidirectionally_consistent_points": 1004,
+  "ambiguous_points_retained": 815,
+  "all_screened_light_brackets_confirmed": true,
+  "confirmed_light_brackets": 6,
+  "continuous_reverse_light_brackets": 4,
+  "first_order_control_brackets": 2,
+  "A_refinement_points": 24,
+  "all_light_gap_signs_unchanged": true,
+  "max_A_mass_change_MeV": 3.528792808538128e-05,
+  "max_A_gamma_change_MeV": 5.128652898633845e-05,
+  "previous_eta_probe": {
+    "path": "D:\\CodexCompute\\trmott-xi04-20261028-v1\\roots_v1\\poles.csv",
+    "sha256": "5667d5e1e96f26950d8135cea7719424b7d3ab7ba14b5e6e79295cf6603342ab",
+    "rows": 18,
+    "max_mass_change_MeV": 9.643315479479497e-09,
+    "max_gamma_change_MeV": 1.4783552160224644e-10
+  },
+  "stages": {
+    "roots_v1": {
+      "status": {
+        "status": "finished",
+        "exit_code": 0,
+        "started_utc": "2026-10-29T01:55:59.9264561Z",
+        "finished_utc": "2026-10-29T01:58:19.6200556Z",
+        "elapsed_seconds": 139.6976022
+      },
+      "source_check": {
+        "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+        "files_checked_before": 340,
+        "files_checked_after": 340,
+        "all_match": true,
+        "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+      },
+      "qualified_pole_rows": 3638
+    },
+    "roots_A64_v1": {
+      "status": {
+        "status": "finished",
+        "exit_code": 0,
+        "started_utc": "2026-10-29T02:00:58.8822149Z",
+        "finished_utc": "2026-10-29T02:01:51.0239715Z",
+        "elapsed_seconds": 52.144909299999995
+      },
+      "source_check": {
+        "source_root": "D:\\CodexCompute\\trfull-20261026-v1\\case\\source",
+        "files_checked_before": 340,
+        "files_checked_after": 340,
+        "all_match": true,
+        "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+      },
+      "qualified_pole_rows": 48
+    }
+  },
+  "original_grid_hashes_unchanged": true,
+  "new_transport_integrals": false,
+  "survey_reviewer_sha256": "5f302042a9840fdafadfc7033f67c94e42ae301fbafbefda040e49771b57883b",
+  "validator_sha256": "14b43b974bd74d76503fcdd7a1a62ba9d61eb05933dbb3fafdd0a29555606d2d",
+  "response_comparison_sha256": "1c2f3979938b43270b02f09301e19fd890eee18165da463dc2660f2e3aa2aaa4",
+  "step_comparison_rule": "growth per original 0.01 xi; relative steps -3, maximum of 0/1, and +4; no smoothing",
+  "limit": "confirmed bracket list; no unique global eta branch assignment and no additional transport convergence certification"
+}

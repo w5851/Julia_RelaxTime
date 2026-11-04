@@ -137,10 +137,10 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
   - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
-  - phase-guided 当前 formal raw case（mode a/b，高 `xi` 分辨率）：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
-  - phase-guided 低 `xi` 分辨率 anchor / p104-vs-p128 收敛依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
-  - 两个 case 的完整结果、图层和 convergence evidence 路径以 `docs/guides/scripts/README.md` 的当前登记为准；旧高密度 `prod_v1` 保留为历史回退。
-  - `prod_v2` 的 raw 数值结果已由作者接受并登记为 `approved`；文献图使用前仍需单独的 publication-clean 派生层，不修改 raw CSV。
+  - 当前默认算法：`thermal_weighted_v1`，采用完整 A^xi 与 cm 相对速度；背景、热平均、末端积分和采样误差统一配置。
+  - 当前正式数值为η加密后的1867点；原1819点整批结果和各自晋升记录保留。完整状态与研究边界见[输运重算与分析](docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
+  - 当前正式图层为 `publication_clean_v14_pdf`（1819点）；v15的76对PNG已审阅，PDF暂缓，current仍为v14。
+  - 工程源码、测试、逐文件清单和恢复方式见[工程交付](data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)；旧prod_v1/prod_v2及旧图层只保留历史证据和恢复用途。
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
   - 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`
