@@ -12,7 +12,7 @@ PR 使用 `codex/transport-recalculation-wrapup`，对应工作树为
 
 | 原提交 | PR 分支提交 | 内容 |
 | --- | --- | --- |
-| `4b7c285226d6d0546fb3f03007856c1976074c4f` | `8c7dfded` | 工程交付、生产和诊断证据 |
+| `4b7c285226d6d0546fb3f03007856c1976074c4f` | `8c7dfded1a6bccd6d8a4cc735b69a28905f9795e` | 工程交付、生产和诊断证据 |
 | `08db84bbe26256e5c93760dcb394bb4569b1ddb6` | `1ea2778e9ed9474592b8a3bfae5a17c63321b905` | v1–v4 公共重复 PNG 退役 |
 
 独立的 Issue130 工作流退役提交 `3a07a0e2a6082011bc72ea3f9e02cdf55e1bb4b5` 未带入本 PR。
@@ -26,8 +26,10 @@ PR 使用 `codex/transport-recalculation-wrapup`，对应工作树为
 介子冻结线／两族参数包络的主要实现已由 [PR #327](https://github.com/w5851/Julia_RelaxTime/pull/327)
 合并；其后续本地说明、其他任务状态与该独立提交均不借本 PR 提交或清除。
 
-2026-11-04 再检查时，GitHub SSH 的 `ls-remote`、`fetch` 和目标分支的 `push --dry-run` 均成功。
-这更新了原交付记录中当时的 `publickey` 失败状态；实际写入及最终合并状态以对应 PR 和远端 ref 为准。
+2026-11-04 再检查时，GitHub SSH 的 `ls-remote`、`fetch`、推送预演及实际 `push` 均成功，
+远端读回确认 `827fb01eaf52aa279af1a3a129a66caaa537d987`，并建立
+[PR #331](https://github.com/w5851/Julia_RelaxTime/pull/331)。这更新了原交付记录中当时的 `publickey` 失败状态；
+最终 head、CI 和合并状态以该 PR 为准。
 
 ## 历史图片定位与恢复
 
@@ -66,6 +68,12 @@ python scripts/analysis/relaxtime/transport_delivery_archive.py restore --archiv
 原始数值资格和工程测试见 [validation_summary.json](../validation_summary.json)。PR 包含生产源码相对 main 的变化，
 因此仍需 GitHub 的 unit、integration、regression 和 validation 检查；本次存储整理没有重跑物理数值。
 路径整理的本地验证记录见 [validation.json](validation.json)；最终 CI 与合并状态以 GitHub PR 为准。
+
+首轮 CI 的 unit core、integration core、数值性能基准及已触发的治理检查通过，但脚本入口检查发现6条路径问题。
+修复 σ 诊断的仓库／历史版本选择，热权重审计记录实际加载的 spectrum 文件哈希，并保留 midpoint 的显式路径覆盖。
+49项一次性目录夹具检查覆盖缺失、仓库名、历史名及相对／绝对覆盖路径，未加载物理模型或修改生产 `src`。
+原失败日志与修复验证见 [ci_entrypoint_fix.json](ci_entrypoint_fix.json)。大批产物导致部分 `paths` 过滤未触发，
+补跑方式见[测试治理](../../../../../../../../docs/dev/testing_governance.md)；依赖审计增加手动触发入口以支持同一最终提交的补检。
 
 后续先完成 v15 的 PDF 交付检查与图层晋升，再更新 current、论文插图及相应说明并编译核对，
 最后复核旧资产的消费者和恢复链。旧数值、收敛证据或代码依赖仍被 v15 引用时继续保留，不能按版本号整体删除。

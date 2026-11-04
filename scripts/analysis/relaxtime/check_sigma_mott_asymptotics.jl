@@ -1,7 +1,9 @@
 #!/usr/bin/env julia
 # quote-remote verification of side curvature, kernel representation and regulator.
-include(joinpath(@__DIR__, isfile(joinpath(@__DIR__,"run_sigma_mott_asymptotics_v3.jl")) ?
-    "run_sigma_mott_asymptotics_v3.jl" : "run_sigma_mott_asymptotics.jl"))
+const SIG_ASYM_CHECK_LIBRARY_PATH = let archived=joinpath(@__DIR__, "run_sigma_mott_asymptotics_v3.jl")
+    isfile(archived) ? archived : joinpath(@__DIR__, "run_sigma_mott_asymptotics.jl")
+end
+include(SIG_ASYM_CHECK_LIBRARY_PATH)
 
 function check_asymptotics()
     source=joinpath(dirname(OUTPUT_DIR),"asym_full_v2")

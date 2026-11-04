@@ -1,6 +1,8 @@
 #!/usr/bin/env julia
 # SOURCE_ROOT INPUT_DIR OUTPUT_DIR; quote-remote only.
-include(joinpath(@__DIR__,get(ENV,"MOTT_REFINEMENT_LIBRARY","run_transport_other_mott_refinement.jl")))
+const MOTT_REFINEMENT_LIBRARY_PATH = joinpath(@__DIR__,
+    get(ENV, "MOTT_REFINEMENT_LIBRARY", "run_transport_other_mott_refinement.jl"))
+include(MOTT_REFINEMENT_LIBRARY_PATH)
 profile=SP_OTHER.load_profile(joinpath(INPUT_DIR,"base.toml"))
 thresholds,backgrounds=NamedTuple[],NamedTuple[]
 

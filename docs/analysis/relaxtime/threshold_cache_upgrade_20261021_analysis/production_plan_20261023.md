@@ -6,7 +6,7 @@
 恢复方式见[交付入口](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 本地工程交付已提交为`4b7c285226d6d0546fb3f03007856c1976074c4f`，提交内容与清单及恢复包一致。
 PR 收尾使用独立分支 `codex/transport-recalculation-wrapup`，原工作树的介子冻结线及其他未提交工作保留。
-SSH 读取、fetch 和推送预演已恢复；分支来源映射、历史审阅图片的路径整理与恢复见
+SSH 读取、fetch 及实际推送已恢复，[PR #331](https://github.com/w5851/Julia_RelaxTime/pull/331)已建立；分支来源映射、历史审阅图片的路径整理与恢复见
 [PR 交付整理](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md)。
 随后按[首批退役记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/legacy_display_retirement_20261104_v1/README.md)归档迁出v1–v4的288张公共PNG副本，原manifest和同字节分析图片保留；有依赖的旧资产继续保留。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。

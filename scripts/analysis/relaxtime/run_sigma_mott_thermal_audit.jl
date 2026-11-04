@@ -1,7 +1,9 @@
 #!/usr/bin/env julia
 # quote-remote only. Independent continuum thermal weight in total-pair variables.
-include(joinpath(@__DIR__, isfile(joinpath(@__DIR__,"run_sigma_mott_spectrum_v2.jl")) ?
-    "run_sigma_mott_spectrum_v2.jl" : "run_sigma_mott_spectrum.jl"))
+const SIG_THERMAL_SPECTRUM_PATH = let archived=joinpath(@__DIR__, "run_sigma_mott_spectrum_v2.jl")
+    isfile(archived) ? archived : joinpath(@__DIR__, "run_sigma_mott_spectrum.jl")
+end
+include(SIG_THERMAL_SPECTRUM_PATH)
 
 """Return W(s)/x for equal-mass incoming u/ubar, x=s-4m^2.
 
@@ -278,7 +280,7 @@ function run_sigma_thermal_audit()
         interpretation="Continuum equal-mass thermal weight versus the retained p48/c36/phi36 discrete measure. Kernel, CM relative velocity, blocking and density normalization are identical. This is a diagnostic; no production quadrature is replaced.",
         continuous_weight_quadratures=((64,16,12,12),(96,24,20,20)),x_range_inv_fm2=[first(bounds),last(bounds)],
         omitted_endpoint_interval_inv_fm2=[0.,first(bounds)],script_sha256=digest(@__FILE__),
-        spectrum_sha256=digest(joinpath(@__DIR__,"run_sigma_mott_spectrum_v2.jl")),
+        spectrum_sha256=digest(SIG_THERMAL_SPECTRUM_PATH),
         library_sha256=SIG_LIBRARY_SHA,
         files=Dict(f=>digest(joinpath(OUTPUT_DIR,f)) for f in readdir(OUTPUT_DIR))))
 end

@@ -351,6 +351,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - `scripts/analysis/`
   - 后处理与分析脚本
   - [输运采样联合验证、检查点恢复与完整计时](transport_sampling_qualification.md) 是算法验收入口，不是正式生产入口。
+  - σ Mott 诊断脚本在仓库内使用无版本后缀的 spectrum/asymptotics 入口；独立历史包中的 `run_sigma_mott_spectrum_v2.jl` 或 `run_sigma_mott_asymptotics_v3.jl` 存在时优先使用该冻结文件。热权重审计记录实际加载文件的 SHA-256。midpoint 筛查保留 `MOTT_REFINEMENT_LIBRARY` 显式路径覆盖；这些入口仍只用于隔离诊断，不改变生产核。
   - [版本化输运采样配置](../../api/relaxtime/transport/TransportSamplingProfiles.md) 说明 `--sampling-profile` 的积分层次、逐道诊断和续算身份校验。
 - `scripts/debug/`
   - 排障脚本

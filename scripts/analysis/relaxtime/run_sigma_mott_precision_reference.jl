@@ -1,7 +1,9 @@
 #!/usr/bin/env julia
 # quote-remote only. Fixed-background reference with bounded inter-s polarization cache.
-include(joinpath(@__DIR__, isfile(joinpath(@__DIR__,"run_sigma_mott_spectrum_v2.jl")) ?
-    "run_sigma_mott_spectrum_v2.jl" : "run_sigma_mott_spectrum.jl"))
+const SIG_PRECISION_SPECTRUM_PATH = let archived=joinpath(@__DIR__, "run_sigma_mott_spectrum_v2.jl")
+    isfile(archived) ? archived : joinpath(@__DIR__, "run_sigma_mott_spectrum.jl")
+end
+include(SIG_PRECISION_SPECTRUM_PATH)
 
 function sigma_reference_rate(row, process, state, runtime, folder)
     qp,tp,kc=state.qp,state.tp,state.kc

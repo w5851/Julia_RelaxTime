@@ -53,7 +53,18 @@
   "production_src_tree": "274f43ac44348e3a52ce9a5f5bf136c5f585aa2d",
   "production_src_identical_to": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
   "updated_markdown_local_links": "passed",
-  "full_pr_range_guard": "run after committing; see PR checks",
+  "full_pr_range_guard": {
+    "status": "passed",
+    "head": "827fb01eaf52aa279af1a3a129a66caaa537d987",
+    "base": "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+    "log": "data_output_guard_range.log"
+  },
   "physical_numerical_recalculation": false,
-  "ci": "pending; unit, integration, regression and validation must run on the PR"
+  "ci": "See https://github.com/w5851/Julia_RelaxTime/pull/331/checks for the current PR head; local evidence is not a CI result.",
+  "ssh_write": {
+    "status": "pushed",
+    "head": "827fb01eaf52aa279af1a3a129a66caaa537d987",
+    "ref": "refs/heads/codex/transport-recalculation-wrapup",
+    "pr": "https://github.com/w5851/Julia_RelaxTime/pull/331"
+  }
 }

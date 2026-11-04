@@ -1,7 +1,9 @@
 #!/usr/bin/env julia
 # Final independent background-grid and smaller derivative-step diagnostics.
-include(joinpath(@__DIR__, isfile(joinpath(@__DIR__,"run_sigma_mott_asymptotics_v3.jl")) ?
-    "run_sigma_mott_asymptotics_v3.jl" : "run_sigma_mott_asymptotics.jl"))
+const SIG_BACKGROUND_ASYM_LIBRARY_PATH = let archived=joinpath(@__DIR__, "run_sigma_mott_asymptotics_v3.jl")
+    isfile(archived) ? archived : joinpath(@__DIR__, "run_sigma_mott_asymptotics.jl")
+end
+include(SIG_BACKGROUND_ASYM_LIBRARY_PATH)
 
 function background_asymptotic_checks()
     source=joinpath(dirname(OUTPUT_DIR),"asym_full_v2")

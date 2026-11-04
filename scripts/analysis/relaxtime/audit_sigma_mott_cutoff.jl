@@ -1,6 +1,9 @@
 #!/usr/bin/env julia
 # quote-remote only. Attribute finite-grid changes to the moving hard s cutoff.
-include(joinpath(@__DIR__, "run_sigma_mott_spectrum_v2.jl"))
+const SIG_CUTOFF_SPECTRUM_PATH = let archived=joinpath(@__DIR__, "run_sigma_mott_spectrum_v2.jl")
+    isfile(archived) ? archived : joinpath(@__DIR__, "run_sigma_mott_spectrum.jl")
+end
+include(SIG_CUTOFF_SPECTRUM_PATH)
 
 function sigma_cutoff_audit()
     profile=SP_OTHER.load_profile(joinpath(INPUT_DIR,"s6.toml"))
