@@ -19,23 +19,21 @@
     "pure_manual_before": 25,
     "pure_manual_after": 9,
     "retired_workflows": 16,
-    "retained_parameterized_workflows": 1
+    "retained_parameterized_workflows": 0
   },
   "files": [
     {"path": "README.md", "role": "scope_and_semantics"},
     {"path": "retired_workflows.csv", "role": "exact_wave2_allowlist"},
-    {"path": "retained_parameterized_workflows.csv", "role": "retained_target_list_entry"},
     {"path": "reference_migrations.csv", "role": "active_reference_migrations"},
     {"path": "claim_ledger.csv", "role": "claim_evidence_ledger"},
     {"path": "definitions/", "role": "byte_preserved_retired_workflow_definitions"},
     {"path": "manifest.json", "role": "this_manifest"}
   ],
   "file_hashes": {
-    "README.md": "8fecd5930174681b74d6736824bad8c153f2e71a4cf10b08c9fd860697ca4a4e",
+    "README.md": "ad6e47d167ede739c68953845308d5251c136ff31240537584bea7ae4af48ff3",
     "retired_workflows.csv": "29ef80a70e8b31d7a6ddfbd5247e0e4188c2e90b5fd5ae188a11065f2e4e9ac6",
-    "retained_parameterized_workflows.csv": "e7903e3b13ecc11327d8427c3330ba75dab17631d0313be6a962564e51a24ac7",
     "reference_migrations.csv": "44d80cc6a3ffc0b71bf79a2fb84d05ec64a13f2c29494269ff3aa97131755468",
-    "claim_ledger.csv": "065645e7082e3bb7ad9bd59f05b72e69c4a5740aff880e09ecd5736f22085745",
+    "claim_ledger.csv": "565598054a6fb745d6d36c6281844f8da82db1c75c6c34e2a849e28d7e3638ef",
     "definitions/pnjl-c2-cep-limited-feasibility.yml": "781d97c8fdcba8afb7b3bf487589cd71e992dee0cf20b04c368f931b51b873cb",
     "definitions/pnjl-c2-cep-three-midpoint.yml": "302caa8f7c806d3cf963a8862bac06274bff91e50139ac2a60c6abeebf171c5b",
     "definitions/pnjl-c2-cep-xi05-high-side-extension.yml": "5be2fd7f93e5133d9e4e9b916de108644abea70613f79481f518f97ea836458f",

@@ -69,7 +69,6 @@ HISTORICAL_TOOLING = {
     "scripts/analysis/relaxtime/render_issue130_rs_candidate_legacy_figures.py",
     "scripts/plotting/build_figure_cleanup_preflight.py",
     "scripts/plotting/build_figure_retirement_manifest.py",
-    "scripts/plotting/render_plotting_pilot.py",
 }
 ACTIVE_CONSUMER_FILES = {
     "scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py",

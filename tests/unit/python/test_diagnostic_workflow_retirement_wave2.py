@@ -5,8 +5,6 @@ import hashlib
 import json
 from pathlib import Path
 
-import yaml
-
 
 ROOT = Path(__file__).resolve().parents[3]
 PACKAGE = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1"
@@ -41,7 +39,7 @@ def test_wave2_manifest_and_definition_hashes_are_consistent() -> None:
     assert manifest["github_artifacts_deleted"] is False
     assert manifest["numerical_results_changed"] is False
     assert manifest["counts"]["retired_workflows"] == len(EXPECTED_RETIRED)
-    assert manifest["counts"]["retained_parameterized_workflows"] == 1
+    assert manifest["counts"]["retained_parameterized_workflows"] == 0
 
     with (PACKAGE / "retired_workflows.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
@@ -52,18 +50,6 @@ def test_wave2_manifest_and_definition_hashes_are_consistent() -> None:
         assert hashlib.sha256(path.read_bytes()).hexdigest() == row["source_sha256"]
         assert path.stat().st_size == int(row["bytes"])
         assert not (ACTIVE_WORKFLOW_DIR / row["workflow_file"]).exists()
-
-
-def test_only_maxwell_expansion_remains_active_in_retired_family() -> None:
-    retained = list(csv.DictReader((PACKAGE / "retained_parameterized_workflows.csv").open(newline="", encoding="utf-8")))
-    assert [row["workflow_file"] for row in retained] == ["pnjl-issue130-maxwell-cep-local-expansion.yml"]
-    workflow = ACTIVE_WORKFLOW_DIR / retained[0]["workflow_file"]
-    assert workflow.is_file()
-    payload = yaml.load(workflow.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
-    assert "workflow_dispatch" in payload["on"]
-    text = workflow.read_text(encoding="utf-8")
-    assert "target" in text.lower()
-    assert "failed" in text.lower()
 
 
 def test_wave2_reference_migrations_do_not_leave_active_retired_paths() -> None:

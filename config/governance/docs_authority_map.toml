@@ -128,9 +128,6 @@ entrypoints = [
 stable_entrypoints = [
   "scripts/plotting/validate_plot_artifact.py",
 ]
-legacy_entrypoints = [
-  "scripts/plotting/render_plotting_pilot.py",
-]
 configs = [
   "config/plotting/candidate_aps_v2.toml",
   "config/plotting/strict_aps_v2.toml",
