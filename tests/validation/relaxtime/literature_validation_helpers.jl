@@ -49,6 +49,18 @@ const RELAXTIME_LITERATURE_VALIDATION_VALIDATION_T_NUM = 6
 const RELAXTIME_LITERATURE_VALIDATION_VALIDATION_MAX_ITER = 40
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_N_POINTS = 64
 
+# Freeze this fixture's thermal-average contract separately from production
+# defaults. The kappa/lambda v2 regression uses this same legacy background.
+const RELAXTIME_LITERATURE_VALIDATION_TAU_KWARGS = (
+    p_nodes=48, angle_nodes=36, phi_nodes=36, n_sigma_points=24,
+    sigma_cutoff=Main.Constants_PNJL.Λ_inv_fm,
+    sampling_config=Main.AverageScatteringRate.ThermalSamplingConfig(
+        rtol=1e-3, atol=1e-12, weighted_window=0.6, seed_order=48,
+        max_evaluations=40_000, max_nodes=12_000, max_rounds=40,
+        max_events=30_000_000, relative_velocity=:cm,
+    ),
+)
+
 const RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE = Dict{Tuple{Float64, Float64, Bool}, NamedTuple}()
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_PARAM_CACHE = Dict{Tuple{Float64, Float64}, NamedTuple}()
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_VALUE_CACHE = Dict{Tuple{Float64, Float64, Symbol, Float64}, Float64}()
@@ -151,6 +163,7 @@ function _compute_relaxtime_literature_transport_point_cached(
         compute_tau=true,
         K_coeffs=ktmp.K_coeffs,
         compute_bulk=compute_bulk,
+        tau_kwargs=RELAXTIME_LITERATURE_VALIDATION_TAU_KWARGS,
         p_num=RELAXTIME_LITERATURE_VALIDATION_VALIDATION_P_NUM,
         t_num=RELAXTIME_LITERATURE_VALIDATION_VALIDATION_T_NUM,
         seed_state=Vector(equilibrium.x_state),

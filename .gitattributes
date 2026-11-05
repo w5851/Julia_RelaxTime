@@ -4,6 +4,7 @@
 # Frozen thermal-transport baselines and retained numerical/source evidence.
 tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tests/baselines/relaxtime/baseline_kappa_lambda_thermal_weighted_v*.csv -text
 data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Frozen Actions command logs retain the original printf trailing spaces.

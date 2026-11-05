@@ -4,14 +4,15 @@
 
 本阶段的输运重计算、正式数值验收及计划内有限窗口分析已完成，
 [PR #331](https://github.com/w5851/Julia_RelaxTime/pull/331)已合并到 `bad5f98ce99ffd81a9ff0f60336a6c3c32a3d44a`。
-适用CI已通过，包括修复后的benchmark script smoke；SSH公钥权限已通过实际推送核验。
+PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke；SSH公钥权限已通过实际推送核验。
+此前提交的[nightly full-suite](https://github.com/w5851/Julia_RelaxTime/actions/runs/41996062882)仍有测试合同和旧κ/λ目标偏差，作为 `required_follow_up` 在 `codex/nightly-transport-contracts` 修复；常规CI通过不等于全集通过。
 工程交付范围与恢复方式见[交付入口](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 
-后续交付在 `D:/w/transport-v15-paper`、`codex/transport-v15-paper` 推进：v15的76张PDF已完成，
+后续交付[PR #332](https://github.com/w5851/Julia_RelaxTime/pull/332)已合并到 `e9b14fc311c632d604c1718a58e540121e9ab983`：v15的76张PDF已完成，
 原PNG逐字节复现，PDF字体、矢量、尺寸及三张论文组合图视觉检查通过；作者已授权正式晋升、current及论文替换。
 详见[v15正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)。
 论文已接入所需三张输运PDF和最小数据依据，15页预览、41项引用和逐页视觉核验通过；新正文为 `agent_review`，独立相图沿用原来源。
-消费者迁移后已退役557张旧PNG及论文279份旧附件，均保留已有Git恢复来源；旧树39787个冗余未跟踪文件已按外部归档清单清理，8处tracked残余已核对保留去向并恢复，旧树Git状态干净。当前会话仍占用 `D:/w/meson-freezeout-defaults`，该worktree待切换会话目录后回收。
+消费者迁移后已退役557张旧PNG及论文279份旧附件，均保留已有Git恢复来源；旧树39787个冗余未跟踪文件已按外部归档清单清理，8处tracked残余已核对保留去向并恢复。会话切换到 `D:/w/transport-v15-paper` 后，`D:/w/meson-freezeout-defaults` 及其本地/远程分支已回收。最终9710个ignored文件均完成归档对应或临时文件核验；5805份数密度产物与既有五个归档逐字节相同。外部工程交付的 `pr331_wrapup/README.md` 记录恢复链及提交对应关系。
 既有外部归档继续复用，不重复保存整套数值证据。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。
 
@@ -34,7 +35,8 @@
 | research | 混合谱支未决、严格退耦和采样间双穿越/切触零尚未全面排除；“未见 Mott”只在已查扫描分辨率下成立 |
 | research | 认证极细窗口高阶导数时，处理生产行列式保护的人工曲率、离散热权重/硬边界及右侧最内层精度；此次未改变生产核 |
 | independent | [A 解析降维](full_rs_a_reduction_20261025.md)原型已验，生产接入与端到端收益仍独立待办 |
-| independent | v15 PDF及current已交付；论文15页审阅稿编译通过，旧PNG、论文旧附件及旧树冗余副本已退役。保留v15渲染依赖和唯一恢复链，原会话worktree待切换cwd后回收 |
+| required_follow_up | nightly full-suite测试修复与κ/λ旧目标偏差核对，真实全集通过后收尾；不重算或覆盖已正式交付的1867点 |
+| independent | v15 PDF及current、论文15页审阅稿和旧worktree/分支回收已完成。旧资产未全部删除：v5/v10–v13复现输入、v14上一正式层、数值和收敛依据仍有消费者；继续清理须先解除这些依赖 |
 
 以下保留各批次的实施与验收依据；涉及历史图层或准备阶段的语句不代替上表的当前状态。
 
