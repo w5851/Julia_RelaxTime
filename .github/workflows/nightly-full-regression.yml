@@ -6,9 +6,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  full-regression:
+  full-suite:
+    name: full (${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: unit
+            timeout: 90
+          - shard: regression
+            timeout: 90
+          - shard: integration-models-pnjl
+            timeout: 65
+          - shard: integration-config
+            timeout: 25
+          - shard: integration-relaxtime
+            timeout: 80
+          - shard: integration-ensure-a
+            timeout: 20
+          - shard: validation
+            timeout: 50
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,99 +45,58 @@ jobs:
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-      - name: Run unit full profile
+      - name: Run full profile shard
         env:
-          UNIT_PROFILE: full
-          UNIT_VERBOSE_INCLUDE: "1"
-        run: julia --project=. tests/unit/runtests.jl
+          SHARD: ${{ matrix.shard }}
+        run: |
+          case "$SHARD" in
+            unit)
+              UNIT_PROFILE=full UNIT_VERBOSE_INCLUDE=1 julia --project=. tests/unit/runtests.jl
+              ;;
+            regression)
+              REGRESSION_PROFILE=full REGRESSION_MAGNETIC_SCOPE=nightly julia --project=. tests/regression/runtests.jl
+              ;;
+            validation)
+              VALIDATION_PROFILE=full julia --project=. tests/validation/runtests.jl
+              ;;
+            integration-*)
+              case "$SHARD" in
+                integration-models-pnjl)
+                  files=$(git ls-files "tests/integration/models/test_*.jl" "tests/integration/pnjl/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
+                  ;;
+                integration-config)
+                  files=$(git ls-files "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
+                  ;;
+                integration-relaxtime)
+                  files=$(git ls-files "tests/integration/relaxtime/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils[.]jl$' | grep -v '^relaxtime/test_ensure_quark_params_has_A_property[.]jl$' | paste -sd ';' -)
+                  ;;
+                integration-ensure-a)
+                  files="relaxtime/test_ensure_quark_params_has_A_property.jl"
+                  ;;
+                *) echo "Unknown integration shard: $SHARD" >&2; exit 1 ;;
+              esac
+              if [ -z "$files" ]; then
+                echo "No integration files found for $SHARD" >&2
+                exit 1
+              fi
+              echo "INTEGRATION_FILES=$files"
+              INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
+              ;;
+            *) echo "Unknown shard: $SHARD" >&2; exit 1 ;;
+          esac
 
-      - name: Run regression full profile
-        if: always()
+  final-gate:
+    name: Final test gate
+    needs: full-suite
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every full-suite shard
         env:
-          REGRESSION_PROFILE: full
-          REGRESSION_MAGNETIC_SCOPE: nightly
-        run: julia --project=. tests/regression/runtests.jl
-
-      - name: Run integration full profile (models + pnjl shard)
-        id: integration_models_pnjl
-        if: always()
-        timeout-minutes: 60
+          SUITE_RESULT: ${{ needs.full-suite.result }}
         run: |
-          files=$(git ls-files "tests/integration/models/test_*.jl" "tests/integration/pnjl/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
-          if [ -z "$files" ]; then
-            echo "No integration files found for models+pnjl shard" >&2
+          if [ "$SUITE_RESULT" != "success" ]; then
+            echo "::error::Full-suite shards did not all succeed (result=$SUITE_RESULT)."
             exit 1
           fi
-          echo "INTEGRATION_FILES=$files"
-          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
-
-      - name: Run integration full profile (config shard)
-        id: integration_config
-        if: always()
-        timeout-minutes: 20
-        run: |
-          files=$(git ls-files "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
-          if [ -z "$files" ]; then
-            echo "No integration files found for config shard" >&2
-            exit 1
-          fi
-          echo "INTEGRATION_FILES=$files"
-          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
-
-      - name: Run integration full profile (relaxtime shard except ensure-A)
-        id: integration_relaxtime
-        if: always()
-        continue-on-error: true
-        timeout-minutes: 75
-        run: |
-          files=$(git ls-files "tests/integration/relaxtime/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils\.jl$' | grep -v '^relaxtime/test_ensure_quark_params_has_A_property\.jl$' | paste -sd ';' -)
-          if [ -z "$files" ]; then
-            echo "No integration files found for relaxtime shard" >&2
-            exit 1
-          fi
-          echo "INTEGRATION_FILES=$files"
-          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
-
-      - name: Run integration full profile (relaxtime ensure-A watchdog)
-        id: integration_relaxtime_ensure_a
-        if: always()
-        timeout-minutes: 15
-        run: |
-          file="relaxtime/test_ensure_quark_params_has_A_property.jl"
-          echo "INTEGRATION_FILES=$file"
-          INTEGRATION_FILES="$file" julia --project=. tests/integration/runtests.jl
-
-      - name: Run validation full profile
-        id: validation_full
-        if: always()
-        timeout-minutes: 45
-        env:
-          VALIDATION_PROFILE: full
-        run: julia --project=. tests/validation/runtests.jl
-
-      - name: Final test gate
-        if: always()
-        run: |
-          failures=0
-
-          check_step() {
-            local step_name="$1"
-            local outcome="$2"
-            if [ "$outcome" != "success" ]; then
-              echo "::error::Step failed: $step_name (outcome=$outcome)"
-              failures=$((failures + 1))
-            fi
-          }
-
-          check_step "integration models+pnjl" "${{ steps.integration_models_pnjl.outcome }}"
-          check_step "integration config" "${{ steps.integration_config.outcome }}"
-          check_step "integration relaxtime except ensure-A" "${{ steps.integration_relaxtime.outcome }}"
-          check_step "integration relaxtime ensure-A" "${{ steps.integration_relaxtime_ensure_a.outcome }}"
-          check_step "validation full" "${{ steps.validation_full.outcome }}"
-
-          if [ "$failures" -ne 0 ]; then
-            echo "Final gate detected $failures failing step(s)."
-            exit 1
-          fi
-
-          echo "Final gate passed: all required steps succeeded."
+          echo "Final gate passed: all full-suite shards succeeded."

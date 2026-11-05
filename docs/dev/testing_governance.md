@@ -14,6 +14,11 @@
 dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终分支上使用 `workflow_dispatch` 补跑，
 核对每次运行的 `headSha`，并在 PR 保存结果链接。未触发的检查不能视为通过；已有检查必须正常通过。
 
+`nightly-full-suite` 将 unit、regression、validation 和既有四组 integration 分为七个独立 job，
+保留原 full profile、magnetic nightly 范围和 integration 文件选择。`fail-fast=false` 使其他分片
+在一个分片失败后继续给出结果；失败不使用 `continue-on-error` 改写，最终门禁要求所有分片成功。
+分片间不共享 Julia 进程状态，各 integration 分片内部仍按原顺序在同一进程运行。
+
 ---
 
 ## 目录分层（必须遵守）

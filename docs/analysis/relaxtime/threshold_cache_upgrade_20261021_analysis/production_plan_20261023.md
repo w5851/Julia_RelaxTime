@@ -4,7 +4,8 @@
 
 本阶段的输运重计算、正式数值验收及计划内有限窗口分析已完成，
 [PR #331](https://github.com/w5851/Julia_RelaxTime/pull/331)已合并到 `bad5f98ce99ffd81a9ff0f60336a6c3c32a3d44a`。
-PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke；SSH公钥权限已通过实际推送核验。
+PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke；当时的SSH公钥权限已通过实际推送核验。
+本轮SSH/443出现连接关闭，使用既有GitHub凭据的HTTPS推送成功；连接关闭未归因为公钥权限，也未宣称SSH链路当前持续可用。
 此前提交的[nightly full-suite](https://github.com/w5851/Julia_RelaxTime/actions/runs/41996062882)仍有测试合同和旧κ/λ目标偏差，作为 `required_follow_up` 在 `codex/nightly-transport-contracts` 修复；常规CI通过不等于全集通过。
 工程交付范围与恢复方式见[交付入口](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 
@@ -36,7 +37,7 @@ PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke
 | research | 认证极细窗口高阶导数时，处理生产行列式保护的人工曲率、离散热权重/硬边界及右侧最内层精度；此次未改变生产核 |
 | independent | [A 解析降维](full_rs_a_reduction_20261025.md)原型已验，生产接入与端到端收益仍独立待办 |
 | required_follow_up | nightly full-suite测试修复与κ/λ旧目标偏差核对，真实全集通过后收尾；不重算或覆盖已正式交付的1867点 |
-| independent | v15 PDF及current、论文15页审阅稿和旧worktree/分支回收已完成。旧资产未全部删除：v5/v10–v13复现输入、v14上一正式层、数值和收敛依据仍有消费者；继续清理须先解除这些依赖 |
+| independent | v15 PDF及current、论文15页审阅稿和旧worktree/分支回收已完成。旧资产未全部删除：公共图目录仍有v15前824张PNG和225张PDF，此外保留历史数值/收敛记录及复现输入；v5/v10–v13来源依赖和v14上一正式层的进一步退役须先处理消费者 |
 
 以下保留各批次的实施与验收依据；涉及历史图层或准备阶段的语句不代替上表的当前状态。
 

@@ -8,9 +8,20 @@ This test verifies that relaxation_times produces identical results
 whether called with QuarkParams/ThermoParams structs or NamedTuple parameters.
 """
 
+# Load required modules through relaxtime entrypoint
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
+end
+
+module RelaxationTimeProperties
 using Test
 using Supposition
 using Random
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main: Constants_PNJL
+using Main.RelaxTime: RelaxationTime, EffectiveCouplings
+using Main.RelaxTime.OneLoopIntegrals: A
+using Main.RelaxTime.GaussLegendre: gauleg
 
 function run_with_timeout_seconds(f::Function, timeout_seconds::Real, label::AbstractString)
     task = @async f()
@@ -21,20 +32,9 @@ function run_with_timeout_seconds(f::Function, timeout_seconds::Real, label::Abs
     return fetch(task)
 end
 
-# Load required modules through relaxtime entrypoint
-if !isdefined(Main, :RelaxTime)
-    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
-end
-
-using Main.RelaxationTime
-using Main.Constants_PNJL
-using Main.EffectiveCouplings
-using Main.OneLoopIntegrals: A
-using Main.GaussLegendre: gauleg
-
-# Load test utilities
-include("test_utils.jl")
-using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
+# A two-node quadrature can have zero or only one distinct supported s value;
+# neither defines the interval required by the thermal-weighted cache.
+const QUADRATURE = (p_nodes=4, angle_nodes=3, phi_nodes=5, n_sigma_points=4)
 
 @inline finite_float(minimum::Float64, maximum::Float64) =
     Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
@@ -129,24 +129,21 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # This tests that the struct interface works correctly with pre-computed rates
             rates = run_with_timeout_seconds(sample_timeout_seconds, "compute_average_rates(relaxation_times)") do
                 RelaxationTime.compute_average_rates(
-                    q_nt, t_nt, K_coeffs,
-                    p_nodes=2,
-                    angle_nodes=2,
-                    phi_nodes=2,
-                    n_sigma_points=3,
+                    q_nt, t_nt, K_coeffs;
+                    QUADRATURE...,
                     sigma_cutoff=5.0
                 )
             end
             
             # Compute relaxation times with struct parameters using pre-computed rates
-            result_struct = relaxation_times(
+            result_struct = RelaxationTime.relaxation_times(
                 q_struct, t_struct, K_coeffs;
                 densities=densities,
                 existing_rates=rates
             )
             
             # Compute relaxation times with NamedTuple parameters using pre-computed rates
-            result_nt = relaxation_times(
+            result_nt = RelaxationTime.relaxation_times(
                 q_nt, t_nt, K_coeffs;
                 densities=densities,
                 existing_rates=rates
@@ -237,11 +234,8 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Compute average rates with struct parameters (minimal nodes)
             rates_struct = run_with_timeout_seconds(sample_timeout_seconds, "compute_average_rates(struct)") do
                 RelaxationTime.compute_average_rates(
-                    q_struct, t_struct, K_coeffs,
-                    p_nodes=2,
-                    angle_nodes=2,
-                    phi_nodes=2,
-                    n_sigma_points=3,
+                    q_struct, t_struct, K_coeffs;
+                    QUADRATURE...,
                     sigma_cutoff=5.0
                 )
             end
@@ -249,11 +243,8 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Compute average rates with NamedTuple parameters
             rates_nt = run_with_timeout_seconds(sample_timeout_seconds, "compute_average_rates(namedtuple)") do
                 RelaxationTime.compute_average_rates(
-                    q_nt, t_nt, K_coeffs,
-                    p_nodes=2,
-                    angle_nodes=2,
-                    phi_nodes=2,
-                    n_sigma_points=3,
+                    q_nt, t_nt, K_coeffs;
+                    QUADRATURE...,
                     sigma_cutoff=5.0
                 )
             end
@@ -295,3 +286,5 @@ println("  2. Struct-NamedTuple equivalence for compute_average_rates")
 println("  3. Physical constraints maintained (positive tau, non-negative rates)")
 println("  4. All values are finite")
 println("="^70)
+
+end # module RelaxationTimeProperties
