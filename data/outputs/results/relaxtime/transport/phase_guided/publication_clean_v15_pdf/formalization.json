@@ -1,0 +1,152 @@
+{
+  "schema": "phase_guided_publication_clean_formalization_v15",
+  "status": "author_accepted_formal_raw_figure_layer",
+  "promoted_at": "2026-11-05T10:02:01.858006+00:00",
+  "formal_production_promoted": true,
+  "manuscript_eligible": true,
+  "current_publication_layer": true,
+  "case_slug": "publication_clean_v15_pdf",
+  "counts": {
+    "single_figures": 72,
+    "main_composites": 3,
+    "detail_figures": 1,
+    "referenced_color_png": 76,
+    "referenced_grayscale_png": 76,
+    "vector_pdf": 76,
+    "duplicated_png": 0
+  },
+  "raw_points": 1867,
+  "numerical_postprocessing": "explicit selection of computed values; no smoothing or interpolation",
+  "source_selection": {
+    "v14_retained": 1810,
+    "recomputed_original": 9,
+    "xi_inserted": 48
+  },
+  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "figure_bundle": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "formal_vector_and_referenced_png_bundle",
+    "bytes": 6120124,
+    "sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959"
+  },
+  "numerical_promotion": {
+    "path": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/formal_promotion_v1/promotion.json",
+    "path_kind": "repository_relative",
+    "role": "formal_numerical_acceptance",
+    "bytes": 7001,
+    "sha256": "08c39415a79b34031550ded0e21d816e26a28958dbac426569e667adb074e1f4"
+  },
+  "author_authorization": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/author_authorization.json",
+    "path_kind": "repository_relative",
+    "role": "author_acceptance_and_delivery_authorization",
+    "bytes": 750,
+    "sha256": "0208e0e2a5a6fac3d3718768125f22daf5cc0a5f8f18750f514bba1d14f46320"
+  },
+  "pdf_delivery": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/delivery_validation.json",
+    "path_kind": "repository_relative",
+    "role": "all_76_pdf_technical_checks",
+    "bytes": 750,
+    "sha256": "b1a95f69110ba3e802f4b2f8349e257acf103b2b8d01a5b409303ec1b90537dd"
+  },
+  "pdf_render_review": {
+    "status": "passed",
+    "method": "three new PDF renders, bounded DeepSeek candidates, primary visual and geometry reconciliation",
+    "samples": [
+      {
+        "figure": "figure1_relaxation_times_comparison",
+        "pdf_sha256": "f0b7d688e3b421a09d9f37d2413718e08e8f43747861997eb0db6e3538da3ecc",
+        "delegated_candidate": {
+          "readable": true,
+          "issues": [
+            {
+              "location": "面板 (c)",
+              "description": "图例（First-order, restored, broken）紧贴顶部边缘，与面板上边框/曲线接近，略显拥挤"
+            },
+            {
+              "location": "整个图",
+              "description": "各行面板间距不一致；第2–3行之间（(d)–(f)与(g)–(i)）垂直间距偏紧，而第1–2行间距较大"
+            }
+          ],
+          "uncertain": []
+        },
+        "primary_review": "passed: visible text, ticks, curves and legends; no clipping or overlap"
+      },
+      {
+        "figure": "figure2_transport_coefficients_comparison",
+        "pdf_sha256": "39cffcbd269f0786e2d491c94a2c4085432d7b80c77e1461603941686fe78576",
+        "delegated_candidate": {
+          "readable": true,
+          "issues": [],
+          "uncertain": [
+            "(c)和(f)面板中图例“First-order”及其restored/broken标记的近旁曲线元素是否构成重叠，在渲染分辨率下难以确证，未计入issues"
+          ]
+        },
+        "primary_review": "passed: visible text, ticks, curves and legends; no clipping or overlap"
+      },
+      {
+        "figure": "figure4_transport_fixed_T",
+        "pdf_sha256": "ca0e5dd7d671c4103a24f716d418807361f9449369ab8fada32fb7e7e4f480a1",
+        "delegated_candidate": {
+          "readable": true,
+          "issues": [
+            {
+              "location": "顶级(第一行)",
+              "description": "x轴刻度标签缺失，第一行面板（a、b、c）在底部不显示刻度数字。"
+            },
+            {
+              "location": "中间行(d、e、f)",
+              "description": "x轴刻度标签缺失，中间行各面板在底部不显示刻度数字。"
+            },
+            {
+              "location": "面板(e)",
+              "description": "y轴次刻度标签10与顶部刻度重合，靠近上边界显得拥挤。"
+            },
+            {
+              "location": "面板(e)",
+              "description": "y轴刻度的数量级标签(10、1)在底部拥挤，低刻度标签挨着坐标轴底角。"
+            },
+            {
+              "location": "面板(f)",
+              "description": "y轴次刻度标签0.03与主刻度标签0.04极为接近，在纵轴上部有可能重叠。"
+            },
+            {
+              "location": "面板(i)",
+              "description": "y轴次刻度标签0.04靠近0.06，主刻度间距较密，上部刻度标签有可能拥挤。"
+            },
+            {
+              "location": "面板(a)",
+              "description": "图例中的标记（圆圈、方框）与文字行基线未对齐，标记与「restored」和「broken」两行未整齐对齐。"
+            },
+            {
+              "location": "面板(g)",
+              "description": "图例标题μB(MeV)与第一种曲线的颜色线相交，图例框离数据曲线很近。"
+            },
+            {
+              "location": "图例",
+              "description": "图例条目颜色只对应面板(g)中的μB系列，但图例放在(g)内，可能误读为适用于其他面板。"
+            }
+          ],
+          "needs_review": [
+            "左右两侧的面板列在x方向边缘过窄：面板(a)(d)(g)右边缘与y轴刻度线极为接近。",
+            "图内所有文字和刻度线都在图像边界内，没有裁切痕迹。"
+          ]
+        },
+        "primary_review": "passed: visible text, ticks, curves and legends; no clipping or overlap"
+      }
+    ],
+    "adjudication": "Shared x tick labels appear only in the bottom row by design. Tick/legend overlap candidates were not reproduced visually or geometrically. The accepted layout is unchanged.",
+    "scope": "three manuscript composites visually reviewed; all 76 technical checks and accepted-PNG byte comparisons passed"
+  },
+  "previous_current_pointer": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/previous_state/publication_clean_current.json",
+    "path_kind": "repository_relative",
+    "role": "preserved_pre_promotion_selection",
+    "bytes": 2744,
+    "sha256": "48915f56f04e0ab52e7c30f9a543848dfa04c53a531e94fb0fb14e6d4f8069b3"
+  },
+  "historical_records_unchanged": true,
+  "qualification_note": "The 2026-10-29 numerical promotion retains its original pending figure-use status. This later author-authorized record grants v15 figure and manuscript eligibility; it does not certify continuum derivatives of complete transport coefficients."
+}

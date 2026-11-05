@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "figures": 76,
+  "pdf_count": 76,
+  "referenced_png_count": 152,
+  "duplicated_png_count": 0,
+  "all_png_rerenders_byte_identical": true,
+  "all_pdfs_single_page_embedded_non_type3_fonts_and_vector": true,
+  "no_smoothing_or_interpolation": true,
+  "source_selection": {
+    "v14_retained": 1810,
+    "recomputed_original": 9,
+    "xi_inserted": 48
+  },
+  "manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "validated_delivery_bundle",
+    "bytes": 6120124,
+    "sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959"
+  },
+  "validation_errors": []
+}
