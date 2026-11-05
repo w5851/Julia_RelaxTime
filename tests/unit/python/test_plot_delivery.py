@@ -76,6 +76,26 @@ def test_hash_bound_acceptance_and_relocated_identical_png_pass(delivery):
     assert validate_png_delivery(manifest, root=root) == []
 
 
+def test_acceptance_can_bind_one_figure_in_original_bundle(delivery):
+    from scripts.plotting.plot_bundle import build_bundle
+
+    manifest, receipt, root = delivery
+    response = json.loads(receipt.read_text())
+    path = root / response["accepted_manifest"]["path"]
+    accepted = json.loads(path.read_text())
+    accepted["asset_id"] = "accepted-figure"
+    path.write_text(json.dumps(build_bundle({"charts": [{"stem": "original"}]}, [accepted])))
+    response.update(accepted_manifest=input_record(path, role="accepted_png_manifest", root=root),
+                    accepted_figure_id="accepted-figure")
+    receipt.write_text(json.dumps(response))
+    manifest["author_review"]["record"] = input_record(receipt, role="author_png_acceptance", root=root)
+    assert validate_png_delivery(manifest, root=root) == []
+    response["accepted_figure_id"] = "wrong-figure"
+    receipt.write_text(json.dumps(response))
+    manifest["author_review"]["record"] = input_record(receipt, role="author_png_acceptance", root=root)
+    assert any("select exactly one" in error for error in validate_png_delivery(manifest, root=root))
+
+
 def test_missing_acceptance_is_rejected_even_with_old_pass_flags(delivery):
     manifest, _, root = delivery
     manifest.pop("author_review")

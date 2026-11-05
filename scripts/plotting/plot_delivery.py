@@ -55,6 +55,18 @@ def validate_png_delivery(manifest: dict[str, Any], *, root: Path) -> list[str]:
             or not acceptance["author_instruction"].strip()):
         errors.append("PNG acceptance must record an actual author instruction and PDF authorization")
     accepted = _checked_json(acceptance.get("accepted_manifest"), root, "accepted_manifest", errors)
+    if accepted is not None and "accepted_figure_id" in acceptance:
+        from scripts.plotting.plot_bundle import expand_bundle
+
+        try:
+            matches = [record for _, record in expand_bundle(accepted)
+                       if record.get("asset_id") == acceptance["accepted_figure_id"]]
+            if len(matches) != 1:
+                raise ValueError("accepted_figure_id must select exactly one bundled figure")
+            accepted = matches[0]
+        except (KeyError, TypeError, ValueError) as exc:
+            errors.append(f"cannot select accepted bundled figure: {exc}")
+            accepted = None
     png = acceptance.get("accepted_png")
     if not isinstance(png, dict):
         errors.append("acceptance must bind the accepted PNG hash")

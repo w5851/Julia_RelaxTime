@@ -5,6 +5,7 @@
 ## 当前内容
 
 - `convergence/`：数值收敛性分析相关脚本与说明
+- `relaxtime/export_phase_guided_publication_clean_v15_pdf.py`：以 `--authorization <record.json>` 将已接受的 v15 PNG 包补充为 76 张 PDF；校验 1867 点来源、同字节 PNG 重绘和字体/矢量合同。使用新 `--case`，拒绝覆盖；`--font-sources <map.json>` 仅允许同字节历史字体。保留原 PNG 路径，不复制审阅图及源码树。
 - `scan_mott_meson_vs_xi_mu0.jl`：在 `mu=0` 条件下扫描 Mott 点与介子质量随 `xi` 的变化
 - `mott_reference_mapping.jl`：生成/检查 Mott 参考映射数据
 - `relaxtime/bu_kernel_gate_utils.jl`：纯数值 finite-window BU 恒等式 helper，显式分解 bulk、上下边界项与 closure；由 unit 测试直接覆盖，不是正式数密度入口

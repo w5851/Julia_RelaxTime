@@ -2,21 +2,29 @@
 
 本目录维护 phase-guided relaxation-time transport 的当前图件入口与历史诊断索引。正式数值和新图像位于 `data/outputs`；旧证据包保留其生成时的资格和哈希。
 
-**当前正式图层为 publication_clean_v14**，入口为 [current 指针](publication_clean_current.json)和[交付索引](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/README.md)。1819 个 full-RS 原始点直接生成 76 张彩色 PNG、76 张灰度 PNG 和 76 份单页矢量 PDF，无平滑、插值、删点或局部替换；包含 mode-B／FIG4。作者的条件授权已通过 75 张 v13 对应形式及指定 fixed-T 形式核验，数值、PDF 和论文使用资格见[正式化记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json)。
+**当前正式图层为 publication_clean_v15**，入口为[current指针](publication_clean_current.json)和
+[v15交付索引](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)。
+输入为[η加密的1867点正式网格](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：
+1810个v14原值、9个原坐标重算值及48个新ξ点。76张PDF直接配对已接受的76对PNG；重绘字节完全一致，
+PDF字体、矢量和尺寸检查通过，三张论文组合图已重新渲染核对。没有平滑、插值或拟合显示值。
 
-新 FIG4 采用作者指定的 20261021 面板内图例版。论文 `main.tex` 仍引用 v13 的 Figure 1/2 和更早的顶部图例 FIG4，本次不修改论文工程。旧包已被 v14 取代为默认选用来源；[旧资产清单](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/legacy_cleanup/README.md)记录引用和归档条件，目前未物理删除。
+2026-11-05作者授权衔接见[正式化记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/formalization.json)。
+v15沿用v14的76图形式，包括指定的fixed-T面板内图例版。
+论文采用三张v15输运组合图，独立相图不变；新物理解释和正文以论文 `writing_package/00_status.md` 的审阅状态为准。
+旧版本退出默认入口，冻结manifest不回写；旧证据按可恢复清单迁出，仍被v15引用的PNG、源码及恢复链保留。
 
-最新正式数值版本为[η阈值局部加密的1867点网格](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：
-1810个v14原值、9个原坐标重算值及48个新增ξ点，全部数值验收在quote-remote完成。
-对应图像为[publication_clean_v15 PNG审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/)，
-沿用v14的76图形式。新PNG已由作者审阅；PDF按作者要求暂缓，图层资格仍为png_review，尚未替换current。冻结生成记录中的pending保留当时状态，当前决策见[生产计划](../threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
+本次[旧PNG退役清单](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/retirement.json)
+将557张无活跃图件依赖的旧副本迁出常用目录，可从已合并Git提交恢复。
+下方历史包中的图片链接描述原始位置；重放整包时在独立checkout恢复，不能据旧manifest假称当前仍有完整旧包。
+v5/v10–v15的实用依赖和旧raw/收敛表保持原位，后者不再用于当前论文数字。
 
 ## Stages
 
 | 阶段 | 当前路径 | 角色 |
 | --- | --- | --- |
-| publication-clean v15 PNG review | [新审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/) | 1867点正式数据直出，沿用v14形式；manuscript_eligible=false；作者已审阅，PDF暂缓，未晋升current |
-| publication-clean v14 current | [正式 PNG/PDF 包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/) | 新 full-RS 原始数据正式图层，76 图；manuscript_eligible=true |
+| publication-clean v15 current | [正式PDF包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/) | 1867点、76图；正式晋升并更新current，原PNG直接引用 |
+| publication-clean v15 PNG review | [新审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/) | 冻结PNG阶段；后续作者接受和PDF资格见v15正式化记录 |
+| publication-clean v14 previous | [正式 PNG/PDF 包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/) | 新 full-RS 原始数据正式图层，76 图；manuscript_eligible=true |
 | publication-clean v14 PNG snapshot | [冻结审阅包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/) | 原 PNG 阶段记录不回写；独立条件接受记录衔接正式 PDF |
 | publication-clean v13 accepted layout | [`publication_clean_v13_png_acceptance_v1.json`](publication_clean_v13_png_acceptance_v1.json) | 作者版本级 PNG 接受及对应 PDF 导出授权；不声称逐文件人工审查或数值生产晋升 |
 | publication-clean v13 PDF delivery | [`phase_guided_transport_publication_clean_v13_pdf/`](phase_guided_transport_publication_clean_v13_pdf/) | 72 单图、2 主复合图、1 局部图，共 75 份单页矢量 PDF；完成 vector_delivery，manuscript_eligible=false |
@@ -34,11 +42,11 @@
 | publication-clean accepted parent | [`phase_guided_transport_publication_clean_v4/`](phase_guided_transport_publication_clean_v4/) | v5 的已接受显示父级；保留 v4 的局部显示调整与 raw/display provenance |
 | publication-clean intermediate | [`phase_guided_transport_publication_clean_v3/`](phase_guided_transport_publication_clean_v3/) | v4 的不可变父级和中间版本，仅保留 provenance，不作为当前 publication layer |
 
-v1–v4公共目录的288张重复PNG已按[退役记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/legacy_display_retirement_20261104_v1/README.md)归档迁出；同字节分析图片和原manifest保留，旧验证器需先恢复公共路径。v5及其后的来源依赖继续保留。
+v1–v4公共目录的288张重复PNG已按[退役记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/legacy_display_retirement_20261104_v1/README.md)归档迁出；本次又按上方557图清单清理无活跃依赖的分析图片及其他旧公共副本。原manifest保留，旧整包验证需在独立checkout恢复对应路径。v5及其后的来源依赖继续保留。
 
 PR 收尾将 results 下的70张历史审阅／诊断PNG封装为可逐字节恢复的原路径ZIP，4份退役README迁入results；旧审阅JSON和公共图包manifest不回写。恢复入口见[PR交付整理](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md)。
 
-版本共存按用途区分：v14 是当前正式产物，v1–v13 是被取代的历史数据／显示层，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，历史 renderer 保留生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。`production_registry.json` 保留旧批次登记，新批次资格以 current 指针所链接的 full-RS 晋升记录为准。
+版本共存按用途区分：v15 是当前正式产物，v14 是上一正式图层，v1–v13 是被取代的历史数据／显示层，v6–v9 沿用已有本地归档。v13 直接核验 156 个 v12 文件，历史 renderer 保留生成器导入依赖；目录迁移须保持来源图谱并验证恢复，不按版本号直接删除。`production_registry.json` 保留旧批次登记，新批次资格以 current 指针所链接的 full-RS 晋升记录为准。
 
 v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_window_summary.csv`；v2 是连续审计阶段，不覆盖、不合并、也不重写 v1。
 
@@ -57,7 +65,7 @@ v2 的 `tables/window_classification.csv` 直接引用 v1 的 `tables/mechanism_
 
 ## Current promotion and historical boundary
 
-v14 的晋升同时绑定新网格收敛、回归、完整 provenance、失败点与局部结构审计，以及作者条件授权。PNG 重绘逐字节一致，PDF 的字体、矢量和物理尺寸检查通过，原始表与原始 PNG 未被覆盖。
+v15的后续晋升绑定η加密数值资格、原PNG字节复现及本批PDF核验。v14 的原晋升同时绑定新网格收敛、回归、完整 provenance、失败点与局部结构审计，以及作者条件授权。PNG 重绘逐字节一致，PDF 的字体、矢量和物理尺寸检查通过，原始表与原始 PNG 未被覆盖。
 
 下述 v5–v13 说明保留各阶段当时的边界；其中“current=v5”只描述历史状态，不是当前入口。v5 当时由作者明确用于正式文稿，成为 publication-clean **图层**。该接受只覆盖
 `author_accepted_formal_layout` 的显示产物，不晋升 phase reference，不修改

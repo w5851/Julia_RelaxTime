@@ -1,0 +1,39 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "好的，按此顺序做，未提交改动你看情况处理、未跟踪文件如果仅是证据 我的建议是没必要保留太多证据",
+  "acceptance_basis": "Existing author review of v15 PNGs recorded in production_plan_20261023.md; current instruction authorizes the agreed PDF checks, formal promotion, current/paper replacement and subsequent cleanup.",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 5930744,
+    "sha256": "af22fcc624d5fdb7c9ab6324806cc771482f59160e7b70dc380c55a38e03eee6"
+  },
+  "accepted_figure_id": "relaxtime.phase_guided.publication_clean_v15_png_review.mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi",
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/mode_a_fixed_muB_phase_scaled/plot_panel=muB450.0/tau_d_vs_xi.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 190916,
+    "sha256": "15e79afdffe67540f1b2ebaacac118ddadfcbbb4ddd070dce7b90e0258ff1787",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        2760
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        4.6000092000184
+      ]
+    },
+    "role": "color_review"
+  }
+}

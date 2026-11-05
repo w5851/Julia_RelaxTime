@@ -78,3 +78,14 @@ artist 编码。新字体／身份字段在 PNG 与后续 PDF 阶段必须一致
 未声明这些字段的冻结历史 manifest 保留历史核验方式，不追溯要求迁移。
 缺少 `font_policy` 的历史 v2 配置副本可以读取其尺寸等合同字段；若要渲染这类旧图，
 使用对应冻结代码。现行 `style_context` 仍拒绝无显式策略的新渲染。
+
+## 接受记录引用多图包
+
+`plot_delivery.validate_png_delivery` 的 `plot_png_acceptance_v1` 记录可以直接
+引用原始 `plot_manifest_bundle_v1`：`accepted_manifest` 绑定原包的文件哈希，
+`accepted_figure_id` 指定其中唯一的 `asset_id`，`accepted_png` 绑定该图的 PNG。
+不存在或重复的图身份被拒绝。省略 `accepted_figure_id` 时继续按单图 manifest
+核验，已有接受记录不需要迁移。
+
+矢量包的 `outputs` 可以引用原 PNG 路径，无须复制 PNG 或展开保存所有单图
+manifest。输入内容、角色、渲染语义及字体身份仍逐图与已接受的记录比较。
