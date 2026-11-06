@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_production_shadow.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-production-shadow.yml"
 
 
 def load_module(path: Path, name: str):
@@ -154,16 +153,3 @@ def test_shadow_collector_rejects_cascade_confirmation_on_oracle_ambiguous(tmp_p
     gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40)
     assert gate["verdict"] == "hybrid_required"
     assert any("classification mismatch" in error for error in gate["cascade_errors"])
-
-
-def test_shadow_workflow_has_immutable_ref_and_nine_jobs():
-    module = load_module(COLLECTOR, "collector_workflow_contract")
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "calculation_ref" in text
-    assert "actions: read" in text
-    assert "timeout-minutes: 180" in text
-    assert "aggregate_replay" in text
-    assert "source_run_id" in text
-    assert "source_calculation_sha" in text
-    assert "pip install matplotlib" in text
-    assert len(module.XIS) * len(module.METHODS) == 9

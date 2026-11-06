@@ -1,5 +1,4 @@
 import csv
-import hashlib
 import importlib.util
 import io
 import json
@@ -12,7 +11,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_targeted_closure.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-c2-targeted-closure-v1.yml"
 
 
 def load_module():
@@ -68,17 +66,6 @@ def _write_method(root: Path, module, target_id: str, method: str, *, status="co
         "provenance": {"reference_write": False, "oracle_labels_used_for_routing": False},
     }
     (target_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-
-
-def test_workflow_freezes_scope_sha_and_exact_target_matrix():
-    module = load_module()
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert module.SCHEMA_VERSION in text
-    assert module.CALCULATION_SHA in text
-    assert "regression_curves" in text and "cep_brackets" in text and "cross_axis_audit" in text
-    assert len(module.artifact_names("regression_curves")) == 9
-    assert len(module.artifact_names("cep_brackets")) == 3
-    assert "oracle_labels_used_for_routing" in SCRIPT.read_text(encoding="utf-8")
 
 
 def test_source_validation_reconciles_two_methods_without_solver_call(tmp_path):

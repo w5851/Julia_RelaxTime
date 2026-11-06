@@ -1,0 +1,24 @@
+{
+  "common_sha256": "df29eab3d227deb11b783baf402c9a70829205f6e614aff5d3603d8695633a7c",
+  "nonfinite_json": "null; inspect convergence/status fields and CSV",
+  "parameters": {
+    "background": "retained rows; critical and detuned states locally solved p24 angle8",
+    "scope": "equal-mass k=0 branch point and mixed-P threshold",
+    "integration": "threshold-weight projected s-P integral, not full tau",
+    "loop_schemes": [
+      "production",
+      "paired_pv"
+    ],
+    "couplings": "retained transport isotropic A",
+    "smoke": false
+  },
+  "status": "analysis_only",
+  "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+  "script": "scripts\\analysis\\relaxtime\\run_mott_threshold_mechanism.jl",
+  "created_utc": "2026-10-16T11:11:25.741",
+  "input_sha256": "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+  "julia": "1.12.5",
+  "formal_data_modified": false,
+  "script_sha256": "004318c63c3f485759741df5932412d1673bc783c3f0d1528ce01c9e360823c5",
+  "manuscript_eligible": false
+}

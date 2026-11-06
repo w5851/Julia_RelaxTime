@@ -87,8 +87,6 @@ end
 function validate_registry(
     root::AbstractString=PROJECT_ROOT;
     registry_rel::AbstractString=DEFAULT_REGISTRY_REL,
-    current_date::Date=today(),
-    advisories::Vector{String}=String[],
 )
     violations = String[]
     parsed = _load_registry(root, registry_rel, violations)
@@ -98,9 +96,6 @@ function validate_registry(
         push!(violations, "schema_version must be v1")
 
     allowed_statuses = Set(_string_vector(parsed, "allowed_statuses", "registry", violations))
-    section_key = haskey(parsed, "recommended_sections") ? "recommended_sections" : "required_sections"
-    recommended_sections = haskey(parsed, section_key) ?
-        _string_vector(parsed, section_key, "registry", violations) : String[]
     forbidden_patterns = _string_vector(parsed, "forbidden_patterns", "registry", violations)
 
     index_rel = _nonempty_string(
@@ -185,26 +180,12 @@ function validate_registry(
             sop_path = _existing_repo_path!(violations, root, normalized_path, "$(item_label) document")
         end
 
-        review_days = get(raw, "review_cycle_days", nothing)
-        if !(review_days isa Integer) || review_days <= 0
-            push!(violations, "$(item_label).review_cycle_days must be a positive integer")
-            review_days = nothing
-        end
-        last_verified = _parse_date(get(raw, "last_verified", nothing), "$(item_label).last_verified", violations)
-        if status == "active" && review_days !== nothing && last_verified !== nothing
-            if last_verified > current_date
-                push!(advisories, "$(item_label).last_verified is in the future: $(last_verified)")
-            elseif Dates.value(current_date - last_verified) > review_days
-                push!(advisories, "$(item_label) review is overdue: last_verified=$(last_verified), review_cycle_days=$(review_days)")
-            end
+        if haskey(raw, "last_verified")
+            _parse_date(raw["last_verified"], "$(item_label).last_verified", violations)
         end
 
         if status == "active" && sop_path !== nothing && isfile(sop_path)
             content = read(sop_path, String)
-            for section in recommended_sections
-                occursin(section, content) ||
-                    push!(advisories, "$(item_label) missing recommended section: $(section)")
-            end
             for pattern in forbidden_patterns
                 occursin(pattern, content) &&
                     push!(violations, "$(item_label) contains forbidden pattern: $(pattern)")
@@ -217,9 +198,7 @@ end
 
 function main(args::Vector{String}=collect(String.(ARGS)))
     isempty(args) || error("check_sop_governance.jl does not accept arguments")
-    advisories = String[]
-    violations = validate_registry(; advisories)
-    foreach(item -> println("[sop-governance] advisory: " * item), advisories)
+    violations = validate_registry()
     if !isempty(violations)
         println("[sop-governance] FAILED: $(length(violations)) violation(s)")
         for item in violations

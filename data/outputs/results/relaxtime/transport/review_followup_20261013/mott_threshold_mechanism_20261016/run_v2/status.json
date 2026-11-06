@@ -1,0 +1,8 @@
+{
+  "critical_states": 2,
+  "integrals": 84,
+  "samples": 1554,
+  "bound_poles": 8,
+  "complete": true,
+  "cases": 7
+}

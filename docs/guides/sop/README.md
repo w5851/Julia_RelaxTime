@@ -2,7 +2,7 @@
 
 本目录是 Julia_RelaxTime 面向计算执行、验证、复现与产物升格的权威 SOP 入口。
 
-SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历史仍由既有目录负责。权威身份与复核周期以 `config/governance/docs_authority_map.toml` 为机读单一来源。
+SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历史仍由既有目录负责。权威身份与入口以 `config/governance/docs_authority_map.toml` 为机读单一来源。
 
 ## 阅读顺序
 
@@ -56,9 +56,9 @@ SOP 回答“如何可靠地运行”；公式、API、研究结论和任务历�
 julia --project=. scripts/dev/check_sop_governance.jl
 ```
 
-5. 实际执行登记的最小验证命令，再更新 `last_verified`。
+5. 根据变更运行适用的验证；实际复核日期可记录为 `last_verified`。
 
-固定章节和复核超期只产生建议；不存在的入口/配置、权威范围冲突和误导性旧路径仍是错误。修改 checker 或其测试时才运行对应 fixture 测试，普通 SOP 内容更新只运行适用的文档与引用检查。
+章节按内容组织，复核由入口或合同变化触发；不存在的入口/配置、权威范围冲突和误导性旧路径仍是错误。修改 checker 或其测试时才运行对应 fixture 测试，普通 SOP 内容更新只运行适用的文档与引用检查。
 
 ## 边界
 
@@ -66,4 +66,4 @@ julia --project=. scripts/dev/check_sop_governance.jl
 - 本目录不保存一次性运行日志或结果结论。
 - smoke 成功不自动等价于数值收敛。
 - diagnostic 产物不自动进入论文或正式 baseline。
-- 改变物理语义、默认求解策略或容差时，必须另立任务并执行对应 regression/validation 治理。
+- 改变物理语义、默认求解策略或容差时，在当前任务中明确范围并执行对应 regression/validation。

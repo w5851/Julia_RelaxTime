@@ -1,6 +1,6 @@
 # 测试组织与入口规范（Julia_RelaxTime）
 
-更新时间：2026-10-04
+更新时间：2026-11-06
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
 - 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
@@ -21,7 +21,7 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
 
 ---
 
-## 目录分层（必须遵守）
+## 目录分层
 
 | 层级 | 目录 | 用途 | CI 层 |
 |------|------|------|-------|
@@ -99,14 +99,13 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
 运行档：
 - `UNIT_PROFILE=smoke`（默认）：精选、稳定、确定性的测试集合，长期保持绿色。
 - `UNIT_PROFILE=core`：CI 与合并前的较广行为覆盖；与 smoke 的职责不同。
-- `UNIT_PROFILE=full`：更大范围 include，逐步修复；允许短期不全绿。
+- `UNIT_PROFILE=full`：更大范围 include，由 nightly 检查；失败需定位并修复。
 
 环境变量（以入口实现为准）：
 - `UNIT_PROFILE=smoke|core|full`
 - `UNIT_INCLUDE_PERF=1`：full 下允许 include performance 相关测试（默认关闭）。
 - `UNIT_INCLUDE_WIP=1`：允许 include `DEFAULT_SKIP` 中的迁移测试。
 - `UNIT_FILES=path1,path2,...`：仅运行指定单元测试文件。
-- `UNIT_FILES=path1,path2,...`：仅运行指定文件。
 
 ## 回归测试入口策略
 
@@ -132,7 +131,7 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
   - 固定点：`(T,μ)=(0.75,0.00),(0.90,0.00),(1.05,0.00),(0.90,0.15)`
   - 比较量：`η/σ/ζ`
   - 容差：`rtol=8e-2`, `atol=1e-6`
-- 容差调整须在 `docs/dev/active` 记录变更原因与对比。
+- 容差调整在对应基线说明或 issue/PR 记录误差来源与对比证据。
 
 ## Regression 与 Validation 的边界
 
@@ -151,12 +150,13 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
   - 主要目标是性能/缩放趋势比较，非功能正确性。
 - 触发后动作：
   - 在 `runtests.jl` 分组注释中说明迁移原因；
-  - 在 `docs/dev/active` 记录回归影响；
+  - 在对应 issue/PR 说明覆盖变化；
   - 只有迁出后留下重要行为覆盖缺口时才补替代 smoke，不按迁出文件数量新增测试。
 
 ## 测试价值与触发范围
 
 - 测试应捕获实际行为错误：公式/极限、单位、分支、稳定接口、失败语义或数值漂移。
+- 退役脚本同时移除专用测试；仍在使用的解析器、恢复器或数据适配器保留行为覆盖。历史 YAML 的文字、文件数量及已执行的清理动作由 Git 记录，不作为持续回归目标。
 - 不按源码文件 1:1 配置测试；不固定当前任务、分支、SHA 或内部调用措辞。
 - 架构禁用规则使用静态检查；源码中出现函数名或字符串不构成该行为已执行的证明。
 - 文档或任务治理的 fixture 测试由对应 CI 维护，不重复纳入 unit core；full 仍可覆盖这些测试。

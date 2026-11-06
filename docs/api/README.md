@@ -38,6 +38,13 @@
 - 模型变体总入口：`docs/api/models/variants/README.md`
 - 衍生量总入口：`docs/api/models/derived/README.md`
 
+### 对接 Web / HTTP 服务
+
+- 启动与使用：[稳定脚本指南](../guides/scripts/README.md)、[Web 示例](../guides/examples/web_demo.md)。
+- 服务装配：[启动入口](../../scripts/server/server_full.jl) 调用 [ServerLauncher](../../src/simulation/ServerLauncher.jl)；[FullServerApp](../../src/simulation/FullServerApp.jl) 组织处理器与路由。
+- 请求到计算的映射：[routing.jl](../../src/simulation/fullserver/routing.jl) 分发到同目录处理器；请求解析、单位转换和返回字段需对照相应处理器，异步任务另看 `pnjl_scan_jobs.jl` 或 `script_task_jobs.jl`。
+- 计算层数据结构见[数据契约](data_contracts.md)及对应计算主题；Julia 函数可用不表示已有对应 HTTP 路由。稳定请求/响应说明放在对应接口页面，未实现的适配方案放在已有开发设计中。
+
 ### 使用公共绘图 helper
 
 - [曲线身份、局部样式上下文与字体策略](plotting/PlotStyle.md)

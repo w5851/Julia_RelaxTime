@@ -269,7 +269,7 @@ status = "promoted"
 current_task = "plot-sop-independent-land"
 blocked_by = []
 unlocks = []
-next_action = "绘图 SOP 合同已由作者审核并完成 promotion；后续逐图族迁移、legacy 图清理和 strict layout gate 作为独立任务推进，不改变已审核历史产物。"
+next_action = "v1 合同制定与旧资产整理已完成，历史任务已归档；当前绘图使用 figure_production_v2。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -277,7 +277,7 @@ current_branch = "main"
 current_sha = "acc610ee03dff0e7dd53f8e8e048764420f2f11c"
 run_ids = []
 evidence = [
-  "file:docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md",
+  "file:docs/dev/archived/2026-08-15_论文级绘图资产注册表与合同草案.md",
   "file:docs/guides/sop/workflows/figure_production.md",
   "file:config/plotting/audit_v1.toml",
   "file:config/plotting/candidate_origin_like_v1.toml",
@@ -840,13 +840,13 @@ track_id = "plot-sop"
 classification = "independent"
 status = "promoted"
 parent = "track:plot-sop"
-task_file = "docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md"
+task_file = "docs/dev/archived/2026-08-15_论文级绘图资产注册表与合同草案.md"
 reason = "正式绘图 SOP、三份 style profile、validator、绘图 helper 和合同单测已落地；PR #218、#220、#222 已合并，line-first pilot 已获作者视觉审核。"
-next_action = "以已 promotion 的 SOP 为公共合同；逐图族迁移和 strict layout gate 另立独立 task/PR，不追溯覆盖历史图像。"
+next_action = "v1 制定阶段已完成；当前执行合同为 figure_production_v2。图族工作按实际需求与已有授权推进。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-08-15_论文级绘图资产注册表与合同草案.md",
+  "file:docs/dev/archived/2026-08-15_论文级绘图资产注册表与合同草案.md",
   "file:docs/guides/sop/workflows/figure_production.md",
   "file:config/plotting/audit_v1.toml",
   "file:config/plotting/candidate_origin_like_v1.toml",

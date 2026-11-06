@@ -1,0 +1,21 @@
+{
+  "common_sha256": "df29eab3d227deb11b783baf402c9a70829205f6e614aff5d3603d8695633a7c",
+  "nonfinite_json": "null; inspect convergence/status fields and CSV",
+  "parameters": {
+    "full_rs_scope": "k=0 occupation resummation, unchanged on-shell denominators",
+    "points": 215,
+    "pole_convention": "real_axis_width_coupling",
+    "angle_nodes": 32,
+    "couplings": "production_isotropic_A",
+    "energy_nodes": 128
+  },
+  "status": "analysis_only",
+  "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+  "script": "scripts\\analysis\\relaxtime\\run_transport_review_meson.jl",
+  "created_utc": "2026-10-14T11:32:22.046",
+  "input_sha256": "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+  "julia": "1.12.5",
+  "formal_data_modified": false,
+  "script_sha256": "e56f7d9d8d2f3e8fe9550d765de3bbb31bcba21ff1b03625134837c03cb89f09",
+  "manuscript_eligible": false
+}

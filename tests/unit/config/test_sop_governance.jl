@@ -1,4 +1,3 @@
-using Dates
 using Test
 
 const SOP_CHECKER_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "scripts", "dev", "check_sop_governance.jl"))
@@ -13,49 +12,9 @@ function _write_text(path::AbstractString, content::AbstractString)
     return path
 end
 
-function _sop_content(; omit_section::Union{Nothing, String}=nothing)
-    sections = [
-        "## 1. 目的与适用范围",
-        "## 2. 非适用范围",
-        "## 3. 权威入口",
-        "## 4. 物理口径、单位与参数约束",
-        "## 5. 输入配置及优先级",
-        "## 6. 环境与版本冻结",
-        "## 7. Smoke 预检",
-        "## 8. 收敛性验证",
-        "## 9. 正式计算命令",
-        "## 10. 输出目录与产物合同",
-        "## 11. Regression / Validation 验收",
-        "## 12. 失败点、断点续算与重跑",
-        "## 13. Diagnostic 与 Formal Production 的边界",
-        "## 14. 后处理与作图",
-        "## 15. 关联公式、API 和测试",
-        "## 16. 最后验证记录",
-    ]
-    kept = omit_section === nothing ? sections : filter(!=(omit_section), sections)
-    return "# Fixture SOP\n\n" * join((section * "\n\nfixture\n" for section in kept), "\n")
-end
+_sop_content() = "# Fixture workflow\n\nInstructions for this workflow.\n"
 
 function _registry_text(; last_verified::String="2026-07-10", duplicate_authority::Bool=false)
-    required = join(("  \"$(section)\"," for section in [
-        "## 1. 目的与适用范围",
-        "## 2. 非适用范围",
-        "## 3. 权威入口",
-        "## 4. 物理口径、单位与参数约束",
-        "## 5. 输入配置及优先级",
-        "## 6. 环境与版本冻结",
-        "## 7. Smoke 预检",
-        "## 8. 收敛性验证",
-        "## 9. 正式计算命令",
-        "## 10. 输出目录与产物合同",
-        "## 11. Regression / Validation 验收",
-        "## 12. 失败点、断点续算与重跑",
-        "## 13. Diagnostic 与 Formal Production 的边界",
-        "## 14. 后处理与作图",
-        "## 15. 关联公式、API 和测试",
-        "## 16. 最后验证记录",
-    ]), "\n")
-
     second = duplicate_authority ? """
 
 [[sop]]
@@ -66,7 +25,6 @@ authoritative_for = ["fixture_workflow"]
 entrypoints = ["scripts/run_fixture.jl"]
 stable_entrypoints = ["scripts/run_fixture.jl"]
 configs = []
-review_cycle_days = 30
 last_verified = "$(last_verified)"
 verification_commands = ["julia --project=. scripts/run_fixture.jl --help"]
 """ : ""
@@ -75,9 +33,6 @@ verification_commands = ["julia --project=. scripts/run_fixture.jl --help"]
 schema_version = "v1"
 allowed_statuses = ["draft", "active", "deprecated"]
 stable_entrypoint_index = "docs/guides/scripts/README.md"
-recommended_sections = [
-$(required)
-]
 forbidden_patterns = ["src/pnjl/"]
 
 [[sop]]
@@ -88,14 +43,13 @@ authoritative_for = ["fixture_workflow"]
 entrypoints = ["scripts/run_fixture.jl"]
 stable_entrypoints = ["scripts/run_fixture.jl"]
 configs = []
-review_cycle_days = 30
 last_verified = "$(last_verified)"
 verification_commands = ["julia --project=. scripts/run_fixture.jl --help"]
 $(second)
 """
 end
 
-function _make_fixture(root::AbstractString; omit_section=nothing, last_verified="2026-07-10", duplicate_authority=false)
+function _make_fixture(root::AbstractString; last_verified="2026-07-10", duplicate_authority=false)
     _write_text(joinpath(root, "scripts", "run_fixture.jl"), "println(\"fixture\")\n")
     _write_text(
         joinpath(root, "docs", "guides", "scripts", "README.md"),
@@ -103,7 +57,7 @@ function _make_fixture(root::AbstractString; omit_section=nothing, last_verified
     )
     _write_text(
         joinpath(root, "docs", "guides", "sop", "fixture.md"),
-        _sop_content(; omit_section=omit_section),
+        _sop_content(),
     )
     if duplicate_authority
         _write_text(
@@ -126,49 +80,29 @@ end
     mktempdir() do temp_root
         valid_root = _make_fixture(joinpath(temp_root, "valid"))
         @test isempty(Main.SopGovernance.validate_registry(
-            valid_root;
-            current_date=Date(2026, 7, 10),
+            valid_root,
         ))
 
-        missing_section = "## 8. 收敛性验证"
-        incomplete_root = _make_fixture(
-            joinpath(temp_root, "incomplete");
-            omit_section=missing_section,
-        )
-        advisories = String[]
-        incomplete = Main.SopGovernance.validate_registry(
-            incomplete_root;
-            current_date=Date(2026, 7, 10),
-            advisories,
-        )
-        @test isempty(incomplete)
-        @test any(item -> occursin(missing_section, item), advisories)
+        invalid_date = _make_fixture(joinpath(temp_root, "invalid-date"); last_verified="not-a-date")
+        @test any(item -> occursin("last_verified", item), Main.SopGovernance.validate_registry(invalid_date))
 
-        overdue_root = _make_fixture(
-            joinpath(temp_root, "overdue");
-            last_verified="2026-01-01",
-        )
-        overdue = Main.SopGovernance.validate_registry(
-            overdue_root;
-            current_date=Date(2026, 7, 10),
-            advisories,
-        )
-        @test isempty(overdue)
-        @test any(item -> occursin("review is overdue", item), advisories)
+        no_date_root = _make_fixture(joinpath(temp_root, "no-date"))
+        registry = joinpath(no_date_root, "config", "governance", "docs_authority_map.toml")
+        write(registry, replace(read(registry, String), r"last_verified = [^\n]*\n" => ""))
+        @test isempty(Main.SopGovernance.validate_registry(no_date_root))
 
         duplicate_root = _make_fixture(
             joinpath(temp_root, "duplicate");
             duplicate_authority=true,
         )
         duplicate = Main.SopGovernance.validate_registry(
-            duplicate_root;
-            current_date=Date(2026, 7, 10),
+            duplicate_root,
         )
         @test any(item -> occursin("is claimed by both", item), duplicate)
 
         rm(joinpath(valid_root, "scripts", "run_fixture.jl"))
         @test any(item -> occursin("does not exist", item), Main.SopGovernance.validate_registry(
-            valid_root; current_date=Date(2026, 7, 10),
+            valid_root,
         ))
     end
 end
