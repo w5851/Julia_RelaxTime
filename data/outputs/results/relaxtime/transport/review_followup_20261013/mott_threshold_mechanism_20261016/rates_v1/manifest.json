@@ -1,0 +1,46 @@
+{
+  "common_sha256": "df29eab3d227deb11b783baf402c9a70829205f6e614aff5d3603d8695633a7c",
+  "nonfinite_json": "null; inspect convergence/status fields and CSV",
+  "parameters": {
+    "levels": [
+      96,
+      192
+    ],
+    "production_modified": false,
+    "scope": "matched two-channel rate countercheck, unchanged backgrounds and outer grid",
+    "config": {
+      "phi_nodes": 36,
+      "sigma_grid_n": 560,
+      "asym_window": 0.6,
+      "angle_nodes": 20,
+      "p_nodes": 128,
+      "asym_extra_points": 10,
+      "threshold_subtraction": true,
+      "sigma_cutoff": 3.0522942112582996,
+      "n_sigma_points": 24,
+      "asym_fit_min_points": 8,
+      "sigma_cache_policy": "validated_anchored",
+      "interpolation_mode": "linear"
+    },
+    "channels": [
+      "uubar_to_uubar",
+      "uubar_to_ddbar"
+    ],
+    "replacement": "direct sigma on original knots plus log-x and uniform-q threshold knots; no asymptotic subtraction",
+    "raw_cache": "analysis-supplied cache without production fingerprint; explicit matching parameters in manifest",
+    "xis": [
+      0.36,
+      0.37,
+      0.38
+    ]
+  },
+  "status": "analysis_only",
+  "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+  "script": "scripts\\analysis\\relaxtime\\run_mott_threshold_rate_countercheck.jl",
+  "created_utc": "2026-10-16T12:22:43.253",
+  "input_sha256": "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+  "julia": "1.12.5",
+  "formal_data_modified": false,
+  "script_sha256": "99acd3efc1d9f5cf0b48d3d8b76f649acfb802ed3375efa9d06693f5b8c852f4",
+  "manuscript_eligible": false
+}

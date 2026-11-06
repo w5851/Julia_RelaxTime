@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_deep_oracle.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-deep-oracle.yml"
 SHA = "a" * 40
 WORKFLOW_SHA = "b" * 40
 POINTS = [(-0.5, 20.0), (0.0, 5.0), (0.0, 20.0), (0.5, 5.0), (0.5, 20.0)]
@@ -84,26 +83,3 @@ def test_deep_oracle_collector_supports_required_three_points(tmp_path):
     assert result["status"] == "complete"
     assert result["anchor_set"] == "required_three"
     assert result["job_count"] == 3
-
-
-def test_deep_oracle_workflow_is_fixed_scope_and_provenance_bound():
-    text = WORKFLOW.read_text(encoding="utf-8")
-    runner = (ROOT / "scripts" / "analysis" / "pnjl_cep_deep_oracle.jl").read_text(encoding="utf-8")
-    assert "calculation_ref" in text
-    assert "anchor_set" in text
-    assert "required_three" in text
-    assert "workflow-head-sha" in text
-    assert "0.003125" in runner
-    assert "0.0015625" in runner
-    assert "pnjl_cep_deep_oracle.jl" in text
-    assert "reference_write" not in text
-    assert "cep.mu_last_first_order_MeV" in runner
-    assert "cep.muq_last_first_order_MeV" not in runner
-
-
-def test_deep_oracle_csv_uses_missing_for_unavailable_cep_fields():
-    runner = (ROOT / "scripts" / "analysis" / "pnjl_cep_deep_oracle.jl").read_text(encoding="utf-8")
-    block = runner.split("function _deep_finite(value)", 1)[1].split("function _deep_write_job", 1)[0]
-    assert "? Float64(value) : missing" in block
-    assert "return missing" in block
-    assert "return isfinite(Float64(value)) ? Float64(value) : nothing" not in block

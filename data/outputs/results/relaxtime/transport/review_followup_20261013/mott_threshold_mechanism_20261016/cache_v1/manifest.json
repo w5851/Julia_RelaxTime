@@ -1,0 +1,31 @@
+{
+  "common_sha256": "df29eab3d227deb11b783baf402c9a70829205f6e614aff5d3603d8695633a7c",
+  "nonfinite_json": "null; inspect convergence/status fields and CSV",
+  "parameters": {
+    "production_modified": false,
+    "scope": "full uubar elastic cross section: direct versus production cache",
+    "weights": "integral dx x sigma; local threshold diagnostic, not full thermal rate",
+    "t_nodes": [
+      24,
+      48
+    ],
+    "grids": [
+      560,
+      1120
+    ],
+    "xis": [
+      0.36,
+      0.37,
+      0.38
+    ]
+  },
+  "status": "analysis_only",
+  "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+  "script": "scripts\\analysis\\relaxtime\\run_mott_threshold_cache_audit.jl",
+  "created_utc": "2026-10-16T11:10:11.957",
+  "input_sha256": "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+  "julia": "1.12.5",
+  "formal_data_modified": false,
+  "script_sha256": "c34d132fdd687a7e4b0d751385eaf5c9799f5743a0846ee1b151ac3490bcd57e",
+  "manuscript_eligible": false
+}

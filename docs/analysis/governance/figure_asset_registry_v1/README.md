@@ -1,5 +1,8 @@
 # Figure Asset Registry v1
 
+本轮工作已由 PR #220/#222 完成。任务记录见
+[历史归档](../../../dev/archived/2026-08-16_历史绘图资产清理与退役任务单.md)；下文为当时的盘点与执行说明。
+
 这是历史 PNG/PDF/SVG 退役流程的 PR A dry-run 报告。它只盘点 Git 已跟踪的 `data/outputs/figures` 资产；当前工作树中的未跟踪 C1/C2/pilot 文件被排除且未修改。
 
 ## 文件

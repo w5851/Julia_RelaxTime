@@ -1,157 +1,74 @@
 # AGENTS.md
 
-Repository guidance for coding agents working in `Julia_RelaxTime`.
+Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese.
 
 ## Working Context
 
-- Primary language: Julia.
-- Main environment: `Project.toml` in the repo root.
-- Benchmark environment: `benchmark/Project.toml`.
-- CI workflows pin Julia `1.12.5`; root compatibility remains Julia `1.10`.
-- This repo is include-driven, not a standard packaged `src/PackageName.jl` layout.
-- Prefer unified entrypoints exposed through `Models` and `src/models/entrypoints.jl`.
-- `src/pnjl/PNJL.jl` is historical compatibility context, not a current implementation entrypoint.
-- Keep mixed-meson governance and non-fixedmu unified joint-solve semantics unchanged unless task scope explicitly requires otherwise.
-- Default user-facing communication language is Chinese.
-- QuadGK is not a root runtime/test dependency. It is allowed only through the explicitly activated/stacked `benchmark/` environment as an external comparison oracle; see `docs/decisions/0006-isolate-optional-numerical-oracles.md`.
+- Julia project, include-driven rather than a packaged `src/PackageName.jl` layout.
+- Root environment: `Project.toml`; CI uses Julia `1.12.5`, root compatibility is Julia `1.10`.
+- Use unified entrypoints in `Models` and `src/models/entrypoints.jl`. `src/pnjl/PNJL.jl` is historical compatibility context.
+- Preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
+- QuadGK is an optional comparison oracle in the explicitly activated/stacked `benchmark/` environment. See [ADR 0006](docs/decisions/0006-isolate-optional-numerical-oracles.md).
+- `AGENTS.md` is the shared repository instruction source; `.github/copilot-instructions.md` points here. No Cursor-specific rules are maintained.
 
-## Repo Rules From Copilot / Cursor
+## Task Scope and Records
 
-- `.github/copilot-instructions.md` is present and must be followed.
-- No `.cursorrules` file or `.cursor/rules/` directory exists.
-- New core behavior requires meaningful test coverage; reuse existing coverage when sufficient. Changes to stable public entrypoints require corresponding `docs/api/` updates.
-- Model config belongs in `config/models/<model>/`; shared physics constants belong in `config/physics/`.
-- Preserve test layering: `tests/unit/`, `tests/integration/`, `tests/regression/`, `tests/validation/`, and `benchmark/`.
-- Non-test scripts do not belong under `tests/`; analysis scripts belong in `scripts/analysis/`; performance probes belong in `scripts/perf/`.
-- Smoke tests must be deterministic, fast, and free of external dependencies.
-- Performance work must be justified by profiling or benchmark evidence.
+- Read and validate in proportion to the change. Before editing `src/models/`, `src/relaxtime/` or `src/simulation/`, inspect the affected entrypoint and test layer.
+- Inspect Git state and preserve unrelated work. Use one writer per file or logical block when work is delegated.
+- Continue explicit tasks directly. For ambiguous continuations or track changes, run `scripts/dev/check_task_ledger.jl --preflight` and read the relevant items in `config/governance/task_tracks.toml`.
+- Use the conversation or an existing issue/PR for ordinary planning. Maintain a task document only when it serves a shared design, user request or existing ledger contract. See [task tracking](docs/dev/task_tracking_governance.md).
+- Update current summaries in place. Retain the inputs, code and key results needed to support scientific conclusions; use Git history for superseded tracked material. Repeated execution logs, source copies and cleanup receipts need not become permanent project assets.
+- Search current source, scripts, tests, config, API/guides and active/backlog docs first. Read `docs/dev/archived/` for a specific historical question.
+- Complete implementation, proportionate validation and a concise report. Existing authorization covers the corresponding steps; ask again only if scope or external impact materially changes.
 
-## Codex Collaboration Rules
+## Correctness and Verification
 
-### Task Execution
-
-- Match repository reading and validation to task scope: for a typo, isolated documentation edit, or other low-risk change, inspect only the affected file and its immediate contract; before editing `src/models/`, `src/relaxtime/`, or `src/simulation/`, read the relevant entrypoint and corresponding test layer.
-- For unified solver or workflow changes, preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
-- For cross-module refactors, prefer the smallest convergent change and introduce shared abstractions only when required.
-- For stable CLI workflows, prefer `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` as documented in `docs/guides/scripts/README.md`.
-- For ambiguous continuation requests, multiple active tracks, or newly discovered follow-ups, validate `config/governance/task_tracks.toml` and read only the relevant tracks/items before choosing the next task.
-- For track changes or ambiguous continuations, use `scripts/dev/check_task_ledger.jl --preflight` to report branch, HEAD, and dirty paths. For a clearly scoped task, inspect Git state directly and preserve user changes.
-- Classify cross-track work as `blocker`, `required_follow_up`, `independent`, or `research`; a scoped fix may be tracked in its issue/PR without a new ledger entry. Do not silently replace the current primary track.
-- Unless the user asks for analysis only, define completion as implementation plus proportionate validation and a concise report; do not stop at a proposal or the first plausible patch.
-- Use conversation planning or an existing issue/PR for ordinary work. Do not create task documents or execution logs by default; retain a task file when explicitly requested, needed for a shared design, or required by an existing ledger contract. See `docs/dev/task_tracking_governance.md`.
-- Update unfrozen current-state notes in place and link to detailed evidence instead of appending progress narratives. Preserve historical experiment records and frozen/hash-bound sources.
-- Local tests that use disposable fixtures and have no production or external-service access may be run, and failures caused by the requested change may be fixed and rerun without asking for approval at each iteration. Keep network, credential, production-data, publication, and destructive actions subject to the existing approval boundaries.
-
-### Scope, Verification, And Knowledge Governance
-
-- User approval applies only to the stated target, scope, files, approach, risk level, and external impact. If any materially changes, stop and re-state the plan.
-- For changes affecting stable entrypoints, solver behavior, numerical results, script contracts, server/API behavior, or user-visible workflows, distinguish written/configured behavior from effective/usable behavior.
-- When semantics change, verify both the target change and the explicitly non-changing constraints.
-- Keep long-lived facts and governance in the existing `docs/` structure; optional task notes belong in `docs/dev/active/` or archived task records.
-- Parallel read-only investigation is acceptable, but edits to one file/module/logical block require a single writer and main-agent reconciliation before validation or commit.
-
-### Search Scope And Historical Archives
-
-- Default searches prioritize `README.md`, `AGENTS.md`, `.github/copilot-instructions.md`, `docs/api/`, `docs/guides/`, `docs/dev/active/`, `docs/dev/backlog/`, `src/`, `scripts/`, `tests/`, and `config/`.
-- Do not include `docs/dev/archived/**` in broad default searches; it may preserve obsolete paths and superseded plans.
-- Search archives only for explicit historical traceability, provenance, old PR context, or prior-decision evidence, and label those results as historical.
-
-### Numerical And Regression Governance
-
-- For numerical, scan, solver, cross-section, or relaxation-time changes, explicitly select the required unit/integration/regression/validation layer.
-- If numerical drift is possible, run or update corresponding regression coverage; if skipped, state the reason and risk.
-- Never loosen tolerances merely to pass tests. Explain the error source, physical meaning, and evidence for any tolerance change.
-- Back performance changes with profiling, benchmarks, or existing performance evidence before broad hot-path rewrites.
-
-### Documentation And Paper Collaboration
-
-- When stable entrypoints, scripts, or data contracts change, evaluate `docs/api/`, `docs/dev/`, and `docs/guides/` impacts.
-- Do not invent experimental conclusions, numerical trends, figure provenance, or literature conclusions.
-- For methods, setup, captions, or interpretation, verify terminology, variables, units, and implementation consistency first.
-- For research analysis, experiment records, and retained conclusions, follow `docs/analysis/governance/research_evidence.md`; use `literature-reproduction-spike` for isolated literature reproduction and its optional evidence retention.
-
-### Frontend Contract First
-
-- If UI implementation is not explicitly requested, prioritize backend field definitions, units, examples, error semantics, and boundary behavior.
-- Numerical fields exposed to frontend consumers must document units, domain, missing/error semantics, and ordering assumptions.
-- Prefer a mock/intermediate contract before hard-coding an unstable interface.
-
-### Reusable Workflow Capture
-
-- Capture a recurring workflow as a skill, script entrypoint, or template when reuse reduces actual maintenance work.
-- Skills should supply project-specific decisions, operational constraints, or reusable tools; avoid duplicating native planning, general language tutorials, or rules already maintained in `AGENTS.md`.
-- Put durable process rules in `docs/dev/` or the relevant skill rather than leaving them only in chat history.
-- Repository skills under `.agents/skills/` are canonical; do not duplicate the same skill name in a user-level root.
-- Keep positive triggers in SKILL.md frontmatter; keep bodies focused on execution, boundaries, resources, and validation.
-- Write skill bodies as direct task instructions; omit self-referential role statements and commentary about the skill's design.
-- Regenerate `.claude/skills/` adapters with `scripts/dev/sync_claude_skills.jl`; never edit generated bodies manually.
-- Reserve `.claude/commands/` for true parameterized action macros, not duplicated skill workflows.
-
-## Command Reference
-
-- Environment setup, test profiles, governance checks, sysimage commands, and benchmarks: `docs/dev/agent_command_reference.md`.
-- Stable user-facing script entrypoints and wrappers: `docs/guides/scripts/README.md`.
-- Test organization and smoke/core/full semantics: `docs/dev/testing_governance.md`.
-- Use focused selectors first; expand validation in proportion to numerical and workflow risk.
+- New core behavior needs meaningful coverage; reuse existing tests when sufficient. Prefer behavior, formulas, limits, units, error paths and numerical drift over source wording or file-count assertions.
+- For solver, scan, cross-section and transport changes, select the affected unit/integration/regression/validation tests. Explain skipped numerical checks and their remaining risk.
+- Change tolerances only with an explanation of the numerical error and evidence for the new criterion. An algorithm upgrade alone does not justify replacing a baseline.
+- Validate public inputs with clear `ArgumentError` messages. Reuse `src/utils/ValidationUtils.jl`; keep finiteness, positivity, grid compatibility and recoverable warnings explicit.
+- Justify performance changes with profiling or benchmarks. Keep smoke deterministic, fast and independent of external services.
+- Verify effective behavior when changing entrypoints or configuration. Public API, CLI or data-contract changes need the corresponding `docs/api/` or `docs/guides/` update.
 
 ## Repository Layout
 
-- `src/`: reusable Julia modules.
-- `src/models/`: unified model architecture and workflow entrypoints.
-- `src/relaxtime/`: transport, scattering, propagators, and relaxation-time logic.
-- `src/simulation/`: HTTP server and simulation helpers.
-- `tests/unit/`: deterministic fast unit tests.
-- `tests/integration/`: cross-module workflow tests.
-- `tests/regression/`: internal numerical baseline regression tests.
-- `tests/validation/`: external reference and acceptance tests.
-- `benchmark/`: performance benchmarks and isolated comparison-oracle dependencies only.
-- `scripts/analysis/`: analysis and diagnostics, not automated tests.
-- `scripts/perf/`: profiling and performance probes, not correctness tests.
-- `docs/api/`: public API docs for stable entrypoints.
-- `docs/dev/active/`: active task docs; archive completed tasks or explicitly cancelled/superseded tasks with their termination reason, never to hide unfinished work.
+| Location | Responsibility |
+| --- | --- |
+| `src/models/`, `src/relaxtime/`, `src/simulation/` | Unified models, transport, HTTP service and simulation helpers |
+| `config/models/<model>/`, `config/physics/` | Model configuration and shared physical constants |
+| `tests/unit/`, `tests/integration/` | Focused behavior and cross-module workflows |
+| `tests/regression/`, `tests/validation/` | Internal numerical baselines and external references |
+| `benchmark/`, `scripts/perf/` | Performance comparisons/optional oracles and profiling |
+| `scripts/analysis/` | Research and diagnostic scripts |
+| `data/outputs/results/`, `data/outputs/figures/` | Numerical results/metadata and rendered figures |
+| `docs/api/`, `docs/guides/`, `docs/analysis/` | Public contracts, usage and scientific interpretation |
+| `docs/dev/active/`, `backlog/`, `archived/` | Shared ongoing work, deferred work and completed/superseded records |
 
-## Code Style
+## Julia Conventions
 
-- Follow local file style; do not apply broad reformatting.
-- Modules and types use `PascalCase`; functions use `snake_case`.
-- Test files use `test_*.jl`; benchmark files use `bench_*.jl` or `benchmark_*.jl` under `benchmark/`.
-- Prefer small focused files with one clear responsibility; do not move exploratory code into `src/`.
+- Follow local style; use `PascalCase` for modules/types and `snake_case` for functions. Tests use `test_*.jl`; benchmarks use `bench_*.jl` or `benchmark_*.jl`.
+- Put imports near the module top. Prefer explicit imports; use `import` to extend a method. Relative imports and `if !isdefined(Main, :ModuleName)` guards are normal in this include-driven project.
+- Use concrete structs for stable inputs while preserving existing `NamedTuple` support. Prefer multiple dispatch; avoid `Any` and repeated allocations in hot paths. Add `@inline`/`@inbounds` with a demonstrated hot-path benefit.
+- Internal values use natural units. New fm^-1 names use `_inv_fm`; MeV-facing values use names such as `T_MeV`. Follow existing higher-order forms such as `sigma_fm4` and `coupling_inv_fm4`. Domain Unicode names are supported.
 
-## Imports, Types, And Naming
+## Scientific and Paper Work
 
-- Place `using` and `import` near the module top after any module docstring.
-- Prefer explicit imports such as `using Main.ParameterTypes: QuarkParams, ThermoParams`.
-- Use `import` when extending methods and `using` when consuming names.
-- Relative imports such as `using ..GaussLegendre` are normal.
-- Preserve `if !isdefined(Main, :ModuleName)` guards where shared modules may already be loaded into `Main`.
-- Prefer concrete structs for stable API inputs while preserving existing `NamedTuple` compatibility.
-- Prefer multiple dispatch over large flag-heavy functions; avoid `Any` containers in hot paths and use `const` for global bindings.
-- Internal quantities use natural units. Use `_inv_fm` for new fm^-1 names and explicit MeV-facing names such as `T_MeV` or `mu_MeV`.
-- Higher-order units follow local forms such as `sigma_fm4` or `coupling_inv_fm4`.
+- Check formulas, variables, units, implementation and actual evidence before writing a result or caption. Separate observations, conditional derivations and mechanism hypotheses.
+- Use [research evidence guidance](docs/analysis/governance/research_evidence.md) for retained studies, and the relevant production/plotting SOP for formal deliveries.
+- Document numerical API units, domains, missing/error values and ordering; map HTTP requests to implemented handlers before describing availability.
+- Literature-to-implementation agents are available when explicitly requested; see [the protocol](docs/analysis/governance/literature_to_implementation_protocol.md). Citation/BibTeX curation belongs in `D:/Desktop/paper`, especially `paper/bib`.
 
-## Error Handling, Performance, And Tests
+## Reusable Guidance
 
-- Validate public inputs early and use clear `ArgumentError` messages naming the invalid parameter.
-- Reuse `src/utils/ValidationUtils.jl` where applicable.
-- Use `@warn` for recoverable fallback behavior; never silently ignore invalid physical or numerical inputs.
-- Keep finiteness, positivity, and grid-compatibility safeguards explicit.
-- Avoid allocations and repeated calculations in hot loops; add `@inline` or `@inbounds` only with hot-path justification.
-- Put performance comparisons in `benchmark/`, not smoke tests.
-- Testing and documentation obligations are defined above; select affected tests first and expand by numerical/workflow risk.
+- Keep a rule or helper where it has an ongoing consumer and reduces maintenance. Consolidate duplicated instructions; retire obsolete scripts with their dedicated tests.
+- Repository skills in `.agents/skills/` are canonical. Keep them focused on project decisions and reusable operations; link shared rules instead of copying them.
+- Generate `.claude/skills/` adapters with `scripts/dev/sync_claude_skills.jl`. `.claude/commands/` is for parameterized action macros.
+- Commit subjects are concise, single-line descriptions of staged changes; familiar prefixes include `docs:`, `fix:`, `refactor:`, `ci:` and `feat:`.
 
-## Commit Messages
+## Command Reference
 
-Use a concise, single-line subject describing the staged change. Prefer familiar prefixes such as `docs:`, `fix:`, `refactor:`, `ci:`, or `feat:`; consult recent history when the local convention is unclear. Check that the subject matches the actual staged scope.
+- [Environment, focused tests, governance and benchmarks](docs/dev/agent_command_reference.md)
+- [Stable script entrypoints and sysimage wrappers](docs/guides/scripts/README.md)
+- [Test layers and profile selection](docs/dev/testing_governance.md)
 
-## Literature-To-Implementation Subagents
-
-Use these project agents only when the user explicitly requests subagents or parallel literature/research-engineering work:
-
-- `relax-literature-search-strategist`: formulas, algorithms, parameterizations, validation points, and reproducibility signals.
-- `relax-method-reviewer`: assumptions, notation, units, reproducibility, implementation risk, and validation requirements.
-- `relax-evidence-synthesizer`: method comparison, project fit, recommended path, test implications, and documentation impacts.
-- `relax-gap-analyst`: evidence/formula/validation gaps, regression needs, docs tasks, and paper handoffs.
-
-Citation and BibTeX cleanup belongs in `D:\Desktop\paper`, especially `D:\Desktop\paper\bib`; do not edit that master bibliography here. Return citation cleanup to the `paper-citation-curator`.
-
-Protocol: `docs/analysis/governance/literature_to_implementation_protocol.md`.
+Start with focused selectors; expand checks to resolve a concrete remaining risk.

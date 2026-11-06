@@ -171,8 +171,6 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
   - 单图或多图总 `plot_manifest.json` 的稳定验证入口；多图包展开 `shared + figures[].record` 后逐记录检查输入/输出 hash、单位、support/mask 和 strict gate；APS v2 还核验实际物理尺寸、有效 DPI、PDF 矢量内容/字体嵌入、最终字形高度、四侧刻度和文字/图例布局
 - `scripts/plotting/inventory_figure_assets.py`
   - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
-- `scripts/plotting/render_plotting_pilot.py`
-  - 历史 v1 compatibility pilot，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case。新图不得以该 pilot 或 v1 profile 为默认入口
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v15.py --png-review --case <new-case>`
   - 读取已验收的1867点η加密正式网格，复用v14布局；保留原始值、全部质量提示和两处经审计的一阶断线。已有case拒绝覆盖。
 - `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v15_pdf.py --authorization <record.json> --case <new-case>`

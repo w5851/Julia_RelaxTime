@@ -5,23 +5,8 @@ if !isdefined(Main, :AgentInstructionGovernance)
     include(AGENT_INSTRUCTION_CHECKER)
 end
 
-const _AGENT_REQUIRED = """
-# AGENTS.md
-## Working Context
-## Codex Collaboration Rules
-## Command Reference
-See docs/dev/agent_command_reference.md.
-## Repository Layout
-## Commit Message Governance (Mandatory)
-"""
-
-const _COMMAND_REQUIRED = """
-# Command reference
-## Environment and setup
-## Focused test profiles
-## Governance and audit commands
-## Benchmark commands
-"""
+const _AGENT_REQUIRED = "# Project guidance\nSee docs/dev/agent_command_reference.md.\n"
+const _COMMAND_REQUIRED = "# Commands\n"
 
 function _write_agent_fixture(root; agents=_AGENT_REQUIRED, command_reference=_COMMAND_REQUIRED)
     mkpath(joinpath(root, "docs", "dev"))
@@ -33,22 +18,15 @@ end
 @testset "agent instruction governance" begin
     mktempdir() do temp
         valid = _write_agent_fixture(joinpath(temp, "valid"))
-        @test isempty(Main.AgentInstructionGovernance.validate_repository(valid; max_root_lines=20))
+        @test isempty(Main.AgentInstructionGovernance.validate_repository(valid))
 
-        embedded = _write_agent_fixture(joinpath(temp, "embedded"); agents=_AGENT_REQUIRED * "\n## Test Commands\n")
-        advisories = String[]
-        @test isempty(Main.AgentInstructionGovernance.validate_repository(embedded; max_root_lines=20, advisories))
-        @test !isempty(advisories)
-
-        too_long = _write_agent_fixture(joinpath(temp, "too_long"); agents=_AGENT_REQUIRED * repeat("extra\n", 20))
-        @test isempty(Main.AgentInstructionGovernance.validate_repository(too_long; max_root_lines=10, advisories))
-        @test any(item -> occursin("consider shortening", item), advisories)
-
-        renamed = _write_agent_fixture(joinpath(temp, "renamed"); agents="# 项目指导\nSee docs/dev/agent_command_reference.md.\n")
-        @test isempty(Main.AgentInstructionGovernance.validate_repository(renamed))
+        unlinked = _write_agent_fixture(joinpath(temp, "unlinked"); agents="# Project guidance\n")
+        @test any(item -> occursin("must link", item), Main.AgentInstructionGovernance.validate_repository(unlinked))
 
         missing_reference = _write_agent_fixture(joinpath(temp, "missing_reference"); command_reference=nothing)
-        violations = Main.AgentInstructionGovernance.validate_repository(missing_reference; max_root_lines=20)
-        @test any(item -> occursin("missing command reference", item), violations)
+        @test any(item -> occursin("missing command reference", item), Main.AgentInstructionGovernance.validate_repository(missing_reference))
+
+        rm(joinpath(valid, "AGENTS.md"))
+        @test Main.AgentInstructionGovernance.validate_repository(valid) == ["missing root AGENTS.md"]
     end
 end

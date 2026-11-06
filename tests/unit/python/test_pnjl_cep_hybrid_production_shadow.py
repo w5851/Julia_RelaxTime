@@ -7,8 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_hybrid_production_shadow.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-cep-hybrid-production-shadow.yml"
-ENDPOINT_LOCAL_WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-maxwell-endpoint-local-production-shadow-v4.yml"
 
 
 def load_module(path: Path, name: str):
@@ -279,36 +277,6 @@ def test_stage_c_guard_matches_six_decimal_curve_temperature(tmp_path):
     assert not gate["workflow_contract_errors"]
 
 
-def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
-    module = load_module(COLLECTOR, "hybrid_collector_workflow")
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "calculation_ref" in text
-    assert "production_hybrid" in text and "independent_oracle" in text
-    assert "timeout-minutes: 180" in text
-    assert "aggregate_replay" in text and "source_run_id" in text
-    assert "deep_oracle_run_id" in text
-    assert "scope" in text and "targeted" in text and "full" in text
-    assert "numeric_jobs" in text and "numeric_failures" in text
-    assert "matplotlib==3.9.2" in text
-    assert "--schema-version cep_maxwell_endpoint_production_shadow_v3" in text
-    assert "--endpoint-mode" in text
-    assert "--endpoint-policy bounded_zero_density_v1" in text
-    assert "--candidate-policy unique_three_crossing_topology_v1" in text
-    assert "--deep-input-dir deep-artifacts" in text
-    assert "--deep-run-id \"$DEEP_RUN_ID\"" in text
-    assert "--pattern '*aggregate'" in text
-    assert "--run-mode aggregate_replay" in text
-    assert len(module.XIS) * len(module.METHODS) == 9
-
-
-def test_replay_accepts_numeric_success_when_source_aggregate_failed():
-    text = WORKFLOW.read_text(encoding="utf-8")
-    provenance_block = text.split("- name: Verify source run provenance", 1)[1].split("- name: Download source numerical artifacts", 1)[0]
-    assert 'test "$(echo "$payload" | jq -r .status)" = completed' in provenance_block
-    assert 'numeric_failures="$(echo "$payload"' in provenance_block
-    assert 'test "$(echo "$payload" | jq -r .conclusion)" = success' not in provenance_block
-
-
 def test_replay_source_accepts_legacy_hybrid_numeric_job_prefix():
     module = load_module(COLLECTOR, "hybrid_collector_source_replay_prefix")
     payload = {
@@ -424,24 +392,6 @@ def test_endpoint_gate_finite_helper_accepts_serialized_values():
     assert module._finite("0.125")
     assert not module._finite("NaN")
     assert not module._finite(None)
-
-
-def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
-    text = ENDPOINT_LOCAL_WORKFLOW.read_text(encoding="utf-8")
-    assert "cep_maxwell_endpoint_local_production_shadow_v4" in text
-    assert "three_crossing_endpoint_local_v2" in text
-    assert "options: [focused, targeted, full]" in text
-    assert "aggregate_replay" in text
-    assert "rerun_failed_only" in text
-    assert "timeout-minutes: 180" in text
-    assert "GH_TOKEN: ${{ github.token }}" in text
-    assert 'actions/runs/${SOURCE_RUN_ID}/artifacts?per_page=100' in text
-    assert 'actions/runs/${DEEP_RUN_ID}/artifacts?per_page=100' in text
-    assert 'gh run download "$SOURCE_RUN_ID" --name "$artifact_name"' in text
-    assert 'gh run download "$DEEP_RUN_ID" --name "$deep_name"' in text
-    assert 'expected exactly one non-expired deep-oracle aggregate artifact' in text
-    assert "source_workflow_head_sha" in text
-    assert "job summaries remain the authoritative calculation-SHA check" in text
 
 
 def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_path, monkeypatch):

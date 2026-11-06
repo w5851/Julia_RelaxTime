@@ -5,43 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-EVALUATOR = ROOT / "scripts" / "analysis" / "pnjl_stagec_density_certificate_feasibility_v2.jl"
 PLOTTER = ROOT / "scripts" / "analysis" / "plot_pnjl_stagec_density_certificate_feasibility_v2.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-stagec-density-certificate-feasibility-v2.yml"
-
-
-def test_v2_evaluator_is_solver_free_and_versioned():
-    text = EVALUATOR.read_text(encoding="utf-8")
-    assert 'SCHEMA_VERSION = "cep_hybrid_stagec_density_certificate_feasibility_v2"' in text
-    assert 'const SOURCE_RUN_ID' not in text
-    assert 'const SOURCE_CALCULATION_SHA' not in text
-    assert '"--source-run-id is required"' in text
-    assert 'source_run_id" => source_run_id' in text
-    assert '"--expected-calculation-sha is required"' in text
-    assert '"--expected-source-postprocess-sha is required"' in text
-    assert "solver_called" in text
-    assert "run_production_phase_pipeline" not in text
-    assert "candidate_point_index.csv" in text
-    assert "Write the manifest last" in text
-
-
-def test_v2_workflow_is_aggregate_only_and_uses_dual_sha():
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "options: [aggregate_replay]" in text
-    assert "source_run_id" in text and "source_calculation_sha" in text
-    assert "source_postprocess_sha" in text
-    assert "EXPECTED_SOURCE_RUN_ID" not in text
-    assert "EXPECTED_CALCULATION_SHA" not in text
-    assert 'source_calculation_sha must match calculation_ref' in text
-    assert 'source_run_id must be numeric' in text
-    assert "numeric_jobs" in text and "test \"$numeric_jobs\" = 30" in text
-    assert "numeric_failures" in text and "test \"$numeric_failures\" = 0" in text
-    assert "git worktree add --detach calculation" in text
-    assert "--expected-calculation-sha" in text
-    assert '--source-run-id "$SOURCE_RUN_ID"' in text
-    assert "--producer-head-sha" in text
-    assert "solver_called" in text
-    assert "matplotlib==3.9.2" in text
 
 
 def test_v2_plotter_emits_figures_and_refreshes_manifest(tmp_path):

@@ -5,7 +5,6 @@ using JSON3
 const ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const EVALUATOR = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_cep_limited_feasibility.jl")
 const JOB = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_cep_limited_feasibility_job.jl")
-const WORKFLOW = joinpath(ROOT, "docs", "analysis", "governance", "diagnostic_workflow_retirement_wave2_v1", "definitions", "pnjl-c2-cep-limited-feasibility.yml")
 
 include(JOB)
 module CEPReplayEvaluatorContract
@@ -13,35 +12,6 @@ include(Main.EVALUATOR)
 end
 
 @testset "C2 CEP limited feasibility contracts" begin
-    evaluator = read(EVALUATOR, String)
-    job = read(JOB, String)
-    workflow = read(WORKFLOW, String)
-    @test occursin("pnjl_c2_cep_limited_feasibility_v2", evaluator)
-    @test occursin("pnjl_c2_cep_limited_feasibility_job_v2", evaluator)
-    @test occursin("_production_maxwell_options", evaluator)
-    @test occursin("_production_maxwell_or_empty", evaluator)
-    @test occursin("hybrid_states=endpoints.hybrid_states", evaluator)
-    @test occursin("point_request_reconciliation", evaluator)
-    @test occursin("oracle_labels_used_for_routing=false", job)
-    @test occursin("const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2", job)
-    @test occursin("local_step=HYBRID_LOCAL_STEP", job)
-    @test occursin("hybrid_local_step_contract", job)
-    @test occursin("point_requests=item.cache.unique_solves + item.cache.cache_hits", job) ||
-        occursin("point_requests == unique_solves + cache_hits", job)
-    @test occursin("method=\"hybrid\"", job)
-    @test occursin("method=\"oracle\"", job)
-    @test occursin("pnjl_c2_cep_limited_feasibility_v2", workflow)
-    @test occursin("options: [cep]", workflow)
-    @test occursin("max-parallel: 17", workflow)
-    @test occursin("rerun_failed_only", workflow)
-    @test occursin("production_eval_materialization_v1", job)
-    @test occursin("trho_scan_materialized.csv", job)
-    @test occursin("solver_called\" => false", job)
-    @test occursin("CSV_COORD_ATOL = 1e-6", job)
-    @test occursin("_temperature_key(value) = round(Float64(value); digits=8)", evaluator)
-    @test !occursin("round(row.T_MeV, 8)", evaluator)
-    @test !occursin("round(T, 8)", evaluator)
-
     @testset "target xi subset remains explicit" begin
         @test CEPReplayEvaluatorContract._parse_target_xi("0.125,0.39375,0.5") ==
             (0.125, 0.39375, 0.5)

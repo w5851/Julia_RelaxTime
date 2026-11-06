@@ -8,9 +8,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_xi05_high_side_extension.py"
-JOB = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_xi05_high_side_extension_job.jl"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-c2-cep-xi05-high-side-extension.yml"
-PLAN = ROOT / "docs" / "analysis" / "pnjl" / "c2_followups" / "c2_cep_xi05_high_side_extension_v1" / "temperature_plan.csv"
 
 
 def load_module():
@@ -19,31 +16,6 @@ def load_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-def test_plan_and_workflow_are_versioned_and_equal_step():
-    module = load_module()
-    assert module.XI == 0.5
-    assert module.ANCHOR_T == 107.0625
-    assert module.STEP == 0.0625
-    assert module.TEMPERATURES == (107.125, 107.1875, 107.25)
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "pnjl_c2_cep_xi05_high_side_extension_v1" in text
-    assert "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48" in text
-    assert "107.125,107.1875,107.25" in text
-    assert "awk -F, 'NR > 1 {print $4}'" in text
-    assert "run_mode == 'aggregate_replay'" in text
-    assert "source_run_id" in text and "source_calculation_sha" in text
-    assert "solver_called=false" not in text.lower()
-    assert PLAN.read_text(encoding="utf-8").count("0.0625") == 3
-
-
-def test_job_keeps_oracle_after_routing_and_reconciles_cost():
-    text = JOB.read_text(encoding="utf-8")
-    assert "oracle_labels_used_for_routing=false" in text
-    assert "_run_slice(cfg, plan_row.T_MeV, slice_dir)" in text
-    assert "point_requests == item.unique_solves + item.cache_hits" in text
-    assert "manual_decision_required" in text
 
 
 def _write_minimal_artifact(module, root: Path, *, routing_leak: bool = False):

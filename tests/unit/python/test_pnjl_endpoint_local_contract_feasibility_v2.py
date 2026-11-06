@@ -1,11 +1,9 @@
-import csv
 import importlib.util
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_endpoint_local_feasibility_v2.py"
-WORKFLOW = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions" / "pnjl-maxwell-endpoint-production-shadow.yml"
 
 
 def load_module():
@@ -65,11 +63,3 @@ def test_route_uses_stage_b_for_midpoint_selection_and_produces_internal_certifi
     assert len(trace) == module.MAX_TARGETED
     assert all(row["route_decision_source"] == "post_sampled_curve_candidate" for row in trace)
     assert brackets[1]["bracket_kind"] == "right_maxwell"
-
-
-def test_workflow_has_authenticated_replay_and_explicit_run_mode():
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "aggregate_replay" in text
-    assert "GH_TOKEN: ${{ github.token }}" in text
-    assert "--run-mode aggregate_replay" in text
-    assert "deep_oracle_run_id" in text

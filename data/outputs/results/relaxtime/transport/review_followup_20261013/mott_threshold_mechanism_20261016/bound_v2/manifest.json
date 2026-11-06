@@ -1,0 +1,24 @@
+{
+  "common_sha256": "df29eab3d227deb11b783baf402c9a70829205f6e614aff5d3603d8695633a7c",
+  "nonfinite_json": "null; inspect convergence/status fields and CSV",
+  "parameters": {
+    "offsets": [
+      1.0e-6,
+      3.0e-6,
+      1.0e-5,
+      3.0e-5
+    ],
+    "scope": "closer bound-side points and absorptive threshold coefficient",
+    "input": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\review_followup_20261013\\mott_threshold_mechanism_20261016\\run_v2\\critical_states.csv",
+    "coefficient": "-Im denominator/sqrt(x), x/s0=1e-9"
+  },
+  "status": "analysis_only",
+  "head": "d6282e456cbda0d406809b239a4f2e62b35ca6cd",
+  "script": "scripts\\analysis\\relaxtime\\run_mott_threshold_bound_refinement.jl",
+  "created_utc": "2026-10-16T12:30:19.469",
+  "input_sha256": "72c46b6142955b908fca65157f0a64cfb7beb3f2716c01567337cffbaf34e922",
+  "julia": "1.12.5",
+  "formal_data_modified": false,
+  "script_sha256": "1e2b265e47010870db39abb8ac6272d8fbc7f07af150b7235770d51ab40c9394",
+  "manuscript_eligible": false
+}

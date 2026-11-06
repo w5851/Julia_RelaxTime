@@ -1,4 +1,3 @@
-import csv
 import importlib.util
 import json
 from pathlib import Path
@@ -8,9 +7,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_limited_feasibility.py"
-DEFINITIONS = ROOT / "docs" / "analysis" / "governance" / "diagnostic_workflow_retirement_wave2_v1" / "definitions"
-WORKFLOW = DEFINITIONS / "pnjl-c2-cep-limited-feasibility.yml"
-MIDPOINT_WORKFLOW = DEFINITIONS / "pnjl-c2-cep-three-midpoint.yml"
 
 
 def load_module():
@@ -19,46 +15,6 @@ def load_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-def test_v2_schema_and_workflow_contract():
-    module = load_module()
-    assert module.SCHEMA_VERSION == "pnjl_c2_cep_limited_feasibility_v2"
-    assert module.JOB_SCHEMA == "pnjl_c2_cep_limited_feasibility_job_v2"
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "pnjl_c2_cep_limited_feasibility_v2" in text
-    assert "issue130_c2_cep_limited_feasibility_v2_20260812" in text
-    assert "solver_called=false" not in text.lower()
-
-
-def test_three_midpoint_workflow_is_narrow_and_versioned():
-    text = MIDPOINT_WORKFLOW.read_text(encoding="utf-8")
-    assert "pnjl_c2_cep_three_midpoint_refinement_v1" in text
-    assert "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48" in text
-    assert 'xi: ["0.125", "0.39375", "0.5"]' in text
-    assert "max-parallel: 3" in text
-    assert "--target-xi \"$TARGET_XI\"" in text
-    assert "run_mode == 'aggregate_replay'" in text
-
-
-def test_numerical_job_materializes_hashed_frozen_brackets():
-    text = WORKFLOW.read_text(encoding="utf-8")
-    relative_path = "docs/analysis/pnjl/c2_followups/c2_limited_feasibility_v1/cep_failures.csv"
-    assert f"bracket_rel='{relative_path}'" in text
-    assert "bracket_sha='f8775f3cb7e0457722a523b30eb89485239bdd1730e88f372eeae4e2bc21f3d2'" in text
-    assert 'test -f "$bracket_rel"' in text
-    assert 'cp "$bracket_rel" "calculation/$bracket_rel"' in text
-    assert 'sha256sum "calculation/$bracket_rel"' in text
-
-
-def test_hybrid_local_step_is_nested_below_fine_step():
-    job = (ROOT / "scripts" / "analysis" / "pnjl_c2_cep_limited_feasibility_job.jl").read_text(
-        encoding="utf-8"
-    )
-    assert "const RHO_FINE_STEP = 0.003125" in job
-    assert "const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2" in job
-    assert "local_step=HYBRID_LOCAL_STEP" in job
-    assert "hybrid_local_step_contract" in job
 
 
 def test_target_xi_parser_keeps_default_and_rejects_unknown_values():

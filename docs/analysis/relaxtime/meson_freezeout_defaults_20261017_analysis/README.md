@@ -6,6 +6,9 @@
 本页保留默认参数阶段的证据和评分口径。Ledger item：
 `meson-freezeout-default-comparison`。
 
+首轮[冻结公式与快度口径](../meson_freezeout_experiment_20261017_analysis/README.md)
+保留文献参数约定和 NA49 中快度/全相空间对照。
+
 同一研究链依次包含默认比较、[近期文献筛选](literature_candidates_20261017.md)、
 [多项式五参数探索](parameter_envelope_20261018.md)和 [Andronic 族探索](andronic_family_20261018.md)。
 两族统一使用固定九个 Au+Au 点评价；本页的历史十四点、文献筛选的八点指标各自保留。

@@ -149,3 +149,7 @@ data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/
 # Retained diagnostics keep the exact bytes of their original figure/review packages.
 data/outputs/figures/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Retained desktop research input and source bytes.
+data/outputs/results/relaxtime/transport/review_followup_20261013/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/evidence.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
