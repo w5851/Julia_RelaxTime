@@ -1153,7 +1153,7 @@ evidence = [
   "file:src/models/workflow_apps/TransportWorkflow.jl",
   "file:tests/unit/relaxtime/test_afieldbuilder.jl",
   "file:tests/unit/models/test_transport_workflow.jl",
-  "note:20261106_optional_reduced_A_entrypoint_116_unit_tests_passed_and_final_benchmark_max_thermal_rtol_3.9968028886505635e-15_median_kernel_speedup_8.892269871389416",
+  "note:20261106_optional_reduced_A_entrypoint_116_unit_tests_passed_benchmark_max_thermal_rtol_3.9968028886505635e-15_median_kernel_speedup_about_8.6x_repeat_8.56_to_8.89x",
   "note:production_default_remains_two_dimensional_A_aniso_and_full_transport_speedup_not_claimed",
 ]
 
