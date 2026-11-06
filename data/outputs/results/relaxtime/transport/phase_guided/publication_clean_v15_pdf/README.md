@@ -13,14 +13,15 @@ PDF均为单页、嵌入非Type-3字体、保留矢量曲线和已接受的物�
 图件位于 `data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/`。
 论文只接入三张组合PDF、两份主表及最小来源记录，独立相图不变；
 论文当前科学与文字审阅状态见其 `writing_package/00_status.md`。
-旧图层的冻结manifest不回写，旧证据恢复链见工程交付；v15渲染所依赖的源码及PNG继续保留。
+v15渲染所依赖的源码、PNG、正式数值与验收依据继续保留。
 
 复现入口：`scripts/analysis/relaxtime/export_phase_guided_publication_clean_v15_pdf.py`。
 该入口拒绝覆盖case，要求绑定PNG的作者授权；若系统字体升级，使用
 `font_sources.json`中经过SHA-256核对的同字节保留字体。字体文件不随Git分发。
 
-旧资产退役见[retirement.json](retirement.json)：557张已被替代的PNG退出常用目录，
-原字节可从已合并提交`bad5f98ce99ffd81a9ff0f60336a6c3c32a3d44a`恢复，未新增全量归档。
-74张仍被v13冻结合同引用的v5图片保留；旧数值表、收敛依据和v10–v15输入继续支持现存复现入口。
+旧图层、旧raw/显示表、孤立manifest及对应历史入口已整组退役，
+恢复来源和最小保留范围见[专题入口](../../../../../../../docs/analysis/relaxtime/phase_guided_transport/README.md)。
+v13对v5的历史引用不再要求当前分支保留旧图片；当前数值资格和Mott分析依据继续保留。
+退役前版本为`6a3d08663c845587ae457fbe1c90173e0e5dcc25`，不另建全量备份或逐文件退役记录。
 论文另清理279份旧附件，来源为paper提交`f8d1bae7377b7ec8976c998a5cba40550a70fdaf`。
 当前论文已通过15页编译预览、41项引用和逐页视觉核验；新正文仍为agent_review。

@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_maxwell_tolerance_feasibility.jl"
-EVIDENCE = ROOT / "docs" / "analysis" / "pnjl_maxwell_tolerance_contract_feasibility_v1"
+EVIDENCE = ROOT / "docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_tolerance_contract_feasibility_v1"
 
 
 def test_feasibility_runner_is_solver_free_and_contract_bound():
