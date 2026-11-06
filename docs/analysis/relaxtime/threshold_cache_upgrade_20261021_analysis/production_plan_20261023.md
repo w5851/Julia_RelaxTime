@@ -1,17 +1,22 @@
 # 新采样生产参数与整批执行（2026-10-23）
 
-## 当前状态与交付范围（2026-11-05）
+## 当前状态与交付范围（2026-11-06）
 
 本阶段的输运重计算、正式数值验收及计划内有限窗口分析已完成，
 [PR #331](https://github.com/w5851/Julia_RelaxTime/pull/331)已合并到 `bad5f98ce99ffd81a9ff0f60336a6c3c32a3d44a`。
-适用CI已通过，包括修复后的benchmark script smoke；SSH公钥权限已通过实际推送核验。
+PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke；当时的SSH公钥权限已通过实际推送核验。
+本轮SSH/443曾出现连接关闭，先使用既有GitHub凭据的HTTPS推送；后续SSH认证及包含workflow的提交推送均实际成功，连接关闭未归因为公钥权限。
+此前[nightly full-suite](https://github.com/w5851/Julia_RelaxTime/actions/runs/41996062882)暴露的测试合同和旧κ/λ目标偏差由[PR #333](https://github.com/w5851/Julia_RelaxTime/pull/333)修复：
+统一模块加载、有效热积分夹具及经加密核验的内部基线，保留原物理源码和容差。
+后续输运全集已通过2178项断言、validation通过1345项；完整七分片及最终门禁结果见[nightly 42069597889](https://github.com/w5851/Julia_RelaxTime/actions/runs/42069597889)，绑定提交`bc2d87af18e335af43f9335c3c4f56bf3f8d05ad`。
+本页及台账后续仅更新状态说明；合并状态与各提交的检查结果以PR记录为准。
 工程交付范围与恢复方式见[交付入口](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 
-后续交付在 `D:/w/transport-v15-paper`、`codex/transport-v15-paper` 推进：v15的76张PDF已完成，
+后续交付[PR #332](https://github.com/w5851/Julia_RelaxTime/pull/332)已合并到 `e9b14fc311c632d604c1718a58e540121e9ab983`：v15的76张PDF已完成，
 原PNG逐字节复现，PDF字体、矢量、尺寸及三张论文组合图视觉检查通过；作者已授权正式晋升、current及论文替换。
 详见[v15正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)。
 论文已接入所需三张输运PDF和最小数据依据，15页预览、41项引用和逐页视觉核验通过；新正文为 `agent_review`，独立相图沿用原来源。
-消费者迁移后已退役557张旧PNG及论文279份旧附件，均保留已有Git恢复来源；旧树39787个冗余未跟踪文件已按外部归档清单清理，8处tracked残余已核对保留去向并恢复，旧树Git状态干净。当前会话仍占用 `D:/w/meson-freezeout-defaults`，该worktree待切换会话目录后回收。
+消费者迁移后已退役557张旧PNG及论文279份旧附件，均保留已有Git恢复来源；旧树39787个冗余未跟踪文件已按外部归档清单清理，8处tracked残余已核对保留去向并恢复。会话切换到 `D:/w/transport-v15-paper` 后，`D:/w/meson-freezeout-defaults` 及其本地/远程分支已回收。最终9710个ignored文件均完成归档对应或临时文件核验；5805份数密度产物与既有五个归档逐字节相同。外部工程交付的 `pr331_wrapup/README.md` 记录恢复链及提交对应关系。
 既有外部归档继续复用，不重复保存整套数值证据。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。
 
@@ -22,6 +27,7 @@
 | 最新正式数值 | [η 加密版本](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：1867 点、31739 道记录；1810 个原值、9 个原坐标重算值及48 个新增点 |
 | 当前正式图层 | [v15 PDF及原PNG引用](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)，对应1867点；[current](../phase_guided_transport/publication_clean_current.json)已切换 |
 | 论文交付 | 三张v15输运组合图及独立相图组成四图审阅稿；新科学解释与文字状态见论文 `writing_package/00_status.md`，不继承旧正文批准 |
+| nightly 修复 | [PR #333](https://github.com/w5851/Julia_RelaxTime/pull/333)及上方完整运行入口；κ/λ旧表收敛不足的受控比较和四点14项加密核对见[基线说明](../../../../tests/baselines/relaxtime/kappa_lambda_thermal_weighted.md) |
 | Mott 分析 | π、K、η、σ 的计划内检查完成；13 个窗口及175 个参考求值、过程/物种分解见[Mott 分析](mott_local_bumps_20261028.md) |
 | σ 最新补检 | 连续近阈混合标量平方积分的左侧 h^(-1/2)、右侧对数段及误差对照完成；完整 τ 和末端输运量的高阶导数未据此认证 |
 
@@ -34,7 +40,7 @@
 | research | 混合谱支未决、严格退耦和采样间双穿越/切触零尚未全面排除；“未见 Mott”只在已查扫描分辨率下成立 |
 | research | 认证极细窗口高阶导数时，处理生产行列式保护的人工曲率、离散热权重/硬边界及右侧最内层精度；此次未改变生产核 |
 | independent | [A 解析降维](full_rs_a_reduction_20261025.md)原型已验，生产接入与端到端收益仍独立待办 |
-| independent | v15 PDF及current已交付；论文15页审阅稿编译通过，旧PNG、论文旧附件及旧树冗余副本已退役。保留v15渲染依赖和唯一恢复链，原会话worktree待切换cwd后回收 |
+| independent | v15 PDF及current、论文15页审阅稿和旧worktree/分支回收已完成。旧资产未全部删除：公共图目录仍有v15前824张PNG和225张PDF，此外保留历史数值/收敛记录及复现输入；v5/v10–v13来源依赖和v14上一正式层的进一步退役须先处理消费者 |
 
 以下保留各批次的实施与验收依据；涉及历史图层或准备阶段的语句不代替上表的当前状态。
 

@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "purpose": "internal kappa/lambda regression after thermal-weighted sampler replacement; not external validation",
+  "date": "2026-11-05",
+  "julia_version": "1.12.5",
+  "host": "quote-remote",
+  "threads": 1,
+  "source_commit": "e9b14fc311c632d604c1718a58e540121e9ab983",
+  "numerical_source_commit": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+  "legacy_sampling_source_commit": "dffe4070eb5c0788e9c8a1e227cf40978b51ce3e",
+  "legacy_target": "tests/validation/data/targets/relaxtime/legacy/transport/relaxtime_kappa_lambda_fixedpoint_targets_v1.csv",
+  "legacy_target_sha256": "532c90c96127a40b3265857f8c5a820b534d7b8192dc100ee0c8defa95269135",
+  "baseline_sha256": "440d03da048be4b1a13a534e629519a2e4b304db45169e32e5273279c49c7d59",
+  "source_files": {
+    "src/relaxtime/AverageScatteringRate.jl": "474586f8cda5859532de848056038c139f30167f057c3416d84b73ed3a0354cd",
+    "src/relaxtime/ThermalWeightedCache.jl": "172d995efe26112471bba31c2f26e16a211f583eadeaba68ffb5dc88599ae59e",
+    "src/relaxtime/ThermalWeightedSampling.jl": "453fdccc9c1e9e993e63bdea5ff899da10490124b91d3e7e790b09bc2ed03709",
+    "src/relaxtime/RelaxationTime.jl": "6cf7f6c2c980d70b685840f1eb63a5494ae318c2b05e8d0a6de883ede92a0a02",
+    "src/models/workflow_apps/TransportWorkflow.jl": "2030f76e3053beadcfe476ec8650b9cc92f4b7f843c74698559e11e724d8f838",
+    "config/physics/default.toml": "456b0a2fe28ce9652f6545b42ac0cf4705f62a1cbcc87d1ef11c086f04ef53d1",
+    "Manifest.toml": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067"
+  },
+  "configurations": {
+    "candidate": {
+      "p_nodes": 48,
+      "angle_nodes": 36,
+      "phi_nodes": 36,
+      "n_sigma_points": 24,
+      "sampling_rtol": 0.001
+    },
+    "refined": {
+      "p_nodes": 72,
+      "angle_nodes": 40,
+      "phi_nodes": 48,
+      "n_sigma_points": 48,
+      "sampling_rtol": 0.00025,
+      "max_events": 60000000
+    },
+    "common": {
+      "xi": 0.0,
+      "sigma_cutoff_inv_fm": 3.0522942112582996,
+      "relative_velocity": "cm",
+      "background_p_num": 12,
+      "background_t_num": 6,
+      "models_residual_norm_max": 0.0001,
+      "A_p_nodes": 16,
+      "A_p_max_inv_fm": 20.0,
+      "A_cos_nodes": 4,
+      "coupling_A_p_nodes": 64,
+      "coupling_A_p_max_inv_fm": 10.0,
+      "terminal_p_nodes": 64,
+      "terminal_p_max_inv_fm": 10.0,
+      "terminal_cos_nodes": 8,
+      "bulk": false
+    }
+  },
+  "scope": "Four retained legacy-background fixed points. Refinement checks thermal averaging and t integration only; no claim of background/terminal convergence or v15 full-grid requalification.",
+  "regression_rtol": 1e-06,
+  "regression_atol": 1e-08,
+  "refinement_relative_limit": 0.001,
+  "maximum_relative_refinement_change": 0.00019538993461254428,
+  "comparison": [
+    {
+      "record_id": "kappa_mu0_t210_bb",
+      "relative_to_legacy": -0.077389501465009,
+      "relative_to_refined": -2.8340915566915648e-05
+    },
+    {
+      "record_id": "kappa_mu0_t210_qq",
+      "relative_to_legacy": -0.08460726696805487,
+      "relative_to_refined": -5.126756640394525e-05
+    },
+    {
+      "record_id": "kappa_mu0_t210_ss",
+      "relative_to_legacy": -0.03735588545469437,
+      "relative_to_refined": 9.259821640772437e-05
+    },
+    {
+      "record_id": "kappa_mu0_t250_bb",
+      "relative_to_legacy": -0.009872277497487203,
+      "relative_to_refined": 8.619582413160742e-05
+    },
+    {
+      "record_id": "kappa_mu0_t250_qq",
+      "relative_to_legacy": -0.009873077482670078,
+      "relative_to_refined": 6.471948944519745e-05
+    },
+    {
+      "record_id": "kappa_mu0_t250_ss",
+      "relative_to_legacy": -0.00986821057039311,
+      "relative_to_refined": 0.00019538993461254428
+    },
+    {
+      "record_id": "kappa_mu100_t210_bb",
+      "relative_to_legacy": -0.01776740305429625,
+      "relative_to_refined": -1.0789389902954305e-05
+    },
+    {
+      "record_id": "kappa_mu100_t210_qq",
+      "relative_to_legacy": -0.01647108021493615,
+      "relative_to_refined": -3.313230426638114e-05
+    },
+    {
+      "record_id": "kappa_mu100_t210_ss",
+      "relative_to_legacy": -0.02419484510672998,
+      "relative_to_refined": 0.00011615914634766078
+    },
+    {
+      "record_id": "lambda_mu100_t210",
+      "relative_to_legacy": -0.01776740305429625,
+      "relative_to_refined": -1.0789389902954305e-05
+    },
+    {
+      "record_id": "kappa_mu100_t250_bb",
+      "relative_to_legacy": -0.009052969665507171,
+      "relative_to_refined": 5.8065215016833704e-05
+    },
+    {
+      "record_id": "kappa_mu100_t250_qq",
+      "relative_to_legacy": -0.009382954575928859,
+      "relative_to_refined": 5.131847425499103e-05
+    },
+    {
+      "record_id": "kappa_mu100_t250_ss",
+      "relative_to_legacy": -0.007636416611021768,
+      "relative_to_refined": 9.595384638316773e-05
+    },
+    {
+      "record_id": "lambda_mu100_t250",
+      "relative_to_legacy": -0.009052969665505617,
+      "relative_to_refined": 5.8065215016833704e-05
+    }
+  ],
+  "diagnostic_archive": {
+    "path": "D:/DevData/Julia_RelaxTime/artifacts/transport_recalculation_20261104_v1/pr331_wrapup/nightly_transport_audit.zip",
+    "sha256": "5e62e31fca24c36e1e378a0ed694cb952cdcff3a554a1e54e058853f46a085f1",
+    "bytes": 32739,
+    "contents": "Exact diagnostic driver, two unchanged historical sampling modules, 13 configuration summaries and stdout/stderr. Remaining source recovers from source_commit."
+  },
+  "reproduction": "Restore source_commit to an isolated checkout; extract diagnostic archive to tmp/nightly_transport; run julia --project=. tmp/nightly_transport/probe_legacy_baseline.jl. Reuse neither old generated .jls files nor probe_results when rerunning."
+}

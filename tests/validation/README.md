@@ -48,6 +48,15 @@ Matching target/provenance directories should preserve the same semantic split:
 - `targets/relaxtime/legacy/transport/`: lightweight acceptance targets for legacy transport quantities such as `tau`, `eta_over_s`, `sigma_t`, `kappa_*`, `lambda`, and stable ratio diagnostics.
 - `provenance/.../evidence/`: source file paths, column semantics, and comparison notes that justify how targets were extracted.
 
+The historical `relaxtime_kappa_lambda_fixedpoint_targets_v1.csv` is retained
+for traceability but is no longer an acceptance input. Its source is an internal
+Julia fixed-point export, and the old 60-point scattering table was not converged
+at T=210 MeV, muB=0. The replacement lives in
+`tests/regression/relaxtime/test_kappa_lambda_thermal_weighted_regression.jl`;
+the [baseline review](../baselines/relaxtime/kappa_lambda_thermal_weighted.md)
+records the unchanged background/cutoff, old/new comparison, and refined checks.
+This does not replace a literature or independent Fortran validation.
+
 The current Mott integral external replay is evidence-only:
 `data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`.
 It records source hashes and error statistics but is not read by the default

@@ -44,6 +44,11 @@ function _build_k_coeffs(q, t)
     )
 end
 
+# These tests protect parameter representation through the real call chain.
+# Use an explicit small quadrature like the adjacent struct/edge tests; default
+# production accuracy and convergence are covered by their own regression tests.
+const FULL_CHAIN_QUADRATURE = (p_nodes=4, angle_nodes=3, phi_nodes=5, n_sigma_points=4)
+
 @testset "Integration: Full Call Chain" begin
     
     @testset "Struct parameters flow through entire chain" begin
@@ -70,7 +75,8 @@ end
         result = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         # Verify result structure
@@ -131,14 +137,16 @@ end
         result_struct = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         # Call with NamedTuple parameters
         result_nt = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_nt, t_nt, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         # Verify equivalence of relaxation times
@@ -179,7 +187,8 @@ end
         result1 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q1, t1, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test haskey(result1, :tau)
@@ -193,7 +202,8 @@ end
         result2 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q2, t2, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test haskey(result2, :tau)
@@ -207,7 +217,8 @@ end
         result3 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q3, t3, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test haskey(result3, :tau)
@@ -232,7 +243,8 @@ end
         process = :us_to_us
         avg_rate = Main.RelaxTime.AverageScatteringRate.average_scattering_rate(
             process, q_with_A, t_struct, K_coeffs;
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test isfinite(avg_rate)
@@ -294,7 +306,8 @@ end
         result1 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_nt, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test haskey(result1, :tau)
@@ -308,7 +321,8 @@ end
         result2 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_nt, t_struct, K_coeffs;
             densities = densities,
-            sigma_cutoff=5.0
+            sigma_cutoff=5.0,
+            FULL_CHAIN_QUADRATURE...
         )
         
         @test haskey(result2, :tau)

@@ -1,6 +1,8 @@
 using Test, LinearAlgebra
-include(joinpath(@__DIR__,"..","..","..","scripts","analysis","relaxtime","TerminalTransportQuadrature.jl"))
-using .TerminalTransportQuadrature, .ThresholdUpgradeCommon
+if !isdefined(Main, :TerminalTransportQuadrature)
+    include(joinpath(@__DIR__,"..","..","..","scripts","analysis","relaxtime","TerminalTransportQuadrature.jl"))
+end
+using .TerminalTransportQuadrature: terminal_grams, gram_relative_change, transport_from_grams, SPECIES
 
 @testset "Gram moments reproduce the actual RTA kernels" begin
     qp=(m=(u=0.73,d=0.81,s=1.41),μ=(u=0.29,d=0.25,s=0.57))

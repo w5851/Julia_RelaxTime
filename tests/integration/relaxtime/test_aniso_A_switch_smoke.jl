@@ -7,10 +7,9 @@ if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
 
-TransportWorkflow = Models.transport_workflow_module()
+const ANISO_A_WORKFLOW = Models.transport_workflow_module()
 
 using .RelaxationTime
-using .TransportWorkflow
 using Main.ParameterTypes: QuarkParams, ThermoParams
 using Main.OneLoopIntegrals: A
 using Main.OneLoopIntegralsCorrection: A_aniso
@@ -32,7 +31,7 @@ using Main.OneLoopIntegralsCorrection: A_aniso
         @test hasproperty(q_aniso, :A)
 
         nodes_p, weights_p = Main.GaussLegendre.gauleg(0.0, 20.0, 16)
-        nodes_cos, weights_cos = Main.GaussLegendre.gauleg(-1.0, 1.0, Main.AverageScatteringRate.DEFAULT_ANGLE_NODES)
+        nodes_cos, weights_cos = Main.GaussLegendre.gauleg(-1.0, 1.0, Main.AverageScatteringRate.DEFAULT_A_COS_NODES)
 
         A_u_iso_expected = A(quark_params.m.u, quark_params.μ.u, thermo_iso.T, thermo_iso.Φ, thermo_iso.Φbar, nodes_p, weights_p)
         A_u_aniso_expected = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_aniso.T, thermo_aniso.Φ, thermo_aniso.Φbar,
@@ -48,11 +47,11 @@ using Main.OneLoopIntegralsCorrection: A_aniso
         thermo_iso_struct = ThermoParams(thermo_iso)
         thermo_aniso_struct = ThermoParams(thermo_aniso)
 
-        A_map_iso = TransportWorkflow._A_from_equilibrium(thermo_iso.T, q, thermo_iso_struct)
-        A_map_aniso = TransportWorkflow._A_from_equilibrium(thermo_aniso.T, q, thermo_aniso_struct)
+        A_map_iso = ANISO_A_WORKFLOW._A_from_equilibrium(thermo_iso.T, q, thermo_iso_struct)
+        A_map_aniso = ANISO_A_WORKFLOW._A_from_equilibrium(thermo_aniso.T, q, thermo_aniso_struct)
 
-        nodes = TransportWorkflow.DEFAULT_MOMENTUM_NODES
-        weights = TransportWorkflow.DEFAULT_MOMENTUM_WEIGHTS
+        nodes = ANISO_A_WORKFLOW.DEFAULT_MOMENTUM_NODES
+        weights = ANISO_A_WORKFLOW.DEFAULT_MOMENTUM_WEIGHTS
         nodes_cos, weights_cos = Main.GaussLegendre.gauleg(-1.0, 1.0, 4)
 
         A_u_iso_expected = A(quark_params.m.u, quark_params.μ.u, thermo_iso.T, thermo_iso.Φ, thermo_iso.Φbar, nodes, weights)

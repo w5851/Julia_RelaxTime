@@ -10,27 +10,21 @@ This test file verifies that the RelaxationTime module correctly handles:
 - Pre-computed rates vs computing from scratch
 """
 
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
+end
+
+module RelaxationTimeEdgeCases
 using Test
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main: Constants_PNJL
+using Main.RelaxTime: RelaxationTime, EffectiveCouplings
+using Main.RelaxTime.OneLoopIntegrals: A
+using Main.RelaxTime.GaussLegendre: gauleg
 
-# Load required modules
-push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
-
-include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/RelaxationTime.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
-
-using .RelaxationTime
-using .Constants_PNJL
-using .EffectiveCouplings
-using .OneLoopIntegrals: A
-using .GaussLegendre: gauleg
-
-# Load test utilities
-include("test_utils.jl")
-using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
+# Two momentum/angle nodes can leave no supported thermal events. This small
+# grid exercises the real cache and its convergence gate, as in full-chain tests.
+const QUADRATURE = (p_nodes=4, angle_nodes=3, phi_nodes=5, n_sigma_points=4)
 
 @testset "RelaxationTime Edge Cases and Unit Tests" begin
     
@@ -70,21 +64,15 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         # Compute with struct parameters (minimal nodes for speed)
         rates_struct = RelaxationTime.compute_average_rates(
-            q_struct, t_struct, K_coeffs,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            q_struct, t_struct, K_coeffs;
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
         # Compute with NamedTuple parameters
         rates_nt = RelaxationTime.compute_average_rates(
-            q_nt, t_nt, K_coeffs,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            q_nt, t_nt, K_coeffs;
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -128,11 +116,8 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         # First compute some rates
         rates = RelaxationTime.compute_average_rates(
-            q_struct, t_struct, K_coeffs,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            q_struct, t_struct, K_coeffs;
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -171,11 +156,8 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         # First compute rates separately
         rates = RelaxationTime.compute_average_rates(
-            q_struct, t_struct, K_coeffs,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            q_struct, t_struct, K_coeffs;
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -184,10 +166,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             q_struct, t_struct, K_coeffs;
             densities=densities,
             existing_rates=rates,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -236,10 +215,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         result_struct = RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
             densities=densities,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -247,10 +223,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         result_nt = RelaxationTime.relaxation_times(
             q_nt, t_nt, K_coeffs;
             densities=densities,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -282,10 +255,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         result1 = RelaxationTime.relaxation_times(
             q_struct, t_nt, K_coeffs;
             densities=densities,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -293,10 +263,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         result2 = RelaxationTime.relaxation_times(
             q_nt, t_struct, K_coeffs;
             densities=densities,
-            p_nodes=2,
-            angle_nodes=2,
-            phi_nodes=2,
-            n_sigma_points=3,
+            QUADRATURE...,
             sigma_cutoff=5.0
         )
         
@@ -330,3 +297,5 @@ println("  5. Mixed struct/NamedTuple usage patterns work")
 println("  6. Physical constraints maintained (positive tau, non-negative rates)")
 println("  7. Isospin symmetry preserved")
 println("="^70)
+
+end # module RelaxationTimeEdgeCases
