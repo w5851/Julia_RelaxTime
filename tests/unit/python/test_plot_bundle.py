@@ -45,6 +45,30 @@ def test_shared_provenance_is_stored_once_and_roundtrips(tmp_path):
     assert validate_manifest(path, repo_root=tmp_path) == []
 
 
+def test_moved_bundle_validates_original_outputs_and_still_inspects_png(tmp_path):
+    index, records = fixtures(tmp_path)
+    original = tmp_path / "data/outputs/figures/old"
+    original.mkdir(parents=True)
+    for number, record in enumerate(records):
+        source = tmp_path / f"figure{number}.png"
+        target = original / source.name
+        source.rename(target)
+        record["outputs"] = [output_record(target, fmt="png", dpi=600, vector=False, root=tmp_path)]
+        index["charts"][number]["outputs"] = record["outputs"]
+    path = original / "plot_manifest.json"
+    write_manifest(path, build_bundle(index, records))
+    moved = original.with_name("diagnostics")
+    original.rename(moved)
+    registry = tmp_path / "config/plotting/artifact_locations.toml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text('[[relocations]]\nfrom="data/outputs/figures/old"\n'
+                        'to="data/outputs/figures/diagnostics"\n', encoding="utf-8")
+    assert validate_manifest(path, repo_root=tmp_path) == []
+    assert validate_manifest(moved / path.name, repo_root=tmp_path) == []
+    (moved / "figure0.png").write_bytes(b"damaged moved PNG")
+    assert any("sha256 mismatch" in error for error in validate_manifest(path, repo_root=tmp_path))
+
+
 @pytest.mark.parametrize("damage", ["duplicate_id", "shared_override", "empty", "invalid_package"])
 def test_bundle_rejects_ambiguous_or_empty_records(tmp_path, damage):
     index, records = fixtures(tmp_path)

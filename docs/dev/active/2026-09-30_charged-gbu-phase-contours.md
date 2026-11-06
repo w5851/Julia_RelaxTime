@@ -5,6 +5,11 @@
 merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；十项合并 PR 检查均成功。
 M4 的作者研究产物审阅仍待处理，本文继续保留在 active，不自动提升为 accepted/promoted。
 
+2026-11-06 存储整理：原 `D:/w/charged-gbu-contours/retained-pr325` 已移至
+`D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325`。原 manifest、图像、数值和源码 bundle
+保持字节；1875 条文件记录及 bundle 依赖核验通过。`D:/Temp` 原副本已不存在，
+阅读或恢复使用新位置的 `README.md`；旧 `D:/w` 目录只剩空标记，不是 worktree。
+
 当前 q0 口径及产物入口见 M9；前面各批次的数值、门禁判断和运行 SHA 保留为历史证据。
 绘图参数和复现方法统一维护在[脚本入口说明](../../guides/scripts/README.md)。
 联合 T–μB 路径与参数探索由[化学冻结线主线](../../analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md)

@@ -1,0 +1,59 @@
+# Storage changes only. Frozen manifests, image bytes and review identities stay unchanged.
+# Superseded diagnostic packages are recoverable from 703c23d234bfebd107a9f1acc7179a8290bd1640.
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/eta_refinement"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/eta_refinement"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/mott_slopes"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/mott_slopes"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/sigma_spectrum"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/sigma_spectrum"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/sigma_checks"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/sigma_checks"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/sigma_curvature"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/sigma_curvature"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/sigma_asymptotics"
+
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review"
+to = "data/outputs/results/relaxtime/transport/diagnostics/sigma_asymptotics"
+
+# The final v4 review reuses this v3 shape review; the remaining v3 package is retired.
+[[relocations]]
+from = "data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v3_png_review/ds_review_v1/side-shapes.json"
+to = "data/outputs/results/relaxtime/transport/diagnostics/sigma_asymptotics/ds_review_v1/side-shapes-v3.json"
+
+[[relocations]]
+from = "data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1"
+to = "data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies"

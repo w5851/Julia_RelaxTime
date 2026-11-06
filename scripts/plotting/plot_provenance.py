@@ -11,6 +11,48 @@ import zipfile
 from typing import Any
 
 
+def _artifact_relocations(root: Path) -> list[tuple[str, str]]:
+    registry = root / "config/plotting/artifact_locations.toml"
+    if not registry.is_file():
+        return []
+    entries = tomllib.loads(registry.read_text(encoding="utf-8")).get("relocations", [])
+    pairs = []
+    for entry in entries:
+        pair = []
+        for field in ("from", "to"):
+            relative = Path(entry[field])
+            resolved = (root / relative).resolve()
+            if relative.is_absolute() or not resolved.is_relative_to(root.resolve() / "data/outputs"):
+                raise ValueError("artifact relocation must stay within repository data/outputs")
+            pair.append(relative.as_posix().rstrip("/"))
+        pairs.append(tuple(pair))
+    return pairs
+
+
+def resolve_artifact_path(value: str, *, root: Path) -> Path:
+    """Find a moved artifact without changing its frozen path or hash record."""
+    path = Path(value)
+    path = path.resolve() if path.is_absolute() else (root / path).resolve()
+    if path.exists():
+        return path
+    try:
+        relative = path.relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path
+    for old, new in sorted(_artifact_relocations(root), key=lambda pair: len(pair[0]), reverse=True):
+        if relative == old or relative.startswith(old + "/"):
+            return root / (new + relative[len(old):])
+    return path
+
+
+def _original_artifact_path(path: Path, root: Path) -> str:
+    relative = path.resolve().relative_to(root.resolve()).as_posix()
+    for old, new in sorted(_artifact_relocations(root), key=lambda pair: len(pair[1]), reverse=True):
+        if relative == new or relative.startswith(new + "/"):
+            return old + relative[len(new):]
+    return relative
+
+
 @lru_cache(maxsize=8)
 def _verified_archive(path: str, expected: str, mtime_ns: int, size: int) -> dict[str, bytes]:
     payload = Path(path).read_bytes()
@@ -21,10 +63,9 @@ def _verified_archive(path: str, expected: str, mtime_ns: int, size: int) -> dic
 
 
 def record_bytes(record: dict[str, Any], *, root: Path) -> bytes:
-    """Resolve current bytes, or an explicitly archived pre-migration manifest."""
+    """Read original or relocated bytes, or an explicitly archived manifest."""
     value = record["path"]
-    path = Path(value)
-    path = path if path.is_absolute() else root / path
+    path = resolve_artifact_path(value, root=root)
     expected = record.get("sha256")
     current = path.read_bytes() if path.is_file() else None
     if current is not None and (not expected or hashlib.sha256(current).hexdigest() == expected):
@@ -32,7 +73,7 @@ def record_bytes(record: dict[str, Any], *, root: Path) -> bytes:
     registry = root / "config/plotting/historical_snapshots.toml"
     if expected and registry.is_file() and path.suffix == ".json":
         try:
-            relative = path.resolve().relative_to(root.resolve()).as_posix()
+            relative = _original_artifact_path(path, root)
         except ValueError:
             relative = ""
         manifest_name = (path.name in {"plot_manifest.json", "pdf_review_index.json"}
@@ -173,8 +214,7 @@ def validate_hash_record(record: dict[str, Any], *, root: Path, label: str,
             errors = validate_hash_record(snapshot, root=root, label=f"{label}.source_snapshot", allow_historical=False)
             if errors:
                 return errors
-            snapshot_path = Path(snapshot["path"])
-            payload = (snapshot_path if snapshot_path.is_absolute() else root / snapshot_path).read_bytes()
+            payload = record_bytes(snapshot, root=root)
         elif is_code_record(path, root):
             try:
                 retained = working_tree_source(path, expected, root)
@@ -204,7 +244,13 @@ def validate_snapshot(manifest_path: Path, *, root: Path, code_ref: str) -> list
     path = manifest_path.resolve()
     try:
         relative = path.relative_to(root.resolve()).as_posix()
-        frozen = git_source(str(root.resolve()), code_ref, relative)
+        try:
+            frozen = git_source(str(root.resolve()), code_ref, relative)
+        except ValueError:
+            original = _original_artifact_path(path, root)
+            if original == relative:
+                raise
+            frozen = git_source(str(root.resolve()), code_ref, original)
         if record_bytes({"path": relative, "sha256": hashlib.sha256(frozen).hexdigest()}, root=root) != frozen:
             return [f"snapshot manifest differs from {code_ref}:{relative}"]
     except (ValueError, OSError, zipfile.BadZipFile) as exc:

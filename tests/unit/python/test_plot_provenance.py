@@ -8,7 +8,7 @@ import zipfile
 import pytest
 
 from scripts.plotting.plot_manifest import generator_record, input_record
-from scripts.plotting.plot_provenance import code_ref_for_manifest, git_source, read_manifest_record, validate_hash_record, validate_snapshot
+from scripts.plotting.plot_provenance import code_ref_for_manifest, git_source, read_manifest_record, resolve_artifact_path, validate_hash_record, validate_snapshot
 
 
 @pytest.fixture
@@ -60,6 +60,69 @@ def test_generator_snapshot_preserves_exact_bytes(frozen):
     assert validate_hash_record(record, root=root, label="generator") == []
     snapshot.write_bytes(b"tampered source")
     assert validate_hash_record(record, root=root, label="generator")
+
+
+def test_moved_artifact_keeps_frozen_hash_and_rejects_stale_or_changed_bytes(tmp_path):
+    old = tmp_path / "data/outputs/figures/old/plot_manifest.json"
+    old.parent.mkdir(parents=True)
+    old.write_bytes(b'{"status":"diagnostic"}\n')
+    record = input_record(old, role="manifest", root=tmp_path)
+    new = tmp_path / "data/outputs/figures/diagnostics/example/plot_manifest.json"
+    new.parent.mkdir(parents=True)
+    old.rename(new)
+    registry = tmp_path / "config/plotting/artifact_locations.toml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text('[[relocations]]\nfrom="data/outputs/figures/old"\n'
+                        'to="data/outputs/figures/diagnostics/example"\n', encoding="utf-8")
+    assert resolve_artifact_path(record["path"], root=tmp_path) == new
+    assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False) == []
+    assert read_manifest_record(record, root=tmp_path) == {"status": "diagnostic"}
+    old.write_bytes(b"a stale duplicate must not be silently skipped")
+    assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False)
+    old.unlink()
+    new.write_bytes(b"changed moved artifact")
+    assert validate_hash_record(record, root=tmp_path, label="outputs", allow_historical=False)
+    assert resolve_artifact_path("data/outputs/figures/old_extra/item.png", root=tmp_path) == (
+        tmp_path / "data/outputs/figures/old_extra/item.png")
+
+
+def test_relocation_resolves_source_snapshot_and_original_git_manifest(frozen):
+    root, code, _, _, _, _, _ = frozen
+    original = root / "data/outputs/results/old"
+    original.mkdir(parents=True)
+    snapshot = original / "renderer.py"
+    snapshot.write_bytes(code.read_bytes())
+    record = generator_record(code, command="fixture", root=root, source_snapshot=snapshot)
+    manifest = original / "plot_manifest.json"
+    manifest.write_text(json.dumps({"generator": record}), encoding="utf-8")
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(root), "-c", "user.name=Fixture", "-c",
+                    "user.email=fixture@example.invalid", "commit", "-m", "snapshot"], check=True, capture_output=True)
+    commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"]).decode().strip()
+    moved = original.with_name("diagnostics")
+    original.rename(moved)
+    registry = root / "config/plotting/artifact_locations.toml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text('[[relocations]]\nfrom="data/outputs/results/old"\n'
+                        'to="data/outputs/results/diagnostics"\n', encoding="utf-8")
+    code.write_bytes(b"new renderer")
+    assert validate_hash_record(record, root=root, label="generator") == []
+    assert validate_snapshot(moved / manifest.name, root=root, code_ref=commit) == []
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(root), "-c", "user.name=Fixture", "-c",
+                    "user.email=fixture@example.invalid", "commit", "-m", "relocated"], check=True, capture_output=True)
+    moved_commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"]).decode().strip()
+    assert validate_snapshot(moved / manifest.name, root=root, code_ref=moved_commit) == []
+    (moved / snapshot.name).write_bytes(b"damaged source")
+    assert validate_hash_record(record, root=root, label="generator")
+
+
+def test_relocation_cannot_escape_output_tree(tmp_path):
+    registry = tmp_path / "config/plotting/artifact_locations.toml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text('[[relocations]]\nfrom="data/outputs/old"\nto="../outside"\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="data/outputs"):
+        resolve_artifact_path("data/outputs/old/figure.png", root=tmp_path)
 
 
 def test_contract_history_does_not_substitute_historical_data(frozen):

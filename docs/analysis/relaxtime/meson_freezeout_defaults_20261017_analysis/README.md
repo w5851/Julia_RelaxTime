@@ -1,7 +1,8 @@
 # 化学冻结线与 K+/pi+：研究链阶段审阅
 
 研究阶段：`review`、`diagnostic_only`；默认比较、文献筛选、两族探索和 standard/fine、PNG 已完成。
-2026-10-22 收尾审阅：将上述阶段作为同一研究链整理进入 PR，图像作者审阅仍为 `pending`。
+2026-11-06 状态核对：[PR #327](https://github.com/w5851/Julia_RelaxTime/pull/327) 已于 2026-10-22 合并，
+实现、参数和冻结证据已进入主干；图像和研究判断仍待作者审阅，不另开重复计算。
 本页保留默认参数阶段的证据和评分口径。Ledger item：
 `meson-freezeout-default-comparison`。
 
@@ -34,7 +35,7 @@
 Andronic 的宽平台后移。两族均未完整重现实验 horn。采样带不是统计置信带，同一 K/pi
 数据用于选参后不能再称独立预测验证；standard/fine 仅验证当前有限窗口内的分辨率稳健性。
 
-当前 PR 保留实现、参数和冻结证据，图像仍为 `png_review`、作者审阅待定。
+PR #327 已合入实现、参数和冻结证据，图像仍为 `png_review`、作者审阅待定。
 [证据恢复说明](../../../../data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md)
 定位数值及检索 ZIP、原始逐点记录和源码快照，
 [本次 PR 验证](pr_validation_20261022.json) 记录在独立工作树的复核。
@@ -207,10 +208,12 @@ manifest 缺少三个验证字段退出，不能把该中间尝试当最终交�
 
 ## 工作树与验证
 
-PR 整理工作树为 `D:/w/meson-freezeout-review`，分支 `codex/meson-freezeout-review`，
-基线为 `698feaf8fada670fde81c93bab6093b50093935f`。
-原计算工作树 `D:/w/meson-freezeout-defaults` 的输运优化、SciPlot 待办及其他修改保留；
-根工作树未由本次收尾改写。PR 仅纳入本研究链的实现和证据。
+历史 PR 整理工作树为 `D:/w/meson-freezeout-review`，计算基线为
+`698feaf8fada670fde81c93bab6093b50093935f`；PR #327 合并提交为
+`9c727d106abb9e931ba22dd26c206dc38d2efdff`。该 worktree 和分支已经回收。
+原计算工作树 `D:/w/meson-freezeout-defaults` 也已在输运重算交付后回收；
+其冻结线证据由[五个归档](../../../../data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/README.md)保留。
+当前研究继续使用本页及 ledger 的审阅状态，无需恢复旧工作树才能阅读结果。
 
 历史默认阶段完成 Julia 613 个断言与 Python 7 项验证；多项式阶段完成集成 71 个断言和
 Python 17 项，Andronic 阶段完成 Python 25 项。原记录分别见

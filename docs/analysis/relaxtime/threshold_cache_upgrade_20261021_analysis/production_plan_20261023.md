@@ -20,6 +20,8 @@ PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke
 2026-11-06 按作者意见整组退役v1–v13旧图层、旧raw/显示及收敛表、孤立manifest和对应一次性生成器/测试；
 v14及最初full-RS试排的重复图件和审阅副本也退出当前目录。
 当前正式数值、最小渲染依赖和Mott结论依据保留，恢复版本及边界见[输运专题](../phase_guided_transport/README.md)。
+最终局部诊断已集中到 `transport/diagnostics/`，8 组已被替代的中间图及配套审阅副本退出当前分支；
+主题、科学边界和恢复提交见[诊断图入口](../phase_guided_transport/README.md#诊断图入口)。
 历史字节使用已有Git恢复，不新增整套备份或逐文件退役报告。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。
 

@@ -53,3 +53,11 @@ v1–v13 生成器与旧 raw/显示包已退役。v14/raw 模块保留为 v15 �
 历史 v14/raw 独立出图需在退役前 checkout 恢复对应参考包。
 v14 版式 manifest 是现存 v15 PNG 入口的实际依赖，不要求保留它记录的整套旧图。
 恢复版本与保留边界见[专题入口](README.md)。
+
+## 诊断图的存放位置
+
+局部 Mott 与采样诊断归入 `data/outputs/figures/relaxtime/transport/diagnostics/`；
+元数据位于对应 `results/` 目录，最终 case 及用途见[诊断图入口](README.md#诊断图入口)。
+新诊断生成器继续接受显式 output/results 参数，传入新的 case 目录，不覆盖现有图包。
+历史 manifest 的路径由 `config/plotting/artifact_locations.toml` 定位；
+验证器保持原 manifest 和全部 hash 检查，图像的物理语义与审阅资格不随位置变化。

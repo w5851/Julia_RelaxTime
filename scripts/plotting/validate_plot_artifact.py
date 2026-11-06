@@ -17,7 +17,7 @@ if str(_SCRIPT_PROJECT_ROOT) not in sys.path:
 from scripts.plotting.plot_manifest import MANIFEST_SCHEMA, PROJECT_ROOT
 from scripts.plotting.plot_style import ALLOWED_PROFILES, load_profile
 from scripts.plotting.plot_quality import inspect_export, placement_limits
-from scripts.plotting.plot_provenance import code_ref_for_manifest, read_manifest_record, validate_hash_record, validate_snapshot
+from scripts.plotting.plot_provenance import code_ref_for_manifest, read_manifest_record, resolve_artifact_path, validate_hash_record, validate_snapshot
 from scripts.plotting.plot_bundle import BUNDLE_SCHEMA, expand_bundle
 from scripts.plotting.plot_accessibility import validate_accessibility
 from scripts.plotting.plot_delivery import validate_png_delivery
@@ -53,8 +53,7 @@ REQUIRED_FIELDS = {
 
 
 def _resolve_artifact_path(value: str, root: Path) -> Path:
-    candidate = Path(value)
-    return candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+    return resolve_artifact_path(value, root=root)
 
 
 def _check_hash_record(record: dict[str, Any], *, root: Path, label: str, errors: list[str],
@@ -94,11 +93,11 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
                       font_sources: dict[str, str] | None = None) -> list[str]:
     """Return all contract violations; an empty list means the artifact passes."""
 
-    path = Path(manifest_path).resolve()
     try:
+        path = resolve_artifact_path(str(manifest_path), root=repo_root)
         manifest = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return [f"cannot read manifest {path}: {exc}"]
+    except (OSError, ValueError) as exc:
+        return [f"cannot read manifest {manifest_path}: {exc}"]
     if not isinstance(manifest, dict):
         return ["manifest root must be a JSON object"]
     reference = code_ref or code_ref_for_manifest(path, repo_root)
