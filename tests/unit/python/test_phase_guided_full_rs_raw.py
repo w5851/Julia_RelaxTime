@@ -1,17 +1,13 @@
 from __future__ import annotations
 
 from copy import deepcopy
-import json
-import os
-from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pytest
 
 from scripts.analysis.relaxtime import build_phase_guided_full_rs_raw as raw
-from scripts.plotting.plot_bundle import load_chart_records
 from scripts.plotting.plot_series import validate_series_styles
-from scripts.plotting.validate_plot_artifact import _check_declared_legends, validate_manifest
+from scripts.plotting.validate_plot_artifact import _check_declared_legends
 
 
 def fixture_rows():
@@ -142,37 +138,3 @@ def test_build_refuses_existing_case_before_reading_sources(monkeypatch, tmp_pat
     (tmp_path / "already_exists").mkdir()
     with pytest.raises(FileExistsError, match="refusing to overwrite"):
         raw.build_review("already_exists")
-
-
-def test_completed_artifact_bundle():
-    case = os.environ.get("RAW_PNG_CASE", raw.DEFAULT_CASE)
-    path = raw.FIGURE_PARENT / case / "plot_manifest.json"
-    if not path.is_file():
-        pytest.skip("run after this case has been generated")
-    package, charts = load_chart_records(path, root=raw.ROOT)
-    font_map = os.environ.get("PLOT_FONT_SOURCES")
-    sources = json.loads(Path(font_map).read_text(encoding="utf-8")) if font_map else None
-    assert validate_manifest(path, font_sources=sources) == []
-    assert len(charts) == 75
-    assert package["raw_input_point_count"] == 1819
-    assert package["numerical_data_postprocessing"] == "none"
-    assert len(list(path.parent.rglob("*.png"))) == 150
-    assert list(path.parent.rglob("*.json")) == [path]
-    assert not list(path.parent.rglob("*.pdf"))
-    source_coverage = set()
-    for chart, record in charts:
-        assert record["interpolation_policy"] == "none"
-        assert record["validation"]["original_vertices_verified"] is True
-        assert record["manuscript_eligible"] is False
-        assert record["current_publication_layer"] is False
-        assert record["rendering"]["path_simplification"] is False
-        if chart["kind"] == "single":
-            for series in record["series"]:
-                for curve in series["source_curves"]:
-                    source_coverage.update((curve["mode_key"], curve["source_column"], row)
-                                           for row in curve["source_rows"])
-    assert len(source_coverage) == 1819 * 12
-    review = json.loads((raw.RESULT_PARENT / case / "quality_review.json").read_text(encoding="utf-8"))
-    assert review["status"] == "passed"
-    assert review["original_vertices_verified"] == 29411
-    assert review["grayscale_pairs_pixel_exact"] is True

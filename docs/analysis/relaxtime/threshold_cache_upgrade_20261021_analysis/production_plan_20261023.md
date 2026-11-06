@@ -17,7 +17,10 @@ PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke
 详见[v15正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)。
 论文已接入所需三张输运PDF和最小数据依据，15页预览、41项引用和逐页视觉核验通过；新正文为 `agent_review`，独立相图沿用原来源。
 消费者迁移后已退役557张旧PNG及论文279份旧附件，均保留已有Git恢复来源；旧树39787个冗余未跟踪文件已按外部归档清单清理，8处tracked残余已核对保留去向并恢复。会话切换到 `D:/w/transport-v15-paper` 后，`D:/w/meson-freezeout-defaults` 及其本地/远程分支已回收。最终9710个ignored文件均完成归档对应或临时文件核验；5805份数密度产物与既有五个归档逐字节相同。外部工程交付的 `pr331_wrapup/README.md` 记录恢复链及提交对应关系。
-既有外部归档继续复用，不重复保存整套数值证据。
+2026-11-06 按作者意见整组退役v1–v13旧图层、旧raw/显示及收敛表、孤立manifest和对应一次性生成器/测试；
+v14及最初full-RS试排的重复图件和审阅副本也退出当前目录。
+当前正式数值、最小渲染依赖和Mott结论依据保留，恢复版本及边界见[输运专题](../phase_guided_transport/README.md)。
+历史字节使用已有Git恢复，不新增整套备份或逐文件退役报告。
 历史记录中的 pending 只描述生成时的阶段，不推翻后续晋升记录。
 
 | 对象 | 当前状态与入口 |
@@ -40,7 +43,7 @@ PR及合并推送的常规CI已通过，包括修复后的benchmark script smoke
 | research | 混合谱支未决、严格退耦和采样间双穿越/切触零尚未全面排除；“未见 Mott”只在已查扫描分辨率下成立 |
 | research | 认证极细窗口高阶导数时，处理生产行列式保护的人工曲率、离散热权重/硬边界及右侧最内层精度；此次未改变生产核 |
 | independent | [A 解析降维](full_rs_a_reduction_20261025.md)原型已验，生产接入与端到端收益仍独立待办 |
-| independent | v15 PDF及current、论文15页审阅稿和旧worktree/分支回收已完成。旧资产未全部删除：公共图目录仍有v15前824张PNG和225张PDF，此外保留历史数值/收敛记录及复现输入；v5/v10–v13来源依赖和v14上一正式层的进一步退役须先处理消费者 |
+| independent | v15 PDF、current、论文审阅稿及旧worktree/分支回收已完成；旧图/表及其专用消费者已退役，当前依赖和研究依据保留。当前会话worktree的临时文件按作者意见留待回收该worktree时处理 |
 
 以下保留各批次的实施与验收依据；涉及历史图层或准备阶段的语句不代替上表的当前状态。
 
@@ -62,7 +65,7 @@ Actions 的七个先导 jobs、十一点及后续 135 个新分片均已完成�
 及 [publication_clean_v14 图层正式化](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json)。
 交付 76 对彩色／灰度 PNG 和 76 份矢量 PDF，补齐固定 T／FIG4；原 1819 点无平滑、删点或局部替换。
 μB=900 的 π 与 η Mott 窗口补查在 quote-remote 完成，现有积分加密证据支持保留其快速响应。
-旧版本从 current 入口退役，原数据、图像和冻结审计保持字节；物理清理见[清单](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/legacy_cleanup/README.md)。
+旧版本从 current 入口退役，原数据、图像和冻结审计保持字节；物理清理见[历史恢复说明](../phase_guided_transport/README.md)。
 
 2026-10-29按作者同意的方案完成[η局部加密正式数值版本](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：
 1810个原值不变、9个原坐标重算、48个新ξ点，共1867点及31739道记录。
@@ -255,7 +258,7 @@ v2 校正枚举范围后通过，原复核器及失败证据保留；数值源�
 17 道诊断、失败证据、执行命令和完整进程时间/峰值内存。
 在 Actions artifacts 的 30 天保留期内取回到新的持久 case，核对源码/配置、完整点集、重复点和失败点后合并。
 新数值已用于生成与 v13 同构的原始 PNG 审阅图包：
-[full_rs_raw_20261027_png_review](../../../../data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/README.md)。
+`full_rs_raw_20261027_png_review`（已被v15替代，旧包见[历史恢复说明](../phase_guided_transport/README.md)）。
 75 对彩色/灰度 PNG、原始顶点和全部图像质量检查通过，17 项定向绘图测试通过；
 仅两处已审计一阶不连续断线，1819 点和全部质量提示原样保留。
 作者于 2026-10-28 大致审阅后要求检查 μB=900 的两处局部小凸起。

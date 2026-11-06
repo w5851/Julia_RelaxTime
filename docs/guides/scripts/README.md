@@ -173,38 +173,16 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
   - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
 - `scripts/plotting/render_plotting_pilot.py`
   - 历史 v1 compatibility pilot，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case。新图不得以该 pilot 或 v1 profile 为默认入口
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v7.py --png-review`
-  - 历史 v7 renderer，也是 v11 的导入依赖；不再推荐生成新的 v7 审查包。完整 v6-v9 图包通过历史 ZIP/hash 索引恢复
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v10.py --png-review`
-  - 使用同一 v5 冻结点表生成 72 张单图和两张紧凑复合 PNG；参数/端点图例分放 (a)/(c)，检查图例与曲线/marker 相交，记录 PNG-review 字形例外；不生成 PDF、不修改 v5/current、不调用 solver
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v11.py --png-review`
-  - 保留 v11 历史 PNG 审查入口：弛豫时间全 log-y、普通数字刻度和行内小数位，生成 72 张单图与两张复合图；已接受阶段的原始产物不覆盖。
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v12.py --png-review`
-  - 保留 v12 历史 PNG 审查入口：72 张双栏单图、2 张复合图、1 张低值局部图，各含彩色／灰度版本和图外 key；原始源码／合同有独立快照，不覆盖已存在的 case。
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v13.py --png-review`
-  - 保留 v13 显示点表的 PNG 审查入口：同一冻结点表生成 75 对彩色／灰度图，主图把参数／端点 key 分放 (a)/(c)，单图逐份选择并检查所有图例；按 600 dpi 测量真实遮挡、最终字高和缩放区间，保留 v12 低值局部窗口。不补 PDF 或晋升资格。试排使用 `--preview <new-directory>`。
-- `scripts/analysis/relaxtime/build_phase_guided_full_rs_raw.py --png-review --case <new-case>`
-  - 从本次已验收 full-RS 原始 CSV 直接生成与 v13 同构的 75 对彩色／灰度 PNG；保留全部 1819 点和有限质量提示，不平滑、插值、删点或替换。仅在新背景审计确认的一阶不连续处分段，逐图核对实际原始顶点、固定参数样式及 600 dpi 几何。图像与 results 下同名证据目录拒绝覆盖；默认 case 为 `full_rs_raw_20261027_png_review`。只读试排用 `--preview <new-directory>`；`--reference-root` 可指定旧 v13 图包的位置，旧数据只用于核对图版目录结构。
-- `scripts/analysis/relaxtime/transport_delivery_archive.py pack|verify|restore --archive <zip> --receipt <json>`
-  - 按显式文件清单保存输运证据，校验ZIP和逐成员SHA-256；恢复目标必须不存在。命令、范围及当前恢复包见[工程交付](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
-- `scripts/plotting/validate_plot_artifact.py <manifest> --font-sources <json>`
-  - 仅在历史字体文件换址时提供“原路径→恢复路径”的JSON映射；仍检查原字节数、SHA-256及字体族。默认直接检查原路径，不替换字体或重写manifest。
-- `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py --png-review --case <new-case>`
-  - 1819点原网格的76图布局，含固定T的Figure 4；当前正式PNG/PDF由v14管理，恢复入口见[输运交付](../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)。
 - `scripts/analysis/relaxtime/build_phase_guided_publication_clean_v15.py --png-review --case <new-case>`
-  - 1867点η加密正式数值复用v14布局。已有PNG已审阅，PDF暂缓；指定新目录才可重绘，不覆盖旧包。
-- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v13_pdf.py`
-  - 从已接受的 v13 PNG 与冻结 renderer 导出 75 张矢量 PDF；核对全部重绘 PNG 像素、panel/legend 声明、嵌入字体、单页及无栅格包裹。`--check` 只验证已有 PDF 包和接受记录，不重绘、不更新 publication 指针。
-- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py`
-  - 用不变的 v11 renderer 补 74 张真矢量 PDF；保留 native-size preflight 失败项，不改 PNG、数值、SOP 或 current，不授予 manuscript eligibility
-- `scripts/analysis/relaxtime/formalize_phase_guided_publication_clean_v11_stage.py --check`
-  - 按 `config/plotting/historical_snapshots.toml` 中固定的代码 commit 验证已接受的 v11 manifest graph、renderer/合同来源和现存数据、PNG/PDF、冻结的历史v5选择合同；live current可继续前进，历史 SOP/skill 不与当前正文绑定。该检查不重跑历史 renderer、不补数值 gate、不晋升论文资格；`--apply` 只创建新验收记录并拒绝覆盖
-- `scripts/analysis/relaxtime/migrate_phase_guided_plot_manifest_bundles.py --check`
-  - 检查作者授权的 v10/v11 manifest 存储迁移：三个图包各只有一份总 manifest，222 条逐图记录无损，225 份旧图谱在登记的 ZIP/hash 中保留，315 个受保护文件字节不变；不重绘、不求解、不修改资格或 current。`--archive-only` / `--apply` 仅用于首次迁移，拒绝覆盖迁移报告
-- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v11_pdf_review.py --check`
-  - 不重绘地检查总 manifest 中全部 PDF 记录、真矢量/字体证据及保留的 native-size preflight 失败
-- `scripts/analysis/relaxtime/archive_phase_guided_publication_review_history.py restore --archive <zip> --destination <new-empty-directory>`
-  - 从本地历史归档逐文件校验并恢复 v6-v9 中间产物；拒绝覆盖现有目标目录。归档目前未上传远端，索引位于 phase_guided_transport 分析根目录
+  - 读取已验收的1867点η加密正式网格，复用v14布局；保留原始值、全部质量提示和两处经审计的一阶断线。已有case拒绝覆盖。
+- `scripts/analysis/relaxtime/export_phase_guided_publication_clean_v15_pdf.py --authorization <record.json> --case <new-case>`
+  - 从已接受的v15 PNG导出76张矢量PDF，核对源包、授权、冻结renderer、原始顶点及全部PNG字节；直接引用152张已有PNG，不复制旧审阅包。正式v15 PDF、current及论文替换已完成。
+- `scripts/plotting/validate_plot_artifact.py <manifest> --font-sources <json>`
+  - 仅在历史字体文件换址时提供“原路径→恢复路径”的JSON映射；仍检查原字节数、SHA-256及字体族。默认直接检查原路径。
+- `scripts/analysis/relaxtime/transport_delivery_archive.py pack|verify|restore --archive <zip> --receipt <json>`
+  - 按显式文件清单校验已有输运交付归档；恢复目标必须不存在。本次旧图清理使用Git历史，不另建备份。
+- v14/raw模块仍是v15的渲染依赖；历史独立出图需要在退役前checkout恢复旧参考包。
+  v1–v13及旧raw/显示包的生成器、测试和重复图件已退役，恢复版本见[输运专题](../../analysis/relaxtime/phase_guided_transport/README.md)。
 - 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
 
 ### PNJL
@@ -317,11 +295,9 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - 当前已验收数据和图层以[统一状态说明](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)及[绘图专题入口](../../analysis/relaxtime/phase_guided_transport/README.md)为准：
     - 原1819点完整网格：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/`。
     - 最新η加密正式数值1867点：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/`。
-    - 当前正式图层v14：`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/`，对应1819点，含76对PNG和76份PDF。
-    - v15对应1867点，76对PNG已由作者审阅；PDF暂缓，未替换current或论文附件。
-  - 历史`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`、低分辨率anchor及v1–v13图层不再是当前计算/图像入口；其原始数据、审阅状态和恢复依据保留于专题索引。
-    - 旧prod_v1的退役/删除依据见`docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/`；不能将历史Git恢复误记为现有fallback。
-    - 旧图包renderer、manifest和收敛证据在依赖复核前继续保留。下一阶段按明确文件范围和已验证的恢复来源退役旧资产。
+    - 当前正式图层v15：`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/`，对应1867点，76份PDF直接引用已接受的76对PNG；current及论文图已替换。
+  - 旧`first_canonical` raw/收敛表、v1–v13图层和v14重复图件已退役；在独立checkout恢复提交`6a3d08663c845587ae457fbe1c90173e0e5dcc25`可复核历史结果。
+    当前正式来源、少量v14渲染依赖及Mott机制依据继续保留，范围见专题入口。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`

@@ -32,12 +32,6 @@ PACKAGE_SPECS = (
         "a564d3288ba35913172894c3ccc47db6f90d68d7",
         "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1",
     ),
-    (
-        "phase_guided_transport_p128_xi001_analysis",
-        "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis",
-        "5f75efab086bccac95eb07e84b7c5c15c8f011ba",
-        "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis",
-    ),
 )
 
 
