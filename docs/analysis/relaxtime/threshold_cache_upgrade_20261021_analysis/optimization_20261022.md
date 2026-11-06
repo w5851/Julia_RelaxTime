@@ -71,10 +71,10 @@ CPU 中位数分别降低约 45%、19%、27%；墙钟受机器负载影响，不
 
 其余窗口的快速变化没有被此层采样修正消除：μB=0、αT=1 的 ξ≈−0.22 对照；μB=0、αT=1.1 的 ξ≈+0.48；μB=450、αT=1 的 ξ≈−0.20；以及 μB=900 的四个同相分支窗口。详细数值见 [window_summary.csv](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/window_summary.csv)。这些是保留快速变化的数值证据，本轮没有重新求介子极点，不能单凭它们给出新的 Mott 归因。
 
-图像按项目目录习惯放在 `data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/`。每个窗口分别展示原曲率更大的夸克或反夸克物种；选择依据为原始数据，全部六种 τ 均保存在 CSV 中。图例位于子图内，连线仅连接计算节点。
+图像按项目目录习惯放在 `data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/`。每个窗口分别展示原曲率更大的夸克或反夸克物种；选择依据为原始数据，全部六种 τ 均保存在 CSV 中。图例位于子图内，连线仅连接计算节点。
 
-- [夸克对照 PNG](../../../../data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/anomaly_windows.png) · [PDF](../../../../data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/anomaly_windows.pdf)
-- [反夸克对照 PNG](../../../../data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/anomaly_antiquark_windows.png) · [PDF](../../../../data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/anomaly_antiquark_windows.pdf)
+- [夸克对照 PNG](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/anomaly_windows.png) · [PDF](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/anomaly_windows.pdf)
+- [反夸克对照 PNG](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/anomaly_antiquark_windows.png) · [PDF](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/anomaly_antiquark_windows.pdf)
 
 ## 加密核验及生产替换判断
 

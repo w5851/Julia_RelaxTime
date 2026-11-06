@@ -89,3 +89,12 @@ artist 编码。新字体／身份字段在 PNG 与后续 PDF 阶段必须一致
 
 矢量包的 `outputs` 可以引用原 PNG 路径，无须复制 PNG 或展开保存所有单图
 manifest。输入内容、角色、渲染语义及字体身份仍逐图与已接受的记录比较。
+
+## 已有图包的存储迁移
+
+`plot_provenance.resolve_artifact_path(value, root=...)` 和产物验证器读取
+`config/plotting/artifact_locations.toml` 中的精确目录／文件映射。仅在原路径不存在时解析新位置；
+原路径存在但字节不同仍报错，不能借迁移跳过重复副本的错误。
+映射两端限定在仓库 `data/outputs/` 内，原 manifest、输出字节、来源和审阅 hash 均保持原样。
+`validate_snapshot` 对迁移后的 manifest 回查迁移前的 Git 路径，再验证当前存储的字节。
+字体迁移仍通过已有 `--font-sources` 参数，沿用原字体 bytes/hash。

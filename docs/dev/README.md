@@ -2,6 +2,37 @@
 
 本目录保存需要跨对话共享的设计、开发约定与历史依据。普通工作使用对话计划或已有 issue/PR，不默认创建任务单、执行台账或归档副本。
 
+## 工作区收尾状态（2026-11-06）
+
+当前计算项目登记两个 worktree：本会话 `D:/w/transport-v15-paper` 和主工作区
+`D:/Desktop/Julia_RelaxTime`。远程仅有 `main`，无待合并 PR（本次整理 PR 另计）。
+已合入主干的本地 `codex/workflow-guidance-trim` 已回收。
+
+桌面主工作区仍为 `codex/docs-architecture-cleanup`，tip
+`5946aaf73a4d26f0f392bc7d43b49419f0ee6f26`。相对整理前主干
+`703c23d234bfebd107a9f1acc7179a8290bd1640` 有 6 个未合入提交、2 个已跟踪脏文件和
+1783 个未跟踪文件；暂存区为空。它不是可直接删除的旧隔离目录。
+
+| 范围 | 收尾处理 |
+| --- | --- |
+| `feed2c99` 的已合并任务说明 | 冻结线 PR #327 已合并的事实已同步到当前入口；审阅 pending 继续保留。旧图清理任务的归档可随桌面分支收尾处理 |
+| `e5c21ebf` 的 Web/API 导航 | 独立文档改动，需按当前入口核对后选入收尾 PR |
+| `4b91ee73` 的早期冻结线文献与交接 | 与已保留的 PR #327 五个归档查重，提取仍独有的研究解释；不恢复重复数值产物 |
+| `c498d85e` 的旧 FIG4 留存 | v15 已替代；保留提交恢复来源，不把旧输运图重新带入当前目录 |
+| `9d1c637d` 的早期 APS 包归档 | 先核对现行相图交付是否仍需要，不因分支收尾重建整套备份 |
+| `5946aaf7` 的 Issue130 工具退役 | 独立工程改动；重新检查当前脚本／workflow 消费者并验证后再合入 |
+| 两处脏文档及早期输运研究（约 22 MiB） | 含旧 Mott 推导、k=0 完整 RS 比较、Julia–Fortran 分析及源码，尚无完整已核验的持久替代；保留原处逐项收口。旧台账里的“待整批重算”已由 PR #331–334 完成，当前状态看输运专题 |
+
+当前[任务台账](../../config/governance/task_tracks.toml)继续以冻结线研究为主线；
+输运 v15 已交付，GBU 与冻结线的作者审阅、完整输运正则性和 A 降维等研究问题分别保留。
+桌面分支后续按上述内容选择合入，不能整体 merge 后重新引入已退役资产。
+
+`D:/w` 另外三个目录均已失去 Git worktree 身份：`charged-gbu-contours` 只剩空标记，
+其 GBU 产物已移至 `D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325`；
+`project-skills-wrapup` 只剩空标记；`meson-freezeout-review-closeout-20261022` 只剩
+PR #327 的临时检查 ZIP 和收据。三处残留的删除被自动审批以 `blocked by policy` 拒绝，未执行。
+本会话 worktree 的旧临时缓存继续按作者意见留待回收时处理。
+
 ## 维护入口
 
 | 需要解决的问题 | 权威入口 |

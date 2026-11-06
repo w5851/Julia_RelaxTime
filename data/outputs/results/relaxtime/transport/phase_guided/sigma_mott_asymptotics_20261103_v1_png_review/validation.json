@@ -1,6 +1,0 @@
-{
-  "passed": false,
-  "errors": [
-    "sigma_side_scaling: series_styles: selected style identities lack measured curve evidence"
-  ]
-}

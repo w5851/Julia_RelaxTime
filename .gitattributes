@@ -6,7 +6,6 @@ tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.csv -text white
 tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tests/baselines/relaxtime/baseline_kappa_lambda_thermal_weighted_v*.csv -text
 data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/threshold_cache_upgrade_20261021/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Frozen Actions command logs retain the original printf trailing spaces.
 data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/*/artifact/artifacts/relaxtime_phase_guided_transport/*/command.txt whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
@@ -133,32 +132,12 @@ data/outputs/results/relaxtime/meson_density/sciplot_Tmu_20261022_png_review_r2/
 data/outputs/figures/relaxtime/meson_density/sciplot_*/*.png binary
 
 # Frozen full-RS publication and Mott diagnostic delivery.
-data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_fine_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_precision_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v2_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v3_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_fine_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_precision_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
@@ -166,11 +145,7 @@ data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261103_v2_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v3_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v1_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Retained diagnostics keep the exact bytes of their original figure/review packages.
+data/outputs/figures/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

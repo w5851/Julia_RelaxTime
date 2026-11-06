@@ -1,5 +1,8 @@
 # μB=900 局部凸起与 Mott 阈值核对（2026-10-28）
 
+图件已按主题集中到[诊断图入口](../phase_guided_transport/README.md#诊断图入口)。
+以下保留各阶段的数值与观察；已被替代的试排图通过该入口注明的 Git 提交恢复。
+
 **当前结论（2026-11-04）：π、K、η、σ 的计划内有限窗口诊断，以及 σ 连续近阈积分的左右渐近与误差检查已完成。** 13 个窗口的195 个主网格点、3315 道率及175/175 个参考求值齐全，819 项同端点斜率比较、432 项 ξ 分割比较和同宽度过程／物种分解已核对。K 也存在局部斜率响应；σ 局部积分的左侧二阶导数呈 h^(-1/2)，右侧在已分辨窗口呈对数增长，一阶导数的条件性共同极限成立。这里没有认证全部完整 τ 或末端输运量均为 C¹ 且非 C²，也没有把 Mott 称为热力学二阶相变。
 
 最新证据见[σ 二阶左右极限与误差控制](#σ-二阶左右极限与误差控制2026-11-03-计算2026-11-04-收束)；[10月31日审阅记录](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/scientific_review_v1.json)保持原字节。π 最窄尖峰、混合谱支排除、完整输运量的正则性传递和 σ 右侧最内层精度仍有限制。统一任务状态、未决问题及工程交付见[生产计划当前入口](production_plan_20261023.md)。η加密的1867点已正式验收；2026-11-05按作者授权完成[v15 PDF交付与正式晋升](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/formalization.json)，current已切换；历史PNG阶段记录保持原字节。以下各节保留其注明的参数、日期和结论范围。
@@ -271,7 +274,7 @@ S_y(\xi_L,\xi_R)=\frac{1}{\xi_R-\xi_L}
 
 因此，粗网格的S是局部对数导数的区间平均。减速段与加速段落在同一个0.01区间内时，其调制会在平均中部分抵消；纵轴数值接近粗节点直线弦，与局部增速变化明显并不矛盾。该恒等式解释采样的平均作用，不单独证明 η 的物理贡献或连续导数极值。
 
-[细网格PNG对照图](../../../../data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_fine_png_review/plot_manifest.json)包含三条曲线的τū、σ/T共6张彩色图及6张灰度图，上面板为原始值、下面板为远端计算的区间对数斜率；没有平滑或拟合。全部图像合同检查通过，已目视复核6张彩色图与1张灰度代表图，状态仍为诊断PNG审阅。
+细网格PNG对照图（历史图包 `eta_mott_xi_refinement_20261029_v1_fine_png_review`，已退役）包含三条曲线的τū、σ/T共6张彩色图及6张灰度图，上面板为原始值、下面板为远端计算的区间对数斜率；没有平滑或拟合。全部图像合同检查通过，已目视复核6张彩色图与1张灰度代表图，状态仍为诊断PNG审阅。
 
 积分与峰区复核已全部完成：每曲线在ξη±0.0001、已见峰区两端及中点、ξη本身使用10⁻⁶容差，共18次参考计算。连同主网格，共69次完整输运计算、57个不同参数点；新增点与原点均重新计算全部十七道率。结果见[最终数值审阅](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/returned/review_final_v1/review.json)。
 
@@ -291,7 +294,7 @@ S_y(\xi_L,\xi_R)=\frac{1}{\xi_R-\xi_L}
 
 以上结果确认：**Δξ=0.01确实平均掉了窄的减速—加速结构；输运值相对粗弦的偏差小，不等于局部增速调制弱。** 该判断限于当前冻结核、已检查的s容差及所采样的ξ尺度；三处外层积分未另行全面升阶，η分振幅移除也未进行，因此不把全部局部曲率排他性地归为η，或宣称连续导数的严格界。正式CSV、v14图件和current指针保持原样。
 
-[最终诊断PNG图包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review/plot_manifest.json)包含三条曲线的τū、σ/T各一张彩色与灰度图，共12张PNG。上面板保留全部原始计算点；下面板的黑叉只比较与主网格具有相同端点的高精度割线，黑加号表示新增中点产生的半区间割线，稀疏参考点之间其他跨度的割线不混入精度对照。全部12张PNG通过产物检查，6张彩色图和3张电导率灰度图已完成[图面复核](../../../../data/outputs/results/relaxtime/transport/phase_guided/eta_mott_xi_refinement_20261029_v1_png_review/visual_review.json)，各图上下两面板的点数与选择规则也已核对。生成器、图注和质量检查保存于results下同名case，图包保持诊断审阅资格；主网格中间图包未覆盖。
+[最终诊断PNG图包](../../../../data/outputs/figures/relaxtime/transport/diagnostics/eta_refinement/plot_manifest.json)包含三条曲线的τū、σ/T各一张彩色与灰度图，共12张PNG。上面板保留全部原始计算点；下面板的黑叉只比较与主网格具有相同端点的高精度割线，黑加号表示新增中点产生的半区间割线，稀疏参考点之间其他跨度的割线不混入精度对照。全部12张PNG通过产物检查，6张彩色图和3张电导率灰度图已完成[图面复核](../../../../data/outputs/results/relaxtime/transport/diagnostics/eta_refinement/visual_review.json)，各图上下两面板的点数与选择规则也已核对。生成器、图注和质量检查保存于results下同名case，图包保持诊断审阅资格；主网格中间图包在生成时未覆盖，现已按上述整理规则退役。
 
 [本机接收核验](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/local_return_verification.json)确认157个返回文件的字节数与SHA-256全部匹配，最终三个数值阶段均成功退出，远端340个冻结源码文件仍匹配。返回ZIP为1,697,418字节，SHA-256为`8d3961b1af46284a45ff62e283fd541cf5219bab9d7f1eb706b1feff5a139e24`；定位失败、提前终止批次及续算依据仍保存在包内。全部求解和数值派生分析在quote-remote完成，本机仅传输、核验、绘图及编辑说明。
 
@@ -394,7 +397,7 @@ J 比较阈值两侧的一阶割线；它是有限窗口量，不是连续导数
 
 h=0.0001 使用新增的加严参考点，原生主网格没有该对称三点，不能声称这里另有相同 h 的双 s 容差对照。上述尺度依赖说明最窄尖峰幅度及连续导数极限**尚未验收**；中心细节的物理／数值归属未定，既有较宽窗口的快速响应证据仍按原范围成立。若要定量使用这些尖峰，需要在 quote-remote 继续 ξ 加密，并对近阈点补独立外层、t 或 B₀ 等积分层检查；本次没有启动新的数值队列。
 
-[完整参考 PNG 图包](../../../../data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/README.md)覆盖 13 窗口的 τū、τs̄、η/s、ζ/s、σ/T，共 65 张彩色及 65 张灰度图。130 个输出及图像合同核验通过；DeepSeek 辅助筛查全部彩色联系表，并保留 23 项原始任务回复（21 项结构合格、2 项失败）。主代理通过三张详细／组合预览复核五幅原图，补查失败项及裁切候选；实际范围见[图面审阅记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/agent_review.json)。模型误读的符号和裁切候选未被采用，科学结论来自远端数值表及源码。三张灰度代表获得辅助筛查，其中两张由主代理复核，其他灰度图仅做机器核验；联系表不能替代每张原图在最终尺寸下的作者审阅。
+[完整参考 PNG 图包](../../../../data/outputs/results/relaxtime/transport/diagnostics/mott_slopes/README.md)覆盖 13 窗口的 τū、τs̄、η/s、ζ/s、σ/T，共 65 张彩色及 65 张灰度图。130 个输出及图像合同核验通过；DeepSeek 辅助筛查全部彩色联系表，并保留 23 项原始任务回复（21 项结构合格、2 项失败）。主代理通过三张详细／组合预览复核五幅原图，补查失败项及裁切候选；实际范围见[图面审阅记录](../../../../data/outputs/results/relaxtime/transport/diagnostics/mott_slopes/agent_review.json)。模型误读的符号和裁切候选未被采用，科学结论来自远端数值表及源码。三张灰度代表获得辅助筛查，其中两张由主代理复核，其他灰度图仅做机器核验；联系表不能替代每张原图在最终尺寸下的作者审阅。
 
 本轮已完成计划内的有限窗口诊断审阅，结论及未决项写入[独立审阅记录](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/scientific_review_v1.json)。冻结自动报告中的 `whole_task_complete=false` 保持原字节，它表达自动收尾不代替科学审阅的边界；本记录不赋予新正式数据、图像 current 或论文资格。v15 PDF 仍按作者要求暂缓，谱支歧义和上述连续导数限制继续保留。
 
@@ -473,7 +476,7 @@ Rehberg 等 1996 第 30 页报告过 σ Mott 附近强子化率的明显结构�
 
 **σ 确实有尖峰，峰面积同时缩小。** 在 ξ<ξM 的反向 Mott 连续谱侧，原生完整散射核的实轴共振与 pair128/pair256 成对 PV 后端位置的最大相对差为 1.26×10⁻⁶。令 x=s−4Mℓ²，实轴共振位置为 xᵣ；峰宽相对 xᵣ 的幂次拟合为 1.499817，混合标量平方项峰高为 −0.999582，±32 半宽内面积为 0.500318。四个点为 Δξ=−0.0002、−0.0001、−0.00005、−0.00002；xᵣ 从 3.14453×10⁻⁴ 降至 3.13517×10⁻⁵ fm⁻²，半宽从 1.14319×10⁻⁶ 降至 3.60053×10⁻⁸ fm⁻²，面积从 0.0100672 降至 0.00317638。16/32 阶峰面积差的最大相对值为 4.42×10⁻¹⁰。
 
-这里的正面积取完整 σ/σ′味传播子的模方，保留两个混合极点在该传播子中的相干叠加；**不含该项与其他振幅的交叉项**。完整截面及振幅移除诊断则保留、核对那些干涉，最大相对回代差为 5.57×10⁻¹⁶。因此该面积不能称为独立、无干涉的纯 σ 率。参数见[最终峰形表](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/peak_scaling.csv)。[近阈谱 PNG](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_spectrum_20261101_v2_png_review/sigma_spectrum.png)机器检查通过；DeepSeek 辅助指出阈值点与阈下点的低值曲线重合，保留这一共同对数尺度的可辨识限制。
+这里的正面积取完整 σ/σ′味传播子的模方，保留两个混合极点在该传播子中的相干叠加；**不含该项与其他振幅的交叉项**。完整截面及振幅移除诊断则保留、核对那些干涉，最大相对回代差为 5.57×10⁻¹⁶。因此该面积不能称为独立、无干涉的纯 σ 率。参数见[最终峰形表](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/peak_scaling.csv)。[近阈谱 PNG](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_spectrum/sigma_spectrum.png)机器检查通过；DeepSeek 辅助指出阈值点与阈下点的低值曲线重合，保留这一共同对数尺度的可辨识限制。
 
 **独立连续热权重暴露了外层积分误差。** 对等质量轻味初态保持当前 `v_cm=2 sqrt(x/s)`、PNJL/RS 分布、阻塞和密度归一化不变，使用总三动量 Q、s 及对质心的相对方向重写积分。雅可比给出
 
@@ -485,7 +488,7 @@ C=\frac{D_q^2}{32\pi^5 n_u n_{\bar u}}.
 
 因此最低阈值处 W/x 有限。64×16×12×12 与 96×24×20×20 两组连续权重求积差的最大相对值为 3.24×10⁻¹³；Boltzmann 角积分、阈值极限、初态交换及权重插值均有独立检查。全新变量下的 Boltzmann 权重另与原 p1/p2 变量、解析相对角 δ 积分核对（7 个 x 点，最大相对误差 5.21×10⁻¹³）；这排除了整体雅可比因子错误。具体物理核仍保持原生计算。
 
-uū→uū 的混合标量峰热加权贡献，在上述四点依次为 2.53224×10⁻⁷、8.92191×10⁻⁸、3.14893×10⁻⁸、7.95795×10⁻⁹ fm²，拟合为 xᵣ^1.500739。这支持本窗口共振贡献随 Mott 接近而消失的解释。原 p48/c36/φ36 离散热权重在同一峰带却分别给出 1.19637×10⁻⁶、4.18423×10⁻⁶、9.10440×10⁻⁷、1.20723×10⁻⁷ fm²，是连续值的 4.72、46.90、28.91、15.17 倍；峰位相对离散权重的移动造成不规则变化。对两过程共 2458 个峰内热事件直接计算核，其插值与直接值的 L1 差约为 10⁻¹⁵ fm²，因此这里发现的是外层热权重分辨率问题，不能靠继续收紧 s 插值自动解决。完整数字见[热峰面积](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/thermal_audit_v1/thermal_peak_areas.csv)与[面积及热贡献图](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/sigma_areas.png)。峰贡献在总率中仍小，局部斜率会放大其影响。
+uū→uū 的混合标量峰热加权贡献，在上述四点依次为 2.53224×10⁻⁷、8.92191×10⁻⁸、3.14893×10⁻⁸、7.95795×10⁻⁹ fm²，拟合为 xᵣ^1.500739。这支持本窗口共振贡献随 Mott 接近而消失的解释。原 p48/c36/φ36 离散热权重在同一峰带却分别给出 1.19637×10⁻⁶、4.18423×10⁻⁶、9.10440×10⁻⁷、1.20723×10⁻⁷ fm²，是连续值的 4.72、46.90、28.91、15.17 倍；峰位相对离散权重的移动造成不规则变化。对两过程共 2458 个峰内热事件直接计算核，其插值与直接值的 L1 差约为 10⁻¹⁵ fm²，因此这里发现的是外层热权重分辨率问题，不能靠继续收紧 s 插值自动解决。完整数字见[热峰面积](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/thermal_audit_v1/thermal_peak_areas.csv)与[面积及热贡献图](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_checks/sigma_areas.png)。峰贡献在总率中仍小，局部斜率会放大其影响。
 
 **中心斜率与 s 精度对照。** 定义 Sᵧ[a,b]=ln[y(b)/y(a)]/(b−a)，Jᵧ(h)=Sᵧ[ξM,ξM+h]−Sᵧ[ξM−h,ξM]。下表只使用统一 10⁻⁶ 的三端点值；近阈控制只替换 uū→uū、uū→dd̄ 中 x<0.001 fm⁻² 的积分，然后重新计算逆弛豫时间与末端系数。
 
@@ -496,7 +499,7 @@ uū→uū 的混合标量峰热加权贡献，在上述四点依次为 2.53224×
 | 0.00005 | −0.052652 | −0.014453 | −0.003903 | −0.003063 | +0.000393 |
 | 0.00002 | −0.026924 | −0.012708 | −0.013403 | −0.013091 | −0.000813 |
 
-替换上界从 0.001 扩到 0.01 fm⁻² 对这两个观测量的 J 最大影响为 2.47×10⁻⁵。最内层独立 10⁻⁷ 三点对照给出原 Jτū=−0.02687194、Jσ/T=−0.01336804；相对 10⁻⁶ 分别只改变 5.17×10⁻⁵、3.54×10⁻⁵，9 量中最大的 |ΔJ| 为 8.71×10⁻⁵。因此已见残差主要不能归因于本次 s 插值误差。全部点、过程/末端分解及精度对照见[统一精度审阅](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/summary.json)和[局部斜率差 PNG](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/sigma_slopes.png)。
+替换上界从 0.001 扩到 0.01 fm⁻² 对这两个观测量的 J 最大影响为 2.47×10⁻⁵。最内层独立 10⁻⁷ 三点对照给出原 Jτū=−0.02687194、Jσ/T=−0.01336804；相对 10⁻⁶ 分别只改变 5.17×10⁻⁵、3.54×10⁻⁵，9 量中最大的 |ΔJ| 为 8.71×10⁻⁵。因此已见残差主要不能归因于本次 s 插值误差。全部点、过程/末端分解及精度对照见[统一精度审阅](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/summary.json)和[局部斜率差 PNG](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_checks/sigma_slopes.png)。
 
 **普通 qq 过程的硬上限跳格解释了大部分电导率残差。** 固定动量/角度求积中，ξ 改变使离散事件跨过 s 的硬上限；有限和因事件纳入/排除而出现台阶。对 uu→uu、ud→ud 的四个 h 窗口逐事件直接计算，2424 条事件的符号、计数及修正总和全部回代通过，最大总和差为 1.59×10⁻²² fm²。在 h=0.00002，若仅把事件集合固定为中心的纳入集合，两个过程率的 J 分别从 +0.016204、+0.013387 降到 −0.000154、−0.000384。这里保持原物理积分上限，固定的是离散求积事件的纳入状态；它是定位积分台阶的**反事实诊断，不是新的连续积分解**。
 
@@ -504,7 +507,7 @@ uū→uū 的混合标量峰热加权贡献，在上述四点依次为 2.53224×
 
 **结论范围。** 此次检查支持：σ 的 P 波阈值分子抑制与极点增强并存，截面峰可越来越高、越来越窄，而热积分贡献约按 xᵣ^(3/2) 消失。若 xᵣ 随 ξ−ξM 线性趋零，这个局部共振项可具有连续的一阶导数及非解析的二阶导数；完整输运量还含背景、其他过程和干涉，不能自动继承该证明。加密没有提供“存在稳定有限斜率跳变”的证据，也尚未完成完整外层积分、全部过程及更小 h 的联合收敛认证。当前应表述为“σ 的弱一阶响应有阈值律和数值支持，已定位两类离散伪结构”，不能写成“σ 的 Mott 附近斜率已严格证明平滑”。
 
-两张新图及同尺寸灰度图沿用冻结远端数值，未平滑或重拟合；[PNG manifest](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/plot_manifest.json)及[机器验收](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/validation.json)保持诊断审阅资格。实测最小字形高度 2.096 mm、线宽 1.2 pt，无文字裁切/重叠及图例遮挡。DeepSeek 对两图及灰度图均给出可读候选；主代理未加载图片，结合源码与几何检查核对了其定位意见，记录于[辅助图面审阅](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/agent_review.json)。最内层精度叉号与原点接近属真实数值尺度，未作人为错位；未将外部模型意见当作作者接受或科学证明。原先失败/替代的作业、初始混合精度汇总和提前返回包均保留。没有替换正式 CSV、生产默认值或图像 current；未生成 PDF，v15 PDF 仍暂缓。
+两张新图及同尺寸灰度图沿用冻结远端数值，未平滑或重拟合；[PNG manifest](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_checks/plot_manifest.json)及[机器验收](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_checks/validation.json)保持诊断审阅资格。实测最小字形高度 2.096 mm、线宽 1.2 pt，无文字裁切/重叠及图例遮挡。DeepSeek 对两图及灰度图均给出可读候选；主代理未加载图片，结合源码与几何检查核对了其定位意见，记录于[辅助图面审阅](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_checks/agent_review.json)。最内层精度叉号与原点接近属真实数值尺度，未作人为错位；未将外部模型意见当作作者接受或科学证明。原先失败/替代的作业、初始混合精度汇总和提前返回包均保留。没有替换正式 CSV、生产默认值或图像 current；未生成 PDF，v15 PDF 仍暂缓。
 
 ### 连续公式的局部可微性：条件性解析结论（2026-11-03）
 
@@ -625,13 +628,13 @@ R_a(u)=\sum_{b,cd}n_b(u)\bar w_{ab\to cd}(u),\qquad
 
 赝标量项在足够小的两侧表现为从低于背景到高于背景的变化；标量峰项在左侧抬高斜率，接近中心时降回背景。二者在中心都趋零；局部极大值、肩部、整体斜率的正负及最终输运系数的形状仍取决于平滑背景和过程权重。这里把奇性系数与平滑项分开，不声称有限窗口原曲线等于这两项。
 
-作者指定的 [K 窗口 τs̄ 图](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other01_tau_sbar.png)可与同一图包的 [σ 窗口 τs̄ 图](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_sbar.png)及 [σ 窗口 τū 图](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261031_v1_complete_png_review/other07_tau_ubar.png)对照。下方面板均为有限区间的 Δlnτ/Δξ，并非介子质量导数或已求出的连续导数。K 的 τs̄ 割线在中心快速抬升、右侧有局部最大值后回落；σ 的 τs̄ 与 τū 在所示宽窗口内主要单调下降，中心调制较弱。相同 h=0.0002、同为 10⁻⁶ s 精度的两侧割线，K 的 Sτs̄=3.503997/3.901268，σ 的 Sτs̄=7.178026/7.157901，直接摘自冻结 `reference_slopes.csv`。
+作者指定的 [K 窗口 τs̄ 图](../../../../data/outputs/figures/relaxtime/transport/diagnostics/mott_slopes/other01_tau_sbar.png)可与同一图包的 [σ 窗口 τs̄ 图](../../../../data/outputs/figures/relaxtime/transport/diagnostics/mott_slopes/other07_tau_sbar.png)及 [σ 窗口 τū 图](../../../../data/outputs/figures/relaxtime/transport/diagnostics/mott_slopes/other07_tau_ubar.png)对照。下方面板均为有限区间的 Δlnτ/Δξ，并非介子质量导数或已求出的连续导数。K 的 τs̄ 割线在中心快速抬升、右侧有局部最大值后回落；σ 的 τs̄ 与 τū 在所示宽窗口内主要单调下降，中心调制较弱。相同 h=0.0002、同为 10⁻⁶ s 精度的两侧割线，K 的 Sτs̄=3.503997/3.901268，σ 的 Sτs̄=7.178026/7.157901，直接摘自冻结 `reference_slopes.csv`。
 
-三个输出图和三份斜率表的 hash 与原 manifest 匹配；DeepSeek 只辅助描述图形，主代理以原表核对并保留“跳变、连续平滑”等视觉措辞不构成数学判定的限制，见[图形对照记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_checks_20261103_v1_png_review/shape_comparison_v1/agent_review.json)。K 图为 T=200.0898 MeV、μB=0，σ 图为 T=125.7360 MeV、μB=900；这是不同背景的观测比较，并非只替换标量/赝标量顶点的受控实验。宇称解释标准形与局部奇性差异，不单独决定整幅图。
+三个输出图和三份斜率表的 hash 与原 manifest 匹配；DeepSeek 只辅助描述图形，主代理以原表核对并保留“跳变、连续平滑”等视觉措辞不构成数学判定的限制，见[图形对照记录](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_checks/shape_comparison_v1/agent_review.json)。K 图为 T=200.0898 MeV、μB=0，σ 图为 T=125.7360 MeV、μB=900；这是不同背景的观测比较，并非只替换标量/赝标量顶点的受控实验。宇称解释标准形与局部奇性差异，不单独决定整幅图。
 
 **目前可采用的光滑性表述与 σ 差商视图。** “P、S 的局部阈值项在列出的非退化条件下为 C¹，一般不为 C²”是本节解析结论；“全部完整输运量均已证明为 C¹\C²”尚不成立。C¹ 的传递要求背景、其余通道与积分边界满足相应条件；非 C² 的传递还要求目标输运量中的非解析系数确实非零、未发生抵消。二阶导数发散或不存在时，称“二阶不可微/二阶非解析”比“存在一个有限二阶导数跳跃”准确。单个谱峰面积的幂次拟合既不认证这些全部假设，也不认证末端系数的奇性幅度。
 
-旧 `other07_tau_ubar.png` 显示宽窗口有限对数割线。它没有在 ξM 点直接画出导数，区间平均会削弱窄结构，光滑背景也可掩盖小系数的奇性。因此图上没有明显折角不构成 C² 的证据，也不能反向把它解释为“二阶发散已经存在、只是人眼看不见”。为检查已有数据实际能分辨到哪一层，新增 [σ 中心曲率诊断 PNG](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/sigma_curvature.png)。取 L=ln(τū/τ_ref)，τ_ref 为任意固定正参考值，图下半部分直接读取远端已有 `jump_over_h`：
+旧 `other07_tau_ubar.png` 显示宽窗口有限对数割线。它没有在 ξM 点直接画出导数，区间平均会削弱窄结构，光滑背景也可掩盖小系数的奇性。因此图上没有明显折角不构成 C² 的证据，也不能反向把它解释为“二阶发散已经存在、只是人眼看不见”。为检查已有数据实际能分辨到哪一层，新增 [σ 中心曲率诊断 PNG](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_curvature/sigma_curvature.png)。取 L=ln(τū/τ_ref)，τ_ref 为任意固定正参考值，图下半部分直接读取远端已有 `jump_over_h`：
 
 \[
 C(h)=\frac{J(h)}{h}
@@ -649,7 +652,7 @@ C(h)=\frac{J(h)}{h}
 
 最内层独立 10⁻⁷ 三点给出 −1343.597 和 −632.815。连续近阈对照的前几档尚接近有限背景曲率，最后一档偏离，但四个宽度并未建立稳定的 h^(−1/2) 渐近。原外层离散热权重、尚未替换的其他积分部分及更小尺度的误差仍影响判断；不能把最内层偏离单独宣布为物理发散。当前证据支持继续使用条件性解析解释，不支持把本图改名为“已证二阶不连续图”。下节新增的是连续近阈混合标量积分的左右极限核对，不把其成功替换成这张完整 τū 图的收敛结论。
 
-该图只复用[冻结统一精度表](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/centered_slopes.csv)，没有本机重新差分、拟合、平滑或数值求解。[PNG manifest](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/plot_manifest.json)绑定输入和生成器；[机器及辅助视觉审阅](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_curvature_20261103_v1_png_review/agent_review.json)通过，实测最小字形 2.096 mm，主代理未加载图像。保持 PNG 诊断审阅资格，原图和正式数据不变。
+该图只复用[冻结统一精度表](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_refinement_20261101_v1/complete_checks_return_v1/returned/review_uniform_with_cutoff_v1/centered_slopes.csv)，没有本机重新差分、拟合、平滑或数值求解。[PNG manifest](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_curvature/plot_manifest.json)绑定输入和生成器；[机器及辅助视觉审阅](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_curvature/agent_review.json)通过，实测最小字形 2.096 mm，主代理未加载图像。保持 PNG 诊断审阅资格，原图和正式数据不变。
 
 ### σ 二阶左右极限与误差控制（2026-11-03 计算，2026-11-04 收束）
 
@@ -706,13 +709,13 @@ Q_{\log}(h)=\frac{I_S''(h)-I_S''(h_{\rm prev})}{\ln(h_{\rm prev}/h)}.
 
 **自动微分的取舍。** 自动微分／TaylorDiff 可以用于光滑背景的隐式导数及同一侧正则化后积分，减少点值相减造成的精度损失；本批背景 Jacobian 已使用 ForwardDiff。但它们不会恢复外层求积漏掉的窄峰，也不会把 det 保护、硬 cutoff 或缓存量化变成可微公式。现有散射链路还含 Float64/ComplexF64 类型限定，部分旧分布导数辅助函数提取 Dual 的 primal 值，不能未经检查就把整条链路包进 TaylorDiff。Mott 处若二阶导数本来不存在，Taylor 展开也不能给出一个物理有限二阶导数。当前不需要为已暴露的局部幂律改造全链路；若继续认证完整输运量，优先把连续积分／边界和可微契约整理好，再选择局部 AD 或高精度差分，并逐项处理其余通道。
 
-**图件。** [左右曲率](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/sigma_side_curvature.png)、[幂指数与缩放平台](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/sigma_side_scaling.png)、[左右系数及精度对照](../../../../data/outputs/figures/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/sigma_side_coefficients.png)均直接读冻结远端表。横轴明确 Mott 极限为向左，第三张下方面板保留最内层偏离，精度标记不人为错开。图及同尺寸灰度图通过[机器检查](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/validation.json)，实测最小字形 2.096 mm、线宽 1.2 pt，无裁切、文字或图例遮挡，保持 PNG 诊断审阅资格。v3 系数图审阅提出留白与灰度标记区分问题，v4 增大标记并改为空心方框／黑叉后通过候选审阅；未修改任何数据。此前 v2 回复的极限方向错误、v4 回复中一个最左端标记上下位置描述均已依冻结表拒绝，见[辅助审图与主代理复核](../../../../data/outputs/results/relaxtime/transport/phase_guided/sigma_mott_asymptotics_20261104_v4_png_review/agent_review.json)。主代理未加载图像；数据解释不由模型视觉描述代替。
+**图件。** [左右曲率](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_asymptotics/sigma_side_curvature.png)、[幂指数与缩放平台](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_asymptotics/sigma_side_scaling.png)、[左右系数及精度对照](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_asymptotics/sigma_side_coefficients.png)均直接读冻结远端表。横轴明确 Mott 极限为向左，第三张下方面板保留最内层偏离，精度标记不人为错开。图及同尺寸灰度图通过[机器检查](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_asymptotics/validation.json)，实测最小字形 2.096 mm、线宽 1.2 pt，无裁切、文字或图例遮挡，保持 PNG 诊断审阅资格。v3 系数图审阅提出留白与灰度标记区分问题，v4 增大标记并改为空心方框／黑叉后通过候选审阅；未修改任何数据。此前 v2 回复的极限方向错误、v4 回复中一个最左端标记上下位置描述均已依冻结表拒绝，见[辅助审图与主代理复核](../../../../data/outputs/results/relaxtime/transport/diagnostics/sigma_asymptotics/agent_review.json)。主代理未加载图像；数据解释不由模型视觉描述代替。
 
 ### 主网格与先导历史证据（2026-10-29—30）
 
 2026-10-30 的[主网格及已完成参考审阅](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/main_grid_snapshot_v1/returned/acceptance_review_v1/summary.json)核对全部 195 个点、13 个窗口和 3315 道率的计划对应、背景残差、分段、正值、采样误差及精确回代。该快照的主网格完整；参考计划当时完成 43/175 点，未决点和未完成的 ξ 分割区间在摘要中逐一列出。当时 198 项同端点比较的最大绝对斜率修正为 3.41856×10⁻⁴，点值最大相对修正为 9.09317×10⁻⁷，精确分解最大闭合差为 8.83440×10⁻¹¹。[618 文件返回包](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/main_grid_snapshot_v1/local_return_verification.json)已按归档及逐文件 hash 验证。
 
-同一冻结快照的[主网格 PNG 图包](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/plot_manifest.json)覆盖 13 个窗口的 τū、τs̄ 和 σ/T，共 39 张彩色及 39 张灰度图。上面板显示直接计算值，下面板读取远端割线；加严和 ξ 分割标记仅使用快照中已完成的参考点，不跨稀疏参考点构造精度割线。78 张 PNG 的机器检查及输出 hash 核对通过；全部彩色图完成总览核对，另详细查看两处 K 的 τs̄、σ 窗口的 σ/T、other08 π 对照的 τū 和 σ/T，以及一张 K 灰度代表，未见裁切或图例遮挡。[图面审阅记录](../../../../data/outputs/results/relaxtime/transport/phase_guided/mott_other_slopes_20261030_v1_main_grid_png_review/agent_review.json)区分总览、详细和灰度核对范围；其余灰度图未逐张人工审阅。图包保持诊断审阅资格，无拟合或平滑。
+同一冻结快照的主网格 PNG 图包（历史图包 `mott_other_slopes_20261030_v1_main_grid_png_review`，已退役）覆盖 13 个窗口的 τū、τs̄ 和 σ/T，共 39 张彩色及 39 张灰度图。上面板显示直接计算值，下面板读取远端割线；加严和 ξ 分割标记仅使用快照中已完成的参考点，不跨稀疏参考点构造精度割线。78 张 PNG 的机器检查及输出 hash 核对通过；全部彩色图完成总览核对，另详细查看两处 K 的 τs̄、σ 窗口的 σ/T、other08 π 对照的 τū 和 σ/T，以及一张 K 灰度代表，未见裁切或图例遮挡。图面审阅记录（历史图包 `mott_other_slopes_20261030_v1_main_grid_png_review`，已退役）区分总览、详细和灰度核对范围；其余灰度图未逐张人工审阅。图包保持诊断审阅资格，无拟合或平滑。
 
 两处 π 对照在精细网格上均保留中心下探与很窄的斜率结构；other08 的 τū、σ/T 细节已在上述图包中单独核对。这是新的 ξ 尺度上的观察，当时尚待收齐同端点 s 精度和 ξ 分割对照。完整参考的判断与继续保留的精度边界见上节；粗网格窗口已有的收敛证据不自动认证这些更窄区间。
 
@@ -751,7 +754,7 @@ Q_{\log}(h)=\frac{I_S''(h)-I_S''(h_{\rm prev})}{\ln(h_{\rm prev}/h)}.
 
 完整参考核对和打包由独立持久任务 `CodexMottOtherSlopes-20261030-final-acceptance-v1` 完成。它未启动数值 worker；在恢复终态合格、全部 worker 退出后，调用冻结验收脚本的 `--require-complete`，核对 175/175 参考点与全部计划 ξ 分割，输出 `acceptance_review_complete_v1` 和 `packages/complete_acceptance_snapshot_v1`。原恢复控制器、旧审阅目录及包保持不变。[收尾配置与预检](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/final_acceptance_setup_v1/preflight.json)核对全部 340 份数值源码及传输脚本 hash；五项收尾保护测试在 quote-remote 通过，涵盖失败队列、未退出 worker、参考身份及覆盖缺失、科学完成状态误标。收尾自动终态仍为 `ready_for_agent_review`，只证明完整参考审阅产物已生成，不代替逐窗口精度判断或介子机制归因。
 
-首个 K 先导的[精度对照 PNG](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_precision_png_review/plot_manifest.json)包含 τū、τs̄、η/s、ζ/s、σ/T 共 5 张彩色图与 5 张灰度图；全部图像合同检查通过，已目视检查全部彩色图及一张灰度代表图。上面板展示六个主网格值和四个加严参考值，下面板黑叉只比较三个相同端点区间；没有把稀疏参考间的不同跨度混入精度对照。坐标与斜率使用远端原表，没有在本机重算或拟合；图包保持诊断 PNG 资格。此前[不含参考点的先导 PNG](../../../../data/outputs/figures/relaxtime/transport/phase_guided/mott_other_slopes_20261029_v1_pilot_png_review/plot_manifest.json)保留原始字节和范围。
+首个 K 先导的精度对照 PNG（历史图包 `mott_other_slopes_20261029_v1_pilot_precision_png_review`，已退役）包含 τū、τs̄、η/s、ζ/s、σ/T 共 5 张彩色图与 5 张灰度图；全部图像合同检查通过，已目视检查全部彩色图及一张灰度代表图。上面板展示六个主网格值和四个加严参考值，下面板黑叉只比较三个相同端点区间；没有把稀疏参考间的不同跨度混入精度对照。坐标与斜率使用远端原表，没有在本机重算或拟合；图包保持诊断 PNG 资格。此前不含参考点的先导 PNG（历史图包 `mott_other_slopes_20261029_v1_pilot_png_review`，已退役）保留原始字节和范围。
 
 ## μB=900 两处凸起的论文表述范围
 
