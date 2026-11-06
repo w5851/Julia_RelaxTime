@@ -75,6 +75,9 @@ end
         @test haskey(cache.transport_workflow_defaults_cache, profile)
         @test prefer isa Bool
         @test a_cfg.p_nodes > 0
+        @test a_cfg.a_method == :quadrature
+        @test a_cfg.reduced_radial_nodes > 0
+        @test a_cfg.reduced_scale > 0.0
 
         _TW.reset_transport_workflow_config_cache!(cache)
 
@@ -95,6 +98,22 @@ end
         d2 = _TW._default_physics_fallback_dict()
         d1["transport_workflow"]["prefer_energy_aniso"] = false
         @test d2["transport_workflow"]["prefer_energy_aniso"] == true
+    end
+
+    @testset "A builder method override is explicit and mergeable" begin
+        base = _TW.DEFAULT_A_BUILDER_FALLBACK
+        reduced = _TW._merge_a_builder_config(base, (
+            a_method=:reduced,
+            reduced_p_max=Inf,
+            reduced_radial_nodes=32,
+            reduced_scale=5.0,
+        ))
+        @test reduced.a_method == :reduced
+        @test reduced.reduced_p_max == Inf
+        @test reduced.reduced_radial_nodes == 32
+        @test reduced.reduced_scale == 5.0
+        @test reduced.p_nodes == base.p_nodes
+        @test_throws ErrorException _TW._merge_a_builder_config(base, (unknown=true,))
     end
 
     @testset "workflow warning diagnostics payload shape" begin
@@ -162,6 +181,11 @@ end
         @test meta.physics_profile == profile
         @test meta.physics_config_path isa String
         @test endswith(meta.physics_config_path, string(profile, ".toml"))
+        reduced_meta = _TW._workflow_reproducibility_metadata(
+            a_builder_config=(p_nodes=16, p_max=20.0, cos_nodes=4, use_aniso=true,
+                a_method=:reduced, reduced_p_max=Inf, reduced_radial_nodes=32, reduced_scale=5.0))
+        @test reduced_meta.a_builder_config.a_method == "reduced"
+        @test reduced_meta.a_builder_config.reduced_radial_nodes == 32
     end
 
     @testset "workflow result includes reproducibility metadata" begin

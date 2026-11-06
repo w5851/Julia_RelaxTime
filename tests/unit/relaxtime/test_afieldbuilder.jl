@@ -35,7 +35,9 @@ if !isdefined(Main, :AFieldBuilder)
     Base.include(Main, _AFIELD_BUILDER_PATH)
 end
 
-using Main.AFieldBuilder: build_A_triplet, ensure_quark_params_has_A
+using Main.AFieldBuilder: build_A_triplet, ensure_quark_params_has_A, A_BUILD_METHODS
+using Main.OneLoopIntegralsCorrection: A_aniso, A_aniso_reduced
+using Main.GaussLegendre: gauleg
 
 @testset "AFieldBuilder" begin
     Main.AFieldBuilder._AUTO_A_WARNED_ANISO[] = false
@@ -83,6 +85,61 @@ using Main.AFieldBuilder: build_A_triplet, ensure_quark_params_has_A
         withenv("RELAXTIME_AUTO_A_WARN" => "0") do
             Main.AFieldBuilder._AUTO_A_WARNED_ANISO[] = false
             @test_logs ensure_quark_params_has_A(quark_params, thermo)
+        end
+    end
+
+    @testset "可选解析角约化保持完整 RS A 的数值口径" begin
+        @test A_BUILD_METHODS == (:quadrature, :reduced)
+        m, μ, T, Φ, Φbar = 0.30, 0.10, 0.15, 0.20, 0.20
+        for ξ in (-0.90, -0.22, 0.0, 0.30, 5.0)
+            p, pw = gauleg(0.0, 20.0, 32)
+            c, cw = gauleg(-1.0, 1.0, 32)
+            direct = A_aniso(m, μ, T, Φ, Φbar, ξ, p, pw, c, cw)
+            reduced = A_aniso_reduced(m, μ, T, Φ, Φbar, ξ;
+                p_max=20.0, radial_nodes=64)
+            @test isfinite(reduced)
+            @test isapprox(reduced, direct; rtol=5e-6, atol=2e-8)
+        end
+
+        # Match the semi-infinite grid used by transport profiles.
+        x, xw = gauleg(0.0, 1.0, 64)
+        p_inf = 5.0 .* x ./ (1.0 .- x)
+        pw_inf = 5.0 .* xw ./ (1.0 .- x).^2
+        c_inf, cw_inf = gauleg(-1.0, 1.0, 32)
+        direct_inf = A_aniso(m, μ, T, Φ, Φbar, 0.30, p_inf, pw_inf, c_inf, cw_inf)
+        reduced_inf = A_aniso_reduced(m, μ, T, Φ, Φbar, 0.30;
+            p_max=Inf, radial_nodes=64, semi_infinite_scale=5.0)
+        @test isapprox(reduced_inf, direct_inf; rtol=2e-10, atol=2e-11)
+
+        for ξ in (-1e-12, 1e-12)
+            value = A_aniso_reduced(m, μ, T, Φ, Φbar, ξ;
+                p_max=20.0, radial_nodes=64)
+            @test isfinite(value)
+        end
+
+        # The production A builder remains on the two-dimensional default path.
+        thermo = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.30)
+        default = build_A_triplet(quark_params, thermo; p_nodes=16, p_max=20.0, cos_nodes=4)
+        explicit = build_A_triplet(quark_params, thermo; p_nodes=16, p_max=20.0,
+            cos_nodes=4, a_method=:quadrature)
+        @test default == explicit
+
+        reduced_triplet = build_A_triplet(quark_params, thermo;
+            p_nodes=16, p_max=20.0, a_method=:reduced, reduced_radial_nodes=32)
+        @test all(isfinite, (reduced_triplet.u, reduced_triplet.d, reduced_triplet.s))
+        @test_throws ArgumentError A_aniso_reduced(m, μ, T, Φ, Φbar, -1.0; p_max=20.0)
+        @test_throws ArgumentError A_aniso_reduced(m, μ, 0.0, Φ, Φbar, 0.3; p_max=20.0)
+        @test_throws ArgumentError A_aniso_reduced(m, μ, T, Φ, Φbar, NaN; p_max=20.0)
+        @test_throws ArgumentError A_aniso_reduced(m, μ, T, Φ, Φbar, Inf; p_max=20.0)
+        @test_throws ArgumentError A_aniso_reduced(m, μ, T, Φ, Φbar, 0.3; p_max=0.0)
+    end
+
+    @testset "半无穷变换在 ξ→-1 附近保持有限" begin
+        m, μ, T, Φ, Φbar = 0.30, 0.10, 0.15, 0.20, 0.20
+        for ξ in (-1.0 + 1e-12, -1.0 + 1e-9, -0.999, -0.9, 0.0, 0.5)
+            value = A_aniso_reduced(m, μ, T, Φ, Φbar, ξ;
+                p_max=Inf, radial_nodes=48, semi_infinite_scale=5.0)
+            @test isfinite(value)
         end
     end
 end

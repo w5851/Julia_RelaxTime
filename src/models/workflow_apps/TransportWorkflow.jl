@@ -152,6 +152,10 @@ const A_BUILDER_KEYS = (
     :p_max,
     :cos_nodes,
     :use_aniso,
+    :a_method,
+    :reduced_p_max,
+    :reduced_radial_nodes,
+    :reduced_scale,
 )
 
 const DEFAULT_A_BUILDER_FALLBACK = (
@@ -159,6 +163,10 @@ const DEFAULT_A_BUILDER_FALLBACK = (
     p_max=20.0,
     cos_nodes=4,
     use_aniso=true,
+    a_method="quadrature",
+    reduced_p_max=nothing,
+    reduced_radial_nodes=16,
+    reduced_scale=5.0,
 )
 
 const DEFAULT_PHYSICS_FALLBACK_NT = (
@@ -239,6 +247,10 @@ end
             p_max=Float64(get(a_builder, "p_max", 20.0)),
             cos_nodes=Int(get(a_builder, "cos_nodes", 4)),
             use_aniso=Bool(get(a_builder, "use_aniso", true)),
+            a_method=Symbol(String(get(a_builder, "a_method", "quadrature"))),
+            reduced_p_max=(get(a_builder, "reduced_p_max", nothing) === nothing ? nothing : Float64(get(a_builder, "reduced_p_max", nothing))),
+            reduced_radial_nodes=Int(get(a_builder, "reduced_radial_nodes", get(a_builder, "p_nodes", 16))),
+            reduced_scale=Float64(get(a_builder, "reduced_scale", 5.0)),
         ),
     )
 
@@ -280,6 +292,10 @@ end
         p_max=get(override, :p_max, base.p_max),
         cos_nodes=get(override, :cos_nodes, base.cos_nodes),
         use_aniso=get(override, :use_aniso, base.use_aniso),
+        a_method=Symbol(get(override, :a_method, base.a_method)),
+        reduced_p_max=get(override, :reduced_p_max, base.reduced_p_max),
+        reduced_radial_nodes=get(override, :reduced_radial_nodes, base.reduced_radial_nodes),
+        reduced_scale=get(override, :reduced_scale, base.reduced_scale),
     )
 end
 
@@ -310,12 +326,18 @@ end
     )
 end
 
-@inline function _workflow_reproducibility_metadata()
+@inline function _workflow_reproducibility_metadata(; a_builder_config=nothing)
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
     physics_config_path = abspath(normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics", string(physics_profile, ".toml"))))
+    a_builder_metadata = if a_builder_config === nothing
+        nothing
+    else
+        merge(a_builder_config, (a_method=String(a_builder_config.a_method),))
+    end
     return (
         physics_profile=physics_profile,
         physics_config_path=physics_config_path,
+        a_builder_config=a_builder_metadata,
     )
 end
 
@@ -487,6 +509,10 @@ end
         p_max=cfg.p_max,
         cos_nodes=cfg.cos_nodes,
         use_aniso=cfg.use_aniso,
+        a_method=cfg.a_method,
+        reduced_p_max=cfg.reduced_p_max,
+        reduced_radial_nodes=cfg.reduced_radial_nodes,
+        reduced_scale=cfg.reduced_scale,
     )
 end
 
@@ -515,7 +541,7 @@ end
 - `p_num`, `t_num`: 热积分节点数（传给能隙求解/密度计算）
 - `solver_kwargs`: 透传到 `solve`（例如 `iterations` 等）
 - `tau_kwargs`: 透传到 `RelaxationTime.relaxation_times`（例如 `p_nodes/angle_nodes/phi_nodes/n_sigma_points/cs_caches/existing_rates` 等）
-- `a_builder_config`: A 构造配置（`p_nodes/p_max/cos_nodes/use_aniso`），用于 `compute_tau=true` 时构建 `quark_params.A`。
+- `a_builder_config`: A 构造配置（`p_nodes/p_max/cos_nodes/use_aniso/a_method/reduced_p_max/reduced_radial_nodes/reduced_scale`），用于 `compute_tau=true` 时构建 `quark_params.A`。默认 `a_method=:quadrature`；只有显式设为 `:reduced` 才启用解析角约化。
 - `transport_config`: 输运系数积分配置（推荐），例如 `TransportIntegrationConfig(p_nodes=64, p_max=15.0, cos_nodes=32)`。
     - 若同时在 `transport_kwargs` 里提供了 `p_nodes/p_max/...`，会被自动提取并用于构造 config（便于平滑迁移）。
 - `c_p`, `rho_mass`: 可选热背景量；若提供则 `transport.prandtl_number` 可直接给出有限值。
@@ -809,7 +835,7 @@ function solve_transport_from_equilibrium(
         rates=rates,
         bulk_coeffs=bulk_coeffs,
         transport=tr,
-        reproducibility=_workflow_reproducibility_metadata(),
+        reproducibility=_workflow_reproducibility_metadata(a_builder_config=_effective_a_builder_config(cache, a_builder_config)),
     )
 end
 

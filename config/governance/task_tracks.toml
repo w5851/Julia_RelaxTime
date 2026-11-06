@@ -1116,7 +1116,7 @@ status = "promoted"
 current_task = "thermal-sampling-production-integration"
 blocked_by = []
 unlocks = []
-next_action = "输运重算及v15正式交付已完成，PR331/332已合并；论文按四图agent_review接入。旧worktree与对应本地/远程分支已回收，旧图/表及专用历史消费者已退役，当前数值资格、Mott依据和最小渲染依赖保留。nightly测试修复、旧基线收敛归因及整体验证结果见PR333和production_plan；研究边界和A降维独立保留。"
+next_action = "输运重算及v15正式交付已完成，PR331/332已合并；论文按四图agent_review接入。旧worktree与对应本地/远程分支已回收，旧图/表及专用历史消费者已退役，当前数值资格、Mott依据和最小渲染依赖保留。nightly测试修复、旧基线收敛归因及整体验证结果见PR333和production_plan；A降维可选入口已完成并归档，默认二维A保持，完整输运收益测量与默认晋升另行授权。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -1130,11 +1130,11 @@ updated_at = "2026-11-06"
 id = "transport-full-rs-a-reduction"
 track_id = "transport-threshold-upgrade"
 classification = "independent"
-status = "triaged"
+status = "archived"
 parent = "item:thermal-sampling-production-integration"
 task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/full_rs_a_reduction_20261025.md"
-reason = "作者要求将完整 RS 单线 A 的解析降维优化列为待办；目标是等价加速现有极化 A，保留普通在壳 E_kin 分母、真空 Λ 截止与半无穷热积分。"
-next_action = "quote-remote 原型已通过 120 个角权重组合和 72 组积分对照；A 内核中位加速 8.397 倍，但原单次 A 仅 25.14–33.02 微秒，未测完整输运加速。暂不作为新口径验收前置；生产维持二维 A。后续另做 p/q 网格与有限热域接口、算法身份及实际入口回归，本项尚未生产接入。"
+reason = "作者要求将完整 RS 单线 A 的解析降维优化列为待办；本轮已完成可选一维入口、有限/半无穷截止处理、边界稳定性验证和单线性能验证，保留普通在壳 E_kin 分母、真空 Λ 截止与生产默认二维 A。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -1148,7 +1148,13 @@ evidence = [
   "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/package_manifest.json",
   "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/returned/results/summary.json",
   "note:author_20261025_requested_priority_assessment_quote_remote_only_numerical_work",
-  "note:prototype_verified_production_integration_deferred_not_a_prerequisite",
+  "file:docs/api/integrals/OneLoopIntegralsAniso.md",
+  "file:src/relaxtime/AFieldBuilder.jl",
+  "file:src/models/workflow_apps/TransportWorkflow.jl",
+  "file:tests/unit/relaxtime/test_afieldbuilder.jl",
+  "file:tests/unit/models/test_transport_workflow.jl",
+  "note:20261106_optional_reduced_A_entrypoint_116_unit_tests_passed_and_final_benchmark_max_thermal_rtol_3.9968028886505635e-15_median_kernel_speedup_8.892269871389416",
+  "note:production_default_remains_two_dimensional_A_aniso_and_full_transport_speedup_not_claimed",
 ]
 
 [[items]]

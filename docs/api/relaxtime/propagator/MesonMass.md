@@ -7,7 +7,7 @@
 
 ## 主要函数
 
-### `ensure_quark_params_has_A(quark_params, thermo_params; p_nodes=16, p_max=20.0, cos_nodes=..., use_aniso=true)`
+### `ensure_quark_params_has_A(quark_params, thermo_params; p_nodes=16, p_max=20.0, cos_nodes=..., use_aniso=true, a_method=:quadrature, reduced_p_max=nothing, reduced_radial_nodes=p_nodes, reduced_scale=5.0)`
 为 `quark_params` 补齐 `A` 字段（若缺失）。
 
 **参数**
@@ -16,6 +16,8 @@
 - `p_nodes::Int`：A 积分节点数（默认 16）
 - `p_max::Float64`：A 积分上限（默认 20.0）
 - `use_aniso::Bool`：若 `thermo_params` 含 `ξ` 且 `use_aniso=true`，则使用各向异性 A 积分
+- `a_method::Symbol`：A 的算法；默认 `:quadrature` 使用二维 `A_aniso`，显式设为 `:reduced` 才使用解析角约化
+- `reduced_p_max`、`reduced_radial_nodes`、`reduced_scale`：`a_method=:reduced` 时的有限截止、径向节点数和半无穷映射尺度
 
 **返回**
 - 新的 `quark_params`（包含 `A` 字段）

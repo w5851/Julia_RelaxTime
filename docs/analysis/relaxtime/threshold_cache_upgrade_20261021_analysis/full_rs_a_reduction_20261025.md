@@ -1,8 +1,8 @@
 # 完整 RS 单线 A 的解析角积分降维
 
-任务：`transport-full-rs-a-reduction`。独立原型评估已通过，生产接入仍为待办。
-作者于 2026-10-25 要求评估是否在完整 A^xi 口径的收敛验收前处理本项；
-数值验证与计时仅在 `quote-remote`（W）运行。本机只准备源码、公式和证据文件。
+任务：`transport-full-rs-a-reduction`。本轮已完成可选内部算法入口、数值稳定性验证和单线内核计时；生产默认仍为二维 `A_aniso`。
+作者于 2026-10-25 要求评估完整 A^xi 口径的解析降维；本轮只优化算法并验证，不重做完整输运计算，
+也不把降维入口晋升为正式数据口径。
 
 ## 公式与适用域
 
@@ -72,18 +72,20 @@ A 不服从内部数密度所用的简单 \(1/\sqrt{1+\xi}\) 缩放。
 ## 验证范围与来源
 
 [独立原型与计时脚本](../../../../benchmark/relaxtime/bench_full_rs_a_reduction.jl)
-检查 120 个角权重极限组合、4 个非法 xi 输入、27 组半无穷积分及 45 组有限球形截止积分。
+检查 120 个角权重极限组合、4 个非法 xi 输入、27 组半无穷积分及 45 组有限球形截止积分；
+当前 benchmark 的等价性循环同时调用 `A_aniso_reduced` API 与独立参考表达式。
 角权重用 256-bit 另一等价表达式复核；二维/一维积分各自升阶，比较热项以避免真空项抵消掩盖误差。
 积分比较阈值固定为 rtol=1e-9、atol=1e-11；它不替代完整输运的 1% 验收。
 8 组内核计时同时记录现有 A 和一维候选相对高阶参考的误差。
 
-源码来自当前未提交工作树，以逐文件 SHA256 和源码 ZIP 绑定；HEAD 只记录工作树基底。
+源码来自当前工作树；实现入口为 `OneLoopIntegralsCorrection.A_aniso_reduced`，
+`AFieldBuilder.build_A_triplet(...; a_method=:reduced)` 与 workflow 的 `a_builder_config` 只在显式选择时启用。
 [v1 来源清单](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v1/package_manifest.json)
 对应脚本头文档字符串的加载失败，尚未进行数值评估。
 [v2 来源清单](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/package_manifest.json)
 仅修正该加载问题，公式与容差不变。
 
-## 远端结果与执行排序
+## 原型证据
 
 W 上 Julia 1.12.5、单线程的 v2 运行于 2026-10-25 完成，退出码为 0。
 [结果摘要](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/returned/results/summary.json)
@@ -102,8 +104,19 @@ W 上 Julia 1.12.5、单线程的 v2 运行于 2026-10-25 完成，退出码为 
 
 当前 `TransportSamplingProfiles.point_state` 在通道循环之前构造并传递 A 与有效耦合，
 随后 17 道缓存消费该点状态。现有证据不支持把 A 视为每次截面求值都要重算的热点。
-因此本轮先保留原型成果，**不把降维的生产接入设为完整 A^xi 验收的前置条件**，
-主任务继续使用现有二维 A 在 quote-remote 完成新口径验证。
 
-后续接入仍需明确 p/q 网格与有限热域的接口、记录算法身份，并完成实际入口的受影响回归。
-原型通过不等于这些工作完成；本项继续作为独立待办，不标为生产已接受。
+## 本轮实现与验证（2026-11-06）
+
+- `A_aniso_reduced` 已进入 `OneLoopIntegralsCorrection`，支持半无穷热域和原球形有限 `p_max`；
+  负 `ξ` 采用 `asinh` 稳定形式，输入显式拒绝 `ξ≤-1`、非有限参数、非正温度和非法截止。
+- `AFieldBuilder` 增加 `a_method=:quadrature|:reduced`、`reduced_p_max`、`reduced_radial_nodes` 和
+  `reduced_scale`。默认配置和 `TransportWorkflow` 的默认值保持 `:quadrature`，并将实际选择写入
+  workflow reproducibility metadata。
+- 聚焦单元测试：`tests/unit/runtests.jl` 选择
+  `models/test_transport_workflow.jl` 与 `relaxtime/test_afieldbuilder.jl`，`116/116` 通过（其中 workflow 子集 `78/78`）。
+- benchmark：Julia 1.12.5、单线程；120 个角权重边界组合、72 组积分对照和 8 个计时案例全部通过，
+  最大半无穷热项相对差 `3.9968028886505635e-15`，最终单线 A 内核中位加速 `8.892269871389416x`。
+  计时只覆盖固定背景下的 A 内核，不代表完整输运流程加速；本轮没有改动正式输运结果。
+
+本项的工程目标至此完成：算法已可选、默认口径未变、数值边界和性能证据已覆盖。完整输运入口的收益测量、
+更广泛扫描和是否把 `:reduced` 晋升为默认，仍应作为后续独立任务处理，不阻塞本项归档。

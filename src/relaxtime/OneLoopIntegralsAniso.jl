@@ -4,6 +4,7 @@
 module OneLoopIntegralsCorrection
 
 export B0_correction, A_correction, A_aniso,
+    A_aniso_reduced,
     IntegrationDiagnostics
 
 import ..GaussLegendre  # needed by IntervalQuadratureStrategies
@@ -11,6 +12,7 @@ include("../integration/IntervalQuadratureStrategies.jl")
 using ForwardDiff
 using ..GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using Main.PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
+using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using ..OneLoopIntegrals: internal_momentum, EPS_K,
     energy_cutoff, singularity_k_positive, const_integral_term_A
 
@@ -469,5 +471,138 @@ function A_aniso(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float6
     # 分布函数项：angle integration给出因子2（cosθ权重和），φ积分贡献2π→归一化为2，总共4
     # 常数项：无角度依赖，需要完整4π因子
     return 2.0 * integral - 4.0 * const_integral_term_A(m)
+end
+
+@inline function _a_reduced_ratio_atan(z::Float64)
+    return z == 0.0 ? 1.0 : atan(z) / z
+end
+
+@inline function _a_reduced_ratio_asinh(z::Float64)
+    return z == 0.0 ? 1.0 : asinh(z) / z
+end
+
+"""
+    _a_reduced_radial_weight(q, m, ξ, u=1)
+
+Analytic integral of the transformed angular measure over `[-u, u]`.
+The ordinary on-shell denominator is retained.  The negative-`ξ` branch is
+written with `asinh` so that the argument does not round to one as `ξ → -1`.
+"""
+@inline function _a_reduced_radial_weight(q::Float64, m::Float64, ξ::Float64, u::Float64=1.0)
+    q >= 0.0 && m >= 0.0 || throw(ArgumentError("q and m must be nonnegative"))
+    0.0 <= u <= 1.0 || throw(ArgumentError("u must lie in [0, 1]"))
+    (q == 0.0 || u == 0.0) && return 0.0
+
+    if ξ == 0.0
+        return 2.0 * q^2 * u / hypot(q, m)
+    elseif ξ > 0.0
+        a = 1.0 + ξ * u^2
+        d = hypot(q, m * sqrt(a))
+        z = q * sqrt(ξ) * u / d
+        return 2.0 * q^2 * u / d * _a_reduced_ratio_atan(z)
+    else
+        a = 1.0 + ξ * u^2
+        # This is algebraically equivalent to the atanh form with
+        # q*sqrt(-ξ)*u/sqrt(q^2 + m^2*a), but remains stable near ξ=-1.
+        d = hypot(q, m) * sqrt(a)
+        z = q * sqrt(-ξ) * u / d
+        return 2.0 * q^2 * u / d * _a_reduced_ratio_asinh(z)
+    end
+end
+
+@inline function _a_reduced_thermal_sum(q::Float64, m::Float64, μ::Float64,
+    T::Float64, Φ::Float64, Φbar::Float64)
+    E = hypot(q, m)
+    return quark_distribution(E, μ, T, Φ, Φbar) +
+        antiquark_distribution(E, μ, T, Φ, Φbar)
+end
+
+function _validate_a_reduced_inputs(m::Float64, μ::Float64, T::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64, p_max::Float64,
+    radial_nodes::Int, semi_infinite_scale::Float64)
+    all(isfinite, (m, μ, T, Φ, Φbar, ξ)) ||
+        throw(ArgumentError("A_aniso_reduced inputs must be finite"))
+    m >= 0.0 || throw(ArgumentError("m must be nonnegative"))
+    T > 0.0 || throw(ArgumentError("T must be positive"))
+    ξ > -1.0 || throw(ArgumentError("ξ must be finite and greater than -1"))
+    (isfinite(p_max) && p_max > 0.0) || p_max == Inf ||
+        throw(ArgumentError("p_max must be positive and finite, or Inf"))
+    radial_nodes > 0 || throw(ArgumentError("radial_nodes must be positive"))
+    isfinite(semi_infinite_scale) && semi_infinite_scale > 0.0 ||
+        throw(ArgumentError("semi_infinite_scale must be positive and finite"))
+    return nothing
+end
+
+function _a_reduced_thermal_finite(m::Float64, μ::Float64, T::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64, p_max::Float64, n::Int)
+    edge = sqrt(1.0 + ξ)
+    q_break = p_max * min(1.0, edge)
+    q_max = p_max * max(1.0, edge)
+    q, w = gauleg(0.0, q_break, n)
+    total = 0.0
+    @inbounds @simd for i in eachindex(q, w)
+        total += w[i] * _a_reduced_radial_weight(q[i], m, ξ) *
+            _a_reduced_thermal_sum(q[i], m, μ, T, Φ, Φbar)
+    end
+    q_max == q_break && return 2.0 * total
+
+    # The finite spherical p cutoff produces a square-root angular endpoint.
+    # A squared variable removes that endpoint from the radial quadrature.
+    t, wt = gauleg(0.0, 1.0, n)
+    width = q_max - q_break
+    @inbounds for i in eachindex(t, wt)
+        qi = ξ > 0.0 ? q_break + width * t[i]^2 : q_max - width * t[i]^2
+        u2 = ξ > 0.0 ? ((qi / p_max)^2 - 1.0) / ξ :
+            (1.0 - (qi / p_max)^2) / (-ξ)
+        -64eps() <= u2 <= 1.0 + 64eps() ||
+            throw(ArgumentError("transformed finite-cutoff angular domain is invalid"))
+        u = sqrt(clamp(u2, 0.0, 1.0))
+        angular_weight = ξ > 0.0 ?
+            _a_reduced_radial_weight(qi, m, ξ) - _a_reduced_radial_weight(qi, m, ξ, u) :
+            _a_reduced_radial_weight(qi, m, ξ, u)
+        total += wt[i] * (2.0 * width * t[i]) * angular_weight *
+            _a_reduced_thermal_sum(qi, m, μ, T, Φ, Φbar)
+    end
+    return 2.0 * total
+end
+
+function _a_reduced_thermal_semi_infinite(m::Float64, μ::Float64, T::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64, n::Int, scale::Float64)
+    x, w = gauleg(0.0, 1.0, n)
+    total = 0.0
+    @inbounds @simd for i in eachindex(x, w)
+        denominator = 1.0 - x[i]
+        q = scale * x[i] / denominator
+        q_weight = scale * w[i] / denominator^2
+        total += q_weight * _a_reduced_radial_weight(q, m, ξ) *
+            _a_reduced_thermal_sum(q, m, μ, T, Φ, Φbar)
+    end
+    return 2.0 * total
+end
+
+"""
+    A_aniso_reduced(m, μ, T, Φ, Φbar, ξ; p_max=20.0,
+                    radial_nodes=16, semi_infinite_scale=5.0)
+
+Optional one-dimensional angular-reduction implementation of the full RS
+single-line integral.  It keeps the ordinary on-shell denominator and the
+existing vacuum cutoff.  A finite `p_max` is interpreted as the original
+spherical cutoff; `p_max=Inf` selects the semi-infinite thermal mapping.
+
+This is an opt-in internal algorithm.  The production default remains
+`A_aniso`, which uses the existing two-dimensional quadrature.
+"""
+function A_aniso_reduced(m::Float64, μ::Float64, T::Float64, Φ::Float64,
+    Φbar::Float64, ξ::Float64; p_max::Float64=20.0, radial_nodes::Int=16,
+    semi_infinite_scale::Float64=5.0)
+    _validate_a_reduced_inputs(m, μ, T, Φ, Φbar, ξ, p_max,
+        radial_nodes, semi_infinite_scale)
+    thermal = isinf(p_max) ?
+        _a_reduced_thermal_semi_infinite(m, μ, T, Φ, Φbar, ξ,
+            radial_nodes, semi_infinite_scale) :
+        _a_reduced_thermal_finite(m, μ, T, Φ, Φbar, ξ, p_max, radial_nodes)
+    result = thermal - 4.0 * const_integral_term_A(m)
+    isfinite(result) || throw(ArgumentError("A_aniso_reduced result is not finite"))
+    return result
 end
 end # module OneLoopIntegralsCorrection
