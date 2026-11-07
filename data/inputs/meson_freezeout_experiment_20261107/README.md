@@ -30,6 +30,8 @@ Phys. Rev. C **113**, 054907 (2026)，[论文](https://arxiv.org/abs/2512.06415)
 既有十四点/九点评分继续使用各自冻结观测集合。这两个字段不是实验质量等级。
 绘图入口 `scripts/analysis/relaxtime/plot_freezeout_comparison.py` 的 `--experiment` 可指向本 CSV；
 采用时输出到新的图层目录。当前已准备输入，尚未替换论文图像。
+论文接入目标为 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi`；结果用途和章节重组范围见
+[介子研究入口](../../../docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md#论文接入位置与范围)。
 
 ## 峰附近与系统大小的新资料
 

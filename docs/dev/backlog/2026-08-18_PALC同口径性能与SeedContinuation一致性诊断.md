@@ -1,6 +1,6 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / triaged`；这是 PALC 隔离分析 backend 的后续研究项，不属于当前 Issue #130 phase reference production review，也不授权启动新的数值生产任务。
+状态：`research / deferred`。作者于 2026-11-07 将本项置于当前介子数密度图件与论文接入、以及 Arena Issue #313 核对之后再评估；尚未安排 pilot。
 
 ## 1. 背景与目标
 

@@ -26,6 +26,10 @@
 - [介子热力学 regression 与 validation 治理方案](2026-05-09_介子热力学regression与validation治理方案.md)
 - [PNJL 全温区参考生产 PR3 规划](2026-07-17_PNJL全温区相图热积分与参考生产.md)
 - [带电 K/π 介子数密度物理约束与验证中期路线](2026-07-25_带电KPi介子数密度物理约束与验证中期路线.md)
+- [PALC 同口径性能与延拓一致性诊断](2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)
+
+作者于 2026-11-07 确定：先完成当前介子图件与论文接入，再核对
+[Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)，随后评估 PALC 与全温区 PR3。
 
 ## 使用规则
 

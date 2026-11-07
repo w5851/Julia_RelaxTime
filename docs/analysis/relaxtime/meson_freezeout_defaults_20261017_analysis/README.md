@@ -40,6 +40,17 @@ NA49、STAR 发布点中的最大值分别在 7.62、7.7 GeV。原始参数比�
 后续实验参考优先核对 Au+Au、Pb+Pb 等重碰撞体系的同电荷、中快度 K+/pi+；
 最新数据的筛选与采用建议见[实验输入入口](../../../../data/inputs/meson_freezeout_experiment_20261107/README.md)。
 
+### 论文接入位置与范围
+
+作者于 2026-11-07 明确：本研究接入 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi` 介子期刊稿。
+该稿当前仍以两张 Mott 图、表格和复极点解释为主；下一步先重组章节，再接入冻结线数密度结果与实验比较。
+当前冻结线计算使用 `xi=0`、quark-only BQS 背景及 q0 外推，写作时需与旧稿的各向异性 Mott 扫描分别说明。
+谱与阈值变化、密度积分、冻结路径及实验比值之间的联系按已有证据建立；当前密度结果不提供 ratio 的各向异性扫描。
+
+M4 的二维等高图已获作者接受，用于观察 ratio 趋势并指导已完成的参数调优，见[归档记录](../../../dev/archived/2026-09-30_charged-gbu-phase-contours.md)。
+本批图件与介子论文接入完成后，再核对 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)；
+PALC 性能诊断及全温区 PR3 置于该 issue 之后再评估。
+
 ## 2026-10-22 阶段审阅结论
 
 | 固定九点 fine 指标 | Andronic 2018 默认 | 多项式最优 `hornmap_001` | Andronic 最优 |

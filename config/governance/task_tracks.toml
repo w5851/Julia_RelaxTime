@@ -9,7 +9,7 @@ status = "ready"
 current_task = "meson-freezeout-heavy-ion-paper-comparison"
 blocked_by = []
 unlocks = []
-next_action = "默认比较和两族参数带已获作者接受并归档。新版重核实验输入已加入STAR 54.4 GeV正式点；接下来以既有原文参数曲线更新论文对照图与分析，参数带作灵敏度材料，强调峰位并保留幅度差异。"
+next_action = "使用新版实验输入更新K/pi图件，先重组并接入D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi介子稿；原文参数作定性主比较，参数带作灵敏度材料。本任务完成后核对Arena #313，再评估PALC与全温区PR3。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -17,6 +17,7 @@ current_branch = "main"
 current_sha = "9c727d106abb9e931ba22dd26c206dc38d2efdff"
 run_ids = []
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
@@ -86,10 +87,11 @@ status = "ready"
 parent = "track:meson-freezeout-experiment"
 task_file = "data/inputs/meson_freezeout_experiment_20261107/README.md"
 reason = "作者接受默认冻结线和两族参数带，要求采用文献原始参数作偏定性论文分析，并关注最新重核碰撞数据及峰位。"
-next_action = "重核资料筛选及STAR 54.4 GeV正式数据准备已完成；以既有模型曲线和新版实验CSV装配论文对照图与文字。54.4 GeV点用于显示，维持旧评分集合；NA61 7.6 GeV全相空间预备点只作独立趋势参考。"
+next_action = "目标为D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi：先核对旧Mott稿与xi=0冻结线结果的章节关系，更新项目K/pi图并接入介子稿。STAR 54.4 GeV用于显示、旧评分集合保留；完成后转Arena #313。"
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
   "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
@@ -214,18 +216,19 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "formula-route-closure"
 title = "Formula route closure SOP and charged-RPA/BU pilot"
-status = "review"
+status = "archived"
 current_task = "charged-gbu-phase-contours"
 blocked_by = []
 unlocks = []
-next_action = "公式路线SOP及严格charged RPA/BU实现已完成并归档（PR290/310/311）；本主线仅剩M4等高图的作者审阅，见charged-gbu-phase-contours。Arena创建的RS一致性issue #313是独立议题。"
+next_action = ""
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
 current_branch = "main"
 current_sha = "7e5c7e896d4a4e66b73535ae11250ddfc74f1052"
 run_ids = []
 evidence = [
+  "review:author_20261107_accepted_m4_ratio_trend_visualization_and_completed_freezeout_guidance",
   "file:docs/guides/sop/formula_route_closure.md",
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
   "pr:290",
@@ -381,11 +384,11 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "triaged"
+status = "deferred"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "仅在明确授权后设计同口径 GitHub Actions pilot；在此之前保持 PALC 为 isolated diagnostic backend。"
+next_action = "按作者2026-11-07顺序，在介子图件与论文接入及Arena #313核对完成后，再评估PALC同口径pilot范围和收益。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -393,10 +396,11 @@ current_branch = ""
 current_sha = ""
 run_ids = []
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
-updated_at = "2026-08-18"
+updated_at = "2026-11-07"
 
 [[tracks]]
 id = "analysis-docs-cleanup"
@@ -1056,14 +1060,15 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "triaged"
+status = "deferred"
 parent = "track:palc-performance-research"
 task_file = ""
 reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 研究不应阻塞当前 Issue #130 production review。"
-next_action = "保留 backlog 任务；仅在单独授权后创建 active pilot，固定 workload、cold/warm、solver telemetry 和停止条件。"
+next_action = "在介子稿任务和Arena #313之后再评估；如启动则固定workload、cold/warm、solver telemetry与停止条件。"
 blocked_by = []
 backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
@@ -1072,19 +1077,20 @@ evidence = [
 id = "charged-gbu-phase-contours"
 track_id = "formula-route-closure"
 classification = "independent"
-status = "review"
+status = "archived"
 parent = "track:formula-route-closure"
-task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
+task_file = "docs/dev/archived/2026-09-30_charged-gbu-phase-contours.md"
 reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
-next_action = "PR #325 已于2026-10-08合并，十项检查成功；代码集成与组会图交付已收口。M4研究产物作者审阅仍待定，不自动晋升。联合T–muB路径及参数研究已由冻结线主线承接并随PR #327集成；保留muB灵敏度的q0/有限q对照、失败和来源，背景稳定性与全q尾部复核另行指定。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-09-30_charged-gbu-phase-contours.md",
+  "review:author_20261107_accepted_m4_ratio_trend_visualization_and_completed_freezeout_guidance",
+  "file:docs/dev/archived/2026-09-30_charged-gbu-phase-contours.md",
   "pr:325",
   "sha:8519c561b4a9af5df2bbe000ee2a6ec30c409214",
   "sha:7e5c7e896d4a4e66b73535ae11250ddfc74f1052",
-  "note:pr325_merged_20261008_all_10_recorded_checks_successful_m4_author_review_pending",
+  "note:pr325_merged_20261008_all_10_recorded_checks_successful_m4_author_accepted_20261107",
   "note:retained_pr325_relocated_to_D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325_1875_records_and_bundle_verified",
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
