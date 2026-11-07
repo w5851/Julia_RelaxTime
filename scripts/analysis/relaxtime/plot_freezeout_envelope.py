@@ -11,7 +11,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from scripts.analysis.relaxtime.plot_freezeout_comparison import load_experiment
+from scripts.analysis.relaxtime.plot_freezeout_comparison import load_experiment, experiment_provenance
 from scripts.plotting.plot_manifest import (build_manifest, generator_record, input_record,
     output_record, runtime_record, sha256_file, write_manifest)
 from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
@@ -29,10 +29,40 @@ def number(row, key):
     return float(row[key]) if row[key] else math.nan
 
 
+def retained_data_path(path):
+    """Locate a retained data file after its originating worktree is retired."""
+    original = Path(path)
+    if original.is_file():
+        return original
+    parts = str(path).replace("\\", "/").split("/")
+    if "data" not in parts:
+        raise FileNotFoundError(f"no retained data path: {path}")
+    relative = Path(*parts[parts.index("data"):])
+    current = (ROOT / relative).resolve()
+    if ".." in relative.parts or not current.is_relative_to(ROOT / "data"):
+        raise ValueError(f"invalid retained data path: {path}")
+    return current
+
+
+def display_experiments(summary, override=None):
+    """Select a display table while keeping the frozen scoring input intact."""
+    scoring_path = retained_data_path(summary["experiment"]["path"])
+    if sha256_file(scoring_path) != summary["experiment"]["sha256"]:
+        raise ValueError("experimental scoring input changed")
+    display_path = Path(override).resolve() if override is not None else scoring_path
+    rows = [r for r in load_experiment(display_path)
+        if 4.87 <= r["energy"] <= 200 and r["method"] != "digitized"
+        and r["system"] in {"Au+Au", "Pb+Pb"}
+        and r["experiment"] != "ALICE"]
+    return display_path, scoring_path, rows
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--experiment", type=Path,
+        help="optional display-only experimental table; frozen scores and bands are unchanged")
     args = parser.parse_args()
     source, output = args.summary_dir.resolve(), args.output_dir.resolve()
     results = ROOT / "data/outputs/results/relaxtime/meson_density" / output.name
@@ -43,18 +73,14 @@ def main():
             raise ValueError(f"summary input changed: {name}")
     summary = json.loads((source / "summary.json").read_text(encoding="utf-8"))
     is_andronic = summary.get("family") == "andronic_logistic_rational_v1"
-    experiment_path = Path(summary["experiment"]["path"])
-    if sha256_file(experiment_path) != summary["experiment"]["sha256"]:
-        raise ValueError("experimental input changed")
-    screen_path = Path(summary["screen_assessment"]["path"])
+    experiment_path, scoring_path, experiments = display_experiments(summary, args.experiment)
+    screen_path = retained_data_path(summary["screen_assessment"]["path"])
     if sha256_file(screen_path) != summary["screen_assessment"]["sha256"]:
         raise ValueError("screening membership input changed")
     screen = json.loads(screen_path.read_text(encoding="utf-8"))
     bands = table(source / "screen_band.csv")
     fine = [r for r in table(source / "fine_curves.csv") if r["profile"] == summary["best_selected"]]
     baseline = [r for r in table(source / "baseline_curves.csv") if r["profile"] == "andronic2018"]
-    experiments = [r for r in load_experiment(experiment_path)
-        if 4.87 <= r["energy"] <= 200 and r["method"] != "digitized"]
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -71,7 +97,7 @@ def main():
     near_count = len(screen["near_best_band_complete_profiles"])
     if near_count > 1:
         ax.fill_between(x, [number(r,"near_minimum") for r in bands], [number(r,"near_maximum") for r in bands],
-            facecolor="#C6DEF0", edgecolor="#0072B2", linewidth=.65, hatch="/", label="Near-best envelope", zorder=2)
+            facecolor="#FFFFFF", edgecolor="#0072B2", linewidth=.8, hatch="///", label="Near-best envelope", zorder=2)
     for rows, color, style, label in ((fine,"#0072B2","-","Best sampled (refined)"),
         (baseline,"#A04800","--","Andronic (2018)")):
         ax.plot([number(r,"energy_GeV") for r in rows], [number(r,"ratio") for r in rows],
@@ -119,6 +145,7 @@ def main():
         "Orange dashed: frozen Andronic 2018 default at fine resolution. Filled circles: Au+Au AGS/STAR; open squares: auxiliary NA49 Pb+Pb. "
         "Only nine Au+Au points at 7.7-200 GeV enter the primary RMSE; the 4.87 GeV point and Pb+Pb points are shape diagnostics. "
         "Source centralities and rapidity windows are retained in the versioned experimental input. "
+        "New observations in a display-only table do not enter the frozen scores or change band membership. "
         "The envelopes describe finite sampled parameter sets, not probability intervals or a global optimum. "
         "Straight boundary segments join existing computed support; no added interpolation points or smoothing. "
         "Failed candidates excluded from whole-curve envelopes are identified in the assessment; failures in the best curve remain gaps. "
@@ -138,9 +165,10 @@ def main():
             runtime=runtime_record({"matplotlib":matplotlib.__version__})),
         inputs=[*[input_record(source / n,role="frozen_exploration") for n in
             ("summary.json","checksums.json","screen_band.csv","fine_curves.csv","baseline_curves.csv","selected_parameters.csv")],
-            input_record(Path(summary["screen_assessment"]["path"]),role="screening_membership_and_selection"),
+            input_record(screen_path,role="screening_membership_and_selection"),
             input_record(experiment_path,role="experimental_observations"),
-            input_record(experiment_path.parent / "sources.json",role="experimental_provenance"),
+            input_record(scoring_path,role="frozen_scoring_observations"),
+            experiment_provenance(experiment_path),
             input_record(ROOT / "config/plotting/candidate_aps_v2.toml",role="plot_style_contract"),
             *[input_record(ROOT / "scripts/plotting" / n,role="shared_plotting_code") for n in
                 ("plot_style.py","plot_manifest.py","plot_quality.py","plot_accessibility.py","validate_plot_artifact.py")]],
@@ -175,7 +203,7 @@ def main():
             legend_placements=[dict(legend_index=0,host_axes_index=0,title="",labels=labels,placement="in_axes",location="upper right",scope="bands, curves and experiments")],
             legend_layout_reason="author requests legends inside one panel; upper-right whitespace retained",
             color_route="undecided_review",quality=quality,placement_limits=placement_limits(quality,profile,outputs),
-            accessibility=accessibility_record(encodings,backgrounds=["#FFFFFF","#E8E8E8","#C6DEF0"],background_scope="white axes and light band fills; dark boundaries and hatching carry band semantics"),
+            accessibility=accessibility_record(encodings,backgrounds=["#FFFFFF","#E8E8E8"],background_scope="white axes and gray full envelope; dense blue hatching on white identifies the near-best envelope"),
             connections="straight segments at existing direct support; no additional points"),
         calculation_sha=summary["calculation_sha"],source_run_id=summary["fine_inputs"][0]["scan_identity"])
     manifest.update(delivery_stage="png_review",manuscript_eligible=False,current_publication_layer=False,

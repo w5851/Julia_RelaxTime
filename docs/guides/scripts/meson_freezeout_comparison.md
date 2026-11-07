@@ -111,6 +111,11 @@ python scripts/analysis/relaxtime/plot_freezeout_comparison.py `
 
 参数包络另用两个只读分析入口汇总与绘图：
 
+2026-11-07 实验显示更新可给两个 ratio 绘图入口传入
+`--experiment data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv`。
+对参数包络，该参数只替换显示观测；评分表的哈希、九点评分、曲线排名和包络成员
+继续来自冻结 summary。新增 STAR 54.4 GeV 点不触发模型插值或重算。
+
 ```powershell
 python scripts/analysis/relaxtime/summarize_freezeout_envelope.py `
   --screen-assessment ALL_SCREEN_ASSESSMENT/assessment.json `

@@ -87,6 +87,15 @@ def load_experiment(path):
         "primary_auau": truth(r["primary_auau"]), "auxiliary_horn": truth(r["auxiliary_horn"])} for r in rows]
 
 
+def experiment_provenance(path):
+    """Use the input edition's existing source record."""
+    directory = Path(path).parent
+    source = directory / "sources.json"
+    if not source.is_file():
+        source = directory / "README.md"
+    return input_record(source, role="experimental_provenance")
+
+
 def residual_summary(pairs):
     residuals = [p[0] - p[1] for p in pairs]
     if not residuals:
@@ -193,8 +202,6 @@ def compare_resolutions(refined, reference):
 
 def render(models, experiments, output_dir, result_dir, calculation, state, run_dir, experiment_path,
            *, series_order=None):
-    import matplotlib
-    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     profile = load_profile("candidate_aps_v2")
@@ -283,7 +290,7 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
             input_record(run_dir / "run.json", role="calculation_identity"),
             input_record(run_dir / "manifest.json", role="calculation_manifest"),
             input_record(experiment_path, role="experimental_observations"),
-            input_record(experiment_path.parent / "sources.json", role="experimental_provenance"),
+            experiment_provenance(experiment_path),
             input_record(ROOT / "config/plotting/candidate_aps_v2.toml", role="plot_style_contract"),
             *[input_record(ROOT / "scripts/plotting" / name, role="shared_plotting_code") for name in
                 ("plot_style.py", "plot_series.py", "plot_manifest.py", "plot_quality.py", "plot_accessibility.py", "validate_plot_artifact.py")]],
@@ -329,6 +336,8 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
 
 
 def main():
+    import matplotlib
+    matplotlib.use("Agg")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--reference-run-dir", type=Path, help="optional lower-resolution run for matched numerical differences")
