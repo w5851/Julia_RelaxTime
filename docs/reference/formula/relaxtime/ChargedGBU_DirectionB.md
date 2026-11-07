@@ -19,7 +19,7 @@
 
 后续B2/B3的[辅助响应与观察量审查](ChargedGBU_ObservableClosure.md)明确区分
 Gaussian行列式、标量GBU恒等式与完整Phi驻点来源；B仍为主候选，尚未完成密度验收。
-证据与执行见 [strict-audit 第22.19节起](../../../dev/active/2026-08-30_charged-rpa-bu-strict-audit.md)；
+证据与执行见 [strict-audit 第22.19节起](../../../dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md)；
 前序负谱判定及其必要条件边界见 [热谱适用性](ChargedGBU_ThermalAdmissibility.md)。
 
 ## 1. 针对性文献复核，不构成系统综述

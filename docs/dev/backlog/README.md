@@ -24,10 +24,11 @@
 - [PNJL 可选功能盘点与优先级任务单](2026-03-01_PNJL可选功能盘点与优先级任务单.md)
 - [sysimage 产品化与 package/app/service 演进任务单](2026-05-04_sysimage产品化与package-app-service演进任务单.md)
 - [介子热力学 regression 与 validation 治理方案](2026-05-09_介子热力学regression与validation治理方案.md)
+- [PNJL 全温区参考生产 PR3 规划](2026-07-17_PNJL全温区相图热积分与参考生产.md)
 - [带电 K/π 介子数密度物理约束与验证中期路线](2026-07-25_带电KPi介子数密度物理约束与验证中期路线.md)
 
 ## 使用规则
 
 - 命名建议沿用 `YYYY-MM-DD_描述.md`
-- 当 backlog 条目进入实际执行时，应拆成新的 `docs/dev/active/` 任务单
-- backlog 文档不替代实现验收；真正执行时仍需有独立 active 任务单承接
+- 启动时先明确剩余范围与验收条件，通常使用对话计划或已有 issue。
+- 需要共享设计、用户要求文档或现有 ledger 合同时，再维护 `active/` 文档；参见[任务跟踪治理](../task_tracking_governance.md)。

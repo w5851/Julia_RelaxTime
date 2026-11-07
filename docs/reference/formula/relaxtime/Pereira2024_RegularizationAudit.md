@@ -4,7 +4,7 @@
 
 本文件说明 charged GBU 研究候选的极化函数依据与独立验证方法，不选定最终
 论文 regulator，不授权 production。运行和失败证据见
-[strict-audit 第22.16节](../../../dev/active/2026-08-30_charged-rpa-bu-strict-audit.md)。
+[strict-audit 第22.16节](../../../dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md)。
 完整背景与部分产额契约见 [研究方法 v1](ChargedGBU_ResearchMethod_v1.md)。
 
 直接公式来源是 Pereira、Costa、Providência、Moreira，

@@ -1,8 +1,21 @@
+---
+title: "完整 KMT 路线 Phase 4-6：BQS、BU A/B 与冻结线候选审查"
+archived: true
+original: "docs/dev/active/2026-08-29_full-kmt-phase4-phase6.md"
+archived_date: "2026-11-07"
+task_status: "superseded"
+archive_reason: "KMT Phase 4–6 诊断已完成；严格带电 RPA/BU 后续由 PR #299/#300/#310/#311 完成并接续。"
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 完整 KMT 路线 Phase 4-6：BQS、BU A/B 与冻结线候选审查
 
 更新日期：2026-08-29
 
-当前状态：in progress。本文承接[已归档的 Phase 0–3](../archived/2026-08-29_full-kmt-interaction-phase0-phase1.md)，记录完整 charged KMT 耦合接回现有 BQS quark-only 平衡后的诊断实现。本文不授权修改正式 production baseline，也不把 `x_min_cut`/低节点结果当作实验拟合。
+当前状态：Phase 4–6 的 A/B 与七点冻结线诊断已完成，2026-11-07 按被后续工作接续归档。严格带电 RPA/BU 实现与入口验收已由 PR #299、#300、#310、#311 完成，见[严格复核记录](2026-08-30_charged-rpa-bu-strict-audit.md)。本文承接[已归档的 Phase 0–3](../archived/2026-08-29_full-kmt-interaction-phase0-phase1.md)，保留完整 charged KMT 耦合接回 BQS quark-only 平衡的历史诊断；其中 `x_min_cut`/低节点结果的用途仍是诊断。
 
 ## 1. 路线与边界
 

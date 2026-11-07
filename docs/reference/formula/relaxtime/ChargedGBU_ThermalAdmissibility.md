@@ -5,7 +5,7 @@
 本文件是 [PNJL 稳定性审查](ChargedGBU_PNJLStability.md) 的后续 required follow-up，
 不选择新的 regulator，也不更改 [研究方法 v1](ChargedGBU_ResearchMethod_v1.md)
 或生产默认。固定 quark-only BQS 背景、质量、耦合、通道与外频率坐标。
-执行证据见 [strict-audit 第22.18节](../../../dev/active/2026-08-30_charged-rpa-bu-strict-audit.md)。
+执行证据见 [strict-audit 第22.18节](../../../dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md)。
 
 **判定对象必须分开**：
 

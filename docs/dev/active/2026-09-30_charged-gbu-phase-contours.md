@@ -5,6 +5,9 @@
 merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；十项合并 PR 检查均成功。
 M4 的作者研究产物审阅仍待处理，本文继续保留在 active，不自动提升为 accepted/promoted。
 
+2026-11-07 状态核对：作者已接受后续默认冻结线与两族参数带，用于文献原始参数下的偏定性论文分析。
+该决定针对冻结线研究；本页 M4 的二维等高图仍单独待审，当前无待运行数值任务。
+
 2026-11-06 存储整理：原 `D:/w/charged-gbu-contours/retained-pr325` 已移至
 `D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325`。原 manifest、图像、数值和源码 bundle
 保持字节；1875 条文件记录及 bundle 依赖核验通过。`D:/Temp` 原副本已不存在，

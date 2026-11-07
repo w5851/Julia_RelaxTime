@@ -1,11 +1,11 @@
 # Andronic 函数族：文献使用与参数包络
 
-研究日期：2026-10-18（Asia/Shanghai）；实现与冻结证据已随 PR #327 合并。状态：`review`、`diagnostic_only`；
+研究日期：2026-10-18（Asia/Shanghai）；实现与冻结证据已随 PR #327 合并。当前状态：作者于 2026-11-07 接受，计算任务已归档。
 作者已要求将三篇国外团队正文与原作者 2026 v2 综述的适用参数纳入新版逐坐标探索域。
-作者随后要求与多项式族同构的数值与图像产出；59 组筛选、三组 standard/fine 与两套 PNG 已完成，作者审阅待定。
+作者随后要求与多项式族同构的数值与图像产出；59 组筛选、三组 standard/fine 与两套 PNG 均已完成并获接受。
 研究续接对话：`01a144e3-f91e-7230-b41d-04ca2f50ae52`；本次收尾对话来源：`01a14d43-2154-7be2-9f66-72f1d33e52d5`。
 默认比较、文献筛选、多项式与 Andronic 族作为同一研究链收纳，
-[阶段结论与 PR 证据入口](README.md#2026-10-22-阶段审阅结论)。后续问题待组会讨论后独立确定。
+[阶段结论与 PR 证据入口](README.md#2026-10-22-阶段审阅结论)。论文优先使用原文成套参数作偏定性比较，本参数带用于灵敏度分析，见[作者接受与论文用法](README.md#2026-11-07-作者接受与论文用法)。
 
 ## 结论
 
@@ -211,7 +211,7 @@ muB=371.204-423.709 MeV；扩展 v2 为 T=123.920-155.472 MeV、muB=299.128-423.
 
 ## Andronic 族同构产出
 
-状态：`review`。采用[固定采样设计](../../../../config/physics/freezeout/parameter_domains/andronic_exploration_v1.toml)，
+状态：已获作者接受并归档。采用[固定采样设计](../../../../config/physics/freezeout/parameter_domains/andronic_exploration_v1.toml)，
 不改写已确认的 v2 文献域。首轮为四个尚无密度结果的不同完整中心组、32 个分层内部样本、
 10 个坐标边界探针，共 46 组；2018 默认参数及 Elfner 的相同组复用已有基准。
 JHEP 的温度部分来源参与文献取界，不构造完整五参密度候选。
@@ -310,14 +310,14 @@ muB=0–500 MeV 的部分解析延伸超出各组原密度能区，未被当作�
 两套图均为 600 dpi PNG，使用与多项式图相同的布局、带语义和原 2018 参照；
 原参照在 17.27 GeV 的失败缺口保留。四张彩色/灰度图均实际看图复核，图例、线型、
 斜线与空心标记可辨，无裁切或数据遮挡；机器检查通过。图注、源码和审查记录保留在
-各自同名 results case。它们仍为 `png_review`，作者审阅 `pending`，未授予论文使用资格。
+各自同名 results case。原 `png_review` 身份保留；作者于 2026-11-07 接受这些图像和结果用于上述论文分析。
 
 [完整数值汇总](../../../../data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/summary.json)
 · [分辨率对照](../../../../data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_summary/resolution_comparison.json)
 · [最终核验](../../../../data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018_execution/final_validation.json)。
 
 本轮复用同一 K/pi 资料校准参数，不能称为独立预测验证。包络不具有统计置信度；
-没有加入最终态衰变、流场与快度接受度模型。当前产出支持本次有限探索和作者审阅；后续问题与判据待组会讨论后独立确定，当前不安排新增研究。
+没有加入最终态衰变、流场与快度接受度模型。当前产出已接受为有限参数灵敏度研究；后续核对重核碰撞实验数据，按原始参数的偏定性论文用途组织比较。
 
 ## 本地证据与复核范围
 

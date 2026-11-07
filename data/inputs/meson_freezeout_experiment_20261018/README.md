@@ -6,3 +6,6 @@
 原始数据、提取过程和已确认的勘误见[上一版](../meson_freezeout_experiment_20261017/README.md)。
 本版从上一版 CSV 复制并应用 `sources.json` 中唯一的字段修订；
 旧生成器仍重建上一版，旧文件和图像保持原字节。
+
+后续论文对照可使用[2026-11-07 重核数据更新](../meson_freezeout_experiment_20261107/README.md)：
+继承本版 22 行并加入 STAR 54.4 GeV 正式点；本版仍对应原参数比较和评分。
