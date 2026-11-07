@@ -5,18 +5,22 @@ updated_at = "2026-11-07"
 [[tracks]]
 id = "meson-freezeout-experiment"
 title = "Meson K/pi freezeout and heavy-ion comparison"
-status = "ready"
+status = "review"
 current_task = "meson-freezeout-heavy-ion-paper-comparison"
 blocked_by = []
 unlocks = []
-next_action = "使用新版实验输入更新K/pi图件，先重组并接入D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi介子稿；原文参数作定性主比较，参数带作灵敏度材料。本任务完成后核对Arena #313，再评估PALC与全温区PR3。"
-required_author_review = false
-author_review_status = "not_required"
+next_action = "三张新版K/pi图及介子稿已接入，学校2025模板的学位初稿已建立；当前待审阅新图和科学叙述，旧数值/参数带/M4的作者接受保持有效。图面确认后交付矢量图并收口本批，再核对Arena #313，最后评估PALC与全温区PR3。"
+required_author_review = true
+author_review_status = "pending"
 promotion_required = false
 current_branch = "main"
 current_sha = "9c727d106abb9e931ba22dd26c206dc38d2efdff"
 run_ids = []
 evidence = [
+  "note:20261107_three_display_figures_and_meson_manuscript_draft_integrated_xjtu_thesis_created",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
@@ -53,7 +57,7 @@ track_id = "meson-freezeout-experiment"
 classification = "research"
 status = "archived"
 parent = "track:meson-freezeout-experiment"
-task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
+task_file = ""
 reason = "作者要求模块化完整化学冻结线，使用q0外推与Au+Au实验同图比较，先选择文献默认参数下较优方案，再开展参数带调优。"
 next_action = ""
 blocked_by = []
@@ -83,14 +87,18 @@ evidence = ["review:author_20261107_accepted_default_and_envelopes_original_para
 id = "meson-freezeout-heavy-ion-paper-comparison"
 track_id = "meson-freezeout-experiment"
 classification = "required_follow_up"
-status = "ready"
+status = "review"
 parent = "track:meson-freezeout-experiment"
-task_file = "data/inputs/meson_freezeout_experiment_20261107/README.md"
+task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
 reason = "作者接受默认冻结线和两族参数带，要求采用文献原始参数作偏定性论文分析，并关注最新重核碰撞数据及峰位。"
-next_action = "目标为D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi：先核对旧Mott稿与xi=0冻结线结果的章节关系，更新项目K/pi图并接入介子稿。STAR 54.4 GeV用于显示、旧评分集合保留；完成后转Arena #313。"
+next_action = "审阅D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi的新正文与三张图；已明确历史实轴质量宽度处方和xi=0有限窗口密度设置，STAR 54.4 GeV仅更新显示。图面确认后导出矢量图、收口本批，随后核对Arena #313。"
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "note:20261107_three_display_figures_and_meson_manuscript_draft_integrated_xjtu_thesis_created",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",

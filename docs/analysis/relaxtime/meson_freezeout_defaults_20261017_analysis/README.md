@@ -43,13 +43,34 @@ NA49、STAR 发布点中的最大值分别在 7.62、7.7 GeV。原始参数比�
 ### 论文接入位置与范围
 
 作者于 2026-11-07 明确：本研究接入 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi` 介子期刊稿。
-该稿当前仍以两张 Mott 图、表格和复极点解释为主；下一步先重组章节，再接入冻结线数密度结果与实验比较。
-当前冻结线计算使用 `xi=0`、quark-only BQS 背景及 q0 外推，写作时需与旧稿的各向异性 Mott 扫描分别说明。
+本批已重写标题、摘要、方法、结果和结论，保留 pi/K 谱图并接入三张冻结线图、九点评分比较和重核实验讨论。
+`sections/density_method.tex` 与 `sections/freezeout_results.tex` 说明 `xi=0`、quark-only BQS 背景及 q0 类时外推，
+与历史各向异性谱扫描分别呈现。核对源码后，旧“完整复极点”叙述改为实轴环函数与质量宽度联立处方。
 谱与阈值变化、密度积分、冻结路径及实验比值之间的联系按已有证据建立；当前密度结果不提供 ratio 的各向异性扫描。
 
 M4 的二维等高图已获作者接受，用于观察 ratio 趋势并指导已完成的参数调优，见[归档记录](../../../dev/archived/2026-09-30_charged-gbu-phase-contours.md)。
 本批图件与介子论文接入完成后，再核对 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)；
 PALC 性能诊断及全温区 PR3 置于该 issue 之后再评估。
+
+### 本批显示更新与论文草稿（2026-11-07）
+
+| 内容 | 当前图像 |
+| --- | --- |
+| 文献默认参数 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/kplus_piplus_freezeout_defaults.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/kplus_piplus_freezeout_defaults_gray.png) |
+| 多项式参数带 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/kplus_piplus_parameter_envelope.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/kplus_piplus_parameter_envelope_gray.png) |
+| Andronic 参数带 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/kplus_piplus_parameter_envelope.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/kplus_piplus_parameter_envelope_gray.png) |
+
+三图均复用已冻结数值，显示更新使用 23 行实验表，包含 STAR 54.4 GeV；原九点/十四点评分集合、
+带成员与失败点保持原口径。近优带使用密斜线以改善灰度区分，三图的输入/输出 manifest 校验通过。
+绘图软件的定向测试为 11 passed。没有重新进行密度扫描，精度结论仍来自原 standard/fine 对照。
+绘图源码由 `8053c0dc3be0b7e4208906ab34924126c543174a` 保存，图像 manifest 引用该版本，
+本批结果目录不重复保存源码。为重绘临时恢复的 433 个逐点/源码文件已清理，原数值 ZIP 保留。
+
+介子稿 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi/main.pdf` 已生成 12 页；
+学位论文 `D:/Desktop/paper/My_Paper/xjtu_master_thesis/` 已采用作者提供的学校 2025 模板建立六章初稿，
+预览为 `build/main.pdf`（13 页）。两稿完成编译、引文和逐页版面核对，未见缺失引文、缺字或溢出公式。
+本批新图和新文字待作者审阅；2026-11-07 对原有数值、参数带和 M4 的接受保持有效。
+本次不把固定窗口的数值稳定性推及零频极限，也不把局域关联密度直接等同于接受度内的最终态产额。
 
 ## 2026-10-22 阶段审阅结论
 
