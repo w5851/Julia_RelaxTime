@@ -303,7 +303,7 @@ G_s = calculate_G_from_A(A_s, m_s_inv_fm)
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
 println("K₀⁺ = ", K_coeffs.K0_plus, " fm²")
-println("K₁₂₃⁻ = ", K_coeffs.K123_minus, " fm² (π介子)")
+println("K₁₂₃⁺ = ", K_coeffs.K123_plus, " fm² (π介子)")
 println("det(K⁺) = ", K_coeffs.det_K_plus, " fm⁴ (η/η'混合)")
 println("det(K⁻) = ", K_coeffs.det_K_minus, " fm⁴ (σ/σ'混合)")
 ```

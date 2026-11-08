@@ -1,6 +1,6 @@
 {
   "schema_version": "plot_manifest_v1",
-  "generated_at_utc": "2026-11-07T05:20:23.034282+00:00",
+  "generated_at_utc": "2026-11-08T02:48:33.847855+00:00",
   "asset_id": "meson_freezeout_parameter_envelope_20261018",
   "figure_family": "charged_meson_freezeout",
   "case_slug": "freezeout_envelope_20261107_png_review",
@@ -12,8 +12,8 @@
   "generator": {
     "path": "scripts/analysis/relaxtime/plot_freezeout_envelope.py",
     "path_kind": "repository_relative",
-    "sha256": "5191ca5a5c26c70e6e7b78a3ea07b135c8483752d861a22b34e53b0ab525387d",
-    "command": "scripts/analysis/relaxtime/plot_freezeout_envelope.py --summary-dir data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary --experiment data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv --output-dir data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review",
+    "sha256": "ca389090ce6d95303ef1a70f5e6f6c078fbc37d40f0634ad92f01dadbcaef4f9",
+    "command": "scripts/analysis/relaxtime/plot_freezeout_envelope.py --summary-dir data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary --experiment data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv --output-dir data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review --replace-draft",
     "runtime": {
       "python": "3.13.2",
       "platform": "Windows-11-10.0.26300-SP0",
@@ -21,9 +21,9 @@
       "matplotlib": "3.10.1"
     }
   },
-  "git_commit": "7cb7c649d625a13242cacbb2cda568dcba10442f",
+  "git_commit": "714079df5629c267062b3bdf962ccadde4fb4a1b",
   "calculation_sha": "698feaf8fada670fde81c93bab6093b50093935f",
-  "postprocess_sha": "8053c0dc3be0b7e4208906ab34924126c543174a",
+  "postprocess_sha": null,
   "source_run_id": "ad3456626644e74fbde4286948fc543b78683d2c51c50ea086d612d5fc91246a",
   "inputs": [
     {
@@ -79,8 +79,8 @@
       "path": "data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv",
       "path_kind": "repository_relative",
       "role": "experimental_observations",
-      "bytes": 5405,
-      "sha256": "6f5638aef78fd2cde20743373a651fd58b85321828a8aa85ad1f205a163d068e"
+      "bytes": 10497,
+      "sha256": "d8866a6ac027f9b6a0eff16c2fccae79e6f1e02ad334fe159698d97d8dfbd6c3"
     },
     {
       "path": "data/inputs/meson_freezeout_experiment_20261018/experimental_ratios.csv",
@@ -93,8 +93,15 @@
       "path": "data/inputs/meson_freezeout_experiment_20261107/README.md",
       "path_kind": "repository_relative",
       "role": "experimental_provenance",
-      "bytes": 5605,
-      "sha256": "de8a7c1b5ed193e998592900f021bcacadf22820fcc116fd07c4d33a35d78e5c"
+      "bytes": 13069,
+      "sha256": "6e005e10d05ebb5ef7711ecb1f0696bd53431b6f66a98ef725e63ac56991e8cb"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/plot_freezeout_comparison.py",
+      "path_kind": "repository_relative",
+      "role": "shared_plotting_code",
+      "bytes": 30256,
+      "sha256": "d95258165347dbf91f0641e7c6ed6dd86f70978fbdd3be004fd3e56c189ed3f8"
     },
     {
       "path": "config/plotting/candidate_aps_v2.toml",
@@ -195,12 +202,26 @@
       "failure_count": 1
     },
     {
-      "series_id": "Au+Au",
+      "series_id": "AuAu",
       "state": "experimental",
-      "point_count": 11,
-      "support_rule": "published ratios or ratios of published yields at retained source energies",
+      "point_count": 15,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
       "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "midrapidity",
+        "|y|<0.1"
+      ],
+      "error_methods": [
+        "published_combined",
+        "published_stat_sys_quadrature",
+        "quadrature_of_published_stat_syst",
+        "zero_covariance_propagation"
+      ],
       "ids": [
+        "AGS_2.35",
+        "AGS_3.32",
+        "AGS_3.83",
+        "AGS_4.29",
         "AGS_4.87",
         "STAR_BES_7.7",
         "STAR_BES_11.5",
@@ -215,11 +236,17 @@
       ]
     },
     {
-      "series_id": "Pb+Pb",
+      "series_id": "NA49",
       "state": "experimental",
       "point_count": 5,
-      "support_rule": "published ratios or ratios of published yields at retained source energies",
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
       "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "K: |y|<0.1; pi: 0<y<0.2"
+      ],
+      "error_methods": [
+        "published_stat_sys_quadrature"
+      ],
       "ids": [
         "NA49_6.27",
         "NA49_7.62",
@@ -227,9 +254,100 @@
         "NA49_12.32",
         "NA49_17.27"
       ]
+    },
+    {
+      "series_id": "AuAu4pi",
+      "state": "experimental",
+      "point_count": 6,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
+      "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "full phase space (4pi)"
+      ],
+      "error_methods": [
+        "published_combined"
+      ],
+      "ids": [
+        "AGS_2.35_4pi",
+        "AGS_3.32_4pi",
+        "AGS_3.83_4pi",
+        "AGS_4.29_4pi",
+        "AGS_4.87_4pi",
+        "BRAHMS_200_4pi"
+      ]
+    },
+    {
+      "series_id": "NA494pi",
+      "state": "experimental",
+      "point_count": 5,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
+      "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "full phase space (4pi)"
+      ],
+      "error_methods": [
+        "published_stat_sys_quadrature"
+      ],
+      "ids": [
+        "NA49_6.27_4pi",
+        "NA49_7.62_4pi",
+        "NA49_8.77_4pi",
+        "NA49_12.32_4pi",
+        "NA49_17.27_4pi"
+      ]
+    },
+    {
+      "series_id": "BRAHMS",
+      "state": "experimental",
+      "point_count": 1,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
+      "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "y=0 (centre-of-mass)"
+      ],
+      "error_methods": [
+        "published_stat_sys_quadrature"
+      ],
+      "ids": [
+        "BRAHMS_62.4_y0"
+      ]
+    },
+    {
+      "series_id": "STARBESII",
+      "state": "digitized_reference",
+      "point_count": 3,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
+      "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "y=0 plotted bin (centre-of-mass)"
+      ],
+      "error_methods": [
+        "zero_covariance_of_digitized_combined_yield_errors"
+      ],
+      "ids": [
+        "STAR_BESII_14.6",
+        "STAR_BESII_19.6",
+        "STAR_BESII_27"
+      ]
+    },
+    {
+      "series_id": "NA61",
+      "state": "digitized_reference",
+      "point_count": 1,
+      "support_rule": "retained source observations; separate systems/charges/acceptances",
+      "mask_rule": "none; retained source observations only",
+      "rapidity": [
+        "full phase space (4pi)"
+      ],
+      "error_methods": [
+        "quadrature_of_vector_extracted_stat_syst"
+      ],
+      "ids": [
+        "NA61_PbPb_7.62_4pi"
+      ]
     }
   ],
-  "selection_rule": "4.87-200 GeV; frozen fixed sample envelope and selected refined curve",
+  "selection_rule": "2.35-200 GeV observations; frozen fixed sample envelope and selected refined curve on original support",
   "interpolation_policy": "none",
   "connector_policy": "forbidden",
   "missing_value_policy": "gaps retained; no zero fill",
@@ -240,12 +358,12 @@
       "format": "png",
       "dpi": 600,
       "vector": false,
-      "bytes": 402666,
-      "sha256": "a04a0b899fbf2cb554f4e2eb1512566ae902d510ac3364c217cb1abdc4c1d0e3",
+      "bytes": 543484,
+      "sha256": "853e4cec4dc4e4b2c3ea595a144dcff88c51d3c419688fd33fa0d3e9ce84bb94",
       "inspection": {
         "size_pixels": [
           4050,
-          2760
+          3600
         ],
         "actual_dpi": [
           599.9988,
@@ -253,7 +371,7 @@
         ],
         "physical_size_inches": [
           6.750013500027,
-          4.6000092000184
+          6.000012000024
         ]
       }
     },
@@ -263,12 +381,12 @@
       "format": "png",
       "dpi": 600,
       "vector": false,
-      "bytes": 376765,
-      "sha256": "03011e848e9c9026644126fd979bb2bb95bd22009799b12336c38697c99fcb33",
+      "bytes": 519914,
+      "sha256": "5015ed7e248a5b8e69557ff1afce978895827dd826822f3546986468f3c805c2",
       "inspection": {
         "size_pixels": [
           4050,
-          2760
+          3600
         ],
         "actual_dpi": [
           599.9988,
@@ -276,7 +394,7 @@
         ],
         "physical_size_inches": [
           6.750013500027,
-          4.6000092000184
+          6.000012000024
         ]
       }
     }
@@ -287,8 +405,9 @@
     "review_contract": "prd_review_v1",
     "figure_size_inches": [
       6.75,
-      4.6
+      6.0
     ],
+    "size_override_reason": "Additional acceptance and preliminary-data groups need an in-panel legend above the high-energy plateau.",
     "column": "double_column",
     "font": {
       "schema": "plot_font_resolution_v1",
@@ -321,7 +440,12 @@
           "Best sampled (refined)",
           "Andronic (2018)",
           "Au+Au: AGS, STAR",
-          "Pb+Pb: NA49"
+          "Pb+Pb: NA49",
+          "Au+Au: AGS, BRAHMS ($4\\pi$)",
+          "Pb+Pb: NA49 ($4\\pi$)",
+          "Au+Au: BRAHMS (y=0)",
+          "Au+Au: BES-II (derived, prelim.)",
+          "Pb+Pb: NA61/SHINE ($4\\pi$, prelim.)"
         ],
         "placement": "in_axes",
         "location": "upper right",
@@ -333,7 +457,7 @@
     "quality": {
       "figure_size_inches": [
         6.75,
-        4.6
+        6.0
       ],
       "intended_width_inches": 6.75,
       "placement_scale": 1.0,
@@ -345,7 +469,8 @@
           "bytes": 1190952,
           "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
           "roles": [
-            "text"
+            "text",
+            "mathtext"
           ]
         },
         {
@@ -429,8 +554,8 @@
           "role": "primary"
         },
         {
-          "text": "PNJL + GBU\nChemical freezeout",
-          "glyph": "P",
+          "text": "Au+Au: AGS, BRAHMS ($4\\pi$)",
+          "glyph": "B",
           "font": "times.ttf",
           "source_size_pt": 12.0,
           "final_height_mm": 2.8032604166666664,
@@ -444,8 +569,8 @@
           "axis": "x",
           "scale": "log",
           "minor_locator": "LogLocator",
-          "major_count": 6,
-          "minor_count": 10,
+          "major_count": 7,
+          "minor_count": 11,
           "inward": true,
           "both_sides": true
         },
@@ -453,8 +578,8 @@
           "axis": "y",
           "scale": "linear",
           "minor_locator": "AutoMinorLocator",
-          "major_count": 7,
-          "minor_count": 7,
+          "major_count": 9,
+          "minor_count": 9,
           "inward": true,
           "both_sides": true
         }
@@ -478,13 +603,18 @@
             "Best sampled (refined)",
             "Andronic (2018)",
             "Au+Au: AGS, STAR",
-            "Pb+Pb: NA49"
+            "Pb+Pb: NA49",
+            "Au+Au: AGS, BRAHMS ($4\\pi$)",
+            "Pb+Pb: NA49 ($4\\pi$)",
+            "Au+Au: BRAHMS (y=0)",
+            "Au+Au: BES-II (derived, prelim.)",
+            "Pb+Pb: NA61/SHINE ($4\\pi$, prelim.)"
           ],
           "bbox_inches": [
-            4.263749999999999,
-            2.905374999999999,
-            2.2341666666666673,
-            1.4272916666666668
+            3.483024088541665,
+            3.1093749999999987,
+            3.014892578125,
+            2.5672916666666663
           ]
         }
       ],
@@ -569,7 +699,7 @@
         {
           "value": "AuAu",
           "color": "#B2282E",
-          "noncolor_encoding": "filled circles",
+          "noncolor_encoding": "o; filled",
           "contrasts": [
             6.489566257177475,
             5.296427100364221
@@ -578,10 +708,55 @@
         {
           "value": "NA49",
           "color": "#222222",
-          "noncolor_encoding": "open squares",
+          "noncolor_encoding": "s; filled",
           "contrasts": [
             15.909984431773273,
             12.984854360276907
+          ]
+        },
+        {
+          "value": "AuAu4pi",
+          "color": "#B2282E",
+          "noncolor_encoding": "o; open",
+          "contrasts": [
+            6.489566257177475,
+            5.296427100364221
+          ]
+        },
+        {
+          "value": "NA494pi",
+          "color": "#222222",
+          "noncolor_encoding": "s; open",
+          "contrasts": [
+            15.909984431773273,
+            12.984854360276907
+          ]
+        },
+        {
+          "value": "BRAHMS",
+          "color": "#6A3D9A",
+          "noncolor_encoding": "P; filled",
+          "contrasts": [
+            7.644841217596705,
+            6.239298991373759
+          ]
+        },
+        {
+          "value": "STARBESII",
+          "color": "#6A3D9A",
+          "noncolor_encoding": "^; open",
+          "contrasts": [
+            7.644841217596705,
+            6.239298991373759
+          ]
+        },
+        {
+          "value": "NA61",
+          "color": "#006D2C",
+          "noncolor_encoding": "D; open",
+          "contrasts": [
+            6.514000207981219,
+            5.31636874732141
           ]
         }
       ]
@@ -606,7 +781,7 @@
     "path": "data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261107_png_review/caption.md",
     "path_kind": "repository_relative",
     "role": "figure_caption",
-    "bytes": 1366,
-    "sha256": "9182eebd7eaea5da5e3ae97be61583a349a9cb8205181d7de1e80e6697e98cb7"
+    "bytes": 2201,
+    "sha256": "54625c455c885a9202aebfbc9938cb8ad8ebb85e6aab2d1289dd042b8146ac17"
   }
 }

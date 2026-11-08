@@ -1,6 +1,6 @@
 # 化学冻结线与 K+/pi+：研究结果与论文用法
 
-当前状态：作者于 2026-11-07 接受默认参数比较、两族参数带及既有图像，相关计算任务已完成并归档。
+当前状态：默认参数比较、两族参数带和 M4 已于 2026-11-07 获作者接受；更新实验图件、三张矢量 PDF 与论文接入已完成。作者于 2026-11-08 确定采用简短的快度讨论，并授权本批计算任务收尾；后续文字审阅由论文库承接。
 [PR #327](https://github.com/w5851/Julia_RelaxTime/pull/327) 已于 2026-10-22 合并实现、参数和冻结证据。
 论文按下述决定使用这些结果；原产物中的 `png_review`、`diagnostic_only` 保留生成时的身份，当前接受状态由本页记录。
 本页保留默认参数阶段的证据和评分口径。Ledger item：
@@ -49,27 +49,39 @@ NA49、STAR 发布点中的最大值分别在 7.62、7.7 GeV。原始参数比�
 谱与阈值变化、密度积分、冻结路径及实验比值之间的联系按已有证据建立；当前密度结果不提供 ratio 的各向异性扫描。
 
 M4 的二维等高图已获作者接受，用于观察 ratio 趋势并指导已完成的参数调优，见[归档记录](../../../dev/archived/2026-09-30_charged-gbu-phase-contours.md)。
-本批图件与介子论文接入完成后，再核对 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)；
-PALC 性能诊断及全温区 PR3 置于该 issue 之后再评估。
+作者随后授权先处理 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)。
+五项约定的[本地审计](../../../reference/formula/relaxtime/transport/RS_Response_Convention.md)与 quote-remote 32/32 检查已完成，
+未修改数值算法、基线或 v15；作者接受保留现行定义，GitHub issue 已于 2026-11-07 按[审计结论](https://github.com/w5851/Julia_RelaxTime/issues/313#issuecomment-6706495944)关闭。完整颜色张量响应与备选 gap 闭合属于可选模型研究。
+作者于 2026-11-08 接受三张更新图及实验范围，矢量版已完成并接入两份稿件。计算侧交付已收口，后续论文审阅留在论文库；PALC 性能诊断及全温区 PR3 保持未排期研究。
 
-### 本批显示更新与论文草稿（2026-11-07）
+### 本批显示更新与论文草稿（2026-11-08）
 
-| 内容 | 当前图像 |
+| 内容 | 已交付矢量 PDF |
 | --- | --- |
-| 文献默认参数 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/kplus_piplus_freezeout_defaults.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/kplus_piplus_freezeout_defaults_gray.png) |
-| 多项式参数带 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/kplus_piplus_parameter_envelope.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/kplus_piplus_parameter_envelope_gray.png) |
-| Andronic 参数带 | [彩色](../../../../data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/kplus_piplus_parameter_envelope.png) · [灰度](../../../../data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/kplus_piplus_parameter_envelope_gray.png) |
+| 文献默认参数 | [PDF](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/kplus_piplus_freezeout_defaults.pdf) |
+| 多项式参数带 | [PDF](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/kplus_piplus_polynomial_envelope.pdf) |
+| Andronic 参数带 | [PDF](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/kplus_piplus_andronic_envelope.pdf) |
 
-三图均复用已冻结数值，显示更新使用 23 行实验表，包含 STAR 54.4 GeV；原九点/十四点评分集合、
-带成员与失败点保持原口径。近优带使用密斜线以改善灰度区分，三图的输入/输出 manifest 校验通过。
-绘图软件的定向测试为 11 passed。没有重新进行密度扫描，精度结论仍来自原 standard/fine 对照。
-绘图源码由 `8053c0dc3be0b7e4208906ab34924126c543174a` 保存，图像 manifest 引用该版本，
-本批结果目录不重复保存源码。为重绘临时恢复的 433 个逐点/源码文件已清理，原数值 ZIP 保留。
+三图均复用已冻结数值，11-08 显示更新使用 39 行实验表：除 STAR 54.4 GeV 和 NA61/SHINE
+7.62 GeV 全相空间预备点外，加入 HEPData 25202 的全部 11 点、BRAHMS 62.4 GeV 中快度点和
+BES-II 14.6、19.6、27 GeV 的三个派生比值。全相空间点用空心标记，BES-II 单列 `derived, prelim.`，
+其比值误差按公开产额误差和零协方差假设传播。参数带图扩展实验显示至 2.35–200 GeV，含 36 点，
+默认图含全部 39 点；理论支持与缺口保持原样。本批先前的未接受中间图已原位替换。
+当前三个 PNG case 是本次已接受的图面依据，矢量包直接引用，未重复复制 PNG。
+原九点/十四点评分、数值源、带成员和失败点均经哈希或字段复核保持一致。
+近优带使用密斜线以改善灰度区分，三图的输入/输出 manifest 校验通过。
+三张 PDF 均为 6.75 × 6 英寸的单页矢量图，嵌入非 Type 3 字体、无栅格包装；重新渲染 PNG 与作者接受文件逐字节一致。
+[唯一交付 manifest](../../../../data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/plot_manifest.json)绑定原接受文件、冻结输入、独立导出器与 PDF。
+定向绘图及交付测试为 105 passed。没有重新进行密度扫描，精度结论仍来自原 standard/fine 对照。
+交付 manifest 记录渲染源码 hash；结果目录不重复保存源码。
+新增实验及 BRAHMS、STAR BES-II、NA49 全相空间候选的使用建议统一记在[实验输入入口](../../../../data/inputs/meson_freezeout_experiment_20261107/README.md)。
 
-介子稿 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi/main.pdf` 已生成 12 页；
-学位论文 `D:/Desktop/paper/My_Paper/xjtu_master_thesis/` 已采用作者提供的学校 2025 模板建立六章初稿，
-预览为 `build/main.pdf`（13 页）。两稿完成编译、引文和逐页版面核对，未见缺失引文、缺字或溢出公式。
-本批新图和新文字待作者审阅；2026-11-07 对原有数值、参数带和 M4 的接受保持有效。
+介子稿 `D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi/main.pdf` 已生成 13 页；
+学位论文 `D:/Desktop/paper/My_Paper/xjtu_master_thesis/` 使用学校 2025 模板，按同组硕士论文风格重组为六章两附录，快度讨论精简后为 114 页，
+删除工程过程章节，集中于 PNJL/RS、相移关联、冻结路径、v15 输运及 Mott 响应的物理解释；正文引用 237 篇去重文献。
+新增已接受的二维 ratio 及两族 T–muB 路径图，并展开守恒荷、角动量阈值与可观测响应的推导；快度影响按作者决定作简短定性讨论。
+预览为 `build/main.pdf`，同组篇幅比较与最新编译核验记录集中在该目录 README。
+本批图面、实验范围已于 2026-11-08 获作者接受并完成矢量交付，计算侧任务归档；2026-11-07 对原有数值、参数带和 M4 的接受保持有效。稿件后续审阅由论文库管理。
 本次不把固定窗口的数值稳定性推及零频极限，也不把局域关联密度直接等同于接受度内的最终态产额。
 
 ## 2026-10-22 阶段审阅结论
@@ -244,15 +256,24 @@ STAR Au+Au 的本次发布点峰在 7.7 GeV、比值 0.2227。两种实验体系
 显式图例位置和 `prd_review_v1` 声明，未改变 fine 数值。首个 standard case 曾因
 manifest 缺少三个验证字段退出，不能把该中间尝试当最终交付。
 
-## 快度解释与后续参数带
+## 快度解释与参数带范围（2026-11-08 核对）
 
-本轮比较的是均匀介质的局域、指定介子部分产额数密度与实验的中快度最终产额。
-完整局域动量积分不等于已经计算整场碰撞的全相空间最终产额；映射仍依赖冻结面、
-流场、纵向热力学变化及共振衰变。仅凭 `y≈0` 不能推断实验比值必然更低。
-例如 NA49 同实验 30A GeV 的中快度中心值 `21.2/83.0≈0.2554` 高于全相空间
-`52.9/241≈0.2195`，见 PRC 77, 024903 (2008),
-[0710.0118v2](https://arxiv.org/abs/0710.0118)，Table I。
-因此接受度可列为待检验机制，不能作为本轮整体偏高的已证实解释。
+图例 `4π` 表示全相空间总产额，通常包括对未测快度和横动量区域的实验外推。
+中快度是碰撞质心系中 `y=0` 附近的区域，实验表中的 `YRAP` 是粒子快度。
+
+作者确定将接受度作为可能影响简短讨论。[BRAHMS HEPData 104454](https://www.hepdata.net/record/104454)
+在 62.4 GeV、0–10% Au+Au 中显示离开中快度后 `K+/pi+` 有偏大的趋势。
+前向区域可能保留更多净重子，相应的化学组成、较大的奇异化学势及 kaon–超子伴随产生
+可能提高正 kaon 相对 pion 的丰度。这为中快度比值可能较小提供了一种物理解释，
+纵向组成与接受度也可能影响本文局域热比值的实验比较。两份稿件已采用这一简短表述，
+本批快度讨论与计算到此收口。
+
+默认两条理论曲线各含 50 个能量点，覆盖 **2.35–5020 GeV**。
+两族参数包络各使用 **4.87–200 GeV 的 17 个初筛能量**，其原计算域由
+`literature_envelope_v1.toml` 和 `andronic_exploration_v1.toml` 指定。
+近优候选使用 **7.7–200 GeV 的九个 Au+Au 点**选参，4.87 GeV 及 Pb+Pb horn 支点补充形状诊断。
+本次实验显示扩展至 2.35–200 GeV，未重新选参。较窄的参数带来自此前计算域，
+若扩展到更低能或 LHC，需要沿每条候选路径补算密度，单独延长解析冻结线不能提供比值带。
 
 极限温度、低能形状及束流化学势映射对幅度和峰位的后续探索见
 [参数包络研究](parameter_envelope_20261018.md)。文献未给出的协方差不能补造；

@@ -18,6 +18,8 @@ SEMANTIC_FIELDS = ("style_profile", "axes", "series", "selection_rule", "interpo
                    "caption_parameters", "frozen_render_signature")
 RENDER_FIELDS = ("figure_size_inches", "column", "legend_policy", "legend_placements",
                  "parameter_encoding", "coexistence_fill", "accessibility")
+OPTIONAL_SEMANTIC_FIELDS = {"derived_display_geometry", "caption_parameters", "frozen_render_signature"}
+OPTIONAL_RENDER_FIELDS = {"parameter_encoding", "coexistence_fill"}
 
 
 def _checked_json(record: Any, root: Path, label: str, errors: list[str]) -> dict[str, Any] | None:
@@ -93,9 +95,16 @@ def validate_png_delivery(manifest: dict[str, Any], *, root: Path) -> list[str]:
     if manifest.get("rendering", {}).get("vector_delivery_pending") is not False:
         errors.append("vector delivery must record vector_delivery_pending=false")
     for field in SEMANTIC_FIELDS:
+        # These describe specific figure families. An ordinary line chart need
+        # not invent derived geometry; adding or losing a declared field is drift.
+        if field in OPTIONAL_SEMANTIC_FIELDS and field not in accepted and field not in manifest:
+            continue
         if field not in accepted or field not in manifest or accepted[field] != manifest[field]:
             errors.append(f"PNG/vector semantic mismatch: {field}")
     for field in RENDER_FIELDS:
+        if (field in OPTIONAL_RENDER_FIELDS and field not in rendering
+                and field not in manifest.get("rendering", {})):
+            continue
         if field not in rendering or rendering[field] != manifest.get("rendering", {}).get(field):
             errors.append(f"PNG/vector rendering mismatch: {field}")
     # New context/identity records are conditional so frozen older packages do

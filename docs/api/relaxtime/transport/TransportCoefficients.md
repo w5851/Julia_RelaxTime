@@ -2,6 +2,8 @@
 
 本模块实现弛豫时间近似（RTA）下的夸克物质输运系数计算：剪切粘滞系数 $\eta$、体粘滞系数 $\zeta$、电导率 $\sigma$。
 
+有限 $\xi$ 输出采用占据加权标量约定；$\eta/\sigma/\zeta$ 使用 $f_\xi(1-f_\xi)$，扩散使用 $f_\xi$ 及热力学标量焓。完整 RS 张量与 PNJL 颜色响应未包含在这些 API 中。定义、解析对照及适用范围见 [RS 响应约定](../../../reference/formula/relaxtime/transport/RS_Response_Convention.md)。
+
 如果你当前更关心 transport provider 的字段契约、`Models.TransportProvider` 与 `prepare_transport_provider` 的桥接语义，建议先阅读 `CoreConcepts.md`，本页聚焦系数公式、积分配置与直接调用方式。
 
 ## 单位约定

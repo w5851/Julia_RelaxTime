@@ -145,3 +145,29 @@ def test_input_removal_and_png_substitution_are_rejected(delivery):
     errors = validate_png_delivery(manifest, root=root)
     assert any("frozen input" in error for error in errors)
     assert any("differs from" in error for error in errors)
+
+
+@pytest.mark.parametrize("field", ["derived_display_geometry", "caption_parameters", "frozen_render_signature",
+                                   "parameter_encoding", "coexistence_fill"])
+@pytest.mark.parametrize("drift", [None, "added", "removed"])
+def test_family_specific_fields_are_optional_but_cannot_appear_or_disappear(delivery, field, drift):
+    manifest, receipt, root = delivery
+    response = json.loads(receipt.read_text())
+    accepted_path = root / response["accepted_manifest"]["path"]
+    accepted = json.loads(accepted_path.read_text())
+    render_field = field in {"parameter_encoding", "coexistence_fill"}
+    before = accepted["rendering"] if render_field else accepted
+    after = manifest["rendering"] if render_field else manifest
+    if drift != "removed":
+        before.pop(field)
+    if drift != "added":
+        after.pop(field)
+    accepted_path.write_text(json.dumps(accepted))
+    response["accepted_manifest"] = input_record(accepted_path, role="accepted_png_manifest", root=root)
+    receipt.write_text(json.dumps(response))
+    manifest["author_review"]["record"] = input_record(receipt, role="author_png_acceptance", root=root)
+    errors = validate_png_delivery(manifest, root=root)
+    if drift is None:
+        assert errors == []
+    else:
+        assert any(f"mismatch: {field}" in error for error in errors)

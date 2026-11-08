@@ -1,27 +1,34 @@
 schema_version = 1
-primary_track = "meson-freezeout-experiment"
-updated_at = "2026-11-07"
+primary_track = "palc-performance-research"
+updated_at = "2026-11-08"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
 title = "Meson K/pi freezeout and heavy-ion comparison"
-status = "review"
+status = "archived"
 current_task = "meson-freezeout-heavy-ion-paper-comparison"
 blocked_by = []
 unlocks = []
-next_action = "三张新版K/pi图及介子稿已接入，学校2025模板的学位初稿已建立；当前待审阅新图和科学叙述，旧数值/参数带/M4的作者接受保持有效。图面确认后交付矢量图并收口本批，再核对Arena #313，最后评估PALC与全温区PR3。"
+next_action = ""
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
 current_branch = "main"
 current_sha = "9c727d106abb9e931ba22dd26c206dc38d2efdff"
 run_ids = []
 evidence = [
-  "note:20261107_three_display_figures_and_meson_manuscript_draft_integrated_xjtu_thesis_created",
+  "review:author_20261108_accepted_three_updated_figures_experiment_scope_and_authorized_vector_delivery",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/plot_manifest.json",
+  "review:author_20261108_accepted_brief_rapidity_discussion_and_authorized_computation_task_closeout",
+  "note:accepted_vectors_delivered_to_meson_and_thesis_manuscripts_further_text_review_owned_by_paper_repo",
+  "file:docs/reference/formula/relaxtime/transport/RS_Response_Convention.md",
+  "file:tests/validation/relaxtime/test_rs_response_conventions.jl",
+  "note:github_issue_313_closed_20261107_author_accepted_current_conventions_comment_6706495944",
+  "note:arena313_closed_quote_remote_32_pass_no_baseline_or_production_change",
   "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
   "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
   "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
-  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+  "note:author_20261107_authorized_arena313_now_thesis_expansion_and_png_review_before_vector_decision_palc_pr3_later",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
@@ -49,7 +56,7 @@ evidence = [
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
 ]
-updated_at = "2026-11-07"
+updated_at = "2026-11-08"
 
 [[items]]
 id = "meson-freezeout-default-comparison"
@@ -87,19 +94,23 @@ evidence = ["review:author_20261107_accepted_default_and_envelopes_original_para
 id = "meson-freezeout-heavy-ion-paper-comparison"
 track_id = "meson-freezeout-experiment"
 classification = "required_follow_up"
-status = "review"
+status = "archived"
 parent = "track:meson-freezeout-experiment"
 task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
 reason = "作者接受默认冻结线和两族参数带，要求采用文献原始参数作偏定性论文分析，并关注最新重核碰撞数据及峰位。"
-next_action = "审阅D:/Desktop/paper/My_Paper/pnjl_meson_mott_xi的新正文与三张图；已明确历史实轴质量宽度处方和xi=0有限窗口密度设置，STAR 54.4 GeV仅更新显示。图面确认后导出矢量图、收口本批，随后核对Arena #313。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "note:20261107_three_display_figures_and_meson_manuscript_draft_integrated_xjtu_thesis_created",
+  "review:author_20261108_accepted_three_updated_figures_experiment_scope_and_authorized_vector_delivery",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/plot_manifest.json",
+  "review:author_20261108_accepted_brief_rapidity_discussion_and_authorized_computation_task_closeout",
+  "note:accepted_vectors_delivered_to_meson_and_thesis_manuscripts_further_text_review_owned_by_paper_repo",
+  "file:docs/reference/formula/relaxtime/transport/RS_Response_Convention.md",
   "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
   "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
   "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
-  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+  "note:author_20261107_authorized_arena313_now_thesis_expansion_and_png_review_before_vector_decision_palc_pr3_later",
   "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
   "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
@@ -396,7 +407,7 @@ status = "deferred"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "按作者2026-11-07顺序，在介子图件与论文接入及Arena #313核对完成后，再评估PALC同口径pilot范围和收益。"
+next_action = "介子交付和Arena #313已完成；下一步评估PALC同口径pilot的范围、成本和收益。本项仍为未排期研究。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -405,10 +416,33 @@ current_sha = ""
 run_ids = []
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+  "note:20261108_meson_delivery_and_arena313_complete_palc_remains_unscheduled",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
-updated_at = "2026-11-07"
+updated_at = "2026-11-08"
+
+[[tracks]]
+id = "full-temperature-reference-research"
+title = "Full-temperature phase-reference production research"
+status = "deferred"
+current_task = "full-temperature-reference-pr3"
+blocked_by = []
+unlocks = []
+next_action = "算法PR #137/#139已完成；后续按研究收益确定新温区、收敛与参考生产范围，尚未安排计算。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = ""
+current_sha = ""
+run_ids = []
+evidence = [
+  "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
+  "pr:137",
+  "pr:139",
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+]
+updated_at = "2026-11-08"
 
 [[tracks]]
 id = "analysis-docs-cleanup"
@@ -1071,14 +1105,32 @@ classification = "research"
 status = "deferred"
 parent = "track:palc-performance-research"
 task_file = ""
-reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 研究不应阻塞当前 Issue #130 production review。"
-next_action = "在介子稿任务和Arena #313之后再评估；如启动则固定workload、cold/warm、solver telemetry与停止条件。"
+reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
+next_action = "前置介子交付和Arena #313已完成；如启动pilot则固定workload、cold/warm、solver telemetry与停止条件，当前尚未排期。"
 blocked_by = []
 backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
+]
+
+[[items]]
+id = "full-temperature-reference-pr3"
+track_id = "full-temperature-reference-research"
+classification = "research"
+status = "deferred"
+parent = "track:full-temperature-reference-research"
+task_file = ""
+reason = "全温区积分与相线算法已经交付；新温区参考产物尚未生产，是否继续取决于后续物理计算需求。"
+next_action = "先确定输入与温区，再规划积分、相线几何、独立oracle收敛以及新参考产物的验收；当前尚未排期。"
+blocked_by = []
+backlog_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
+evidence = [
+  "pr:137",
+  "pr:139",
+  "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
+  "note:issue130_phase_and_transport_v15_completed_independently_new_full_temperature_production_deferred",
 ]
 
 [[items]]

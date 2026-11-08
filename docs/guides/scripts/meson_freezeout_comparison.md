@@ -100,8 +100,11 @@ python scripts/analysis/relaxtime/plot_freezeout_comparison.py `
 这检验分辨率变化下的排序稳定性，不代替尾部和端点极限验收。
 
 图像目录只保存彩色/灰度 PNG 与 `plot_manifest.json`。同名 `results` case 保存
-比较指标、逐点残差、可选的分辨率差异、图注和绘图源码快照；可用 `--result-dir`
-指定该目录。已有任一 case 都拒绝覆盖。交付为 `png_review`，图例位于同一子图内，
+比较指标、逐点残差、可选的分辨率差异和图注；可用 `--result-dir`
+指定该目录。生成器和共享绘图代码按当前文件 hash 记录，不再为每次草稿重复保存源码。
+默认拒绝覆盖；两个 ratio 绘图入口可用 `--replace-draft` 原位更新 `png_review` 且
+`author_review=pending` 的未接受草稿。该选项只改写本次生成的图、图注、指标和 manifest，
+不删除目录或其他文件。交付为 `png_review`，图例位于同一子图内，
 不会自动更新论文的 current 图层。
 
 默认比值图固定 `cleymans2006` 为蓝色实线、`andronic2018` 为橙色虚线，子集／重排
@@ -111,10 +114,16 @@ python scripts/analysis/relaxtime/plot_freezeout_comparison.py `
 
 参数包络另用两个只读分析入口汇总与绘图：
 
-2026-11-07 实验显示更新可给两个 ratio 绘图入口传入
+2026-11-08 实验显示更新可给两个 ratio 绘图入口传入
 `--experiment data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv`。
 对参数包络，该参数只替换显示观测；评分表的哈希、九点评分、曲线排名和包络成员
-继续来自冻结 summary。新增 STAR 54.4 GeV 点不触发模型插值或重算。
+继续来自冻结 summary。39 行实验表包括 STAR 54.4 GeV、NA61/SHINE 7.62 GeV 全相空间预备点、
+HEPData 25202 的全部 11 个全相空间点、BRAHMS 62.4 GeV 中快度点和三个 BES-II 派生比值。
+常规 AGS/STAR/NA49 中快度点用实心标记，全相空间点用空心标记；BRAHMS 和 BES-II 单列图例，
+BES-II 标明 `derived, prelim.`，误差由产额按零协方差传播。参数带的实验显示范围为 2.35–200 GeV，
+包含上述 36 点（另外三个 HADES/ALICE 点只在默认图中显示）；理论曲线保持原计算范围及缺口。
+这些显示更新复用已计算结果。数值及接受度、误差定义见
+[实验输入](../../../data/inputs/meson_freezeout_experiment_20261107/README.md)。
 
 ```powershell
 python scripts/analysis/relaxtime/summarize_freezeout_envelope.py `
@@ -140,7 +149,26 @@ python scripts/analysis/relaxtime/plot_freezeout_envelope.py `
 灰色带来自固定的完整初筛曲线集合；蓝色带来自主 RMSE 不超过初筛最小值
 1.10 倍的完整曲线集合。最优曲线使用加密后的直接计算。初筛带不会因选中三条
 曲线完成 fine 核验而自动获得同等精度；两种带均没有统计置信度。
-任何已有汇总或图像 case 都拒绝覆盖，修订图应使用新的同级目录。
+数值汇总和已接受图件保留原版本；两个 ratio 入口的未接受 PNG 草稿可用上述 `--replace-draft` 原位更新。
+
+### 已接受图面的矢量导出
+
+2026-11-08 作者接受的三张图已交付于
+`data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/`。
+独立入口 `export_freezeout_pdf.py` 读取实际作者接受记录，复用原渲染器，在 PNG 输出边界生成
+PDF；重新渲染的 PNG 必须与接受文件逐字节一致。输入、坐标、曲线、图例和缺口沿用接受版。
+逐点或源码核验依赖若已归档，只在临时目录读取原 ZIP 字节，交付后不留恢复副本。
+
+```powershell
+python scripts/analysis/relaxtime/export_freezeout_pdf.py `
+  --acceptance RESULTS/freezeout_defaults_acceptance.json RESULTS/freezeout_envelope_acceptance.json RESULTS/andronic_envelope_acceptance.json `
+  --output-dir data/outputs/figures/relaxtime/meson_density/NEW_VECTOR_CASE
+```
+
+接受记录使用 `plot_png_acceptance_v1`，绑定作者回复、PNG 和原 manifest 的 hash。
+新 case 仅保存三张 PDF 与一个 bundle manifest，引用原 PNG；不覆盖已接受 case。
+导出验证包含物理尺寸、字体嵌入、矢量路径和两阶段一致性，不调用密度求解器。
+默认曲线能区为 2.35–5020 GeV，参数包络计算域为 4.87–200 GeV；九点选参能区为 7.7–200 GeV。
 
 相同参数组的 T–muB 图使用独立的解析准备阶段；绘图阶段只读准备好的表：
 

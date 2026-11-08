@@ -1,8 +1,8 @@
 # 有效耦合系数 - 实现文档
 
 ## 1. 公式标识
-- **程序实现**: `K_effective_couplings`
-- **对应文件**: `../../src/relaxtime/EffectiveCouplings.jl`
+- **程序实现**: `calculate_effective_couplings`
+- **对应文件**: `src/relaxtime/EffectiveCouplings.jl`
 
 ## 2. 物理意义
 - **物理背景**: 在3味PNJL模型中，有效耦合系数描述了夸克-反夸克相互作用通过介子传播的有效强度，是随机相位近似下介子传播子的关键参数
@@ -11,7 +11,9 @@
 
 ## 3. 数学表达式
 
-### 3.1 原始公式
+有限 RS 背景中，本页由 A 重构的凝聚记为 $\phi_A$，而能隙方程的场变量来自 RS 巨势变分，记为 $\phi_\Omega$。二者的热件在固定背景上存在 $O(\xi)$ 差；helper `calculate_G_from_A` 返回的是 $H=-\phi_A$。现行混合闭合、积分域条件及根/碰撞率传播公式见 [RS 响应约定](../transport/RS_Response_Convention.md)。
+
+### 3.1 有效耦合与 A 积分的支持
 
 为与当前物理凝聚口径区分，下面先记历史 helper
 `H_u=-\phi_u`、`H_s=-\phi_s`；它们对应代码参数名 `G_u`、`G_s`。
@@ -26,29 +28,35 @@ K_{08}^{\pm} &= \pm \frac{1}{6} \sqrt{2} K(H_u - H_s)
 \end{aligned}
 ```
 
-其中，物理上应优先从夸克凝聚
+上标和字段名的对应为 `+` / `*_plus` = 赝标量 P，`-` / `*_minus` = 标量 S，与 `MesonPropagator.meson_propagator_simple` 的选择一致。
+
+其中，顶点凝聚与 A 的归一化关系为
 ```math
-\begin{aligned}
-\phi_f &= \frac{N_c}{4\pi^2} \; m_f\; A_f(T, \mu), \\
-A_f(T, \mu) &= -16\pi^2 \int_0^\Lambda \frac{d^3 p}{(2\pi)^3} \frac{1}{2E}\left[ 1 - n_f^+ - n_f^- \right].
-\end{aligned}
-```
-出发，其中
-```math
-\phi_f \equiv \langle \bar q_f q_f \rangle.
+\phi_{A,f}=\frac{N_c}{4\pi^2}m_f A_f,\qquad H_f=-\phi_{A,f}.
 ```
 
-等价地，把角积分做掉后，
+现行 `A` 将真空与热部分分开处理。在各向同性背景上，
 ```math
-A_f(T,\mu)= -4\int_0^\Lambda dp\,\frac{p^2}{E}
-\left[1-n_q(E;\mu,\Phi,\bar\Phi)-n_{\bar q}(E;\mu,\Phi,\bar\Phi)\right].
+A_f=-4\int_0^\Lambda dp\,\frac{p^2}{E}
+ +4\int_{\mathcal D_T}dp\,\frac{p^2}{E}[n_q(E)+n_{\bar q}(E)],
+\qquad E=\sqrt{p^2+m_f^2}.
 ```
 
-若改写成当前项目代码直接实现的积分核，则同一个 `A_f` 也可写成
+真空项由 `const_integral_term_A` 解析计算。热积分域 $\mathcal D_T$ 由传入节点与权重决定，通常用有限上限近似全域；它不自动等于 `[0,Lambda]`。`A_aniso` 的对应表达为
 ```math
-A_f(T,\mu)= 4\int_0^\Lambda dp\,\frac{p^2}{E}
-\left[n_q(E;\mu,\Phi,\bar\Phi)+n_{\bar q}(E;\mu,\Phi,\bar\Phi)-1\right].
+A_f^{\xi}=-4\int_0^\Lambda dp\,\frac{p^2}{E}
+ +2\int_{\mathcal D_T}dp\,\frac{p^2}{E}\int_{-1}^{1}dc\,
+ [n_q(E_\xi)+n_{\bar q}(E_\xi)],\qquad
+ E_\xi=\sqrt{p^2+m_f^2+\xi p^2c^2}.
 ```
+可选 `A_aniso_reduced` 对同一个积分做角约化；有限 `p_max` 对应原物理动量球的热支持，`p_max=Inf` 对应半无穷热积分。
+
+只有当真空和热部分共同取 `[0,Lambda]` 时，才能合并为历史有限支持式
+```math
+A_f^{\rm common}=-4\int_0^\Lambda dp\,\frac{p^2}{E}[1-n_q-n_{\bar q}]
+ =4\int_0^\Lambda dp\,\frac{p^2}{E}[n_q+n_{\bar q}-1].
+```
+这两个写法只是符号等价，不能用于说明现行热积分也被真空 cutoff 截断。
 
 在项目的自然单位约定下，`p,m_f,T,mu_f` 的单位为 `fm^-1`，因此
 ```math
@@ -58,11 +66,9 @@ A_f(T,\mu)= 4\int_0^\Lambda dp\,\frac{p^2}{E}
 [K H_f]=\mathrm{fm}^{2}.
 ```
 
-这两式之所以等价，是因为第二式把第一式中整体的负号吸收到括号里，改写成了 `n_q+n_{\bar q}-1`；这里的物理凝聚主口径始终是 `\phi_f`，而不是 `-\phi_f`。
-
 - 需要注意：当前实现中的辅助函数 `calculate_G_from_A(A_f, m_f)` 返回的是
 ```math
-G^f_{\text{helper}} = -\phi_f,
+G^f_{\text{helper}} = -\phi_{A,f},
 ```
 这是历史实现中为适配后续有效耦合公式而保留的中间变量口径；在文档解释层，应优先把 `\phi_f` 视为基本物理量。
 
@@ -113,9 +119,7 @@ end
 - **\(\phi_u,\phi_s\)**: 物理上的夸克凝聚，通过 A 积分确定
 - **G_u,G_s**: 当前实现中传给 `calculate_effective_couplings` 的 helper 变量，满足 `G_u=-\phi_u, G_s=-\phi_s`
 
-`G_u/G_s` 的命名是兼容旧接口的历史遗留。后续完整 KMT 路径应直接复用
-平衡解中已得到的 `\phi_u,\phi_d,\phi_s`，避免再次从 `A_f` 重积分或把
-`H_f` 当作独立物理输入。
+`G_u/G_s` 的命名是兼容旧接口的历史遗留。复用已计算的顶点凝聚可以减少重复积分；有限 RS 下若将其替换成平衡场 `phi_Omega`，则是在改变凝聚闭合。完整 KMT 路径应显式注明所用凝聚与支持，`H_f` 不作为独立物理输入。
 
 ### 5.2 非对称背景下的旧/完整通道映射
 
@@ -149,7 +153,7 @@ K^0=d bar(s), bar(K)^0=s bar(d)  -> K67  (u spectator)
 ## 6. 输出结果说明
 
 ### 6.1 主输出
-- **有效耦合系数组**: 包含10个耦合系数的元组，分别对应不同味道通道的标量(+)和赝标量(-)相互作用强度
+- **有效耦合系数组**: 返回各味道通道的赝标量(+)和标量(-)耦合字段，以及混合矩阵所需的行列式字段。
 
 ### 6.2 辅助输出
 - **耦合矩阵行列式**: det K = K₀⁺K₈⁺ - (K₀₈⁺)²，用于混合介子传播子计算

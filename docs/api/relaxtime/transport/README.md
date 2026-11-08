@@ -45,6 +45,7 @@
 - `RelaxationTime.md`
 - `AverageScatteringRate.md`
 - [TransportSamplingProfiles.md](TransportSamplingProfiles.md)：默认生产配置与逐道误差诊断
+- [RS 响应约定](../../../reference/formula/relaxtime/transport/RS_Response_Convention.md)：Arena #313 的凝聚、统计权重、标量投影与热力学焓审计
 - `generated/Exports.md`
 
 ### 4. workflow 细节

@@ -28,8 +28,20 @@
 - [带电 K/π 介子数密度物理约束与验证中期路线](2026-07-25_带电KPi介子数密度物理约束与验证中期路线.md)
 - [PALC 同口径性能与延拓一致性诊断](2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)
 
-作者于 2026-11-07 确定：先完成当前介子图件与论文接入，再核对
-[Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313)，随后评估 PALC 与全温区 PR3。
+## 当前恢复入口（2026-11-08 核对）
+
+介子冻结线数值、更新实验图件、矢量交付及论文接入均已完成；
+[Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313) 已按作者接受的现行定义关闭。
+论文后续文字审阅由 `D:/Desktop/paper` 管理。计算项目当前没有执行中或被阻塞的任务。
+
+| 待评估研究 | 实际剩余工作 | 当前状态 |
+| --- | --- | --- |
+| PALC 性能与 SeedContinuation 一致性 | 固定相同 workload，比较 cold/warm 成本、solver telemetry 和生产扫描语义 | `deferred`；下一恢复入口，尚未安排 pilot |
+| 全温区参考生产 PR3 | 确定新生产温区与输入，完成积分/相线/oracle 收敛及新参考产物验收 | `deferred`；算法 PR #137/#139 已完成，生产尚未开展 |
+
+其余文档是按需求重开的候选研究与能力规划。旧阶段勾选保留当时的语境，
+实际进度由各页当前摘要、现有实现及 `config/governance/task_tracks.toml` 确定。
+P1/BU2020 的条件性扩展见[候选清单](2026-08-03_P1与BU2020后续治理待办.md)。
 
 ## 使用规则
 

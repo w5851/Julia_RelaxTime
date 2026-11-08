@@ -1,6 +1,6 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / deferred`。作者于 2026-11-07 将本项置于当前介子数密度图件与论文接入、以及 Arena Issue #313 核对之后再评估；尚未安排 pilot。
+状态：`research / deferred`。截至 2026-11-08，介子数密度图件与论文接入、Arena Issue #313 核对均已完成。本项是计算项目的下一恢复入口；仍需评估同口径 pilot 的范围和收益，尚未安排计算。
 
 ## 1. 背景与目标
 
