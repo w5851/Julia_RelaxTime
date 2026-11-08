@@ -66,6 +66,9 @@ def summarize(directory):
             seed = cases["seed"]["repetitions"][-1]["result"]["points"]
             candidate = cases[other]["repetitions"][-1]["result"]["points"]
             checks[f"seed_vs_{other}"] = compare_points(seed, candidate)
+    if "palc" in cases and "dense" in cases:
+        checks["palc_vs_dense"] = compare_points(cases["palc"]["repetitions"][-1]["result"]["points"],
+            cases["dense"]["repetitions"][-1]["result"]["points"])
     complete = len(cases) == 5 and all(m.get("complete") and m.get("accepted_all") for m in measurements.values())
     identities_match = len({d["source_sha"] for d in cases.values()}) == 1 and len({
         json.dumps(d["config"], sort_keys=True) for d in cases.values()}) == 1
@@ -84,6 +87,7 @@ def summarize(directory):
         lines.append(f"| {method} | {m.get('load_seconds')} | {m.get('first_call_seconds')} | "
                      f"{m.get('warm_median_seconds')} | {m.get('accepted_all', False)} |")
     lines += ["", f"Seed / PALC warm cost ratio (only if parity passes): {speedup}", "",
+              *[f"- {name}: {check['passed']}" for name, check in checks.items() if "_vs_" in name], "",
               "The 8 x 4 quadrature is a solver diagnostic, not an integration-convergence claim.",
               "All methods start from fresh seeds on every repetition. Load is separate; first call includes remaining JIT.",
               "PALC includes anchor discovery and correction to the same target densities.",

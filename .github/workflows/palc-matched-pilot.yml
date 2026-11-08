@@ -45,6 +45,8 @@ jobs:
         run: |
           julia --project=. -e 'using Pkg; Pkg.instantiate()'
           julia --project=scripts/analysis/pnjl_bifurcation_spike -e 'using Pkg; Pkg.instantiate()'
+      - name: Precompile the shared dependency stack before timing
+        run: julia --startup-file=no --project=scripts/analysis/pnjl_bifurcation_spike -e 'include("scripts/analysis/pnjl_bifurcation_spike/run_matched_pilot.jl")'
       - name: Verify counters and helpers
         if: matrix.case == 't120_rho035'
         run: |

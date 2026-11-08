@@ -161,6 +161,8 @@ existing windows on Actions with 5 common density targets and 8 x 4 quadrature.
 `run_matched_pilot.jl` records loading separately, then repeats the same fresh
 workload three times (first call and two warm calls). BifurcationKit remains in
 this isolated environment. PNJL numerical pilot execution is on Actions.
+The workflow imports the shared dependency stack once before starting timed
+subprocesses, so package precompilation cannot consume the numerical timeout.
 
 Methods are multi-anchor PALC, `SeedContinuation`, independent pressure-governed
 `solve_multi`, the equilibrium helper used by the combined `trho_asymmetric`
