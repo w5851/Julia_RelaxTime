@@ -126,12 +126,20 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 ## 请求级 solver telemetry
 
-需要审计 `FixedRho` equilibrium 工作量时，可显式创建 `Models.SolverWorkTelemetry()`，并将其作为
-`work_telemetry=` 传给 `Models.solve` 或 `Models.solve_constraint`。计数器属于单次请求/扫描，
+需要审计 `FixedRho` 或 `FixedAsymmetricRho` equilibrium 工作量时，可显式创建 `Models.SolverWorkTelemetry()`，并将其作为
+`work_telemetry=` 传给 `Models.solve`、`Models.solve_multi`、`Models.solve_constraint` 或 `Models.solve_path`。计数器属于单次请求/扫描，
 不是全局状态；`SolverResult v1` 的字段和序列化契约不变。`Models.solver_work_snapshot`
 返回可写入 evidence 的 `NamedTuple`，包含 residual/Jacobian 调用、Newton/trust-region
 迭代、fallback/rescue、异常和 retry 计数；长循环复用对象前可调用
 `Models.reset_solver_work!`。未传入 telemetry 时保持原有路径。
+
+`FixedAsymmetricRho` 的 `fixedasymrho_requests` 统计外部 equilibrium 请求，
+`governed_attempts` 统计外层候选尝试，`fixedasymrho_inner_solves` 统计每次实际启动的内层
+多种子 NLsolve（包括抛出异常的尝试）。`fixedasymrho_residual_evaluations` 统计该内层
+残差函数的实际调用，包含 ForwardDiff 求 Jacobian 时的 Dual 调用；
+`nlsolve_f_calls/g_calls` 则沿用 NLsolve 自报口径，两者不能直接相加。
+后处理残差单独计入 `postprocess_residual_calls`；`nonconverged_attempts` 包含内层
+物理/残差检查未通过和异常退出，最终请求是否成功仍由外层治理及返回结果确定。
 底层计数累加器 `record_solver_request!`、`record_governed_attempt!`、
 `record_nlsolve_work!`、`record_postprocess_residual!`、`record_attempt_outcome!`、
 `record_solver_exception!` 和 `record_scan_retry!` 主要供隔离 pilot/测试使用，

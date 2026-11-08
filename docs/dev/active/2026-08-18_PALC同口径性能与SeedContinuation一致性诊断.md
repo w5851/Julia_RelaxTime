@@ -1,6 +1,6 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / deferred`。截至 2026-11-08，介子数密度图件与论文接入、Arena Issue #313 核对均已完成。本项是计算项目的下一恢复入口；仍需评估同口径 pilot 的范围和收益，尚未安排计算。
+状态：`research / active`。2026-11-08 作者授权启动；前置介子图件/论文接入及 Arena #313 已完成。当前准备两个既有小窗口的 GitHub Actions pilot，评估分支一致性和实际求解成本。
 
 ## 1. 背景与目标
 
@@ -28,12 +28,23 @@ PALC multi-branch spike 已在两个 `FixedAsymmetricRho` 多根场景中展示�
 
 - PALC 历史计时没有 matched dense/seed 对照，不能产生加速比。
 - 现有 PALC 计时缺少完整 PNJL residual/Jacobian/attempt/fallback 计数。
-- `SeedContinuation` 到 `run_trho_scan` 的 production-script parity 仍未闭环。
+- `SeedContinuation` 到 `run_combined_meson_density_scan.jl` 的 `trho_asymmetric` equilibrium 路径 parity 仍未闭环；`Models.run_trho_scan` 是另一条扫描链路。
 - PALC 的多 anchor、多 branch 工作量不能直接等同于单分支或单点 solver 工作量。
+
+## 首阶段工作量（2026-11-08）
+
+- 复用 `T=120 MeV, rho/rho0=0.30:0.025:0.40` 和 `T=130 MeV, rho/rho0=0.75:0.025:0.85`，每窗口五个目标点；`xi=0, u/d=0.876, s_target=0, p_num=8, t_num=4`。
+- 所有方法采用相同积分节点、`residual_norm_max=1e-6` 和最大压力选择；记录当前内部求解容差，最终用相同显式残差、物理条件和密度误差检验。该 pilot 比较离散方程求解，不据此声称积分收敛。
+- 对比 PALC（包含 anchor 发现、双向延拓及目标 rho 校正）、SeedContinuation、逐点 `solve_multi`、生产脚本 equilibrium helper，以及半步长 SeedContinuation 参考；参考的额外计算成本单独显示。
+- 每种方法在独立 Julia 进程加载相同依赖后，执行一次首次调用和两次相同工作量的 warm 调用；加载耗时单列，首次调用仍包含尚未发生的 JIT。所有重复重新发现 anchor/求解，不复用前一轮结果。
+- FixedAsymmetricRho 当前在外层候选治理内再次遍历种子，必须同时统计外层请求和实际内层 NLsolve；PALC 计入有限差分 Jacobian 内部残差及失败 Newton 尝试。
+- 原 spike 的最近 rho 节点对比只作 seed 来源；性能 pilot 的结果比较必须先校正到目标 rho，且将校正成本纳入 PALC。
+- 生产式 parity 复用 `combined_meson_density_equilibrium.jl`，覆盖 downstream 介子步骤成功时的 equilibrium 序列；介子步骤失败时生产脚本保留旧 seed 的行为不在本 pilot 模拟。
+- 同点 parity 门槛为 natural-unit 状态距离 `1e-4`、压力差 `1e-6 fm^-4`，与 `1e-6` 显式残差和密度约束同时检查；另输出连续差值供复核。所有方法固定 tensor quadrature，adaptive-quadrature 计数不适用。
 
 ## 4. 诊断任务
 
-- [ ] 设计固定 workload：相同 `T/rho/xi`、`p_num/t_num`、quadrature policy、iterations、容差、seed 和 pressure selection。
+- [x] 设计固定 workload：相同 `T/rho/xi`、`p_num/t_num`、quadrature policy、iterations、容差、seed 和 pressure selection。
 - [ ] 在同一 Julia 进程分别测 cold/warm，避免把 BifurcationKit 编译或 `Models` 加载混入数值成本。
 - [ ] 通过 Actions 采集 residual/Jacobian/Newton/attempt/fallback/nonconverged/adaptive-quadrature telemetry。
 - [ ] 对照 PALC、SeedContinuation/`solve_multi` 和 dense reference 的结果、分支数、压力选择和残差。

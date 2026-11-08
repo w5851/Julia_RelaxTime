@@ -45,6 +45,29 @@ end
     @test_throws ArgumentError Models.record_solver_request!(Ref(0); fixedrho=false)
 end
 
+@testset "FixedAsymmetricRho inner work and residual instrumentation" begin
+    telemetry = Models.SolverWorkTelemetry()
+    Models.record_solver_request!(telemetry; fixedasymrho=true)
+    Models.record_fixedasymrho_inner_solve!(telemetry)
+    Models.record_fixedasymrho_inner_solve!(telemetry)
+    residual! = (F, x) -> (F .= x .^ 2 .- 1)
+    @test Models._instrument_fixedasymrho_residual(residual!, nothing) === residual!
+    instrumented! = Models._instrument_fixedasymrho_residual(residual!, telemetry)
+    output = zeros(2)
+    instrumented!(output, [2.0, 3.0])
+    @test output == [3.0, 8.0]
+    instrumented!(output, [1.0, 2.0])
+    @test output == [0.0, 3.0]
+    snapshot = Models.solver_work_snapshot(telemetry)
+    @test snapshot.equilibrium_requests == snapshot.fixedasymrho_requests == 1
+    @test snapshot.fixedrho_requests == 0
+    @test snapshot.fixedasymrho_inner_solves == 2
+    @test snapshot.fixedasymrho_residual_evaluations == 2
+    @test_throws ArgumentError Models._instrument_fixedasymrho_residual(residual!, Ref(0))
+    Models.reset_solver_work!(telemetry)
+    @test all(iszero, values(Models.solver_work_snapshot(telemetry)))
+end
+
 @testset "SolverResult v1 remains unchanged with telemetry" begin
     @test Models.SOLVER_CONTRACT_VERSION_V1 == :v1
     @test :contract_version in Models.SOLVER_RESULT_REQUIRED_FIELDS

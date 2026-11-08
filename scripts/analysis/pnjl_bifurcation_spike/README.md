@@ -152,3 +152,39 @@ PALC may advance as an opt-in analysis backend when both scenarios expose
 distinct branches and explicit ground-state selections, but BifurcationKit stays
 out of the root `Project.toml` until broader regression, precompile, and
 production opt-in evidence justify changing the stable environment.
+
+### Matched performance pilot (2026-11-08)
+
+The current task uses `.github/workflows/palc-matched-pilot.yml`. It runs the two
+existing windows on Actions with 5 common density targets and 8 x 4 quadrature.
+`run_matched_pilot.py` launches each method in a separate Julia process;
+`run_matched_pilot.jl` records loading separately, then repeats the same fresh
+workload three times (first call and two warm calls). BifurcationKit remains in
+this isolated environment. PNJL numerical pilot execution is on Actions.
+
+Methods are multi-anchor PALC, `SeedContinuation`, independent pressure-governed
+`solve_multi`, the equilibrium helper used by the combined `trho_asymmetric`
+script, and a half-step SeedContinuation reference. Every reported target is
+checked at its actual rho with the same explicit residual and physicality gate.
+The PALC total includes catalog/high-density anchor discovery, all continuation
+branches, and single-seed correction to the common targets. Nearest/interpolated
+branch points supply correction seeds only. All target crossings of a folded
+branch are considered.
+
+`summary.json` and `summary.md` report parity and timing. A cost ratio is emitted
+only after all repetitions and same-target comparisons pass. `processes.json`
+also records process wall time and runner compute time, including dependency
+loading; Actions setup/install time remains visible in the workflow. First-call
+timing includes remaining method JIT, and is not a package-cache-free cold start.
+
+`FixedAsymmetricRho` telemetry separates requests, outer attempts and actual
+inner multi-seed NLsolve work. Direct residual evaluations include AD or finite
+difference Jacobian work; NLsolve f/g counts use the library's own convention
+and are not added to those evaluations. BK callbacks include failed Newton
+attempts and retries. Both paths use fixed tensor quadrature, so there is no
+adaptive-quadrature workload in this pilot.
+
+This establishes local solver consistency at fixed discretization. The dense
+reference is a step-size check, and production parity covers the equilibrium
+stage with successful downstream meson steps; neither runs meson densities nor
+proves complete branch discovery or converged thermal integration.

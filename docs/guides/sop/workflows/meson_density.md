@@ -39,6 +39,8 @@
 
 - `scripts/relaxtime/run_combined_meson_density_scan.jl`
 - 轻量参数/输出合同：`scripts/relaxtime/combined_meson_density_scan_contract.jl`
+- `trho_asymmetric` 的 equilibrium 种子池和最大压力求解封装：
+  `scripts/relaxtime/combined_meson_density_equilibrium.jl`，供组合扫描与独立延拓诊断复用。
 
 远程长任务入口：
 

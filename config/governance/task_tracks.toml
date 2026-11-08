@@ -403,20 +403,21 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "deferred"
+status = "active"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "介子交付和Arena #313已完成；下一步评估PALC同口径pilot的范围、成本和收益。本项仍为未排期研究。"
+next_action = "完成 FixedAsymmetricRho 内层 telemetry 和同密度点校正，运行两个旧窗口的 Actions pilot；比较 cold/warm 成本及 SeedContinuation 生产式语义。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = ""
-current_sha = ""
+current_branch = "codex/palc-matched-diagnostic"
+current_sha = "70d3e8af8c17b9021a929d7acff91445d36d45d9"
 run_ids = []
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
-  "note:20261108_meson_delivery_and_arena313_complete_palc_remains_unscheduled",
+  "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
+  "file:docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
@@ -1102,14 +1103,15 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "deferred"
+status = "active"
 parent = "track:palc-performance-research"
-task_file = ""
+task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
-next_action = "前置介子交付和Arena #313已完成；如启动pilot则固定workload、cold/warm、solver telemetry与停止条件，当前尚未排期。"
+next_action = "按已启动合同补齐内外层求解计数与同点比较，执行有限 Actions pilot，依据 parity 和成本决定后续价值。"
 blocked_by = []
-backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
+backlog_file = ""
 evidence = [
+  "note:author_20261108_start_palc_matched_diagnostic",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",

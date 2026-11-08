@@ -21,10 +21,13 @@ mutable struct SolverWorkTelemetry
     governed_rescues::Int
     exceptions::Int
     scan_retries::Int
+    fixedasymrho_requests::Int
+    fixedasymrho_inner_solves::Int
+    fixedasymrho_residual_evaluations::Int
 end
 
 SolverWorkTelemetry() = SolverWorkTelemetry(
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 )
 
 @inline function _require_solver_work_telemetry(telemetry)
@@ -35,12 +38,29 @@ SolverWorkTelemetry() = SolverWorkTelemetry(
     return telemetry
 end
 
-@inline function record_solver_request!(telemetry; fixedrho::Bool=false)
+@inline function record_solver_request!(telemetry; fixedrho::Bool=false, fixedasymrho::Bool=false)
     telemetry = _require_solver_work_telemetry(telemetry)
     telemetry === nothing && return nothing
     telemetry.equilibrium_requests += 1
     fixedrho && (telemetry.fixedrho_requests += 1)
+    fixedasymrho && (telemetry.fixedasymrho_requests += 1)
     return nothing
+end
+
+@inline function record_fixedasymrho_inner_solve!(telemetry)
+    telemetry = _require_solver_work_telemetry(telemetry)
+    telemetry === nothing && return nothing
+    telemetry.fixedasymrho_inner_solves += 1
+    return nothing
+end
+
+function _instrument_fixedasymrho_residual(residual!, telemetry)
+    telemetry = _require_solver_work_telemetry(telemetry)
+    telemetry === nothing && return residual!
+    return function (F, x)
+        telemetry.fixedasymrho_residual_evaluations += 1
+        return residual!(F, x)
+    end
 end
 
 @inline function record_governed_attempt!(telemetry; origin::Symbol=:primary)
