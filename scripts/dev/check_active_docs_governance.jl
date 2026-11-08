@@ -12,7 +12,8 @@ function review_documents(root::AbstractString=ROOT; current_date::Date=today())
     active_dir = joinpath(root, "docs", "dev", "active")
     violations = String[]
     advisories = String[]
-    isdir(active_dir) || return (; violations=["active docs directory not found: $(active_dir)"], advisories)
+    # Git omits this directory when every active task has been archived.
+    ispath(active_dir) || return (; violations, advisories)
     for file in sort(readdir(active_dir))
         isfile(joinpath(active_dir, file)) && endswith(file, ".md") || continue
         if !occursin(NAME_RE, file)
