@@ -1,12 +1,14 @@
 # Algorithmic Feasibility Evidence
 
-本目录收纳独立的 PNJL 临界判据算法可行性审计。它使用解析 cusp 曲线族验证 secant、rho-support cascade、拟合稳定性、CEP 外推和性能记录的合同；不代表 PNJL 数值结果，也不属于 phase-reference promotion 证据。
+本目录收纳 PNJL 算法可行性分析。`criticality_feasibility_v1` 使用解析 cusp 曲线族审计临界判据；
+`palc_matched_20261108_analysis` 使用真实 PNJL 小窗口比较延拓与种子扫描，两者各自保留适用范围。
 
 ## Evidence Package
 
 | 逻辑角色 | 当前路径 | verdict / 用途 |
 | --- | --- | --- |
 | criticality feasibility v1 | [`criticality_feasibility_v1/`](criticality_feasibility_v1/) | `diagnostic_candidate`；受控解析反例上的算法合同审计 |
+| PALC matched pilot | [`palc_matched_20261108_analysis/`](palc_matched_20261108_analysis/) | 两窗口同密度点、cold/warm 与工作量对照；隔离诊断及候选根选择反例 |
 
 ## Boundary
 

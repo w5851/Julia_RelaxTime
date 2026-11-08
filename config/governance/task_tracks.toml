@@ -403,20 +403,24 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "active"
+status = "review"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "完成 FixedAsymmetricRho 内层 telemetry 和同密度点校正，运行两个旧窗口的 Actions pilot；比较 cold/warm 成本及 SeedContinuation 生产式语义。"
-required_author_review = false
-author_review_status = "not_required"
+next_action = "PR #338 两窗口诊断完成且 CI 通过；审阅隔离 PALC 的收益及候选根保留反例，再决定下一阶段生产算法改进。"
+required_author_review = true
+author_review_status = "pending"
 promotion_required = false
 current_branch = "codex/palc-matched-diagnostic"
-current_sha = "70d3e8af8c17b9021a929d7acff91445d36d45d9"
-run_ids = []
+current_sha = "053099ba585e640ef89e1dfa0a150f60c7fbe0d7"
+run_ids = ["42477523346", "42479096492"]
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
+  "pr:338",
+  "run:42479096492",
+  "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
+  "file:data/outputs/results/analysis/palc_matched_20261108/pilot.json",
   "file:docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
@@ -1103,15 +1107,18 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "active"
+status = "review"
 parent = "track:palc-performance-research"
 task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
-next_action = "按已启动合同补齐内外层求解计数与同点比较，执行有限 Actions pilot，依据 parity 和成本决定后续价值。"
+next_action = "首阶段计算验证已完成，审阅 PR #338 与结果；候选保留问题属于生产 backend 前的下一阶段，当前默认未改。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "note:author_20261108_start_palc_matched_diagnostic",
+  "pr:338",
+  "run:42479096492",
+  "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",

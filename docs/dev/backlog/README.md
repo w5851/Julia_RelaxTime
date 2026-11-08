@@ -31,12 +31,12 @@
 
 介子冻结线数值、更新实验图件、矢量交付及论文接入均已完成；
 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313) 已按作者接受的现行定义关闭。
-论文后续文字审阅由 `D:/Desktop/paper` 管理。PALC 同口径诊断已获作者授权启动，
+论文后续文字审阅由 `D:/Desktop/paper` 管理。PALC 同口径诊断已完成首阶段 pilot，
 任务合同已移至 [active](../active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)。
 
 | 待评估研究 | 实际剩余工作 | 当前状态 |
 | --- | --- | --- |
-| PALC 性能与 SeedContinuation 一致性 | 固定相同 workload，比较 cold/warm 成本、solver telemetry 和生产扫描语义 | `active`；准备两窗口 Actions pilot |
+| PALC 性能与 SeedContinuation 一致性 | 两窗口同点及计数对照完成，存在候选根选择敏感性；保留隔离诊断，后续可核对候选保留 | `review`；PR #338，等待诊断结论审阅 |
 | 全温区参考生产 PR3 | 确定新生产温区与输入，完成积分/相线/oracle 收敛及新参考产物验收 | `deferred`；算法 PR #137/#139 已完成，生产尚未开展 |
 
 其余文档是按需求重开的候选研究与能力规划。旧阶段勾选保留当时的语境，

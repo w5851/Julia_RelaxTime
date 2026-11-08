@@ -1,6 +1,6 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / active`。2026-11-08 作者授权启动；前置介子图件/论文接入及 Arena #313 已完成。当前准备两个既有小窗口的 GitHub Actions pilot，评估分支一致性和实际求解成本。
+状态：`research / review`。2026-11-08 已完成两窗口 Actions pilot、计数开关数值 parity 和结果复核，见 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338)。建议保留隔离诊断能力；候选根选择敏感性在进入生产 backend 前另行处理。完整结果见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 
 ## 1. 背景与目标
 
@@ -24,12 +24,14 @@ PALC multi-branch spike 已在两个 `FixedAsymmetricRho` 多根场景中展示�
 - 不在本机运行 PNJL solver；正式数值诊断只允许通过明确授权的 GitHub Actions pilot。
 - 不降低物理/数值容差，不改变 phase branch governance，不启动 C3/O1 或 reference promotion。
 
-## 3. 当前缺口
+## 3. 本阶段结果与后续决策
 
-- PALC 历史计时没有 matched dense/seed 对照，不能产生加速比。
-- 现有 PALC 计时缺少完整 PNJL residual/Jacobian/attempt/fallback 计数。
-- `SeedContinuation` 到 `run_combined_meson_density_scan.jl` 的 `trho_asymmetric` equilibrium 路径 parity 仍未闭环；`Models.run_trho_scan` 是另一条扫描链路。
-- PALC 的多 anchor、多 branch 工作量不能直接等同于单分支或单点 solver 工作量。
+- 两窗口 `SeedContinuation` 与组合生产脚本 equilibrium helper 的结果一致。
+- T=120 的原步长 SeedContinuation 在 rho=0.375 选中低压力根；PALC、独立逐点 `solve_multi` 与半步长参考一致选中高压力根。各方法重复结果稳定，残差均通过；该差异属于候选可见性/路径依赖，不应靠放宽容差处理。
+- T=130 首轮独立逐点 `solve_multi` 在 rho=0.75 选中低压力根，完整重跑五方法均为同一高压力根；跨运行敏感性反例已保留，具体环境/舍入影响未定位。
+- 首轮 T=130 PALC 依赖预编译超时已修复；完整重跑两个窗口成功，PALC 与半步长参考均 5/5 一致。本地未运行 PNJL solver。
+- PALC warm 中位耗时 0.818 / 0.380 s，SeedContinuation 1.874 / 1.115 s；130 MeV 同结果成本比 2.93。120 MeV 分支不同，不给生产替换意义的加速比。
+- 本阶段计算与验证完成，待审阅诊断结论。下一阶段可聚焦内层多种子根被最小残差选择提前舍弃的问题，不把该改进混入本批生产默认。
 
 ## 首阶段工作量（2026-11-08）
 
@@ -45,17 +47,17 @@ PALC multi-branch spike 已在两个 `FixedAsymmetricRho` 多根场景中展示�
 ## 4. 诊断任务
 
 - [x] 设计固定 workload：相同 `T/rho/xi`、`p_num/t_num`、quadrature policy、iterations、容差、seed 和 pressure selection。
-- [ ] 在同一 Julia 进程分别测 cold/warm，避免把 BifurcationKit 编译或 `Models` 加载混入数值成本。
-- [ ] 通过 Actions 采集 residual/Jacobian/Newton/attempt/fallback/nonconverged/adaptive-quadrature telemetry。
-- [ ] 对照 PALC、SeedContinuation/`solve_multi` 和 dense reference 的结果、分支数、压力选择和残差。
-- [ ] 设定停止条件：若 PALC 在同等物理合同下没有准确度优势，或成本明显高于当前路径，则保持 isolated diagnostic backend。
+- [x] 每方法进程分别测首次调用/warm，加载和依赖预编译单列；首次调用含剩余 JIT。
+- [x] 通过 Actions 采集 residual/Jacobian/Newton/attempt/fallback/nonconverged telemetry；固定 tensor quadrature 不涉及自适应积分。
+- [x] 对照 PALC、SeedContinuation/`solve_multi` 和半步长参考的结果、分支数、压力选择和残差。
+- [x] 采用停止条件：已有分支差异时保持 isolated diagnostic，不提升生产默认；后续改进先解决候选根保留。
 
 ## 5. 验收标准与 DoD
 
-- [ ] 有可复核的 matched workload 配置和 provenance manifest。
-- [ ] 每个 backend 有 cold/warm wall time、runner-minutes、anchor/branch/continuation 计数和 solver telemetry。
-- [ ] `SeedContinuation` parity 通过小 rho grid 语义回归，且不改变非 FixedAsymmetricRho 语义。
-- [ ] 结果明确区分“分支发现能力”“数值准确度”“生产性能”，不把历史非同口径计时写成加速结论。
+- [x] 同工作量配置、源码 SHA 和两窗口结果汇总保存在 `data/outputs/results/analysis/palc_matched_20261108/pilot.json`。
+- [x] 每个 backend 有首次调用/warm wall time、runner-minutes、anchor/branch/continuation 计数和 solver telemetry。
+- [x] `SeedContinuation` 与组合扫描 equilibrium helper 通过两窗口 parity；生产算法和其它模式语义未改。
+- [x] 结果区分分支发现、离散方程精度和性能，首轮预编译失败与候选根反例均已记录。
 - [ ] 作者审核后才能决定是否创建 opt-in PALC backend PR；本任务本身不升级 production。
 
 ## 6. 风险与回退
