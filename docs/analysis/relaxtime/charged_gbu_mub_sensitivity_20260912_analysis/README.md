@@ -105,12 +105,12 @@ python -m zipfile -e data/outputs/results/relaxtime/analysis/charged_rpa_phase_b
 
 [PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325) 已于 2026-10-08 合并，
 merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；合并 PR 的十项检查均成功。
-[等高图任务](../../../dev/active/2026-09-30_charged-gbu-phase-contours.md) 的代码集成已收口，
-M4 的作者研究产物审阅仍单独保留；不因代码合并或本次留存而标记 accepted/promoted。
+[等高图任务](../../../dev/archived/2026-09-30_charged-gbu-phase-contours.md) 的代码集成已收口。
+作者于 2026-11-07 完成 M4 审阅，接受这些图用于趋势可视化和已完成的冻结线调参指导，任务已归档。
 
 留存包已随 [PR #328](https://github.com/w5851/Julia_RelaxTime/pull/328) 合入主干。
 2026-10-22 经作者授权，历史 tag 已推送，原 `D:/w/charged-gbu-mub-sensitivity`
 worktree 和 `codex/charged-gbu-mub-sensitivity` 分支已回收。
 回收前，64 个原结果文件和未提交的 q0 脚本均与主干归档逐字节/hash 一致；
 额外的 620 字节 `test/SuppositionDB/README.md` 为通用示例说明，无科研结果。
-历史实现按 tag 与留存包恢复，M4 作者审阅和原有来源缺口维持上述状态。
+历史实现按 tag 与留存包恢复；M4 接受状态见上文，原有来源缺口仍按本页的核验范围解读。

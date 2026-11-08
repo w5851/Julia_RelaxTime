@@ -5,6 +5,7 @@
 `OneLoopIntegralsAniso` 模块（正式名称为 `OneLoopIntegralsCorrection`）提供动量各向异性情况下的单圈积分修正计算。模块包含两类函数：
 1. **一阶修正函数**：`A_correction` 和 `B0_correction`，计算各向异性参数 ξ 的一阶修正项
 2. **完整各向异性函数**：`A_aniso`，直接计算包含 Romatschke-Strickland (RS) 分布的完整积分
+3. **可选角约化函数**：`A_aniso_reduced`，用解析角权重把同一完整 RS 热项降为一维径向积分
 
 本模块实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A_Aniso_Collinear.md`、`docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0_Aniso_General.md` 等公式文档，适用于重离子碰撞等非平衡系统的早期动力学研究。
 
@@ -20,7 +21,7 @@
 
 - 所有动力学参数（`m`, `μ`, `T`, `λ`, `k`）单位为 fm⁻¹
 - 各向异性参数 `ξ` 为无量纲（典型取值范围 0~0.5）
-- `A_correction` 和 `A_aniso` 返回值单位：fm
+- `A_correction`、`A_aniso` 和 `A_aniso_reduced` 返回值单位：fm
 - `B0_correction` 返回值 `(real_part, imag_part)` 单位：fm
 
 ---
@@ -231,6 +232,21 @@ A_full = A_aniso(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p, nodes_cosθ, weigh
 
 println("A (完整各向异性, ξ=", ξ, "): ", A_full, " fm")
 ```
+
+### `A_aniso_reduced(m, μ, T, Φ, Φbar, ξ; p_max=20.0, radial_nodes=16, semi_infinite_scale=5.0)`
+
+`A_aniso_reduced` 是同一完整 RS 单线积分的可选一维实现。它保留普通在壳能量
+`sqrt(p^2 + m^2)` 作为分母和现有真空项；只对热项作变量代换
+`q = p*sqrt(1 + ξ*cosθ^2)`，再解析完成角积分。
+
+- `p_max=Inf` 使用半无穷热积分映射，`semi_infinite_scale` 是映射尺度。
+- 有限 `p_max` 仍表示原来的球形动量截止，函数会按 `q` 的完整角域和部分角域分段积分。
+- `ξ` 必须满足 `ξ > -1`；负 `ξ` 分支使用等价的 `asinh` 表达式，避免接近 `-1` 时 `atanh` 自变量舍入到 1。
+- 该入口默认不改变生产链；`AFieldBuilder.build_A_triplet(...; a_method=:reduced)` 才会显式启用它。默认
+  `a_method=:quadrature` 仍调用二维 `A_aniso`。
+
+它适合在固定背景下减少单线 A 的内核成本。是否替换生产默认，还需要独立的完整输运入口
+基准与算法身份记录；本次优化没有改变正式数据口径。
 
 **典型输出**（ξ=0.4 时）：
 ```

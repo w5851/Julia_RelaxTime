@@ -253,6 +253,8 @@ function _number_densities_rs_reduced_adaptive(
 
         invT = inv(T_val)
         integrand = q -> begin
+            # q is the RS-rescaled radial momentum. This equals E_xi(p),
+            # not the ordinary on-shell energy at the original physical p.
             E_dist = sqrt(q * q + mass_i * mass_i)
             fq = _pnjl_quark_distribution_core((E_dist - mu_i) * invT, Φ, Φbar)
             faq = _pnjl_antiquark_distribution_core((E_dist + mu_i) * invT, Φ, Φbar)

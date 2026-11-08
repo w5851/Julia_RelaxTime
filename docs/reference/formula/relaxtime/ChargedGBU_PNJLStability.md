@@ -6,7 +6,7 @@
 production 处方选择。双线域与 retarded 的文献依据见
 [Pereira 公式审查](Pereira2024_RegularizationAudit.md)；以下谱稳定性充分条件
 是本项目的数学推导，不声称该论文已证明 PNJL-BQS 的完整稳定性。
-实际运行和失败见 [strict-audit 第22.17节](../../../dev/active/2026-08-30_charged-rpa-bu-strict-audit.md)。
+实际运行和失败见 [strict-audit 第22.17节](../../../dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md)。
 
 主候选仍使用 PNJL 占据、双线交集、同域两个单线项与 B0。普通 Fermi
 仅作统计函数控制；真空/热分量均同时存在于 A 和 B，不能把 A 统称为真空项。

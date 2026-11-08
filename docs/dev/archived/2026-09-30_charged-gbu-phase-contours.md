@@ -1,9 +1,23 @@
+---
+title: "charged GBU 相图介子数密度等高图任务单"
+archived: true
+original: "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
+archived_date: "2026-11-07"
+task_status: "completed"
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # charged GBU 相图介子数密度等高图任务单
 
-当前状态：`review`（2026-10-22）。实现、远程计算、组会图交付和代码集成已完成。
+当前状态：已完成，作者于 2026-11-07 完成 M4 审阅，按 accepted research artifact 收尾归档。实现、远程计算、组会图交付和代码集成已完成。
 [PR #325](https://github.com/w5851/Julia_RelaxTime/pull/325) 已于 2026-10-08 合并，
 merge commit 为 `7e5c7e896d4a4e66b73535ae11250ddfc74f1052`；十项合并 PR 检查均成功。
-M4 的作者研究产物审阅仍待处理，本文继续保留在 active，不自动提升为 accepted/promoted。
+作者确认这些图主要用于可视化掌握 `(T, muB)` 平面上介子数密度及 `K+/pi+` 的大致变化趋势，
+并指导现已完成的化学冻结线参数调优。该用途已验收；原有限网格、mask 和数值资格说明保留。
+后续默认冻结线与两族参数带已另获接受，进入介子期刊稿 `My_Paper/pnjl_meson_mott_xi` 的图像与分析接入。
 
 2026-11-06 存储整理：原 `D:/w/charged-gbu-contours/retained-pr325` 已移至
 `D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325`。原 manifest、图像、数值和源码 bundle
@@ -33,7 +47,7 @@ task ledger、active 文档、relaxtime 脚本及 SOP 治理检查均通过。ac
 主干整理只改变了 M9 数值来源清单中的 `src/models/Models.jl` 字节。保存背景恢复
 继续严格检查源码哈希；历史 M9 批次须使用计算版本 `c22f5e3e267bf2dce2431cf901a9dc3508d27600`
 重放，不以当前主干替代旧版本。冻结 CSV 的重绘入口不受此限制。本轮 PR 范围是代码、
-证据入口与组会图交付的收尾，M4 研究晋升仍由作者独立决定。
+证据入口与组会图交付的收尾；当时保留的 M4 作者审阅现已按页首用途完成。
 
 ## 1. 背景与目标
 
@@ -214,7 +228,7 @@ diagnostic，不更新 production baseline。GitHub 的 `workflow_dispatch` 只�
 
 - [x] 绘图器和候选选择器生成 manifest、输入/源码 hash、行数、NaN/Inf/失败点摘要
       和图形/候选清单。
-- [ ] 只有作者审核后才提升为 accepted research artifact；不自动更新 baseline。
+- [x] 作者于 2026-11-07 接受趋势可视化与冻结线调参指导用途，完成研究图件审阅；baseline 保持既有资格。
 
 ### M5：授权扩域与加密 screening（2026-10-02）
 
@@ -323,7 +337,7 @@ run `36957893472` / `eb77d0616be4da6597df01e6159ad69b6eb19b89`。
 `D:/Temp/charged-gbu-contour-fine-36957893472/freezeout-guidance-v3/`。
 `freezeout_neighborhood_ratio.png` 已经 agent 视觉审核；公共 v2 validator 通过，
 600 dpi、最小测量字高约 `2.096 mm`、无裁切/文字重叠、图例位于 axes 外。
-保持 `audit/png_review`、`manuscript_eligible=false`，等待作者审核。
+生成时记录为 `audit/png_review`、`manuscript_eligible=false`；2026-11-07 的作者接受用途见页首。
 新合成/输入契约测试 `6/6`；本轮绘图与候选测试合计 `21/21`；所复用的公共
 plotting contract/quality 测试 `31/31`。不运行数值 regression，因为未修改计算核。
 
@@ -652,7 +666,7 @@ run `37172076768` / source `c22f5e3e267bf2dce2431cf901a9dc3508d27600`
 覆盖低值边界、标签精度及原路径不变。PNG 已目视核验，新增标签无裁切/相互重叠，
 图例与横轴/脚注不重叠；保留四边向内主次刻度和无警告显示。
 本次只修改显示选择及数据导出，没有调用数值核，故无需数值 regression 或 Actions 重算。
-仍保留 M4 的作者审核事项；此图不自动获得 accepted research 或论文资格。
+2026-11-07 作者已完成 M4 审阅，接受本图用于趋势可视化及既有冻结线参数研究的指导。
 
 ## 7. 风险与回退
 

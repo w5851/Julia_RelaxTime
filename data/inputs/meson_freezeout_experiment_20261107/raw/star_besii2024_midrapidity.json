@@ -1,0 +1,123 @@
+{
+  "source": "10.1051/epjconf/202429614009",
+  "source_figure": "Fig.1, PDF page 2",
+  "source_image": "star_besii2024_fig1.png",
+  "source_image_sha256": "a8210c6b563d902104c8cfa61c3d3d7e3def0babf1b492f6bd6b580745d3f334",
+  "image_size_px": [
+    2098,
+    676
+  ],
+  "centrality": "Au+Au 0-5%",
+  "rapidity": "plotted y=0 bin in the centre-of-mass frame; horizontal bar approximately [-0.05,0.05] (graphical extent, not a separately published cut)",
+  "preliminary": true,
+  "method": "ratio of pixel-extracted pT-integrated yields; K+ display multiplier 2.5 removed",
+  "y_calibration": {
+    "anchors": [
+      [
+        608,
+        0
+      ],
+      [
+        107,
+        200
+      ]
+    ],
+    "check_anchors": [
+      [
+        357,
+        100
+      ],
+      [
+        207,
+        160
+      ]
+    ],
+    "max_check_residual": 0.19960079840319622,
+    "calibration_error_px": 0.5
+  },
+  "coordinate_selection_error_px": 1.0,
+  "error_method": "first-order propagation of the plotted combined yield errors with assumed zero kaon-pion covariance; not a collaboration-published ratio uncertainty",
+  "formula": "R=(608-yK)/(2.5*(608-ypi)); sigma_R=R*sqrt((sigma_K/K)^2+(sigma_pi/pi)^2)",
+  "covariance_sensitivity": "sigma_R(rho)=R*sqrt(a^2+b^2-2*rho*a*b), a=sigma_K/K, b=sigma_pi/pi",
+  "validation": "Codex checked source figure, filled-particle identities, scale factors, endpoints and independent ticks; DeepSeek used as an auxiliary identity check only",
+  "points": [
+    {
+      "energy_GeV": 14.6,
+      "x_px": 148,
+      "pi_pixels": {
+        "center": 247,
+        "top": 228,
+        "bottom": 265
+      },
+      "K_pixels": {
+        "center": 452.5,
+        "top": 444,
+        "bottom": 462
+      },
+      "pi_dNdy": 144.1117764471058,
+      "K_dNdy": 24.830339321357286,
+      "pi_combined_error": 7.385229540918163,
+      "K_combined_error": 1.437125748502994,
+      "ratio": 0.17229916897506925,
+      "derived_error_rho0": 0.013319571506728722,
+      "graphical_ratio_interval": [
+        0.16993103448275862,
+        0.17468706536856746
+      ],
+      "error_rho_plus1": 0.0011425633627734596,
+      "error_rho_minus1": 0.018802034975176678
+    },
+    {
+      "energy_GeV": 19.6,
+      "x_px": 848,
+      "pi_pixels": {
+        "center": 214,
+        "top": 193,
+        "bottom": 234
+      },
+      "K_pixels": {
+        "center": 439.5,
+        "top": 431,
+        "bottom": 448
+      },
+      "pi_dNdy": 157.28542914171658,
+      "K_dNdy": 26.906187624750498,
+      "pi_combined_error": 8.183632734530939,
+      "K_combined_error": 1.3572854291417165,
+      "ratio": 0.1710659898477157,
+      "derived_error_rho0": 0.012397124009493785,
+      "graphical_ratio_interval": [
+        0.16890012642225033,
+        0.1732484076433121
+      ],
+      "error_rho_plus1": 0.00027119997938622416,
+      "error_rho_minus1": 0.017530083228117187
+    },
+    {
+      "energy_GeV": 27,
+      "x_px": 1548,
+      "pi_pixels": {
+        "center": 189,
+        "top": 165,
+        "bottom": 213
+      },
+      "K_pixels": {
+        "center": 409.5,
+        "top": 399,
+        "bottom": 422
+      },
+      "pi_dNdy": 167.26546906187625,
+      "K_dNdy": 31.696606786427147,
+      "pi_combined_error": 9.580838323353294,
+      "K_combined_error": 1.8363273453093811,
+      "ratio": 0.18949880668257757,
+      "derived_error_rho0": 0.015438418143878993,
+      "graphical_ratio_interval": [
+        0.18739595719381688,
+        0.19161676646706588
+      ],
+      "error_rho_plus1": 0.00012417336424376584,
+      "error_rho_minus1": 0.021832867208548597
+    }
+  ]
+}

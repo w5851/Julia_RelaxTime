@@ -1,22 +1,36 @@
 schema_version = 1
-primary_track = "meson-freezeout-experiment"
-updated_at = "2026-11-06"
+primary_track = "palc-performance-research"
+updated_at = "2026-11-08"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
-title = "Meson K/pi chemical-freezeout parameter envelopes"
-status = "review"
-current_task = "meson-freezeout-parameter-envelope"
+title = "Meson K/pi freezeout and heavy-ion comparison"
+status = "archived"
+current_task = "meson-freezeout-heavy-ion-paper-comparison"
 blocked_by = []
 unlocks = []
-next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论和图像仍为 review/diagnostic_only，作者审阅 pending；当前无待执行计算，后续研究待作者决定。"
+next_action = ""
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
 current_branch = "main"
 current_sha = "9c727d106abb9e931ba22dd26c206dc38d2efdff"
 run_ids = []
 evidence = [
+  "review:author_20261108_accepted_three_updated_figures_experiment_scope_and_authorized_vector_delivery",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/plot_manifest.json",
+  "review:author_20261108_accepted_brief_rapidity_discussion_and_authorized_computation_task_closeout",
+  "note:accepted_vectors_delivered_to_meson_and_thesis_manuscripts_further_text_review_owned_by_paper_repo",
+  "file:docs/reference/formula/relaxtime/transport/RS_Response_Convention.md",
+  "file:tests/validation/relaxtime/test_rs_response_conventions.jl",
+  "note:github_issue_313_closed_20261107_author_accepted_current_conventions_comment_6706495944",
+  "note:arena313_closed_quote_remote_32_pass_no_baseline_or_production_change",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
+  "note:author_20261107_authorized_arena313_now_thesis_expansion_and_png_review_before_vector_decision_palc_pr3_later",
+  "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
+  "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine/manifest.json",
   "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/plot_manifest.json",
@@ -42,20 +56,20 @@ evidence = [
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
 ]
-updated_at = "2026-11-06"
+updated_at = "2026-11-08"
 
 [[items]]
 id = "meson-freezeout-default-comparison"
 track_id = "meson-freezeout-experiment"
 classification = "research"
-status = "review"
+status = "archived"
 parent = "track:meson-freezeout-experiment"
-task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
+task_file = ""
 reason = "作者要求模块化完整化学冻结线，使用q0外推与Au+Au实验同图比较，先选择文献默认参数下较优方案，再开展参数带调优。"
-next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论和图像仍为 review/diagnostic_only，作者审阅 pending；当前无待执行计算，后续研究待作者决定。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
-evidence = [
+evidence = ["review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
   "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
   "file:data/inputs/meson_freezeout_experiment_20261017/README.md",
   "file:data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017_fine_png_review_r2/resolution_comparison.json",
@@ -66,15 +80,42 @@ evidence = [
 id = "meson-freezeout-parameter-envelope"
 track_id = "meson-freezeout-experiment"
 classification = "research"
-status = "review"
+status = "archived"
 parent = "track:meson-freezeout-experiment"
 task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md"
 reason = "作者允许汇合不同文献参数范围并跨源组合；先明确探索范围，再以固定完整曲线评价q0的K/pi，区别最优样本和参数包络。"
-next_action = "默认比较、文献筛选、两族有限参数探索、加密核验与冻结证据已随 PR #327 合并。研究结论和图像仍为 review/diagnostic_only，作者审阅 pending；当前无待执行计算，后续研究待作者决定。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
-evidence = ["file:config/physics/freezeout/parameter_domains/literature_envelope_v1.toml", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json", "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json", "note:author_20261018_authorized_cross_literature_parameter_pooling", "note:png_review_pending_author_acceptance", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md", "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml", "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json", "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion"]
+evidence = ["review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use", "file:config/physics/freezeout/parameter_domains/literature_envelope_v1.toml", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_design/design.json", "file:data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018_summary/summary.json", "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018_png_review_r2/plot_manifest.json", "note:author_20261018_authorized_cross_literature_parameter_pooling", "note:png_review_original_artifact_stage_author_accepted_20261107", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v1.toml", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_family_20261018.md", "note:author_selected_three_group_andronic_box_excluding_yu_set_i_only_domain_selection_accepted", "file:config/physics/freezeout/parameter_domains/andronic_literature_envelope_v2.toml", "file:data/inputs/meson_freezeout_andronic_literature_20261018/recent_sources_manifest.json", "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/andronic_domain_validation_v2_20261018.json", "note:author_requested_domain_update_with_four_recent_sources_preserve_yu_set_i_exclusion"]
 
+
+[[items]]
+id = "meson-freezeout-heavy-ion-paper-comparison"
+track_id = "meson-freezeout-experiment"
+classification = "required_follow_up"
+status = "archived"
+parent = "track:meson-freezeout-experiment"
+task_file = "docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md"
+reason = "作者接受默认冻结线和两族参数带，要求采用文献原始参数作偏定性论文分析，并关注最新重核碰撞数据及峰位。"
+next_action = ""
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "review:author_20261108_accepted_three_updated_figures_experiment_scope_and_authorized_vector_delivery",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/plot_manifest.json",
+  "review:author_20261108_accepted_brief_rapidity_discussion_and_authorized_computation_task_closeout",
+  "note:accepted_vectors_delivered_to_meson_and_thesis_manuscripts_further_text_review_owned_by_paper_repo",
+  "file:docs/reference/formula/relaxtime/transport/RS_Response_Convention.md",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261107_png_review/plot_manifest.json",
+  "file:data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
+  "note:author_20261107_authorized_arena313_now_thesis_expansion_and_png_review_before_vector_decision_palc_pr3_later",
+  "review:author_20261107_accepted_default_and_envelopes_original_parameters_qualitative_paper_use",
+  "file:docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md",
+  "file:data/inputs/meson_freezeout_experiment_20261107/README.md",
+  "file:data/inputs/meson_freezeout_experiment_20261107/experimental_ratios.csv",
+]
 
 [[tracks]]
 id = "issue130-phase"
@@ -194,21 +235,25 @@ updated_at = "2026-08-30"
 [[tracks]]
 id = "formula-route-closure"
 title = "Formula route closure SOP and charged-RPA/BU pilot"
-status = "accepted"
-current_task = "charged-rpa-bu-strict-implementation"
+status = "archived"
+current_task = "charged-gbu-phase-contours"
 blocked_by = []
 unlocks = []
-next_action = "无限热B路线已获作者授权，作为charged介子密度smoke production默认入口；保持quark-only BQS、无介子反馈、PNJLCore和baseline不变。完整冻结线v2作为accepted research result归档，正式baseline或论文定量声明另行授权。"
+next_action = ""
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = false
 current_branch = "main"
-current_sha = "c0a09912c9551da39b1e2dd30f7c0489d6c0a6d3"
+current_sha = "7e5c7e896d4a4e66b73535ae11250ddfc74f1052"
 run_ids = []
 evidence = [
+  "review:author_20261107_accepted_m4_ratio_trend_visualization_and_completed_freezeout_guidance",
   "file:docs/guides/sop/formula_route_closure.md",
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
   "pr:290",
+  "pr:310",
+  "pr:311",
+  "pr:325",
   "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
   "sha:bc9b2990bcfe3b8c32d2ec0f00066b52b4cf800b",
   "pr:289",
@@ -260,16 +305,16 @@ evidence = [
   "note:pereira_formula_parity_144_cases_diagnostic_only_pnjl_and_thermal_extensions_separate",
   "note:author_prioritizes_regulator_closure_then_production_workflow_no_manual_freezeout_densification",
 ]
-updated_at = "2026-09-07"
+updated_at = "2026-11-07"
 
 [[tracks]]
 id = "plot-sop"
 title = "Paper-grade plotting SOP and migration"
-status = "promoted"
+status = "archived"
 current_task = "plot-sop-independent-land"
 blocked_by = []
 unlocks = []
-next_action = "v1 合同制定与旧资产整理已完成，历史任务已归档；当前绘图使用 figure_production_v2。"
+next_action = ""
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -294,7 +339,7 @@ evidence = [
   "promotion:figure_production_sop_contract_v1",
   "note:formal_sop_promoted_future_figure_family_migrations_separate",
 ]
-updated_at = "2026-08-30"
+updated_at = "2026-11-07"
 
 [[tracks]]
 id = "diagnostic-workflow-lifecycle"
@@ -358,11 +403,11 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "triaged"
+status = "deferred"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "仅在明确授权后设计同口径 GitHub Actions pilot；在此之前保持 PALC 为 isolated diagnostic backend。"
+next_action = "介子交付和Arena #313已完成；下一步评估PALC同口径pilot的范围、成本和收益。本项仍为未排期研究。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -370,10 +415,34 @@ current_branch = ""
 current_sha = ""
 run_ids = []
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+  "note:20261108_meson_delivery_and_arena313_complete_palc_remains_unscheduled",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
-updated_at = "2026-08-18"
+updated_at = "2026-11-08"
+
+[[tracks]]
+id = "full-temperature-reference-research"
+title = "Full-temperature phase-reference production research"
+status = "deferred"
+current_task = "full-temperature-reference-pr3"
+blocked_by = []
+unlocks = []
+next_action = "算法PR #137/#139已完成；后续按研究收益确定新温区、收敛与参考生产范围，尚未安排计算。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = ""
+current_sha = ""
+run_ids = []
+evidence = [
+  "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
+  "pr:137",
+  "pr:139",
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
+]
+updated_at = "2026-11-08"
 
 [[tracks]]
 id = "analysis-docs-cleanup"
@@ -431,15 +500,15 @@ evidence = [
 id = "charged-rpa-bu-strict-implementation"
 track_id = "formula-route-closure"
 classification = "required_follow_up"
-status = "accepted"
+status = "archived"
 parent = "track:formula-route-closure"
-task_file = "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
+task_file = "docs/dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md"
 reason = "PR290 已固定 candidate 公式路线；ordered charged retarded bubble、严格 BU 测度、相位/Levinson/Mott gate、Bose 支撑和四算法收敛仍需在独立后续 PR 实现与验收。"
-next_action = "strict-audit第22.24–22.26节：10点/40通道研究产额和图像已经作者审核；无限热B路线已授权为charged介子密度smoke production默认入口。保留v2产物/源码快照及历史失败，不将有限网格验收扩大为全频证明或全部背景覆盖；保持双球真空、无限PNJL热差、quark-only BQS、旧通用MesonDensity兼容入口与formal baseline不变。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md",
+  "file:docs/dev/archived/2026-08-30_charged-rpa-bu-strict-audit.md",
   "file:docs/reference/formula/relaxtime/ChargedRPA_BU_ProductionRoute.md",
   "sha:fa2e4583cec08fff6d572b3573a7db96be9bf612",
   "note:implementation_follow_up_after_pr290",
@@ -838,11 +907,11 @@ evidence = [
 id = "plot-sop-independent-land"
 track_id = "plot-sop"
 classification = "independent"
-status = "promoted"
+status = "archived"
 parent = "track:plot-sop"
 task_file = "docs/dev/archived/2026-08-15_论文级绘图资产注册表与合同草案.md"
 reason = "正式绘图 SOP、三份 style profile、validator、绘图 helper 和合同单测已落地；PR #218、#220、#222 已合并，line-first pilot 已获作者视觉审核。"
-next_action = "v1 制定阶段已完成；当前执行合同为 figure_production_v2。图族工作按实际需求与已有授权推进。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -1033,35 +1102,55 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "triaged"
+status = "deferred"
 parent = "track:palc-performance-research"
 task_file = ""
-reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 研究不应阻塞当前 Issue #130 production review。"
-next_action = "保留 backlog 任务；仅在单独授权后创建 active pilot，固定 workload、cold/warm、solver telemetry 和停止条件。"
+reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
+next_action = "前置介子交付和Arena #313已完成；如启动pilot则固定workload、cold/warm、solver telemetry与停止条件，当前尚未排期。"
 blocked_by = []
 backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 evidence = [
+  "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
+]
+
+[[items]]
+id = "full-temperature-reference-pr3"
+track_id = "full-temperature-reference-research"
+classification = "research"
+status = "deferred"
+parent = "track:full-temperature-reference-research"
+task_file = ""
+reason = "全温区积分与相线算法已经交付；新温区参考产物尚未生产，是否继续取决于后续物理计算需求。"
+next_action = "先确定输入与温区，再规划积分、相线几何、独立oracle收敛以及新参考产物的验收；当前尚未排期。"
+blocked_by = []
+backlog_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
+evidence = [
+  "pr:137",
+  "pr:139",
+  "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
+  "note:issue130_phase_and_transport_v15_completed_independently_new_full_temperature_production_deferred",
 ]
 
 [[items]]
 id = "charged-gbu-phase-contours"
 track_id = "formula-route-closure"
 classification = "independent"
-status = "review"
+status = "archived"
 parent = "track:formula-route-closure"
-task_file = "docs/dev/active/2026-09-30_charged-gbu-phase-contours.md"
+task_file = "docs/dev/archived/2026-09-30_charged-gbu-phase-contours.md"
 reason = "组会授权在当前quark-only BQS无限热GBU路线构建T-muB等高图；先校正cold/warm计时并在GitHub Actions取得可重复成本，独立于已accepted的公式闭合主线。"
-next_action = "PR #325 已于2026-10-08合并，十项检查成功；代码集成与组会图交付已收口。M4研究产物作者审阅仍待定，不自动晋升。联合T–muB路径及参数研究已由冻结线主线承接并随PR #327集成；保留muB灵敏度的q0/有限q对照、失败和来源，背景稳定性与全q尾部复核另行指定。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-09-30_charged-gbu-phase-contours.md",
+  "review:author_20261107_accepted_m4_ratio_trend_visualization_and_completed_freezeout_guidance",
+  "file:docs/dev/archived/2026-09-30_charged-gbu-phase-contours.md",
   "pr:325",
   "sha:8519c561b4a9af5df2bbe000ee2a6ec30c409214",
   "sha:7e5c7e896d4a4e66b73535ae11250ddfc74f1052",
-  "note:pr325_merged_20261008_all_10_recorded_checks_successful_m4_author_review_pending",
+  "note:pr325_merged_20261008_all_10_recorded_checks_successful_m4_author_accepted_20261107",
   "note:retained_pr325_relocated_to_D:/DevData/Julia_RelaxTime/artifacts/charged_gbu_pr325_1875_records_and_bundle_verified",
   "pr:327",
   "sha:9c727d106abb9e931ba22dd26c206dc38d2efdff",
@@ -1112,11 +1201,11 @@ evidence = [
 [[tracks]]
 id = "transport-threshold-upgrade"
 title = "Thermal quadrature optimization and original transport anomaly validation"
-status = "promoted"
+status = "archived"
 current_task = "thermal-sampling-production-integration"
 blocked_by = []
 unlocks = []
-next_action = "输运重算及v15正式交付已完成，PR331/332已合并；论文按四图agent_review接入。旧worktree与对应本地/远程分支已回收，旧图/表及专用历史消费者已退役，当前数值资格、Mott依据和最小渲染依赖保留。nightly测试修复、旧基线收敛归因及整体验证结果见PR333和production_plan；研究边界和A降维独立保留。"
+next_action = ""
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -1124,17 +1213,17 @@ current_branch = "main"
 current_sha = "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
 run_ids = ["40224161650", "40224178198", "40224194586", "40224212631", "40224228254", "40224250574", "40224267466", "40257762185", "40257769077", "40257775674", "40257782672", "40257789188", "40257795718", "40257802172", "40257808831", "40257815119", "40257821230", "40257827518", "40257833867", "40257840822", "40257847731", "40257853734", "40257859977", "40257866209", "40257872353", "40257878565", "40257884307", "40258285096", "40259581154", "40259640748", "40259709293", "40259714615", "40259796453", "40259802013", "40259808405", "40260380600", "40260457365", "40260463594", "40260469868", "40260524665", "40260598142", "40260603739", "40260618550", "40260700567", "40260715697", "40260721635", "40260869286", "40261115447", "40261120993", "40261845606", "40262041940", "40262107635", "40262435798", "40262441251", "40262598706", "40262604480", "40262611240", "40262844058", "40262851444", "40262971057", "40263129443", "40263137216", "40263879049", "40263884784", "40263890763", "40263896716", "40263903140", "40263909106", "40263969492", "40264204355", "40264538252", "40264873380", "40264932880", "40265241761", "40265248467", "40266208748", "40265346710", "40265542775", "40265548392", "40265638208", "40265644081", "40265652460", "40265662075", "40265963809", "40266377409", "40266460609", "40266917125", "40266923034", "40266989256", "40266995245", "40267055491", "40267165886", "40267434477", "40267545196", "40267626795", "40267632886", "40267702965", "40267926254", "40267991862", "40268058520", "40280671866", "40268578017", "40268666355", "40268674271", "40269163626", "40269229842", "40269352781", "40269497235", "40269585480", "40269592076", "40269721693", "40269999478", "40270063665", "40270497663", "40270504588", "40270879274", "40270884588", "40270890999", "40270955592", "40271018512", "40271085327", "40271155838", "40271600141", "40271607353", "40271680412", "40271755220", "40271761507", "40271828397", "40272016230", "40272405990", "40272412182", "40272486315", "40272492194", "40272707562", "40272770532", "40273151275", "40273222713", "40273514590", "40273590341", "40273723825", "40274315032", "40274614791"]
 evidence = ["promotion:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/scientific_review_v1.json", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_complete_summary_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/summary.json", "note:author_20261022_authorized_optimization_and_original_non_first_order_anomaly_validation", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_precheck_v1/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_dispatch_preparation_v1/calculation_publication_receipt.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/dispatch_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/reviewed_pilot.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/remaining_batches/batches_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/cost_summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/queue_plan.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/collection_status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/reviewed_grid.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/background/background_audit.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/runner_accounting.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/point_provenance.csv", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/mott_local_bumps_20261028.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_local_probe_20261028_v1/returned/final_review_v2/review.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/returned/convergence_review_v1/review.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/returned/asym_final_review_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/background_return_v1/asym_background_review_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md", "file:docs/analysis/relaxtime/phase_guided_transport/README.md", "sha:6a3d08663c845587ae457fbe1c90173e0e5dcc25", "note:superseded_transport_assets_retired_20261106_recover_in_historical_checkout"]
-updated_at = "2026-11-06"
+updated_at = "2026-11-07"
 
 [[items]]
 id = "transport-full-rs-a-reduction"
 track_id = "transport-threshold-upgrade"
 classification = "independent"
-status = "triaged"
+status = "archived"
 parent = "item:thermal-sampling-production-integration"
 task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/full_rs_a_reduction_20261025.md"
-reason = "作者要求将完整 RS 单线 A 的解析降维优化列为待办；目标是等价加速现有极化 A，保留普通在壳 E_kin 分母、真空 Λ 截止与半无穷热积分。"
-next_action = "quote-remote 原型已通过 120 个角权重组合和 72 组积分对照；A 内核中位加速 8.397 倍，但原单次 A 仅 25.14–33.02 微秒，未测完整输运加速。暂不作为新口径验收前置；生产维持二维 A。后续另做 p/q 网格与有限热域接口、算法身份及实际入口回归，本项尚未生产接入。"
+reason = "作者要求将完整 RS 单线 A 的解析降维优化列为待办；本轮已完成可选一维入口、有限/半无穷截止处理、边界稳定性验证和单线性能验证，保留普通在壳 E_kin 分母、真空 Λ 截止与生产默认二维 A。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -1148,18 +1237,24 @@ evidence = [
   "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/package_manifest.json",
   "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/returned/results/summary.json",
   "note:author_20261025_requested_priority_assessment_quote_remote_only_numerical_work",
-  "note:prototype_verified_production_integration_deferred_not_a_prerequisite",
+  "file:docs/api/integrals/OneLoopIntegralsAniso.md",
+  "file:src/relaxtime/AFieldBuilder.jl",
+  "file:src/models/workflow_apps/TransportWorkflow.jl",
+  "file:tests/unit/relaxtime/test_afieldbuilder.jl",
+  "file:tests/unit/models/test_transport_workflow.jl",
+  "note:20261106_optional_reduced_A_entrypoint_116_unit_tests_passed_benchmark_max_thermal_rtol_3.9968028886505635e-15_median_kernel_speedup_about_8.6x_repeat_8.56_to_8.89x",
+  "note:production_default_remains_two_dimensional_A_aniso_and_full_transport_speedup_not_claimed",
 ]
 
 [[items]]
 id = "thermal-optimization-anomaly-audit"
 track_id = "transport-threshold-upgrade"
 classification = "research"
-status = "accepted"
+status = "archived"
 parent = "track:transport-threshold-upgrade"
 task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/optimization_20261022.md"
 reason = "验证预计算、相对速度简化及复用在同误差下的性能；以原始数据定位和复核非一阶异常。"
-next_action = "四处孤立凹陷纠正及7项补算验收完成；后续全通道准入、默认替换与重算已由 thermal-sampling-production-integration 完成。历史优化与异常证据保留，无本项待算任务。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_analysis_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/native_performance_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/grouped_performance_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/anomaly_refinement_v2/status.json"]
@@ -1168,11 +1263,11 @@ evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgra
 id = "thermal-sampling-production-qualification"
 track_id = "transport-threshold-upgrade"
 classification = "required_follow_up"
-status = "accepted"
+status = "archived"
 parent = "item:thermal-optimization-anomaly-audit"
 task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md"
 reason = "作者要求角度合并推广、无需例外点的稳定采样，以及 Actions 前独立/联合收敛和性能验证。"
-next_action = "切换前的十二点/108项、独立密度和计时为历史验收；完整A^xi的独立/联合收敛、实际入口、v3回归及整批已完成，见生产计划当前入口。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/grouped_production_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/outer_summary_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/kernel_A_convergence_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/background_tail_controls_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/density_qualification_v1/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_complete_summary_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/joint_density_normalization_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/complete_timing_p48_v1/status.json", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "note:author_20261022_final_observable_tolerance_one_percent_time_priority"]
@@ -1181,11 +1276,11 @@ evidence = ["file:data/outputs/results/relaxtime/transport/threshold_cache_upgra
 id = "thermal-sampling-production-integration"
 track_id = "transport-threshold-upgrade"
 classification = "required_follow_up"
-status = "promoted"
+status = "archived"
 parent = "item:thermal-sampling-production-qualification"
 task_file = "docs/dev/archived/2026-10-23_输运采样生产接入与重跑合同.md"
 reason = "作者授权在通用性和稳定性验收后替换默认并清理旧实现；新结果须通过真实生产入口复算，并衔接新背景相界、同点外部对齐和新的计算合同。"
-next_action = "输运重算及v15正式交付已完成，PR331/332已合并；论文按四图agent_review接入。旧worktree与对应本地/远程分支已回收，旧图/表及专用历史消费者已退役，当前数值资格、Mott依据和最小渲染依赖保留。nightly测试修复、旧基线收敛归因及整体验证结果见PR333和production_plan；研究边界和A降维独立保留。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = ["promotion:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/scientific_review_v1.json", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_sampling_20261022.md", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_integration_20261023.md", "file:docs/guides/scripts/transport_sampling_qualification.md", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_plan_v1/production_parameters.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/package_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_manual_preflight_v1/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_replay_all_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/phase_revalidation_v5/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/fortran_alignment_v2/status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_integration_checks_v1/background_drift_review_v1.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/production_repeat_defaults_v1/verification.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/runner_inputs_v1/runner_inputs.json", "note:Julia_Fortran_alignment_completed_evidence_in_production_plan", "note:author_20261026_full_grid_execution_authorized_without_full_length_pilot", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/returned/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned/reviewed_result.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_dispatch_preparation_v1/calculation_publication_receipt.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/dispatch_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/reviewed_pilot.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/remaining_batches/batches_manifest.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/cost_summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/queue_plan.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/collection_status.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/full_grid_acceptance.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/reviewed_grid.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/background/background_audit.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/final_review_v1/runner_accounting.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/returned/transfer_090/reviews/transfer_090/point_provenance.csv", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/mott_local_bumps_20261028.md", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_local_probe_20261028_v1/returned/final_review_v2/review.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_sampling_convergence_20261028_v1/returned/final_review_v1/review.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_sampling_convergence_20261028_v1/local_receipt.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_pk_separation_20261028_v1/returned/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_pk_separation_20261028_v1/local_receipt.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/formalization.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_xi04_probe_20261028_v1/returned/convergence_review_v1/review.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/formal_promotion_v1/promotion.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/returned/asym_final_review_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/background_return_v1/asym_background_review_v1/summary.json", "file:data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md", "file:docs/analysis/relaxtime/phase_guided_transport/README.md", "sha:6a3d08663c845587ae457fbe1c90173e0e5dcc25", "note:superseded_transport_assets_retired_20261106_recover_in_historical_checkout"]
@@ -1194,11 +1289,11 @@ evidence = ["promotion:data/outputs/results/relaxtime/transport/threshold_cache_
 id = "transport-relative-velocity-convention"
 track_id = "transport-threshold-upgrade"
 classification = "required_follow_up"
-status = "accepted"
+status = "archived"
 parent = "item:thermal-sampling-production-integration"
 task_file = "docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/relative_velocity_convention_20261024.md"
 reason = "作者确认沿用课题组和当前生产实现的质心系相对速度；论文公式已改为入射质心系能量分母，代码继续使用 profile 的 cm 口径。"
-next_action = "cm口径已确定；完整A^xi切换后的独立/联合收敛、四个ξ=0的Julia–Fortran对齐及runner先导已完成，证据由生产接入任务维护。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = ["file:src/relaxtime/AverageScatteringRate.jl", "file:src/relaxtime/ThermalWeightedSampling.jl", "file:src/relaxtime/ThermalWeightedCache.jl", "file:src/models/workflow_apps/TransportSamplingProfiles.jl", "file:tests/unit/relaxtime/test_thermal_optimization_native.jl", "file:tests/unit/relaxtime/test_thermal_weighted_cache.jl", "file:docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/relative_velocity_convention_20261024.md", "note:author_20261024_confirmed_cm", "note:production_profile_remains_cm_and_Actions_not_dispatched"]

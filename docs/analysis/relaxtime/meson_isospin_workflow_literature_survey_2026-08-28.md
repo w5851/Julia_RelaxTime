@@ -475,5 +475,5 @@ Maslov & Blaschke（PRD 107, 094010, 2023）进一步在 2 味 PNJL 中保留介
 - [从拉氏量到巨热力学势：平均场推导统一流程](../../reference/formula/models/shared/Lagrangian_to_GrandPotential_MFA_Workflow.md)：本仓库的 MFA/巨势统一语义。
 - [介子密度稳定粒子与 K/π 比值公式](../../reference/formula/relaxtime/meson_density/MesonDensity_稳定粒子与KPi比值.md)：稳定粒子密度、化学势差和比值定义。
 - [介子密度 BU 相移公式](../../reference/formula/relaxtime/meson_density/MesonDensity_BU相移公式.md)：相移导数、窗口和积分约定。
-- [部分反馈与冻结线粗扫任务记录](../../dev/active/2026-07-27_partial-feedback性能与冻结线粗扫.md)：当前 x_min_cut partial-feedback 诊断的成本、比值和生产边界。
-- [带电 K/π BU kernel 门禁与同点消融](../../dev/active/2026-07-26_带电KPi_BU_kernel门禁与同点消融.md)：当前带电通道 kernel 门禁和 \(\mu_s\) 消融记录。
+- [部分反馈与冻结线粗扫任务记录](../../dev/archived/2026-07-27_partial-feedback性能与冻结线粗扫.md)：历史 x_min_cut partial-feedback 诊断的成本、比值和适用范围。
+- [带电 K/π BU kernel 门禁与同点消融](../../dev/archived/2026-07-26_带电KPi_BU_kernel门禁与同点消融.md)：当前带电通道 kernel 门禁和 \(\mu_s\) 消融记录。

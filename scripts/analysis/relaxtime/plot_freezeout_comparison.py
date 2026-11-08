@@ -13,6 +13,7 @@ import math
 from pathlib import Path
 import shutil
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
@@ -85,6 +86,98 @@ def load_experiment(path):
     return [{**r, "energy": float(r["sqrt_s_NN_GeV"]), "ratio": float(r["ratio"]),
         "error_minus": float(r["error_minus"]), "error_plus": float(r["error_plus"]),
         "primary_auau": truth(r["primary_auau"]), "auxiliary_horn": truth(r["auxiliary_horn"])} for r in rows]
+
+
+def experiment_provenance(path):
+    """Use the input edition's existing source record."""
+    directory = Path(path).parent
+    source = directory / "sources.json"
+    if not source.is_file():
+        source = directory / "README.md"
+    return input_record(source, role="experimental_provenance")
+
+
+def experiment_groups(experiments, *, na49_filled=True):
+    """Keep experiment, charge and acceptance identities distinct in both plots."""
+    def full_phase_space(row):
+        return "full phase space" in row["rapidity"]
+
+    definitions = [
+        ("AuAu", lambda r: r["experiment"] in {"AGS", "STAR"} and not full_phase_space(r),
+            "o", "#B2282E", "Au+Au: AGS, STAR", True, "experimental"),
+        ("NA49", lambda r: r["experiment"] == "NA49" and not full_phase_space(r),
+            "s", "#222222", "Pb+Pb: NA49", True, "experimental"),
+        ("AuAu4pi", lambda r: r["system"] == "Au+Au" and full_phase_space(r),
+            "o", "#B2282E", r"Au+Au: AGS, BRAHMS ($4\pi$)", False, "experimental"),
+        ("NA494pi", lambda r: r["experiment"] == "NA49" and full_phase_space(r),
+            "s", "#222222", r"Pb+Pb: NA49 ($4\pi$)", False, "experimental"),
+        ("BRAHMS", lambda r: r["experiment"] == "BRAHMS" and not full_phase_space(r),
+            "P", "#6A3D9A", "Au+Au: BRAHMS (y=0)", True, "experimental"),
+        ("STARBESII", lambda r: r["experiment"] == "STAR BES-II",
+            "^", "#6A3D9A", "Au+Au: BES-II (derived, prelim.)", False, "digitized_reference"),
+        ("ALICE", lambda r: r["experiment"] == "ALICE",
+            "v", "#222222", "Pb+Pb: ALICE (charge sum)", False, "experimental"),
+        ("HADES", lambda r: r["experiment"] == "HADES",
+            "+", "#B2282E", "Au+Au: HADES (digitized)", True, "digitized_reference"),
+        ("NA61", lambda r: r["experiment"] == "NA61/SHINE",
+            "D", "#006D2C", r"Pb+Pb: NA61/SHINE ($4\pi$, prelim.)", False, "digitized_reference"),
+    ]
+    groups = []
+    for name, select, marker, color, label, filled, state in definitions:
+        rows = [r for r in experiments if select(r)]
+        if rows:
+            groups.append(dict(name=name, rows=rows, marker=marker, color=color,
+                label=label, filled=filled, state=state))
+    return groups
+
+
+def experimental_caption():
+    return (
+        "Filled red circles and black squares denote AGS/STAR Au+Au and NA49 Pb+Pb midrapidity ratios. "
+        "Open red circles and black squares denote the full-phase-space AGS/BRAHMS and NA49 energy scan. "
+        "The purple filled cross is BRAHMS at 62.4 GeV and y=0 (0-10% centrality). "
+        "Purple open triangles are three STAR BES-II preliminary ratios derived from Fig. 1 of "
+        "EPJ Web Conf. 296, 14009 (2024): midrapidity pi+ and K+ yields, with the K+ plotting factor 2.5 removed. "
+        "Their bars propagate the plotted combined yield errors assuming zero kaon-pion covariance; "
+        "they are derived uncertainties, distinct from the graphical reading interval. "
+        "The open green diamond is NA61/SHINE preliminary Pb+Pb at 7.62 GeV, 0-7.2% centrality and 4pi acceptance, "
+        "read from the source vector figure with statistical and systematic errors combined in quadrature. "
+        "The added reference observations do not enter the frozen parameter scores. "
+    )
+
+
+def prepare_review_directories(output, results, *, replace_draft=False):
+    """An explicit replacement rewrites draft outputs without deleting directories."""
+    if results == output or results.is_relative_to(output) or output.is_relative_to(results):
+        raise ValueError("figure and result directories must be separate case directories")
+    if output.exists() or results.exists():
+        if not replace_draft:
+            raise FileExistsError(f"plot case exists: {output}; use --replace-draft for an unaccepted PNG draft")
+        manifest_path = output / "plot_manifest.json"
+        existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if (existing.get("delivery_stage") != "png_review"
+                or existing.get("validation", {}).get("author_review") != "pending"):
+            raise ValueError("only an unaccepted PNG draft can be replaced")
+    output.mkdir(parents=True, exist_ok=True)
+    results.mkdir(parents=True, exist_ok=True)
+
+
+def export_review_png(figure, stem, profile):
+    """Render with the shared quality checks before writing the approved draft."""
+    with tempfile.TemporaryDirectory(prefix="freezeout-png-") as temporary:
+        outputs, quality = export_figure(figure, Path(temporary) / stem.name, profile, formats=["png"])
+        target = stem.with_suffix(".png")
+        shutil.copyfile(Path(temporary) / target.name, target)
+        record = output_record(target, fmt="png", dpi=profile.dpi, vector=False)
+        record["inspection"] = outputs[0]["inspection"]
+    return [record], quality
+
+
+def write_review_manifest(path, manifest):
+    with tempfile.TemporaryDirectory(prefix="freezeout-manifest-") as temporary:
+        staged = Path(temporary) / "plot_manifest.json"
+        write_manifest(staged, manifest)
+        shutil.copyfile(staged, path)
 
 
 def residual_summary(pairs):
@@ -193,8 +286,6 @@ def compare_resolutions(refined, reference):
 
 def render(models, experiments, output_dir, result_dir, calculation, state, run_dir, experiment_path,
            *, series_order=None):
-    import matplotlib
-    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     profile = load_profile("candidate_aps_v2")
@@ -203,7 +294,7 @@ def render(models, experiments, output_dir, result_dir, calculation, state, run_
         raise ValueError("series_order must select existing calculation profiles")
     styles = CURVE_STYLES.select(profiles)
     with style_context(profile) as context:
-        figure, ax = plt.subplots(figsize=figure_size_inches(profile))
+        figure, ax = plt.subplots(figsize=(figure_size_inches(profile)[0], 6.0))
         context.bind(figure)
         try:
             return _render_figure(figure, ax, profile, context.font, profiles, styles, models, experiments,
@@ -229,31 +320,26 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
             "mask_rule": "failed=NaN; disconnect at every failed support point", "point_count": len(points),
             "failure_count": sum(not p["passed"] for p in points),
             "endpoint_warning_points": sum(int(p["pi_plus_endpoint_warning_shells"])+int(p["K_plus_endpoint_warning_shells"])>0 for p in points)})
-    groups = [
-        ("AuAu", lambda r: r["system"] == "Au+Au" and r["method"] != "digitized", "o", "#B2282E", "Au+Au: AGS, STAR", True),
-        ("NA49", lambda r: r["experiment"] == "NA49", "s", "#222222", "Pb+Pb: NA49", True),
-        ("ALICE", lambda r: r["experiment"] == "ALICE", "v", "#222222", "Pb+Pb: ALICE (charge sum)", False),
-        ("HADES", lambda r: r["experiment"] == "HADES", "+", "#B2282E", "Au+Au: HADES (digitized)", True),
-    ]
-    for name, select, marker, color, label, filled in groups:
-        rows = [r for r in experiments if select(r)]
-        if not rows:
-            continue
+    for group in experiment_groups(experiments):
+        name, rows, marker, color, label, filled = (group[key] for key in
+            ("name", "rows", "marker", "color", "label", "filled"))
         kwargs = dict(fmt=marker, color=color, markerfacecolor=color if filled else "white",
-            markeredgecolor=color, markersize=5.2, markeredgewidth=.85, elinewidth=.65,
+            markeredgecolor=color, markersize=6 if name == "NA61" else 5.2, markeredgewidth=.85, elinewidth=.65,
             capsize=2, capthick=.65, linestyle="none", label=label, zorder=4)
         errors = None if name == "HADES" else [[r["error_minus"] for r in rows], [r["error_plus"] for r in rows]]
         ax.errorbar([r["energy"] for r in rows], [r["ratio"] for r in rows], yerr=errors, **kwargs)
         encodings.append({"value":name,"color":color,"noncolor_encoding":f"{marker}; {'filled' if filled else 'open'}"})
-        series.append({"series_id": name, "state": "experimental" if name != "HADES" else "digitized_reference",
-            "support_rule": "retained source observations; separate systems/charges", "mask_rule": "none",
+        series.append({"series_id": name, "state": group["state"],
+            "support_rule": "retained source observations; separate systems/charges/acceptances", "mask_rule": "none",
+            "rapidity": sorted({r["rapidity"] for r in rows}),
+            "error_methods": sorted({r["error_method"] for r in rows}),
             "point_count": len(rows), "ids": [r["id"] for r in rows]})
     valid_values = [p["ratio"] for points in models.values() for p in points.values() if p["passed"]]
     ax.set_xscale("log")
     ax.set_xlim(2.1, 7000.)
     # Empty space above the high-energy plateau carries the user-preferred
     # in-panel legend. No computed extrema are clipped to create this space.
-    ax.set_ylim(min(0., min(valid_values)-.02), max(.56, math.ceil((max(valid_values)+.08)/.05)*.05))
+    ax.set_ylim(min(0., min(valid_values)-.02), max(.88, math.ceil((max(valid_values)+.08)/.05)*.05))
     ax.xaxis.set_major_locator(FixedLocator([3, 10, 100, 1000]))
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{x:g}"))
     ax.yaxis.set_major_locator(MultipleLocator(.1))
@@ -263,27 +349,25 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
     ax.text(.025, .962, "PNJL + GBU\nChemical freezeout", transform=ax.transAxes,
         va="top", fontsize=12)
     legend_labels = ax.get_legend_handles_labels()[1]
-    ax.legend(loc="upper right", fontsize=12, handlelength=2.8, labelspacing=.45,
+    ax.legend(loc="upper right", fontsize=12, handlelength=2.3, labelspacing=.32,
         borderaxespad=.55, frameon=False)
-    outputs, quality = export_figure(figure, output_dir / "kplus_piplus_freezeout_defaults", profile, formats=["png"])
+    outputs, quality = export_review_png(figure, output_dir / "kplus_piplus_freezeout_defaults", profile)
     color_path = output_dir / "kplus_piplus_freezeout_defaults.png"
     gray_path = output_dir / "kplus_piplus_freezeout_defaults_gray.png"
     with Image.open(color_path) as im:
         im.convert("L").convert("RGB").save(gray_path, dpi=(profile.dpi,profile.dpi))
     gray = output_record(gray_path, fmt="png", dpi=profile.dpi, vector=False)
     gray["inspection"] = inspect_export(gray_path); outputs.append(gray)
-    snapshot = result_dir / "source" / Path(__file__).name
-    snapshot.parent.mkdir(exist_ok=True); shutil.copyfile(__file__, snapshot)
     manifest = build_manifest(asset_id="meson_freezeout_defaults_20261017", figure_family="charged_meson_freezeout",
         case_slug=output_dir.name, figure_mode="audit", semantic_status="default_parameter_comparison",
         style_profile=profile.profile_id, publication_scope="internal_review",
-        generator=generator_record(__file__, command=" ".join(sys.argv), source_snapshot=snapshot,
+        generator=generator_record(__file__, command=" ".join(sys.argv),
             runtime=runtime_record({"matplotlib": matplotlib.__version__})),
         inputs=[input_record(run_dir / "freezeout_ratios.csv", role="direct_q0_calculations", units={"T":"MeV","muB":"MeV","sqrt_s_NN":"GeV","density":"fm^-3","ratio":"dimensionless"}),
             input_record(run_dir / "run.json", role="calculation_identity"),
             input_record(run_dir / "manifest.json", role="calculation_manifest"),
             input_record(experiment_path, role="experimental_observations"),
-            input_record(experiment_path.parent / "sources.json", role="experimental_provenance"),
+            experiment_provenance(experiment_path),
             input_record(ROOT / "config/plotting/candidate_aps_v2.toml", role="plot_style_contract"),
             *[input_record(ROOT / "scripts/plotting" / name, role="shared_plotting_code") for name in
                 ("plot_style.py", "plot_series.py", "plot_manifest.py", "plot_quality.py", "plot_accessibility.py", "validate_plot_artifact.py")]],
@@ -295,7 +379,7 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
         validation={"finite":True,"duplicate_keys":True,"support":True,
             "solver_called":False,"canonical_data_modified":False,"checks":"hashes, ratio finiteness, experiment energy coverage, measured rendering","author_review":"pending"},
         rendering={"delivery_stage":"png_review","vector_delivery_pending":True,"review_contract":"prd_review_v1",
-            "figure_size_inches":list(figure_size_inches(profile)),"column":"double_column","font":font,
+            "figure_size_inches":list(figure.get_size_inches()),"size_override_reason":"Additional acceptance and preliminary-data groups need an in-panel legend above the high-energy plateau.","column":"double_column","font":font,
             "series_styles":CURVE_STYLES.record(profiles),
             "legend_policy":"declared_geometry_checked","legend_outside":False,
             "legend_placements":[{"legend_index":0,"host_axes_index":0,"title":"","labels":legend_labels,
@@ -310,18 +394,11 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
         calculation_sha=state["git_head"], source_run_id=calculation["scan_identity"])
     manifest.update({"delivery_stage":"png_review", "manuscript_eligible":False,
         "current_publication_layer":False,"vector_delivery_pending":True,
-        "observable_note":"Local quark-only meson densities compared with final midrapidity hadron yields; no decay or acceptance model. ALICE is a charge sum.",
+        "observable_note":"Local mesonic correlation densities compared with midrapidity and 4pi final yields. NA61 and derived BES-II references are preliminary; ALICE is a charge sum. Source acceptance and error definitions are retained.",
         "caption":input_record(result_dir / "caption.md",role="figure_caption"),
         "analysis_outputs":[input_record(result_dir/name,role="derived_comparison") for name in
             ("comparison_metrics.json","comparison_residuals.csv","resolution_comparison.json") if (result_dir/name).exists()]})
-    for record in manifest["inputs"]:
-        if record["role"] in {"plot_style_contract", "shared_plotting_code"}:
-            code_path = ROOT / record["path"]
-            code_snapshot = result_dir / "source" / record["path"]
-            code_snapshot.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(code_path, code_snapshot)
-            record["source_snapshot"] = input_record(code_snapshot, role="plotting_source_snapshot")
-    write_manifest(output_dir / "plot_manifest.json", manifest)
+    write_review_manifest(output_dir / "plot_manifest.json", manifest)
     issues = validate_manifest(output_dir / "plot_manifest.json", repo_root=ROOT)
     if issues:
         raise ValueError("plot contract failed: " + "; ".join(issues))
@@ -329,22 +406,20 @@ def _render_figure(figure, ax, profile, font, profiles, styles, models, experime
 
 
 def main():
+    import matplotlib
+    matplotlib.use("Agg")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--reference-run-dir", type=Path, help="optional lower-resolution run for matched numerical differences")
     parser.add_argument("--experiment", type=Path, default=ROOT / "data/inputs/meson_freezeout_experiment_20261017/experimental_ratios.csv")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--result-dir", type=Path,
-        help="metrics, caption and source snapshot; defaults to the same case under results/relaxtime/meson_density")
+        help="metrics and caption; defaults to the same case under results/relaxtime/meson_density")
+    parser.add_argument("--replace-draft", action="store_true",
+        help="replace the unaccepted PNG draft in place; no directories or unrelated files are deleted")
     args = parser.parse_args()
     output = args.output_dir.resolve()
     result_dir = (args.result_dir or ROOT / "data/outputs/results/relaxtime/meson_density" / output.name).resolve()
-    if output.exists():
-        raise FileExistsError(f"refusing to overwrite plot case: {output}")
-    if result_dir == output or result_dir.is_relative_to(output) or output.is_relative_to(result_dir):
-        raise ValueError("figure and result directories must be separate case directories")
-    if result_dir.exists():
-        raise FileExistsError(f"refusing to overwrite plot results: {result_dir}")
     models, calculation, state = load_calculation(args.run_dir.resolve())
     experiments = load_experiment(args.experiment.resolve())
     metrics, residuals = compare(models, experiments)
@@ -365,8 +440,7 @@ def main():
             "inputs":[input_record(args.reference_run_dir.resolve()/name,role="reference_resolution") for name in
                 ("run.json","manifest.json","freezeout_ratios.csv")],
             "limitation":"sampling refinement only; fixed qmax and finite lower endpoint; not full production convergence"})
-    output.mkdir(parents=True)
-    result_dir.mkdir(parents=True)
+    prepare_review_directories(output, result_dir, replace_draft=args.replace_draft)
     (result_dir / "comparison_metrics.json").write_text(json.dumps(metrics,indent=2)+"\n",encoding="utf-8")
     if resolution_comparison is not None:
         (result_dir / "resolution_comparison.json").write_text(json.dumps(resolution_comparison,indent=2)+"\n",encoding="utf-8")
@@ -381,8 +455,7 @@ def main():
         "window starting at 1e-5 fm^-1. Straight segments connect adjacent valid "
         "calculation points; failures remain gaps. These are diagnostic finite-window "
         "results, without a final-state decay or rapidity-acceptance model. "
-        "Filled red circles: published central Au+Au AGS/STAR midrapidity data; "
-        "filled black squares: NA49 Pb+Pb midrapidity data. Open triangles: ALICE "
+        + experimental_caption() + "Open downward triangles: ALICE "
         "Pb+Pb charge-summed (K+ + K-)/(pi+ + pi-) ratios, used only as auxiliary "
         "high-energy observations. The red cross is a HADES point digitized from "
         "the supplied compilation; its pixel uncertainty is not an experimental "

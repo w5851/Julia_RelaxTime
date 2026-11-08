@@ -5,6 +5,19 @@ if !isdefined(Main, :ActiveDocsGovernance)
     include(joinpath(@__DIR__, "..", "..", "..", "scripts", "dev", "check_active_docs_governance.jl"))
 end
 
+@testset "A clean checkout may have no active documents" begin
+    mktempdir() do root
+        mkpath(joinpath(root, "docs", "dev"))
+        active = joinpath(root, "docs", "dev", "active")
+        result = ActiveDocsGovernance.review_documents(root; current_date=Date(2026, 11, 8))
+        @test isempty(result.violations)
+        @test isempty(result.advisories)
+        @test !ispath(active)
+        mkpath(active)
+        @test ActiveDocsGovernance.review_documents(root; current_date=Date(2026, 11, 8)) == result
+    end
+end
+
 @testset "Active document review follows status, not age" begin
     mktempdir() do root
         active = joinpath(root, "docs", "dev", "active")

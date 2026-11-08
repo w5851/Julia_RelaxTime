@@ -4,7 +4,8 @@ Isolated full-RS A angular-reduction feasibility and cost probe.
 Run with Julia 1.12.5 on quote-remote:
     julia --project=. benchmark/relaxtime/bench_full_rs_a_reduction.jl OUTPUT_DIR
 
-The prototype below does not replace a production entrypoint. Both quadratures
+The reduced call uses the opt-in `A_aniso_reduced` implementation. The
+production default remains the two-dimensional `A_aniso` path. Both methods
 retain the ordinary on-shell denominator, and the vacuum contribution is read
 from the existing production implementation.
 =#
@@ -20,7 +21,7 @@ if !isdefined(Main, :RelaxTime)
 end
 using Main.RelaxTime.GaussLegendre: gauleg
 using Main.RelaxTime.OneLoopIntegrals: const_integral_term_A
-using Main.RelaxTime.OneLoopIntegralsCorrection: A_aniso
+using Main.RelaxTime.OneLoopIntegralsCorrection: A_aniso, A_aniso_reduced
 using Main.PNJLQuarkDistributions_Aniso: distribution_aniso
 
 function semi_infinite_grid_a_probe(n::Int, scale::Float64)
@@ -160,12 +161,17 @@ function main_a_probe(outdir::String)
         one_coarse = thermal_1d_a_probe(case, q256, w256)
         two = thermal_2d_a_probe(case, q512, w512, c256, wc256)
         two_coarse = thermal_2d_a_probe(case, q256, w256, c128, wc128)
-        passed = all(isfinite, (one, two, one_coarse, two_coarse)) &&
+        api = A_aniso_reduced(case.m, case.mu, case.T, case.phi, case.phibar,
+            case.xi; p_max=Inf, radial_nodes=512, semi_infinite_scale=5.0) +
+            4.0 * const_integral_term_A(case.m)
+        passed = all(isfinite, (one, two, one_coarse, two_coarse, api)) &&
             isapprox(one, two; rtol=1e-9, atol=1e-11) &&
+            isapprox(api, one; rtol=1e-9, atol=1e-11) &&
             isapprox(one, one_coarse; rtol=1e-9, atol=1e-11) &&
             isapprox(two, two_coarse; rtol=1e-9, atol=1e-11)
         push!(equivalence, (;domain="semi_infinite", name=case.name, xi, pmax=nothing,
-            thermal_1d=one, thermal_2d=two, one_refinement=one-one_coarse,
+            thermal_1d=one, thermal_1d_api=api, thermal_2d=two,
+            one_refinement=one-one_coarse,
             two_refinement=two-two_coarse, relative_error=abs(one/two-1), passed))
         passed || push!(failures, "semi-infinite $(case.name) xi=$xi")
         println("EQUIVALENCE ", case.name, " xi=", xi, " passed=", passed); flush(stdout)
@@ -178,12 +184,16 @@ function main_a_probe(outdir::String)
         one_coarse = thermal_1d_finite_a_probe(case, pmax, 128)
         two = thermal_2d_a_probe(case, p, wp, c256, wc256)
         two_coarse = thermal_2d_a_probe(case, pc, wpc, c128, wc128)
-        passed = all(isfinite, (one, two, one_coarse, two_coarse)) &&
+        api = A_aniso_reduced(case.m, case.mu, case.T, case.phi, case.phibar,
+            case.xi; p_max=pmax, radial_nodes=256) + 4.0 * const_integral_term_A(case.m)
+        passed = all(isfinite, (one, two, one_coarse, two_coarse, api)) &&
             isapprox(one, two; rtol=1e-9, atol=1e-11) &&
+            isapprox(api, one; rtol=1e-9, atol=1e-11) &&
             isapprox(one, one_coarse; rtol=1e-9, atol=1e-11) &&
             isapprox(two, two_coarse; rtol=1e-9, atol=1e-11)
         push!(equivalence, (;domain="finite_spherical_p", name=case.name, xi, pmax,
-            thermal_1d=one, thermal_2d=two, one_refinement=one-one_coarse,
+            thermal_1d=one, thermal_1d_api=api, thermal_2d=two,
+            one_refinement=one-one_coarse,
             two_refinement=two-two_coarse, relative_error=abs(one/two-1), passed))
         passed || push!(failures, "finite $(case.name) xi=$xi pmax=$pmax")
     end
@@ -196,9 +206,11 @@ function main_a_probe(outdir::String)
         case = merge(background, (;xi))
         production_call = () -> A_aniso(case.m, case.mu, case.T, case.phi, case.phibar,
             case.xi, q32, w32, c16, wc16)
-        reduced_call = () -> thermal_1d_a_probe(case, q32, w32) - 4.0 * const_integral_term_A(case.m)
+        reduced_call = () -> A_aniso_reduced(case.m, case.mu, case.T, case.phi, case.phibar,
+            case.xi; p_max=Inf, radial_nodes=32, semi_infinite_scale=5.0)
         production_value, reduced_value = production_call(), reduced_call()
-        reference = thermal_1d_a_probe(case, q512, w512) - 4.0 * const_integral_term_A(case.m)
+        reference = A_aniso_reduced(case.m, case.mu, case.T, case.phi, case.phibar,
+            case.xi; p_max=Inf, radial_nodes=512, semi_infinite_scale=5.0)
         old_trial = @benchmark $production_call() samples=200 evals=10 seconds=0.25
         new_trial = @benchmark $reduced_call() samples=200 evals=10 seconds=0.25
         old_time, new_time = median(old_trial).time * 1e-9, median(new_trial).time * 1e-9
@@ -209,7 +221,7 @@ function main_a_probe(outdir::String)
             production_allocated_bytes=old_trial.memory, reduced_allocated_bytes=new_trial.memory))
     end
     write_probe_json(joinpath(outdir, "timings.json"), timings)
-    summary = (;complete=true, prototype_only=true, production_entry_changed=false,
+    summary = (;complete=true, prototype_only=false, production_entry_changed=false,
         numerical_host=get(ENV,"COMPUTERNAME","unknown"), julia_version=string(VERSION),
         julia_threads=Threads.nthreads(), angular_checks=length(bounds),
         integral_checks=length(equivalence), timing_cases=length(timings),

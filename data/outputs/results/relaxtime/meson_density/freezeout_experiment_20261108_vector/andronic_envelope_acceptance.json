@@ -1,0 +1,37 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "我已审阅三张新图，可以正式接受本次的实验数据范围(不必保留之前的“中间态 图像”)并完成矢量交付",
+  "accepted_at": "2026-11-08",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 26150,
+    "sha256": "185da5a6c958d91e0888bb0a8d7d60947b85bf4d6cc05ffa0a0e7e89cb1a0fda"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261107_png_review/kplus_piplus_parameter_envelope.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 536313,
+    "sha256": "4d5b348e2bb648f4f10f4e070ff0b62a809dcb21d2a0cce1267ed6c3f227c8d0",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        3600
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        6.000012000024
+      ]
+    }
+  }
+}

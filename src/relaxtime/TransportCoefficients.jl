@@ -22,6 +22,11 @@ module TransportCoefficients
 - E_dist = sqrt(p² + m² + ξ(p cosθ)²) 只作为 RS 分布的变形自变量
 - `prefer_energy_aniso` 只选择等价的分布调用路径，不是积分核能量策略
 
+物理定义：有限 ξ 输出为占据加权的标量 RTA 量。η/σ/ζ 用 f(1-f)，
+κ 使用继承的 f 权重及标量焓投影；它们没有实现围绕 RS 态的完整张量响应。
+PNJL 颜色平均占据数一般也不满足 -T*∂f/∂E = f(1-f)。
+适用范围及 O(ξ) 对照见 docs/reference/formula/relaxtime/transport/RS_Response_Convention.md。
+
 积分核（含相空间测度 p²）：
 - η: p⁶/E² (来自 p² × p⁴/E²)
 - σ: p⁴q²/E² (来自 p² × p²q²/E²)

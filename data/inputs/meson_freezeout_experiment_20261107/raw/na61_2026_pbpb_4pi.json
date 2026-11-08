@@ -1,0 +1,110 @@
+{
+  "source": {
+    "arxiv": "2606.00597v1",
+    "url": "https://arxiv.org/src/2606.00597v1",
+    "section": 4,
+    "figure": 7,
+    "page": 11,
+    "source_member": "hornPlus4Pi_corr.pdf",
+    "file": "na61_2026_pbpb_4pi_fig7.pdf",
+    "sha256": "c3c204ba01e2a5b948afb6a9a6254d2bd694423a126837eec3868b6489c920ba"
+  },
+  "observable": {
+    "system": "Pb+Pb",
+    "beam_momentum_A_GeV_c": 30,
+    "sqrt_s_NN_GeV": 7.62,
+    "centrality": "0-7.2%",
+    "rapidity": "full phase space (4pi)",
+    "ratio": "<K+>/<pi+>",
+    "publication_status": "preliminary",
+    "pion_positive_yield": "measured pi- scaled by NA49 pi+/pi- ratio"
+  },
+  "method": "vector-figure extraction with pdftocairo -svg; affine axis calibration; no curve interpolation",
+  "calibration": {
+    "coordinate_system": "SVG point coordinates from pdftocairo; origin at top left",
+    "x_log10_anchors": [
+      [
+        113.386719,
+        1
+      ],
+      [
+        265.675781,
+        10
+      ]
+    ],
+    "x_check_anchor": [
+      417.964844,
+      100
+    ],
+    "x_check_residual_GeV": 1.511983356294877e-06,
+    "y_linear_anchors": [
+      [
+        440.03125,
+        0
+      ],
+      [
+        156.839844,
+        0.2
+      ]
+    ],
+    "y_check_anchor": [
+      298.4375,
+      0.1
+    ],
+    "y_check_residual": -1.379279143814971e-06,
+    "formula_x": "10**((x-113.386719)/(265.675781-113.386719))",
+    "formula_y": "0.2*(440.03125-y)/(440.03125-156.839844)",
+    "series_color": "rgb(59.999084%,0%,0%)",
+    "marker_center": [
+      247.699219,
+      105.511719
+    ],
+    "stat_errorbar_y": [
+      104.902344,
+      106.121094
+    ],
+    "systematic_band_y": [
+      78.679688,
+      132.34375
+    ],
+    "band_x_range_not_energy_error": [
+      237.722656,
+      257.671875
+    ]
+  },
+  "extracted": {
+    "sqrt_s_NN_GeV": 7.620046625563371,
+    "ratio": 0.23624977588479504,
+    "stat": 0.00043036263607520997,
+    "syst": 0.01894974948498261,
+    "syst_lower_ratio": 0.2173000263998124,
+    "syst_upper_ratio": 0.25519952536977764
+  },
+  "used_in_csv": {
+    "sqrt_s_NN_GeV": 7.62,
+    "ratio": 0.23625,
+    "stat": 0.00043,
+    "syst": 0.01895,
+    "error_minus": 0.018954878000134952,
+    "error_plus": 0.018954878000134952
+  },
+  "rounding_and_error_semantics": "Approximate graphical readings, not an official numerical table. Quoted last digits reflect vector extraction; nominal values rounded to 0.00001. Statistical/systematic ranges are experimental graphical uncertainties; no graphical extraction error is used as an experimental bar.",
+  "crosscheck": {
+    "arxiv": "2608.04758v1",
+    "section": 2,
+    "figure": "1 left",
+    "source_member": "figures/identified_particles/hornPlus4Pi.pdf",
+    "source_sha256": "4dd7c0299af2c698b54fb2ec3a0ba0ae4be06ff6a4ee5b6442c1089ffe3c518e",
+    "ratio": 0.23624904173631325,
+    "difference_from_fig7": -7.341484817846577e-07,
+    "caption": "statistical uncertainties as error bars, systematic as shaded bands; same preliminary measurement, not independent data"
+  },
+  "display_policy": {
+    "primary_auau": false,
+    "auxiliary_horn": false,
+    "marker": "open green diamond",
+    "label": "Pb+Pb: NA61/SHINE (4pi, prelim.)",
+    "scoring": "excluded; original scoring tables unchanged"
+  },
+  "checked_on": "2026-11-07"
+}

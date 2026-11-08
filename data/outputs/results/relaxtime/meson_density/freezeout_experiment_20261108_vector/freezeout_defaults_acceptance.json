@@ -1,0 +1,37 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "我已审阅三张新图，可以正式接受本次的实验数据范围(不必保留之前的“中间态 图像”)并完成矢量交付",
+  "accepted_at": "2026-11-08",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 26684,
+    "sha256": "cc8a4ca2f3010a5954ddc8f4398dd43db038efaa309ff234536096a8c008d8ee"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261107_png_review/kplus_piplus_freezeout_defaults.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 513467,
+    "sha256": "5e4a9b43b05231d0694e1f5139ca8bc20c3e78e8b7d2d6fba0587d4135d62872",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        3600
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        6.000012000024
+      ]
+    }
+  }
+}

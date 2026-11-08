@@ -17,17 +17,19 @@ docs/analysis/relaxtime/charged_gbu_mub_sensitivity_20260912_analysis/q0_finite_
 data/inputs/meson_freezeout_*/*.pdf binary
 data/inputs/meson_freezeout_*/**/*.png binary
 data/outputs/figures/relaxtime/meson_density/freezeout_*/*.png binary
-data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018*/*.png binary
+data/outputs/figures/relaxtime/meson_density/andronic_envelope_*/*.png binary
 data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/*.zip binary
 data/inputs/meson_freezeout_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/meson_density/freezeout_defaults_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_defaults_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/meson_density/freezeout_literature_candidates_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/meson_density/freezeout_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/meson_density/andronic_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_envelope_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/andronic_envelope_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/meson_density/freezeout_defaults_20261017*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261018*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/freezeout_defaults_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/freezeout_envelope_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/andronic_envelope_*/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/meson_density/freezeout_experiment_20261108_vector/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/inputs/meson_freezeout_andronic_literature_20261018/source_manifest.json whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
 

@@ -1,9 +1,21 @@
+---
+title: "Charged RPA/BU 严格复核与后续实现任务单"
+archived: true
+original: "docs/dev/active/2026-08-30_charged-rpa-bu-strict-audit.md"
+archived_date: "2026-11-07"
+task_status: "completed"
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Charged RPA/BU 严格复核与后续实现任务单
 
 更新日期：2026-09-07
 
-当前状态：研究生产入口与配置冻结线验收完成，作者已审核图像；工程合入记录见第22.25节及PR310。
-当前有效结论以第22.23–22.25节为准，前面各轮记录是历史过程，不覆盖最新验收。
+当前状态：已完成，2026-11-07 收尾归档。研究生产入口与配置冻结线已获作者验收，PR #310 已合入实现，PR #311 已采用无限热 B 的 charged 介子密度 smoke 默认入口。
+本任务最终结论以第22.23–22.26节为准，前面各轮记录保留历史语境。后续默认冻结线及两族参数探索见[当前研究入口](../../analysis/relaxtime/meson_freezeout_defaults_20261017_analysis/README.md)。
 本文承接完整 KMT interaction-kernel 与固定 BQS
 quark-only 后处理诊断，目标是重新核对 charged `π^±/K^±` 的 RPA/BU 数值链，
 但不在本任务单完成前替换现有 `MesonDensity` 生产语义。`x_min_cut`、低节点数、
