@@ -403,22 +403,27 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "active"
+status = "review"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "作者接受首阶段并授权继续：收尾 PR #338，验证单次候选遍历及 T=120 一阶相变多分支，再扩大有限性能 pilot。"
+next_action = "作者审阅 PR #339 的候选搜索和 PALC 有限验证结果，含 T120 一阶温区跨密度回弯；无待运行批次。通用 PALC backend 按实际消费者需求再接入。"
 required_author_review = true
-author_review_status = "accepted"
+author_review_status = "pending"
 promotion_required = false
-current_branch = "codex/palc-matched-diagnostic"
-current_sha = "053099ba585e640ef89e1dfa0a150f60c7fbe0d7"
-run_ids = ["42477523346", "42479096492"]
+current_branch = "main"
+current_sha = "b9dfae4b2919cfa4172b89545ea46b5e37a2fe87"
+run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220"]
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",
+  "pr:339",
+  "run:42594377256",
+  "run:42598285619",
+  "run:42604649370",
+  "file:data/outputs/results/analysis/palc_matched_20261108/single_pass_pilot.json",
   "run:42479096492",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "file:data/outputs/results/analysis/palc_matched_20261108/pilot.json",
@@ -1108,17 +1113,21 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "active"
+status = "review"
 parent = "track:palc-performance-research"
 task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
-reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
-next_action = "首阶段已获作者认可；继续可选候选搜索优化、分支与自由能核对及扩大有限 pilot，数值验证在 Actions 运行。"
+reason = "同口径性能、候选保留及一阶温区均匀分支验证完成；已交付可选 single-pass，PALC 长路径收益有有限证据。"
+next_action = "作者审阅 PR #339 与当前分析；算法优化及有限验证已完成，无待运行批次。通用 PALC 接入留待实际消费者需求，完整物理重算未启动。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "note:author_20261108_start_palc_matched_diagnostic",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",
+  "pr:339",
+  "run:42598285619",
+  "run:42604649370",
+  "file:data/outputs/results/analysis/palc_matched_20261108/single_pass_pilot.json",
   "run:42479096492",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",

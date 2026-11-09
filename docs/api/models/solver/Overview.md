@@ -126,6 +126,17 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 ## 请求级 solver telemetry
 
+`FixedAsymmetricRho` 可显式传入 `fixedasymrho_seed_policy=:single_pass`，并设置
+`evaluate_all_attempts=true`。它展开既有外层和内层种子的并集，对每个不同起点进行一次
+相同的八变量联立求解，将全部候选交给现有硬约束和 selector；默认 `:nested` 保留原路径。
+该选项适用于 `solve`、`solve_multi`、`solve_constraint` 及 SeedContinuation 的 `solve_path`。
+`solve_multi` 和默认 SeedContinuation 已评估全部候选；直接 `solve`/`solve_constraint`
+需要显式设置 `evaluate_all_attempts=true`。未知策略或提前停止配置抛出 `ArgumentError`。
+两策略可能因候选可见性不同而选中不同根，尤其在一阶相变温区；`semantic_mode` 和
+自定义 selector 的含义不变。固定密度的压力最大规则与物理相共存判定须分别核对。
+新策略全部候选未通过硬约束时返回 `converged=false`；单点 `solve_constraint`
+的 `hard_constraint_ok`、`failed_constraints` 和诊断字段保留具体原因。
+
 需要审计 `FixedRho` 或 `FixedAsymmetricRho` equilibrium 工作量时，可显式创建 `Models.SolverWorkTelemetry()`，并将其作为
 `work_telemetry=` 传给 `Models.solve`、`Models.solve_multi`、`Models.solve_constraint` 或 `Models.solve_path`。计数器属于单次请求/扫描，
 不是全局状态；`SolverResult v1` 的字段和序列化契约不变。`Models.solver_work_snapshot`

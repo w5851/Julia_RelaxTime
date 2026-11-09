@@ -686,6 +686,12 @@ function _governed_nonrho_problem_spec_forward_solve(
         fallback_method=fallback_method,
     )
 
+    single_pass = mode isa FixedAsymmetricRho &&
+        get(kwargs, :fixedasymrho_seed_policy, :nested) === :single_pass
+    if single_pass
+        attempt_plan = _fixedasymrho_single_pass_plan(mode, T_fm, attempt_plan, kwargs[:mu0])
+    end
+
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
     hard_constraints = _append_extra_feasible_rule(hard_constraints, extra_constraints, mode)
@@ -707,6 +713,8 @@ function _governed_nonrho_problem_spec_forward_solve(
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
             mode isa FixedAsymmetricRho || delete!(local_kwargs, :work_telemetry)
+            delete!(local_kwargs, :fixedasymrho_seed_policy)
+            single_pass && (local_kwargs[:single_seed] = true)
             delete!(local_kwargs, :trust_region_fallback)
             delete!(local_kwargs, :fallback_method)
 
@@ -754,6 +762,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         end,
     )
     s = selected.selected_candidate
+    single_pass && (s = (; s..., converged=Bool(s.converged) && Bool(s.hard_constraint_ok)))
     result = (
         converged=Bool(s.converged),
         solution=Vector{Float64}(s.solution),
@@ -824,7 +833,14 @@ end
 
 function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    policy = get(kwargs, :fixedasymrho_seed_policy, :nested)
+    policy isa Symbol && policy in (:nested, :single_pass) || throw(ArgumentError(
+        "fixedasymrho_seed_policy must be :nested or :single_pass, got $(policy)",
+    ))
     cfg = _fixedasymrho_runtime_config_from_kwargs(mode, kwargs)
+    policy === :single_pass && !cfg.evaluate_all_attempts && throw(ArgumentError(
+        "fixedasymrho_seed_policy=:single_pass requires evaluate_all_attempts=true to retain all candidates",
+    ))
     record_solver_request!(get(kwargs, :work_telemetry, nothing); fixedasymrho=true)
     kwargs[:rho0] = cfg.rho0
     kwargs[:mu0] = cfg.mu0

@@ -20,7 +20,7 @@ include(joinpath(@__DIR__, "..", "..", "relaxtime", "combined_meson_density_equi
 const RESIDUAL_TOL = 1e-6
 const ROOT_TOL = 1e-9
 const ROOT_DISTANCE = 1e-4
-const METHODS = ("palc", "seed", "multi", "production", "dense")
+const METHODS = ("palc", "seed", "multi", "production", "dense", "legacy_seed", "seed_reverse")
 
 Base.@kwdef mutable struct PilotWork
     solver::Models.SolverWorkTelemetry = Models.SolverWorkTelemetry()
@@ -44,19 +44,36 @@ Base.@kwdef mutable struct PilotWork
     correction_requests::Int = 0
 end
 
-function config(case, output)
+function config(case, output; profile=get(ENV, "PALC_PILOT_PROFILE", "local"))
     case in ("t120_rho035", "t130_rho080") || throw(ArgumentError("unknown case: $case"))
+    profile in ("local", "long", "higher", "transition") || throw(ArgumentError("unknown profile: $profile"))
+    if profile == "transition"
+        case == "t120_rho035" || throw(ArgumentError("transition profile uses T=120 only"))
+        return M.MultiBranchConfig(repo_root=Main.REPO_ROOT, output_dir=dirname(output), run_id=case,
+            T_MeV=120.0, rho_min=0.6, rho_max=3.0, rho_anchor=1.8, rho_step=0.1,
+            production_source_rho=3.2, production_source_step=0.1,
+            p_num=24, t_num=8, ds_rho=0.02, dsmax_rho=0.1, max_steps=100,
+            root_distance_tol=ROOT_DISTANCE, run_phase3_review=false)
+    end
     first_case = case == "t120_rho035"
+    anchor = first_case ? 0.35 : 0.80
+    width = profile == "local" ? 0.05 : 0.10
     return M.MultiBranchConfig(repo_root=Main.REPO_ROOT, output_dir=dirname(output), run_id=case,
         T_MeV=first_case ? 120.0 : 130.0,
-        rho_min=first_case ? 0.30 : 0.75, rho_max=first_case ? 0.40 : 0.85,
-        rho_anchor=first_case ? 0.35 : 0.80, rho_step=0.025,
+        rho_min=anchor-width, rho_max=anchor+width, rho_anchor=anchor,
+        rho_step=profile == "local" ? 0.025 : 0.01,
+        p_num=profile == "higher" ? 24 : 8, t_num=profile == "higher" ? 8 : 4,
         root_distance_tol=ROOT_DISTANCE, run_phase3_review=false)
 end
 
-solve_kwargs(cfg, work) = (; xi=cfg.xi, p_num=cfg.p_num, t_num=cfg.t_num,
-    iterations=300, residual_norm_max=RESIDUAL_TOL, work_telemetry=work.solver)
-rho_grid(cfg; dense=false) = reverse(round.(collect(range(cfg.rho_min, cfg.rho_max; length=dense ? 9 : 5)); digits=10))
+solve_kwargs(cfg, work; policy=:single_pass) = (; xi=cfg.xi, p_num=cfg.p_num, t_num=cfg.t_num,
+    iterations=300, residual_norm_max=RESIDUAL_TOL, work_telemetry=work.solver,
+    fixedasymrho_seed_policy=policy)
+function rho_grid(cfg; dense=false)
+    intervals = round(Int, (cfg.rho_max-cfg.rho_min)/cfg.rho_step)
+    return reverse(round.(collect(range(cfg.rho_min, cfg.rho_max;
+        length=(dense ? 2 : 1)*intervals+1)); digits=10))
+end
 mode_at(cfg, rho) = Models.FixedAsymmetricRho(rho, cfg.asym_ud_ratio_target, cfg.asym_s_target)
 
 function failed_point(rho; reason="solver_failed")
@@ -77,12 +94,17 @@ function checked_point(model, cfg, rho, solution, solver_ok, work)
     thermo = Models.compute_thermo_from_solution(model, x, T;
         xi=cfg.xi, p_num=cfg.p_num, t_num=cfg.t_num, rho0_scale=Models.ρ0)
     physical = Models._thermo_quantities_finite(thermo) &&
-        Models._is_mass_positive(thermo.masses) && Models._is_phi_in_range(thermo.x_state)
+        Models._is_mass_positive(thermo.masses) && Models._is_phi_in_range(thermo.x_state) &&
+        Models._is_mass_hierarchy_physical(thermo.masses)
     accepted = solver_ok && physical && isfinite(residual_norm) && residual_norm <= RESIDUAL_TOL &&
         abs(thermo.rho_norm - rho) <= RESIDUAL_TOL
     return (; rho, solution=x, pressure=Float64(thermo.pressure),
+        mu_inv_fm=Float64.(thermo.mu_vec), density_inv_fm3=Float64.(thermo.rho_vec),
+        helmholtz_inv_fm4=Float64(-thermo.pressure + dot(thermo.mu_vec, thermo.rho_vec)),
+        masses_inv_fm=Float64.(thermo.masses),
         rho_norm=Float64(thermo.rho_norm), residual_norm, accepted,
-        reason=accepted ? "accepted" : "common_residual_or_physicality_gate")
+        reason=accepted ? "accepted" : !Models._is_mass_hierarchy_physical(thermo.masses) ?
+            "mass_hierarchy_invalid" : "common_residual_or_physicality_gate")
 end
 
 function direct_root(model, cfg, rho, seed, work)
@@ -136,8 +158,10 @@ function discover_anchors(model, cfg, work)
     for source_rho in M._rho_path(cfg.production_source_rho, rho, cfg.production_source_step)
         work.anchor_requests += 1
         result = seed === nothing ?
-            Models.solve(model, mode_at(cfg, source_rho), T; seed_strategy=Models.MultiSeed(), solve_kwargs(cfg, work)...) :
-            Models.solve(model, mode_at(cfg, source_rho), T; seed_guess=seed, solve_kwargs(cfg, work)...)
+            Models.solve(model, mode_at(cfg, source_rho), T; seed_strategy=Models.MultiSeed(),
+                evaluate_all_attempts=true, solve_kwargs(cfg, work)...) :
+            Models.solve(model, mode_at(cfg, source_rho), T; seed_guess=seed,
+                evaluate_all_attempts=true, solve_kwargs(cfg, work)...)
         seed = copy(result.solution)
     end
     add_distinct!(roots, checked_point(model, cfg, rho, result.solution, result.converged, work))
@@ -214,13 +238,15 @@ end
 function run_baseline(method, model, cfg, work)
     T = cfg.T_MeV / U.HBARC_MEV_FM
     grid = rho_grid(cfg; dense=method == "dense")
+    method == "seed_reverse" && reverse!(grid)
     points = NamedTuple[]
-    if method in ("seed", "dense")
+    if method in ("seed", "dense", "legacy_seed", "seed_reverse")
         path = Models.FixedAsymmetricRhoPath(T, grid; ud_ratio_target=cfg.asym_ud_ratio_target,
             s_target=cfg.asym_s_target, xi=cfg.xi, p_num=cfg.p_num, t_num=cfg.t_num)
         result = Models.solve_path(model, path; continuation_strategy=Models.SeedContinuation(),
             branch_policy=Models.GroundStateBranchPolicy(cfg.pressure_gap_tol, RESIDUAL_TOL),
-            iterations=300, residual_norm_max=RESIDUAL_TOL, work_telemetry=work.solver)
+            iterations=300, residual_norm_max=RESIDUAL_TOL, work_telemetry=work.solver,
+            fixedasymrho_seed_policy=method == "legacy_seed" ? :nested : :single_pass)
         for p in only(result.branches).points
             push!(points, checked_point(model, cfg, p.param_value, p.solution, p.converged, work))
         end
@@ -255,9 +281,11 @@ function run(method, case, output)
     cfg = config(case, output)
     model = Models.create_model(:PNJL)
     repetitions = Any[]
+    repetition_count = parse(Int, get(ENV, "PALC_PILOT_REPETITIONS", "6"))
+    repetition_count >= 3 || throw(ArgumentError("PALC_PILOT_REPETITIONS must be at least 3"))
     # Reset all seeds and anchor discovery every time; only Julia compilation
     # and model quadrature caches survive between identical repetitions.
-    for repetition in 1:3
+    for repetition in 1:repetition_count
         work = PilotWork()
         GC.gc()
         timed = @timed method == "palc" ? run_palc(model, cfg, work) : run_baseline(method, model, cfg, work)
@@ -265,12 +293,14 @@ function run(method, case, output)
             wall_seconds=timed.time, gc_seconds=timed.gctime, allocated_bytes=timed.bytes,
             compile_seconds=hasproperty(timed, :compile_time) ? timed.compile_time : nothing,
             work=work_snapshot(work), result=timed.value))
-        U._write_json(output, (; schema="palc_matched_pilot_v1", method, case,
+        U._write_json(output, (; schema="palc_matched_pilot_v2", method, case,
             source_sha=readchomp(`git -C $(cfg.repo_root) rev-parse HEAD`),
             julia_version=string(VERSION), bifurcationkit_version=string(Base.pkgversion(BifurcationKit)),
             threads=Threads.nthreads(), blas_threads=BLAS.get_num_threads(),
             load_seconds=Main.MATCHED_PILOT_LOAD_SECONDS,
+            expected_repetitions=repetition_count,
             config=(; T_MeV=cfg.T_MeV, targets=rho_grid(cfg), xi=cfg.xi, p_num=cfg.p_num,
+                profile=get(ENV, "PALC_PILOT_PROFILE", "local"),
                 t_num=cfg.t_num, ud_ratio=cfg.asym_ud_ratio_target, s_target=cfg.asym_s_target,
                 residual_tol=RESIDUAL_TOL, root_tol=ROOT_TOL, root_distance_tol=ROOT_DISTANCE,
                 ds=cfg.ds_rho, dsmax=cfg.dsmax_rho, max_steps=cfg.max_steps,
