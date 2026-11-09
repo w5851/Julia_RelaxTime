@@ -14,7 +14,7 @@ def finite(value):
     return isinstance(value, (int, float)) and math.isfinite(value)
 
 
-def compare_points(left, right, *, state_tol=1e-4, pressure_tol=1e-6):
+def compare_points(left, right, *, state_tol=1e-4, pressure_tol=1e-6, require_accepted=True):
     rows = []
     for a in left:
         matches = [b for b in right if abs(a["rho"] - b["rho"]) <= 1e-12]
@@ -22,7 +22,7 @@ def compare_points(left, right, *, state_tol=1e-4, pressure_tol=1e-6):
             rows.append(dict(rho=a["rho"], passed=False, reason="missing_or_duplicate_target"))
             continue
         b = matches[0]
-        valid = a["accepted"] and b["accepted"] and finite(a["pressure"]) and finite(b["pressure"])
+        valid = (not require_accepted or (a["accepted"] and b["accepted"])) and finite(a["pressure"]) and finite(b["pressure"])
         valid = valid and all(finite(x) for x in a["solution"] + b["solution"])
         if not valid:
             rows.append(dict(rho=a["rho"], passed=False, reason="unaccepted_point"))
@@ -64,7 +64,7 @@ def summarize(directory):
         reps = data["repetitions"]
         for rep in reps[1:]:
             checks[f"{method}_repeat_{rep['repetition']}"] = compare_points(
-                rep["result"]["points"], reps[0]["result"]["points"])
+                rep["result"]["points"], reps[0]["result"]["points"], require_accepted=method != "legacy_seed")
     for other in ("production", "multi", "dense", "palc", "seed_reverse", "legacy_seed"):
         if "seed" in cases and other in cases:
             seed = cases["seed"]["repetitions"][-1]["result"]["points"]
@@ -78,9 +78,10 @@ def summarize(directory):
     identities_match = len({d["source_sha"] for d in cases.values()}) == 1 and len({
         json.dumps(d["config"], sort_keys=True) for d in cases.values()}) == 1
     # Legacy branch differences remain visible, but they are not the acceptance
-    # gate for the new search policy. Each legacy repetition must still agree.
+    # gate for the new search policy. Legacy repetition checks compare the raw
+    # finite root, including roots rejected by the common physicality gate.
     parity = complete and identities_match and all(check["passed"] for name, check in checks.items()
-        if name != "seed_vs_legacy_seed" and not name.startswith("legacy_seed_repeat_"))
+        if name != "seed_vs_legacy_seed")
     speedup = None
     if parity and "palc" in measurements and "seed" in measurements:
         speedup = measurements["seed"]["warm_median_seconds"] / measurements["palc"]["warm_median_seconds"]
