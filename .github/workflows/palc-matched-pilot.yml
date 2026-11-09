@@ -16,6 +16,11 @@ on:
         type: choice
         options: ["1", "2"]
         default: "1"
+      case:
+        description: "Temperature case"
+        type: choice
+        options: [both, t120_rho035, t130_rho080]
+        default: both
 
 permissions:
   contents: read
@@ -31,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [t120_rho035, t130_rho080]
+        case: ${{ fromJSON(inputs.case == 't120_rho035' && '["t120_rho035"]' || inputs.case == 't130_rho080' && '["t130_rho080"]' || '["t120_rho035","t130_rho080"]') }}
     env:
       JULIA_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
@@ -79,6 +84,7 @@ jobs:
         if: always()
         run: |
           for batch in "$PILOT_OUTPUT"/batch_*; do
+            [ -d "$batch" ] || continue
             python scripts/analysis/pnjl_bifurcation_spike/summarize_matched_pilot.py "$batch" --require-parity
             cat "$batch/summary.md" >> "$GITHUB_STEP_SUMMARY"
           done

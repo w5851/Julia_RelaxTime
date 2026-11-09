@@ -1,4 +1,4 @@
-"""Bounded remote checks for the two candidate-visibility counterexamples."""
+# Bounded remote checks for the two candidate-visibility counterexamples.
 using Test
 using LinearAlgebra
 include(joinpath(@__DIR__, "run_matched_pilot.jl"))
