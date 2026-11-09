@@ -57,4 +57,13 @@ end
     @test any(c.pressure == 22.0 for c in observed)
     @test length(calls) == length(Set(Tuple(s) for s in calls))
     @test result.candidate_count == length(calls)
+
+    # A converged equation root rejected by the requested hard rules must not
+    # be reported as a successful single-pass equilibrium.
+    kwargs[:hard_constraints] = M.HardConstraintRule[c -> (false, :author_constraint)]
+    rejected = M._governed_nonrho_problem_spec_forward_solve(model, mode, T, kwargs,
+        "FixedAsymmetricRho", :asym_attempt_origin, fake_solve)
+    @test !rejected.converged
+    @test !rejected.hard_constraint_ok
+    @test :author_constraint in rejected.failed_constraints
 end

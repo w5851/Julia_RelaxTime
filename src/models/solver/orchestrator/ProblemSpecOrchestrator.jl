@@ -762,6 +762,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         end,
     )
     s = selected.selected_candidate
+    single_pass && (s = (; s..., converged=Bool(s.converged) && Bool(s.hard_constraint_ok)))
     result = (
         converged=Bool(s.converged),
         solution=Vector{Float64}(s.solution),

@@ -71,6 +71,14 @@ function check_candidate_search(output)
             @test default.converged == nested.converged
             @test norm(default.solution-nested.solution) <= P.ROOT_DISTANCE
             @test abs(default.pressure-nested.pressure) <= 1e-6
+            rejected = Models.solve_constraint(model, mode, T;
+                seed_guess=seeds[2], xi=0.0, p_num=8, t_num=4, rho0=Models.ρ0,
+                residual_norm_max=P.RESIDUAL_TOL, iterations=300,
+                evaluate_all_attempts=true, fixedasymrho_seed_policy=:single_pass,
+                hard_constraints=Models.HardConstraintRule[c -> (false, :audit_rejection)])
+            @test !rejected.converged
+            @test !rejected.hard_constraint_ok
+            @test :audit_rejection in rejected.failed_constraints
             push!(report, (; case, target, permutations=measurements))
         end
     end

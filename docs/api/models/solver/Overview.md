@@ -134,6 +134,8 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 需要显式设置 `evaluate_all_attempts=true`。未知策略或提前停止配置抛出 `ArgumentError`。
 两策略可能因候选可见性不同而选中不同根，尤其在一阶相变温区；`semantic_mode` 和
 自定义 selector 的含义不变。固定密度的压力最大规则与物理相共存判定须分别核对。
+新策略全部候选未通过硬约束时返回 `converged=false`；单点 `solve_constraint`
+的 `hard_constraint_ok`、`failed_constraints` 和诊断字段保留具体原因。
 
 需要审计 `FixedRho` 或 `FixedAsymmetricRho` equilibrium 工作量时，可显式创建 `Models.SolverWorkTelemetry()`，并将其作为
 `work_telemetry=` 传给 `Models.solve`、`Models.solve_multi`、`Models.solve_constraint` 或 `Models.solve_path`。计数器属于单次请求/扫描，

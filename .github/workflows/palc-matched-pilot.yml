@@ -21,6 +21,10 @@ on:
         type: choice
         options: [both, t120_rho035, t130_rho080]
         default: both
+      verify_only:
+        description: "Only candidate and compatibility checks (local/T120)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -72,6 +76,7 @@ jobs:
           julia --project=scripts/analysis/pnjl_bifurcation_spike scripts/analysis/pnjl_bifurcation_spike/check_candidate_search.jl "$PILOT_OUTPUT/candidate_checks.json"
           python -m unittest discover -s tests/unit/python -p test_palc_matched_summary.py
       - name: Run bounded matched workloads
+        if: ${{ !inputs.verify_only }}
         env:
           PILOT_PROFILE: ${{ inputs.profile }}
           PILOT_REPETITIONS: ${{ inputs.repetitions }}
