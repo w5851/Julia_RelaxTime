@@ -706,7 +706,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         selector_fn,
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
-            delete!(local_kwargs, :work_telemetry)
+            mode isa FixedAsymmetricRho || delete!(local_kwargs, :work_telemetry)
             delete!(local_kwargs, :trust_region_fallback)
             delete!(local_kwargs, :fallback_method)
 
@@ -825,6 +825,7 @@ end
 function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
     cfg = _fixedasymrho_runtime_config_from_kwargs(mode, kwargs)
+    record_solver_request!(get(kwargs, :work_telemetry, nothing); fixedasymrho=true)
     kwargs[:rho0] = cfg.rho0
     kwargs[:mu0] = cfg.mu0
     return _governed_nonrho_problem_spec_forward_solve(

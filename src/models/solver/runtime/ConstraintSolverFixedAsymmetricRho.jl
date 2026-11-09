@@ -16,6 +16,7 @@ function _solve_constraint_fixedasymrho(
     rho0::Real,
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
+    work_telemetry=nothing,
     nlsolve_kwargs...,
 )
     _ = solver_primary, solver_secondary, nlsolve_method, enforce_physicality
@@ -27,7 +28,7 @@ function _solve_constraint_fixedasymrho(
         t_num=t_num,
         model_kind=model_kind,
     )
-    joint_residual! = build_residual!(mode, joint_params)
+    joint_residual! = _instrument_fixedasymrho_residual(build_residual!(mode, joint_params), work_telemetry)
 
     candidate_seeds = Vector{Vector{Float64}}()
     if length(seed_guess) >= 8
@@ -57,6 +58,7 @@ function _solve_constraint_fixedasymrho(
     best_joint = nothing
 
     for x0 in values(uniq)
+        record_fixedasymrho_inner_solve!(work_telemetry)
         joint = try
             nlsolve(
                 joint_residual!,
@@ -69,9 +71,12 @@ function _solve_constraint_fixedasymrho(
             )
         catch err
             err isa InterruptException && rethrow()
+            record_solver_exception!(work_telemetry)
+            record_attempt_outcome!(work_telemetry; converged=false)
             nothing
         end
         joint === nothing && continue
+        record_nlsolve_work!(work_telemetry, joint, :trust_region)
 
         joint_solution = Float64.(joint.zero)
         joint_thermo = compute_thermo_from_solution(
@@ -90,6 +95,7 @@ function _solve_constraint_fixedasymrho(
         nB_joint = sum(joint_thermo.rho_vec) / (3.0 * rho0)
         ud_ratio_joint = rho_u - rho_d * ud_ratio_target
 
+        record_postprocess_residual!(work_telemetry)
         joint_residual_norm = _compose_mode_residual_norm(
             model,
             joint_thermo.x_state,
@@ -109,6 +115,7 @@ function _solve_constraint_fixedasymrho(
             joint_thermo_finite && _is_mass_positive(joint_thermo.masses) && _is_phi_in_range(joint_thermo.x_state)
         joint_converged = Bool(joint.f_converged) && joint_phys && isfinite(joint_residual_norm) &&
             joint_residual_norm <= max(Float64(residual_norm_max), 1e-3)
+        record_attempt_outcome!(work_telemetry; converged=joint_converged)
 
         joint_result = _build_mode_result_from_outer_state(
             joint_thermo.x_state,

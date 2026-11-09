@@ -23,6 +23,8 @@ using Dates
 using .Constants_PNJL: ħc_MeV_fm
 using .Models
 
+include(joinpath(@__DIR__, "combined_meson_density_equilibrium.jl"))
+
 const TRHO_ASYMMETRIC_BRANCH_POLICY = :pressure_max_all_attempts_multiseed
 
 @inline _fmt(x::Real) = Models.ScanCommon.fmt(x)
@@ -129,24 +131,6 @@ function _constraint_diagnostics(
         "muQ_MeV" => mu_Q,
         "muS_MeV" => mu_S,
     )
-end
-
-function _trho_asymmetric_seed_candidates(T_fm::Float64, mode, equilibrium_seed)
-    multiseeds = Models.get_all_seeds(Models.MultiSeed(), [T_fm], mode)
-    seed_pool = if equilibrium_seed === nothing
-        Models.build_seed_pool(mode;
-            primary_seed=multiseeds[1],
-            extra_seed_pool=multiseeds[2:end],
-            seed_extend=(seed, _) -> Float64.(seed),
-        )
-    else
-        Models.build_seed_pool(mode;
-            primary_seed=equilibrium_seed,
-            extra_seed_pool=multiseeds,
-            seed_extend=(seed, _) -> Float64.(seed),
-        )
-    end
-    return [entry.seed for entry in seed_pool]
 end
 
 function _trho_branch_diagnostics(equilibrium, seed_candidate_count::Int)
@@ -875,7 +859,7 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
             branch_diagnostics = _trho_branch_diagnostics(nothing, length(seed_candidates))
 
             equilibrium = try
-                Models.solve_multi(
+                _solve_trho_asymmetric_equilibrium(
                     model,
                     mode,
                     T_fm;
@@ -884,8 +868,6 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
                     p_num=opts.p_num,
                     t_num=opts.t_num,
                     iterations=opts.max_iter,
-                    semantic_mode=:ground_state,
-                    evaluate_all_attempts=true,
                 )
             catch err
                 base = Dict{String, Any}(

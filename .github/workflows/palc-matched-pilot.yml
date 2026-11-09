@@ -1,0 +1,66 @@
+name: palc-matched-pilot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: palc-matched-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [t120_rho035, t130_rho080]
+    env:
+      JULIA_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+      PILOT_OUTPUT: temp_palc_matched/${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - uses: julia-actions/cache@v2
+        with:
+          cache-name: palc-matched-pilot
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instantiate root and isolated continuation environments
+        run: |
+          julia --project=. -e 'using Pkg; Pkg.instantiate()'
+          julia --project=scripts/analysis/pnjl_bifurcation_spike -e 'using Pkg; Pkg.instantiate()'
+      - name: Precompile the shared dependency stack before timing
+        run: julia --startup-file=no --project=scripts/analysis/pnjl_bifurcation_spike -e 'include("scripts/analysis/pnjl_bifurcation_spike/run_matched_pilot.jl")'
+      - name: Verify counters and helpers
+        if: matrix.case == 't120_rho035'
+        run: |
+          julia --project=. tests/unit/models/test_solver_work_telemetry.jl
+          julia --project=. tests/unit/models/test_combined_equilibrium_helper.jl
+          julia --project=. tests/unit/models/test_palc_matched_support.jl
+          julia --project=. scripts/analysis/pnjl_bifurcation_spike/check_matched_telemetry.jl
+          python -m unittest discover -s tests/unit/python -p test_palc_matched_summary.py
+      - name: Run bounded matched workloads
+        run: python scripts/analysis/pnjl_bifurcation_spike/run_matched_pilot.py --case '${{ matrix.case }}' --output "$PILOT_OUTPUT"
+      - name: Compare target points and work
+        if: always()
+        run: |
+          python scripts/analysis/pnjl_bifurcation_spike/summarize_matched_pilot.py "$PILOT_OUTPUT"
+          cat "$PILOT_OUTPUT/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: palc-matched-${{ matrix.case }}
+          path: ${{ env.PILOT_OUTPUT }}
+          retention-days: 14
+          if-no-files-found: warn
