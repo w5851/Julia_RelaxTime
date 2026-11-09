@@ -38,19 +38,27 @@ function check_candidate_search(output)
                 accepted = filter(c -> c.converged && c.hard_constraint_ok, candidates)
                 @test selected.converged
                 @test selected.residual_norm <= P.RESIDUAL_TOL
-                @test any(norm(c.solution-Float64.(low["solution"])) <= P.ROOT_DISTANCE for c in accepted)
+                @test any(norm(c.solution-Float64.(low["solution"])) <= P.ROOT_DISTANCE for c in candidates)
+                low_candidates = filter(c -> norm(c.solution-Float64.(low["solution"])) <= P.ROOT_DISTANCE, candidates)
+                @test all(:mass_hierarchy_invalid in c.failed_constraints for c in low_candidates)
                 @test any(norm(c.solution-Float64.(high["solution"])) <= P.ROOT_DISTANCE for c in accepted)
                 @test selected.pressure >= high["pressure"]-1e-6
                 @test telemetry.fixedasymrho_inner_solves == selected.candidate_count
                 @test telemetry.fixedasymrho_inner_solves == telemetry.governed_attempts
                 points = NamedTuple[]
+                excluded = NamedTuple[]
                 work = P.PilotWork()
                 for root in accepted
                     P.add_distinct!(points, P.checked_point(model, cfg, target, root.solution, true, work))
                 end
+                for root in low_candidates
+                    point = P.checked_point(model, cfg, target, root.solution, root.converged, work)
+                    @test !point.accepted
+                    isempty(excluded) && push!(excluded, (; point..., failed_constraints=root.failed_constraints))
+                end
                 push!(selected_solutions, copy(selected.solution))
                 push!(measurements, (; selected_pressure=selected.pressure,
-                    selected_solution=selected.solution, roots=points,
+                    selected_solution=selected.solution, roots=points, excluded_roots=excluded,
                     work=Models.solver_work_snapshot(telemetry)))
             end
             @test all(norm(x-first(selected_solutions)) <= P.ROOT_DISTANCE for x in selected_solutions)

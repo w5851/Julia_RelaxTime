@@ -36,7 +36,7 @@ class MatchedPoints(unittest.TestCase):
         for method in methods:
             grid = [0.3+i*0.005 for i in range(41)] if method == "dense" else targets
             pressure = 2.0 if (wrong_new and method == "seed") or (wrong_legacy and method == "legacy_seed") else 1.0
-            points = [self.point(rho, pressure) for rho in grid]
+            points = [self.point(rho, pressure, accepted=not (wrong_legacy and method == "legacy_seed")) for rho in grid]
             if truncate and method == "dense":
                 points = points[:-1]
             reps = [dict(repetition=i, phase="first_call" if i == 1 else "warm",

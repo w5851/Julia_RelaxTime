@@ -95,7 +95,8 @@ function checked_point(model, cfg, rho, solution, solver_ok, work)
         helmholtz_inv_fm4=Float64(-thermo.pressure + dot(thermo.mu_vec, thermo.rho_vec)),
         masses_inv_fm=Float64.(thermo.masses),
         rho_norm=Float64(thermo.rho_norm), residual_norm, accepted,
-        reason=accepted ? "accepted" : "common_residual_or_physicality_gate")
+        reason=accepted ? "accepted" : !Models._is_mass_hierarchy_physical(thermo.masses) ?
+            "mass_hierarchy_invalid" : "common_residual_or_physicality_gate")
 end
 
 function direct_root(model, cfg, rho, seed, work)

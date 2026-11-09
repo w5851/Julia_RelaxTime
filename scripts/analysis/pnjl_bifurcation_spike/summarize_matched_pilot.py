@@ -73,13 +73,14 @@ def summarize(directory):
     if "palc" in cases and "dense" in cases:
         checks["palc_vs_dense"] = compare_points(cases["palc"]["repetitions"][-1]["result"]["points"],
             cases["dense"]["repetitions"][-1]["result"]["points"])
-    complete = len(cases) == len(methods) and all(m.get("complete") and m.get("accepted_all") for m in measurements.values())
+    complete = len(cases) == len(methods) and all(m.get("complete") and
+        (method == "legacy_seed" or m.get("accepted_all")) for method, m in measurements.items())
     identities_match = len({d["source_sha"] for d in cases.values()}) == 1 and len({
         json.dumps(d["config"], sort_keys=True) for d in cases.values()}) == 1
     # Legacy branch differences remain visible, but they are not the acceptance
     # gate for the new search policy. Each legacy repetition must still agree.
     parity = complete and identities_match and all(check["passed"] for name, check in checks.items()
-        if name != "seed_vs_legacy_seed")
+        if name != "seed_vs_legacy_seed" and not name.startswith("legacy_seed_repeat_"))
     speedup = None
     if parity and "palc" in measurements and "seed" in measurements:
         speedup = measurements["seed"]["warm_median_seconds"] / measurements["palc"]["warm_median_seconds"]

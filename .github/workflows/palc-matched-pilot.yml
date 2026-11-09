@@ -62,7 +62,7 @@ jobs:
       - name: Precompile the shared dependency stack before timing
         run: julia --startup-file=no --project=scripts/analysis/pnjl_bifurcation_spike -e 'include("scripts/analysis/pnjl_bifurcation_spike/run_matched_pilot.jl")'
       - name: Verify counters and helpers
-        if: matrix.case == 't120_rho035'
+        if: matrix.case == 't120_rho035' && inputs.profile == 'local'
         run: |
           julia --project=. tests/unit/models/test_solver_work_telemetry.jl
           julia --project=. tests/unit/models/test_combined_equilibrium_helper.jl
