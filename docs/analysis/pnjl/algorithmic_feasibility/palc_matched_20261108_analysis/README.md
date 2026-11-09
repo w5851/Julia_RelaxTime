@@ -70,6 +70,10 @@ PALC/Seed 对均匀根的数值一致性不等于完成了 Maxwell/Gibbs 相共�
 | long 两温度各两批 | [42594377256](https://github.com/w5851/Julia_RelaxTime/actions/runs/42594377256) | `dbad30ac` |
 | higher 两温度各两批 | [42598285619](https://github.com/w5851/Julia_RelaxTime/actions/runs/42598285619) | `dbad30ac` |
 | T120 跨区 | [42604649370](https://github.com/w5851/Julia_RelaxTime/actions/runs/42604649370) | `777bcad0` |
+| 最终候选/失败返回值检查 | [42607669220](https://github.com/w5851/Julia_RelaxTime/actions/runs/42607669220) | `b9dfae4b` |
+
+最终定向复核通过 191 项数值候选/排列/默认兼容/失败返回值检查和 13 项 telemetry parity；
+辅助候选测试 87 项通过。该修正只影响全部候选被硬约束拒绝时的成功标记，已接受扫描点均通过硬约束。
 
 首轮 T120 的脚本注释误写成 `using` 的 docstring，修正后原断言又将应被质量层级排除的根要求为
 accepted；这两次失败分别为 `42582867659` 的 T120 job 和 `42586424407`。
