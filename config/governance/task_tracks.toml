@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "palc-performance-research"
-updated_at = "2026-11-08"
+updated_at = "2026-11-09"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -403,13 +403,13 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "review"
+status = "active"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "PR #338 两窗口诊断完成且 CI 通过；审阅隔离 PALC 的收益及候选根保留反例，再决定下一阶段生产算法改进。"
+next_action = "作者接受首阶段并授权继续：收尾 PR #338，验证单次候选遍历及 T=120 一阶相变多分支，再扩大有限性能 pilot。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = false
 current_branch = "codex/palc-matched-diagnostic"
 current_sha = "053099ba585e640ef89e1dfa0a150f60c7fbe0d7"
@@ -417,6 +417,7 @@ run_ids = ["42477523346", "42479096492"]
 evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
+  "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",
   "run:42479096492",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
@@ -425,7 +426,7 @@ evidence = [
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
-updated_at = "2026-11-08"
+updated_at = "2026-11-09"
 
 [[tracks]]
 id = "full-temperature-reference-research"
@@ -1107,15 +1108,16 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "review"
+status = "active"
 parent = "track:palc-performance-research"
 task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 需要独立评估其性能收益。"
-next_action = "首阶段计算验证已完成，审阅 PR #338 与结果；候选保留问题属于生产 backend 前的下一阶段，当前默认未改。"
+next_action = "首阶段已获作者认可；继续可选候选搜索优化、分支与自由能核对及扩大有限 pilot，数值验证在 Actions 运行。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "note:author_20261108_start_palc_matched_diagnostic",
+  "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",
   "run:42479096492",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",

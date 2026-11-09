@@ -163,6 +163,8 @@ workload three times (first call and two warm calls). BifurcationKit remains in
 this isolated environment. PNJL numerical pilot execution is on Actions.
 The workflow imports the shared dependency stack once before starting timed
 subprocesses, so package precompilation cannot consume the numerical timeout.
+The numerical workflow is dispatched explicitly for a chosen code revision;
+ordinary PR checks remain automatic. Documentation updates do not rerun the pilot.
 
 Methods are multi-anchor PALC, `SeedContinuation`, independent pressure-governed
 `solve_multi`, the equilibrium helper used by the combined `trho_asymmetric`

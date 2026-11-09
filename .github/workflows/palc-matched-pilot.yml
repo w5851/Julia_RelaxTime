@@ -2,11 +2,6 @@ name: palc-matched-pilot
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "scripts/analysis/pnjl_bifurcation_spike/**"
-      - "scripts/relaxtime/combined_meson_density_equilibrium.jl"
-      - ".github/workflows/palc-matched-pilot.yml"
 
 permissions:
   contents: read
