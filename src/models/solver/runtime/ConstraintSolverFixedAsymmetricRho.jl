@@ -1,3 +1,36 @@
+function _fixedasymrho_inner_seeds(mode, T_fm, seed_guess, mu0; single_seed::Bool=false)
+    candidate_seeds = Vector{Vector{Float64}}()
+    push!(candidate_seeds, length(seed_guess) >= 8 ? Float64.(seed_guess[1:8]) :
+        extend_seed(Float64.(seed_guess), mode))
+    if !single_seed
+        if length(seed_guess) >= 5 && length(mu0) >= 3
+            push!(candidate_seeds, Float64[Float64.(seed_guess[1:5])..., Float64.(mu0[1:3])...])
+        end
+        for seed in seed_catalog(mode, [T_fm])
+            push!(candidate_seeds, length(seed) >= 8 ? Float64.(seed[1:8]) :
+                extend_seed(Float64.(seed), mode))
+        end
+    end
+    # Keep the existing nested path's iteration order for compatibility.
+    uniq = Dict{String, Vector{Float64}}()
+    for seed in candidate_seeds
+        get!(uniq, _mode_seed_key(seed), seed)
+    end
+    return collect(values(uniq))
+end
+
+function _fixedasymrho_single_pass_plan(mode, T_fm, attempt_plan, mu0)
+    seeds = Dict{String, Vector{Float64}}()
+    for attempt in attempt_plan, seed in _fixedasymrho_inner_seeds(mode, T_fm, attempt.seed, mu0)
+        get!(seeds, _mode_seed_key(seed), seed)
+    end
+    # All legacy inner starts remain available, but each is solved only once.
+    # Canonical ordering also makes equal-quality selector ties reproducible.
+    ordered = sort!(collect(values(seeds)); by=Tuple)
+    return [(; seed, method=:trust_region, use_fallback=false,
+        fallback_method=:trust_region, attempt_origin=:candidate_search) for seed in ordered]
+end
+
 function _solve_constraint_fixedasymrho(
     model::AbstractQCDModel,
     T_fm::Real,
@@ -17,6 +50,7 @@ function _solve_constraint_fixedasymrho(
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
     work_telemetry=nothing,
+    single_seed::Bool=false,
     nlsolve_kwargs...,
 )
     _ = solver_primary, solver_secondary, nlsolve_method, enforce_physicality
@@ -30,34 +64,13 @@ function _solve_constraint_fixedasymrho(
     )
     joint_residual! = _instrument_fixedasymrho_residual(build_residual!(mode, joint_params), work_telemetry)
 
-    candidate_seeds = Vector{Vector{Float64}}()
-    if length(seed_guess) >= 8
-        push!(candidate_seeds, Float64.(seed_guess[1:8]))
-    else
-        push!(candidate_seeds, extend_seed(Float64.(seed_guess), mode))
-    end
-    if length(seed_guess) >= 5 && length(mu0) >= 3
-        push!(candidate_seeds, Float64[Float64.(seed_guess[1:5])..., Float64.(mu0[1:3])...])
-    end
-    for seed in seed_catalog(mode, [T_fm])
-        if length(seed) >= 8
-            push!(candidate_seeds, Float64.(seed[1:8]))
-        else
-            push!(candidate_seeds, extend_seed(Float64.(seed), mode))
-        end
-    end
-
-    uniq = Dict{String, Vector{Float64}}()
-    for s in candidate_seeds
-        key = join(round.(s; digits=10), ",")
-        haskey(uniq, key) || (uniq[key] = s)
-    end
+    candidate_seeds = _fixedasymrho_inner_seeds(mode, T_fm, seed_guess, mu0; single_seed)
 
     nls_kwargs = Dict{Symbol,Any}(pairs(nlsolve_kwargs))
     joint_iterations = Int(get(nls_kwargs, :iterations, 600))
     best_joint = nothing
 
-    for x0 in values(uniq)
+    for x0 in candidate_seeds
         record_fixedasymrho_inner_solve!(work_telemetry)
         joint = try
             nlsolve(

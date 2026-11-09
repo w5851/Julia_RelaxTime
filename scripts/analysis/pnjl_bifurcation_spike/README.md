@@ -159,7 +159,7 @@ The current task uses `.github/workflows/palc-matched-pilot.yml`. It runs the tw
 existing windows on Actions with 5 common density targets and 8 x 4 quadrature.
 `run_matched_pilot.py` launches each method in a separate Julia process;
 `run_matched_pilot.jl` records loading separately, then repeats the same fresh
-workload three times (first call and two warm calls). BifurcationKit remains in
+workload six times by default (first call and five warm calls). BifurcationKit remains in
 this isolated environment. PNJL numerical pilot execution is on Actions.
 The workflow imports the shared dependency stack once before starting timed
 subprocesses, so package precompilation cannot consume the numerical timeout.
@@ -168,7 +168,9 @@ ordinary PR checks remain automatic. Documentation updates do not rerun the pilo
 
 Methods are multi-anchor PALC, `SeedContinuation`, independent pressure-governed
 `solve_multi`, the equilibrium helper used by the combined `trho_asymmetric`
-script, and a half-step SeedContinuation reference. Every reported target is
+script, a half-step SeedContinuation reference, the legacy nested SeedContinuation,
+and a reverse-direction SeedContinuation. The first five and reverse-direction
+methods use `fixedasymrho_seed_policy=:single_pass`. Every reported target is
 checked at its actual rho with the same explicit residual and physicality gate.
 The PALC total includes catalog/high-density anchor discovery, all continuation
 branches, and single-seed correction to the common targets. Nearest/interpolated
@@ -180,6 +182,19 @@ only after all repetitions and same-target comparisons pass. `processes.json`
 also records process wall time and runner compute time, including dependency
 loading; Actions setup/install time remains visible in the workflow. First-call
 timing includes remaining method JIT, and is not a package-cache-free cold start.
+Legacy/new branch differences are reported separately from the new-policy parity
+gate. `--require-parity` makes numerical CI fail on incomplete work or mismatches
+among the new methods. This differs from the first-stage observational pilot.
+
+The workflow accepts `profile=local|long|higher`: five target points at `8 x 4`,
+21 points at `8 x 4`, or 21 points at `24 x 8`. Long/higher windows are
+`rho/rho0=0.25:0.01:0.45` and `0.70:0.01:0.90`. `repeat_processes=2` executes
+two independent batches; `repetitions` controls identical calls within each process.
+`check_candidate_search.jl` verifies the two retained counterexamples, seed
+permutations, candidate visibility and default/nested compatibility.
+Each accepted root includes chemical potentials, flavor densities and homogeneous
+Helmholtz free energy. T=120 is treated as a first-order-transition temperature
+region; branch retention is distinct from a global coexistence construction.
 
 `FixedAsymmetricRho` telemetry separates requests, outer attempts and actual
 inner multi-seed NLsolve work. Direct residual evaluations include AD or finite
