@@ -6,7 +6,7 @@ on:
       profile:
         description: "Bounded workload"
         type: choice
-        options: [local, long, higher]
+        options: [local, long, higher, transition]
         default: local
       repetitions:
         description: "First call plus warm repetitions"

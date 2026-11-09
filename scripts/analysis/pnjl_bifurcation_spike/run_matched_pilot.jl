@@ -46,7 +46,15 @@ end
 
 function config(case, output; profile=get(ENV, "PALC_PILOT_PROFILE", "local"))
     case in ("t120_rho035", "t130_rho080") || throw(ArgumentError("unknown case: $case"))
-    profile in ("local", "long", "higher") || throw(ArgumentError("unknown profile: $profile"))
+    profile in ("local", "long", "higher", "transition") || throw(ArgumentError("unknown profile: $profile"))
+    if profile == "transition"
+        case == "t120_rho035" || throw(ArgumentError("transition profile uses T=120 only"))
+        return M.MultiBranchConfig(repo_root=Main.REPO_ROOT, output_dir=dirname(output), run_id=case,
+            T_MeV=120.0, rho_min=0.6, rho_max=3.0, rho_anchor=1.8, rho_step=0.1,
+            production_source_rho=3.2, production_source_step=0.1,
+            p_num=24, t_num=8, ds_rho=0.02, dsmax_rho=0.1, max_steps=100,
+            root_distance_tol=ROOT_DISTANCE, run_phase3_review=false)
+    end
     first_case = case == "t120_rho035"
     anchor = first_case ? 0.35 : 0.80
     width = profile == "local" ? 0.05 : 0.10

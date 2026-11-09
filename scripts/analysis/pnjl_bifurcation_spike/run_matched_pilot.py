@@ -18,10 +18,12 @@ def main():
     parser.add_argument("--case", choices=("t120_rho035", "t130_rho080"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout-seconds", type=int, default=480)
-    parser.add_argument("--profile", choices=("local", "long", "higher"), default="local")
+    parser.add_argument("--profile", choices=("local", "long", "higher", "transition"), default="local")
     parser.add_argument("--methods", nargs="+", choices=METHODS, default=list(METHODS))
     parser.add_argument("--repetitions", type=int, default=6)
     args = parser.parse_args()
+    if args.profile == "transition" and args.methods == list(METHODS):
+        args.methods.remove("legacy_seed")
     args.output.mkdir(parents=True, exist_ok=True)
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     records = []
