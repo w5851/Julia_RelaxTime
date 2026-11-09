@@ -186,12 +186,17 @@ Legacy/new branch differences are reported separately from the new-policy parity
 gate. `--require-parity` makes numerical CI fail on incomplete work or mismatches
 among the new methods. This differs from the first-stage observational pilot.
 
-The workflow accepts `profile=local|long|higher`: five target points at `8 x 4`,
+The workflow accepts `profile=local|long|higher|transition`: five target points at `8 x 4`,
 21 points at `8 x 4`, or 21 points at `24 x 8`. Long/higher windows are
 `rho/rho0=0.25:0.01:0.45` and `0.70:0.01:0.90`. `repeat_processes=2` executes
 two independent batches; `repetitions` controls identical calls within each process.
 `check_candidate_search.jl` verifies the two retained counterexamples, seed
 permutations, candidate visibility and default/nested compatibility.
+The T120 `transition` profile covers `rho/rho0=0.6:0.1:3.0` with `24 x 8` nodes
+and a half-step 49-point reference. It follows the homogeneous root through the
+nonmonotone conjugate-chemical-potential region; it does not construct a mixed phase.
+Use `verify_only=true` with `case=t120_rho035, profile=local` to rerun only the
+candidate, rejection and compatibility checks after changes confined to those contracts.
 Each accepted root includes chemical potentials, flavor densities and homogeneous
 Helmholtz free energy. T=120 is treated as a first-order-transition temperature
 region; branch retention is distinct from a global coexistence construction.
@@ -207,3 +212,10 @@ This establishes local solver consistency at fixed discretization. The dense
 reference is a step-size check, and production parity covers the equilibrium
 stage with successful downstream meson steps; neither runs meson densities nor
 proves complete branch discovery or converged thermal integration.
+
+`collect_matched_pilot.py --case-dir <downloaded-case> ... --candidate-checks <json>
+--output <result.json>` retains timing/counts, comparison errors, one representative
+path, branch corrections and differing legacy roots. It checks parity and independent
+process results before replacing repeated state arrays with their verified differences.
+The current qualified delivery and performance decision are documented in
+`docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md`.

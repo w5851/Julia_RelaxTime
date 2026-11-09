@@ -8,7 +8,7 @@
 | 逻辑角色 | 当前路径 | verdict / 用途 |
 | --- | --- | --- |
 | criticality feasibility v1 | [`criticality_feasibility_v1/`](criticality_feasibility_v1/) | `diagnostic_candidate`；受控解析反例上的算法合同审计 |
-| PALC matched pilot | [`palc_matched_20261108_analysis/`](palc_matched_20261108_analysis/) | 两窗口同密度点、cold/warm 与工作量对照；隔离诊断及候选根选择反例 |
+| PALC matched pilot | [`palc_matched_20261108_analysis/`](palc_matched_20261108_analysis/) | 可选 single-pass、七组有限性能对照及 T120 一阶温区均匀分支回弯；长扫描有延拓收益 |
 
 ## Boundary
 

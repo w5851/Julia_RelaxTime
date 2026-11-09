@@ -1,12 +1,12 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / active`。2026-11-09 作者接受首阶段分析并授权按顺序推进：收尾 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338)，验证候选根完整保留与重复求解削减，再扩大有限 pilot。T=120 按一阶相变温区处理，保留多分支和可能的物理跳转。首阶段完整结果见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
+状态：`research / review`。2026-11-09 已按作者授权完成首阶段 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338) 合并、可选候选搜索优化及扩大有限 pilot，第二阶段交付于 [PR #339](https://github.com/w5851/Julia_RelaxTime/pull/339)。T=120 的跨区检查保留了均匀解的化学势回弯。完整结果及数值代码见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 
 ## 1. 背景与目标
 
-PALC multi-branch spike 已在两个 `FixedAsymmetricRho` 多根场景中展示分支发现、延拓和显式 pressure selection 能力，但现有 `125.4 s cold / 1.37 s warm` 计时来自不同 workload，且缺少 matched dense/seed baseline 与 PNJL solver telemetry。因此当前只能保留 `ready_for_opt_in_diagnostic_backend`，不能宣称 PALC 加速或替代 production path。
+本任务始于历史 PALC 与 SeedContinuation 计时口径不一致。现已补齐同点、冷暖调用和真实求解工作量比较；新结果支持较长同密度路径上的延拓收益，短窗口需要考虑 anchor 成本。
 
-本任务建立可比较的性能和语义 parity 证据，优化候选搜索，并决定 PALC 是否值得接入可选 backend。
+本任务建立可比较的性能和语义 parity 证据，优化候选搜索，并决定 PALC 的后续接口范围。当前交付可复用的 single-pass 开关与隔离 PALC pilot；通用 PALC 接口集成留到实际消费者提出时，当前没有待运行批次或完整生产任务。
 
 ## 2. 范围与非范围
 
@@ -63,10 +63,11 @@ PALC multi-branch spike 已在两个 `FixedAsymmetricRho` 多根场景中展示�
 
 ## 第二阶段验收
 
-- [ ] 单次候选遍历保留全部合格根，统一交给既有 selector；比较次数和真实残差调用下降。
-- [ ] 两处已知反例通过种子排列、扫描方向与重复运行核对；一阶相变温区分支作为独立结果保留。
-- [ ] 扩大网格与积分节点的有限 pilot，区分首次调用、warm、anchor 和延拓成本。
-- [ ] 根据数值一致性和性能，决定可选 PALC backend 的实现范围；同步台账与 PR。
+- [x] 单次候选遍历保留全部合格根，统一交给既有 selector；21 点 NLsolve 次数从 2526 降至 476。
+- [x] 两处反例通过种子排列、扫描方向与独立进程核对；低压力根的质量层级失败明确保留。T120 跨区化学势回弯未被平滑删除。
+- [x] 完成 local/long/higher 各两批及 T120 跨区单批；同点、半步长和正反向均一致。
+- [x] 24×8 下 single-pass Seed 约快 7 倍；PALC 再有约 1.9–4.4 倍长路径收益。保留可选 single-pass 和隔离 PALC 能力，暂不接入通用生产 backend。
+- [x] 第二阶段数值归并至 `single_pass_pilot.json`，当前状态在台账与 PR 同步。
 
 ## 6. 风险与回退
 
