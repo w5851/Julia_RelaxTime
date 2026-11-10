@@ -197,6 +197,33 @@ end
         @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
     end
 
+    @testset "Temperature paths retain constraint targets and input order" begin
+        modes = (Models.FixedEntropy(0.5), Models.FixedSigma(12.0),
+            Models.FixedMuBConservedCharges(4.5))
+        for mode in modes
+            path = Models.ConstraintTPath(mode, [0.7, 0.5, 0.6]; p_num=24, t_num=8)
+            @test Models._path_values(path) == [0.7, 0.5, 0.6]
+            @test Models._path_temperature(path, 0.6) == 0.6
+            @test Models._path_mode(path, 0.6) === mode
+            @test Models.to_namedtuple(path).T_values == [0.7, 0.5, 0.6]
+            @test all(seed -> length(seed) == 8, Models._path_catalog(path, 0.6))
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [0.0])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [NaN])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, Float64[])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [0.5]; xi=-1.0)
+        end
+        @test_throws ArgumentError Models.SingleSeedAnchor(NaN, ones(8))
+        @test_throws ArgumentError Models.SingleSeedAnchor(0.5, [Inf])
+        model = Models.create_model(:PNJL)
+        path = Models.ConstraintTPath(Models.FixedSigma(12.0), [0.5, 0.6])
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.5, ones(5)))
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.7, ones(8)))
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.5, ones(8)), anchor_values=[0.5])
+    end
+
     @testset "FixedMu scan preserves its historical density unit" begin
         value = Models.SolverResult(Models.FixedMu(), true, zeros(5), zeros(5), zeros(3),
             -1.0, 1.0, 2.0, 3.0, 4.0, ones(3), 0, 1e-9, 0.0)

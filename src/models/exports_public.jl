@@ -44,6 +44,7 @@ export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
 export FixedMuPath, FixedRhoPath, FixedAsymmetricRhoPath, solve_path, selected_path_results
+export ConstraintTPath, SingleSeedAnchor
 export SeedContinuation, PALCContinuation, SeedPoolAnchor, MultiSeedAnchor, CompositeAnchor, ProductionLikeAnchor
 export GroundStateBranchPolicy, ContinuationBranchPolicy, AllBranchesPolicy, PathSolveResult
 export SOLVER_CONTRACT_VERSION_V1, SOLVER_RESULT_REQUIRED_FIELDS

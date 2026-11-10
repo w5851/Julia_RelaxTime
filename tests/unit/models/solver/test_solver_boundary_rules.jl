@@ -6,7 +6,7 @@ const SOLVER_ROOT = joinpath(PROJECT_ROOT, "src", "models", "solver")
 function _domain_for_path(path::String)
     rel = replace(relpath(path, SOLVER_ROOT), '\\' => '/')
     parts = split(rel, '/')
-    if length(parts) >= 2 && parts[1] in ("api", "orchestrator", "spec", "runtime", "governance", "compat", "diagnostics", "config")
+    if length(parts) >= 2 && parts[1] in ("api", "orchestrator", "path", "spec", "runtime", "governance", "compat", "diagnostics", "config")
         return Symbol(parts[1])
     end
     return :root
@@ -193,11 +193,12 @@ end
         end; label="R4 forbids compat refs from non-api/orchestrator domains")
     end
 
-    @testset "R5 only orchestrator may bridge runtime + governance" begin
+    @testset "R5 point and path orchestration may bridge runtime + governance" begin
         violations = String[]
         for file in files
             d = _domain_for_path(file)
-            d == :orchestrator && continue
+            # Path continuation orchestrates root correction and governed branch selection.
+            d in (:orchestrator, :path) && continue
             has_runtime = haskey(runtime_refs, file)
             has_governance = haskey(governance_refs, file)
             (has_runtime && has_governance) || continue
