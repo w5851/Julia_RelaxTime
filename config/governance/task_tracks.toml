@@ -412,9 +412,13 @@ required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "main"
-current_sha = "26671f2aaf1971928956dd3e0efe5bd3cf61ec5c"
+current_sha = "e0416a0f947d7336bc89874f97ae552d16db2ef5"
 run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220", "42745978294", "42749746651"]
 evidence = [
+  "pr:341",
+  "sha:e0416a0f947d7336bc89874f97ae552d16db2ef5",
+  "run:42783613052",
+  "note:tmu_default_merged_20261110_all_pr_checks_passed_integration_522_of_522",
   "pr:340",
   "sha:26671f2aaf1971928956dd3e0efe5bd3cf61ec5c",
   "note:pr340_merged_20261110_all_13_pr_checks_successful_palc_branches_retired",
@@ -1133,7 +1137,9 @@ backlog_file = ""
 evidence = [
   "pr:340",
   "sha:26671f2aaf1971928956dd3e0efe5bd3cf61ec5c",
-  "note:production_scope_complete_tmu_default_authorized_old_and_warm_rpnjl_qualification_optional_not_scheduled",
+  "note:production_scope_complete_tmu_default_merged_old_and_warm_rpnjl_qualification_optional_not_scheduled",
+  "pr:341",
+  "run:42783613052",
   "run:42754800362",
   "run:42745978294",
   "run:42749746651",

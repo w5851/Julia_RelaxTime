@@ -7,7 +7,8 @@
 相图 production/research 入口。`continuation=:auto` 对标准 PNJL tensor 热积分、默认
 ground_state 选择器且每条等温线至少 21 点的两类 Tρ 扫描启用 PALC。作者随后接受已有
 310 点一致性及首次扫描收益，授权 Tμ 在同样的模型/积分/选择器条件下、至少 31 点时
-默认启用 PALC。RPNJL、短路径、自定义求解器/选择器继续使用 legacy。
+默认启用 PALC；由 [PR #341](https://github.com/w5851/Julia_RelaxTime/pull/341)
+合并为 `e0416a0f`。RPNJL、短路径、自定义求解器/选择器继续使用 legacy。
 显式 `:legacy|:single_pass|:palc` 可选，CLI 支持
 `--continuation=...`。单点 `solve`/`solve_multi` 与独立介子数密度 CLI 的默认算法未切换。
 
@@ -71,6 +72,11 @@ Tμ 旧策略及共同 warm 的补齐、RPNJL 默认资格留待未来计算需�
 [integration core](https://github.com/w5851/Julia_RelaxTime/actions/runs/42754800362)
 为 323/323，包含 T120 默认 PALC 与 single_pass 同点核对、零密度端点、回弯/Maxwell 和
 部分 CSV 续扫。合并后任务归档；本批没有待执行的数值任务。
+
+Tμ 默认切换的源码 `5595c497` 全部 PR CI 通过；
+[integration core](https://github.com/w5851/Julia_RelaxTime/actions/runs/42783613052)
+为 522/522，新增了 T120 的 31 点默认入口与 single_pass 比较、密度单位、零 μ、
+稳定分支密度跳变、CSV/callback 顺序和部分续扫检查。没有追加性能实验。
 
 ### 提速来自哪些工作量变化
 
