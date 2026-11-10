@@ -10,6 +10,21 @@ if !isdefined(Main, :PathContinuationDummyModel)
     @eval Main struct PathContinuationDummyModel <: Models.AbstractQCDModel end
 end
 
+if !isdefined(Main, :ConstraintPathRecordingModel)
+    @eval Main struct ConstraintPathRecordingModel <: Models.AbstractQCDModel
+        calls::Vector{NamedTuple}
+    end
+end
+
+function Models.solve(model::Main.ConstraintPathRecordingModel, mode::Models.FixedSigma,
+    T_fm::Real; kwargs...)
+    push!(model.calls, (;T_fm, kwargs...))
+    solution = copy(kwargs[:seed_guess])
+    solution[6:8] .+= 0.1
+    return Models.SolverResult(mode, true, solution, solution[1:5], solution[6:8],
+        -1.0, 1.0, 1.0, 2.0, 3.0, ones(3), 1, 1e-9, 0.0)
+end
+
 function _toy_point(param_value::Real, pressure::Real;
     residual_norm::Real=1e-8,
     converged::Bool=true,
@@ -233,6 +248,19 @@ end
             anchor_strategy=Models.SingleSeedAnchor(0.7, ones(8)))
         @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
             anchor_strategy=Models.SingleSeedAnchor(0.5, ones(8)), anchor_values=[0.5])
+    end
+
+    @testset "Legacy temperature path forwards custom controls and the previous root" begin
+        model = Main.ConstraintPathRecordingModel(NamedTuple[])
+        path = Models.ConstraintTPath(Models.FixedSigma(12.0), [0.5, 0.6])
+        seed = [-1.0,-1.0,-2.0,0.2,0.2,1.0,1.0,1.0]
+        result = Models.solve_path(model, path; continuation=:legacy,
+            seed_guess=seed, evaluate_all_attempts=true, iterations=21, mu0=0.4)
+        @test model.calls[1].seed_guess == seed
+        @test model.calls[2].seed_guess == result.branches[1].points[1].solution
+        @test all(call -> call.evaluate_all_attempts && call.iterations == 21 && call.mu0 == 0.4, model.calls)
+        @test [call.T_fm for call in model.calls] == [0.5,0.6]
+        @test result.diagnostics.failure_count == 0
     end
 
     @testset "FixedMu scan preserves its historical density unit" begin

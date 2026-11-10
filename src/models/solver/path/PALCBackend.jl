@@ -419,25 +419,29 @@ function _solve_seed_equilibrium_path(model, path, strategy;
     anchor_strategy=SeedPoolAnchor(), branch_policy=GroundStateBranchPolicy(),
     diagnostic_level=:summary, branch_jump_tol=DEFAULT_PATH_BRANCH_JUMP_TOL, kwargs...)
     messages = _seed_continuation_anchor_messages(anchor_strategy)
+    if path isa ConstraintTPath
+        messages = ["Temperature continuation uses the previous solution and the existing joint point solver's seed policy."]
+    end
     diagnostic_level in (:summary, :full) || throw(ArgumentError("invalid diagnostic_level"))
     started = time()
     points = BranchPoint[]
     previous = nothing
     for (step, value) in enumerate(_path_values(path))
         mode = _path_mode(path, value)
-        seeds = _path_catalog(path, value; previous)
-        common = (; seeds, xi=path.xi, p_num=path.p_num, t_num=path.t_num,
-            evaluate_all_attempts=strategy.evaluate_all_attempts, kwargs...)
         result = if path isa ConstraintTPath
             # Preserve the existing point solver's joint solve and seed policy.
-            seed = previous === nothing ? get_seed(DefaultSeed(), [value], mode) : previous
-            solve(model, mode, value; seed_guess=seed, xi=path.xi,
+            seed = previous === nothing ? get(kwargs, :seed_guess,
+                get_seed(get(kwargs, :seed_strategy, DefaultSeed()), [value], mode)) : previous
+            common = merge((; xi=path.xi,
                 p_num=path.p_num, t_num=path.t_num,
-                evaluate_all_attempts=strategy.evaluate_all_attempts, kwargs...)
-        elseif path isa FixedMuPath
-            solve_multi(model, mode, path.T_fm, value; common...)
+                evaluate_all_attempts=strategy.evaluate_all_attempts), (;kwargs...), (;seed_guess=seed))
+            solve(model, mode, value; common...)
         else
-            solve_multi(model, mode, path.T_fm; common...)
+            seeds = _path_catalog(path, value; previous)
+            common = (; seeds, xi=path.xi, p_num=path.p_num, t_num=path.t_num,
+                evaluate_all_attempts=strategy.evaluate_all_attempts, kwargs...)
+            path isa FixedMuPath ? solve_multi(model, mode, path.T_fm, value; common...) :
+                solve_multi(model, mode, path.T_fm; common...)
         end
         push!(points, _branch_point_from_solver_result(value, result, :seed_continuation, step))
         result.converged && (previous = copy(result.solution))
