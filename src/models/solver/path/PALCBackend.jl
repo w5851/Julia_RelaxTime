@@ -178,10 +178,10 @@ function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
         semantic_mode === :ground_state && selector === nothing && controls_supported &&
         constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho)
     if strategy === :auto
-        # Qualified density workloads have at least 21 targets. FixedMu and
-        # RPNJL retain their prior default until their production comparison is complete.
-        qualified = supported && model_kind === :PNJL &&
-            constraint_mode in (:fixed_rho, :fixed_asymmetric_rho) && point_count >= 21
+        # The matched workloads cover 21-point density and 31-point chemical-
+        # potential paths. Keep shorter paths and unqualified models on legacy.
+        minimum_points = constraint_mode === :fixed_mu ? 31 : 21
+        qualified = supported && model_kind === :PNJL && point_count >= minimum_points
         return qualified ? :palc : :legacy
     end
     strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(

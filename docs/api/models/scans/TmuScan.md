@@ -53,22 +53,22 @@
 
 `use_phase_aware` 是兼容参数。`:legacy` 沿每条等温线使用连续性种子和全候选选择。
 `:single_pass` 展开候选种子并去重后逐点求解；`:palc` 从多起点双向延拓，校正到请求的
-每个 μq 后选择通过硬约束的最大压力根。`:auto` 在 Tμ 仍沿用 `:legacy`；中等网格上
-PALC 与 single_pass 的 310 点一致，旧策略完整计时未在本次预算内完成，因此尚未切换默认。
+每个 μq 后选择通过硬约束的最大压力根。`:auto` 对标准 PNJL、tensor 热积分、默认
+ground_state 选择器、受支持的 solver 选项且每条等温线至少 31 点的扫描使用 `:palc`；
+较短路径和 RPNJL 等其它配置保留 `:legacy`。31 点长度与已完成的生产对照一致。
+五温度、两 ξ 的 310 个同点上 PALC 与 single_pass 一致；作者据此接受 Tμ 默认切换。
+旧策略完整计时与 single_pass 的完整 warm 对照未在预算内完成，现有首次扫描倍率见
+[性能分析](../../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 显式新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector；不支持的组合抛出
 `ArgumentError`。`palc_options` 传入 `PALCContinuation`，例如 `(ds=0.02, dsmax=0.08)`。
 自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
 
 ## 路径依赖与扫描顺序
 
-T-μ 扫描的连续性跟踪是路径依赖的：策略对象只知道“上一个点”的收敛解，因此你按什么顺序遍历网格，就沿那条路径延续。
-
-推荐做法：
-
-- 固定一条 `μ` 扫描线，沿 `T` 推进，并在换线时 `reset!`
-- 或固定一条 `T` 扫描线，沿 `μ` 推进，并在换线时 `reset!`
-
-不推荐把二维网格当作任意蛇形路径处理，否则分支跟踪结果会随遍历顺序改变。
+扫描按 `(T, ξ)` 分组，每组沿 `mu_values` 输出。`:legacy` 和 `:single_pass` 复用该组
+上一点的解作为候选种子，换线时重置；其候选可见性可能受到扫描方向影响。
+PALC 在每组内按排序去重后的 μ 发现和延拓分支，再校正到目标点，最终仍按用户输入顺序
+输出 CSV 与 callback。稳定分支的一阶跳变由候选压力竞争产生，不要求输出解本身连续。
 
 ## 输出合同
 
