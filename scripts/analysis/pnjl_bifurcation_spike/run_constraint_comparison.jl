@@ -85,6 +85,10 @@ function run_comparison(destination; repetitions=2, scope="all")
                 result = Models.solve_path(model,path;
                     continuation_strategy=Models.PALCContinuation(),anchor_strategy=anchor,
                     path_work=work,iterations=300)
+                if method === :single_seed
+                    work.anchor_solves == 1 || error("single-seed experiment must attempt exactly one anchor")
+                    work.fallback_solves == 0 || error("single-seed experiment must not use catalog fallback")
+                end
                 selected = Models.selected_path_results(model,result; iterations=300)
                 seconds = time()-started
                 rows = [row_record(model,path,value,point) for (value,point) in zip(path.mu_values,selected)]

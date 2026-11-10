@@ -735,10 +735,7 @@ function solve_path(model::AbstractQCDModel, path::ConstraintTPath;
     kwargs...)
     selected_strategy = continuation_strategy
     if selected_strategy === nothing
-        route = resolve_scan_continuation(continuation, model_kind_symbol(model),
-            get(kwargs, :thermo_quadrature_policy, :tensor_gauss), :ground_state, nothing,
-            length(path.T_values); constraint_mode=_path_constraint_symbol(path),
-            controls_supported=_scan_path_controls_supported(kwargs))
+        route = _constraint_path_route(continuation, model, path; kwargs...)
         route === :single_pass && throw(ArgumentError(
             "ConstraintTPath supports :auto, :legacy or :palc"))
         selected_strategy = route === :palc ? PALCContinuation() : SeedContinuation(false)

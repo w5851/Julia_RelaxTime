@@ -207,12 +207,18 @@ end
             @test Models._path_mode(path, 0.6) === mode
             @test Models.to_namedtuple(path).T_values == [0.7, 0.5, 0.6]
             @test all(seed -> length(seed) == 8, Models._path_catalog(path, 0.6))
+            model = Models.create_model(:PNJL)
+            @test Models._constraint_path_route(:palc, model, path; iterations=300,
+                path_work=Models.PALCWorkTelemetry()) === :palc
+            @test Models._constraint_path_route(:auto, model, path) === :legacy
             @test_throws ArgumentError Models.ConstraintTPath(mode, [0.0])
             @test_throws ArgumentError Models.ConstraintTPath(mode, [NaN])
             @test_throws ArgumentError Models.ConstraintTPath(mode, Float64[])
             @test_throws ArgumentError Models.ConstraintTPath(mode, [0.5]; xi=-1.0)
         end
         @test_throws ArgumentError Models.SingleSeedAnchor(NaN, ones(8))
+        @test_throws ArgumentError Models.ConstraintTPath(Models.FixedEntropy(-0.5), [0.5])
+        @test_throws ArgumentError Models.ConstraintTPath(Models.FixedSigma(0.0), [0.5])
         @test_throws ArgumentError Models.SingleSeedAnchor(0.5, [Inf])
         model = Models.create_model(:PNJL)
         path = Models.ConstraintTPath(Models.FixedSigma(12.0), [0.5, 0.6])

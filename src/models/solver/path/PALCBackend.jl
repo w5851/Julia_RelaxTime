@@ -205,6 +205,14 @@ function _push_distinct_path_root!(roots, candidate; tol=1e-5)
     return true
 end
 
+function _constraint_path_route(strategy, model, path::ConstraintTPath; kwargs...)
+    kind = model isa PNJLModel ? :PNJL : model isa RPNJLModel ? :RPNJL : model_kind_symbol(model)
+    return resolve_scan_continuation(strategy, kind,
+        get(kwargs, :thermo_quadrature_policy, :tensor_gauss), :ground_state, nothing,
+        length(path.T_values); constraint_mode=_path_constraint_symbol(path),
+        controls_supported=_scan_path_controls_supported(kwargs))
+end
+
 """Return every crossing of a target, including folds; interpolation is only a seed."""
 function _palc_target_seeds(points, target; nearest::Bool=false)
     seeds = Vector{Vector{Float64}}()
@@ -365,7 +373,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
             :bifurcationkit, points, :complete, (; curve=curves[i], work=snapshot)))
     end
     if !isempty(fallback_points)
-        push!(branches, ContinuationBranch(:fallback, :fallback_anchor, :catalog_fallback,
+        push!(branches, ContinuationBranch(:fallback, :fallback_anchor,
+            single_seed ? :uncovered_single_seed : :catalog_fallback,
             fallback_points, failure_count == 0 ? :complete : :partial, (; work=snapshot)))
     end
     selected = apply_branch_policy(branches, branch_policy)
