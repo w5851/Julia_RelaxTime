@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "palc-performance-research"
-updated_at = "2026-11-09"
+updated_at = "2026-11-10"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -407,14 +407,19 @@ status = "active"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "接入通用 PALC 的 Tmu、FixedRho 和 FixedAsymmetricRho 扫描，运行总预算约一小时的 Actions 三策略对照；根据同点和多分支结果确定默认范围。"
-required_author_review = true
-author_review_status = "pending"
+next_action = "预算实验完成；较长 PNJL Tρ 默认 PALC，Tμ 保留 legacy。等待 PR #340 最终 CI 后合并、同步台账并归档本任务。"
+required_author_review = false
+author_review_status = "not_required"
 promotion_required = false
 current_branch = "codex/palc-production"
-current_sha = "b9dfae4b2919cfa4172b89545ea46b5e37a2fe87"
-run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220"]
+current_sha = "1afeb65a71a753d7182ee284cf62b5ba188e40bc"
+run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220", "42745978294", "42749746651"]
 evidence = [
+  "pr:340",
+  "run:42745978294",
+  "run:42749746651",
+  "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
+  "note:production_comparison_budget_closed_61min_density_defaults_palc_tmu_default_legacy_missing_old_and_warm",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
@@ -1118,10 +1123,14 @@ status = "active"
 parent = "track:palc-performance-research"
 task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 reason = "作者接受前阶段候选搜索优化结果，要求把通用 PALC 接入生产扫描并在约一小时 Actions 预算内核对三策略。"
-next_action = "完成三个约束路线的生产扫描对照与接口验证，依据结果确定默认策略；同步 PR 和数值结论。"
+next_action = "实现和预算实验完成；PR #340 最终 CI 与合并清理。Tμ 旧策略/warm 和 RPNJL 默认资格留作未来按需扩展，不追加本批预算。"
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "pr:340",
+  "run:42745978294",
+  "run:42749746651",
+  "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
   "note:author_20261108_start_palc_matched_diagnostic",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",

@@ -6,7 +6,7 @@ end
 
 @testset "Qualified density scans use PALC and preserve first-order structure" begin
     mktempdir() do directory
-        grid = collect(0.2:0.15:3.5)
+        grid = vcat(0.0, collect(0.2:0.15:3.5))
         rows = Dict{Float64,Any}()
         reference = Dict{Float64,Any}()
         paths = Ref(0)
@@ -29,11 +29,11 @@ end
             @test maximum(abs.(rows[rho].solution .- reference[rho].solution)) < 1e-6
             @test abs(rows[rho].pressure - reference[rho].pressure) < 1e-6
         end
-        mu = [sum(rows[rho].mu_vec)/3 for rho in grid]
-        @test any(<(0), diff(mu))
-        shape = Models.detect_s_shape(mu, grid)
+        mu_q_MeV = [sum(rows[rho].mu_vec)/3 * Main.Constants_PNJL.ħc_MeV_fm for rho in grid]
+        @test any(<(0), diff(mu_q_MeV))
+        shape = Models.detect_s_shape(mu_q_MeV, grid)
         @test shape.has_s_shape
-        boundary = Models.maxwell_construction(mu, grid; spinodal_hint=shape)
+        boundary = Models.maxwell_construction(mu_q_MeV, grid; spinodal_hint=shape)
         @test boundary.converged
         @test boundary.rho_hadron < boundary.rho_quark
 
