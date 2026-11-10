@@ -27,6 +27,7 @@ result = run_trho_scan(
 """
 module TrhoScan
 
+import ..Models
 using Printf
 using StaticArrays
 using Statistics
@@ -224,6 +225,8 @@ function run_trho_scan(;
     resume::Bool=true,
     reverse_rho::Bool=true,
     seed_policy::Symbol=:hybrid_continuity,
+    continuation::Symbol=:auto,
+    palc_options::NamedTuple=(;),
     hybrid_weighted_fallback::Bool=false,
     hybrid_weighted_max_seed_candidates::Int=3,
     constraint_mode::Symbol=:fixed_rho,
@@ -243,11 +246,16 @@ function run_trho_scan(;
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
     work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
+    path_diagnostics_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    continuation_mode = Models.resolve_scan_continuation(continuation, model_kind,
+        thermo_quadrature_policy, semantic_mode, selector, length(rho_values);
+        constraint_mode, controls_supported=Models._scan_path_controls_supported(nlsolve_kwargs) &&
+            _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend) === :models)
     model_kind === :PNJL && foreach(PNJLIntegrals.validate_rs_anisotropy, xi_values)
     PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
     if thermo_quadrature_policy === :rs_reduced_adaptive
@@ -306,7 +314,21 @@ function run_trho_scan(;
                 hybrid_trackers[seed_key] = HybridContinuitySeed()
             end
             
-            for rho in rho_scan_order
+            path = continuation_mode === :legacy ? nothing : constraint_mode === :fixed_asymmetric_rho ?
+                Models.FixedAsymmetricRhoPath(T / ħc_MeV_fm, rho_scan_order;
+                    ud_ratio_target=asym_ud_ratio_target, s_target=asym_s_target, xi, p_num, t_num) :
+                Models.FixedRhoPath(T / ħc_MeV_fm, rho_scan_order; xi, p_num, t_num)
+            path_results = nothing
+            single_previous = nothing
+            if continuation_mode === :palc && any(rho -> !(ScanCommon.key3(T, rho, xi; digits=6) in completed), rho_scan_order)
+                path_result = Models.solve_path(create_model(model_kind), path;
+                    continuation_strategy=Models.PALCContinuation(; palc_options...),
+                    solver_kwargs...)
+                path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
+                path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
+            end
+
+            for (rho_index, rho) in enumerate(rho_scan_order)
             stats[:total] += 1
             key = ScanCommon.key3(T, rho, xi; digits=6)
             
@@ -319,7 +341,25 @@ function run_trho_scan(;
             T_fm = T / ħc_MeV_fm
 
             local result, message
-            if seed_policy === :hybrid_continuity && constraint_mode === :fixed_asymmetric_rho
+            if continuation_mode === :palc
+                result = path_results[rho_index]
+                message = "continuation=palc"
+            elseif continuation_mode === :single_pass
+                if constraint_mode === :fixed_asymmetric_rho
+                    mode = FixedAsymmetricRho(rho, asym_ud_ratio_target, asym_s_target)
+                    seeds = Models._seed_continuation_seeds(path, mode, single_previous)
+                    single_kwargs = merge(solver_kwargs, (; evaluate_all_attempts=true,
+                        fixedasymrho_seed_policy=:single_pass))
+                    single_kwargs = (; (key => value for (key, value) in pairs(single_kwargs) if key !== :path_work)...)
+                    result = Models.solve_multi(create_model(model_kind), mode, T_fm;
+                        seeds, xi, p_num, t_num, single_kwargs...)
+                else
+                    result = Models._single_pass_path_result(create_model(model_kind), path,
+                        rho, single_previous; solver_kwargs...)
+                end
+                result === nothing || !result.converged || (single_previous = copy(result.solution))
+                message = "continuation=single_pass"
+            elseif seed_policy === :hybrid_continuity && constraint_mode === :fixed_asymmetric_rho
                 strategy = hybrid_trackers[seed_key]
                 result, message = _attempt_with_strategy(T_fm, rho, xi, strategy;
                     constraint_mode=constraint_mode,
@@ -985,6 +1025,9 @@ mutable struct RhoPointSession
     unique_solves::Int
     targeted_additions::Int
     failed_points::Int
+    continuation::Symbol
+    palc_options::NamedTuple
+    prepared::Dict{Tuple{Float64,Float64,Float64}, Union{Nothing,SolverResult}}
 end
 
 function new_rho_point_session(; model_kind::Symbol=:PNJL,
@@ -998,7 +1041,11 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         thermo_quadrature_rtol::Float64=1e-8,
         thermo_quadrature_atol::Float64=1e-10,
         thermo_quadrature_maxevals::Int=10^7,
-        telemetry::Union{Nothing, SolverWorkTelemetry}=nothing)
+        telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
+        continuation::Symbol=:auto,
+        palc_options::NamedTuple=(;))
+    Models.resolve_scan_continuation(continuation, model_kind, thermo_quadrature_policy,
+        :ground_state, nothing, 5)
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("rho point session model_kind is unsupported: $(model_kind)"))
     seed_policy in (:hybrid_continuity, :candidates) ||
@@ -1020,7 +1067,29 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         Dict{Tuple{Float64, Float64, Float64}, NamedTuple}(),
         Dict{Tuple{Float64, Float64}, Vector{Float64}}(),
         Dict{Tuple{Float64, Float64}, Vector{Float64}}(), 0, 0, 0, 0, 0,
+        continuation, palc_options,
+        Dict{Tuple{Float64,Float64,Float64}, Union{Nothing,SolverResult}}(),
     )
+end
+
+"""Prepare a production rho slice through the selected path backend before cache materialization."""
+function prepare_rho_path!(session::RhoPointSession, T::Real, xi::Real, values)
+    strategy = Models.resolve_scan_continuation(session.continuation, session.model_kind,
+        session.thermo_quadrature_policy, :ground_state, nothing, length(values))
+    strategy === :palc || return nothing
+    pending = Float64[value for value in values if !haskey(session.cache, (Float64(T), Float64(xi), Float64(value)))]
+    isempty(pending) && return nothing
+    path = Models.FixedRhoPath(T / ħc_MeV_fm, pending;
+        xi, p_num=session.p_num, t_num=session.t_num)
+    model = create_model(session.model_kind)
+    common = (; iterations=session.iterations, work_telemetry=session.telemetry)
+    result = Models.solve_path(model, path;
+        continuation_strategy=Models.PALCContinuation(; session.palc_options...), common...)
+    solutions = Models.selected_path_results(model, result; common...)
+    for (rho, solution) in zip(pending, solutions)
+        session.prepared[(Float64(T), Float64(xi), rho)] = solution
+    end
+    return result
 end
 
 function _session_default_seed_pool(rho::Float64)
@@ -1111,17 +1180,29 @@ function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targ
         iterations=session.iterations,
         work_telemetry=session.telemetry,
     )
-    result, message = _attempt_with_candidates(
-        T_value / ħc_MeV_fm, rho_value, xi_value, candidates;
-        constraint_mode=:fixed_rho,
-        solver_backend=session.solver_backend,
-        auto_pnjl_backend=:models,
-        semantic_mode=:ground_state,
-        model_kind=session.model_kind,
-        p_num=session.p_num,
-        t_num=session.t_num,
-        solver_kwargs...,
-    )
+    if haskey(session.prepared, key)
+        result = pop!(session.prepared, key)
+        message = "continuation=palc"
+    elseif session.continuation === :single_pass
+        path = Models.FixedRhoPath(T_value / ħc_MeV_fm, [rho_value];
+            xi=xi_value, p_num=session.p_num, t_num=session.t_num)
+        previous = _nearest_session_solution(session, T_value, xi_value, rho_value)
+        result = Models._single_pass_path_result(create_model(session.model_kind), path, rho_value,
+            previous === nothing ? nothing : previous.solution; solver_kwargs...)
+        message = "continuation=single_pass"
+    else
+        result, message = _attempt_with_candidates(
+            T_value / ħc_MeV_fm, rho_value, xi_value, candidates;
+            constraint_mode=:fixed_rho,
+            solver_backend=session.solver_backend,
+            auto_pnjl_backend=:models,
+            semantic_mode=:ground_state,
+            model_kind=session.model_kind,
+            p_num=session.p_num,
+            t_num=session.t_num,
+            solver_kwargs...,
+        )
+    end
     converged = result !== nothing && _is_success(result)
     finite = converged && all(isfinite, result.solution) && all(isfinite, result.mu_vec) &&
         isfinite(result.pressure) && isfinite(result.residual_norm)

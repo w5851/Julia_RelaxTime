@@ -27,6 +27,7 @@ result = run_tmu_scan(
 """
 module TmuScan
 
+import ..Models
 using Printf
 using StaticArrays
 
@@ -180,6 +181,8 @@ function run_tmu_scan(;
     resume::Bool=true,
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
+    continuation::Symbol=:auto,
+    palc_options::NamedTuple=(;),
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     semantic_mode::Symbol=:ground_state,
@@ -188,6 +191,7 @@ function run_tmu_scan(;
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
+    path_diagnostics_cb::Union{Nothing, Function}=nothing,
     diagnostic_level::Symbol=:none,
     thermo_quadrature_policy::Symbol=:tensor_gauss,
     thermo_quadrature_rtol::Float64=1e-8,
@@ -198,6 +202,10 @@ function run_tmu_scan(;
     _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode, selector)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    continuation_mode = Models.resolve_scan_continuation(continuation, model_kind,
+        thermo_quadrature_policy, semantic_mode, selector, length(mu_values);
+        constraint_mode=:fixed_mu, controls_supported=Models._scan_path_controls_supported(nlsolve_kwargs) &&
+            _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend) === :models)
     model_kind === :PNJL && foreach(PNJLIntegrals.validate_rs_anisotropy, xi_values)
     PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
     if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
@@ -235,8 +243,18 @@ function run_tmu_scan(;
                 # 每个新温度重置连续性缓存
                 seed_key = _seed_continuation_key(T, xi)
                 delete!(continuation_seeds, seed_key)
+                path = continuation_mode === :legacy ? nothing :
+                    Models.FixedMuPath(T / ħc_MeV_fm, Float64.(mu_values) ./ ħc_MeV_fm; xi, p_num, t_num)
+                path_results = nothing
+                single_previous = nothing
+                if continuation_mode === :palc && any(mu -> !(ScanCommon.key3(T, mu, xi; digits=6) in completed), mu_values)
+                    path_result = Models.solve_path(create_model(model_kind), path;
+                        continuation_strategy=Models.PALCContinuation(; palc_options...), solver_kwargs...)
+                    path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
+                    path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
+                end
                 
-                for mu in mu_values
+                for (mu_index, mu) in enumerate(mu_values)
                     stats[:total] += 1
                     key = ScanCommon.key3(T, mu, xi; digits=6)
                     
@@ -249,20 +267,31 @@ function run_tmu_scan(;
                     T_fm = T / ħc_MeV_fm
                     μ_fm = mu / ħc_MeV_fm
 
-                    # 构建候选并统一选优
-                    candidates = _build_seed_candidates_v2(
-                        continuation_seeds, T, mu, xi, T_fm, μ_fm;
-                        bootstrap_multiseed=bootstrap_multiseed,
-                    )
+                    if continuation_mode === :palc
+                        result = _fixedmu_scan_units(path_results[mu_index])
+                        message = "continuation=palc"
+                    elseif continuation_mode === :single_pass
+                        result = Models._single_pass_path_result(create_model(model_kind), path,
+                            μ_fm, single_previous; solver_kwargs...)
+                        result = _fixedmu_scan_units(result)
+                        result === nothing || !result.converged || (single_previous = copy(result.solution))
+                        message = "continuation=single_pass"
+                    else
+                        # 构建候选并统一选优
+                        candidates = _build_seed_candidates_v2(
+                            continuation_seeds, T, mu, xi, T_fm, μ_fm;
+                            bootstrap_multiseed=bootstrap_multiseed,
+                        )
 
-                    result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-                        solver_backend=solver_backend,
-                        auto_pnjl_backend=auto_pnjl_backend,
-                        model_kind=model_kind,
-                        diagnostic_level=diagnostic_level,
-                        p_num=p_num,
-                        t_num=t_num,
-                        solver_kwargs...)
+                        result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
+                            solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
+                            model_kind=model_kind,
+                            diagnostic_level=diagnostic_level,
+                            p_num=p_num,
+                            t_num=t_num,
+                            solver_kwargs...)
+                    end
 
                     # 更新连续性缓存
                     if result !== nothing && _is_success(result)
@@ -302,6 +331,17 @@ function run_tmu_scan(;
         skipped=stats[:skipped],
         output=output_path
     )
+end
+
+# The existing Tmu CSV/callback contract stores baryon density in fm^-3,
+# whereas the public path SolverResult uses rho/rho0 like Models.solve.
+function _fixedmu_scan_units(result)
+    result === nothing && return nothing
+    return SolverResult(result.mode, result.converged, result.solution, result.x_state,
+        result.mu_vec, result.omega, result.pressure,
+        result.rho_norm * Main.Constants_PNJL.ρ0_inv_fm3,
+        result.entropy, result.energy, result.masses, result.iterations,
+        result.residual_norm, result.xi)
 end
 
 """run_tmu_scan(config::TmuScanConfig; kwargs...) -> NamedTuple
@@ -553,6 +593,8 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (
         :solver,
+        :iterations,
+        :work_telemetry,
         :residual_norm_max,
         :physicality_check,
         :thermo_quadrature_policy,

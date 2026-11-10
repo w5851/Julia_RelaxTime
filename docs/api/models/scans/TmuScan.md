@@ -24,6 +24,7 @@
 - `resume`
 - `use_phase_aware`
 - `bootstrap_multiseed`
+- `continuation`（`:auto`、`:legacy`、`:single_pass`、`:palc`）与 `palc_options`
 - `solver_backend`
 - `p_num`, `t_num`
 - `thermo_quadrature_policy`（`:tensor_gauss` 或 PNJL 标量热核的 `:rs_reduced_adaptive`）
@@ -50,12 +51,13 @@
 
 ## 与 phase-aware 策略的关系
 
-当 `use_phase_aware=true` 时，入口会尝试建立 `PhaseAwareContinuitySeed`，并在首点可选地配合 `bootstrap_multiseed=true` 做稳定分支自举。
-
-这意味着：
-
-- 该入口并不只是把参数循环交给求解器
-- 它同时承担“路径组织 + 分支跟踪 + 输出合同”三层职责
+`use_phase_aware` 是兼容参数。`:legacy` 沿每条等温线使用连续性种子和全候选选择。
+`:single_pass` 展开候选种子并去重后逐点求解；`:palc` 从多起点双向延拓，校正到请求的
+每个 μq 后选择通过硬约束的最大压力根。`:auto` 在 Tμ 仍沿用 `:legacy`；中等网格上
+PALC 与 single_pass 的 310 点一致，旧策略完整计时未在本次预算内完成，因此尚未切换默认。
+显式新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector；不支持的组合抛出
+`ArgumentError`。`palc_options` 传入 `PALCContinuation`，例如 `(ds=0.02, dsmax=0.08)`。
+自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
 
 ## 路径依赖与扫描顺序
 
@@ -81,6 +83,11 @@ T_MeV,mu_MeV,xi,pressure_fm4,rho,entropy_fm3,energy_fm4,phi_u,phi_d,phi_s,Phi1,P
 - 失败点也会写入 CSV，并通过 `converged=false` 与 `message` 标记
 - 下游应按列名而不是列位置解析
 - 若将来扩展 schema，应优先追加列而不是重命名现有列
+- `T_values` 和 `mu_values` 使用 MeV，μ 是共同夸克化学势 μq；CSV 的 `rho` 与
+  callback 中历史命名的 `result.rho_norm` 均为重子密度 fm⁻³。通用 `solve_path` 的
+  `SolverResult.rho_norm` 则为 ρ/ρ₀，扫描适配层显式换算。
+- `path_diagnostics_cb((T, xi), path_result)` 在 PALC 每条等温线结束后调用。
+  结果仍按输入网格顺序输出；resume 跳过已有点，若一条线部分完成，PALC 重建该线后只写缺点。
 
 ## 相关主题
 

@@ -76,7 +76,8 @@ function _run_single_temperature_scan(
         p_num::Int,
         t_num::Int,
         thermo_quadrature_kwargs::NamedTuple,
-        iterations::Int)
+        iterations::Int,
+        continuation::Symbol=:auto)
     run_trho_scan(;
         T_values=[Float64(T_mid)],
         rho_values=rho_eval,
@@ -86,6 +87,7 @@ function _run_single_temperature_scan(
         resume=false,
         reverse_rho=reverse_rho,
         seed_policy=seed_policy,
+        continuation=continuation,
         solver_backend=solver_backend,
         model_kind=model_kind,
         p_num=p_num,
@@ -155,6 +157,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         solver_backend::Symbol=:models,
         reverse_rho::Bool=true,
         seed_policy::Symbol=:hybrid_continuity,
+        continuation::Symbol=:auto,
         p_num::Int=12,
         t_num::Int=4,
         thermo_quadrature_policy::Symbol=:tensor_gauss,
@@ -252,6 +255,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             solver_backend=solver_backend,
             reverse_rho=reverse_rho,
             seed_policy=seed_policy,
+            continuation=continuation,
             p_num=p_num,
             t_num=t_num,
             thermo_quadrature_kwargs...,
@@ -314,6 +318,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         resume=false,
         reverse_rho=reverse_rho,
         seed_policy=seed_policy,
+        continuation=continuation,
         solver_backend=solver_backend,
         model_kind=model_kind,
         p_num=p_num,
@@ -353,6 +358,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                 t_num,
                 thermo_quadrature_kwargs,
                 iterations,
+                continuation,
             )
             curve === nothing && return nothing
 
@@ -376,6 +382,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                         t_num,
                         thermo_quadrature_kwargs,
                         iterations,
+                        continuation,
                     )
                     curve === nothing && return nothing
                 end
@@ -403,6 +410,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                 t_num,
                 thermo_quadrature_kwargs,
                 iterations,
+                continuation,
             )
         end
     else
@@ -464,6 +472,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "model_kind" => String(model_kind),
         "profile" => String(profile),
         "mode" => "research",
+        "continuation" => String(continuation),
         "xi" => Float64(xi),
         "T_grid" => collect(Float64.(T_grid)),
         "rho_grid" => collect(Float64.(rho_grid)),
@@ -493,6 +502,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
         mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend,
+        continuation=continuation,
         p_num=p_num, t_num=t_num, iterations=iterations,
         thermo_quadrature_policy=thermo_quadrature_policy, thermo_quadrature_rtol=thermo_quadrature_rtol,
         thermo_quadrature_atol=thermo_quadrature_atol, thermo_quadrature_maxevals=thermo_quadrature_maxevals,

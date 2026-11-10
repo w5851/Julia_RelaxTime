@@ -41,6 +41,14 @@ using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, FreezeoutScanConfig, scan_
         @test kw isa NamedTuple
     end
 
+    @testset "Continuation configuration reaches scan entrypoints" begin
+        @test scan_kwargs(TmuScanConfig(continuation=:legacy)).continuation === :legacy
+        @test scan_kwargs(TmuScanConfig(model_kind=:RPNJL)).model_kind === :RPNJL
+        cfg = TrhoScanConfig(continuation=:palc, palc_options=(; ds=0.02, dsmax=0.08))
+        @test scan_kwargs(cfg).continuation === :palc
+        @test scan_kwargs(cfg).palc_options.ds == 0.02
+    end
+
     @testset "scan config 保留显式热积分策略" begin
         cfg = TrhoScanConfig(
             T_values=[150.0],

@@ -1,9 +1,5 @@
 """
-Experimental path-level continuation scaffolding.
-
-This file intentionally has no external continuation dependency. PALC can be
-configured here, but the BifurcationKit adapter remains outside the root
-environment until the experimental gate is passed.
+Path-level continuation and branch selection for equilibrium scans.
 """
 
 abstract type AbstractPathProblem end
@@ -98,6 +94,44 @@ FixedAsymmetricRhoPath(
     p_num=p_num,
     t_num=t_num,
 )
+
+struct FixedRhoPath <: AbstractPathProblem
+    T_fm::Float64
+    rho_values::Vector{Float64}
+    xi::Float64
+    p_num::Int
+    t_num::Int
+    function FixedRhoPath(T_fm::Real, rho_values::AbstractVector{<:Real};
+        xi::Real=0.0, p_num::Integer=default_momentum_count(), t_num::Integer=default_theta_count())
+        new(_path_positive_real(T_fm, :T_fm),
+            _path_float_vector(rho_values, :rho_values; nonnegative=true),
+            _path_finite_real(xi, :xi), _path_positive_int(p_num, :p_num),
+            _path_positive_int(t_num, :t_num))
+    end
+end
+
+"""A fixed-temperature path in common quark chemical potential, in fm^-1."""
+struct FixedMuPath <: AbstractPathProblem
+    T_fm::Float64
+    mu_values::Vector{Float64}
+    xi::Float64
+    p_num::Int
+    t_num::Int
+    function FixedMuPath(T_fm::Real, mu_values::AbstractVector{<:Real};
+        xi::Real=0.0, p_num::Integer=default_momentum_count(), t_num::Integer=default_theta_count())
+        new(_path_positive_real(T_fm, :T_fm), _path_float_vector(mu_values, :mu_values),
+            _path_finite_real(xi, :xi), _path_positive_int(p_num, :p_num),
+            _path_positive_int(t_num, :t_num))
+    end
+end
+
+const EquilibriumPath = Union{FixedMuPath, FixedRhoPath, FixedAsymmetricRhoPath}
+_path_values(path::Union{FixedRhoPath, FixedAsymmetricRhoPath}) = path.rho_values
+_path_values(path::FixedMuPath) = path.mu_values
+_path_mode(::FixedMuPath, value) = FixedMu()
+_path_mode(::FixedRhoPath, value) = FixedRho(value)
+_path_mode(path::FixedAsymmetricRhoPath, value) =
+    FixedAsymmetricRho(value, path.ud_ratio_target, path.s_target)
 
 struct MultiSeedAnchor <: AbstractAnchorStrategy
     evaluate_all_attempts::Bool
@@ -306,10 +340,15 @@ end
 function _runner_up(
     candidates::AbstractVector{Tuple{Symbol, BranchPoint}},
     selected_branch_id::Union{Nothing, Symbol},
+    selected_point::Union{Nothing, BranchPoint}=nothing,
 )
     runner = nothing
     for candidate in candidates
-        candidate[1] === selected_branch_id && continue
+        if selected_point === nothing
+            candidate[1] === selected_branch_id && continue
+        elseif candidate[1] === selected_branch_id && candidate[2] === selected_point
+            continue
+        end
         if runner === nothing || _better_ground_state_candidate(candidate, runner)
             runner = candidate
         end
@@ -325,7 +364,7 @@ function _selection_from_point(
     eligible_candidates::AbstractVector{Tuple{Symbol, BranchPoint}},
     selected_point::Union{Nothing, BranchPoint},
 )
-    runner = _runner_up(eligible_candidates, selected_id)
+    runner = _runner_up(eligible_candidates, selected_id, selected_point)
     runner_id = runner === nothing ? nothing : runner[1]
     runner_pressure = runner === nothing ? NaN : runner[2].pressure
     selected_pressure = selected_point === nothing ? -Inf : selected_point.pressure
@@ -376,7 +415,7 @@ function _ground_state_selections(
                 selected = candidate
             end
         end
-        runner = _runner_up(eligible, selected[1])
+        runner = _runner_up(eligible, selected[1], selected[2])
         reason = :pressure_max_under_constraints
         if runner !== nothing
             pressure_gap = selected[2].pressure - runner[2].pressure
@@ -604,7 +643,8 @@ function solve_path(
         throw(ArgumentError("diagnostic_level must be :summary or :full, got $(diagnostic_level)"))
 
     if continuation_strategy isa PALCContinuation
-        throw(_unsupported_palc_error(model, continuation_strategy))
+        return _solve_palc_path(model, path, continuation_strategy;
+            anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
     elseif !(continuation_strategy isa SeedContinuation)
         throw(ArgumentError("unsupported continuation_strategy type $(typeof(continuation_strategy))"))
     end
@@ -628,6 +668,22 @@ function solve_path(
         messages,
     )
     return PathSolveResult(path, selected.branches, selected.selections, run.anchors, diagnostics)
+end
+
+function solve_path(model::AbstractQCDModel, path::Union{FixedMuPath, FixedRhoPath};
+    continuation_strategy::AbstractContinuationStrategy=SeedContinuation(),
+    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
+    diagnostic_level::Symbol=:summary,
+    branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
+    kwargs...)
+    if continuation_strategy isa PALCContinuation
+        return _solve_palc_path(model, path, continuation_strategy;
+            anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    end
+    continuation_strategy isa SeedContinuation || throw(ArgumentError("unsupported continuation_strategy"))
+    return _solve_seed_equilibrium_path(model, path, continuation_strategy;
+        anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
 end
 
 @inline function to_namedtuple(root::AnchorRoot)
@@ -710,6 +766,11 @@ end
         t_num=path.t_num,
     )
 end
+
+to_namedtuple(path::FixedRhoPath) = (; path_kind=:fixed_rho, T_fm=path.T_fm,
+    rho_values=path.rho_values, xi=path.xi, p_num=path.p_num, t_num=path.t_num)
+to_namedtuple(path::FixedMuPath) = (; path_kind=:fixed_mu, T_fm=path.T_fm,
+    mu_values=path.mu_values, xi=path.xi, p_num=path.p_num, t_num=path.t_num)
 
 @inline function to_namedtuple(result::PathSolveResult)
     return (

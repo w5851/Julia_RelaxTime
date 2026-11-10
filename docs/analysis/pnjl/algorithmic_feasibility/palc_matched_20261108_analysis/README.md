@@ -1,6 +1,69 @@
 # PALC 同密度点性能与分支诊断
 
-## 当前结论（2026-11-09）
+## 当前结论（2026-11-10）
+
+[PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 将 PALC 接入通用 Tρ/Tμ 扫描与
+相图 production/research 入口。`continuation=:auto` 对标准 PNJL tensor 热积分、默认
+ground_state 选择器且每条等温线至少 21 点的两类 Tρ 扫描启用 PALC；Tμ、RPNJL、短路径、
+自定义求解器/选择器继续使用 legacy。显式 `:legacy|:single_pass|:palc` 可选，CLI 支持
+`--continuation=...`。单点 `solve`/`solve_multi` 与独立介子数密度 CLI 的默认算法未切换。
+
+两批 Actions 共 **61.10 runner-minutes**，预算已结束。第一批因补齐有效参数/失败记录而
+提前停止，已完成的五组结果保留；第二批按 1800 s 数值上限自动停止。三条路线都有新方法
+同点对照，两条 Tρ 有三策略结果；Tμ 的 single_pass 第二轮仅完成 232/310 点，旧策略未启动。
+第二批的 `failure` 由不完整工作量和旧 asym 的不合格点共同触发，不是 PALC 求解报错。
+
+完整代表路径、每轮耗时、差异点、工作量和源码/运行标识归并在
+[production_comparison.json](../../../../../data/outputs/results/analysis/palc_matched_20261108/production_comparison.json)
+（约 384 KiB）；`collect_production_comparison.py` 可从两批 artifact 重建，重复 CSV/状态不入库。
+
+| 路线 | legacy 首次 / warm (s) | single_pass 首次 / warm (s) | PALC 首次 / warm (s) | 可比结论 |
+| --- | ---: | ---: | ---: | --- |
+| FixedAsymmetricRho，230 点 | 349.104 / 333.608 (B) | 103.807 / 88.723 (A) | 45.136 / 25.917 (A) | A 同 runner warm：PALC 快 3.42 倍；legacy 225/230 合格 |
+| FixedRho，230 点 | 45.318 / 30.298 (B) | 36.311 / 24.988 (A) | 24.644 / 6.215 (A) | A 同 runner warm：PALC 快 4.02 倍；三策略数值一致 |
+| FixedMu，310 点 | 未运行 | 397.792 / 未完成 (B) | 61.949 / 42.339 (B) | B 首次完整扫描快 6.42 倍；尚无共同 warm/旧策略结论 |
+
+A=[42745978294](https://github.com/w5851/Julia_RelaxTime/actions/runs/42745978294)，源码 `c9d2a4f1`；
+B=[42749746651](https://github.com/w5851/Julia_RelaxTime/actions/runs/42749746651)，源码 `db0496a0`。
+两批均为 Julia 1.12.5、BifurcationKit 0.8.0、Julia/BLAS 单线程。前者 Tμ legacy 参数透传
+存在旧缺口，但该方法当时未运行；已完成五方法的有效参数一致。后续变化为 iterations 和
+telemetry 透传、非有限数序列化及按预算选择案例，PALC 数值核一致。Tμ PALC 跨两批状态
+逐字段完全相同，warm 分别 42.373/42.339 s；该观察不用于拼接其它方法的跨 runner 速度比。
+
+### 生产入口数值检查
+
+- T=100/120/140/170/200 MeV，ξ=0/0.4；ρ/ρ₀=0.2:0.15:3.5，或 μq=0:15:450 MeV；
+  24×8 tensor 节点，iterations=300，残差与密度/味约束阈值 `1e-6`。FixedRho 和 asym 均保持
+  八变量联立方程。PALC 包含三处 anchor 全候选搜索、双向延拓、目标点校正和失败 fallback。
+- 新方法三路线全部目标点合格。最大显式残差 `1.79e-9`、最大约束误差 `9.43e-10`；
+  PALC/single_pass 最大状态差 `2.58e-8`、压力差 `1.32e-9 fm^-4`。
+  两轮完整方法逐字段重复一致。旧 asym 的两轮也一致，但一致返回了五个不合格根。
+- 旧 asym 在 `(T, ξ, ρ/ρ₀)=(100,0,1.25), (100,0,1.85), (100,0.4,0.8),
+  (120,0,1.7), (120,0.4,1.4)` 选择了 `m_s<m_u` 的根；这些根残差很小，不能用
+  `converged=true` 代替项目已有硬物理筛选。其余 225 点与新方法吻合。PALC/single_pass
+  对五个异常点均得到通过原硬约束的根；没有放宽容差或改变质量规则。
+- T=120、ξ=0 的两类密度路径均保留 `ρ/ρ₀≈1.25–2.15` 的负斜率区段。
+  FixedRho 三策略 Maxwell 为 `μq≈308.6063556 MeV`、
+  `ρh/ρ₀≈0.9663119`、`ρq/ρ₀≈2.4936664`；各点差约 `1e-8`。
+  ξ=0.4 的 T120 切片在本网格上未见回弯，不将同一温度下的各 ξ 预设为同一相区。
+- Tμ 在 T100、ξ=0 的同一延拓曲线上保留最多三个目标交点。T120 的稳定密度在
+  μq=300–315 MeV 间跳变；15 MeV 网格未直接采到窄的三根窗口。这里的有限网格检查
+  支持回弯与分支竞争被保留，不构成孤立分支完整性的证明。
+- 实际 `run_phase_pipeline(mode=:production, memoize_uniform=true)` 的 T120 单切片
+  三策略均完成 CSV 与 Maxwell 输出，PALC 行标记核实了实际策略；首次 pipeline 各约 24 s，
+  编译及公共后处理占比明显，不能据扫描加速声称整个相图管线同倍加速。
+
+原约 7 倍收益专指 FixedAsymmetricRho 的 nested → single_pass 候选展开。现行 legacy
+Tρ 扫描外层还存在首个成功返回等行为，不能把本节实测与旧倍率机械相乘。
+例如本批 asym 的实际内层求解次数 legacy/single_pass/PALC 为 18170/5220/610；
+FixedRho 为 2760/1600/430；FixedMu 的 single_pass/PALC 为 19440/1952。
+
+本批比较同一离散方程的求解算法和接口，未启动完整高精度相图生产，也不重算介子/输运成果。
+Tμ 旧策略及共同 warm 的补齐、RPNJL 默认资格留待未来计算需要时再安排；当前默认只晋升
+已有较长 Tρ 证据支持的范围。自动路由、CSV 顺序、完整/部分续扫、CLI 配置与自定义选项
+兼容性由路径单元和实际默认入口集成测试覆盖。
+
+## 第二阶段结论（2026-11-09）
 
 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338) 已合并。
 [PR #339](https://github.com/w5851/Julia_RelaxTime/pull/339) 增加显式可选的

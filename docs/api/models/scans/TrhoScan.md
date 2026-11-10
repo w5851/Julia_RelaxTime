@@ -24,6 +24,7 @@
 - `resume`
 - `reverse_rho`
 - `seed_policy`
+- `continuation`（`:auto`、`:legacy`、`:single_pass`、`:palc`）与 `palc_options`
 - `constraint_mode`
 - `hybrid_weighted_fallback`
 - `solver_backend`
@@ -44,6 +45,20 @@
 这也是为什么 scan 主题要把 `build_default_rho_grid` 作为公开辅助入口显式写出来。
 
 ## 默认网格与扫描顺序
+
+`:auto` 对 PNJL、tensor 积分、默认 ground_state 选择器且每条等温线至少 21 个目标点的
+`FixedRho` / `FixedAsymmetricRho` 扫描使用 `:palc`；较短路径、RPNJL 及其它配置沿用
+`:legacy`。该阈值来自已完成的 21–25 点与中等网格对照；显式 `:legacy` 可复用旧策略。
+`:palc` 对每个 `(T, ξ)` 进行多起点双向延拓，保留回弯
+上的候选，随后在请求的 ρ/ρ₀ 点作精确联立校正并按既有硬约束和最大压力规则选优。
+`:single_pass` 每个不同种子求解一次；FixedAsymmetricRho 复用既有候选展开实现。
+新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector。其它组合可以用
+`:legacy`；显式不兼容组合报 `ArgumentError`。
+自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
+
+`palc_options` 传入 `PALCContinuation`；`path_diagnostics_cb((T, xi), path_result)`
+可读取起点、分支与工作量。CSV/callback 仍按 `reverse_rho` 控制的输入顺序输出。
+resume 保留已有行；部分完成的等温线会重建 PALC 路径，仅写出缺失点。
 
 若不显式提供 `rho_values`，入口默认使用 `DEFAULT_RHO_VALUES`。若目标是相图主线，一般不建议跳过这一默认多分辨率策略，除非你已经明确知道需要怎样的局部加密。
 

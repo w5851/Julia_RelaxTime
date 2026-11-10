@@ -1,12 +1,12 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / review`。2026-11-09 已按作者授权完成首阶段 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338) 合并、可选候选搜索优化及扩大有限 pilot，第二阶段交付于 [PR #339](https://github.com/w5851/Julia_RelaxTime/pull/339)。T=120 的跨区检查保留了均匀解的化学势回弯。完整结果及数值代码见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
+状态：`research / active`，实现及预算实验已完成，等待 [PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 最终 CI 与工程收尾。2026-11-10 作者接受前两阶段并授权通用 PALC 接入与约一小时 Actions 对照；两批累计 61.10 runner-minutes。较长 PNJL Tρ 默认启用 PALC，Tμ 默认保持 legacy。具体计时、分支差异和未覆盖项见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 
 ## 1. 背景与目标
 
 本任务始于历史 PALC 与 SeedContinuation 计时口径不一致。现已补齐同点、冷暖调用和真实求解工作量比较；新结果支持较长同密度路径上的延拓收益，短窗口需要考虑 anchor 成本。
 
-本任务建立可比较的性能和语义 parity 证据，优化候选搜索，并决定 PALC 的后续接口范围。当前交付可复用的 single-pass 开关与隔离 PALC pilot；通用 PALC 接口集成留到实际消费者提出时，当前没有待运行批次或完整生产任务。
+本任务建立可比较的性能和语义 parity 证据。通用路径现已接入 `run_tmu_scan`、`run_trho_scan`、相图生产入口与 CLI；生产对照支持对标准 PNJL tensor 积分、默认 selector、至少 21 点的 Tρ 路径启用 PALC。Tμ 旧策略完整对照未在预算内完成，默认保持 legacy；未再追加预算计算。
 
 ## 2. 范围与非范围
 
@@ -20,8 +20,8 @@
 
 ### 非范围
 
-- 不把 BifurcationKit 加入根 `Project.toml`。
-- 不修改 `Models.solve`、`Models.solve_multi`、`run_trho_scan` 默认语义或当前 C0/C1/C2 配置。
+- BifurcationKit 0.8.0 作为通用 PALC 的根环境依赖；扫描默认策略依据新实验结果决定。
+- `Models.solve`、`Models.solve_multi` 的单点合同和当前 C0/C1/C2 产物保持既有状态。
 - 不在本机运行 PNJL solver；正式数值诊断只允许通过明确授权的 GitHub Actions pilot。
 - 不降低物理/数值容差，不改变 phase branch governance，不启动 C3/O1 或 reference promotion。
 
@@ -74,3 +74,16 @@
 - BifurcationKit 编译和初始化成本可能主导短测；回退为同进程 warm 对照并单独报告 startup。
 - 多分支 anchor discovery 可能让 PALC 工作量天然高于单分支 scan；回退为 diagnostic oracle，不替换当前路径。
 - parity 或 branch selection 漂移时，保留当前 pressure-governed production scan，不修改现有 C0/C1/C2 产物。
+
+## 第三阶段：生产入口对照
+
+- [x] 三路线统一路径与候选校正；固定密度保持八变量联立约束，全部合格根进入原有最大压力选择。
+- [x] 五温度、两 ξ、23 个密度或 31 个 μq 的中等网格；24×8 tensor 节点，iterations=300，同一残差/物理判据。
+- [x] 两类 Tρ 的 PALC/single_pass 各首次+warm，三策略共 230 点同点对照；FixedRho 全部吻合，旧 asym 的五个质量层级失败点保留为差异证据。
+- [x] Tμ 的 PALC 两批各首次+warm，single_pass 完整首次 310 点一致；single_pass warm 在 232/310 点触及预算，legacy 未开始。因此 Tμ 默认不晋升，缺项列为未来按需扩展。
+- [x] T120、ξ=0 的回弯保留，FixedRho Maxwell 三策略一致；production 相图单切片三策略均完成。
+- [x] 两批累计 61.10 runner-minutes 后结束实验；一份 `production_comparison.json` 保留代表路径、耗时、实际误差和不同根，重复 CSV 不入库。
+- [x] API、CLI/TOML、CSV/callback、完整文件 resume 验证完成；新增默认入口和部分续扫 CI 检查。
+- [ ] PR #340 最终 CI、合并及对应分支清理，随后归档任务文档并同步台账。
+
+比较的是离散方程求解与扫描算法；这组中等网格不承担积分收敛或高精度相图参考晋升。

@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "palc-performance-research"
-updated_at = "2026-11-09"
+updated_at = "2026-11-10"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -403,21 +403,27 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "review"
+status = "active"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "作者审阅 PR #339 的候选搜索和 PALC 有限验证结果，含 T120 一阶温区跨密度回弯；无待运行批次。通用 PALC backend 按实际消费者需求再接入。"
-required_author_review = true
-author_review_status = "pending"
+next_action = "预算实验完成；较长 PNJL Tρ 默认 PALC，Tμ 保留 legacy。等待 PR #340 最终 CI 后合并、同步台账并归档本任务。"
+required_author_review = false
+author_review_status = "not_required"
 promotion_required = false
-current_branch = "main"
-current_sha = "b9dfae4b2919cfa4172b89545ea46b5e37a2fe87"
-run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220"]
+current_branch = "codex/palc-production"
+current_sha = "1afeb65a71a753d7182ee284cf62b5ba188e40bc"
+run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220", "42745978294", "42749746651"]
 evidence = [
+  "pr:340",
+  "run:42745978294",
+  "run:42749746651",
+  "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
+  "note:production_comparison_budget_closed_61min_density_defaults_palc_tmu_default_legacy_missing_old_and_warm",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
+  "note:author_20261110_accepted_stage2_authorized_production_palc_and_one_hour_actions_comparison",
   "pr:338",
   "pr:339",
   "run:42594377256",
@@ -431,7 +437,7 @@ evidence = [
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
-updated_at = "2026-11-09"
+updated_at = "2026-11-10"
 
 [[tracks]]
 id = "full-temperature-reference-research"
@@ -1113,14 +1119,18 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "review"
+status = "active"
 parent = "track:palc-performance-research"
 task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
-reason = "同口径性能、候选保留及一阶温区均匀分支验证完成；已交付可选 single-pass，PALC 长路径收益有有限证据。"
-next_action = "作者审阅 PR #339 与当前分析；算法优化及有限验证已完成，无待运行批次。通用 PALC 接入留待实际消费者需求，完整物理重算未启动。"
+reason = "作者接受前阶段候选搜索优化结果，要求把通用 PALC 接入生产扫描并在约一小时 Actions 预算内核对三策略。"
+next_action = "实现和预算实验完成；PR #340 最终 CI 与合并清理。Tμ 旧策略/warm 和 RPNJL 默认资格留作未来按需扩展，不追加本批预算。"
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "pr:340",
+  "run:42745978294",
+  "run:42749746651",
+  "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
   "note:author_20261108_start_palc_matched_diagnostic",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
   "pr:338",

@@ -19,11 +19,14 @@ Base.@kwdef struct TmuScanConfig
     resume::Union{Nothing, Bool} = nothing
     use_phase_aware::Union{Nothing, Bool} = nothing
     bootstrap_multiseed::Union{Nothing, Bool} = nothing
+    continuation::Union{Nothing, Symbol} = nothing
+    palc_options::NamedTuple = (;)
     thermo_backend::Union{Nothing, Symbol} = nothing
     solver_backend::Union{Nothing, Symbol} = nothing
     auto_pnjl_backend::Union{Nothing, Symbol} = nothing
     semantic_mode::Union{Nothing, Symbol} = nothing
     selector::Union{Nothing, Function} = nothing
+    model_kind::Union{Nothing, Symbol} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
     thermo_quadrature_policy::Union{Nothing, Symbol} = nothing
@@ -43,6 +46,8 @@ Base.@kwdef struct TrhoScanConfig
     resume::Union{Nothing, Bool} = nothing
     reverse_rho::Union{Nothing, Bool} = nothing
     seed_policy::Union{Nothing, Symbol} = nothing
+    continuation::Union{Nothing, Symbol} = nothing
+    palc_options::NamedTuple = (;)
     hybrid_weighted_fallback::Union{Nothing, Bool} = nothing
     hybrid_weighted_max_seed_candidates::Union{Nothing, Int} = nothing
     constraint_mode::Union{Nothing, Symbol} = nothing
@@ -99,11 +104,14 @@ function scan_kwargs(cfg::TmuScanConfig)::NamedTuple
         resume=cfg.resume,
         use_phase_aware=cfg.use_phase_aware,
         bootstrap_multiseed=cfg.bootstrap_multiseed,
+        continuation=cfg.continuation,
+        palc_options=cfg.palc_options,
         thermo_backend=cfg.thermo_backend,
         solver_backend=cfg.solver_backend,
         auto_pnjl_backend=cfg.auto_pnjl_backend,
         semantic_mode=cfg.semantic_mode,
         selector=cfg.selector,
+        model_kind=cfg.model_kind,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
         thermo_quadrature_policy=cfg.thermo_quadrature_policy,
@@ -124,6 +132,8 @@ function scan_kwargs(cfg::TrhoScanConfig)::NamedTuple
         resume=cfg.resume,
         reverse_rho=cfg.reverse_rho,
         seed_policy=cfg.seed_policy,
+        continuation=cfg.continuation,
+        palc_options=cfg.palc_options,
         hybrid_weighted_fallback=cfg.hybrid_weighted_fallback,
         hybrid_weighted_max_seed_candidates=cfg.hybrid_weighted_max_seed_candidates,
         constraint_mode=cfg.constraint_mode,
