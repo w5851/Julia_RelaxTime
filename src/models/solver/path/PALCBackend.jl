@@ -47,7 +47,7 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
             model.base.consts == cached_model.base.consts && model.ext == cached_model.ext &&
             model.use_extensions == cached_model.use_extensions
         same_model || throw(ArgumentError(
-            "density paths require the configured model profile used by the joint residual; " *
+            "joint constraint paths require the configured model profile used by the joint residual; " *
             "select the profile before constructing the path"))
     end
     PNJLIntegrals.validate_rs_anisotropy(path.xi)
@@ -75,11 +75,11 @@ function _path_residual(model, path, options)
     end
     nodes = cached_nodes(path.p_num, path.t_num;
         p_max_inv_fm=thermal_p_max_inv_fm(model))
-    params = GapParams(path.T_fm, nodes, path.xi;
+    params = GapParams(_path_temperature(path, first(_path_values(path))), nodes, path.xi;
         p_num=path.p_num, t_num=path.t_num, model_kind=_joint_model_kind(model))
     return function (x, value)
         out = similar(x, length(x))
-        explicit_residual!(out, x, [path.T_fm], params, _path_mode(path, value))
+        explicit_residual!(out, x, [_path_temperature(path, value)], params, _path_mode(path, value))
         return out
     end
 end
@@ -87,7 +87,7 @@ end
 function _path_candidate(model, path, value, solution, residual, iterations, options)
     mu_vec = path isa FixedMuPath ? normalize_mu_vec(value) : solution[6:8]
     full_solution = path isa FixedMuPath ? vcat(solution, mu_vec) : solution
-    thermo = compute_thermo_from_solution(model, full_solution, path.T_fm;
+    thermo = compute_thermo_from_solution(model, full_solution, _path_temperature(path, value);
         options.thermo..., rho0_scale=rho0)
     residual_norm = LinearAlgebra.norm(residual(solution, value))
     raw = build_solver_candidate(solution, thermo, residual_norm;
@@ -130,7 +130,8 @@ end
 
 function _path_catalog(path, value; previous=nothing)
     mode = _path_mode(path, value)
-    theta = path isa FixedMuPath ? [path.T_fm, value] : [path.T_fm]
+    temperature = _path_temperature(path, value)
+    theta = path isa FixedMuPath ? [temperature, value] : [temperature]
     seeds = Vector{Vector{Float64}}()
     previous === nothing || push!(seeds, Float64.(previous))
     append!(seeds, get_all_seeds(MultiSeed(), theta, mode))
@@ -146,6 +147,10 @@ function _path_catalog(path, value; previous=nothing)
             SeedStrategies.HT_GUESS_0p95_SEED_5, SeedStrategies.WEAK_CHIRAL_CONF_SEED_5])
         # FixedMu production adds small perturbations inside each outer request.
         seeds = reduce(vcat, [_build_default_seed_candidates(seed) for seed in seeds])
+    elseif path isa Union{ConstraintTPath{FixedEntropy},ConstraintTPath{FixedSigma}}
+        # Include the same alternate chemical-potential start used by the
+        # existing joint solvers, once per catalog state instead of nesting it.
+        append!(seeds, [vcat(seed[1:5], fill(0.2, 3)) for seed in copy(seeds)])
     end
     return sort!(_unique_path_seeds(seeds); by=Tuple)
 end
@@ -176,12 +181,15 @@ function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
         "continuation must be :auto, :legacy, :single_pass or :palc, got $(strategy)"))
     supported = model_kind in (:PNJL, :RPNJL) && thermo_policy === :tensor_gauss &&
         semantic_mode === :ground_state && selector === nothing && controls_supported &&
-        constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho)
+        constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho,
+            :fixed_entropy, :fixed_sigma, :fixed_mub_conserved_charges)
     if strategy === :auto
         # The matched workloads cover 21-point density and 31-point chemical-
         # potential paths. Keep shorter paths and unqualified models on legacy.
         minimum_points = constraint_mode === :fixed_mu ? 31 : 21
-        qualified = supported && model_kind === :PNJL && point_count >= minimum_points
+        qualified = supported && model_kind === :PNJL && point_count >= minimum_points &&
+            constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho,
+                :fixed_sigma, :fixed_mub_conserved_charges)
         return qualified ? :palc : :legacy
     end
     strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(
@@ -196,6 +204,14 @@ function _push_distinct_path_root!(roots, candidate; tol=1e-5)
     any(root -> _solution_distance(root.solution, candidate.solution) <= tol, roots) && return false
     push!(roots, candidate)
     return true
+end
+
+function _constraint_path_route(strategy, model, path::ConstraintTPath; kwargs...)
+    kind = model isa PNJLModel ? :PNJL : model isa RPNJLModel ? :RPNJL : model_kind_symbol(model)
+    return resolve_scan_continuation(strategy, kind,
+        get(kwargs, :thermo_quadrature_policy, :tensor_gauss), :ground_state, nothing,
+        length(path.T_values); constraint_mode=_path_constraint_symbol(path),
+        controls_supported=_scan_path_controls_supported(kwargs))
 end
 
 """Return every crossing of a target, including folds; interpolation is only a seed."""
@@ -218,7 +234,7 @@ function _palc_target_seeds(points, target; nearest::Bool=false)
     return _unique_path_seeds(seeds)
 end
 
-function _palc_curve(residual, root, value, bounds, strategy, work)
+function _palc_curve(residual, root, value, bounds, strategy, work; positive_parameter::Bool=false)
     f = function (x, p)
         work.continuation_residual_calls += 1
         residual(x, p.value)
@@ -241,7 +257,8 @@ function _palc_curve(residual, root, value, bounds, strategy, work)
         (@optic _.value); J=jac, record_from_solution=record)
     span = bounds[2] - bounds[1]
     pad = max(strategy.dsmax, 0.05 * span)
-    options = BifurcationKit.ContinuationPar(p_min=bounds[1]-pad, p_max=bounds[2]+pad,
+    lower = positive_parameter ? max(bounds[1]-pad, eps(Float64)) : bounds[1]-pad
+    options = BifurcationKit.ContinuationPar(p_min=lower, p_max=bounds[2]+pad,
         ds=strategy.ds, dsmax=strategy.dsmax, max_steps=strategy.max_steps,
         detect_bifurcation=0, newton_options=BifurcationKit.NewtonPar(
             tol=strategy.newton_tol, max_iterations=strategy.newton_max_iterations))
@@ -265,8 +282,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     path_work::PALCWorkTelemetry=PALCWorkTelemetry(), work_telemetry=nothing,
     anchor_values=nothing, kwargs...)
     diagnostic_level in (:summary, :full) || throw(ArgumentError("diagnostic_level must be :summary or :full"))
-    anchor_strategy isa Union{SeedPoolAnchor,MultiSeedAnchor} || throw(ArgumentError(
-        "PALC production uses catalog anchors; select SeedPoolAnchor or MultiSeedAnchor and optional anchor_values"))
+    anchor_strategy isa Union{SeedPoolAnchor,MultiSeedAnchor,SingleSeedAnchor} || throw(ArgumentError(
+        "select SeedPoolAnchor, MultiSeedAnchor or SingleSeedAnchor"))
     anchor_strategy isa MultiSeedAnchor && !anchor_strategy.evaluate_all_attempts &&
         throw(ArgumentError("PALC anchor discovery requires evaluate_all_attempts=true"))
     jump_tol = _path_positive_real(branch_jump_tol, :branch_jump_tol)
@@ -274,8 +291,16 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     options = _path_options(model, path; kwargs...)
     residual = _path_residual(model, path, options)
     values = sort!(unique(_path_values(path)))
-    positions = anchor_values === nothing ? unique([values[cld(length(values), 2)], first(values), last(values)]) :
-        _path_float_vector(anchor_values, :anchor_values)
+    single_seed = anchor_strategy isa SingleSeedAnchor
+    single_seed && anchor_values !== nothing && throw(ArgumentError(
+        "SingleSeedAnchor already specifies its parameter; omit anchor_values"))
+    if single_seed
+        length(anchor_strategy.seed) == state_dim(_path_mode(path, anchor_strategy.param_value)) ||
+            throw(ArgumentError("SingleSeedAnchor seed length must match the path state dimension"))
+    end
+    positions = single_seed ? [anchor_strategy.param_value] :
+        anchor_values === nothing ? unique([values[cld(length(values), 2)], first(values), last(values)]) :
+            _path_float_vector(anchor_values, :anchor_values)
     all(value -> first(values) <= value <= last(values), positions) ||
         throw(ArgumentError("anchor_values must lie within the requested path"))
     curves = Vector{NamedTuple{(:param,:solution),Tuple{Float64,Vector{Float64}}}}[]
@@ -283,7 +308,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     messages = String[]
     for value in positions
         roots = NamedTuple[]
-        for seed in _path_catalog(path, value)
+        seeds = single_seed ? [anchor_strategy.seed] : _path_catalog(path, value)
+        for seed in seeds
             candidate = _path_root(model, path, value, seed, residual, options, path_work;
                 source=:anchor, work_telemetry)
             _push_distinct_path_root!(roots, candidate)
@@ -297,11 +323,12 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         for root in roots
             any(other -> _solution_distance(root.solution, other.solution) <= 1e-4, covered) && continue
             anchor_id = Symbol("anchor_", length(anchors) + 1)
-            point = _candidate_path_point(value, root, :catalog_anchor, 0)
+            point = _candidate_path_point(value, root, single_seed ? :single_seed_anchor : :catalog_anchor, 0)
             push!(anchors, _anchor_from_branch_point(anchor_id, point, length(roots)))
             try
                 curve = length(values) == 1 ? [(; param=value, solution=copy(root.solution))] :
-                    _palc_curve(residual, root, value, extrema(values), strategy, path_work)
+                    _palc_curve(residual, root, value, extrema(values), strategy, path_work;
+                        positive_parameter=path isa ConstraintTPath)
                 push!(curves, curve)
             catch err
                 err isa InterruptException && rethrow()
@@ -326,7 +353,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
                 end
             end
         end
-        if isempty(accepted)
+        if isempty(accepted) && !single_seed
             for seed in _path_catalog(path, value)
                 candidate = _path_root(model, path, value, seed, residual, options, path_work;
                     source=:fallback, work_telemetry)
@@ -347,12 +374,14 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
             :bifurcationkit, points, :complete, (; curve=curves[i], work=snapshot)))
     end
     if !isempty(fallback_points)
-        push!(branches, ContinuationBranch(:fallback, :fallback_anchor, :catalog_fallback,
+        push!(branches, ContinuationBranch(:fallback, :fallback_anchor,
+            single_seed ? :uncovered_single_seed : :catalog_fallback,
             fallback_points, failure_count == 0 ? :complete : :partial, (; work=snapshot)))
     end
     selected = apply_branch_policy(branches, branch_policy)
     jumps = _path_branch_jump_metrics(branches; tol=jump_tol)
-    diagnostics = PathDiagnostics(:bifurcationkit, :catalog_anchors, _policy_symbol(branch_policy),
+    diagnostics = PathDiagnostics(:bifurcationkit,
+        single_seed ? :single_seed_anchor : :catalog_anchors, _policy_symbol(branch_policy),
         time()-started, path_work.anchor_solves, path_work.continuation_points,
         failure_count, jumps.count, messages)
     return PathSolveResult(path, selected.branches, selected.selections, anchors, diagnostics)
@@ -390,17 +419,30 @@ function _solve_seed_equilibrium_path(model, path, strategy;
     anchor_strategy=SeedPoolAnchor(), branch_policy=GroundStateBranchPolicy(),
     diagnostic_level=:summary, branch_jump_tol=DEFAULT_PATH_BRANCH_JUMP_TOL, kwargs...)
     messages = _seed_continuation_anchor_messages(anchor_strategy)
+    if path isa ConstraintTPath
+        messages = ["Temperature continuation uses the previous solution and the existing joint point solver's seed policy."]
+    end
     diagnostic_level in (:summary, :full) || throw(ArgumentError("invalid diagnostic_level"))
     started = time()
     points = BranchPoint[]
     previous = nothing
     for (step, value) in enumerate(_path_values(path))
         mode = _path_mode(path, value)
-        seeds = _path_catalog(path, value; previous)
-        common = (; seeds, xi=path.xi, p_num=path.p_num, t_num=path.t_num,
-            evaluate_all_attempts=strategy.evaluate_all_attempts, kwargs...)
-        result = path isa FixedMuPath ? solve_multi(model, mode, path.T_fm, value; common...) :
-            solve_multi(model, mode, path.T_fm; common...)
+        result = if path isa ConstraintTPath
+            # Preserve the existing point solver's joint solve and seed policy.
+            seed = previous === nothing ? get(kwargs, :seed_guess,
+                get_seed(get(kwargs, :seed_strategy, DefaultSeed()), [value], mode)) : previous
+            common = merge((; xi=path.xi,
+                p_num=path.p_num, t_num=path.t_num,
+                evaluate_all_attempts=strategy.evaluate_all_attempts), (;kwargs...), (;seed_guess=seed))
+            solve(model, mode, value; common...)
+        else
+            seeds = _path_catalog(path, value; previous)
+            common = (; seeds, xi=path.xi, p_num=path.p_num, t_num=path.t_num,
+                evaluate_all_attempts=strategy.evaluate_all_attempts, kwargs...)
+            path isa FixedMuPath ? solve_multi(model, mode, path.T_fm, value; common...) :
+                solve_multi(model, mode, path.T_fm; common...)
+        end
         push!(points, _branch_point_from_solver_result(value, result, :seed_continuation, step))
         result.converged && (previous = copy(result.solution))
     end

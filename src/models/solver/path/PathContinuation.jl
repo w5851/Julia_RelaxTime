@@ -125,13 +125,42 @@ struct FixedMuPath <: AbstractPathProblem
     end
 end
 
-const EquilibriumPath = Union{FixedMuPath, FixedRhoPath, FixedAsymmetricRhoPath}
+const TemperaturePathMode = Union{FixedEntropy,FixedSigma,FixedMuBConservedCharges}
+
+"""A temperature path (fm^-1) with one fixed entropy or conserved-charge constraint."""
+struct ConstraintTPath{M<:TemperaturePathMode} <: AbstractPathProblem
+    mode::M
+    T_values::Vector{Float64}
+    xi::Float64
+    p_num::Int
+    t_num::Int
+    function ConstraintTPath(mode::M, T_values::AbstractVector{<:Real};
+        xi::Real=0.0, p_num::Integer=default_momentum_count(),
+        t_num::Integer=default_theta_count()) where {M<:TemperaturePathMode}
+        temperatures = _path_float_vector(T_values, :T_values)
+        all(>(0), temperatures) || throw(ArgumentError("T_values must be positive"))
+        mode isa FixedEntropy && _path_nonnegative_real(mode.s_target, :s_target)
+        mode isa FixedSigma && _path_positive_real(mode.sigma_target, :sigma_target)
+        PNJLIntegrals.validate_rs_anisotropy(xi)
+        new{M}(mode, temperatures, _path_finite_real(xi, :xi),
+            _path_positive_int(p_num, :p_num), _path_positive_int(t_num, :t_num))
+    end
+end
+
+const EquilibriumPath = Union{FixedMuPath, FixedRhoPath, FixedAsymmetricRhoPath,ConstraintTPath}
 _path_values(path::Union{FixedRhoPath, FixedAsymmetricRhoPath}) = path.rho_values
 _path_values(path::FixedMuPath) = path.mu_values
+_path_values(path::ConstraintTPath) = path.T_values
+_path_temperature(path::EquilibriumPath, value) = path.T_fm
+_path_temperature(::ConstraintTPath, value) = value
 _path_mode(::FixedMuPath, value) = FixedMu()
 _path_mode(::FixedRhoPath, value) = FixedRho(value)
 _path_mode(path::FixedAsymmetricRhoPath, value) =
     FixedAsymmetricRho(value, path.ud_ratio_target, path.s_target)
+_path_mode(path::ConstraintTPath, value) = path.mode
+_path_constraint_symbol(::ConstraintTPath{FixedEntropy}) = :fixed_entropy
+_path_constraint_symbol(::ConstraintTPath{FixedSigma}) = :fixed_sigma
+_path_constraint_symbol(::ConstraintTPath{FixedMuBConservedCharges}) = :fixed_mub_conserved_charges
 
 struct MultiSeedAnchor <: AbstractAnchorStrategy
     evaluate_all_attempts::Bool
@@ -174,6 +203,15 @@ function default_fixedasymrho_anchor_strategy()
 end
 
 struct SeedPoolAnchor <: AbstractAnchorStrategy end
+
+"""Trace only the curve reached from this initial guess, without catalog fallback."""
+struct SingleSeedAnchor <: AbstractAnchorStrategy
+    param_value::Float64
+    seed::Vector{Float64}
+    function SingleSeedAnchor(param_value::Real, seed::AbstractVector{<:Real})
+        new(_path_finite_real(param_value, :param_value), _path_float_vector(seed, :seed))
+    end
+end
 
 struct SeedContinuation <: AbstractContinuationStrategy
     evaluate_all_attempts::Bool
@@ -302,6 +340,7 @@ end
 @inline _strategy_symbol(::ProductionLikeAnchor) = :production_like_anchor
 @inline _strategy_symbol(::CompositeAnchor) = :composite_anchor
 @inline _strategy_symbol(::SeedPoolAnchor) = :seed_pool_anchor
+@inline _strategy_symbol(::SingleSeedAnchor) = :single_seed_anchor
 @inline _strategy_symbol(::SeedContinuation) = :seed_continuation
 @inline _strategy_symbol(c::PALCContinuation) = c.backend
 @inline _policy_symbol(::GroundStateBranchPolicy) = :ground_state
@@ -686,6 +725,32 @@ function solve_path(model::AbstractQCDModel, path::Union{FixedMuPath, FixedRhoPa
         anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
 end
 
+function solve_path(model::AbstractQCDModel, path::ConstraintTPath;
+    continuation::Symbol=:auto,
+    continuation_strategy::Union{Nothing,AbstractContinuationStrategy}=nothing,
+    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
+    diagnostic_level::Symbol=:summary,
+    branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
+    kwargs...)
+    selected_strategy = continuation_strategy
+    if selected_strategy === nothing
+        route = _constraint_path_route(continuation, model, path; kwargs...)
+        route === :single_pass && throw(ArgumentError(
+            "ConstraintTPath supports :auto, :legacy or :palc"))
+        selected_strategy = route === :palc ? PALCContinuation() : SeedContinuation(false)
+    elseif continuation !== :auto
+        throw(ArgumentError("use either continuation or continuation_strategy"))
+    end
+    if selected_strategy isa PALCContinuation
+        return _solve_palc_path(model, path, selected_strategy;
+            anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    end
+    selected_strategy isa SeedContinuation || throw(ArgumentError("unsupported continuation_strategy"))
+    return _solve_seed_equilibrium_path(model, path, selected_strategy;
+        anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+end
+
 @inline function to_namedtuple(root::AnchorRoot)
     return (
         anchor_id=root.anchor_id,
@@ -771,6 +836,10 @@ to_namedtuple(path::FixedRhoPath) = (; path_kind=:fixed_rho, T_fm=path.T_fm,
     rho_values=path.rho_values, xi=path.xi, p_num=path.p_num, t_num=path.t_num)
 to_namedtuple(path::FixedMuPath) = (; path_kind=:fixed_mu, T_fm=path.T_fm,
     mu_values=path.mu_values, xi=path.xi, p_num=path.p_num, t_num=path.t_num)
+to_namedtuple(path::ConstraintTPath) = (; path_kind=:constraint_temperature,
+    constraint_mode=_path_constraint_symbol(path),
+    constraint=(; (key => getfield(path.mode, key) for key in fieldnames(typeof(path.mode)))...),
+    T_values=path.T_values, xi=path.xi, p_num=path.p_num, t_num=path.t_num)
 
 @inline function to_namedtuple(result::PathSolveResult)
     return (

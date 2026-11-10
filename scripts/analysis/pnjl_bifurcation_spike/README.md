@@ -1,5 +1,20 @@
 # PNJL PALC Spike
 
+Current production paths are implemented in `Models` (root environment); the
+isolated spike sections below retain the earlier experiments. The production
+workflow is `palc-production-comparison.yml`.
+
+`profile=constraints`, `cases=all|entropy|sigma|bqs|single_seed`, `repetitions=2`,
+`budget_seconds=1200` runs the small additional-mode comparison on Actions.
+`compare_constraints.py` caps that numerical process at 1200 seconds and preserves
+completed rounds. Its success means the experiment completed; parity and failures
+are explicit in the summary. A single-seed run disables catalog fallback.
+To retain one compact result from a downloaded artifact without solving:
+
+```sh
+python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output <artifact-directory> --collect <result.json>
+```
+
 This directory is an isolated BifurcationKit experiment. It does not add
 BifurcationKit to the repository root environment and does not change stable
 `Models` entrypoints.

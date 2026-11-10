@@ -10,6 +10,21 @@ if !isdefined(Main, :PathContinuationDummyModel)
     @eval Main struct PathContinuationDummyModel <: Models.AbstractQCDModel end
 end
 
+if !isdefined(Main, :ConstraintPathRecordingModel)
+    @eval Main struct ConstraintPathRecordingModel <: Models.AbstractQCDModel
+        calls::Vector{NamedTuple}
+    end
+end
+
+function Models.solve(model::Main.ConstraintPathRecordingModel, mode::Models.FixedSigma,
+    T_fm::Real; kwargs...)
+    push!(model.calls, (;T_fm, kwargs...))
+    solution = copy(kwargs[:seed_guess])
+    solution[6:8] .+= 0.1
+    return Models.SolverResult(mode, true, solution, solution[1:5], solution[6:8],
+        -1.0, 1.0, 1.0, 2.0, 3.0, ones(3), 1, 1e-9, 0.0)
+end
+
 function _toy_point(param_value::Real, pressure::Real;
     residual_norm::Real=1e-8,
     converged::Bool=true,
@@ -197,6 +212,57 @@ end
         @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
     end
 
+    @testset "Temperature paths retain constraint targets and input order" begin
+        modes = (Models.FixedEntropy(0.5), Models.FixedSigma(12.0),
+            Models.FixedMuBConservedCharges(4.5))
+        for mode in modes
+            path = Models.ConstraintTPath(mode, [0.7, 0.5, 0.6]; p_num=24, t_num=8)
+            @test Models._path_values(path) == [0.7, 0.5, 0.6]
+            @test Models._path_temperature(path, 0.6) == 0.6
+            @test Models._path_mode(path, 0.6) === mode
+            @test Models.to_namedtuple(path).T_values == [0.7, 0.5, 0.6]
+            @test all(seed -> length(seed) == 8, Models._path_catalog(path, 0.6))
+            model = Models.create_model(:PNJL)
+            @test Models._constraint_path_route(:palc, model, path; iterations=300,
+                path_work=Models.PALCWorkTelemetry()) === :palc
+            @test Models._constraint_path_route(:auto, model, path) === :legacy
+            long_path = Models.ConstraintTPath(mode, collect(range(0.5, 0.7; length=21)))
+            expected = mode isa Models.FixedEntropy ? :legacy : :palc
+            @test Models._constraint_path_route(:auto, model, long_path) === expected
+            @test Models._constraint_path_route(:auto, model, long_path; solver=:custom) === :legacy
+            @test Models._constraint_path_route(:auto, Models.create_model(:RPNJL), long_path) === :legacy
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [0.0])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [NaN])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, Float64[])
+            @test_throws ArgumentError Models.ConstraintTPath(mode, [0.5]; xi=-1.0)
+        end
+        @test_throws ArgumentError Models.SingleSeedAnchor(NaN, ones(8))
+        @test_throws ArgumentError Models.ConstraintTPath(Models.FixedEntropy(-0.5), [0.5])
+        @test_throws ArgumentError Models.ConstraintTPath(Models.FixedSigma(0.0), [0.5])
+        @test_throws ArgumentError Models.SingleSeedAnchor(0.5, [Inf])
+        model = Models.create_model(:PNJL)
+        path = Models.ConstraintTPath(Models.FixedSigma(12.0), [0.5, 0.6])
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.5, ones(5)))
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.7, ones(8)))
+        @test_throws ArgumentError Models.solve_path(model, path; continuation=:palc,
+            anchor_strategy=Models.SingleSeedAnchor(0.5, ones(8)), anchor_values=[0.5])
+    end
+
+    @testset "Legacy temperature path forwards custom controls and the previous root" begin
+        model = Main.ConstraintPathRecordingModel(NamedTuple[])
+        path = Models.ConstraintTPath(Models.FixedSigma(12.0), [0.5, 0.6])
+        seed = [-1.0,-1.0,-2.0,0.2,0.2,1.0,1.0,1.0]
+        result = Models.solve_path(model, path; continuation=:legacy,
+            seed_guess=seed, evaluate_all_attempts=true, iterations=21, mu0=0.4)
+        @test model.calls[1].seed_guess == seed
+        @test model.calls[2].seed_guess == result.branches[1].points[1].solution
+        @test all(call -> call.evaluate_all_attempts && call.iterations == 21 && call.mu0 == 0.4, model.calls)
+        @test [call.T_fm for call in model.calls] == [0.5,0.6]
+        @test result.diagnostics.failure_count == 0
+    end
+
     @testset "FixedMu scan preserves its historical density unit" begin
         value = Models.SolverResult(Models.FixedMu(), true, zeros(5), zeros(5), zeros(3),
             -1.0, 1.0, 2.0, 3.0, 4.0, ones(3), 0, 1e-9, 0.0)
@@ -244,6 +310,17 @@ end
             path;
             anchor_strategy=Models.MultiSeedAnchor(),
         )
+    end
+
+    @testset "Connected pitchfork branches require branch switching" begin
+        residual = (x, value) -> [x[1] * (x[1]^2 - value)]
+        work = Models.PALCWorkTelemetry()
+        curve = Models._palc_curve(residual, (solution=[0.0],), -0.5, (-0.6, 1.0),
+            Models.PALCContinuation(ds=0.03, dsmax=0.1, max_steps=100), work)
+        @test maximum(point.param for point in curve) > 0.5
+        @test all(point -> abs(point.solution[1]) < 1e-10, curve)
+        @test residual([1.0], 1.0) == [0.0]
+        @test residual([-1.0], 1.0) == [0.0]
     end
 
     @testset "Path branch jump metrics count state discontinuities" begin

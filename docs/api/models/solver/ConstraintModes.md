@@ -137,6 +137,37 @@ rho_bqs = Models.conserved_densities_from_flavor(rho_flavor)
 
 当前实现是 quark/mean-field-only 守恒荷平衡，不包含介子数密度对 `rho_Q`、`rho_S` 的反馈。介子守恒荷应在显式外层修正或完整热力学反馈阶段加入，不能把本 mode 的 `rho_S=0` 误写成“全体系奇异数严格为零”。
 
+## 约束温度路径与 PALC
+
+`ConstraintTPath(mode, T_values; xi=0, p_num=24, t_num=8)` 沿温度改变，保持
+`FixedEntropy`、`FixedSigma` 或 `FixedMuBConservedCharges` 的目标不变。
+温度使用 fm^-1 且必须为正；熵密度使用 fm^-3，比熵无量纲。
+该路径仍联立求解五个平均场与三个味化学势。
+
+```julia
+model = Models.create_model(:PNJL)
+path = Models.ConstraintTPath(Models.FixedSigma(12.0759), (100:2:140) ./ 197.3269804;
+    p_num=24, t_num=8)
+result = Models.solve_path(model, path; continuation=:palc)
+points = Models.selected_path_results(model, result)
+```
+
+`continuation=:legacy` 使用逐点求解与连续种子；`:palc` 使用三个位置的种子目录发现、
+双向伪弧长延拓和目标温度处的根校正。`:auto` 对 PNJL 标准控制、至少 21 个温度点的
+`FixedSigma` / `FixedMuBConservedCharges` 路径默认使用 PALC。短路径、RPNJL 和
+自定义求解控制使用 legacy。`FixedEntropy` 保留 legacy 默认：相同 s 可对应正、负
+mu 的电荷共轭分支，压力微小舍入差会改变符号选择；需要调用者明确分支约束后再使用
+显式 PALC。PALC 支持配置一致的 PNJL/RPNJL 模型及
+`thermo_quadrature_policy=:tensor_gauss`；结果按输入温度顺序返回，失败点为 `nothing`。
+`rho_norm` 为 nB/rho0，`residual_norm` 是完整八维约束残差的范数。
+路径层协调求根、硬约束检查和候选压力排序。
+
+可显式传入 `anchor_strategy=SingleSeedAnchor(value, seed)`，其中 seed 必须为完整
+8 维状态（`FixedMuPath` 则为 5 维）。它只求一次锚点根、双向延拓所达曲线，且
+关闭种子目录回退；无交点或校正失败会作为失败点返回。该选项用于已知分支的追踪和
+覆盖对照，不表示搜索全部根。PALC 能穿过简单折返点，同一控制参数下因此可得到
+多个交点；分叉处的其他分支仍需要分支切换或新的起点。
+
 ## 为什么这部分不应继续只放在旧 `pnjl` 页面
 
 约束模式本质上已经是 `Models` 的公共合同，而不只是 legacy PNJL 的内部文档主题。继续把它们主要留在旧页，会让新用户误以为 `Models` 只有流程 façade，没有自己的求解合同。
