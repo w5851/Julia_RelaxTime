@@ -1,5 +1,5 @@
 schema_version = 1
-primary_track = "palc-performance-research"
+primary_track = "full-temperature-reference-research"
 updated_at = "2026-11-10"
 
 [[tracks]]
@@ -403,19 +403,22 @@ updated_at = "2026-08-23"
 [[tracks]]
 id = "palc-performance-research"
 title = "PALC matched performance and continuation parity research"
-status = "active"
+status = "archived"
 current_task = "palc-matched-performance-diagnostic"
 blocked_by = []
 unlocks = []
-next_action = "预算实验完成；较长 PNJL Tρ 默认 PALC，Tμ 保留 legacy。等待 PR #340 最终 CI 后合并、同步台账并归档本任务。"
+next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = "codex/palc-production"
-current_sha = "1afeb65a71a753d7182ee284cf62b5ba188e40bc"
+current_branch = "main"
+current_sha = "26671f2aaf1971928956dd3e0efe5bd3cf61ec5c"
 run_ids = ["42582867659", "42590332671", "42594377256", "42598285619", "42604649370", "42607669220", "42745978294", "42749746651"]
 evidence = [
   "pr:340",
+  "sha:26671f2aaf1971928956dd3e0efe5bd3cf61ec5c",
+  "note:pr340_merged_20261110_all_13_pr_checks_successful_palc_branches_retired",
+  "run:42754800362",
   "run:42745978294",
   "run:42749746651",
   "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
@@ -433,7 +436,7 @@ evidence = [
   "run:42479096492",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "file:data/outputs/results/analysis/palc_matched_20261108/pilot.json",
-  "file:docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md",
+  "file:docs/dev/archived/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md",
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
   "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
@@ -1119,15 +1122,18 @@ evidence = [
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
-status = "active"
+status = "archived"
 parent = "track:palc-performance-research"
-task_file = "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
+task_file = "docs/dev/archived/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 reason = "作者接受前阶段候选搜索优化结果，要求把通用 PALC 接入生产扫描并在约一小时 Actions 预算内核对三策略。"
-next_action = "实现和预算实验完成；PR #340 最终 CI 与合并清理。Tμ 旧策略/warm 和 RPNJL 默认资格留作未来按需扩展，不追加本批预算。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
   "pr:340",
+  "sha:26671f2aaf1971928956dd3e0efe5bd3cf61ec5c",
+  "note:production_scope_complete_tmu_old_and_warm_rpnjl_default_qualification_optional_not_scheduled",
+  "run:42754800362",
   "run:42745978294",
   "run:42749746651",
   "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",

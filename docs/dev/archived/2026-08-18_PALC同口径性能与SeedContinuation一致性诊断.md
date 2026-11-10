@@ -1,6 +1,18 @@
+---
+title: "PALC 同口径性能与 SeedContinuation 一致性诊断"
+archived: true
+original: "docs/dev/active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
+archived_date: "2026-11-10"
+task_status: "completed"
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / active`，实现及预算实验已完成，等待 [PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 最终 CI 与工程收尾。2026-11-10 作者接受前两阶段并授权通用 PALC 接入与约一小时 Actions 对照；两批累计 61.10 runner-minutes。较长 PNJL Tρ 默认启用 PALC，Tμ 默认保持 legacy。具体计时、分支差异和未覆盖项见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
+状态：`research / completed`。[PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 的全部 13 项检查通过，2026-11-10 已 squash 合并到 `main`（`26671f2a`），对应本地和远程分支已回收。作者接受前两阶段并授权通用 PALC 接入与约一小时 Actions 对照；两批累计 61.10 runner-minutes。较长 PNJL Tρ 默认启用 PALC，Tμ 默认保持 legacy。具体计时、分支差异和未来可选的验证范围见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 
 ## 1. 背景与目标
 
@@ -84,6 +96,6 @@
 - [x] T120、ξ=0 的回弯保留，FixedRho Maxwell 三策略一致；production 相图单切片三策略均完成。
 - [x] 两批累计 61.10 runner-minutes 后结束实验；一份 `production_comparison.json` 保留代表路径、耗时、实际误差和不同根，重复 CSV 不入库。
 - [x] API、CLI/TOML、CSV/callback、完整文件 resume 验证完成；新增默认入口和部分续扫 CI 检查。
-- [ ] PR #340 最终 CI、合并及对应分支清理，随后归档任务文档并同步台账。
+- [x] PR #340 全部 13 项检查通过并已合并；integration core 323/323，含 T120 默认 PALC、零密度、回弯/Maxwell 和部分续扫；对应本地和远程分支已回收。
 
 比较的是离散方程求解与扫描算法；这组中等网格不承担积分收敛或高精度相图参考晋升。

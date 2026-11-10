@@ -2,7 +2,8 @@
 
 ## 当前结论（2026-11-10）
 
-[PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 将 PALC 接入通用 Tρ/Tμ 扫描与
+[PR #340](https://github.com/w5851/Julia_RelaxTime/pull/340) 已于 2026-11-10 合并到 `main`
+（`26671f2a`），将 PALC 接入通用 Tρ/Tμ 扫描与
 相图 production/research 入口。`continuation=:auto` 对标准 PNJL tensor 热积分、默认
 ground_state 选择器且每条等温线至少 21 点的两类 Tρ 扫描启用 PALC；Tμ、RPNJL、短路径、
 自定义求解器/选择器继续使用 legacy。显式 `:legacy|:single_pass|:palc` 可选，CLI 支持
@@ -62,6 +63,11 @@ FixedRho 为 2760/1600/430；FixedMu 的 single_pass/PALC 为 19440/1952。
 Tμ 旧策略及共同 warm 的补齐、RPNJL 默认资格留待未来计算需要时再安排；当前默认只晋升
 已有较长 Tρ 证据支持的范围。自动路由、CSV 顺序、完整/部分续扫、CLI 配置与自定义选项
 兼容性由路径单元和实际默认入口集成测试覆盖。
+
+最终源码 `87596642` 的全部 13 项 PR 检查通过；
+[integration core](https://github.com/w5851/Julia_RelaxTime/actions/runs/42754800362)
+为 323/323，包含 T120 默认 PALC 与 single_pass 同点核对、零密度端点、回弯/Maxwell 和
+部分 CSV 续扫。合并后任务归档；本批没有待执行的数值任务。
 
 ## 第二阶段结论（2026-11-09）
 

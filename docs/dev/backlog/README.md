@@ -27,16 +27,20 @@
 - [PNJL 全温区参考生产 PR3 规划](2026-07-17_PNJL全温区相图热积分与参考生产.md)
 - [带电 K/π 介子数密度物理约束与验证中期路线](2026-07-25_带电KPi介子数密度物理约束与验证中期路线.md)
 
-## 当前恢复入口（2026-11-08 核对）
+## 当前恢复入口（2026-11-10 核对）
 
 介子冻结线数值、更新实验图件、矢量交付及论文接入均已完成；
 [Arena Issue #313](https://github.com/w5851/Julia_RelaxTime/issues/313) 已按作者接受的现行定义关闭。
-论文后续文字审阅由 `D:/Desktop/paper` 管理。PALC 同口径诊断已完成首阶段 pilot，
-任务合同已移至 [active](../active/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)。
+论文后续文字审阅由 `D:/Desktop/paper` 管理。PALC 的候选搜索优化、通用生产接入和预算对照
+已由 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338)、
+[#339](https://github.com/w5851/Julia_RelaxTime/pull/339)、
+[#340](https://github.com/w5851/Julia_RelaxTime/pull/340) 完成；
+任务合同已[归档](../archived/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)。
+较长的标准 PNJL Tρ 扫描默认 PALC；Tμ 完整旧策略/warm 对照和 RPNJL 默认资格
+留待后续实际需要时再安排，当前没有新增计算任务。
 
 | 待评估研究 | 实际剩余工作 | 当前状态 |
 | --- | --- | --- |
-| PALC 性能与 SeedContinuation 一致性 | 两窗口同点及计数对照完成，存在候选根选择敏感性；保留隔离诊断，后续可核对候选保留 | `review`；PR #338，等待诊断结论审阅 |
 | 全温区参考生产 PR3 | 确定新生产温区与输入，完成积分/相线/oracle 收敛及新参考产物验收 | `deferred`；算法 PR #137/#139 已完成，生产尚未开展 |
 
 其余文档是按需求重开的候选研究与能力规划。旧阶段勾选保留当时的语境，
