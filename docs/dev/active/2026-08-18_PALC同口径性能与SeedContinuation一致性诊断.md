@@ -1,12 +1,12 @@
 # PALC 同口径性能与 SeedContinuation 一致性诊断
 
-状态：`research / review`。2026-11-09 已按作者授权完成首阶段 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338) 合并、可选候选搜索优化及扩大有限 pilot，第二阶段交付于 [PR #339](https://github.com/w5851/Julia_RelaxTime/pull/339)。T=120 的跨区检查保留了均匀解的化学势回弯。完整结果及数值代码见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
+状态：`research / active`。2026-11-10 作者接受 [PR #338](https://github.com/w5851/Julia_RelaxTime/pull/338)、[PR #339](https://github.com/w5851/Julia_RelaxTime/pull/339) 的前阶段结果，授权通用 PALC 生产接入与约一小时 GitHub Actions 对照。先前 T=120 跨区检查保留了均匀解的化学势回弯；结果见[分析](../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
 
 ## 1. 背景与目标
 
 本任务始于历史 PALC 与 SeedContinuation 计时口径不一致。现已补齐同点、冷暖调用和真实求解工作量比较；新结果支持较长同密度路径上的延拓收益，短窗口需要考虑 anchor 成本。
 
-本任务建立可比较的性能和语义 parity 证据，优化候选搜索，并决定 PALC 的后续接口范围。当前交付可复用的 single-pass 开关与隔离 PALC pilot；通用 PALC 接口集成留到实际消费者提出时，当前没有待运行批次或完整生产任务。
+本任务建立可比较的性能和语义 parity 证据。当前阶段把通用路径接入 `run_tmu_scan`、`run_trho_scan` 和相图生产入口，比较 legacy、single_pass、PALC 的实际耗时与选根结果，再决定默认启用范围。
 
 ## 2. 范围与非范围
 
@@ -20,8 +20,8 @@
 
 ### 非范围
 
-- 不把 BifurcationKit 加入根 `Project.toml`。
-- 不修改 `Models.solve`、`Models.solve_multi`、`run_trho_scan` 默认语义或当前 C0/C1/C2 配置。
+- BifurcationKit 0.8.0 作为通用 PALC 的根环境依赖；扫描默认策略依据新实验结果决定。
+- `Models.solve`、`Models.solve_multi` 的单点合同和当前 C0/C1/C2 产物保持既有状态。
 - 不在本机运行 PNJL solver；正式数值诊断只允许通过明确授权的 GitHub Actions pilot。
 - 不降低物理/数值容差，不改变 phase branch governance，不启动 C3/O1 或 reference promotion。
 
@@ -74,3 +74,14 @@
 - BifurcationKit 编译和初始化成本可能主导短测；回退为同进程 warm 对照并单独报告 startup。
 - 多分支 anchor discovery 可能让 PALC 工作量天然高于单分支 scan；回退为 diagnostic oracle，不替换当前路径。
 - parity 或 branch selection 漂移时，保留当前 pressure-governed production scan，不修改现有 C0/C1/C2 产物。
+
+## 第三阶段：生产入口对照
+
+- [ ] 三路线：`FixedAsymmetricRho`、`FixedRho`、`FixedMu`；均使用五场残差，固定密度保持八变量联立约束。
+- [ ] 中等网格：T=100/120/140/170/200 MeV，ξ=0/0.4；ρ/ρ₀=0.2:0.15:3.5 或 μq=0:15:450 MeV。24×8 tensor 节点，同一残差标准；首次和 warm 完整扫描各一次。
+- [ ] PALC 计入起点发现、双向延拓、目标点校正和失败回退；全部合格分支参与现有最大压力选择。
+- [ ] 三路线同点与完整覆盖核对；T120 检查回弯，FixedRho 切片进一步比较 S 形和 Maxwell 后处理。
+- [ ] 单 runner 工作流上限 60 分钟，数值进程共享 2700 秒预算，预算不足保留已完成结果并报告未覆盖范围。
+- [ ] API、CSV/callback、断点续扫及相图入口参数传递验证，按实际结果确定默认范围并更新台账。
+
+比较的是离散方程求解与扫描算法；这组中等网格不承担积分收敛或高精度相图参考晋升。

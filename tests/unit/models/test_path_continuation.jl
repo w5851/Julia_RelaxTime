@@ -134,7 +134,7 @@ end
         @test isempty(result.selections)
     end
 
-    @testset "PALCContinuation is config-only in root environment" begin
+    @testset "PALC rejects models without supported equilibrium residuals" begin
         model = Main.PathContinuationDummyModel()
         path = Models.FixedAsymmetricRhoPath(1.0, [0.1])
         @test_throws Models.UnsupportedCapabilityError Models.solve_path(
@@ -142,6 +142,73 @@ end
             path;
             continuation_strategy=Models.PALCContinuation(),
         )
+    end
+
+    @testset "New path units, input validation and scan dispatch" begin
+        mu = Models.FixedMuPath(1.0, [1.8, 1.5, 1.5]; p_num=8, t_num=4)
+        rho = Models.FixedRhoPath(1.0, [0.0, 0.5]; p_num=8, t_num=4)
+        @test Models.to_namedtuple(mu).mu_values == [1.8, 1.5, 1.5]
+        @test Models.to_namedtuple(rho).path_kind === :fixed_rho
+        @test_throws ArgumentError Models.FixedMuPath(1.0, [NaN])
+        @test_throws ArgumentError Models.FixedRhoPath(1.0, [-0.1])
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy
+        @test Models.resolve_scan_continuation(:palc, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :palc
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 2) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :NJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy
+        @test Models.resolve_scan_continuation(:legacy, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy
+        @test_throws ArgumentError Models.resolve_scan_continuation(:palc, :PNJL, :rs_reduced_adaptive, :ground_state, nothing, 21)
+        @test_throws ArgumentError Models.resolve_scan_continuation(:unknown, :PNJL, :tensor_gauss, :ground_state, nothing, 21)
+    end
+
+    @testset "Path controls reject unsupported options before solving" begin
+        model = Models.create_model(:PNJL)
+        path = Models.FixedMuPath(1.0, [0.0, 0.1])
+        @test_throws ArgumentError Models._path_options(model, path; invalid_option=1)
+        @test_throws ArgumentError Models._path_options(model, path; thermo_quadrature_rtol=-1.0)
+        @test Models._path_options(model, path; iterations=30).iteration_limit == 30
+        @test all(seed -> length(seed) == 5, Models._path_catalog(path, 0.1))
+        @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedRhoPath(1.0, [0.5]), 0.5))
+        @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedAsymmetricRhoPath(1.0, [0.5]), 0.5))
+        @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
+    end
+
+    @testset "FixedMu scan preserves its historical density unit" begin
+        value = Models.SolverResult(Models.FixedMu(), true, zeros(5), zeros(5), zeros(3),
+            -1.0, 1.0, 2.0, 3.0, 4.0, ones(3), 0, 1e-9, 0.0)
+        adapted = Models.TmuScan._fixedmu_scan_units(value)
+        @test adapted.rho_norm == 2.0 * Main.Constants_PNJL.ρ0_inv_fm3
+        @test adapted.pressure == value.pressure
+        @test adapted.solution == value.solution
+        @test Models.TmuScan._fixedmu_scan_units(nothing) === nothing
+    end
+
+    @testset "Fold crossings remain separate target seeds" begin
+        curve = [(param=0.0, solution=[-2.0]), (param=2.0, solution=[0.0]),
+            (param=0.0, solution=[2.0])]
+        seeds = Models._palc_target_seeds(curve, 1.0)
+        @test length(seeds) == 2
+        @test seeds == [[-1.0], [1.0]]
+        @test isempty(Models._palc_target_seeds(curve, 3.0))
+        @test length(Models._palc_target_seeds(curve, 3.0; nearest=true)) == 1
+        first_point = _toy_point(1.0, 2.0)
+        second_point = _toy_point(1.0, 1.5)
+        folded = Models.ContinuationBranch(:fold, :anchor, :bifurcationkit,
+            [first_point, second_point], :complete, (;))
+        selection = only(Models.apply_branch_policy([folded], Models.GroundStateBranchPolicy()).selections)
+        @test selection.candidate_branch_count == 2
+        @test selection.pressure_gap == 0.5
+    end
+
+    @testset "Pseudo-arclength crosses a fold on an analytic equation" begin
+        residual = (x, value) -> [x[1]^2 - value]
+        work = Models.PALCWorkTelemetry()
+        strategy = Models.PALCContinuation(ds=0.05, dsmax=0.1, max_steps=100, newton_tol=1e-10)
+        curve = Models._palc_curve(residual, (solution=[-1.0],), 1.0, (0.0, 1.1), strategy, work)
+        @test any(point -> point.solution[1] > 0.5, curve)
+        @test maximum(abs(point.solution[1]^2 - point.param) for point in curve) < 1e-7
+        @test length(Models._palc_target_seeds(curve, 0.5)) >= 2
+        @test work.continuation_residual_calls > 0
+        @test work.continuation_jacobians > 0
     end
 
     @testset "SeedContinuation diagnostics do not claim unused anchor discovery" begin

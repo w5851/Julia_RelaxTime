@@ -1,0 +1,67 @@
+name: palc-production-comparison
+on:
+  workflow_call:
+    inputs:
+      profile:
+        type: string
+        default: medium
+      repetitions:
+        type: string
+        default: "2"
+  workflow_dispatch:
+    inputs:
+      profile:
+        type: choice
+        options: [quick, medium]
+        default: medium
+      repetitions:
+        type: choice
+        options: ["1", "2", "3"]
+        default: "2"
+permissions:
+  contents: read
+concurrency:
+  group: palc-production-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      JULIA_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      JULIA_NUM_PRECOMPILE_TASKS: "2"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - uses: julia-actions/cache@v2
+        with:
+          cache-name: palc-production
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Prepare the production environment
+        timeout-minutes: 10
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); include("src/models/Models.jl")'
+      - name: Check path and branch behavior
+        timeout-minutes: 3
+        run: julia --project=. tests/unit/models/test_path_continuation.jl
+      - name: Compare production scans within a shared budget
+        env:
+          PROFILE: ${{ inputs.profile }}
+          REPETITIONS: ${{ inputs.repetitions }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --profile "$PROFILE" --repetitions "$REPETITIONS" --budget-seconds 2700
+      - name: Summarize completed results
+        if: always()
+        run: |
+          python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --summarize-only
+          cat temp_palc_production/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: palc-production-comparison
+          path: temp_palc_production
+          retention-days: 14

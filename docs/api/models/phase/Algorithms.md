@@ -29,6 +29,11 @@
 
 两条入口共享底层 `run_trho_scan`、S-shape、Maxwell 与 artifact 治理能力，但在温度扫掠编排和 CEP 收口策略上职责不同。
 
+两入口接受 `continuation=:auto|:legacy|:single_pass|:palc` 并记录在配置快照和哈希中。
+PALC 对每条密度切片先建完整路径；使用 `RhoPointSession` 的生产模式先批量准备该切片，
+再按原顺序写入请求缓存。零散追加点没有可复用整条路径时沿用受约束的逐点求解。
+Tρ 仍是八变量联立解；路径算法输出的回弯随后交给同一 S 形与 Maxwell 判据。
+
 ## 一阶相变判据
 
 ### S-shape 检测

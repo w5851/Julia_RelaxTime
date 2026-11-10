@@ -84,7 +84,8 @@ function _run_single_temperature_production_scan(
         iterations::Int,
         level::Int,
         pass::Int,
-        work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing)
+        work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing;
+        continuation::Symbol=:auto)
     out_csv = joinpath(eval_dir, _production_eval_filename(T_mid, level, pass))
     stats = run_trho_scan(;
         T_values=[Float64(T_mid)],
@@ -95,6 +96,7 @@ function _run_single_temperature_production_scan(
         resume=false,
         reverse_rho=reverse_rho,
         seed_policy=seed_policy,
+        continuation=continuation,
         solver_backend=solver_backend,
         model_kind=model_kind,
         p_num=p_num,
@@ -193,6 +195,7 @@ function _production_session_scan!(session, io, written, T::Float64, xi::Float64
         rho_values::Vector{Float64}, reverse_rho::Bool, p_num::Int, t_num::Int,
         thermo_quadrature_kwargs::NamedTuple)
     order = reverse_rho ? reverse(rho_values) : rho_values
+    TrhoScan.prepare_rho_path!(session, T, xi, order)
     for rho in order
         row = TrhoScan.rho_point!(session, T, xi, rho)
         _write_session_row!(io, written, row, T, xi, p_num, t_num, thermo_quadrature_kwargs)
@@ -204,6 +207,7 @@ function _production_session_scan_hybrid!(session, io, written, T::Float64, xi::
         rho_values::Vector{Float64}, selected_points::Set{Float64}, reverse_rho::Bool,
         p_num::Int, t_num::Int, thermo_quadrature_kwargs::NamedTuple)
     order = reverse_rho ? reverse(rho_values) : rho_values
+    TrhoScan.prepare_rho_path!(session, T, xi, order)
     for rho in order
         row = TrhoScan.rho_point!(session, T, xi, rho; targeted=rho in selected_points)
         _write_session_row!(io, written, row, T, xi, p_num, t_num, thermo_quadrature_kwargs)
@@ -1777,7 +1781,8 @@ function _production_classify_temperature(
         cfg::ProductionPipelineConfig;
         rho_session=nothing,
         rho_prior::Union{Nothing, RhoSupportRefinement.RhoSupportPrior}=nothing,
-        work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing)
+        work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
+        continuation::Symbol=:auto)
     if cfg.rho_refinement_policy === :rho_support_hybrid
         return _production_classify_temperature_hybrid(
             aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
@@ -1834,7 +1839,8 @@ function _production_classify_temperature(
             iterations,
             level,
             pass,
-            work_telemetry,
+            work_telemetry;
+            continuation=continuation,
         )
         pass += 1
         scan_total += scan.stats.total
@@ -2236,6 +2242,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         solver_backend::Symbol=:models,
         reverse_rho::Bool=true,
         seed_policy::Symbol=:hybrid_continuity,
+        continuation::Symbol=:auto,
         p_num::Int=12,
         t_num::Int=4,
         thermo_quadrature_policy::Symbol=:tensor_gauss,
@@ -2432,6 +2439,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             model_kind=model_kind,
             reverse_rho=reverse_rho,
             seed_policy=seed_policy,
+            continuation=continuation,
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
@@ -2467,6 +2475,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             rho_prior=cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ?
                 _select_rho_support_prior(eval_cache, Float64(T)) : nothing,
             work_telemetry=work_telemetry,
+            continuation=continuation,
         )
         eval_cache[key] = value
         return value
@@ -2709,6 +2718,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "model_kind" => String(model_kind),
         "profile" => String(profile),
         "mode" => "production",
+        "continuation" => String(continuation),
         "xi" => Float64(xi),
         "T_start" => cfg.T_start,
         "T_end" => cfg.T_end,
@@ -2774,6 +2784,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         dT=cfg.dT_initial,
         rho_grid=join(rho_base, ","),
         solver_backend=solver_backend,
+        continuation=continuation,
         p_num=p_num,
         t_num=t_num,
         iterations=iterations,

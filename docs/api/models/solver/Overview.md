@@ -126,6 +126,31 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 ## 请求级 solver telemetry
 
+### 通用等温路径
+
+`FixedMuPath(T_fm, mu_values)`、`FixedRhoPath(T_fm, rho_values)` 与
+`FixedAsymmetricRhoPath(T_fm, rho_values; ud_ratio_target=0.876, s_target=0)`
+接受非空向量；温度为正 fm⁻¹，μ 为 fm⁻¹，ρ 为非负 ρ/ρ₀。路径保留输入顺序和重复点。
+
+```julia
+model = Models.create_model(:PNJL)
+path = Models.FixedRhoPath(120 / Constants_PNJL.ħc_MeV_fm, collect(0.2:0.1:3.5);
+    xi=0.0, p_num=24, t_num=8)
+result = Models.solve_path(model, path;
+    continuation_strategy=Models.PALCContinuation(), residual_norm_max=1e-6)
+points = Models.selected_path_results(model, result)
+```
+
+PALC 从中点和两端发现不同根，沿弧长双向推进，并把目标交点作为初值校正；未得到合格根的
+目标点进行候选池回退。有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
+`GroundStateBranchPolicy`；相图中的相共存仍由上层 Maxwell 等构造判断。
+`selected_path_results` 返回按原路径排列的 `Union{Nothing,SolverResult}` 向量；失败为
+`nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。
+
+PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使用相同参数。
+可传入 `PALCWorkTelemetry()` 读取根求解、延拓残差/Jacobian、起点、校正、回退及失败计数；
+对象复用时计数累加，多个路径内保存的累计快照不应再次相加。
+
 `FixedAsymmetricRho` 可显式传入 `fixedasymrho_seed_policy=:single_pass`，并设置
 `evaluate_all_attempts=true`。它展开既有外层和内层种子的并集，对每个不同起点进行一次
 相同的八变量联立求解，将全部候选交给现有硬约束和 selector；默认 `:nested` 保留原路径。

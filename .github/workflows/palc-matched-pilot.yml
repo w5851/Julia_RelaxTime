@@ -6,7 +6,7 @@ on:
       profile:
         description: "Bounded workload"
         type: choice
-        options: [local, long, higher, transition]
+        options: [local, long, higher, transition, production]
         default: local
       repetitions:
         description: "First call plus warm repetitions"
@@ -34,7 +34,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  production:
+    if: inputs.profile == 'production'
+    uses: ./.github/workflows/palc-production-comparison.yml
+    with:
+      profile: medium
+      repetitions: ${{ inputs.repetitions }}
   pilot:
+    if: inputs.profile != 'production'
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     strategy:
