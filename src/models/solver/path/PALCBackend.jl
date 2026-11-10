@@ -188,7 +188,8 @@ function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
         # potential paths. Keep shorter paths and unqualified models on legacy.
         minimum_points = constraint_mode === :fixed_mu ? 31 : 21
         qualified = supported && model_kind === :PNJL && point_count >= minimum_points &&
-            constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho)
+            constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho,
+                :fixed_sigma, :fixed_mub_conserved_charges)
         return qualified ? :palc : :legacy
     end
     strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(

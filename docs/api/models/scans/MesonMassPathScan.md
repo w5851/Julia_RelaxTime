@@ -41,6 +41,15 @@
 - `solver_backend`
 - `solver_kwargs`
 - `mass_kwargs`
+- `continuation=:auto|:legacy|:palc`
+- `path_diagnostics_cb(segment_indices, path_result)`（可选）
+
+等熵路径的 `:auto` 对至少 21 点、固定 `sigma_target`、标准 Models 后端且未提供
+`solver_kwargs` 的连续分段使用 PALC。温度顺序保持输入顺序，不跨 path group、segment
+或 sigma 目标拼接。PALC 求得的平衡态直接传给介子后处理，避免再次求 gap。
+短路径及自定义求解参数沿用逐点链路；`:legacy` 可显式选择原流程。
+返回摘要的 `palc_paths` 记录实际使用 PALC 的分段数。单个未收敛点继续输出失败行。
+这里的 `max_iter` 仍用于介子步骤，PALC 的平衡态校正保持旧约束求解器的最低 300 次上限。
 
 `points` 的最小 contract 为：
 

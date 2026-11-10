@@ -61,4 +61,24 @@ const _MMPS = Models.MesonMassPathScan
         scheduled = _MMPS._schedule_points(copy(points))
         @test scheduled == points
     end
+
+    @testset "isentropic batching separates different constraints and segments" begin
+        inputs = [(T_MeV=120.0, sigma_target=12.0),
+                  (T_MeV=110.0, sigma_target=12.0),
+                  (T_MeV=110.0, sigma_target=20.0),
+                  (T_MeV=120.0, muB_MeV=900.0),
+                  (T_MeV=120.0, sigma_target=12.0),
+                  (T_MeV=130.0, sigma_target=12.0, path_segment="new_segment")]
+        points = [_MMPS._normalize_path_point(point, i) for (i, point) in enumerate(inputs)]
+        @test _MMPS._isentropic_path_segments(points) == [1:2, 3:3, 5:5, 6:6]
+        model = Models.create_model(:PNJL)
+        prepared = _MMPS._prepare_isentropic_paths(model, points, 0.0;
+            continuation=:auto, p_num=24, t_num=8, iterations=300,
+            controls_supported=true, path_diagnostics_cb=nothing)
+        @test isempty(prepared.results)
+        @test prepared.path_count == 0
+        @test_throws ArgumentError _MMPS._prepare_isentropic_paths(model, points, 0.0;
+            continuation=:palc, p_num=24, t_num=8, iterations=300,
+            controls_supported=false, path_diagnostics_cb=nothing)
+    end
 end

@@ -153,8 +153,11 @@ points = Models.selected_path_results(model, result)
 ```
 
 `continuation=:legacy` 使用逐点求解与连续种子；`:palc` 使用三个位置的种子目录发现、
-双向伪弧长延拓和目标温度处的根校正。当前 `:auto` 在三种新模式中使用 legacy，
-PALC 先作为显式选项进行同口径验证。PALC 支持配置一致的 PNJL/RPNJL 模型及
+双向伪弧长延拓和目标温度处的根校正。`:auto` 对 PNJL 标准控制、至少 21 个温度点的
+`FixedSigma` / `FixedMuBConservedCharges` 路径默认使用 PALC。短路径、RPNJL 和
+自定义求解控制使用 legacy。`FixedEntropy` 保留 legacy 默认：相同 s 可对应正、负
+mu 的电荷共轭分支，压力微小舍入差会改变符号选择；需要调用者明确分支约束后再使用
+显式 PALC。PALC 支持配置一致的 PNJL/RPNJL 模型及
 `thermo_quadrature_policy=:tensor_gauss`；结果按输入温度顺序返回，失败点为 `nothing`。
 `rho_norm` 为 nB/rho0，`residual_norm` 是完整八维约束残差的范数。
 路径层协调求根、硬约束检查和候选压力排序。

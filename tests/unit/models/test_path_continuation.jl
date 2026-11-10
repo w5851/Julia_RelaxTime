@@ -211,6 +211,11 @@ end
             @test Models._constraint_path_route(:palc, model, path; iterations=300,
                 path_work=Models.PALCWorkTelemetry()) === :palc
             @test Models._constraint_path_route(:auto, model, path) === :legacy
+            long_path = Models.ConstraintTPath(mode, collect(range(0.5, 0.7; length=21)))
+            expected = mode isa Models.FixedEntropy ? :legacy : :palc
+            @test Models._constraint_path_route(:auto, model, long_path) === expected
+            @test Models._constraint_path_route(:auto, model, long_path; solver=:custom) === :legacy
+            @test Models._constraint_path_route(:auto, Models.create_model(:RPNJL), long_path) === :legacy
             @test_throws ArgumentError Models.ConstraintTPath(mode, [0.0])
             @test_throws ArgumentError Models.ConstraintTPath(mode, [NaN])
             @test_throws ArgumentError Models.ConstraintTPath(mode, Float64[])
@@ -277,6 +282,17 @@ end
             path;
             anchor_strategy=Models.MultiSeedAnchor(),
         )
+    end
+
+    @testset "Connected pitchfork branches require branch switching" begin
+        residual = (x, value) -> [x[1] * (x[1]^2 - value)]
+        work = Models.PALCWorkTelemetry()
+        curve = Models._palc_curve(residual, (solution=[0.0],), -0.5, (-0.6, 1.0),
+            Models.PALCContinuation(ds=0.03, dsmax=0.1, max_steps=100), work)
+        @test maximum(point.param for point in curve) > 0.5
+        @test all(point -> abs(point.solution[1]) < 1e-10, curve)
+        @test residual([1.0], 1.0) == [0.0]
+        @test residual([-1.0], 1.0) == [0.0]
     end
 
     @testset "Path branch jump metrics count state discontinuities" begin

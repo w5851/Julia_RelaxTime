@@ -15,6 +15,7 @@ module MesonMassPathScan
 using Main.Constants_PNJL: ħc_MeV_fm
 
 using ..Models: FixedSigma, create_model, solve_constraint
+using ..Models: ConstraintTPath, SolverResult, solve_path, selected_path_results, _constraint_path_route
 using ..MesonMassWorkflow
 using ..FreezeoutProfiles
 using ..FreezeoutPathProfiles
@@ -300,6 +301,55 @@ function _solve_isentropic_equilibrium(model, pt, xi::Float64, seed_guess, mu0;
     )
 end
 
+"""Contiguous constant-constraint groups, preserving the requested traversal."""
+function _isentropic_path_segments(points)
+    segments = UnitRange{Int}[]
+    i = 1
+    while i <= length(points)
+        first_point = points[i]
+        if isfinite(first_point.muB_MeV) || !(first_point.T_MeV > 0) || !(first_point.sigma_target > 0)
+            i += 1
+            continue
+        end
+        last_index = i
+        while last_index < length(points)
+            point = points[last_index+1]
+            (!isfinite(point.muB_MeV) && point.T_MeV > 0 &&
+                point.sigma_target == first_point.sigma_target &&
+                point.path_segment == first_point.path_segment &&
+                _path_group_key(point) == _path_group_key(first_point)) || break
+            last_index += 1
+        end
+        push!(segments, i:last_index)
+        i = last_index + 1
+    end
+    return segments
+end
+
+function _prepare_isentropic_paths(model, points, xi; continuation, p_num, t_num,
+    iterations, controls_supported, path_diagnostics_cb)
+    continuation in (:auto, :legacy, :palc) || throw(ArgumentError(
+        "meson path continuation must be :auto, :legacy or :palc"))
+    continuation === :palc && !controls_supported && throw(ArgumentError(
+        "PALC meson paths require the standard Models solver without custom solver_kwargs"))
+    requested = controls_supported ? continuation : :legacy
+    results = Dict{Int,Union{Nothing,SolverResult}}()
+    path_count = 0
+    for segment in _isentropic_path_segments(points)
+        path = ConstraintTPath(FixedSigma(points[first(segment)].sigma_target),
+            [points[i].T_MeV / ħc_MeV_fm for i in segment]; xi, p_num, t_num)
+        _constraint_path_route(requested, model, path) === :palc || continue
+        solved = solve_path(model, path; continuation=:palc, iterations)
+        selected = selected_path_results(model, solved; iterations)
+        for (i, result) in zip(segment, selected)
+            results[i] = result
+        end
+        path_count += 1
+        path_diagnostics_cb === nothing || path_diagnostics_cb(segment, solved)
+    end
+    return (; results, path_count)
+end
+
 function _initial_isentropic_seed(pt, xi::Float64, mu0::Float64, solver_backend::Symbol;
     p_num::Int,
     t_num::Int,
@@ -341,6 +391,8 @@ function run_meson_mass_path_scan(;
     solver_backend::Symbol=:auto,
     solver_kwargs::NamedTuple=(;),
     mass_kwargs::NamedTuple=(;),
+    continuation::Symbol=:auto,
+    path_diagnostics_cb::Union{Nothing,Function}=nothing,
 )
     raw_points = collect(points)
     isempty(raw_points) && throw(ArgumentError("points must not be empty"))
@@ -353,6 +405,10 @@ function run_meson_mass_path_scan(;
     model = create_model(:PNJL)
     effective_solver_kwargs = merge((iterations=max_iter,), solver_kwargs)
     effective_mass_kwargs = merge((iterations=max_iter,), mass_kwargs)
+    prepared = _prepare_isentropic_paths(model, normalized, xi;
+        continuation, p_num, t_num, iterations=max(max_iter, 300),
+        controls_supported=solver_backend in (:auto, :models) && isempty(solver_kwargs),
+        path_diagnostics_cb)
 
     continuation_state = nothing
     previous_group = nothing
@@ -360,7 +416,7 @@ function run_meson_mass_path_scan(;
     sigma_mu0 = 0.0
     open(output_path, "w") do io
         println(io, join(cols, ','))
-        for pt in normalized
+        for (point_index, pt) in enumerate(normalized)
             group = _path_group_key(pt)
             if previous_group !== nothing && group != previous_group
                 continuation_state = nothing
@@ -394,27 +450,19 @@ function run_meson_mass_path_scan(;
                     eq_diag = _equilibrium_diag(res.equilibrium)
                     res
                 else
-                    if sigma_seed_state === nothing
-                        sigma_seed_state = _initial_isentropic_seed(
-                            pt,
-                            xi,
-                            sigma_mu0,
-                            solver_backend;
-                            p_num=p_num,
-                            t_num=t_num,
-                            solver_kwargs=effective_solver_kwargs,
+                    sigma_result = if haskey(prepared.results, point_index)
+                        prepared.results[point_index]
+                    else
+                        if sigma_seed_state === nothing
+                            sigma_seed_state = _initial_isentropic_seed(
+                                pt, xi, sigma_mu0, solver_backend;
+                                p_num, t_num, solver_kwargs=effective_solver_kwargs)
+                        end
+                        _solve_isentropic_equilibrium(
+                            model, pt, xi, sigma_seed_state, sigma_mu0;
+                            p_num, t_num, iterations=max_iter,
                         )
                     end
-                    sigma_result = _solve_isentropic_equilibrium(
-                        model,
-                        pt,
-                        xi,
-                        sigma_seed_state,
-                        sigma_mu0;
-                        p_num=p_num,
-                        t_num=t_num,
-                        iterations=max_iter,
-                    )
                     eq_diag = _equilibrium_diag(sigma_result)
                     _constraint_good(sigma_result) || throw(ArgumentError("FixedSigma solve did not satisfy convergence contract"))
                     sigma_seed_state = collect(sigma_result.x_state)
@@ -433,6 +481,7 @@ function run_meson_mass_path_scan(;
                         solver_kwargs=effective_solver_kwargs,
                         mass_kwargs=effective_mass_kwargs,
                         flavor_mu_override=collect(sigma_result.mu_vec),
+                        equilibrium_result=haskey(prepared.results, point_index) ? sigma_result : nothing,
                     )
                 end
 
@@ -448,6 +497,8 @@ function run_meson_mass_path_scan(;
         output_path=output_path,
         points=length(normalized),
         xi=xi,
+        continuation=continuation,
+        palc_paths=prepared.path_count,
         workflow_entry="Models.run_meson_mass_path_scan",
     )
 end
