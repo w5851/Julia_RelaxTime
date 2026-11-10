@@ -177,8 +177,13 @@ function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
     supported = model_kind in (:PNJL, :RPNJL) && thermo_policy === :tensor_gauss &&
         semantic_mode === :ground_state && selector === nothing && controls_supported &&
         constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho)
-    # Promotion is decided from the bounded production comparison, route by route.
-    strategy === :auto && return :legacy
+    if strategy === :auto
+        # Qualified density workloads have at least 21 targets. FixedMu and
+        # RPNJL retain their prior default until their production comparison is complete.
+        qualified = supported && model_kind === :PNJL &&
+            constraint_mode in (:fixed_rho, :fixed_asymmetric_rho) && point_count >= 21
+        return qualified ? :palc : :legacy
+    end
     strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(
         "$(strategy) scan requires PNJL/RPNJL, tensor_gauss, the standard ground_state selector " *
         "and supported path solver controls"))

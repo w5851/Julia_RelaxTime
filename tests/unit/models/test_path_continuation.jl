@@ -151,7 +151,15 @@ end
         @test Models.to_namedtuple(rho).path_kind === :fixed_rho
         @test_throws ArgumentError Models.FixedMuPath(1.0, [NaN])
         @test_throws ArgumentError Models.FixedRhoPath(1.0, [-0.1])
-        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :palc
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 23; constraint_mode=:fixed_asymmetric_rho) === :palc
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 31; constraint_mode=:fixed_mu) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :RPNJL, :tensor_gauss, :ground_state, nothing, 23) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :constrained_manifold, nothing, 23) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, identity, 23) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 20) === :legacy
         @test Models.resolve_scan_continuation(:palc, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :palc
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 2) === :legacy
         @test Models.resolve_scan_continuation(:auto, :NJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy

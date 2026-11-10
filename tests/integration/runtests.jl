@@ -108,6 +108,7 @@ const INTEGRATION_CORE_FILES = [
     # PNJL: 1 e2e + 1 contract guard
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_trho_scan_semantic_modes_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "pnjl", "test_palc_scan_default_smoke.jl"),
 
     # Variants: representative e2e
     joinpath(INTEGRATION_DIR, "models", "test_rotation_workflow_smoke.jl"),

@@ -1,12 +1,20 @@
 import importlib.util
 import argparse
+import json
+import sys
+import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 FILE = Path(__file__).resolve().parents[3] / "scripts/analysis/pnjl_bifurcation_spike/compare_production.py"
 SPEC = importlib.util.spec_from_file_location("palc_production", FILE)
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
+COLLECT_SPEC = importlib.util.spec_from_file_location("palc_collect", FILE.with_name("collect_production_comparison.py"))
+COLLECT = importlib.util.module_from_spec(COLLECT_SPEC)
+with patch.dict(sys.modules, compare_production=MODULE):
+    COLLECT_SPEC.loader.exec_module(COLLECT)
 
 
 def row():
@@ -63,6 +71,29 @@ class ComparisonTests(unittest.TestCase):
         self.assertTrue(MODULE.promotion_checks(summary, 2))
         method["accepted"] = 0
         self.assertTrue(MODULE.promotion_checks(summary, 2, (("tmu", "legacy"),)))
+
+    def test_collector_keeps_cross_runner_values_separate_from_timing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = [Path(directory)/name for name in ("run1", "run2")]
+            for index, path in enumerate(paths):
+                path.mkdir()
+                strategies = ("palc", "single_pass") if index == 0 else ("legacy",)
+                for strategy in strategies:
+                    point = row() if strategy != "legacy" else dict(row(), pressure=19.0)
+                    iteration = dict(seconds=2.0 if strategy == "palc" else 4.0,
+                        rows=[point], work={}, single_pass_work={}, paths=[], curves=[])
+                    data = dict(source_sha="a"*40, actions_run_id=str(index+1),
+                        config=dict(temperatures=[120.0], anisotropies=[0.0], grid=[1.5]),
+                        julia_version="1.12.5", bifurcationkit_version="0.8.0", load_seconds=1.0,
+                        rounds=[iteration, iteration])
+                    (path/f"rho_{strategy}.json").write_text(json.dumps(data), encoding="utf-8")
+            data = COLLECT.collect(paths)
+            self.assertEqual(data["batches"][0]["same_runner_comparisons"]["rho:single_pass_vs_palc"]["warm_cost_ratio"], 2.0)
+            self.assertEqual(data["batches"][1]["same_runner_comparisons"], {})
+            comparison = data["routes"]["rho"]["comparisons"]["2:legacy"]
+            self.assertFalse(comparison["timing_comparable"])
+            self.assertFalse(comparison["same_admissible_results"])
+            self.assertEqual(data["routes"]["rho"]["different_rows"]["2:legacy"][0]["pressure"], 19.0)
 
 
 if __name__ == "__main__":

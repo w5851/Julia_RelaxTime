@@ -53,7 +53,8 @@
 
 `use_phase_aware` 是兼容参数。`:legacy` 沿每条等温线使用连续性种子和全候选选择。
 `:single_pass` 展开候选种子并去重后逐点求解；`:palc` 从多起点双向延拓，校正到请求的
-每个 μq 后选择通过硬约束的最大压力根。`:auto` 当前沿用 `:legacy`，待生产对照资格确认。
+每个 μq 后选择通过硬约束的最大压力根。`:auto` 在 Tμ 仍沿用 `:legacy`；中等网格上
+PALC 与 single_pass 的 310 点一致，旧策略完整计时未在本次预算内完成，因此尚未切换默认。
 显式新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector；不支持的组合抛出
 `ArgumentError`。`palc_options` 传入 `PALCContinuation`，例如 `(ds=0.02, dsmax=0.08)`。
 自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
