@@ -14,6 +14,9 @@ on:
       budget_seconds:
         description: "Production comparison numerical budget"
         default: "2700"
+      production_cases:
+        description: Ordered production route:strategy pairs, comma separated, or all
+        default: all
       repeat_processes:
         description: "Independent process batches (1 or 2)"
         type: choice
@@ -44,6 +47,7 @@ jobs:
       profile: medium
       repetitions: ${{ inputs.repetitions }}
       budget_seconds: ${{ inputs.budget_seconds }}
+      cases: ${{ inputs.production_cases }}
   pilot:
     if: inputs.profile != 'production'
     runs-on: ubuntu-24.04

@@ -14,6 +14,16 @@ import time
 ROOT = Path(__file__).resolve().parents[3]
 STRATEGIES = ("legacy", "single_pass", "palc")
 ROUTES = ("asym", "rho", "tmu")
+ALL_CASES = tuple((route, strategy) for strategy in ("palc", "single_pass", "legacy") for route in ROUTES)
+
+
+def parse_cases(value):
+    if value == "all":
+        return ALL_CASES
+    cases = tuple(tuple(item.strip().split(":")) for item in value.split(","))
+    if not cases or any(case not in ALL_CASES for case in cases) or len(set(cases)) != len(cases):
+        raise argparse.ArgumentTypeError("cases must be unique route:strategy pairs or all")
+    return cases
 
 
 def admissible(row):
@@ -57,23 +67,26 @@ def complete_round(data, iteration):
     return expected == actual and len(iteration["rows"]) == len(expected)
 
 
-def promotion_checks(summary, repetitions):
+def promotion_checks(summary, repetitions, cases=ALL_CASES):
     problems = []
     source_shas = set()
     for route in ROUTES:
         group = summary.get(route, {})
         methods = group.get("methods", {})
-        for strategy in STRATEGIES:
+        required = [strategy for candidate_route, strategy in cases if candidate_route == route]
+        for strategy in required:
             method = methods.get(strategy)
             if not method or method["repetitions"] != repetitions or not method["complete_grids"]:
                 problems.append(f"{route}/{strategy}: incomplete workload")
                 continue
             source_shas.add(method["source_sha"])
+            if method["accepted"] != method["total"]:
+                problems.append(f"{route}/{strategy}: rejected points")
             if not all(check["same_admissible_results"] for check in method["repeat_checks"]):
                 problems.append(f"{route}/{strategy}: repeated results differ or contain rejected points")
-        if not group.get("comparisons", {}).get("single_pass_vs_palc", {}).get("same_admissible_results", False):
+        if {"single_pass", "palc"}.issubset(required) and not group.get("comparisons", {}).get("single_pass_vs_palc", {}).get("same_admissible_results", False):
             problems.append(f"{route}: single_pass/PALC parity failed")
-        if len(methods) == len(STRATEGIES) and any(methods[s]["config"] != methods["palc"]["config"] for s in STRATEGIES):
+        if required and all(s in methods for s in required) and any(methods[s]["config"] != methods[required[0]]["config"] for s in required):
             problems.append(f"{route}: unequal configurations")
     if len(source_shas) != 1:
         problems.append("source SHA is missing or inconsistent")
@@ -99,7 +112,8 @@ def summarize(output):
                 repeat_checks=[compare_rows(first["rows"],r["rows"]) for r in rounds[1:]],
                 complete_grids=all(complete_round(data,r) for r in rounds),
                 phase_pipeline_check=data.get("phase_pipeline_check"),
-                curves=first["curves"], source_sha=data["source_sha"], config=data["config"])
+                curves=first["curves"], source_sha=data["source_sha"], config=data["config"],
+                actions_run_id=data.get("actions_run_id"))
             lines.append(f"|{route}|{strategy}|{first['seconds']:.3f}|{statistics.median(warm) if warm else float('nan'):.3f}|{group[strategy]['accepted']}/{group[strategy]['total']}|")
         comparisons = {}
         for other in ("legacy", "single_pass"):
@@ -123,6 +137,8 @@ def main():
     parser.add_argument("--profile",choices=("quick","medium"),default="medium")
     parser.add_argument("--budget-seconds",type=int,default=2800)
     parser.add_argument("--repetitions",type=int,default=2)
+    parser.add_argument("--cases",type=parse_cases,default=ALL_CASES,
+                        help="Ordered route:strategy pairs, comma separated; default: all nine")
     parser.add_argument("--summarize-only",action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
@@ -133,37 +149,37 @@ def main():
         parser.error("budget must be 1..3000 seconds and repetitions 1..3")
     start = time.monotonic()
     processes = []
-    for strategy in ("palc","single_pass","legacy"):
-        # Cover every new route before spending the remaining budget on old baselines.
-        for route in ROUTES:
-            remaining = args.budget_seconds - (time.monotonic()-start)
-            if remaining <= 30:
-                processes.append(dict(route=route,strategy=strategy,status="budget_exhausted"))
-                continue
-            destination = (args.output/f"{route}_{strategy}.json").resolve()
-            command = ["julia","--startup-file=no","--project=.",
-                       "scripts/analysis/pnjl_bifurcation_spike/run_production_comparison.jl",
-                       route,strategy,str(destination),args.profile,str(args.repetitions)]
-            print(f"Starting {route}/{strategy}; shared budget {remaining:.0f}s",flush=True)
-            began = time.monotonic()
-            try:
-                completed = subprocess.run(command,cwd=ROOT,timeout=remaining,check=False)
-                record = dict(route=route,strategy=strategy,status="finished",returncode=completed.returncode)
-            except subprocess.TimeoutExpired:
-                record = dict(route=route,strategy=strategy,status="timeout",returncode=None)
-            record["process_seconds"] = time.monotonic()-began
-            processes.append(record)
-            (args.output/"processes.json").write_text(json.dumps(dict(processes=processes,
-                seconds=time.monotonic()-start,budget_seconds=args.budget_seconds,
-                actions_run_id=os.environ.get("GITHUB_RUN_ID")),indent=2)+"\n",encoding="utf-8")
-            if record.get("returncode") not in (0,None):
-                summarize(args.output)
-                return 1
+    for route, strategy in args.cases:
+        remaining = args.budget_seconds - (time.monotonic()-start)
+        if remaining <= 30:
+            processes.append(dict(route=route,strategy=strategy,status="budget_exhausted"))
+            continue
+        destination = (args.output/f"{route}_{strategy}.json").resolve()
+        command = ["julia","--startup-file=no","--project=.",
+                   "scripts/analysis/pnjl_bifurcation_spike/run_production_comparison.jl",
+                   route,strategy,str(destination),args.profile,str(args.repetitions)]
+        print(f"Starting {route}/{strategy}; shared budget {remaining:.0f}s",flush=True)
+        began = time.monotonic()
+        try:
+            completed = subprocess.run(command,cwd=ROOT,timeout=remaining,check=False)
+            record = dict(route=route,strategy=strategy,status="finished",returncode=completed.returncode)
+        except subprocess.TimeoutExpired:
+            record = dict(route=route,strategy=strategy,status="timeout",returncode=None)
+        record["process_seconds"] = time.monotonic()-began
+        processes.append(record)
+        (args.output/"processes.json").write_text(json.dumps(dict(processes=processes,
+            seconds=time.monotonic()-start,budget_seconds=args.budget_seconds,
+            actions_run_id=os.environ.get("GITHUB_RUN_ID")),indent=2)+"\n",encoding="utf-8")
+        if record.get("returncode") not in (0,None):
+            summarize(args.output)
+            return 1
     summary = summarize(args.output)
-    complete = len(processes) == len(ROUTES)*len(STRATEGIES) and all(p.get("returncode")==0 for p in processes)
+    complete = len(processes) == len(args.cases) and all(p.get("returncode")==0 for p in processes)
     # Legacy differences are evidence for review; new methods must agree before default promotion.
-    problems = promotion_checks(summary, args.repetitions)
-    (args.output/"checks.json").write_text(json.dumps(dict(complete=complete, problems=problems),indent=2)+"\n",encoding="utf-8")
+    problems = promotion_checks(summary, args.repetitions, args.cases)
+    (args.output/"checks.json").write_text(json.dumps(dict(complete=complete,
+        complete_nine_method_workload=complete and set(args.cases)==set(ALL_CASES),
+        cases=args.cases, problems=problems),indent=2)+"\n",encoding="utf-8")
     return 0 if complete and not problems else 2
 
 

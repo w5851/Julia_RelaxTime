@@ -1,4 +1,5 @@
 import importlib.util
+import argparse
 from pathlib import Path
 import unittest
 
@@ -46,6 +47,22 @@ class ComparisonTests(unittest.TestCase):
 
     def test_no_methods_cannot_pass_promotion(self):
         self.assertTrue(MODULE.promotion_checks({}, 2))
+
+    def test_case_selection_preserves_order_and_rejects_duplicates(self):
+        self.assertEqual(MODULE.parse_cases("tmu:legacy,rho:palc"), (("tmu", "legacy"), ("rho", "palc")))
+        self.assertEqual(len(MODULE.parse_cases("all")), 9)
+        for value in ("rho:other", "rho:palc,rho:palc", ""):
+            with self.assertRaises(argparse.ArgumentTypeError):
+                MODULE.parse_cases(value)
+
+    def test_subset_check_does_not_require_unrequested_work(self):
+        method = dict(repetitions=2, complete_grids=True, source_sha="a"*40,
+                      repeat_checks=[dict(same_admissible_results=True)], accepted=1, total=1, config={})
+        summary = dict(tmu=dict(methods=dict(legacy=method)))
+        self.assertEqual(MODULE.promotion_checks(summary, 2, (("tmu", "legacy"),)), [])
+        self.assertTrue(MODULE.promotion_checks(summary, 2))
+        method["accepted"] = 0
+        self.assertTrue(MODULE.promotion_checks(summary, 2, (("tmu", "legacy"),)))
 
 
 if __name__ == "__main__":

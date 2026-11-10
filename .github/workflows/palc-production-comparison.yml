@@ -11,6 +11,9 @@ on:
       budget_seconds:
         type: string
         default: "2700"
+      cases:
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       profile:
@@ -25,6 +28,10 @@ on:
         description: Shared numerical budget, at most 3000 seconds
         type: string
         default: "2700"
+      cases:
+        description: Ordered route:strategy pairs, comma separated, or all
+        type: string
+        default: all
 permissions:
   contents: read
 concurrency:
@@ -61,7 +68,8 @@ jobs:
           PROFILE: ${{ inputs.profile }}
           REPETITIONS: ${{ inputs.repetitions }}
           BUDGET: ${{ inputs.budget_seconds }}
-        run: python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --profile "$PROFILE" --repetitions "$REPETITIONS" --budget-seconds "$BUDGET"
+          CASES: ${{ inputs.cases }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --profile "$PROFILE" --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
       - name: Summarize completed results
         if: always()
         run: |

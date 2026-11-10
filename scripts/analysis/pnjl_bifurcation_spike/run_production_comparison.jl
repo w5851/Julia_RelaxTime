@@ -164,7 +164,7 @@ function run_case(route::Symbol, strategy::Symbol, destination::String;
             bifurcationkit_version=string(Base.pkgversion(Models.BifurcationKit)),
             actions_run_id=get(ENV,"GITHUB_RUN_ID",""),
             load_seconds,
-            config=(; temperatures,anisotropies,grid,p_num=24,t_num=8,residual_norm_max=1e-6),rounds)
+            config=(; temperatures,anisotropies,grid,p_num=24,t_num=8,iterations=300,residual_norm_max=1e-6),rounds)
         open(destination,"w") do io
             JSON.print(io,_json_finite(payload))
         end

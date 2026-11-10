@@ -592,6 +592,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (
         :solver,
         :iterations,
+        :work_telemetry,
         :residual_norm_max,
         :physicality_check,
         :thermo_quadrature_policy,
