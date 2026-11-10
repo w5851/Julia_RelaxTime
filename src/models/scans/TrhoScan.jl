@@ -1189,17 +1189,17 @@ function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targ
             previous === nothing ? nothing : previous.solution; solver_kwargs...)
         message = "continuation=single_pass"
     else
-    result, message = _attempt_with_candidates(
-        T_value / ħc_MeV_fm, rho_value, xi_value, candidates;
-        constraint_mode=:fixed_rho,
-        solver_backend=session.solver_backend,
-        auto_pnjl_backend=:models,
-        semantic_mode=:ground_state,
-        model_kind=session.model_kind,
-        p_num=session.p_num,
-        t_num=session.t_num,
-        solver_kwargs...,
-    )
+        result, message = _attempt_with_candidates(
+            T_value / ħc_MeV_fm, rho_value, xi_value, candidates;
+            constraint_mode=:fixed_rho,
+            solver_backend=session.solver_backend,
+            auto_pnjl_backend=:models,
+            semantic_mode=:ground_state,
+            model_kind=session.model_kind,
+            p_num=session.p_num,
+            t_num=session.t_num,
+            solver_kwargs...,
+        )
     end
     converged = result !== nothing && _is_success(result)
     finite = converged && all(isfinite, result.solution) && all(isfinite, result.mu_vec) &&

@@ -11,6 +11,9 @@ on:
       repetitions:
         description: "First call plus warm repetitions"
         default: "6"
+      budget_seconds:
+        description: "Production comparison numerical budget"
+        default: "2700"
       repeat_processes:
         description: "Independent process batches (1 or 2)"
         type: choice
@@ -40,6 +43,7 @@ jobs:
     with:
       profile: medium
       repetitions: ${{ inputs.repetitions }}
+      budget_seconds: ${{ inputs.budget_seconds }}
   pilot:
     if: inputs.profile != 'production'
     runs-on: ubuntu-24.04

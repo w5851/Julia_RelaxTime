@@ -1,5 +1,7 @@
 const PRODUCTION_COMPARISON_LOAD_START = time()
-include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+end
 
 module PALCProductionComparison
 using Main.Models
@@ -8,6 +10,12 @@ using Statistics
 import JSON
 
 const HBARC = Main.Constants_PNJL.ħc_MeV_fm
+
+_json_finite(x::AbstractFloat) = isfinite(x) ? x : nothing
+_json_finite(x::NamedTuple) = (; (key => _json_finite(value) for (key,value) in pairs(x))...)
+_json_finite(x::AbstractDict) = Dict(key => _json_finite(value) for (key,value) in pairs(x))
+_json_finite(x::Union{AbstractVector,Tuple}) = [_json_finite(value) for value in x]
+_json_finite(x) = x
 
 function scan_contract_check(route, strategy, temperatures, anisotropies, grid, scan_file)
     bytes_before = read(scan_file)
@@ -158,7 +166,7 @@ function run_case(route::Symbol, strategy::Symbol, destination::String;
             load_seconds,
             config=(; temperatures,anisotropies,grid,p_num=24,t_num=8,residual_norm_max=1e-6),rounds)
         open(destination,"w") do io
-            JSON.print(io,payload)
+            JSON.print(io,_json_finite(payload))
         end
         println("$(route) $(strategy) round $(repetition): $(round(elapsed;digits=3))s, $(stats.success)/$(stats.total)")
         flush(stdout)
@@ -167,7 +175,7 @@ function run_case(route::Symbol, strategy::Symbol, destination::String;
         phase_check = phase_pipeline_check(strategy, destination, grid)
         payload = JSON.parsefile(destination)
         payload["phase_pipeline_check"] = phase_check
-        open(io -> JSON.print(io, payload), destination, "w")
+        open(io -> JSON.print(io, _json_finite(payload)), destination, "w")
     end
 end
 

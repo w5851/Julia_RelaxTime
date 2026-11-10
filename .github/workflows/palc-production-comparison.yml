@@ -8,6 +8,9 @@ on:
       repetitions:
         type: string
         default: "2"
+      budget_seconds:
+        type: string
+        default: "2700"
   workflow_dispatch:
     inputs:
       profile:
@@ -18,6 +21,10 @@ on:
         type: choice
         options: ["1", "2", "3"]
         default: "2"
+      budget_seconds:
+        description: Shared numerical budget, at most 3000 seconds
+        type: string
+        default: "2700"
 permissions:
   contents: read
 concurrency:
@@ -48,12 +55,13 @@ jobs:
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); include("src/models/Models.jl")'
       - name: Check path and branch behavior
         timeout-minutes: 3
-        run: julia --project=. tests/unit/models/test_path_continuation.jl
+        run: julia --project=. -e 'include("tests/unit/models/test_path_continuation.jl"); include("tests/unit/models/test_palc_production_contract.jl")'
       - name: Compare production scans within a shared budget
         env:
           PROFILE: ${{ inputs.profile }}
           REPETITIONS: ${{ inputs.repetitions }}
-        run: python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --profile "$PROFILE" --repetitions "$REPETITIONS" --budget-seconds 2700
+          BUDGET: ${{ inputs.budget_seconds }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --profile "$PROFILE" --repetitions "$REPETITIONS" --budget-seconds "$BUDGET"
       - name: Summarize completed results
         if: always()
         run: |

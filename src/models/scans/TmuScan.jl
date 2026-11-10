@@ -275,20 +275,20 @@ function run_tmu_scan(;
                         result === nothing || !result.converged || (single_previous = copy(result.solution))
                         message = "continuation=single_pass"
                     else
-                    # 构建候选并统一选优
-                    candidates = _build_seed_candidates_v2(
-                        continuation_seeds, T, mu, xi, T_fm, μ_fm;
-                        bootstrap_multiseed=bootstrap_multiseed,
-                    )
+                        # 构建候选并统一选优
+                        candidates = _build_seed_candidates_v2(
+                            continuation_seeds, T, mu, xi, T_fm, μ_fm;
+                            bootstrap_multiseed=bootstrap_multiseed,
+                        )
 
-                    result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-                        solver_backend=solver_backend,
-                        auto_pnjl_backend=auto_pnjl_backend,
-                        model_kind=model_kind,
-                        diagnostic_level=diagnostic_level,
-                        p_num=p_num,
-                        t_num=t_num,
-                        solver_kwargs...)
+                        result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
+                            solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
+                            model_kind=model_kind,
+                            diagnostic_level=diagnostic_level,
+                            p_num=p_num,
+                            t_num=t_num,
+                            solver_kwargs...)
                     end
 
                     # 更新连续性缓存
@@ -591,6 +591,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (
         :solver,
+        :iterations,
         :residual_norm_max,
         :physicality_check,
         :thermo_quadrature_policy,

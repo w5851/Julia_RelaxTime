@@ -148,6 +148,8 @@ PALC 从中点和两端发现不同根，沿弧长双向推进，并把目标交
 `nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。
 
 PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使用相同参数。
+固定密度复用现有 joint residual 的配置模型；若传入不同于该配置的自定义模型参数，入口
+会报 `ArgumentError`，以免残差和后处理使用不同参数。共同 μ 的路径直接使用传入模型。
 可传入 `PALCWorkTelemetry()` 读取根求解、延拓残差/Jacobian、起点、校正、回退及失败计数；
 对象复用时计数累加，多个路径内保存的累计快照不应再次相加。
 

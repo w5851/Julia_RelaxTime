@@ -32,6 +32,15 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
         "path candidate discovery requires evaluate_all_attempts=true"))
     model isa Union{PNJLModel,RPNJLModel} ||
         throw(UnsupportedCapabilityError(model_kind_symbol(model), :palc_continuation))
+    if !(path isa FixedMuPath)
+        cached_model = get_cached_model(_joint_model_kind(model))
+        same_model = model isa PNJLModel ? model.consts == cached_model.consts :
+            model.base.consts == cached_model.base.consts && model.ext == cached_model.ext &&
+            model.use_extensions == cached_model.use_extensions
+        same_model || throw(ArgumentError(
+            "density paths require the configured model profile used by the joint residual; " *
+            "select the profile before constructing the path"))
+    end
     PNJLIntegrals.validate_rs_anisotropy(path.xi)
     PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
     thermo_quadrature_policy === :tensor_gauss || throw(ArgumentError(
@@ -279,6 +288,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
                 push!(curves, curve)
             catch err
                 err isa InterruptException && rethrow()
+                err isa Union{MethodError,UndefVarError} && rethrow()
                 path_work.exceptions += 1
                 push!(messages, "continuation failed: " * normalize_error_message(err))
                 push!(curves, [(; param=value, solution=copy(root.solution))])
