@@ -155,7 +155,17 @@ end
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
             nothing, 23; constraint_mode=:fixed_asymmetric_rho) === :palc
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 31; constraint_mode=:fixed_mu) === :palc
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 30; constraint_mode=:fixed_mu) === :legacy
+        @test Models.resolve_scan_continuation(:legacy, :PNJL, :tensor_gauss, :ground_state,
             nothing, 31; constraint_mode=:fixed_mu) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :RPNJL, :tensor_gauss, :ground_state,
+            nothing, 31; constraint_mode=:fixed_mu) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :rs_reduced_adaptive, :ground_state,
+            nothing, 31; constraint_mode=:fixed_mu) === :legacy
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 31; constraint_mode=:fixed_mu, controls_supported=false) === :legacy
         @test Models.resolve_scan_continuation(:auto, :RPNJL, :tensor_gauss, :ground_state, nothing, 23) === :legacy
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :constrained_manifold, nothing, 23) === :legacy
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, identity, 23) === :legacy

@@ -422,7 +422,8 @@ evidence = [
   "run:42745978294",
   "run:42749746651",
   "file:data/outputs/results/analysis/palc_matched_20261108/production_comparison.json",
-  "note:production_comparison_budget_closed_61min_density_defaults_palc_tmu_default_legacy_missing_old_and_warm",
+  "note:production_comparison_budget_closed_61min_density_and_tmu_defaults_palc_missing_tmu_old_and_warm",
+  "note:author_20261110_authorized_tmu_palc_default_for_qualified_long_paths",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261108_start_palc_matched_diagnostic_after_meson_delivery_and_arena313",
   "note:author_20261109_accepted_stage1_authorized_candidate_search_then_expanded_pilot_t120_first_order",
@@ -1132,7 +1133,7 @@ backlog_file = ""
 evidence = [
   "pr:340",
   "sha:26671f2aaf1971928956dd3e0efe5bd3cf61ec5c",
-  "note:production_scope_complete_tmu_old_and_warm_rpnjl_default_qualification_optional_not_scheduled",
+  "note:production_scope_complete_tmu_default_authorized_old_and_warm_rpnjl_qualification_optional_not_scheduled",
   "run:42754800362",
   "run:42745978294",
   "run:42749746651",

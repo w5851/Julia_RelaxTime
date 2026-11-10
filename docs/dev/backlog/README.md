@@ -36,7 +36,7 @@
 [#339](https://github.com/w5851/Julia_RelaxTime/pull/339)、
 [#340](https://github.com/w5851/Julia_RelaxTime/pull/340) 完成；
 任务合同已[归档](../archived/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md)。
-较长的标准 PNJL Tρ 扫描默认 PALC；Tμ 完整旧策略/warm 对照和 RPNJL 默认资格
+较长的标准 PNJL Tρ/Tμ 扫描默认 PALC；Tμ 完整旧策略/warm 对照和 RPNJL 默认资格
 留待后续实际需要时再安排，当前没有新增计算任务。
 
 | 待评估研究 | 实际剩余工作 | 当前状态 |

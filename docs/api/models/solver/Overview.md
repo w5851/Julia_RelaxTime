@@ -72,6 +72,28 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 它不是常规入口的默认替代品，而是“我明确知道这里有分支竞争”的增强入口。
 
+## 已实现的约束模式与路径支持
+
+PNJL 约束接口当前有六种模式；下表的未知量数包含五个平均场和需要联立求出的化学势。
+
+| 模式 | 固定条件 | 未知量数 | 通用 PALC 路径 |
+| --- | --- | ---: | --- |
+| `FixedMu` | T 与共同夸克化学势 μq | 5 | 已接入，固定 T 扫 μq |
+| `FixedRho` | T、重子密度，三味化学势相等 | 8 | 已接入，固定 T 扫 ρ |
+| `FixedAsymmetricRho` | T、重子密度、u/d 净密度比与 s 味净密度 | 8 | 已接入，固定 T 扫 ρ |
+| `FixedMuBConservedCharges` | T、μB、电荷/重子比、净奇异数密度 | 8 | 尚未接入 |
+| `FixedEntropy` | T、熵密度 s，三味化学势相等 | 8 | 尚未接入 |
+| `FixedSigma` | T、比熵 σ=s/nB，三味化学势相等 | 8 | 尚未接入 |
+
+`FixedEntropy` 固定熵密度；`FixedSigma` 才是保持单位重子熵的等熵轨迹，σ 与 σ 介子无关。
+`run_isentropic_meson_mass_scan` 已逐温度调用 `FixedSigma`。这两种模式的联合求解内部
+仍搜索多个初值，连续路径复用有潜在收益；接入时需要让 T 成为延拓参数，并保持各自的
+约束、候选选择及低密度语义。当前 `solve_multi` 不覆盖它们，不能用 Tρ 的倍率代替验证。
+固定 μB 的守恒荷模式已有多初值接口，可考虑沿 μB 延拓；同样尚无性能对照。
+
+磁场扫描和 NJL/RPNJL 等属于模型或外场变体。`run_magnetic_scan` 的平衡态使用
+`FixedMu`，其 Landau 求和残差需要独立验证后才能接入 PALC。
+
 ## Models 边界签名与参数合同（Plan-A）
 
 在 `Models` 边界，`solve*` 系列当前稳定公共表面为：
@@ -148,8 +170,9 @@ PALC 从中点和两端发现不同根，沿弧长双向推进，并把目标交
 `nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。
 
 PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使用相同参数。
-通用扫描的 `continuation=:auto` 仅对 PNJL 的较长 Tρ 路径（至少 21 点）默认启用 PALC；
-Tμ、RPNJL、短路径、自定义选择器及不支持的求解器选项保留旧路线。单点 `Models.solve`
+通用扫描的 `continuation=:auto` 对 PNJL 的较长 Tρ 路径（至少 21 点）与 Tμ 路径
+（至少 31 点）默认启用 PALC；RPNJL、短路径、自定义选择器及不支持的求解器选项保留
+旧路线。单点 `Models.solve`
 和 `solve_multi` 的默认算法独立于该扫描策略。
 固定密度复用现有 joint residual 的配置模型；若传入不同于该配置的自定义模型参数，入口
 会报 `ArgumentError`，以免残差和后处理使用不同参数。共同 μ 的路径直接使用传入模型。

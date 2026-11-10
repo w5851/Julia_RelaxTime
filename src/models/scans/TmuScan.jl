@@ -16,12 +16,12 @@ result = run_tmu_scan(
     output_path = "my_scan.csv"
 )
 
-# 使用相变感知策略（推荐用于一阶相变区域）
+# 显式使用 PALC 跟踪一阶相变区域的竞争分支
 result = run_tmu_scan(
     T_values = 50.0:10.0:130.0,
     mu_values = 200.0:5.0:400.0,
     xi_values = [0.0],
-    use_phase_aware = true
+    continuation = :palc
 )
 ```
 """
@@ -164,11 +164,11 @@ NamedTuple 包含：
 - `skipped`: 跳过点数
 - `output`: 输出文件路径
 
-# 多初值取优策略
-扫描过程默认采用“候选初值全评估 + 治理选优”：
-1. 优先尝试连续性种子（若有）
-2. 追加多初值候选（`MultiSeed`）
-3. 对全部候选求解后按治理规则统一选择
+# 路径与候选策略
+`continuation=:auto` 对标准 PNJL、tensor 热积分、受支持的 solver 选项且每条
+等温线至少 31 点的扫描使用 PALC。它在少数锚点发现根、双向延拓并校正目标交点，
+沿用硬约束和最大压力选择。其它配置沿用 `:legacy` 的逐点连续性种子和多初值全评估。
+显式 `:legacy`、`:single_pass`、`:palc` 可选择相应算法。
 
 说明：`use_phase_aware` 参数为兼容保留位，不再启用专用相变感知状态机策略。
 """
