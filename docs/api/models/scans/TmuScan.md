@@ -56,6 +56,7 @@
 每个 μq 后选择通过硬约束的最大压力根。`:auto` 当前沿用 `:legacy`，待生产对照资格确认。
 显式新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector；不支持的组合抛出
 `ArgumentError`。`palc_options` 传入 `PALCContinuation`，例如 `(ds=0.02, dsmax=0.08)`。
+自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
 
 ## 路径依赖与扫描顺序
 

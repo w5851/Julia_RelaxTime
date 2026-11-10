@@ -158,6 +158,13 @@ end
         @test Models.resolve_scan_continuation(:legacy, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :legacy
         @test_throws ArgumentError Models.resolve_scan_continuation(:palc, :PNJL, :rs_reduced_adaptive, :ground_state, nothing, 21)
         @test_throws ArgumentError Models.resolve_scan_continuation(:unknown, :PNJL, :tensor_gauss, :ground_state, nothing, 21)
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
+            nothing, 31; controls_supported=false) === :legacy
+        @test_throws ArgumentError Models.resolve_scan_continuation(:palc, :PNJL, :tensor_gauss,
+            :ground_state, nothing, 31; controls_supported=false)
+        @test Models._scan_path_controls_supported((; iterations=300, residual_norm_max=1e-7))
+        @test !Models._scan_path_controls_supported((; solver=:custom))
+        @test !Models._scan_path_controls_supported((; evaluate_all_attempts=false))
     end
 
     @testset "Path controls reject unsupported options before solving" begin

@@ -24,6 +24,7 @@ Base.@kwdef mutable struct PhaseCliConfig
     run_id::Union{Nothing, String} = nothing
     output_dir::Union{Nothing, String} = nothing
     solver_backend::Symbol = :models
+    continuation::Symbol = :auto
     seed_policy::Symbol = :hybrid_continuity
     reverse_rho::Bool = true
     p_num::Int = 12
@@ -178,6 +179,7 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "solver_backend") && (cfg.solver_backend = Symbol(lowercase(String(table["solver_backend"]))))
     haskey(table, "seed_policy") && (cfg.seed_policy = Symbol(lowercase(String(table["seed_policy"]))))
     haskey(table, "reverse_rho") && (cfg.reverse_rho = _as_bool(table["reverse_rho"], "phase_pipeline.reverse_rho"))
+    haskey(table, "continuation") && (cfg.continuation = Symbol(lowercase(String(table["continuation"]))))
     haskey(table, "p_num") && (cfg.p_num = Int(table["p_num"]))
     haskey(table, "t_num") && (cfg.t_num = Int(table["t_num"]))
     haskey(table, "thermo_quadrature_policy") && (cfg.thermo_quadrature_policy = Symbol(lowercase(String(table["thermo_quadrature_policy"]))))
@@ -287,6 +289,7 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "rho_max" => cfg.rho_max,
         "rho_step" => cfg.rho_step,
         "solver_backend" => String(cfg.solver_backend),
+        "continuation" => String(cfg.continuation),
         "seed_policy" => String(cfg.seed_policy),
         "reverse_rho" => cfg.reverse_rho,
         "p_num" => cfg.p_num,
@@ -367,6 +370,7 @@ function _usage()
     println("  --run_id=...           指定 run_id")
     println("  --output_dir=...       指定输出目录（覆盖默认 processed 路径）")
     println("  --solver_backend=models|auto")
+    println("  --continuation=auto|legacy|single_pass|palc")
     println("  --seed_policy=...      扫描初值策略")
     println("  --reverse_rho=true|false")
     println("  --p_num=12             动量积分点数")
@@ -485,6 +489,8 @@ function parse_args(args, project_root::AbstractString)
             cfg.output_dir = arg[14:end]
         elseif startswith(arg, "--solver_backend=")
             cfg.solver_backend = Symbol(lowercase(arg[18:end]))
+        elseif startswith(arg, "--continuation=")
+            cfg.continuation = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         elseif startswith(arg, "--seed_policy=")
             cfg.seed_policy = Symbol(lowercase(arg[15:end]))
         elseif startswith(arg, "--reverse_rho=")
@@ -593,6 +599,8 @@ function parse_args(args, project_root::AbstractString)
     end
     cfg.mode in (:production, :research) || throw(ArgumentError("invalid --mode=$(cfg.mode); accepted values: production, research"))
     cfg.solver_backend in (:models, :auto) || throw(ArgumentError("invalid --solver_backend=$(cfg.solver_backend); accepted values: models, auto"))
+    cfg.continuation in (:auto, :legacy, :single_pass, :palc) || throw(ArgumentError(
+        "invalid --continuation=$(cfg.continuation); accepted values: auto, legacy, single_pass, palc"))
     cfg.thermo_quadrature_policy in (:tensor_gauss, :rs_reduced_adaptive) || throw(ArgumentError(
         "unsupported thermo_quadrature_policy=$(cfg.thermo_quadrature_policy)",
     ))
@@ -678,6 +686,7 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         profile=cfg.profile,
         run_id=cfg.run_id,
         solver_backend=cfg.solver_backend,
+        continuation=cfg.continuation,
         seed_policy=cfg.seed_policy,
         reverse_rho=cfg.reverse_rho,
         p_num=cfg.p_num,

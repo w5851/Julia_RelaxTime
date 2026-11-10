@@ -20,13 +20,22 @@ end
 palc_work_snapshot(work::PALCWorkTelemetry) =
     (; (key => getfield(work, key) for key in fieldnames(PALCWorkTelemetry))...)
 
+const PATH_SOLVER_KEYWORDS = (:residual_norm_max, :iterations,
+    :thermo_quadrature_policy, :thermo_quadrature_rtol, :thermo_quadrature_atol,
+    :thermo_quadrature_maxevals, :physicality_check, :hard_constraints,
+    :work_telemetry, :path_work, :evaluate_all_attempts)
+
+function _scan_path_controls_supported(kwargs)
+    return all(key -> key in PATH_SOLVER_KEYWORDS, keys(kwargs)) &&
+        get(kwargs, :evaluate_all_attempts, true) === true
+end
+
 function _path_options(model, path; residual_norm_max::Real=1e-6,
     iterations::Integer=300, thermo_quadrature_policy::Symbol=:tensor_gauss,
     thermo_quadrature_rtol::Real=1e-8, thermo_quadrature_atol::Real=1e-10,
     thermo_quadrature_maxevals::Integer=10^7, physicality_check::Function=((_, _) -> true),
     hard_constraints=nothing, kwargs...)
-    allowed = (:work_telemetry, :path_work, :evaluate_all_attempts)
-    unknown = setdiff(collect(keys(kwargs)), allowed)
+    unknown = setdiff(collect(keys(kwargs)), PATH_SOLVER_KEYWORDS)
     isempty(unknown) || throw(ArgumentError("unsupported path solver keywords: $(join(unknown, ", "))"))
     get(kwargs, :evaluate_all_attempts, true) === true || throw(ArgumentError(
         "path candidate discovery requires evaluate_all_attempts=true"))
@@ -161,15 +170,18 @@ end
 
 """Resolve the scan default; explicit strategies never silently change route."""
 function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
-    thermo_policy::Symbol, semantic_mode::Symbol, selector, point_count::Integer)
+    thermo_policy::Symbol, semantic_mode::Symbol, selector, point_count::Integer;
+    constraint_mode::Symbol=:fixed_rho, controls_supported::Bool=true)
     strategy in (:auto, :legacy, :single_pass, :palc) || throw(ArgumentError(
         "continuation must be :auto, :legacy, :single_pass or :palc, got $(strategy)"))
     supported = model_kind in (:PNJL, :RPNJL) && thermo_policy === :tensor_gauss &&
-        semantic_mode === :ground_state && selector === nothing
+        semantic_mode === :ground_state && selector === nothing && controls_supported &&
+        constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho)
     # Promotion is decided from the bounded production comparison, route by route.
     strategy === :auto && return :legacy
     strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(
-        "$(strategy) scan requires PNJL/RPNJL, tensor_gauss and the standard ground_state selector"))
+        "$(strategy) scan requires PNJL/RPNJL, tensor_gauss, the standard ground_state selector " *
+        "and supported path solver controls"))
     return strategy
 end
 

@@ -51,6 +51,7 @@
 `:single_pass` 每个不同种子求解一次；FixedAsymmetricRho 复用既有候选展开实现。
 新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector。其它组合可以用
 `:legacy`；显式不兼容组合报 `ArgumentError`。
+自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
 
 `palc_options` 传入 `PALCContinuation`；`path_diagnostics_cb((T, xi), path_result)`
 可读取起点、分支与工作量。CSV/callback 仍按 `reverse_rho` 控制的输入顺序输出。

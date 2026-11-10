@@ -14,6 +14,31 @@ include(joinpath(@__DIR__, "..", "..", "..", "scripts", "analysis", "pnjl_bifurc
     @test parsed["route"] == "rho"
 end
 
+@testset "Phase CLI propagates continuation from configuration and arguments" begin
+    if !isdefined(Main, :PhaseCliSupport)
+        include(joinpath(@__DIR__, "..", "..", "..", "scripts", "pnjl", "phase_cli_support.jl"))
+    end
+    P = PhaseCliSupport
+    @test P.parse_args(["--continuation=palc"]).continuation === :palc
+    @test P.parse_args(["--continuation=legacy"]).continuation === :legacy
+    @test_throws ArgumentError P.parse_args(["--continuation=unknown"])
+    mktempdir() do directory
+        config = joinpath(directory, "phase.toml")
+        write(config, "[phase_pipeline]\ncontinuation = \"single_pass\"\n")
+        @test P.parse_args(["--config=$config"]).continuation === :single_pass
+        @test P.parse_args(["--config=$config", "--continuation=palc"]).continuation === :palc
+        received = Ref{Any}()
+        fake_models = (; RhoSupportConfig=Models.RhoSupportConfig,
+            RhoHybridVerificationConfig=Models.RhoHybridVerificationConfig,
+            run_phase_pipeline=(args...; kwargs...) -> begin
+                received[] = (; kwargs...)
+                throw(InterruptException())
+            end)
+        @test_throws InterruptException P.main(fake_models, directory, ["--continuation=palc"])
+        @test received[].continuation === :palc
+    end
+end
+
 @testset "Complete scan resume preserves CSV and skips callbacks" begin
     P = PALCProductionComparison
     for route in (:asym, :rho, :tmu), strategy in (:legacy, :single_pass, :palc)

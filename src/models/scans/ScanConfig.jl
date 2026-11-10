@@ -26,6 +26,7 @@ Base.@kwdef struct TmuScanConfig
     auto_pnjl_backend::Union{Nothing, Symbol} = nothing
     semantic_mode::Union{Nothing, Symbol} = nothing
     selector::Union{Nothing, Function} = nothing
+    model_kind::Union{Nothing, Symbol} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
     thermo_quadrature_policy::Union{Nothing, Symbol} = nothing
@@ -110,6 +111,7 @@ function scan_kwargs(cfg::TmuScanConfig)::NamedTuple
         auto_pnjl_backend=cfg.auto_pnjl_backend,
         semantic_mode=cfg.semantic_mode,
         selector=cfg.selector,
+        model_kind=cfg.model_kind,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
         thermo_quadrature_policy=cfg.thermo_quadrature_policy,

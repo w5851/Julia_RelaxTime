@@ -203,7 +203,9 @@ function run_tmu_scan(;
     _validate_semantic_mode(semantic_mode, selector)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
     continuation_mode = Models.resolve_scan_continuation(continuation, model_kind,
-        thermo_quadrature_policy, semantic_mode, selector, length(mu_values))
+        thermo_quadrature_policy, semantic_mode, selector, length(mu_values);
+        constraint_mode=:fixed_mu, controls_supported=Models._scan_path_controls_supported(nlsolve_kwargs) &&
+            _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend) === :models)
     model_kind === :PNJL && foreach(PNJLIntegrals.validate_rs_anisotropy, xi_values)
     PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
     if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
