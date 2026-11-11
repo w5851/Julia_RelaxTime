@@ -32,7 +32,7 @@ function Models._path_root(model::Main.EndpointPathTestModel,path,value,seed,res
     source === :anchor && (work.anchor_solves += 1)
     source === :correction && (work.correction_solves += 1)
     source === :fallback && (work.fallback_solves += 1)
-    length(model.calls) <= model.reject_attempts && return nothing
+    (length(model.calls) <= model.reject_attempts || length(model.calls) == -model.reject_attempts) && return nothing
     return (;solution=fill(value,length(seed)),x_state=fill(value,5),mu_vec=fill(value,3),
         pressure=value,rho_norm=value,residual_norm=0.0,converged=true)
 end
@@ -303,6 +303,11 @@ end
             continuation_strategy=Models.NaturalContinuation())
         @test_throws ArgumentError Models.solve_path(model,path;
             continuation_strategy=Models.NaturalContinuation(),anchor_strategy=Models.SeedPoolAnchor())
+        interrupted = Main.EndpointPathTestModel(-2,Symbol[])
+        recovered = Models.solve_path(interrupted,path;continuation_strategy=Models.NaturalContinuation())
+        @test recovered.diagnostics.continuation_backend === :natural_palc_recovery
+        @test recovered.diagnostics.failure_count == 0
+        @test all(s -> s.selected_branch_id !== nothing,recovered.selections)
     end
 
     @testset "Temperature paths retain constraint targets and input order" begin
