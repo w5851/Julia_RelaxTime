@@ -132,18 +132,70 @@ function all_root_records(model, path, result)
     return rows
 end
 
-function write_records(destination, records)
+function write_records(destination, records; anchor_probes=NamedTuple[])
     mkpath(dirname(destination))
     data = (; schema="palc_endpoint_comparison_v1", source_sha=strip(read(`git rev-parse HEAD`, String)),
         actions_run_id=get(ENV,"GITHUB_RUN_ID",""), julia_version=string(VERSION),
         p_num=24,t_num=8,iterations=300,residual_tolerance=1e-6,
         timing_contract="Same process, one thread, path solve plus identical selected-result reconstruction; validation and serialization excluded; first round includes compilation.",
         endpoint_contract="Hadron seed at the lower endpoint and quark seed at the upper endpoint; one direct root solve per target, stop a direction on failure, no catalog fallback; Newton jumps are retained as actual roots.",
-        records)
+        records, anchor_probes)
     open(destination,"w") do io
         JSON.print(io,finite_json(data),2)
         println(io)
     end
+end
+
+"""Inspect individual start guesses outside the matched path timing."""
+function probe_anchors(model, name, path)
+    options = Models._path_options(model,path;iterations=300)
+    residual = Models._path_residual(model,path,options)
+    low, high = extrema(Models._path_values(path))
+    middle = (low+high)/2
+    attempts = [(;label="endpoint_$(i)",attempt...) for (i,attempt) in
+        enumerate(Models._endpoint_anchor_attempts(path))]
+    for (label,value) in (("middle",middle),("high",high))
+        theta = path isa Models.FixedMuPath ? [Models._path_temperature(path,value),value] :
+            [Models._path_temperature(path,value)]
+        for (seed_name,base) in (("hadron",Models.SeedStrategies.HADRON_SEED_5),
+                               ("medium",Models.SeedStrategies.MEDIUM_SEED_5))
+            seed = Models.SeedStrategies.extend_seed(base,Models._path_mode(path,value))
+            push!(attempts,(;label="$(label)_$(seed_name)",value,seed))
+        end
+    end
+    probes = NamedTuple[]
+    for attempt in attempts
+        work = Models.PALCWorkTelemetry()
+        started = time_ns()
+        root = Models._path_root(model,path,attempt.value,attempt.seed,residual,options,work;
+            source=:anchor)
+        root_seconds = (time_ns()-started)/1e9
+        curves = NamedTuple[]
+        if root !== nothing && root.converged
+            for (label,strategy) in (("default",Models.PALCContinuation()),
+                ("small_step",Models.PALCContinuation(ds=0.001,dsmax=0.01,max_steps=400)))
+                curve = nothing
+                error_message = ""
+                started = time_ns()
+                try
+                    curve = Models._palc_curve(residual,root,attempt.value,(low,high),strategy,work;
+                        positive_parameter=path isa Models.ConstraintTPath)
+                catch err
+                    err isa InterruptException && rethrow()
+                    error_message = sprint(showerror,err)
+                end
+                push!(curves,(;strategy=label,seconds=(time_ns()-started)/1e9,error=error_message,
+                    point_count=curve === nothing ? 0 : length(curve),
+                    target_crossings=curve === nothing ? Int[] :
+                        [length(Models._palc_target_seeds(curve,value)) for value in Models._path_values(path)]))
+            end
+        end
+        push!(probes,(;name,attempt...,root_seconds,
+            root=root === nothing ? nothing : (;solution=root.solution,iterations=root.iterations,
+                residual_norm=root.residual_norm,converged=root.converged,
+                failed_constraints=root.failed_constraints,rho_norm=root.rho_norm),curves))
+    end
+    return probes
 end
 
 function anchor_comparison_cases()
@@ -169,7 +221,7 @@ function anchor_comparison_cases()
     return cases
 end
 
-function run_comparison(destination; repetitions=3, scope="endpoints")
+function run_comparison(destination; repetitions=3, scope="endpoints", cases_filter="all", probe=false)
     1 <= repetitions <= 3 || throw(ArgumentError("repetitions must be 1..3"))
     BLAS.set_num_threads(1)
     model = Models.create_model(:PNJL)
@@ -179,6 +231,19 @@ function run_comparison(destination; repetitions=3, scope="endpoints")
         (:rho_t120, Models.FixedRhoPath(120/HBARC, collect(0.2:0.05:3.5); p_num=24,t_num=8)),
         (:tmu_t200, Models.FixedMuPath(200/HBARC, collect(260.0:2.0:380.0)./HBARC; p_num=24,t_num=8)),
     ]
+    if cases_filter != "all"
+        requested = Symbol.(split(cases_filter,','))
+        all(name -> any(c -> first(c) === name,cases),requested) ||
+            throw(ArgumentError("unknown endpoint comparison case"))
+        cases = filter(c -> first(c) in requested,cases)
+    end
+    anchor_probes = NamedTuple[]
+    if probe
+        for (name,path) in cases
+            append!(anchor_probes,probe_anchors(model,name,path))
+            write_records(destination,NamedTuple[];anchor_probes)
+        end
+    end
     records = NamedTuple[]
     for (name,path) in cases, repetition in 1:repetitions
         methods = if scope == "promotion"
@@ -199,7 +264,7 @@ function run_comparison(destination; repetitions=3, scope="endpoints")
             all_roots = all_root_records(model,path,run.result)
             push!(records, (; name,method,repetition,seconds=run.seconds,config=Models.to_namedtuple(path),
                 rows,all_roots,work=run.work,diagnostics=Models.to_namedtuple(run.result.diagnostics)))
-            write_records(destination,records)
+            write_records(destination,records;anchor_probes)
             println("DONE ",name,"/",method," ",run.seconds," s, max roots ",maximum(length(r.roots) for r in all_roots))
             flush(stdout)
         end
@@ -211,5 +276,6 @@ end
 
 if abspath(PROGRAM_FILE) == @__FILE__
     PALCEndpointComparison.run_comparison(ARGS[1]; repetitions=length(ARGS)>=2 ? parse(Int,ARGS[2]) : 3,
-        scope=length(ARGS)>=3 ? ARGS[3] : "endpoints")
+        scope=length(ARGS)>=3 ? ARGS[3] : "endpoints",
+        cases_filter=length(ARGS)>=4 ? ARGS[4] : "all",probe=length(ARGS)>=5 && ARGS[5]=="true")
 end

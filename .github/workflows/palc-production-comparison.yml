@@ -14,6 +14,9 @@ on:
       cases:
         type: string
         default: all
+      probe_anchors:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       profile:
@@ -29,9 +32,13 @@ on:
         type: string
         default: "2700"
       cases:
-        description: Ordered route:strategy pairs, comma separated, or all
+        description: Route:strategy pairs for scans, path names for endpoints, or all
         type: string
         default: all
+      probe_anchors:
+        description: Inspect individual endpoint guesses outside matched timing
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -84,7 +91,12 @@ jobs:
           REPETITIONS: ${{ inputs.repetitions }}
           BUDGET: ${{ inputs.budget_seconds }}
           PROFILE: ${{ inputs.profile }}
-        run: python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --scope "$PROFILE"
+          CASES: ${{ inputs.cases }}
+          PROBE: ${{ inputs.probe_anchors }}
+        run: |
+          extra=()
+          if [ "$PROBE" = "true" ]; then extra+=(--probe-anchors); fi
+          python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --scope "$PROFILE" --cases "$CASES" "${extra[@]}"
       - name: Summarize completed results
         if: always()
         env:
