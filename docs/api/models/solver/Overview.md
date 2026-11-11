@@ -197,6 +197,9 @@ PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使�
 会报 `ArgumentError`，以免残差和后处理使用不同参数。共同 μ 的路径直接使用传入模型。
 可传入 `PALCWorkTelemetry()` 读取根求解、延拓残差/Jacobian、起点、校正、回退及失败计数；
 对象复用时计数累加，多个路径内保存的累计快照不应再次相加。
+其中 `root_time_s` 包含直接求根及候选后处理，`root_candidate_time_s` 是其中的后处理子项；
+`continuation_time_s` 记录 BifurcationKit 延拓，`selected_rebuild_time_s` 记录选中结果重构。
+后者需将同一个 `path_work` 传给 `selected_path_results`；这些计时不含序列化和独立验证。
 
 `FixedAsymmetricRho` 可显式传入 `fixedasymrho_seed_policy=:single_pass`，并设置
 `evaluate_all_attempts=true`。它展开既有外层和内层种子的并集，对每个不同起点进行一次

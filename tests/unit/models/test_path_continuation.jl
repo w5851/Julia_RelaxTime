@@ -16,6 +16,27 @@ if !isdefined(Main, :ConstraintPathRecordingModel)
     end
 end
 
+if !isdefined(Main, :EndpointPathTestModel)
+    @eval Main struct EndpointPathTestModel <: Models.AbstractQCDModel
+        reject_attempts::Int
+        calls::Vector{Symbol}
+    end
+end
+
+Models._path_options(::Main.EndpointPathTestModel,path;kwargs...) = nothing
+Models._path_residual(::Main.EndpointPathTestModel,path,options) = (x,value) -> x .- value
+function Models._path_root(model::Main.EndpointPathTestModel,path,value,seed,residual,options,work;
+    source::Symbol=:correction,work_telemetry=nothing)
+    push!(model.calls,source)
+    work.root_solves += 1
+    source === :anchor && (work.anchor_solves += 1)
+    source === :correction && (work.correction_solves += 1)
+    source === :fallback && (work.fallback_solves += 1)
+    length(model.calls) <= model.reject_attempts && return nothing
+    return (;solution=fill(value,5),x_state=fill(value,5),mu_vec=fill(value,3),
+        pressure=value,rho_norm=value,residual_norm=0.0,converged=true)
+end
+
 function Models.solve(model::Main.ConstraintPathRecordingModel, mode::Models.FixedSigma,
     T_fm::Real; kwargs...)
     push!(model.calls, (;T_fm, kwargs...))
@@ -231,6 +252,37 @@ end
         @test_throws ArgumentError Models.solve_path(model,path;
             continuation_strategy=Models.PALCContinuation(),anchor_strategy=Models.EndpointAnchor(),
             anchor_values=[1.5])
+    end
+
+    @testset "Endpoint recovery runs only after a failed start or incomplete path" begin
+        path = Models.FixedMuPath(1.0,[0.1,0.2])
+        model = Main.EndpointPathTestModel(1,Symbol[])
+        work = Models.PALCWorkTelemetry()
+        result = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation(),
+            anchor_strategy=Models.EndpointAnchor(),path_work=work)
+        @test result.diagnostics.anchor_strategy === :endpoint_anchor
+        @test result.diagnostics.failure_count == 0
+        @test length(result.anchors) == 1
+        @test work.anchor_solves == 2
+        @test work.fallback_solves == 0
+        @test [s.param_value for s in result.selections] == [0.1,0.2]
+
+        failed = Main.EndpointPathTestModel(typemax(Int),Symbol[])
+        result = Models.solve_path(failed,path;continuation_strategy=Models.PALCContinuation(),
+            anchor_strategy=Models.EndpointAnchor())
+        @test result.diagnostics.anchor_strategy === :endpoint_catalog_recovery
+        @test result.diagnostics.failure_count == 2
+        @test isempty(result.anchors)
+        @test :fallback in failed.calls
+
+        short = Main.EndpointPathTestModel(0,Symbol[])
+        result = Models.solve_path(short,Models.FixedMuPath(1.0,[0.1,2.0]);
+            continuation_strategy=Models.PALCContinuation(max_steps=1),
+            anchor_strategy=Models.EndpointAnchor())
+        @test result.diagnostics.anchor_strategy === :endpoint_catalog_recovery
+        @test result.diagnostics.failure_count == 0
+        @test length(result.anchors) > 1
+        @test all(s -> s.selected_branch_id !== nothing,result.selections)
     end
 
     @testset "Temperature paths retain constraint targets and input order" begin
