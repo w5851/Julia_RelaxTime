@@ -81,15 +81,26 @@ PNJL 约束接口当前有六种模式；下表的未知量数包含五个平均
 | `FixedMu` | T 与共同夸克化学势 μq | 5 | 已接入，固定 T 扫 μq |
 | `FixedRho` | T、重子密度，三味化学势相等 | 8 | 已接入，固定 T 扫 ρ |
 | `FixedAsymmetricRho` | T、重子密度、u/d 净密度比与 s 味净密度 | 8 | 已接入，固定 T 扫 ρ |
-| `FixedMuBConservedCharges` | T、μB、电荷/重子比、净奇异数密度 | 8 | 尚未接入 |
-| `FixedEntropy` | T、熵密度 s，三味化学势相等 | 8 | 尚未接入 |
-| `FixedSigma` | T、比熵 σ=s/nB，三味化学势相等 | 8 | 尚未接入 |
+| `FixedMuBConservedCharges` | T、μB、电荷/重子比、净奇异数密度 | 8 | 已接入，固定 mode 中约束沿 T 延拓 |
+| `FixedEntropy` | T、熵密度 s，三味化学势相等 | 8 | 已接入，沿 T 延拓；PALC 为显式选项 |
+| `FixedSigma` | T、比熵 σ=s/nB，三味化学势相等 | 8 | 已接入，固定比熵沿 T 延拓 |
 
 `FixedEntropy` 固定熵密度；`FixedSigma` 才是保持单位重子熵的等熵轨迹，σ 与 σ 介子无关。
-`run_isentropic_meson_mass_scan` 已逐温度调用 `FixedSigma`。这两种模式的联合求解内部
-仍搜索多个初值，连续路径复用有潜在收益；接入时需要让 T 成为延拓参数，并保持各自的
-约束、候选选择及低密度语义。当前 `solve_multi` 不覆盖它们，不能用 Tρ 的倍率代替验证。
-固定 μB 的守恒荷模式已有多初值接口，可考虑沿 μB 延拓；同样尚无性能对照。
+三种约束使用 `ConstraintTPath(mode, T_values)`，温度单位为 fm^-1，继续求五个平均场与
+三个化学势的八变量联立方程。标准 PNJL tensor 热积分路径中，`FixedSigma` 和
+`FixedMuBConservedCharges` 的 `continuation=:auto` 在至少 21 点时使用 PALC；
+`FixedEntropy` 保留 legacy 默认，原因是已测窗口存在等压力的正负化学势分支，应用的
+选支语义仍需确定。可用 `continuation=:palc` 显式选择。
+
+`run_isentropic_meson_mass_scan` 的标准长分段已复用 `FixedSigma` PALC 平衡态，直接交给
+介子后处理；短路径、RPNJL 和自定义控制保留 legacy 默认。三种模式的独立小规模对照见
+[约束路径验证](../../../analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md)。
+`ConstraintTPath` 接受 `:auto|:legacy|:palc`；`single_pass` 是 Tμ/Tρ 扫描的显式选项。
+
+Tμ/Tρ 扫描的 `:legacy` 逐点复用前一点与多初值搜索；`:single_pass` 将每点候选初值展开，
+减少重复求解；`:palc` 在少数位置搜索锚点，再双向延拓并在目标点重新求根。
+`SingleSeedAnchor(value, seed)` 配合 `PALCContinuation()` 使用同一延拓算法，但只从一个
+初值建立锚点并关闭 catalog fallback，适合研究已知解支；它不是第四个 `continuation` 符号。
 
 磁场扫描和 NJL/RPNJL 等属于模型或外场变体。`run_magnetic_scan` 的平衡态使用
 `FixedMu`，其 Landau 求和残差需要独立验证后才能接入 PALC。
