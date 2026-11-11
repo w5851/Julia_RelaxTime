@@ -310,6 +310,11 @@ function _endpoint_anchor_attempts(path)
         theta = path isa FixedMuPath ? [_path_temperature(path, value), value] :
             [_path_temperature(path, value)]
         seed = get_seed(DefaultSeed(; phase_hint=phase), theta, _path_mode(path, value))
+        if path isa ConstraintTPath{FixedSigma} && value == high && phase === :hadron
+            # A finite entropy per baryon benefits from a seed with nonzero
+            # thermal occupation, rather than the nearly vacuum Polyakov loop.
+            seed = SeedStrategies.extend_seed(SeedStrategies.MEDIUM_SEED_5, _path_mode(path,value))
+        end
         any(a -> a.value == value && a.seed == seed, attempts) && continue
         push!(attempts, (; value, seed))
     end
@@ -331,11 +336,23 @@ function _solve_endpoint_palc_path(model, path, strategy;
         any(r -> r.value == attempt.value && _solution_distance(r.solution,root.solution) <= 1e-5,
             attempted_roots) && continue
         push!(attempted_roots,(;value=attempt.value,solution=root.solution))
+        exceptions_before = path_work.exceptions
         result = _solve_palc_path(model, path, strategy;
             anchor_strategy=SingleSeedAnchor(attempt.value, root.solution),
             initial_anchor=root, boundary_correction=true,
             branch_policy, diagnostic_level, branch_jump_tol,
             path_work, work_telemetry, kwargs...)
+        if result.diagnostics.failure_count > 0 && path_work.exceptions > exceptions_before
+            append!(messages,result.diagnostics.messages)
+            push!(messages,"Retrying endpoint PALC from the same root with smaller steps.")
+            reduced = PALCContinuation(ds=strategy.ds/10,dsmax=strategy.dsmax/5,
+                max_steps=strategy.max_steps,newton_tol=strategy.newton_tol,
+                newton_max_iterations=strategy.newton_max_iterations)
+            result = _solve_palc_path(model,path,reduced;
+                anchor_strategy=SingleSeedAnchor(attempt.value,root.solution),
+                initial_anchor=root,boundary_correction=true,
+                branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
+        end
         if result.diagnostics.failure_count == 0
             diagnostics = PathDiagnostics(:bifurcationkit, :endpoint_anchor,
                 _policy_symbol(branch_policy), time()-started, path_work.anchor_solves,

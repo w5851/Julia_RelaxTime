@@ -155,8 +155,6 @@ function probe_anchors(model, name, path)
     attempts = [(;label="endpoint_$(i)",attempt...) for (i,attempt) in
         enumerate(Models._endpoint_anchor_attempts(path))]
     for (label,value) in (("middle",middle),("high",high))
-        theta = path isa Models.FixedMuPath ? [Models._path_temperature(path,value),value] :
-            [Models._path_temperature(path,value)]
         for (seed_name,base) in (("hadron",Models.SeedStrategies.HADRON_SEED_5),
                                ("medium",Models.SeedStrategies.MEDIUM_SEED_5))
             seed = Models.SeedStrategies.extend_seed(base,Models._path_mode(path,value))
@@ -214,6 +212,10 @@ function anchor_comparison_cases()
     end
     push!(cases, (:sigma, Models.ConstraintTPath(Models.FixedSigma(12.0759),
         collect(100.0:2.0:140.0)./HBARC;p_num=24,t_num=8)))
+    push!(cases, (:sigma_xi4, Models.ConstraintTPath(Models.FixedSigma(12.0759),
+        collect(100.0:2.0:140.0)./HBARC;xi=0.4,p_num=24,t_num=8)))
+    push!(cases, (:sigma_t160, Models.ConstraintTPath(Models.FixedSigma(12.0759),
+        collect(120.0:2.0:160.0)./HBARC;p_num=24,t_num=8)))
     push!(cases, (:bqs, Models.ConstraintTPath(Models.FixedMuBConservedCharges(900/HBARC),
         collect(100.0:3.0:160.0)./HBARC;p_num=24,t_num=8)))
     push!(cases, (:entropy, Models.ConstraintTPath(Models.FixedEntropy(0.5),
