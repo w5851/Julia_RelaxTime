@@ -18,7 +18,7 @@ on:
     inputs:
       profile:
         type: choice
-        options: [quick, medium, constraints]
+        options: [quick, medium, constraints, endpoints]
         default: medium
       repetitions:
         type: choice
@@ -64,7 +64,7 @@ jobs:
         timeout-minutes: 3
         run: julia --project=. -e 'include("tests/unit/models/test_path_continuation.jl"); include("tests/unit/models/test_palc_production_contract.jl")'
       - name: Compare production scans within a shared budget
-        if: inputs.profile != 'constraints'
+        if: inputs.profile != 'constraints' && inputs.profile != 'endpoints'
         env:
           PROFILE: ${{ inputs.profile }}
           REPETITIONS: ${{ inputs.repetitions }}
@@ -78,12 +78,20 @@ jobs:
           BUDGET: ${{ inputs.budget_seconds }}
           CASES: ${{ inputs.cases }}
         run: python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
+      - name: Compare two endpoint continuation and PALC
+        if: inputs.profile == 'endpoints'
+        env:
+          REPETITIONS: ${{ inputs.repetitions }}
+          BUDGET: ${{ inputs.budget_seconds }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET"
       - name: Summarize completed results
         if: always()
         env:
           PROFILE: ${{ inputs.profile }}
         run: |
-          if [ "$PROFILE" = "constraints" ]; then
+          if [ "$PROFILE" = "endpoints" ]; then
+            python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --summarize-only
+          elif [ "$PROFILE" = "constraints" ]; then
             python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --summarize-only
           else
             python scripts/analysis/pnjl_bifurcation_spike/compare_production.py --output temp_palc_production --summarize-only
