@@ -18,7 +18,7 @@ on:
     inputs:
       profile:
         type: choice
-        options: [quick, medium, constraints, endpoints]
+        options: [quick, medium, constraints, endpoints, anchors]
         default: medium
       repetitions:
         type: choice
@@ -64,7 +64,7 @@ jobs:
         timeout-minutes: 3
         run: julia --project=. -e 'include("tests/unit/models/test_path_continuation.jl"); include("tests/unit/models/test_palc_production_contract.jl")'
       - name: Compare production scans within a shared budget
-        if: inputs.profile != 'constraints' && inputs.profile != 'endpoints'
+        if: inputs.profile != 'constraints' && inputs.profile != 'endpoints' && inputs.profile != 'anchors'
         env:
           PROFILE: ${{ inputs.profile }}
           REPETITIONS: ${{ inputs.repetitions }}
@@ -79,17 +79,18 @@ jobs:
           CASES: ${{ inputs.cases }}
         run: python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
       - name: Compare two endpoint continuation and PALC
-        if: inputs.profile == 'endpoints'
+        if: inputs.profile == 'endpoints' || inputs.profile == 'anchors'
         env:
           REPETITIONS: ${{ inputs.repetitions }}
           BUDGET: ${{ inputs.budget_seconds }}
-        run: python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET"
+          PROFILE: ${{ inputs.profile }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --scope "$PROFILE"
       - name: Summarize completed results
         if: always()
         env:
           PROFILE: ${{ inputs.profile }}
         run: |
-          if [ "$PROFILE" = "endpoints" ]; then
+          if [ "$PROFILE" = "endpoints" ] || [ "$PROFILE" = "anchors" ]; then
             python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --summarize-only
           elif [ "$PROFILE" = "constraints" ]; then
             python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --summarize-only

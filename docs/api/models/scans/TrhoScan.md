@@ -49,7 +49,8 @@
 `:auto` 对 PNJL、tensor 积分、默认 ground_state 选择器且每条等温线至少 21 个目标点的
 `FixedRho` / `FixedAsymmetricRho` 扫描使用 `:palc`；较短路径、RPNJL 及其它配置沿用
 `:legacy`。该阈值来自已完成的 21–25 点与中等网格对照；显式 `:legacy` 可复用旧策略。
-`:palc` 对每个 `(T, ξ)` 进行多起点双向延拓，保留回弯
+`:palc` 对每个 `(T, ξ)` 的 PNJL 多点路径默认从较高密度建立一个锚点并双向延拓，
+起点或覆盖失败时恢复搜索；RPNJL 保留目录锚点。保留回弯
 上的候选，随后在请求的 ρ/ρ₀ 点作精确联立校正并按既有硬约束和最大压力规则选优。
 `:single_pass` 每个不同种子求解一次；FixedAsymmetricRho 复用既有候选展开实现。
 新策略支持 PNJL/RPNJL、tensor 积分与默认 ground_state selector。其它组合可以用

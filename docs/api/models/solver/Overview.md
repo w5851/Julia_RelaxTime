@@ -98,7 +98,12 @@ PNJL 约束接口当前有六种模式；下表的未知量数包含五个平均
 `ConstraintTPath` 接受 `:auto|:legacy|:palc`；`single_pass` 是 Tμ/Tρ 扫描的显式选项。
 
 Tμ/Tρ 扫描的 `:legacy` 逐点复用前一点与多初值搜索；`:single_pass` 将每点候选初值展开，
-减少重复求解；`:palc` 在少数位置搜索锚点，再双向延拓并在目标点重新求根。
+减少重复求解；`:palc` 从锚点双向延拓并在目标点重新求根。
+标准 PNJL 多点路径默认使用 `EndpointAnchor()`：从较高参数端取得首个合格根，
+温度路径因此从最高温度起步；等温路径从较高 μ 或 ρ 起步。正常路径只建立一个锚点。
+首个初猜失败才尝试互补初猜和另一端；延拓仍有缺点时恢复目录搜索。
+`SeedPoolAnchor()` 可显式保留中点与两端的完整目录搜索。单点路径、RPNJL 和
+`FixedEntropy` 的 PALC 继续默认使用目录策略。
 `SingleSeedAnchor(value, seed)` 配合 `PALCContinuation()` 使用同一延拓算法，但只从一个
 初值建立锚点并关闭 catalog fallback，适合研究已知解支；它不是第四个 `continuation` 符号。
 
@@ -174,8 +179,11 @@ result = Models.solve_path(model, path;
 points = Models.selected_path_results(model, result)
 ```
 
-PALC 从中点和两端发现不同根，沿弧长双向推进，并把目标交点作为初值校正；未得到合格根的
-目标点进行候选池回退。有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
+PALC 默认 `anchor_strategy=nothing` 按上述模型和路径选择锚点策略；可显式传入
+`EndpointAnchor()`、`SeedPoolAnchor()` 或 `SingleSeedAnchor(value,seed)`。
+`EndpointAnchor` 使用双向延拓的全部目标交点；`anchor_values` 仅用于目录策略。
+诊断的 `anchor_strategy` 为 `:endpoint_anchor` 或实际触发恢复时的 `:endpoint_catalog_recovery`。
+有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
 `GroundStateBranchPolicy`；相图中的相共存仍由上层 Maxwell 等构造判断。
 `selected_path_results` 返回按原路径排列的 `Union{Nothing,SolverResult}` 向量；失败为
 `nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。

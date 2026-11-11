@@ -16,8 +16,9 @@ function endpoint_seed(path, value, side)
     return Models.get_seed(Models.DefaultSeed(phase_hint=side), theta, mode)
 end
 
-"""Two natural-parameter sweeps, one root solve per point and no seed-catalog fallback."""
-function dual_endpoint_path(model, path, work)
+"""Natural-parameter sweeps, one root solve per point and no seed-catalog fallback."""
+function dual_endpoint_path(model, path, work; sweep::Symbol=:both)
+    sweep in (:both, :forward, :reverse) || throw(ArgumentError("unknown natural sweep $(sweep)"))
     started = time()
     options = Models._path_options(model, path; iterations=300)
     residual = Models._path_residual(model, path, options)
@@ -27,6 +28,7 @@ function dual_endpoint_path(model, path, work)
     failures = 0
     messages = String[]
     for (direction, grid, side) in ((:forward, values, :hadron), (:reverse, reverse(values), :quark))
+        sweep === :both || sweep === direction || continue
         seed = endpoint_seed(path, first(grid), side)
         points = Models.BranchPoint[]
         anchor_id = Symbol("endpoint_", direction)
@@ -47,7 +49,8 @@ function dual_endpoint_path(model, path, work)
             points, length(points) == length(values) ? :complete : :partial, (;)))
     end
     selected = Models.apply_branch_policy(branches, Models.GroundStateBranchPolicy())
-    diagnostics = Models.PathDiagnostics(:natural_parameter, :two_endpoints, :ground_state,
+    diagnostics = Models.PathDiagnostics(:natural_parameter,
+        sweep === :both ? :two_endpoints : :one_endpoint, :ground_state,
         time()-started, work.anchor_solves, 0, failures, 0, messages)
     return Models.PathSolveResult(path, selected.branches, selected.selections, anchors, diagnostics)
 end
@@ -55,12 +58,17 @@ end
 function run_method(model, path, method)
     work = Models.PALCWorkTelemetry()
     started = time_ns()
-    result = if method === :dual_endpoint
-        dual_endpoint_path(model, path, work)
+    result = if method in (:dual_endpoint, :natural_low, :natural_high)
+        sweep = method === :dual_endpoint ? :both : method === :natural_low ? :forward : :reverse
+        dual_endpoint_path(model, path, work; sweep)
+    elseif method === :hot_start
+        hot_start_path(model,path,work)
     else
         values = Models._path_values(path)
         anchor = if method === :catalog
             Models.SeedPoolAnchor()
+        elseif method === :auto
+            nothing
         else
             low = method === :single_low
             value = low ? minimum(values) : maximum(values)
@@ -72,6 +80,36 @@ function run_method(model, path, method)
     selected = Models.selected_path_results(model, result; iterations=300, path_work=work)
     seconds = (time_ns()-started)/1e9
     return (; result, selected, seconds, work=Models.palc_work_snapshot(work))
+end
+
+function hot_start_path(model, path::Models.FixedMuPath, work)
+    started = time()
+    value = maximum(path.mu_values)
+    initial_T = max(250/HBARC,path.T_fm)
+    grid = collect(range(initial_T,path.T_fm;length=max(2,ceil(Int,(initial_T-path.T_fm)*HBARC/20)+1)))
+    seed = Models.get_seed(Models.DefaultSeed(phase_hint=:quark),[initial_T,value],Models.FixedMu())
+    root = nothing
+    for T in grid
+        point_path = Models.FixedMuPath(T,[value];xi=path.xi,p_num=path.p_num,t_num=path.t_num)
+        options = Models._path_options(model,point_path;iterations=300)
+        residual = Models._path_residual(model,point_path,options)
+        root = Models._path_root(model,point_path,value,seed,residual,options,work;source=:anchor)
+        if root === nothing || !root.converged
+            points = [Models.BranchPoint(v,Float64[],zeros(5),zeros(3),NaN,NaN,Inf,false,:failed,i)
+                for (i,v) in enumerate(Models._path_values(path))]
+            branches = [Models.ContinuationBranch(:hot_start,:hot_anchor,:temperature_bridge,
+                points,:partial,(;))]
+            selected = Models.apply_branch_policy(branches,Models.GroundStateBranchPolicy())
+            diagnostics = Models.PathDiagnostics(:bifurcationkit,:hot_start,:ground_state,
+                time()-started,work.anchor_solves,0,length(points),0,
+                ["High-temperature anchor bridge failed at T=$(T*HBARC) MeV"])
+            return Models.PathSolveResult(path,branches,selected.selections,Models.AnchorRoot[],diagnostics)
+        end
+        seed = root.solution
+    end
+    return Models._solve_palc_path(model,path,Models.PALCContinuation();
+        anchor_strategy=Models.SingleSeedAnchor(value,root.solution),initial_anchor=root,
+        path_work=work,iterations=300)
 end
 
 function all_root_records(model, path, result)
@@ -105,11 +143,34 @@ function write_records(destination, records)
     end
 end
 
-function run_comparison(destination; repetitions=3)
+function anchor_comparison_cases()
+    cases = Tuple{Symbol,Models.EquilibriumPath}[]
+    for T in (100.0,120.0,200.0), xi in (0.0,0.4)
+        push!(cases, (Symbol("tmu_t$(Int(T))_xi$(Int(10xi))"),
+            Models.FixedMuPath(T/HBARC, collect(0.0:15.0:450.0)./HBARC; xi,p_num=24,t_num=8)))
+    end
+    push!(cases, (:tmu_t120_fine,
+        Models.FixedMuPath(120/HBARC, collect(296.0:0.25:318.0)./HBARC; p_num=24,t_num=8)))
+    for T in (100.0,120.0,200.0), xi in (0.0,0.4), asymmetric in (false,true)
+        grid = vcat(0.0,collect(0.2:0.15:3.5))
+        path = asymmetric ? Models.FixedAsymmetricRhoPath(T/HBARC,grid;xi,p_num=24,t_num=8) :
+            Models.FixedRhoPath(T/HBARC,grid;xi,p_num=24,t_num=8)
+        push!(cases,(Symbol("$(asymmetric ? "asym" : "rho")_t$(Int(T))_xi$(Int(10xi))"),path))
+    end
+    push!(cases, (:sigma, Models.ConstraintTPath(Models.FixedSigma(12.0759),
+        collect(100.0:2.0:140.0)./HBARC;p_num=24,t_num=8)))
+    push!(cases, (:bqs, Models.ConstraintTPath(Models.FixedMuBConservedCharges(900/HBARC),
+        collect(100.0:3.0:160.0)./HBARC;p_num=24,t_num=8)))
+    push!(cases, (:entropy, Models.ConstraintTPath(Models.FixedEntropy(0.5),
+        collect(100.0:1.0:120.0)./HBARC;p_num=24,t_num=8)))
+    return cases
+end
+
+function run_comparison(destination; repetitions=3, scope="endpoints")
     1 <= repetitions <= 3 || throw(ArgumentError("repetitions must be 1..3"))
     BLAS.set_num_threads(1)
     model = Models.create_model(:PNJL)
-    cases = [
+    cases = scope == "anchors" ? anchor_comparison_cases() : [
         (:tmu_t120, Models.FixedMuPath(120/HBARC, collect(260.0:2.0:380.0)./HBARC; p_num=24,t_num=8)),
         (:tmu_t120_fine, Models.FixedMuPath(120/HBARC, collect(296.0:0.25:318.0)./HBARC; p_num=24,t_num=8)),
         (:rho_t120, Models.FixedRhoPath(120/HBARC, collect(0.2:0.05:3.5); p_num=24,t_num=8)),
@@ -117,7 +178,14 @@ function run_comparison(destination; repetitions=3)
     ]
     records = NamedTuple[]
     for (name,path) in cases, repetition in 1:repetitions
-        for method in circshift(collect(METHODS), repetition-1)
+        methods = if scope == "anchors"
+            path isa Union{Models.FixedRhoPath,Models.FixedAsymmetricRhoPath} ?
+                (:catalog,:auto,:natural_low,:natural_high) :
+                name in (:tmu_t120_xi0,:tmu_t200_xi0) ? (:catalog,:auto,:hot_start) : (:catalog,:auto)
+        else
+            METHODS
+        end
+        for method in circshift(collect(methods), repetition-1)
             println("START ",name,"/",method," round ",repetition)
             flush(stdout)
             run = run_method(model,path,method)
@@ -136,5 +204,6 @@ end
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    PALCEndpointComparison.run_comparison(ARGS[1]; repetitions=length(ARGS)>=2 ? parse(Int,ARGS[2]) : 3)
+    PALCEndpointComparison.run_comparison(ARGS[1]; repetitions=length(ARGS)>=2 ? parse(Int,ARGS[2]) : 3,
+        scope=length(ARGS)>=3 ? ARGS[3] : "endpoints")
 end

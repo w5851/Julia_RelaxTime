@@ -27,6 +27,8 @@ end
         @test auto.failure == single.failure == 0
         @test length(paths) == 1
         @test only(paths).diagnostics.continuation_backend === :bifurcationkit
+        @test only(paths).diagnostics.anchor_strategy === :endpoint_anchor
+        @test length(only(paths).anchors) == 1
         @test callback_order == grid
         lines = readlines(file)
         @test all(line -> occursin("continuation=palc", line), lines[2:end])
@@ -56,6 +58,26 @@ end
         @test resumed.failure == 0
         @test read(partial) == read(file)
     end
+end
+
+@testset "Automatic single anchor retains the three roots of a first-order slice" begin
+    model = Models.create_model(:PNJL)
+    hbarc = Main.Constants_PNJL.ħc_MeV_fm
+    path = Models.FixedMuPath(120/hbarc,collect(296.0:0.5:318.0)./hbarc;p_num=24,t_num=8)
+    result = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation())
+    @test result.diagnostics.anchor_strategy === :endpoint_anchor
+    @test result.diagnostics.anchor_solve_count == 1
+    @test result.diagnostics.failure_count == 0
+    target = 308/hbarc
+    roots = [point for branch in result.branches for point in branch.points
+        if point.param_value == target && point.converged]
+    @test length(roots) == 3
+    catalog = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation(),
+        anchor_strategy=Models.SeedPoolAnchor())
+    reference = sort([point.rho_norm for branch in catalog.branches for point in branch.points
+        if point.param_value == target && point.converged])
+    @test sort([point.rho_norm for point in roots]) ≈ reference atol=1e-6
+    @test all(point -> point.residual_norm < 1e-6,roots)
 end
 
 @testset "Qualified density scans use PALC and preserve first-order structure" begin

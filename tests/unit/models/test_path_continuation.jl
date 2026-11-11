@@ -212,6 +212,27 @@ end
         @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
     end
 
+    @testset "Endpoint starts preserve path constraints and explicit catalogs" begin
+        model = Models.create_model(:PNJL)
+        path = Models.FixedMuPath(120/197.327, [1.4,1.6]; p_num=24,t_num=8)
+        @test Models._default_path_anchor(model,path) isa Models.EndpointAnchor
+        @test Models._default_path_anchor(Models.create_model(:RPNJL),path) isa Models.SeedPoolAnchor
+        @test Models._default_path_anchor(model,Models.FixedMuPath(1.0,[1.5])) isa Models.SeedPoolAnchor
+        attempts = Models._endpoint_anchor_attempts(path)
+        @test first(attempts).value == maximum(path.mu_values)
+        @test all(a -> length(a.seed)==5, attempts)
+        @test first(attempts).seed == Models.get_seed(Models.DefaultSeed(phase_hint=:quark),
+            [path.T_fm,maximum(path.mu_values)],Models.FixedMu())
+        thermal = Models.ConstraintTPath(Models.FixedSigma(12.0),[0.8,0.5,0.6])
+        @test first(Models._endpoint_anchor_attempts(thermal)).value == 0.8
+        @test all(a -> length(a.seed)==8, Models._endpoint_anchor_attempts(thermal))
+        entropy = Models.ConstraintTPath(Models.FixedEntropy(0.5),[0.5,0.6])
+        @test Models._default_path_anchor(model,entropy) isa Models.SeedPoolAnchor
+        @test_throws ArgumentError Models.solve_path(model,path;
+            continuation_strategy=Models.PALCContinuation(),anchor_strategy=Models.EndpointAnchor(),
+            anchor_values=[1.5])
+    end
+
     @testset "Temperature paths retain constraint targets and input order" begin
         modes = (Models.FixedEntropy(0.5), Models.FixedSigma(12.0),
             Models.FixedMuBConservedCharges(4.5))
