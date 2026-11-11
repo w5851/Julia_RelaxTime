@@ -45,6 +45,8 @@ def summarize(output, collect=None):
             methods[method] = dict(config=first["config"],rows=first["rows"],all_roots=first["all_roots"],
                 timings_seconds=times, warm_median=statistics.median(times[1:]) if len(times)>1 else None,
                 work=rounds[-1]["work"],diagnostics=first["diagnostics"],
+                repeated_rows_exact=all(r["rows"] == first["rows"] for r in rounds),
+                repeated_candidates_exact=all(r["all_roots"] == first["all_roots"] for r in rounds),
                 repeat_checks=[dict(selected=compare(first,r),candidates=root_coverage(first,r)) for r in rounds[1:]])
         comparisons = {}
         if "catalog" in methods:
@@ -54,7 +56,16 @@ def summarize(output, collect=None):
                 warm = record["warm_median"]
                 lines.append(f'| {name} | {method} | {warm:.6f} | {result["selected"]["same"]} | {result["candidates"]["same"]} |'
                              if warm is not None else f'| {name} | {method} | — | {result["selected"]["same"]} | {result["candidates"]["same"]} |')
-        compact["cases"][name] = dict(methods=methods,comparisons=comparisons)
+        # Keep the reference states once, plus every method's measured cost and
+        # comparison. Raw repeated state arrays remain in the Actions artifact.
+        reference = methods.get("catalog", next(iter(methods.values())))
+        retained_methods = {}
+        for method, record in methods.items():
+            retained_methods[method] = {k:v for k,v in record.items() if k not in ("rows","all_roots","config")}
+            retained_methods[method]["candidate_counts"] = [len(row["roots"]) for row in record["all_roots"]]
+        compact["cases"][name] = dict(config=reference["config"],
+            reference_rows=reference["rows"],reference_all_roots=reference["all_roots"],
+            methods=retained_methods,comparisons=comparisons)
     (output/"summary.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
     target = collect or output/"endpoint_compact.json"
     target.parent.mkdir(parents=True,exist_ok=True)

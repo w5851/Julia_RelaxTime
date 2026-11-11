@@ -450,21 +450,23 @@ updated_at = "2026-11-10"
 [[tracks]]
 id = "palc-anchor-optimization"
 title = "PALC anchor discovery cost and branch reuse"
-status = "triaged"
+status = "active"
 current_task = "palc-anchor-search-optimization"
 blocked_by = []
 unlocks = ["item:full-temperature-reference-pr3"]
-next_action = "先核对锚点逐初值成本、重复根与失败尝试，再评估相邻路径分支复用和按需补种子；用少量代表路径验证覆盖、选解与耗时后收尾，随后推进 PR3。"
+next_action = "双端点普通延拓基准已完成：T120 稳定态一致，Tmu 中间根由单锚点 PALC 补全；下一步据实际消费者选择起点/按需补充搜索策略，并核对失败种子成本与覆盖，再收尾进入 PR3。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "main"
 current_sha = "d3648d74358326825ce4e7c8b0465a2e278d5665"
-run_ids = ["42809611507"]
+run_ids = ["42809611507", "42961632594"]
 evidence = [
   "pr:342",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "file:data/outputs/results/analysis/palc_matched_20261108/constraint_comparison.json",
+  "file:data/outputs/results/analysis/palc_matched_20261108/endpoint_comparison.json",
+  "note:two_endpoint_benchmark_t120_selected_states_match_but_tmu_middle_roots_missing_single_anchor_covers_all",
   "note:author_20261111_continue_palc_before_consumer_targeted_low_temperature_pr3",
 ]
 updated_at = "2026-11-11"
@@ -1185,17 +1187,19 @@ evidence = [
 id = "palc-anchor-search-optimization"
 track_id = "palc-anchor-optimization"
 classification = "required_follow_up"
-status = "triaged"
+status = "active"
 parent = "item:palc-matched-performance-diagnostic"
 task_file = "docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md"
 reason = "PR #342 已交付三类约束路径与单锚点入口；现有 T120 对照显示锚点搜索是主要成本，作者要求继续处理 PALC，并将 PR3 排在其后。"
-next_action = "补齐逐初值耗时与重复根分布，评估分支复用和按需搜索；核对一阶区分支、压力选择及相变位置，完成小规模性能验证。"
+next_action = "双端点/单锚点同口径小对照已完成；继续明确生产起点选择和按需补种子策略，结合失败种子成本与候选覆盖核验，保持 PR3 在其后。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "pr:342",
   "sha:d3648d74358326825ce4e7c8b0465a2e278d5665",
   "run:42809611507",
+  "run:42961632594",
+  "file:data/outputs/results/analysis/palc_matched_20261108/endpoint_comparison.json",
   "file:data/outputs/results/analysis/palc_matched_20261108/constraint_comparison.json",
   "note:author_20261111_palc_anchor_optimization_precedes_pr3",
 ]
