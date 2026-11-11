@@ -77,6 +77,9 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--repetitions",type=int,default=3)
+    parser.add_argument("--scope",choices=("endpoints","anchors","promotion"),default="endpoints")
+    parser.add_argument("--cases",default="all",help="Comma separated path names, or all")
+    parser.add_argument("--probe-anchors",action="store_true")
     parser.add_argument("--budget-seconds",type=int,default=900)
     parser.add_argument("--summarize-only",action="store_true")
     parser.add_argument("--collect",type=Path)
@@ -87,7 +90,8 @@ def main():
     code=0
     if not args.summarize_only and args.collect is None:
         cmd=["julia","--startup-file=no","--project=.","scripts/analysis/pnjl_bifurcation_spike/run_endpoint_comparison.jl",
-             str((args.output/"endpoint_comparison.json").resolve()),str(args.repetitions)]
+             str((args.output/"endpoint_comparison.json").resolve()),str(args.repetitions),args.scope,
+             args.cases,str(args.probe_anchors).lower()]
         try:
             code=subprocess.run(cmd,cwd=ROOT,timeout=args.budget_seconds,check=False).returncode
         except subprocess.TimeoutExpired:

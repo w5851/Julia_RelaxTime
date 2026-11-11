@@ -1,5 +1,5 @@
 schema_version = 1
-primary_track = "palc-anchor-optimization"
+primary_track = "full-temperature-reference-research"
 updated_at = "2026-11-11"
 
 [[tracks]]
@@ -450,18 +450,24 @@ updated_at = "2026-11-10"
 [[tracks]]
 id = "palc-anchor-optimization"
 title = "PALC anchor discovery cost and branch reuse"
-status = "active"
+status = "archived"
 current_task = "palc-anchor-search-optimization"
 blocked_by = []
 unlocks = ["item:full-temperature-reference-pr3"]
-next_action = "双端点普通延拓基准已完成：T120 稳定态一致，Tmu 中间根由单锚点 PALC 补全；下一步据实际消费者选择起点/按需补充搜索策略，并核对失败种子成本与覆盖，再收尾进入 PR3。"
+next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "main"
-current_sha = "d3648d74358326825ce4e7c8b0465a2e278d5665"
-run_ids = ["42809611507", "42961632594"]
+current_sha = "288df6719ef1119231afc4423c4bebb7061cbbc2"
+run_ids = ["42809611507", "42961632594", "42981541901", "42984494212", "42989232207", "42990971779"]
 evidence = [
+  "pr:345",
+  "sha:288df6719ef1119231afc4423c4bebb7061cbbc2",
+  "file:data/outputs/results/analysis/palc_matched_20261108/anchor_optimization.json",
+  "run:42990977061",
+  "note:single_endpoint_palc_and_descending_density_defaults_qualified_all_candidate_roots_match_integration_883_of_883",
+  "note:fixed_entropy_sign_selection_and_magnetic_extension_are_future_consumer_specific_work_not_current_blockers",
   "pr:342",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "file:data/outputs/results/analysis/palc_matched_20261108/constraint_comparison.json",
@@ -474,11 +480,11 @@ updated_at = "2026-11-11"
 [[tracks]]
 id = "full-temperature-reference-research"
 title = "Low-temperature consumer and target-derivative convergence"
-status = "deferred"
+status = "ready"
 current_task = "full-temperature-reference-pr3"
-blocked_by = ["item:palc-anchor-search-optimization"]
+blocked_by = []
 unlocks = []
-next_action = "PALC 锚点搜索优化收尾后，按实际低温消费者选择少量代表点，核验目标量及所需导数的积分与求解收敛；达到约定精度即可结束。"
+next_action = "PALC 算法优化与代表路径验证已完成；下一步识别实际低温消费者，确定温区、导数阶数和误差目标，再检查少量代表点的积分与求解收敛。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -491,6 +497,8 @@ evidence = [
   "pr:139",
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261111_rescope_pr3_to_low_temperature_consumer_and_target_derivative_convergence_after_palc",
+  "pr:345",
+  "note:palc_anchor_optimization_complete_pr3_ready_computation_not_started",
 ]
 updated_at = "2026-11-11"
 
@@ -1187,14 +1195,20 @@ evidence = [
 id = "palc-anchor-search-optimization"
 track_id = "palc-anchor-optimization"
 classification = "required_follow_up"
-status = "active"
+status = "archived"
 parent = "item:palc-matched-performance-diagnostic"
 task_file = "docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md"
 reason = "PR #342 已交付三类约束路径与单锚点入口；现有 T120 对照显示锚点搜索是主要成本，作者要求继续处理 PALC，并将 PR3 排在其后。"
-next_action = "双端点/单锚点同口径小对照已完成；继续明确生产起点选择和按需补种子策略，结合失败种子成本与候选覆盖核验，保持 PR3 在其后。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
 evidence = [
+  "pr:345",
+  "sha:288df6719ef1119231afc4423c4bebb7061cbbc2",
+  "run:42984494212",
+  "run:42990971779",
+  "file:data/outputs/results/analysis/palc_matched_20261108/anchor_optimization.json",
+  "note:single_anchor_tmu_sigma_bqs_and_natural_density_defaults_qualified_with_full_candidate_parity",
   "pr:342",
   "sha:d3648d74358326825ce4e7c8b0465a2e278d5665",
   "run:42809611507",
@@ -1208,12 +1222,12 @@ evidence = [
 id = "full-temperature-reference-pr3"
 track_id = "full-temperature-reference-research"
 classification = "research"
-status = "deferred"
+status = "ready"
 parent = "track:full-temperature-reference-research"
-task_file = ""
+task_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
 reason = "低温积分算法已由 PR #137 交付；作者将 PR3 收敛为实际低温消费者及目标导数的代表点核验，安排在 PALC 锚点搜索优化之后。"
-next_action = "PALC 收尾后确定消费者、低温窗口、导数阶数和误差目标；比较少量固定态与自洽点的容差/节点收敛，发现具体精度问题时再优化积分器。"
-blocked_by = ["item:palc-anchor-search-optimization"]
+next_action = "确定消费者、低温窗口、导数阶数和误差目标；比较少量固定态与自洽点的容差/节点收敛，发现具体精度问题时再优化积分器。"
+blocked_by = []
 backlog_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
 evidence = [
   "pr:137",
@@ -1221,6 +1235,8 @@ evidence = [
   "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
   "note:issue130_phase_and_transport_v15_completed_independently_new_full_temperature_production_deferred",
   "note:author_20261111_pr3_consumer_targeted_convergence_replaces_full_temperature_reference_production_scope",
+  "pr:345",
+  "note:palc_complete_pr3_ready_no_new_low_temperature_computation_yet",
 ]
 
 [[items]]

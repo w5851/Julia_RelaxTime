@@ -15,6 +15,10 @@ Base.@kwdef mutable struct PALCWorkTelemetry
     fallback_solves::Int = 0
     rejected_roots::Int = 0
     exceptions::Int = 0
+    root_time_s::Float64 = 0.0
+    root_candidate_time_s::Float64 = 0.0
+    continuation_time_s::Float64 = 0.0
+    selected_rebuild_time_s::Float64 = 0.0
 end
 
 palc_work_snapshot(work::PALCWorkTelemetry) =
@@ -100,6 +104,7 @@ end
 
 function _path_root(model, path, value, seed, residual, options, work;
     source::Symbol=:correction, work_telemetry=nothing)
+    started = time_ns()
     work.root_solves += 1
     source === :anchor && (work.anchor_solves += 1)
     source === :correction && (work.correction_solves += 1)
@@ -116,8 +121,10 @@ function _path_root(model, path, value, seed, residual, options, work;
             ftol=1e-9, xtol=1e-9, iterations=options.iteration_limit)
         record_nlsolve_work!(work_telemetry, root, :trust_region)
         work.postprocess_residual_calls += 1
+        candidate_started = time_ns()
         candidate = _path_candidate(model, path, value, Float64.(root.zero),
             residual, root.iterations, options)
+        work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         !candidate.converged && (work.rejected_roots += 1)
         return candidate
     catch err
@@ -125,6 +132,8 @@ function _path_root(model, path, value, seed, residual, options, work;
         err isa Union{MethodError,UndefVarError} && rethrow()
         work.exceptions += 1
         return nothing
+    finally
+        work.root_time_s += (time_ns() - started) / 1e9
     end
 end
 
@@ -177,8 +186,8 @@ end
 function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
     thermo_policy::Symbol, semantic_mode::Symbol, selector, point_count::Integer;
     constraint_mode::Symbol=:fixed_rho, controls_supported::Bool=true)
-    strategy in (:auto, :legacy, :single_pass, :palc) || throw(ArgumentError(
-        "continuation must be :auto, :legacy, :single_pass or :palc, got $(strategy)"))
+    strategy in (:auto, :legacy, :single_pass, :palc, :natural) || throw(ArgumentError(
+        "continuation must be :auto, :legacy, :single_pass, :palc or :natural, got $(strategy)"))
     supported = model_kind in (:PNJL, :RPNJL) && thermo_policy === :tensor_gauss &&
         semantic_mode === :ground_state && selector === nothing && controls_supported &&
         constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho,
@@ -190,9 +199,12 @@ function resolve_scan_continuation(strategy::Symbol, model_kind::Symbol,
         qualified = supported && model_kind === :PNJL && point_count >= minimum_points &&
             constraint_mode in (:fixed_mu, :fixed_rho, :fixed_asymmetric_rho,
                 :fixed_sigma, :fixed_mub_conserved_charges)
-        return qualified ? :palc : :legacy
+        qualified || return :legacy
+        return constraint_mode in (:fixed_rho,:fixed_asymmetric_rho) ? :natural : :palc
     end
-    strategy in (:palc, :single_pass) && !supported && throw(ArgumentError(
+    strategy === :natural && !(constraint_mode in (:fixed_rho,:fixed_asymmetric_rho)) &&
+        throw(ArgumentError("natural continuation requires a density path"))
+    strategy in (:palc, :single_pass, :natural) && !supported && throw(ArgumentError(
         "$(strategy) scan requires PNJL/RPNJL, tensor_gauss, the standard ground_state selector " *
         "and supported path solver controls"))
     return strategy
@@ -262,11 +274,104 @@ function _palc_curve(residual, root, value, bounds, strategy, work; positive_par
         ds=strategy.ds, dsmax=strategy.dsmax, max_steps=strategy.max_steps,
         detect_bifurcation=0, newton_options=BifurcationKit.NewtonPar(
             tol=strategy.newton_tol, max_iterations=strategy.newton_max_iterations))
-    curve = BifurcationKit.continuation(problem, BifurcationKit.PALC(), options;
-        bothside=true, verbosity=0)
+    started = time_ns()
+    curve = try
+        BifurcationKit.continuation(problem, BifurcationKit.PALC(), options;
+            bothside=true, verbosity=0)
+    finally
+        work.continuation_time_s += (time_ns() - started) / 1e9
+    end
     points = [(; param=Float64(point.param), solution=Float64.(point.solution)) for point in curve.branch]
     work.continuation_points += length(points)
     return points
+end
+
+function _default_path_anchor(model, path)
+    qualified = model isa PNJLModel && length(unique(_path_values(path))) > 1 &&
+        !(path isa ConstraintTPath{FixedEntropy})
+    return qualified ? EndpointAnchor() : SeedPoolAnchor()
+end
+
+"""Cheap starting guesses at the high endpoint, then the opposite endpoint."""
+function _endpoint_anchor_attempts(path)
+    low, high = extrema(_path_values(path))
+    temperature = _path_temperature(path, high)
+    hot = temperature * 197.327 > 150.0
+    hint = if path isa FixedMuPath
+        SeedStrategies.auto_phase_hint(temperature, high)
+    elseif path isa Union{FixedRhoPath,FixedAsymmetricRhoPath}
+        hot || high >= 1.0 ? :quark : :hadron
+    else
+        hot ? :quark : :hadron
+    end
+    attempts = NamedTuple[]
+    for (value, phase) in ((high, hint), (high, hint === :quark ? :hadron : :quark),
+                           (low, :auto), (low,:quark))
+        theta = path isa FixedMuPath ? [_path_temperature(path, value), value] :
+            [_path_temperature(path, value)]
+        seed = get_seed(DefaultSeed(; phase_hint=phase), theta, _path_mode(path, value))
+        if path isa ConstraintTPath{FixedSigma} && value == high && phase === :hadron
+            # A finite entropy per baryon benefits from a seed with nonzero
+            # thermal occupation, rather than the nearly vacuum Polyakov loop.
+            seed = SeedStrategies.extend_seed(SeedStrategies.MEDIUM_SEED_5, _path_mode(path,value))
+        end
+        any(a -> a.value == value && a.seed == seed, attempts) && continue
+        push!(attempts, (; value, seed))
+    end
+    return attempts
+end
+
+function _solve_endpoint_palc_path(model, path, strategy;
+    branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+    started = time()
+    options = _path_options(model, path; kwargs...)
+    residual = _path_residual(model, path, options)
+    messages = String[]
+    attempted_roots = NamedTuple[]
+    for attempt in _endpoint_anchor_attempts(path)
+        root = _path_root(model, path, attempt.value, attempt.seed, residual, options, path_work;
+            source=:anchor, work_telemetry)
+        root === nothing && continue
+        root.converged || continue
+        any(r -> r.value == attempt.value && _solution_distance(r.solution,root.solution) <= 1e-5,
+            attempted_roots) && continue
+        push!(attempted_roots,(;value=attempt.value,solution=root.solution))
+        exceptions_before = path_work.exceptions
+        result = _solve_palc_path(model, path, strategy;
+            anchor_strategy=SingleSeedAnchor(attempt.value, root.solution),
+            initial_anchor=root, boundary_correction=true,
+            branch_policy, diagnostic_level, branch_jump_tol,
+            path_work, work_telemetry, kwargs...)
+        if result.diagnostics.failure_count > 0 && path_work.exceptions > exceptions_before
+            append!(messages,result.diagnostics.messages)
+            push!(messages,"Retrying endpoint PALC from the same root with smaller steps.")
+            reduced = PALCContinuation(ds=strategy.ds/10,dsmax=strategy.dsmax/5,
+                max_steps=strategy.max_steps,newton_tol=strategy.newton_tol,
+                newton_max_iterations=strategy.newton_max_iterations)
+            result = _solve_palc_path(model,path,reduced;
+                anchor_strategy=SingleSeedAnchor(attempt.value,root.solution),
+                initial_anchor=root,boundary_correction=true,
+                branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
+        end
+        if result.diagnostics.failure_count == 0
+            diagnostics = PathDiagnostics(:bifurcationkit, :endpoint_anchor,
+                _policy_symbol(branch_policy), time()-started, path_work.anchor_solves,
+                path_work.continuation_points, 0, result.diagnostics.branch_jump_count,
+                vcat(messages,result.diagnostics.messages))
+            return PathSolveResult(path, result.branches, result.selections, result.anchors, diagnostics)
+        end
+        append!(messages, result.diagnostics.messages)
+        push!(messages, "Endpoint continuation left $(result.diagnostics.failure_count) targets unresolved; trying another endpoint root.")
+    end
+    isempty(messages) && push!(messages, "Endpoint guesses did not establish a complete path; using catalog recovery.")
+    result = _solve_palc_path(model, path, strategy; anchor_strategy=SeedPoolAnchor(),
+        branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+    append!(messages, result.diagnostics.messages)
+    diagnostics = PathDiagnostics(:bifurcationkit, :endpoint_catalog_recovery,
+        _policy_symbol(branch_policy), time()-started, path_work.anchor_solves,
+        path_work.continuation_points, result.diagnostics.failure_count,
+        result.diagnostics.branch_jump_count, messages)
+    return PathSolveResult(path, result.branches, result.selections, result.anchors, diagnostics)
 end
 
 function _candidate_path_point(value, candidate, source, step)
@@ -276,12 +381,20 @@ function _candidate_path_point(value, candidate, source, step)
 end
 
 function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuation;
-    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    anchor_strategy::Union{Nothing,AbstractAnchorStrategy}=nothing,
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary, branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
     path_work::PALCWorkTelemetry=PALCWorkTelemetry(), work_telemetry=nothing,
-    anchor_values=nothing, kwargs...)
+    anchor_values=nothing, initial_anchor=nothing, boundary_correction::Bool=false, kwargs...)
     diagnostic_level in (:summary, :full) || throw(ArgumentError("diagnostic_level must be :summary or :full"))
+    if anchor_strategy === nothing
+        anchor_strategy = anchor_values === nothing ? _default_path_anchor(model, path) : SeedPoolAnchor()
+    end
+    if anchor_strategy isa EndpointAnchor
+        anchor_values === nothing || throw(ArgumentError("EndpointAnchor selects its own endpoint; omit anchor_values"))
+        return _solve_endpoint_palc_path(model, path, strategy;
+            branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+    end
     anchor_strategy isa Union{SeedPoolAnchor,MultiSeedAnchor,SingleSeedAnchor} || throw(ArgumentError(
         "select SeedPoolAnchor, MultiSeedAnchor or SingleSeedAnchor"))
     anchor_strategy isa MultiSeedAnchor && !anchor_strategy.evaluate_all_attempts &&
@@ -310,8 +423,9 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         roots = NamedTuple[]
         seeds = single_seed ? [anchor_strategy.seed] : _path_catalog(path, value)
         for seed in seeds
-            candidate = _path_root(model, path, value, seed, residual, options, path_work;
-                source=:anchor, work_telemetry)
+            candidate = single_seed && initial_anchor !== nothing ? initial_anchor :
+                _path_root(model, path, value, seed, residual, options, path_work;
+                    source=:anchor, work_telemetry)
             _push_distinct_path_root!(roots, candidate)
         end
         covered = NamedTuple[]
@@ -346,7 +460,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     for (step, value) in enumerate(values)
         accepted = NamedTuple[]
         for (i, curve) in enumerate(curves)
-            for seed in _palc_target_seeds(curve, value)
+            nearest = boundary_correction && value in extrema(values)
+            for seed in _palc_target_seeds(curve, value; nearest)
                 candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry)
                 if _push_distinct_path_root!(accepted, candidate)
                     push!(branch_points[i], _candidate_path_point(value, candidate, :palc_corrected, step))
@@ -387,8 +502,65 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     return PathSolveResult(path, selected.branches, selected.selections, anchors, diagnostics)
 end
 
+function _solve_natural_path(model, path; anchor_strategy=nothing,
+    branch_policy=GroundStateBranchPolicy(),diagnostic_level=:summary,
+    branch_jump_tol=DEFAULT_PATH_BRANCH_JUMP_TOL,path_work=PALCWorkTelemetry(),
+    work_telemetry=nothing,recovery_strategy::PALCContinuation=PALCContinuation(),kwargs...)
+    path isa Union{FixedRhoPath,FixedAsymmetricRhoPath} ||
+        throw(ArgumentError("NaturalContinuation requires FixedRhoPath or FixedAsymmetricRhoPath"))
+    anchor_strategy === nothing || anchor_strategy isa EndpointAnchor ||
+        throw(ArgumentError("NaturalContinuation selects an endpoint; use EndpointAnchor or omit anchor_strategy"))
+    diagnostic_level in (:summary,:full) || throw(ArgumentError("invalid diagnostic_level"))
+    jump_tol = _path_positive_real(branch_jump_tol,:branch_jump_tol)
+    started = time()
+    options = _path_options(model,path;kwargs...)
+    residual = _path_residual(model,path,options)
+    values = sort!(unique(_path_values(path));rev=true)
+    root = nothing
+    for attempt in _endpoint_anchor_attempts(path)
+        attempt.value == first(values) || continue
+        candidate = _path_root(model,path,attempt.value,attempt.seed,residual,options,path_work;
+            source=:anchor,work_telemetry)
+        candidate === nothing && continue
+        candidate.converged || continue
+        root = candidate
+        break
+    end
+    points = BranchPoint[]
+    anchors = AnchorRoot[]
+    for (step,value) in enumerate(values)
+        root === nothing && break
+        if step > 1
+            root = _path_root(model,path,value,root.solution,residual,options,path_work;work_telemetry)
+            root === nothing && break
+            root.converged || break
+        end
+        point = _candidate_path_point(value,root,:natural_corrected,step)
+        push!(points,point)
+        step == 1 && push!(anchors,_anchor_from_branch_point(:natural_anchor,point,1))
+    end
+    if length(points) != length(values)
+        result = _solve_endpoint_palc_path(model,path,recovery_strategy;
+            branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
+        diagnostics = PathDiagnostics(:natural_palc_recovery,result.diagnostics.anchor_strategy,
+            _policy_symbol(branch_policy),time()-started,path_work.anchor_solves,
+            path_work.continuation_points,result.diagnostics.failure_count,
+            result.diagnostics.branch_jump_count,
+            vcat(["Descending density continuation stopped; recovered with PALC."],result.diagnostics.messages))
+        return PathSolveResult(path,result.branches,result.selections,result.anchors,diagnostics)
+    end
+    branches = [ContinuationBranch(:natural,:natural_anchor,:natural_parameter,points,:complete,
+        (;work=palc_work_snapshot(path_work)))]
+    selected = apply_branch_policy(branches,branch_policy)
+    diagnostics = PathDiagnostics(:natural_parameter,:endpoint_anchor,_policy_symbol(branch_policy),
+        time()-started,path_work.anchor_solves,length(points),0,
+        _path_branch_jump_metrics(branches;tol=jump_tol).count,String[])
+    return PathSolveResult(path,selected.branches,selected.selections,anchors,diagnostics)
+end
+
 """Rebuild SolverResult v1 at exactly the requested points, preserving input order."""
 function selected_path_results(model, result::PathSolveResult; kwargs...)
+    started = time_ns()
     path = result.path
     options = _path_options(model, path; kwargs...)
     path_work = get(kwargs, :path_work, nothing)
@@ -412,6 +584,7 @@ function selected_path_results(model, result::PathSolveResult; kwargs...)
             candidate.rho_norm, candidate.entropy, candidate.energy, candidate.masses,
             candidate.iterations, candidate.residual_norm, path.xi))
     end
+    path_work === nothing || (path_work.selected_rebuild_time_s += (time_ns()-started)/1e9)
     return out
 end
 

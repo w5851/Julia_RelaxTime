@@ -15,6 +15,9 @@ end
         result = Models.solve_path(model, path; iterations=300)
         @test result.diagnostics.continuation_backend === :bifurcationkit
         @test result.diagnostics.failure_count == 0
+        @test result.diagnostics.anchor_strategy === :endpoint_anchor
+        @test result.diagnostics.anchor_solve_count == 1
+        @test length(result.anchors) == 1
         values = Models.selected_path_results(model, result)
         options = Models._path_options(model, path)
         residual = Models._path_residual(model, path, options)

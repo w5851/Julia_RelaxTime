@@ -152,8 +152,12 @@ result = Models.solve_path(model, path; continuation=:palc)
 points = Models.selected_path_results(model, result)
 ```
 
-`continuation=:legacy` 使用逐点求解与连续种子；`:palc` 使用三个位置的种子目录发现、
-双向伪弧长延拓和目标温度处的根校正。`:auto` 对 PNJL 标准控制、至少 21 个温度点的
+`continuation=:legacy` 使用逐点求解与连续种子；`:palc` 使用双向伪弧长延拓和目标温度处的根校正。
+PNJL 的 `FixedSigma` / `FixedMuBConservedCharges` 多点路径默认从最高温度建立一个锚点，
+起点或覆盖失败才恢复搜索；`anchor_strategy=SeedPoolAnchor()` 保留三个位置的目录策略。
+`FixedSigma` 的低温首猜使用已有中密态，使 Polyakov loop 和热占据从非零量开始；
+PALC 延拓异常时先从同一根缩小步长重试。初猜只影响求解过程，结果仍按完整方程和硬约束验收。
+`:auto` 对 PNJL 标准控制、至少 21 个温度点的
 `FixedSigma` / `FixedMuBConservedCharges` 路径默认使用 PALC。短路径、RPNJL 和
 自定义求解控制使用 legacy。`FixedEntropy` 保留 legacy 默认：相同 s 可对应正、负
 mu 的电荷共轭分支，压力微小舍入差会改变符号选择；需要调用者明确分支约束后再使用

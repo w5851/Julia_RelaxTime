@@ -27,6 +27,8 @@ end
         @test auto.failure == single.failure == 0
         @test length(paths) == 1
         @test only(paths).diagnostics.continuation_backend === :bifurcationkit
+        @test only(paths).diagnostics.anchor_strategy === :endpoint_anchor
+        @test length(only(paths).anchors) == 1
         @test callback_order == grid
         lines = readlines(file)
         @test all(line -> occursin("continuation=palc", line), lines[2:end])
@@ -55,28 +57,51 @@ end
         @test resumed.success == length(grid)-3
         @test resumed.failure == 0
         @test read(partial) == read(file)
+
     end
 end
 
-@testset "Qualified density scans use PALC and preserve first-order structure" begin
+@testset "Automatic single anchor retains the three roots of a first-order slice" begin
+    model = Models.create_model(:PNJL)
+    hbarc = Main.Constants_PNJL.ħc_MeV_fm
+    path = Models.FixedMuPath(120/hbarc,collect(296.0:0.5:318.0)./hbarc;p_num=24,t_num=8)
+    result = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation())
+    @test result.diagnostics.anchor_strategy === :endpoint_anchor
+    @test result.diagnostics.anchor_solve_count == 1
+    @test result.diagnostics.failure_count == 0
+    target = 308/hbarc
+    roots = [point for branch in result.branches for point in branch.points
+        if point.param_value == target && point.converged]
+    @test length(roots) == 3
+    catalog = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation(),
+        anchor_strategy=Models.SeedPoolAnchor())
+    reference = sort([point.rho_norm for branch in catalog.branches for point in branch.points
+        if point.param_value == target && point.converged])
+    @test sort([point.rho_norm for point in roots]) ≈ reference atol=1e-6
+    @test all(point -> point.residual_norm < 1e-6,roots)
+end
+
+@testset "Qualified density scans use natural continuation and preserve first-order structure" begin
     mktempdir() do directory
         grid = vcat(0.0, collect(0.2:0.15:3.5))
         rows = Dict{Float64,Any}()
         reference = Dict{Float64,Any}()
-        paths = Ref(0)
+        paths = Models.PathSolveResult[]
         file = joinpath(directory, "auto.csv")
         common = (; T_values=[120.0], rho_values=grid, xi_values=[0.0],
             p_num=24, t_num=8, iterations=300, reverse_rho=true,
             constraint_mode=:fixed_rho, overwrite=true, resume=false)
         auto = Models.run_trho_scan(; common..., output_path=file,
             progress_cb=(point, result) -> (rows[point.rho] = result),
-            path_diagnostics_cb=(point, result) -> (paths[] += 1))
+            path_diagnostics_cb=(point, result) -> push!(paths,result))
         single = Models.run_trho_scan(; common..., continuation=:single_pass,
             output_path=joinpath(directory, "single.csv"),
             progress_cb=(point, result) -> (reference[point.rho] = result))
         @test auto.success == single.success == length(grid)
-        @test paths[] == 1
-        @test all(line -> occursin("continuation=palc", line), readlines(file)[2:end])
+        @test length(paths) == 1
+        @test only(paths).diagnostics.continuation_backend === :natural_parameter
+        @test only(paths).diagnostics.anchor_solve_count == 1
+        @test all(line -> occursin("continuation=natural", line), readlines(file)[2:end])
         for rho in grid
             @test rows[rho].residual_norm < 1e-6
             @test abs(rows[rho].rho_norm - rho) < 1e-6
@@ -98,5 +123,19 @@ end
         @test resumed.skipped == 1
         @test resumed.success == length(grid)-1
         @test read(partial) == read(file)
+
+        phase = Models.run_phase_pipeline(:PNJL;mode=:production,T_grid=[120.0],
+            rho_grid=grid,xi=0.0,output_dir=joinpath(directory,"phase"),continuation=:auto,
+            seed_policy=:candidates,memoize_uniform=true,p_num=24,t_num=8,iterations=300,
+            cep_max_refine_level=0,rho_geometry_convergence=false,promote_reference=false)
+        @test phase.config_snapshot["continuation"] == "auto"
+        phase_csv = joinpath(directory,"phase","trho_scan.csv")
+        @test all(line -> occursin("continuation=natural",line),readlines(phase_csv)[2:end])
+        phase_curves = Models.load_curves_from_trho_csv(phase_csv;xi=0.0,min_points=3)
+        phase_mu,phase_rho = phase_curves[120.0]
+        phase_boundary = Models.maxwell_construction(phase_mu,phase_rho;
+            spinodal_hint=Models.detect_s_shape(phase_mu,phase_rho))
+        @test phase_boundary.converged
+        @test phase_boundary.mu_transition ≈ boundary.mu_transition atol=1e-6
     end
 end

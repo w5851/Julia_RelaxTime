@@ -98,9 +98,18 @@ PNJL 约束接口当前有六种模式；下表的未知量数包含五个平均
 `ConstraintTPath` 接受 `:auto|:legacy|:palc`；`single_pass` 是 Tμ/Tρ 扫描的显式选项。
 
 Tμ/Tρ 扫描的 `:legacy` 逐点复用前一点与多初值搜索；`:single_pass` 将每点候选初值展开，
-减少重复求解；`:palc` 在少数位置搜索锚点，再双向延拓并在目标点重新求根。
+减少重复求解；`:palc` 从锚点双向延拓并在目标点重新求根。
+标准 PNJL 多点路径默认使用 `EndpointAnchor()`：从较高参数端取得首个合格根，
+温度路径因此从最高温度起步；等温路径从较高 μ 或 ρ 起步。正常路径只建立一个锚点。
+首个初猜失败才尝试互补初猜和另一端。延拓异常且目标未覆盖时，从同一已收敛根缩小步长
+重试一次；步数上限保持不变。仍有缺点时尝试其它端点根，最后恢复目录搜索。
+`SeedPoolAnchor()` 可显式保留中点与两端的完整目录搜索。单点路径、RPNJL 和
+`FixedEntropy` 的 PALC 继续默认使用目录策略。
 `SingleSeedAnchor(value, seed)` 配合 `PALCContinuation()` 使用同一延拓算法，但只从一个
-初值建立锚点并关闭 catalog fallback，适合研究已知解支；它不是第四个 `continuation` 符号。
+初值建立锚点并关闭 catalog fallback，适合研究已知解支，通过 `anchor_strategy` 选择。
+Tρ 的 `:natural` / `NaturalContinuation()` 使用一次从高密到低密的普通参数延拓，
+每点保持完整八变量联立求解。失败时恢复单锚点 PALC；此策略适用于密度路径。
+标准 PNJL 的较长 Tρ 扫描默认选择 natural，Tμ 继续默认选择 PALC。
 
 磁场扫描和 NJL/RPNJL 等属于模型或外场变体。`run_magnetic_scan` 的平衡态使用
 `FixedMu`，其 Landau 求和残差需要独立验证后才能接入 PALC。
@@ -174,21 +183,27 @@ result = Models.solve_path(model, path;
 points = Models.selected_path_results(model, result)
 ```
 
-PALC 从中点和两端发现不同根，沿弧长双向推进，并把目标交点作为初值校正；未得到合格根的
-目标点进行候选池回退。有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
+PALC 默认 `anchor_strategy=nothing` 按上述模型和路径选择锚点策略；可显式传入
+`EndpointAnchor()`、`SeedPoolAnchor()` 或 `SingleSeedAnchor(value,seed)`。
+`EndpointAnchor` 使用双向延拓的全部目标交点；`anchor_values` 仅用于目录策略。
+诊断的 `anchor_strategy` 为 `:endpoint_anchor` 或实际触发恢复时的 `:endpoint_catalog_recovery`。
+有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
 `GroundStateBranchPolicy`；相图中的相共存仍由上层 Maxwell 等构造判断。
 `selected_path_results` 返回按原路径排列的 `Union{Nothing,SolverResult}` 向量；失败为
 `nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。
 
 PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使用相同参数。
-通用扫描的 `continuation=:auto` 对 PNJL 的较长 Tρ 路径（至少 21 点）与 Tμ 路径
-（至少 31 点）默认启用 PALC；RPNJL、短路径、自定义选择器及不支持的求解器选项保留
+通用扫描的 `continuation=:auto` 对 PNJL 的较长 Tρ 路径（至少 21 点）启用 natural，
+Tμ 路径（至少 31 点）启用 PALC；RPNJL、短路径、自定义选择器及不支持的求解器选项保留
 旧路线。单点 `Models.solve`
 和 `solve_multi` 的默认算法独立于该扫描策略。
 固定密度复用现有 joint residual 的配置模型；若传入不同于该配置的自定义模型参数，入口
 会报 `ArgumentError`，以免残差和后处理使用不同参数。共同 μ 的路径直接使用传入模型。
 可传入 `PALCWorkTelemetry()` 读取根求解、延拓残差/Jacobian、起点、校正、回退及失败计数；
 对象复用时计数累加，多个路径内保存的累计快照不应再次相加。
+其中 `root_time_s` 包含直接求根及候选后处理，`root_candidate_time_s` 是其中的后处理子项；
+`continuation_time_s` 记录 BifurcationKit 延拓，`selected_rebuild_time_s` 记录选中结果重构。
+后者需将同一个 `path_work` 传给 `selected_path_results`；这些计时不含序列化和独立验证。
 
 `FixedAsymmetricRho` 可显式传入 `fixedasymrho_seed_policy=:single_pass`，并设置
 `evaluate_all_attempts=true`。它展开既有外层和内层种子的并集，对每个不同起点进行一次

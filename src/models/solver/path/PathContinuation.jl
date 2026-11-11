@@ -204,6 +204,9 @@ end
 
 struct SeedPoolAnchor <: AbstractAnchorStrategy end
 
+"""Start from one accepted endpoint root; recover with catalog search only on failure."""
+struct EndpointAnchor <: AbstractAnchorStrategy end
+
 """Trace only the curve reached from this initial guess, without catalog fallback."""
 struct SingleSeedAnchor <: AbstractAnchorStrategy
     param_value::Float64
@@ -218,6 +221,9 @@ struct SeedContinuation <: AbstractContinuationStrategy
 end
 
 SeedContinuation() = SeedContinuation(true)
+
+"""One descending density sweep from a physical endpoint, with PALC recovery."""
+struct NaturalContinuation <: AbstractContinuationStrategy end
 
 struct PALCContinuation <: AbstractContinuationStrategy
     ds::Float64
@@ -341,7 +347,9 @@ end
 @inline _strategy_symbol(::CompositeAnchor) = :composite_anchor
 @inline _strategy_symbol(::SeedPoolAnchor) = :seed_pool_anchor
 @inline _strategy_symbol(::SingleSeedAnchor) = :single_seed_anchor
+@inline _strategy_symbol(::EndpointAnchor) = :endpoint_anchor
 @inline _strategy_symbol(::SeedContinuation) = :seed_continuation
+@inline _strategy_symbol(::NaturalContinuation) = :natural_parameter
 @inline _strategy_symbol(c::PALCContinuation) = c.backend
 @inline _policy_symbol(::GroundStateBranchPolicy) = :ground_state
 @inline _policy_symbol(::ContinuationBranchPolicy) = :continuation_branch
@@ -671,7 +679,7 @@ end
 function solve_path(
     model::AbstractQCDModel,
     path::FixedAsymmetricRhoPath;
-    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    anchor_strategy::Union{Nothing,AbstractAnchorStrategy}=nothing,
     continuation_strategy::AbstractContinuationStrategy=SeedContinuation(),
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary,
@@ -684,9 +692,13 @@ function solve_path(
     if continuation_strategy isa PALCContinuation
         return _solve_palc_path(model, path, continuation_strategy;
             anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    elseif continuation_strategy isa NaturalContinuation
+        return _solve_natural_path(model,path;
+            anchor_strategy,branch_policy,diagnostic_level,branch_jump_tol,kwargs...)
     elseif !(continuation_strategy isa SeedContinuation)
         throw(ArgumentError("unsupported continuation_strategy type $(typeof(continuation_strategy))"))
     end
+    anchor_strategy = something(anchor_strategy, SeedPoolAnchor())
     messages = _seed_continuation_anchor_messages(anchor_strategy)
     jump_tol = _path_positive_real(branch_jump_tol, :branch_jump_tol)
 
@@ -711,7 +723,7 @@ end
 
 function solve_path(model::AbstractQCDModel, path::Union{FixedMuPath, FixedRhoPath};
     continuation_strategy::AbstractContinuationStrategy=SeedContinuation(),
-    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    anchor_strategy::Union{Nothing,AbstractAnchorStrategy}=nothing,
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary,
     branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
@@ -719,16 +731,20 @@ function solve_path(model::AbstractQCDModel, path::Union{FixedMuPath, FixedRhoPa
     if continuation_strategy isa PALCContinuation
         return _solve_palc_path(model, path, continuation_strategy;
             anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    elseif continuation_strategy isa NaturalContinuation
+        return _solve_natural_path(model,path;
+            anchor_strategy,branch_policy,diagnostic_level,branch_jump_tol,kwargs...)
     end
     continuation_strategy isa SeedContinuation || throw(ArgumentError("unsupported continuation_strategy"))
     return _solve_seed_equilibrium_path(model, path, continuation_strategy;
-        anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+        anchor_strategy=something(anchor_strategy, SeedPoolAnchor()),
+        branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
 end
 
 function solve_path(model::AbstractQCDModel, path::ConstraintTPath;
     continuation::Symbol=:auto,
     continuation_strategy::Union{Nothing,AbstractContinuationStrategy}=nothing,
-    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
+    anchor_strategy::Union{Nothing,AbstractAnchorStrategy}=nothing,
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary,
     branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
@@ -748,7 +764,8 @@ function solve_path(model::AbstractQCDModel, path::ConstraintTPath;
     end
     selected_strategy isa SeedContinuation || throw(ArgumentError("unsupported continuation_strategy"))
     return _solve_seed_equilibrium_path(model, path, selected_strategy;
-        anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+        anchor_strategy=something(anchor_strategy, SeedPoolAnchor()),
+        branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
 end
 
 @inline function to_namedtuple(root::AnchorRoot)

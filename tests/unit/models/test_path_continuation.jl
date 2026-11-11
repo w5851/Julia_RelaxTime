@@ -16,6 +16,27 @@ if !isdefined(Main, :ConstraintPathRecordingModel)
     end
 end
 
+if !isdefined(Main, :EndpointPathTestModel)
+    @eval Main struct EndpointPathTestModel <: Models.AbstractQCDModel
+        reject_attempts::Int
+        calls::Vector{Symbol}
+    end
+end
+
+Models._path_options(::Main.EndpointPathTestModel,path;kwargs...) = nothing
+Models._path_residual(::Main.EndpointPathTestModel,path,options) = (x,value) -> x .- value
+function Models._path_root(model::Main.EndpointPathTestModel,path,value,seed,residual,options,work;
+    source::Symbol=:correction,work_telemetry=nothing)
+    push!(model.calls,source)
+    work.root_solves += 1
+    source === :anchor && (work.anchor_solves += 1)
+    source === :correction && (work.correction_solves += 1)
+    source === :fallback && (work.fallback_solves += 1)
+    (length(model.calls) <= model.reject_attempts || length(model.calls) == -model.reject_attempts) && return nothing
+    return (;solution=fill(value,length(seed)),x_state=fill(value,5),mu_vec=fill(value,3),
+        pressure=value,rho_norm=value,residual_norm=0.0,converged=true)
+end
+
 function Models.solve(model::Main.ConstraintPathRecordingModel, mode::Models.FixedSigma,
     T_fm::Real; kwargs...)
     push!(model.calls, (;T_fm, kwargs...))
@@ -166,9 +187,12 @@ end
         @test Models.to_namedtuple(rho).path_kind === :fixed_rho
         @test_throws ArgumentError Models.FixedMuPath(1.0, [NaN])
         @test_throws ArgumentError Models.FixedRhoPath(1.0, [-0.1])
-        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :palc
+        @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state, nothing, 21) === :natural
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
-            nothing, 23; constraint_mode=:fixed_asymmetric_rho) === :palc
+            nothing, 23; constraint_mode=:fixed_asymmetric_rho) === :natural
+        @test Models.resolve_scan_continuation(:natural,:PNJL,:tensor_gauss,:ground_state,nothing,3) === :natural
+        @test_throws ArgumentError Models.resolve_scan_continuation(:natural,:PNJL,:tensor_gauss,
+            :ground_state,nothing,31;constraint_mode=:fixed_mu)
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
             nothing, 31; constraint_mode=:fixed_mu) === :palc
         @test Models.resolve_scan_continuation(:auto, :PNJL, :tensor_gauss, :ground_state,
@@ -210,6 +234,80 @@ end
         @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedRhoPath(1.0, [0.5]), 0.5))
         @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedAsymmetricRhoPath(1.0, [0.5]), 0.5))
         @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
+    end
+
+    @testset "Endpoint starts preserve path constraints and explicit catalogs" begin
+        model = Models.create_model(:PNJL)
+        path = Models.FixedMuPath(120/197.327, [1.4,1.6]; p_num=24,t_num=8)
+        @test Models._default_path_anchor(model,path) isa Models.EndpointAnchor
+        @test Models._default_path_anchor(Models.create_model(:RPNJL),path) isa Models.SeedPoolAnchor
+        @test Models._default_path_anchor(model,Models.FixedMuPath(1.0,[1.5])) isa Models.SeedPoolAnchor
+        attempts = Models._endpoint_anchor_attempts(path)
+        @test first(attempts).value == maximum(path.mu_values)
+        @test all(a -> length(a.seed)==5, attempts)
+        @test first(attempts).seed == Models.get_seed(Models.DefaultSeed(phase_hint=:quark),
+            [path.T_fm,maximum(path.mu_values)],Models.FixedMu())
+        thermal = Models.ConstraintTPath(Models.FixedSigma(12.0),[0.8,0.5,0.6])
+        @test first(Models._endpoint_anchor_attempts(thermal)).value == 0.8
+        @test all(a -> length(a.seed)==8, Models._endpoint_anchor_attempts(thermal))
+        entropy = Models.ConstraintTPath(Models.FixedEntropy(0.5),[0.5,0.6])
+        @test Models._default_path_anchor(model,entropy) isa Models.SeedPoolAnchor
+        @test_throws ArgumentError Models.solve_path(model,path;
+            continuation_strategy=Models.PALCContinuation(),anchor_strategy=Models.EndpointAnchor(),
+            anchor_values=[1.5])
+    end
+
+    @testset "Endpoint recovery runs only after a failed start or incomplete path" begin
+        path = Models.FixedMuPath(1.0,[0.1,0.2])
+        model = Main.EndpointPathTestModel(1,Symbol[])
+        work = Models.PALCWorkTelemetry()
+        result = Models.solve_path(model,path;continuation_strategy=Models.PALCContinuation(),
+            anchor_strategy=Models.EndpointAnchor(),path_work=work)
+        @test result.diagnostics.anchor_strategy === :endpoint_anchor
+        @test result.diagnostics.failure_count == 0
+        @test length(result.anchors) == 1
+        @test work.anchor_solves == 2
+        @test work.fallback_solves == 0
+        @test [s.param_value for s in result.selections] == [0.1,0.2]
+
+        failed = Main.EndpointPathTestModel(typemax(Int),Symbol[])
+        result = Models.solve_path(failed,path;continuation_strategy=Models.PALCContinuation(),
+            anchor_strategy=Models.EndpointAnchor())
+        @test result.diagnostics.anchor_strategy === :endpoint_catalog_recovery
+        @test result.diagnostics.failure_count == 2
+        @test isempty(result.anchors)
+        @test :fallback in failed.calls
+
+        short = Main.EndpointPathTestModel(0,Symbol[])
+        result = Models.solve_path(short,Models.FixedMuPath(1.0,[0.1,1.0,2.0]);
+            continuation_strategy=Models.PALCContinuation(max_steps=1),
+            anchor_strategy=Models.EndpointAnchor())
+        @test result.diagnostics.anchor_strategy === :endpoint_catalog_recovery
+        @test result.diagnostics.failure_count == 0
+        @test length(result.anchors) > 1
+        @test all(s -> s.selected_branch_id !== nothing,result.selections)
+    end
+
+    @testset "Natural density continuation preserves target order and full state dimension" begin
+        model = Main.EndpointPathTestModel(0,Symbol[])
+        path = Models.FixedRhoPath(1.0,[0.1,0.3,0.2,0.1])
+        result = Models.solve_path(model,path;continuation_strategy=Models.NaturalContinuation())
+        @test result.diagnostics.continuation_backend === :natural_parameter
+        @test result.diagnostics.failure_count == 0
+        @test length(result.anchors) == 1
+        @test length(model.calls) == 3
+        @test all(p -> length(p.solution)==8,only(result.branches).points)
+        @test [p.param_value for p in only(result.branches).points] == [0.3,0.2,0.1]
+        @test Models._path_values(result.path) == [0.1,0.3,0.2,0.1]
+        @test_throws ArgumentError Models.solve_path(model,Models.FixedMuPath(1.0,[0.1,0.2]);
+            continuation_strategy=Models.NaturalContinuation())
+        @test_throws ArgumentError Models.solve_path(model,path;
+            continuation_strategy=Models.NaturalContinuation(),anchor_strategy=Models.SeedPoolAnchor())
+        interrupted = Main.EndpointPathTestModel(-2,Symbol[])
+        recovered = Models.solve_path(interrupted,path;continuation_strategy=Models.NaturalContinuation())
+        @test recovered.diagnostics.continuation_backend === :natural_palc_recovery
+        @test recovered.diagnostics.failure_count == 0
+        @test all(s -> s.selected_branch_id !== nothing,recovered.selections)
     end
 
     @testset "Temperature paths retain constraint targets and input order" begin
