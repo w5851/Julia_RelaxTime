@@ -77,7 +77,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--repetitions",type=int,default=3)
-    parser.add_argument("--scope",choices=("endpoints","anchors"),default="endpoints")
+    parser.add_argument("--scope",choices=("endpoints","anchors","promotion"),default="endpoints")
     parser.add_argument("--budget-seconds",type=int,default=900)
     parser.add_argument("--summarize-only",action="store_true")
     parser.add_argument("--collect",type=Path)

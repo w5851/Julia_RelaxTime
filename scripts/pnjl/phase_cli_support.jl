@@ -370,7 +370,7 @@ function _usage()
     println("  --run_id=...           指定 run_id")
     println("  --output_dir=...       指定输出目录（覆盖默认 processed 路径）")
     println("  --solver_backend=models|auto")
-    println("  --continuation=auto|legacy|single_pass|palc")
+    println("  --continuation=auto|legacy|single_pass|palc|natural")
     println("  --seed_policy=...      扫描初值策略")
     println("  --reverse_rho=true|false")
     println("  --p_num=12             动量积分点数")
@@ -599,8 +599,8 @@ function parse_args(args, project_root::AbstractString)
     end
     cfg.mode in (:production, :research) || throw(ArgumentError("invalid --mode=$(cfg.mode); accepted values: production, research"))
     cfg.solver_backend in (:models, :auto) || throw(ArgumentError("invalid --solver_backend=$(cfg.solver_backend); accepted values: models, auto"))
-    cfg.continuation in (:auto, :legacy, :single_pass, :palc) || throw(ArgumentError(
-        "invalid --continuation=$(cfg.continuation); accepted values: auto, legacy, single_pass, palc"))
+    cfg.continuation in (:auto, :legacy, :single_pass, :palc, :natural) || throw(ArgumentError(
+        "invalid --continuation=$(cfg.continuation); accepted values: auto, legacy, single_pass, palc, natural"))
     cfg.thermo_quadrature_policy in (:tensor_gauss, :rs_reduced_adaptive) || throw(ArgumentError(
         "unsupported thermo_quadrature_policy=$(cfg.thermo_quadrature_policy)",
     ))

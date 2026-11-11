@@ -20,6 +20,7 @@ end
     end
     P = PhaseCliSupport
     @test P.parse_args(["--continuation=palc"]).continuation === :palc
+    @test P.parse_args(["--continuation=natural"]).continuation === :natural
     @test P.parse_args(["--continuation=legacy"]).continuation === :legacy
     @test_throws ArgumentError P.parse_args(["--continuation=unknown"])
     mktempdir() do directory

@@ -63,6 +63,9 @@ function run_method(model, path, method)
         dual_endpoint_path(model, path, work; sweep)
     elseif method === :hot_start
         hot_start_path(model,path,work)
+    elseif method === :production
+        Models.solve_path(model,path;continuation_strategy=Models.NaturalContinuation(),
+            path_work=work,iterations=300)
     else
         values = Models._path_values(path)
         anchor = if method === :catalog
@@ -170,7 +173,7 @@ function run_comparison(destination; repetitions=3, scope="endpoints")
     1 <= repetitions <= 3 || throw(ArgumentError("repetitions must be 1..3"))
     BLAS.set_num_threads(1)
     model = Models.create_model(:PNJL)
-    cases = scope == "anchors" ? anchor_comparison_cases() : [
+    cases = scope in ("anchors","promotion") ? anchor_comparison_cases() : [
         (:tmu_t120, Models.FixedMuPath(120/HBARC, collect(260.0:2.0:380.0)./HBARC; p_num=24,t_num=8)),
         (:tmu_t120_fine, Models.FixedMuPath(120/HBARC, collect(296.0:0.25:318.0)./HBARC; p_num=24,t_num=8)),
         (:rho_t120, Models.FixedRhoPath(120/HBARC, collect(0.2:0.05:3.5); p_num=24,t_num=8)),
@@ -178,7 +181,10 @@ function run_comparison(destination; repetitions=3, scope="endpoints")
     ]
     records = NamedTuple[]
     for (name,path) in cases, repetition in 1:repetitions
-        methods = if scope == "anchors"
+        methods = if scope == "promotion"
+            path isa Union{Models.FixedRhoPath,Models.FixedAsymmetricRhoPath} ?
+                (:catalog,:auto,:production) : (:catalog,:auto)
+        elseif scope == "anchors"
             path isa Union{Models.FixedRhoPath,Models.FixedAsymmetricRhoPath} ?
                 (:catalog,:auto,:natural_low,:natural_high) :
                 name in (:tmu_t120_xi0,:tmu_t200_xi0) ? (:catalog,:auto,:hot_start) : (:catalog,:auto)

@@ -4,9 +4,9 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/models/solver/generated/Exports.md`
-- Exported symbol count: 46
-- Mentioned in non-generated docs/api pages: 46
-- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `FixedMuBConservedCharges`, `flavor_mu_from_bqs`, `conserved_mu_from_flavor`, `conserved_densities_from_flavor`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`, `SolverWorkTelemetry`, `solver_work_snapshot`, `reset_solver_work!`, `EndpointAnchor`, `SingleSeedAnchor`, `SeedPoolAnchor`, `PALCContinuation`, `FixedMuPath`, `FixedRhoPath`, `FixedAsymmetricRhoPath`, `ConstraintTPath`, `solve_path`, `selected_path_results`
+- Exported symbol count: 47
+- Mentioned in non-generated docs/api pages: 47
+- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `FixedMuBConservedCharges`, `flavor_mu_from_bqs`, `conserved_mu_from_flavor`, `conserved_densities_from_flavor`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`, `SolverWorkTelemetry`, `solver_work_snapshot`, `reset_solver_work!`, `EndpointAnchor`, `SingleSeedAnchor`, `SeedPoolAnchor`, `PALCContinuation`, `FixedMuPath`, `FixedRhoPath`, `FixedAsymmetricRhoPath`, `ConstraintTPath`, `solve_path`, `selected_path_results`, `NaturalContinuation`
 
 ## Exported Symbols
 
@@ -25,7 +25,8 @@
 | `ImplicitProblem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `MeanFieldState` | src/models/exports_public.jl | 19 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `MultiSeed` | src/models/exports_public.jl | 79 | 6 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
-| `PALCContinuation` | src/models/exports_public.jl | 48 | 3 | docs/api/models/scans/TmuScan.md<br>docs/api/models/scans/TrhoScan.md<br>docs/api/models/solver/Overview.md |
+| `NaturalContinuation` | src/models/exports_public.jl | 48 | 1 | docs/api/models/solver/Overview.md |
+| `PALCContinuation` | src/models/exports_public.jl | 48 | 2 | docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/Overview.md |
 | `SeedPoolAnchor` | src/models/exports_public.jl | 48 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `SeedStrategy` | src/models/exports_public.jl | 79 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `SingleSeedAnchor` | src/models/exports_public.jl | 47 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |

@@ -222,6 +222,9 @@ end
 
 SeedContinuation() = SeedContinuation(true)
 
+"""One descending density sweep from a physical endpoint, with PALC recovery."""
+struct NaturalContinuation <: AbstractContinuationStrategy end
+
 struct PALCContinuation <: AbstractContinuationStrategy
     ds::Float64
     dsmax::Float64
@@ -346,6 +349,7 @@ end
 @inline _strategy_symbol(::SingleSeedAnchor) = :single_seed_anchor
 @inline _strategy_symbol(::EndpointAnchor) = :endpoint_anchor
 @inline _strategy_symbol(::SeedContinuation) = :seed_continuation
+@inline _strategy_symbol(::NaturalContinuation) = :natural_parameter
 @inline _strategy_symbol(c::PALCContinuation) = c.backend
 @inline _policy_symbol(::GroundStateBranchPolicy) = :ground_state
 @inline _policy_symbol(::ContinuationBranchPolicy) = :continuation_branch
@@ -688,6 +692,9 @@ function solve_path(
     if continuation_strategy isa PALCContinuation
         return _solve_palc_path(model, path, continuation_strategy;
             anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    elseif continuation_strategy isa NaturalContinuation
+        return _solve_natural_path(model,path;
+            anchor_strategy,branch_policy,diagnostic_level,branch_jump_tol,kwargs...)
     elseif !(continuation_strategy isa SeedContinuation)
         throw(ArgumentError("unsupported continuation_strategy type $(typeof(continuation_strategy))"))
     end
@@ -724,6 +731,9 @@ function solve_path(model::AbstractQCDModel, path::Union{FixedMuPath, FixedRhoPa
     if continuation_strategy isa PALCContinuation
         return _solve_palc_path(model, path, continuation_strategy;
             anchor_strategy, branch_policy, diagnostic_level, branch_jump_tol, kwargs...)
+    elseif continuation_strategy isa NaturalContinuation
+        return _solve_natural_path(model,path;
+            anchor_strategy,branch_policy,diagnostic_level,branch_jump_tol,kwargs...)
     end
     continuation_strategy isa SeedContinuation || throw(ArgumentError("unsupported continuation_strategy"))
     return _solve_seed_equilibrium_path(model, path, continuation_strategy;

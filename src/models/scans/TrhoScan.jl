@@ -320,9 +320,11 @@ function run_trho_scan(;
                 Models.FixedRhoPath(T / ħc_MeV_fm, rho_scan_order; xi, p_num, t_num)
             path_results = nothing
             single_previous = nothing
-            if continuation_mode === :palc && any(rho -> !(ScanCommon.key3(T, rho, xi; digits=6) in completed), rho_scan_order)
+            if continuation_mode in (:palc,:natural) && any(rho -> !(ScanCommon.key3(T, rho, xi; digits=6) in completed), rho_scan_order)
                 path_result = Models.solve_path(create_model(model_kind), path;
-                    continuation_strategy=Models.PALCContinuation(; palc_options...),
+                    continuation_strategy=continuation_mode === :palc ?
+                        Models.PALCContinuation(; palc_options...) : Models.NaturalContinuation(),
+                    (continuation_mode === :natural ? (;recovery_strategy=Models.PALCContinuation(;palc_options...)) : (;))...,
                     solver_kwargs...)
                 path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
                 path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
@@ -341,9 +343,9 @@ function run_trho_scan(;
             T_fm = T / ħc_MeV_fm
 
             local result, message
-            if continuation_mode === :palc
+            if continuation_mode in (:palc,:natural)
                 result = path_results[rho_index]
-                message = "continuation=palc"
+                message = "continuation=$(continuation_mode)"
             elseif continuation_mode === :single_pass
                 if constraint_mode === :fixed_asymmetric_rho
                     mode = FixedAsymmetricRho(rho, asym_ud_ratio_target, asym_s_target)
@@ -1076,7 +1078,7 @@ end
 function prepare_rho_path!(session::RhoPointSession, T::Real, xi::Real, values)
     strategy = Models.resolve_scan_continuation(session.continuation, session.model_kind,
         session.thermo_quadrature_policy, :ground_state, nothing, length(values))
-    strategy === :palc || return nothing
+    strategy in (:palc,:natural) || return nothing
     pending = Float64[value for value in values if !haskey(session.cache, (Float64(T), Float64(xi), Float64(value)))]
     isempty(pending) && return nothing
     path = Models.FixedRhoPath(T / ħc_MeV_fm, pending;
@@ -1084,7 +1086,10 @@ function prepare_rho_path!(session::RhoPointSession, T::Real, xi::Real, values)
     model = create_model(session.model_kind)
     common = (; iterations=session.iterations, work_telemetry=session.telemetry)
     result = Models.solve_path(model, path;
-        continuation_strategy=Models.PALCContinuation(; session.palc_options...), common...)
+        continuation_strategy=strategy === :palc ? Models.PALCContinuation(; session.palc_options...) :
+            Models.NaturalContinuation(),
+        (strategy === :natural ? (;recovery_strategy=Models.PALCContinuation(;session.palc_options...)) : (;))...,
+        common...)
     solutions = Models.selected_path_results(model, result; common...)
     for (rho, solution) in zip(pending, solutions)
         session.prepared[(Float64(T), Float64(xi), rho)] = solution
@@ -1182,7 +1187,7 @@ function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targ
     )
     if haskey(session.prepared, key)
         result = pop!(session.prepared, key)
-        message = "continuation=palc"
+        message = session.continuation === :palc ? "continuation=palc" : "continuation=natural"
     elseif session.continuation === :single_pass
         path = Models.FixedRhoPath(T_value / ħc_MeV_fm, [rho_value];
             xi=xi_value, p_num=session.p_num, t_num=session.t_num)

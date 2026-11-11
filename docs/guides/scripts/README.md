@@ -192,9 +192,10 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
   - 磁场最小调用：`scan magnetic --model_kind=PNJLMagnetic --solver_mode=fixed_mu --T_values=150 --mu_values=0 --eB_values=20000 --xi_values=0 --output_path=data/outputs/results/pnjl/scan/magnetic/selected.csv`
 - [scripts/pnjl/calculate_phase_structure.jl](../../../scripts/pnjl/calculate_phase_structure.jl)
 
-相图 CLI 支持 `--continuation=auto|legacy|single_pass|palc`，也可在
+相图 CLI 支持 `--continuation=auto|legacy|single_pass|palc|natural`，也可在
 `[phase_pipeline]` TOML 配置中设置 `continuation`；命令行覆盖配置文件，运行 manifest
-记录该选项。`:palc` 对等温线作弧长延拓和目标点校正，`:legacy` 显式选择既有连续性种子链路。
+记录该选项。`:palc` 对等温线作弧长延拓和目标点校正，`:natural` 从高密端作一次普通密度延拓，
+`:legacy` 显式选择既有连续性种子链路。
   - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
 
 #### 相图最小单命令产线（PNJL）

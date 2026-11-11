@@ -106,6 +106,9 @@ Tμ/Tρ 扫描的 `:legacy` 逐点复用前一点与多初值搜索；`:single_p
 `FixedEntropy` 的 PALC 继续默认使用目录策略。
 `SingleSeedAnchor(value, seed)` 配合 `PALCContinuation()` 使用同一延拓算法，但只从一个
 初值建立锚点并关闭 catalog fallback，适合研究已知解支；它不是第四个 `continuation` 符号。
+Tρ 的 `:natural` / `NaturalContinuation()` 使用一次从高密到低密的普通参数延拓，
+每点保持完整八变量联立求解。失败时恢复单锚点 PALC；此策略适用于密度路径。
+标准 PNJL 的较长 Tρ 扫描默认选择 natural，Tμ 继续默认选择 PALC。
 
 磁场扫描和 NJL/RPNJL 等属于模型或外场变体。`run_magnetic_scan` 的平衡态使用
 `FixedMu`，其 Landau 求和残差需要独立验证后才能接入 PALC。
@@ -189,8 +192,8 @@ PALC 默认 `anchor_strategy=nothing` 按上述模型和路径选择锚点策略
 `nothing`，成功结果维持 v1 合同。`solve_path` 默认仍为 `SeedContinuation()`。
 
 PALC 支持 PNJL/RPNJL 的 tensor 热积分。路径热力学和残差复算使用相同参数。
-通用扫描的 `continuation=:auto` 对 PNJL 的较长 Tρ 路径（至少 21 点）与 Tμ 路径
-（至少 31 点）默认启用 PALC；RPNJL、短路径、自定义选择器及不支持的求解器选项保留
+通用扫描的 `continuation=:auto` 对 PNJL 的较长 Tρ 路径（至少 21 点）启用 natural，
+Tμ 路径（至少 31 点）启用 PALC；RPNJL、短路径、自定义选择器及不支持的求解器选项保留
 旧路线。单点 `Models.solve`
 和 `solve_multi` 的默认算法独立于该扫描策略。
 固定密度复用现有 joint residual 的配置模型；若传入不同于该配置的自定义模型参数，入口

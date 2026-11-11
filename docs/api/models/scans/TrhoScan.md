@@ -47,9 +47,11 @@
 ## 默认网格与扫描顺序
 
 `:auto` 对 PNJL、tensor 积分、默认 ground_state 选择器且每条等温线至少 21 个目标点的
-`FixedRho` / `FixedAsymmetricRho` 扫描使用 `:palc`；较短路径、RPNJL 及其它配置沿用
+`FixedRho` / `FixedAsymmetricRho` 扫描使用 `:natural`；较短路径、RPNJL 及其它配置沿用
 `:legacy`。该阈值来自已完成的 21–25 点与中等网格对照；显式 `:legacy` 可复用旧策略。
-`:palc` 对每个 `(T, ξ)` 的 PNJL 多点路径默认从较高密度建立一个锚点并双向延拓，
+`:natural` 从较高密度的首个合格锚点向低密度做一次普通参数延拓，每点使用前一点的解，
+保持八维联立约束；求解失败时恢复为单锚点 PALC。计算顺序与输出顺序独立。
+`:palc` 是显式选项，对每个 `(T, ξ)` 的 PNJL 多点路径默认从较高密度建立一个锚点并双向延拓，
 起点或覆盖失败时恢复搜索；RPNJL 保留目录锚点。保留回弯
 上的候选，随后在请求的 ρ/ρ₀ 点作精确联立校正并按既有硬约束和最大压力规则选优。
 `:single_pass` 每个不同种子求解一次；FixedAsymmetricRho 复用既有候选展开实现。
@@ -57,9 +59,9 @@
 `:legacy`；显式不兼容组合报 `ArgumentError`。
 自定义 `solver` 或路径未支持的求解器选项由 `:auto` 保留在旧链路；显式新策略在扫描前报错。
 
-`palc_options` 传入 `PALCContinuation`；`path_diagnostics_cb((T, xi), path_result)`
+`palc_options` 传入显式 PALC 或 natural 失败后的 PALC；`path_diagnostics_cb((T, xi), path_result)`
 可读取起点、分支与工作量。CSV/callback 仍按 `reverse_rho` 控制的输入顺序输出。
-resume 保留已有行；部分完成的等温线会重建 PALC 路径，仅写出缺失点。
+resume 保留已有行；部分完成的等温线会重建所选路径，仅写出缺失点。
 
 若不显式提供 `rho_values`，入口默认使用 `DEFAULT_RHO_VALUES`。若目标是相图主线，一般不建议跳过这一默认多分辨率策略，除非你已经明确知道需要怎样的局部加密。
 
