@@ -4,6 +4,18 @@ Current production paths are implemented in `Models` (root environment); the
 isolated spike sections below retain the earlier experiments. The production
 workflow is `palc-production-comparison.yml`.
 
+`profile=endpoints|anchors|promotion` compares ordinary endpoint continuation,
+single-anchor PALC and the production path strategy. Select comma separated path
+names with `cases` (for example `sigma,sigma_xi4,sigma_t160`) or use `all`.
+`probe_anchors=true` also records individual starting guesses and smaller-step
+continuation attempts outside the matched path timing. `repetitions=3` provides
+two warm rounds after the first timed round; the numerical budget is at most 1200 s.
+Collect the compact states, coverage and measured costs after downloading:
+
+```sh
+python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output <artifact-directory> --collect <result.json>
+```
+
 `profile=constraints`, `cases=all|entropy|sigma|bqs|single_seed`, `repetitions=2`,
 `budget_seconds=1200` runs the small additional-mode comparison on Actions.
 `compare_constraints.py` caps that numerical process at 1200 seconds and preserves
@@ -15,9 +27,10 @@ To retain one compact result from a downloaded artifact without solving:
 python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output <artifact-directory> --collect <result.json>
 ```
 
-This directory is an isolated BifurcationKit experiment. It does not add
-BifurcationKit to the repository root environment and does not change stable
-`Models` entrypoints.
+## Earlier isolated spike
+
+The earlier scripts below use the isolated BifurcationKit environment. Current
+production entrypoints and comparisons use the root environment.
 
 Instantiate once:
 
@@ -43,9 +56,9 @@ Compare-only entrypoint with reference generation enabled by default:
 julia --project=scripts/analysis/pnjl_bifurcation_spike scripts/analysis/pnjl_bifurcation_spike/compare_fixedmu_palc.jl
 ```
 
-The scripts stack the repository root project behind this isolated environment
-at runtime, so `Models` and its existing dependencies still come from the main
-project while BifurcationKit remains isolated here.
+These scripts stack the repository root project behind the isolated environment
+at runtime. Their BifurcationKit version is selected by the spike environment;
+the production version is selected by the root environment.
 
 Useful options:
 

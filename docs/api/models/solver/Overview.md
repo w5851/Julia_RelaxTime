@@ -101,11 +101,12 @@ Tμ/Tρ 扫描的 `:legacy` 逐点复用前一点与多初值搜索；`:single_p
 减少重复求解；`:palc` 从锚点双向延拓并在目标点重新求根。
 标准 PNJL 多点路径默认使用 `EndpointAnchor()`：从较高参数端取得首个合格根，
 温度路径因此从最高温度起步；等温路径从较高 μ 或 ρ 起步。正常路径只建立一个锚点。
-首个初猜失败才尝试互补初猜和另一端；延拓仍有缺点时恢复目录搜索。
+首个初猜失败才尝试互补初猜和另一端。延拓异常且目标未覆盖时，从同一已收敛根缩小步长
+重试一次；步数上限保持不变。仍有缺点时尝试其它端点根，最后恢复目录搜索。
 `SeedPoolAnchor()` 可显式保留中点与两端的完整目录搜索。单点路径、RPNJL 和
 `FixedEntropy` 的 PALC 继续默认使用目录策略。
 `SingleSeedAnchor(value, seed)` 配合 `PALCContinuation()` 使用同一延拓算法，但只从一个
-初值建立锚点并关闭 catalog fallback，适合研究已知解支；它不是第四个 `continuation` 符号。
+初值建立锚点并关闭 catalog fallback，适合研究已知解支，通过 `anchor_strategy` 选择。
 Tρ 的 `:natural` / `NaturalContinuation()` 使用一次从高密到低密的普通参数延拓，
 每点保持完整八变量联立求解。失败时恢复单锚点 PALC；此策略适用于密度路径。
 标准 PNJL 的较长 Tρ 扫描默认选择 natural，Tμ 继续默认选择 PALC。
