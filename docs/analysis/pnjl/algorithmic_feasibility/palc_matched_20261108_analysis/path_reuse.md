@@ -1,6 +1,6 @@
 # PALC 路径复用与校正成本
 
-状态：算法与数值验收完成，PR [#346](https://github.com/w5851/Julia_RelaxTime/pull/346) 收尾中（2026-11-12）。
+状态：算法与数值验收完成（2026-11-12），交付 PR [#346](https://github.com/w5851/Julia_RelaxTime/pull/346)。
 最终算法源码 `36bce656e286d1bfc3195b4d23c4172ccf94b550`；基准为 PR #345 的端点 PALC 与自然密度连续扫描。
 结果集中保留在 [path_reuse_optimization.json](../../../../../data/outputs/results/analysis/palc_matched_20261108/path_reuse_optimization.json)，约 1.8 MiB。原始逐次日志和重复状态数组留在 Actions 临时 artifact；本文件及紧凑结果足以恢复配置、根数、误差、计时和结论。
 

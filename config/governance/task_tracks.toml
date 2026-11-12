@@ -488,7 +488,7 @@ next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = "codex/palc-path-reuse"
+current_branch = ""
 current_sha = "36bce656e286d1bfc3195b4d23c4172ccf94b550"
 run_ids = ["43155017475", "43165548215", "43169410396"]
 evidence = [
@@ -496,7 +496,7 @@ evidence = [
   "sha:36bce656e286d1bfc3195b4d23c4172ccf94b550",
   "file:data/outputs/results/analysis/palc_matched_20261108/path_reuse_optimization.json",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/path_reuse.md",
-  "note:algorithm_accepted_750_final_records_same_run_all_roots_and_selection_match_3047_remote_assertions_pr_merge_pending",
+  "note:algorithm_accepted_750_final_records_same_run_all_roots_and_selection_match_3047_remote_assertions",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "note:author_20261112_requests_temperature_reuse_target_correction_and_jacobian_profiling_magnetic_validation_in_separate_thread",
 ]
