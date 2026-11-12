@@ -63,9 +63,13 @@
 可读取起点、分支与工作量。CSV/callback 仍按 `reverse_rho` 控制的输入顺序输出。
 resume 保留已有行；部分完成的等温线会重建所选路径，仅写出缺失点。
 
-`reuse_temperature_anchor=false` 可改为 `true`，复用上一条兼容路径在最高目标密度的根
-作为初值；温度改变后重新校正，模式、ξ、节点数和非对称约束须相同。
-`TrhoScanConfig` 与 `new_rho_point_session` 同样接受此项，后者用于相图的按需切片求解。
+`reuse_temperature_anchor=nothing` 默认在对称 `:fixed_rho` 路径启用邻温端点初值复用，
+非对称密度默认关闭；可显式传入 `true/false`。复用上一条兼容路径在最高目标密度的根
+作为初值，温度改变后重新校正，模式、ξ、节点数和非对称约束须相同。
+自动复用仅用于 PNJL。`TrhoScanConfig` 同样接受此项；相图按需切片的
+`new_rho_point_session` 仅处理对称密度，默认 `reuse_temperature_anchor=true`。
+自然密度连续扫描的目标点默认使用带回溯的 Newton 校正，详见
+[路径校正与 Jacobian 选项](../solver/Overview.md)。
 
 若不显式提供 `rho_values`，入口默认使用 `DEFAULT_RHO_VALUES`。若目标是相图主线，一般不建议跳过这一默认多分辨率策略，除非你已经明确知道需要怎样的局部加密。
 

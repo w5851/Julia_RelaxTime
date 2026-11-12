@@ -20,12 +20,32 @@ def point(rho, pressure=1.0):
 
 
 class PathReuseComparisonTests(unittest.TestCase):
+    def test_completion_rejects_missing_case_and_duplicate_run(self):
+        plan = [dict(name="a", methods=["baseline","default"], repetitions=2)]
+        records = [dict(name="a",method=m,repetition=r) for m in plan[0]["methods"] for r in (1,2)]
+        self.assertTrue(C.check_completion(dict(expected_runs=plan,records=records))["complete"])
+        self.assertFalse(C.check_completion(dict(expected_runs=plan,records=records[:-1]))["complete"])
+        self.assertFalse(C.check_completion(dict(expected_runs=plan,records=records+records[:1]))["complete"])
+        self.assertFalse(C.check_completion(dict(records=records))["complete"])
+
+    def test_invalid_thermodynamics_fail_without_crashing(self):
+        reference = dict(all_roots=[dict(coordinate=1.0, roots=[point(1.0)])])
+        invalid = point(1.0)
+        invalid["pressure"] = None
+        candidate = dict(all_roots=[dict(coordinate=1.0, roots=[invalid])])
+        self.assertFalse(C.compare_all_roots(reference, candidate)["same"])
+
     def test_metastable_pressure_drift_is_checked(self):
         reference = dict(all_roots=[dict(coordinate=1.0, roots=[point(1.0), point(2.0)])])
         changed = dict(all_roots=[dict(coordinate=1.0, roots=[point(1.0), point(2.0, 1.00001)])])
         result = C.compare_all_roots(reference, changed)
         self.assertFalse(result["same"])
         self.assertGreater(result["maxima"]["pressure"], 1e-6)
+
+    def test_duplicate_root_does_not_pass_coverage(self):
+        reference = dict(all_roots=[dict(coordinate=1.0, roots=[point(1.0)])])
+        candidate = dict(all_roots=[dict(coordinate=1.0, roots=[point(1.0),point(1.0)])])
+        self.assertFalse(C.compare_all_roots(reference,candidate)["same"])
 
     def test_missing_middle_root_fails_summary(self):
         rows = [point(1.0)]

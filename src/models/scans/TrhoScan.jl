@@ -227,7 +227,7 @@ function run_trho_scan(;
     seed_policy::Symbol=:hybrid_continuity,
     continuation::Symbol=:auto,
     palc_options::NamedTuple=(;),
-    reuse_temperature_anchor::Bool=false,
+    reuse_temperature_anchor::Union{Nothing,Bool}=nothing,
     hybrid_weighted_fallback::Bool=false,
     hybrid_weighted_max_seed_candidates::Int=3,
     constraint_mode::Symbol=:fixed_rho,
@@ -253,6 +253,7 @@ function run_trho_scan(;
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    reuse_temperature_anchor = something(reuse_temperature_anchor, constraint_mode === :fixed_rho)
     continuation_mode = Models.resolve_scan_continuation(continuation, model_kind,
         thermo_quadrature_policy, semantic_mode, selector, length(rho_values);
         constraint_mode, controls_supported=Models._scan_path_controls_supported(nlsolve_kwargs) &&
@@ -1053,7 +1054,7 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
         continuation::Symbol=:auto,
         palc_options::NamedTuple=(;),
-        reuse_temperature_anchor::Bool=false)
+        reuse_temperature_anchor::Bool=true)
     Models.resolve_scan_continuation(continuation, model_kind, thermo_quadrature_policy,
         :ground_state, nothing, 5)
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||

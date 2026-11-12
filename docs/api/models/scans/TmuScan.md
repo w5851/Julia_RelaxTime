@@ -74,6 +74,9 @@ PALC 在每组内按排序去重后的 μ 发现和延拓分支，再校正到�
 `reuse_temperature_anchor=false` 可改为 `true`，将同一 ξ 下上一条已解路径的最高 μ 根
 作为新温度端点的初值。新温度仍重新求根与延拓；初值失败沿用端点恢复流程。
 该选项也可通过 `TmuScanConfig` 传入。resume 跳过的完整切片不触发额外求解。
+PNJL 默认采用三次目标预测、带回溯的 Newton 校正和中心有限差分 PALC Jacobian；
+局部校正失败时从原初值恢复 trust-region。选项与适用模式见
+[路径校正与 Jacobian 选项](../solver/Overview.md)。
 
 ## 输出合同
 

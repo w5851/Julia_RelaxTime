@@ -18,7 +18,6 @@ Base.@kwdef mutable struct PALCWorkTelemetry
     root_iterations::Int = 0
     root_jacobian_calls::Int = 0
     workspace_builds::Int = 0
-    residual_first_accepts::Int = 0
     reused_anchor_solves::Int = 0
     newton_corrections::Int = 0
     corrector_fallbacks::Int = 0
@@ -35,7 +34,20 @@ const PATH_SOLVER_KEYWORDS = (:residual_norm_max, :iterations,
     :thermo_quadrature_policy, :thermo_quadrature_rtol, :thermo_quadrature_atol,
     :thermo_quadrature_maxevals, :physicality_check, :hard_constraints,
     :work_telemetry, :path_work, :evaluate_all_attempts,
-    :reuse_corrector, :corrector_residual_first, :corrector_method)
+    :reuse_corrector, :corrector_method)
+
+_path_optimization_qualified(model, path) =
+    model isa PNJLModel && !(path isa ConstraintTPath{FixedEntropy})
+
+function _resolved_palc_strategy(model, path, strategy::PALCContinuation)
+    qualified = _path_optimization_qualified(model, path)
+    jacobian = strategy.jacobian === :auto ?
+        (qualified && path isa ConstraintTPath{FixedSigma} ? :forwarddiff : :finite_difference) : strategy.jacobian
+    predictor = strategy.target_predictor === :auto ?
+        (qualified ? :cubic : :linear) : strategy.target_predictor
+    return PALCContinuation(strategy.ds, strategy.dsmax, strategy.max_steps,
+        strategy.newton_tol, strategy.newton_max_iterations, strategy.backend, jacobian, predictor)
+end
 
 function _scan_path_controls_supported(kwargs)
     return all(key -> key in PATH_SOLVER_KEYWORDS, keys(kwargs)) &&
@@ -47,7 +59,7 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
     thermo_quadrature_rtol::Real=1e-8, thermo_quadrature_atol::Real=1e-10,
     thermo_quadrature_maxevals::Integer=10^7, physicality_check::Function=((_, _) -> true),
     hard_constraints=nothing, reuse_corrector::Bool=false,
-    corrector_residual_first::Bool=false, corrector_method::Symbol=:trust_region, kwargs...)
+    corrector_method::Symbol=:auto, kwargs...)
     unknown = setdiff(collect(keys(kwargs)), PATH_SOLVER_KEYWORDS)
     isempty(unknown) || throw(ArgumentError("unsupported path solver keywords: $(join(unknown, ", "))"))
     get(kwargs, :evaluate_all_attempts, true) === true || throw(ArgumentError(
@@ -73,9 +85,11 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
         Float64(thermo_quadrature_rtol), Float64(thermo_quadrature_atol),
         Int(thermo_quadrature_maxevals))
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check) : hard_constraints
-    corrector_method in (:trust_region, :newton) ||
-        throw(ArgumentError("corrector_method must be :trust_region or :newton"))
-    return (; residual_tol, iteration_limit, rules, reuse_corrector, corrector_residual_first, corrector_method,
+    corrector_method in (:auto, :trust_region, :newton) ||
+        throw(ArgumentError("corrector_method must be :auto, :trust_region or :newton"))
+    corrector_method = corrector_method === :auto ?
+        (_path_optimization_qualified(model, path) ? :newton : :trust_region) : corrector_method
+    return (; residual_tol, iteration_limit, rules, reuse_corrector, corrector_method,
         thermo=(; xi=path.xi, p_num=path.p_num, t_num=path.t_num,
             thermo_quadrature_policy, thermo_quadrature_rtol=Float64(thermo_quadrature_rtol),
             thermo_quadrature_atol=Float64(thermo_quadrature_atol),
@@ -259,24 +273,15 @@ function _path_root(model, path, value, seed, residual, options, work;
                 local_root = nothing
             end
         end
-        accepted_seed = local_root !== nothing
-        if !accepted_seed && source === :correction && options.corrector_residual_first
-            work.root_residual_calls += 1
-            seed_residual = residual(seed, value)
-            accepted_seed = all(isfinite, seed_residual) && maximum(abs, seed_residual) <= 1e-9
-        end
         root = if local_root !== nothing
             local_root
-        elseif accepted_seed
-            work.residual_first_accepts += 1
-            (; zero=Float64.(seed), iterations=0)
         elseif workspace === nothing
             nlsolve(f!, Float64.(seed); autodiff=:forward, method=:trust_region,
                 ftol=1e-9, xtol=1e-9, iterations=options.iteration_limit)
         else
             _workspace_root!(workspace, value, seed, options.iteration_limit)
         end
-        if !accepted_seed
+        if local_root === nothing
             record_nlsolve_work!(work_telemetry, root, :trust_region)
             work.root_iterations += root.iterations
             work.root_jacobian_calls += root.g_calls
@@ -338,7 +343,10 @@ function _path_catalog(path, value; previous=nothing)
 end
 
 function _single_pass_path_result(model, path, value, previous; kwargs...)
-    options = _path_options(model, path; kwargs...)
+    # Catalog starts are not nearby path predictions. Keep their root search
+    # unchanged while PALC/natural target correctors use the qualified defaults.
+    options = _path_options(model, path;
+        merge((;corrector_method=:trust_region),(;kwargs...))...)
     residual = _path_residual(model, path, options)
     work = get(kwargs, :path_work, PALCWorkTelemetry())
     roots = NamedTuple[]
@@ -511,7 +519,8 @@ function _palc_curve(residual, root, value, bounds, strategy, work; positive_par
         work.continuation_residual_calls += 1
         residual(x, p.value)
     end
-    jac = _palc_jacobian(residual, root.solution, value, work, strategy.jacobian)
+    jac = _palc_jacobian(residual, root.solution, value, work,
+        strategy.jacobian === :auto ? :finite_difference : strategy.jacobian)
     record = (x, p; kwargs...) -> (; solution=Float64.(x))
     problem = BifurcationKit.BifurcationProblem(f, copy(root.solution), (; value),
         (@optic _.value); J=jac, record_from_solution=record)
@@ -646,6 +655,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     path_work::PALCWorkTelemetry=PALCWorkTelemetry(), work_telemetry=nothing,
     anchor_values=nothing, initial_anchor=nothing, initial_residual=nothing,
     initial_workspace=nothing, boundary_correction::Bool=false, kwargs...)
+    strategy = _resolved_palc_strategy(model, path, strategy)
     diagnostic_level in (:summary, :full) || throw(ArgumentError("diagnostic_level must be :summary or :full"))
     if anchor_strategy === nothing
         anchor_strategy = anchor_values === nothing ? _default_path_anchor(model, path) : SeedPoolAnchor()

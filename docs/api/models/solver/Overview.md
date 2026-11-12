@@ -207,11 +207,17 @@ Tμ 路径（至少 31 点）启用 PALC；RPNJL、短路径、自定义选择�
 `continuation_time_s` 记录 BifurcationKit 延拓，`selected_rebuild_time_s` 记录选中结果重构。
 后者需将同一个 `path_work` 传给 `selected_path_results`；这些计时不含序列化和独立验证。
 
-路径优化比较选项：`PALCContinuation(jacobian=:finite_difference, target_predictor=:linear)`
-也支持 `jacobian=:forwarddiff` 与 `target_predictor=:cubic`。三次插值在单调曲线段内进行，
-邻接回弯或不规则间距时使用线性初值，所有交点仍单独校正。
-`solve_path(...; reuse_corrector=false, corrector_residual_first=false,
-corrector_method=:trust_region)` 可比较工作区复用和 `corrector_method=:newton`。
+`PALCContinuation(jacobian=:auto, target_predictor=:auto)` 按路径选择默认值：
+PNJL 的 FixedMu、FixedRho、FixedAsymmetricRho、FixedSigma 和 FixedMuBConservedCharges
+使用三次目标预测，其中 FixedSigma 的 PALC Jacobian 使用 ForwardDiff，其余使用中心有限差分。
+RPNJL 和 FixedEntropy 使用线性预测与中心有限差分。显式选项为
+`jacobian=:finite_difference/:forwarddiff`、`target_predictor=:linear/:cubic`。
+三次插值在单调曲线段内进行，邻接回弯或不规则间距时使用线性初值，所有交点仍单独校正。
+
+`solve_path(...; corrector_method=:auto, reuse_corrector=false)` 对上述五类 PNJL 路径默认
+采用带工作区复用的 Newton 目标校正；RPNJL 和 FixedEntropy 采用 trust-region。
+`corrector_method=:trust_region` 可显式恢复原校正器；该模式下 `reuse_corrector=true`
+仅复用 NLsolve 工作区。Newton 总是复用工作区。目录种子搜索仍采用 trust-region。
 局部 Newton 先检查残差（上限 1e-9），最多进行 8 步带回溯的校正；失败时从原初值恢复
 trust-region。最终候选仍通过残差和硬约束检查。工作区仅在单条路径请求内部使用，外部参数
 改变时清空数值/Jacobian 缓存。`root_iterations`、`root_jacobian_calls`、`workspace_builds`、

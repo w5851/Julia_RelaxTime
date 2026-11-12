@@ -23,6 +23,15 @@ if !isdefined(Main, :EndpointPathTestModel)
     end
 end
 
+if !isdefined(Main, :CorrectorPathTestModel)
+    @eval Main struct CorrectorPathTestModel <: Models.AbstractQCDModel end
+end
+
+function Models._path_candidate(::Main.CorrectorPathTestModel, path, value, solution, residual, iterations, options)
+    residual_norm = maximum(abs, residual(solution,value))
+    return (; solution, iterations, residual_norm, converged=residual_norm < options.residual_tol)
+end
+
 Models._path_options(::Main.EndpointPathTestModel,path;kwargs...) = nothing
 Models._path_residual(::Main.EndpointPathTestModel,path,options) = (x,value) -> x .- value
 function Models._path_root(model::Main.EndpointPathTestModel,path,value,seed,residual,options,work;
@@ -234,6 +243,33 @@ end
         @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedRhoPath(1.0, [0.5]), 0.5))
         @test all(seed -> length(seed) == 8, Models._path_catalog(Models.FixedAsymmetricRhoPath(1.0, [0.5]), 0.5))
         @test_throws ArgumentError Models._path_options(model, path; evaluate_all_attempts=false)
+        @test_throws ArgumentError Models._path_options(model, path; corrector_method=:unknown)
+    end
+
+    @testset "Optimized defaults follow the qualified path and preserve explicit controls" begin
+        model = Models.create_model(:PNJL)
+        for path in (Models.FixedMuPath(1.0,[0.0,0.1]), Models.FixedRhoPath(1.0,[0.1,0.2]),
+            Models.FixedAsymmetricRhoPath(1.0,[0.1,0.2]),
+            Models.ConstraintTPath(Models.FixedSigma(12.0),[0.5,0.6]),
+            Models.ConstraintTPath(Models.FixedMuBConservedCharges(4.5),[0.5,0.6]))
+            options = Models._path_options(model,path)
+            @test options.corrector_method === :newton
+            strategy = Models._resolved_palc_strategy(model,path,Models.PALCContinuation())
+            @test strategy.target_predictor === :cubic
+            @test strategy.jacobian === (path isa Models.ConstraintTPath{Models.FixedSigma} ?
+                :forwarddiff : :finite_difference)
+            explicit = Models._resolved_palc_strategy(model,path,
+                Models.PALCContinuation(jacobian=:finite_difference,target_predictor=:linear))
+            @test explicit.jacobian === :finite_difference && explicit.target_predictor === :linear
+            @test Models._path_options(model,path;corrector_method=:trust_region).corrector_method === :trust_region
+        end
+        entropy = Models.ConstraintTPath(Models.FixedEntropy(0.5),[0.5,0.6])
+        rpnjl = Models.create_model(:RPNJL)
+        for (m,p) in ((model,entropy),(rpnjl,Models.FixedMuPath(1.0,[0.0,0.1])))
+            @test Models._path_options(m,p).corrector_method === :trust_region
+            strategy = Models._resolved_palc_strategy(m,p,Models.PALCContinuation())
+            @test strategy.jacobian === :finite_difference && strategy.target_predictor === :linear
+        end
     end
 
     @testset "Endpoint starts preserve path constraints and explicit catalogs" begin
@@ -452,6 +488,22 @@ end
         @test Models._reusable_endpoint_anchor(result, Models.FixedRhoPath(0.8,[0.1,0.4])).seed === nothing
         @test Models._reusable_endpoint_anchor(result, Models.FixedMuPath(0.8,[0.1,0.3])).seed === nothing
         @test_throws ArgumentError Models._endpoint_anchor_attempts(path, Models.EndpointAnchor(ones(5)))
+    end
+
+    @testset "Local corrector failure restores trust-region from the original seed" begin
+        model = Main.CorrectorPathTestModel()
+        path = Models.FixedMuPath(1.0,[1.0])
+        residual = (x,p) -> [x[1]^3-p]
+        work = Models.PALCWorkTelemetry()
+        options = (;iteration_limit=300,corrector_method=:newton,residual_tol=1e-6)
+        seed = [0.01]
+        workspace = Models.PathRootWorkspace(residual,1.0,seed,work)
+        candidate = Models._path_root(model,path,1.0,seed,residual,options,work;workspace)
+        @test candidate !== nothing && candidate.converged
+        @test candidate.solution ≈ [1.0] atol=1e-8
+        @test work.corrector_fallbacks == 1
+        @test work.newton_corrections == 1
+        @test seed == [0.01]
     end
 
     @testset "Pseudo-arclength crosses a fold on an analytic equation" begin

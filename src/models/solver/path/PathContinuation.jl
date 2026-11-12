@@ -247,8 +247,8 @@ function PALCContinuation(;
     newton_tol::Real=1e-8,
     newton_max_iterations::Integer=12,
     backend::Symbol=:bifurcationkit,
-    jacobian::Symbol=:finite_difference,
-    target_predictor::Symbol=:linear,
+    jacobian::Symbol=:auto,
+    target_predictor::Symbol=:auto,
 )
     ds_val = _path_positive_real(ds, :ds)
     dsmax_val = _path_positive_real(dsmax, :dsmax)
@@ -258,10 +258,10 @@ function PALCContinuation(;
     newton_tol_val = _path_positive_real(newton_tol, :newton_tol)
     backend === :bifurcationkit ||
         throw(ArgumentError("PALCContinuation backend must be :bifurcationkit, got $(backend)"))
-    jacobian in (:finite_difference, :forwarddiff) ||
-        throw(ArgumentError("jacobian must be :finite_difference or :forwarddiff"))
-    target_predictor in (:linear, :cubic) ||
-        throw(ArgumentError("target_predictor must be :linear or :cubic"))
+    jacobian in (:auto, :finite_difference, :forwarddiff) ||
+        throw(ArgumentError("jacobian must be :auto, :finite_difference or :forwarddiff"))
+    target_predictor in (:auto, :linear, :cubic) ||
+        throw(ArgumentError("target_predictor must be :auto, :linear or :cubic"))
     return PALCContinuation(ds_val, dsmax_val, max_steps_val, newton_tol_val,
         newton_max_iterations_val, backend, jacobian, target_predictor)
 end

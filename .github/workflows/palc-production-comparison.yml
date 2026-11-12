@@ -17,6 +17,9 @@ on:
       probe_anchors:
         type: boolean
         default: false
+      methods:
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       profile:
@@ -39,6 +42,10 @@ on:
         description: Inspect individual endpoint guesses outside matched timing
         type: boolean
         default: false
+      methods:
+        description: Path reuse methods, e.g. baseline,default
+        type: string
+        default: all
 permissions:
   contents: read
 concurrency:
@@ -92,7 +99,8 @@ jobs:
           BUDGET: ${{ inputs.budget_seconds }}
           CASES: ${{ inputs.cases }}
           PALC_TIMING_SAMPLES: "5"
-        run: python scripts/analysis/pnjl_bifurcation_spike/compare_path_reuse.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
+          METHODS: ${{ inputs.methods }}
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_path_reuse.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES" --methods "$METHODS"
       - name: Compare two endpoint continuation and PALC
         if: inputs.profile == 'endpoints' || inputs.profile == 'anchors' || inputs.profile == 'promotion'
         env:
