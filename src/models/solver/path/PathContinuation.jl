@@ -205,7 +205,11 @@ end
 struct SeedPoolAnchor <: AbstractAnchorStrategy end
 
 """Start from one accepted endpoint root; recover with catalog search only on failure."""
-struct EndpointAnchor <: AbstractAnchorStrategy end
+struct EndpointAnchor <: AbstractAnchorStrategy
+    seed::Union{Nothing,Vector{Float64}}
+    EndpointAnchor() = new(nothing)
+    EndpointAnchor(seed::AbstractVector{<:Real}) = new(_path_float_vector(seed, :seed))
+end
 
 """Trace only the curve reached from this initial guess, without catalog fallback."""
 struct SingleSeedAnchor <: AbstractAnchorStrategy
@@ -232,6 +236,8 @@ struct PALCContinuation <: AbstractContinuationStrategy
     newton_tol::Float64
     newton_max_iterations::Int
     backend::Symbol
+    jacobian::Symbol
+    target_predictor::Symbol
 end
 
 function PALCContinuation(;
@@ -241,6 +247,8 @@ function PALCContinuation(;
     newton_tol::Real=1e-8,
     newton_max_iterations::Integer=12,
     backend::Symbol=:bifurcationkit,
+    jacobian::Symbol=:finite_difference,
+    target_predictor::Symbol=:auto,
 )
     ds_val = _path_positive_real(ds, :ds)
     dsmax_val = _path_positive_real(dsmax, :dsmax)
@@ -250,8 +258,17 @@ function PALCContinuation(;
     newton_tol_val = _path_positive_real(newton_tol, :newton_tol)
     backend === :bifurcationkit ||
         throw(ArgumentError("PALCContinuation backend must be :bifurcationkit, got $(backend)"))
-    return PALCContinuation(ds_val, dsmax_val, max_steps_val, newton_tol_val, newton_max_iterations_val, backend)
+    jacobian in (:finite_difference, :forwarddiff) ||
+        throw(ArgumentError("jacobian must be :finite_difference or :forwarddiff"))
+    target_predictor in (:auto, :linear, :cubic) ||
+        throw(ArgumentError("target_predictor must be :auto, :linear or :cubic"))
+    return PALCContinuation(ds_val, dsmax_val, max_steps_val, newton_tol_val,
+        newton_max_iterations_val, backend, jacobian, target_predictor)
 end
+
+PALCContinuation(ds::Float64, dsmax::Float64, max_steps::Int, newton_tol::Float64,
+    newton_max_iterations::Int, backend::Symbol) = PALCContinuation(;
+        ds, dsmax, max_steps, newton_tol, newton_max_iterations, backend)
 
 struct GroundStateBranchPolicy <: AbstractBranchPolicy
     pressure_gap_tol::Float64

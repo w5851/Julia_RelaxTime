@@ -71,6 +71,13 @@ ground_state 选择器、受支持的 solver 选项且每条等温线至少 31 �
 PALC 在每组内按排序去重后的 μ 发现和延拓分支，再校正到目标点，最终仍按用户输入顺序
 输出 CSV 与 callback。稳定分支的一阶跳变由候选压力竞争产生，不要求输出解本身连续。
 
+`reuse_temperature_anchor=false` 可改为 `true`，将同一 ξ 下上一条已解路径的最高 μ 根
+作为新温度端点的初值。新温度仍重新求根与延拓；初值失败沿用端点恢复流程。
+该选项也可通过 `TmuScanConfig` 传入。resume 跳过的完整切片不触发额外求解。
+PNJL 默认采用三次目标预测、带回溯的 Newton 校正和中心有限差分 PALC Jacobian；
+局部校正失败时从原初值恢复 trust-region。选项与适用模式见
+[路径校正与 Jacobian 选项](../solver/Overview.md)。
+
 ## 输出合同
 
 T-μ 扫描的稳定跨模块产物是 CSV，而不是 Julia 内部结构本身。当前 header 为：

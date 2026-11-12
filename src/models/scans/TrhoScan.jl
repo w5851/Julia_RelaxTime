@@ -227,6 +227,7 @@ function run_trho_scan(;
     seed_policy::Symbol=:hybrid_continuity,
     continuation::Symbol=:auto,
     palc_options::NamedTuple=(;),
+    reuse_temperature_anchor::Union{Nothing,Bool}=nothing,
     hybrid_weighted_fallback::Bool=false,
     hybrid_weighted_max_seed_candidates::Int=3,
     constraint_mode::Symbol=:fixed_rho,
@@ -252,6 +253,7 @@ function run_trho_scan(;
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    reuse_temperature_anchor = something(reuse_temperature_anchor, constraint_mode === :fixed_rho)
     continuation_mode = Models.resolve_scan_continuation(continuation, model_kind,
         thermo_quadrature_policy, semantic_mode, selector, length(rho_values);
         constraint_mode, controls_supported=Models._scan_path_controls_supported(nlsolve_kwargs) &&
@@ -305,6 +307,7 @@ function run_trho_scan(;
             println(io, HEADER)
         end
 
+        previous_path = nothing
         for xi in xi_values, T in T_values
             # 每个新温度重置连续性种子
             seed_key = _seed_continuation_key(T, xi)
@@ -322,12 +325,15 @@ function run_trho_scan(;
             single_previous = nothing
             if continuation_mode in (:palc,:natural) && any(rho -> !(ScanCommon.key3(T, rho, xi; digits=6) in completed), rho_scan_order)
                 path_result = Models.solve_path(create_model(model_kind), path;
+                    anchor_strategy=reuse_temperature_anchor && model_kind === :PNJL ?
+                        Models._reusable_endpoint_anchor(previous_path, path) : nothing,
                     continuation_strategy=continuation_mode === :palc ?
                         Models.PALCContinuation(; palc_options...) : Models.NaturalContinuation(),
                     (continuation_mode === :natural ? (;recovery_strategy=Models.PALCContinuation(;palc_options...)) : (;))...,
                     solver_kwargs...)
                 path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
                 path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
+                previous_path = path_result
             end
 
             for (rho_index, rho) in enumerate(rho_scan_order)
@@ -1030,6 +1036,8 @@ mutable struct RhoPointSession
     continuation::Symbol
     palc_options::NamedTuple
     prepared::Dict{Tuple{Float64,Float64,Float64}, Union{Nothing,SolverResult}}
+    reuse_temperature_anchor::Bool
+    previous_path::Union{Nothing,Models.PathSolveResult}
 end
 
 function new_rho_point_session(; model_kind::Symbol=:PNJL,
@@ -1045,7 +1053,8 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         thermo_quadrature_maxevals::Int=10^7,
         telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
         continuation::Symbol=:auto,
-        palc_options::NamedTuple=(;))
+        palc_options::NamedTuple=(;),
+        reuse_temperature_anchor::Bool=true)
     Models.resolve_scan_continuation(continuation, model_kind, thermo_quadrature_policy,
         :ground_state, nothing, 5)
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
@@ -1071,6 +1080,7 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         Dict{Tuple{Float64, Float64}, Vector{Float64}}(), 0, 0, 0, 0, 0,
         continuation, palc_options,
         Dict{Tuple{Float64,Float64,Float64}, Union{Nothing,SolverResult}}(),
+        reuse_temperature_anchor, nothing,
     )
 end
 
@@ -1086,10 +1096,13 @@ function prepare_rho_path!(session::RhoPointSession, T::Real, xi::Real, values)
     model = create_model(session.model_kind)
     common = (; iterations=session.iterations, work_telemetry=session.telemetry)
     result = Models.solve_path(model, path;
+        anchor_strategy=session.reuse_temperature_anchor && session.model_kind === :PNJL ?
+            Models._reusable_endpoint_anchor(session.previous_path, path) : nothing,
         continuation_strategy=strategy === :palc ? Models.PALCContinuation(; session.palc_options...) :
             Models.NaturalContinuation(),
         (strategy === :natural ? (;recovery_strategy=Models.PALCContinuation(;session.palc_options...)) : (;))...,
         common...)
+    session.previous_path = result
     solutions = Models.selected_path_results(model, result; common...)
     for (rho, solution) in zip(pending, solutions)
         session.prepared[(Float64(T), Float64(xi), rho)] = solution
