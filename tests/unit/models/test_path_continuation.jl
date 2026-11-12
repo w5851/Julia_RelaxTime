@@ -256,8 +256,7 @@ end
             @test options.corrector_method === :newton
             strategy = Models._resolved_palc_strategy(model,path,Models.PALCContinuation())
             @test strategy.target_predictor === :cubic
-            @test strategy.jacobian === (path isa Models.ConstraintTPath{Models.FixedSigma} ?
-                :forwarddiff : :finite_difference)
+            @test strategy.jacobian === :finite_difference
             explicit = Models._resolved_palc_strategy(model,path,
                 Models.PALCContinuation(jacobian=:finite_difference,target_predictor=:linear))
             @test explicit.jacobian === :finite_difference && explicit.target_predictor === :linear

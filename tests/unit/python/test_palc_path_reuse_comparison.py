@@ -20,6 +20,25 @@ def point(rho, pressure=1.0):
 
 
 class PathReuseComparisonTests(unittest.TestCase):
+    def test_historical_entropy_tie_requires_both_conjugate_roots_and_roundoff_pressure(self):
+        positive = point(1.0,pressure=20.0)
+        positive["solution"] = [-1.0,-1.0,-2.0,0.1,0.2,1.0,1.0,1.0]
+        negative = dict(positive,solution=[-1.0,-1.0,-2.0,0.2,0.1,-1.0,-1.0,-1.0],
+                        mu_vec=[-1.0]*3,rho_norm=-1.0)
+        left = dict(config=dict(constraint_mode="fixed_entropy"),rows=[positive],
+                    all_roots=[dict(coordinate=1.0,roots=[positive,negative])])
+        right = dict(left, rows=[negative])
+        def ties(a,b):
+            return C.entropy_conjugate_ties(a,b,C.compare(a,b),C.compare_all_roots(a,b))
+        self.assertIsNotNone(ties(left,right))
+        self.assertFalse(C.compare(left,right)["same"])
+        shifted = dict(negative,pressure=20.0+1e-8)
+        self.assertIsNone(ties(left,dict(right,rows=[shifted],
+            all_roots=[dict(coordinate=1.0,roots=[positive,shifted])])) )
+        self.assertIsNone(ties(left,dict(right,all_roots=[dict(coordinate=1.0,roots=[negative])])))
+        self.assertIsNone(ties(dict(left,config=dict(constraint_mode="fixed_sigma")),
+                              dict(right,config=dict(constraint_mode="fixed_sigma"))))
+
     def test_completion_rejects_missing_case_and_duplicate_run(self):
         plan = [dict(name="a", methods=["baseline","default"], repetitions=2)]
         records = [dict(name="a",method=m,repetition=r) for m in plan[0]["methods"] for r in (1,2)]

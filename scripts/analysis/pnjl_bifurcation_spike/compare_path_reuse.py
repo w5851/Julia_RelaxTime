@@ -2,6 +2,7 @@
 import argparse
 from collections import Counter
 import json
+import math
 from pathlib import Path
 import statistics
 import subprocess
@@ -50,6 +51,53 @@ def check_completion(data):
     return dict(complete=bool(expected) and not missing and not unexpected and not duplicate,
                 expected_count=len(expected), completed_count=len(actual),
                 missing=missing, unexpected=unexpected, duplicates=duplicate)
+
+
+def entropy_conjugate_ties(reference, candidate, selected_check, candidates_check):
+    """Explain a historical entropy sign tie without relaxing same-run comparison.
+
+    FixedEntropy does not fix the density sign. Its two charge-conjugate roots
+    have equal pressure; last-bit roundoff can change historical argmax selection.
+    Require both roots, the actual charge-conjugation map and a pressure tie at
+    floating-point roundoff, not the much larger physics comparison tolerance.
+    """
+    if reference.get("config", {}).get("constraint_mode") != "fixed_entropy":
+        return None
+    if (not candidates_check["same"] or not selected_check["same_config"]
+            or selected_check["coverage"] or selected_check["duplicate_keys"]
+            or not selected_check["differences"]):
+        return None
+    rows = [{r["coordinate"]: r for r in run["rows"]} for run in (reference, candidate)]
+    roots = [{r["coordinate"]: r["roots"] for r in run["all_roots"]} for run in (reference,candidate)]
+
+    def conjugate(a, b):
+        if not (admissible(a) and admissible(b)) or len(a["solution"]) != 8:
+            return False
+        x = a["solution"]
+        transformed = x[:3] + [x[4],x[3]] + [-v for v in x[5:]]
+        return (a["rho_norm"]*b["rho_norm"] < 0
+                and max(abs(v-w) for v,w in zip(transformed,b["solution"])) <= 1e-4
+                and max(abs(v+w) for v,w in zip(a["mu_vec"],b["mu_vec"])) <= 1e-4
+                and abs(a["rho_norm"]+b["rho_norm"]) <= 1e-6
+                and max(abs(a[k]-b[k]) for k in ("entropy","energy")) <= 1e-6)
+
+    ties = []
+    for difference in selected_check["differences"]:
+        coordinate = difference["coordinate"]
+        a,b = (r[coordinate] for r in rows)
+        pairs = [r.get(coordinate,[]) for r in roots]
+        if not conjugate(a,b) or any(len(pair)!=2 or not conjugate(*pair) for pair in pairs):
+            return None
+        pressures = [r["pressure"] for pair in pairs for r in pair]
+        roundoff = 64*math.ulp(max(1.0,*map(abs,pressures)))
+        spread = max(pressures)-min(pressures)
+        if spread > roundoff:
+            return None
+        ties.append(dict(coordinate=coordinate, historical_density=a["rho_norm"],
+                         current_density=b["rho_norm"], pressure_spread=spread,
+                         pressure_roundoff_limit=roundoff))
+    return dict(reason="historical_fixed_entropy_charge_conjugate_pressure_tie",
+                strict_selected_match=False, ties=ties)
 
 
 def summarize(source, destination):
@@ -112,8 +160,16 @@ def summarize(source, destination):
                     all_roots=old["reference_all_roots"])
                 check = dict(source_sha=frozen["runs"][run_name]["source_sha"],
                     selected=compare(reference, baseline), candidates=compare_all_roots(reference, baseline))
+                check["accepted"] = check["selected"]["same"] and check["candidates"]["same"]
+                ties = entropy_conjugate_ties(reference, baseline, check["selected"],check["candidates"])
+                if ties is not None:
+                    check["entropy_sign_ties"] = ties
+                    check["accepted"] = True
+                    lines.append(f"\n{name}: {len(ties['ties'])} historical charge-conjugate pressure ties; "
+                                 "strict historical sign selection differs, both roots retained. "
+                                 "Same-run method/selection checks remain strict.")
                 compact["cases"][name]["prior_reference_check"] = check
-                ok &= check["selected"]["same"] and check["candidates"]["same"]
+                ok &= check["accepted"]
                 break
     sequence_costs = {}
     for name, case in compact["cases"].items():

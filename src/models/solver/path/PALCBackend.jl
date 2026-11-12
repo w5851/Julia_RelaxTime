@@ -41,12 +41,10 @@ _path_optimization_qualified(model, path) =
 
 function _resolved_palc_strategy(model, path, strategy::PALCContinuation)
     qualified = _path_optimization_qualified(model, path)
-    jacobian = strategy.jacobian === :auto ?
-        (qualified && path isa ConstraintTPath{FixedSigma} ? :forwarddiff : :finite_difference) : strategy.jacobian
     predictor = strategy.target_predictor === :auto ?
         (qualified ? :cubic : :linear) : strategy.target_predictor
     return PALCContinuation(strategy.ds, strategy.dsmax, strategy.max_steps,
-        strategy.newton_tol, strategy.newton_max_iterations, strategy.backend, jacobian, predictor)
+        strategy.newton_tol, strategy.newton_max_iterations, strategy.backend, strategy.jacobian, predictor)
 end
 
 function _scan_path_controls_supported(kwargs)
@@ -519,8 +517,7 @@ function _palc_curve(residual, root, value, bounds, strategy, work; positive_par
         work.continuation_residual_calls += 1
         residual(x, p.value)
     end
-    jac = _palc_jacobian(residual, root.solution, value, work,
-        strategy.jacobian === :auto ? :finite_difference : strategy.jacobian)
+    jac = _palc_jacobian(residual, root.solution, value, work, strategy.jacobian)
     record = (x, p; kwargs...) -> (; solution=Float64.(x))
     problem = BifurcationKit.BifurcationProblem(f, copy(root.solution), (; value),
         (@optic _.value); J=jac, record_from_solution=record)

@@ -207,10 +207,10 @@ Tμ 路径（至少 31 点）启用 PALC；RPNJL、短路径、自定义选择�
 `continuation_time_s` 记录 BifurcationKit 延拓，`selected_rebuild_time_s` 记录选中结果重构。
 后者需将同一个 `path_work` 传给 `selected_path_results`；这些计时不含序列化和独立验证。
 
-`PALCContinuation(jacobian=:auto, target_predictor=:auto)` 按路径选择默认值：
+`PALCContinuation(jacobian=:finite_difference, target_predictor=:auto)` 按路径选择默认预测：
 PNJL 的 FixedMu、FixedRho、FixedAsymmetricRho、FixedSigma 和 FixedMuBConservedCharges
-使用三次目标预测，其中 FixedSigma 的 PALC Jacobian 使用 ForwardDiff，其余使用中心有限差分。
-RPNJL 和 FixedEntropy 使用线性预测与中心有限差分。显式选项为
+使用三次目标预测。RPNJL 和 FixedEntropy 使用线性预测。PALC Jacobian 默认采用中心有限差分，
+`jacobian=:forwarddiff` 可用于实际工作负载的对照；AD 的速度优势依赖机器和约束模式。显式选项为
 `jacobian=:finite_difference/:forwarddiff`、`target_predictor=:linear/:cubic`。
 三次插值在单调曲线段内进行，邻接回弯或不规则间距时使用线性初值，所有交点仍单独校正。
 

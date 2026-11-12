@@ -11,6 +11,23 @@ using JSON
 const HBARC = Main.Constants_PNJL.ħc_MeV_fm
 const METHODS = (:baseline, :workspace, :cubic, :ad, :newton, :combined, :default)
 
+function jacobian_step_check(residual, x, value, ad)
+    errors = NamedTuple[]
+    for factor in (4.0,2.0,1.0,0.5,0.25)
+        fd = similar(ad)
+        for j in eachindex(x)
+            h = factor*cbrt(eps(Float64))*max(1.0,abs(x[j]))
+            plus,minus = copy(x),copy(x)
+            plus[j] += h
+            minus[j] -= h
+            fd[:,j] .= (residual(plus,value).-residual(minus,value))./(2h)
+        end
+        push!(errors,(;factor,max_abs=maximum(abs,fd-ad),
+            scaled_norm=norm(fd-ad)/max(1.0,norm(ad))))
+    end
+    return (;jacobian_norm=norm(ad),max_abs_jacobian=maximum(abs,ad),errors)
+end
+
 function residual_microbenchmark(model, path, result; samples=500)
     root = first(p for branch in result.branches for p in branch.points if p.converged)
     options = Models._path_options(model,path)
@@ -31,6 +48,7 @@ function residual_microbenchmark(model, path, result; samples=500)
         (;name,seconds=run.time/samples,allocated_bytes=run.bytes/samples)
     end
     return (;samples,coordinate=value,measurements,
+        step_check=jacobian_step_check(residual,x,value,copy(ad(x,(;value)))),
         jacobian_max_abs_difference=maximum(abs.(fd(x,(;value))-ad(x,(;value)))))
 end
 
