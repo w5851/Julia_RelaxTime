@@ -1,39 +1,71 @@
 # PALC 路径复用与校正成本
 
-当前状态：默认策略已实现，最终远端验收中（2026-11-12）；PR #346。基准为 PR #345 的端点 PALC 与自然密度连续扫描。
+状态：算法与数值验收完成，PR [#346](https://github.com/w5851/Julia_RelaxTime/pull/346) 收尾中（2026-11-12）。
+最终算法源码 `36bce656e286d1bfc3195b4d23c4172ccf94b550`；基准为 PR #345 的端点 PALC 与自然密度连续扫描。
+结果集中保留在 [path_reuse_optimization.json](../../../../../data/outputs/results/analysis/palc_matched_20261108/path_reuse_optimization.json)，约 1.8 MiB。原始逐次日志和重复状态数组留在 Actions 临时 artifact；本文件及紧凑结果足以恢复配置、根数、误差、计时和结论。
 
-## 当前选择
+## 最终行为
 
-- PNJL 的 Tμ、对称/非对称 Tρ、FixedSigma、BQS 路径使用先检查残差的 Newton 目标校正，复用 NLsolve 工作区。最多 8 步、每步最多 5 次减半回溯，失败从原初值恢复 trust-region；最终候选仍经过原残差与硬约束检查。
-- PALC 目标初值在同一单调段内使用四点三次插值；回弯附近和不规则间距使用线性插值。每个交点独立校正，保留全部候选及最大压力选态。
-- PALC Jacobian 默认采用中心有限差分；ForwardDiff 保留为显式选项。两者均复用输出及准备缓存。节点、权重与积分公式不变。
-- 对称 Tρ 扫描及密度会话默认复用邻温最高密度端点初值；Tμ 和非对称 Tρ 保留显式选项。新温度重新求解整条路径。
-- FixedEntropy 和 RPNJL 的默认预测、校正及 Jacobian 选择保持原设置。独立的 residual-first 开关已合并进 Newton，避免重复选项。
+- PNJL 的 Tμ、对称/非对称 Tρ、FixedSigma（固定 s/nB）及 BQS 路径默认使用 Newton 目标校正。先检查残差，最多 8 步、每步最多 5 次减半回溯；失败从原初值恢复 trust-region，最终仍检查原残差与硬约束。
+- NLsolve 的函数、Jacobian 准备及求解器工作区在单条路径内复用。参数改变时清空值/Jacobian 缓存；结果复制后返回。目录种子搜索仍采用 trust-region。
+- PALC 默认在同一单调段内使用四点三次目标预测，邻接回弯或不规则间距时使用线性预测；每个交点独立校正。
+- PALC Jacobian 默认中心有限差分；ForwardDiff 为显式选项。两者均复用缓冲。AD 在不同机器上的性能排序不同，不统一设为默认。
+- 对称 Tρ 扫描和密度会话默认复用邻温最高密度端点初值；Tμ/非对称 Tρ 保留显式选项。每个新温度仍重新求解整条路径。
+- FixedEntropy 和 RPNJL 的默认预测、校正及 Jacobian 选择保持原设置。独立 residual-first 开关已并入 Newton。积分公式、节点、权重及非 fixedmu 八维联立约束不变。
 
-## 已完成的扩展对照
+选项见 [solver API](../../../../api/models/solver/Overview.md)、[Tμ API](../../../../api/models/scans/TmuScan.md)、[Tρ API](../../../../api/models/scans/TrhoScan.md)。
 
-Actions [43155017475](https://github.com/w5851/Julia_RelaxTime/actions/runs/43155017475)，源码 `84e192e074530d6d5dc0e2b2483bbc24e26389cf`，3 轮、每轮 5 次计时。
+## 性能与工作量
 
-作业达到 1800 秒预算后退出（exit 124），完成了 23 条独立路径与 12×8 条温度切片，共 1239 条方法/轮次记录；尚未进入 FixedEntropy 的完整比较。这是部分执行记录，不能视为完整验收。
+Julia 1.12.5、单线程/单 BLAS 线程、24×8 tensor 积分、iterations=300。每方法每轮 5 次路径求解，3 轮轮换方法顺序；首轮含编译，仅后两轮用于 warm 中位数。时间包括全部候选求解和相同的选中结果重构；验证和序列化在外。对照在同一份新代码中显式恢复 PR #345 的数值控制，双方共享新的残差/FD 缓冲；因此倍率反映控制器与预测改进，未单独计入共享缓冲相对旧提交的收益。最终矩阵每批计时前统一 GC，批内 GC 保留在总时间中。
 
-所有已完成记录的全部候选根、候选热力学量和选态一致；23 条独立路径还与 PR #345 冻结参考匹配。最大状态差 `2.36e-7`，压力差 `4.85e-10`，密度/熵/能量差分别为 `3.64e-8/2.93e-8/4.09e-8`；原门限 state `1e-4`、thermo `1e-6`、residual `1e-6` 未改变。
+| 场景 | 原设置 / 新默认 | 分配下降 |
+| --- | ---: | ---: |
+| Tμ 升降温序列，ξ=0/0.4 | 1.361–1.376× | 15.1–15.4% |
+| 对称 Tρ 升降温序列 | 1.279–1.283× | 22.7–22.8% |
+| 非对称 Tρ 升降温序列 | 1.159–1.163× | 16.8–17.3% |
+| T=120 MeV 细 Tμ，89 个目标/111 根 | 1.321× | 约 17% |
+| FixedSigma 三个窗口（最终 FD） | 1.147–1.281× | 约 7–12% |
+| BQS（最终 FD） | 1.316× | 约 13% |
+| FixedEntropy（原算法） | 0.998× | 基本相同 |
 
-同一 ξ、T=100,110,120,130,140,160,180,200 MeV 升降温序列的原组合（邻温端点 + 工作区 + 三次插值 + AD + Newton）相对原默认：Tμ `1.323–1.339×`，对称 Tρ `1.178–1.222×`，非对称 Tρ `1.036–1.092×`。单独复用锚点的倍率分别为 `0.989–1.009×`、`1.023–1.070×`、`0.972–1.055×`，所以不把组合收益归因于端点复用。
+温度序列为 T=100,110,120,130,140,160,180,200 MeV，升/降各一遍。独立粗 Tμ 为 μq=0:15:450 MeV；细窗口 296:0.25:318 MeV，含 11 个三根目标。密度网格为 0 加 0.2:0.15:3.5；FixedSigma 为 s/nB=12.0759，T=100:2:140（ξ=0/0.4）及 120:2:160；BQS 为 μB=900 MeV、T=100:3:160。
 
-T=200 MeV、ξ=0.4 的组合总耗时和 sigma_t160 的组合/AD比较受到跨方法垃圾回收影响：前者第二轮每次含 43.6 ms GC，第三轮无 GC；根求解从约 43.7 ms 降至 21.8 ms。sigma_t160 的组合两轮分别含 122.8/44.8 ms GC，根求解由约 125 ms 降至 66 ms，曲线点数与恢复次数相同。最终比较在每批计时前统一 GC，批内 GC 仍计入总耗时。
+细 Tμ 的根 Jacobian 次数由 387 降至 253，迭代由 275 降至 252；最终 Actions 根阶段约 159.6→112.7 ms，PALC 约 19.1→19.0 ms，减少终止点的额外 Jacobian 是主要收益。密度路径可能触发一次局部 Newton 恢复，全部目标仍收敛。端点复用单独贡献较小：首批序列 Tμ 0.989–1.009×，对称 Tρ 1.023–1.070×，非对称 Tρ 0.972–1.055×，所以仅对称密度默认启用。
 
-## 最终验收与复现
+### Jacobian、积分与内存
 
-入口：`scripts/analysis/pnjl_bifurcation_spike/run_path_reuse_comparison.jl` 与 `compare_path_reuse.py`。支持 `--methods baseline,default`，JSON 同时记录计划矩阵与完成项；缺失、重复或未计划的记录不能通过完整验收。写盘按一组方法完成后进行，避免每种方法重复序列化全部历史记录。
+Tμ 微基准中，就地残差从每次 96 bytes 降至 0，耗时约 29.7 μs；FD/AD Jacobian 都为 0 bytes，约 298/353 μs。FixedSigma 就地残差约 1216 bytes，FD/AD Jacobian 约 19456/6432 bytes；最终 runner 的 AD 耗时 1.87 ms，FD 1.62 ms。AD 在远机和首批 Actions 的 FixedSigma 更快，表明不能从残差调用次数或单机结果推断所有机器的收益。
 
-最终验收包含实际 Tμ/Tρ 扫描、密度会话、输出顺序/resume、T=120 MeV 三根、密度一阶结构、BQS/isentropic 介子入口；FixedEntropy 仅核对原设置和当前默认。微基准记录残差分配与 AD/FD Jacobian 的差异。远机最终 8 条路径、48 条方法/轮次记录全部通过，含 FixedEntropy 的 42 根。热运行倍率：细 Tμ 1.412×、T200 ξ=0.4 1.271×、对称 Tρ 1.160×、非对称 Tρ 1.037×、FixedSigma 两窗口 1.494/1.464×、BQS 1.233×。固定熵原算法与默认的差别为计时波动（1.011×），迭代、根数和工作量一致。实际入口测试通过 3047 个断言。最终 Actions 43165548215 在 e1a9c6a7 完成 120 条路径/切片、720 条方法/轮次记录，新默认与同机原设置全部一致。该版本 FixedSigma 使用 AD；该 runner 上 AD 更慢，后续默认统一为 FD，并定向复核 FixedSigma。
+FixedSigma 的 AD/FD 最大绝对差约 2.95e-5，Jacobian 最大元素约 85.3，相对范数差 2.93e-7；差分步长减半后误差约缩小四倍，符合中心差分截断误差。Tμ 相对差约 1e-10。微基准与步长检查由同一比较入口生成。
 
-磁场验证由独立对话负责；本轮完成后继续 PR3 的实际低温消费者及目标导数核验。
+远机 T=120 MeV、μq=310 MeV 的抽样剖析中，620 个样本的 617 个经过 thermal omega，522 个经过 calculate_log_sum；主要成本是嵌套 Dual 的乘法及 exp/log，节点和权重已经缓存。此处仅定位热点，未改变热积分公式。下一层积分/AD 算术优化应由具体负载另行驱动。
 
-### 历史固定熵简并选态
+## 数值与简并选态
 
-完整 Actions 的历史比较在 7 个固定熵点上发现选中密度符号不同；两条电荷共轭根逐根状态最大差 4.45e-15，压力差约 1e-14。固定熵约束未指定密度符号，压力完全简并，舍入足以改变 argmax。这不改变本轮同机原设置/新默认的严格比较（全部相同）。汇总器现在保留 strict historical selected=false，同时仅在 42 根完整、μ/ρ 变号、Phi/Phi_bar 交换且两根压力差在 64 ulp 内时记录历史简并；丢根、物理非简并或其它约束仍失败。原数值容差和求解器选态不变。
+原容差保持 state=1e-4、thermodynamics=1e-6、residual=1e-6。完整矩阵有 120 条路径/切片、720 条方法/轮次记录；最后 FD 补充矩阵 5 条路径、30 条记录。每条记录核对全部候选根、各根热力学量及最大压力选态。同机原设置/新默认均严格一致，包含稳定、亚稳和中间分支。
 
-### Jacobian 实测差异
+完整矩阵跨方法最大差：状态 2.74e-8、压力 4.86e-10、密度 3.64e-8、熵 2.25e-8、能量 4.09e-8；参考最大残差 7.29e-8。单独路径与 PR #345 冻结根逐一匹配。FixedEntropy 有 21 个目标、42 个电荷共轭根，默认仍不晋升为生产 PALC。
 
-AD 在首批 Actions 和远机的 FixedSigma 延拓阶段更快，在最终 Actions runner 上约慢 9–11%；因此中心有限差分保留为默认，AD 由具体负载选择。该差异不影响全部根一致性。FixedSigma 的 AD/FD 最大绝对差约 2.95e-5，Jacobian 最大元素约 85.3，相对范数差 2.93e-7；差分步长减半后误差约缩小四倍，符合中心差分截断误差。Tμ 相对范数差约 1.16e-10。
+历史 FixedEntropy 选中密度符号在 7 个目标与 PR #345 不同：两根压力只差约 1e-14，根集合状态差不超过 4.45e-15。固定熵约束不规定密度符号，μ/ρ 变号同时交换 Phi/Phi_bar 后给出等压根，舍入会改变 argmax。报告保留 `strict historical selected=false`；只有两根完整、满足共轭关系且压力差在 64 ulp 内，才接受历史简并说明。其它模式、丢根或非简并压力差仍失败。同机新旧比较未作该例外，求解器选择规则和数值容差也未修改。
+
+实际消费者测试在远机通过 3047 个断言，覆盖默认 Tμ/Tρ、密度会话、T120 三根、S 形/Maxwell 结构、BQS、isentropic 介子入口、CSV/callback 顺序与 resume。Python 比较器 30 项通过。最终源码的 13 项常规 PR 检查通过。
+
+## 运行来源与复现
+
+| 批次 | 源码 | 结果 |
+| --- | --- | --- |
+| [扩展分项 43155017475](https://github.com/w5851/Julia_RelaxTime/actions/runs/43155017475) | 84e192e0 | 1800 s 预算退出，完成 119 路径/切片、1239 记录；已完成数值全部一致，FixedEntropy 未完成 |
+| [完整默认矩阵 43165548215](https://github.com/w5851/Julia_RelaxTime/actions/runs/43165548215) | e1a9c6a7 | 120 路径/切片、720 记录全部完成；原汇总因历史固定熵简并报失败，修正汇总后通过 |
+| [最终 FD 43169410396](https://github.com/w5851/Julia_RelaxTime/actions/runs/43169410396) | 36bce656 | 5 路径、30 记录全部通过，workflow success |
+
+首批 growing JSON 每方法重复写盘造成额外开销；现在按方法组写盘并记录预期矩阵。缺失、重复或未计划的记录不能通过完整验收。早期 T200 ξ=0.4 与 sigma_t160 的组合总耗时还受到前序工作触发的 GC 影响，最终矩阵统一了批前 GC；历史总耗时保留，未事后扣掉 GC 制造提速。
+
+```text
+PALC_TIMING_SAMPLES=5 julia --startup-file=no --project=. scripts/analysis/pnjl_bifurcation_spike/run_path_reuse_comparison.jl output.json 3 all baseline,default
+python scripts/analysis/pnjl_bifurcation_spike/compare_path_reuse.py --source output.json --output reviewed --summarize-only
+```
+
+Windows 在运行前设置 `$env:PALC_TIMING_SAMPLES="5"`。`--methods baseline,default` 可通过 Python CLI 或 Actions 输入设置；最终 FD 小矩阵的 cases 为 `sigma,sigma_xi4,sigma_t160,bqs,entropy`。首批分项严格复现需使用对应源码版本。约束温度微基准可同时输出 AD/FD 与步长差异。
+
+本轮未重算完整生产。磁场验证由独立对话负责；PALC 收尾后进入 PR3 的实际低温消费者及目标导数收敛核验。

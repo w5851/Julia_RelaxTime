@@ -1,5 +1,5 @@
 schema_version = 1
-primary_track = "palc-path-reuse"
+primary_track = "full-temperature-reference-research"
 updated_at = "2026-11-12"
 
 [[tracks]]
@@ -480,19 +480,23 @@ updated_at = "2026-11-11"
 [[tracks]]
 id = "palc-path-reuse"
 title = "PALC corrector, Jacobian and adjacent-temperature reuse"
-status = "active"
+status = "archived"
 current_task = "palc-path-reuse-verification"
 blocked_by = []
 unlocks = ["item:full-temperature-reference-pr3"]
-next_action = "分项比较校正器工作区、目标预测、PALC Jacobian 和相邻温度锚点复用；核对全部候选根和实际扫描消费者，只保留有收益的优化。"
+next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "codex/palc-path-reuse"
-current_sha = "dc183dfa561dc79ef1f8594948b1a1e705679996"
-run_ids = []
+current_sha = "36bce656e286d1bfc3195b4d23c4172ccf94b550"
+run_ids = ["43155017475", "43165548215", "43169410396"]
 evidence = [
-  "pr:345",
+  "pr:346",
+  "sha:36bce656e286d1bfc3195b4d23c4172ccf94b550",
+  "file:data/outputs/results/analysis/palc_matched_20261108/path_reuse_optimization.json",
+  "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/path_reuse.md",
+  "note:algorithm_accepted_750_final_records_same_run_all_roots_and_selection_match_3047_remote_assertions_pr_merge_pending",
   "file:docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/README.md",
   "note:author_20261112_requests_temperature_reuse_target_correction_and_jacobian_profiling_magnetic_validation_in_separate_thread",
 ]
@@ -505,7 +509,7 @@ status = "ready"
 current_task = "full-temperature-reference-pr3"
 blocked_by = []
 unlocks = []
-next_action = "PALC 路径复用与底层优化完成后，识别实际低温消费者，确定温区、导数阶数和误差目标，再检查少量代表点的积分与求解收敛。"
+next_action = "识别实际低温消费者，确定温区、导数阶数和误差目标，再检查少量代表点的积分与求解收敛。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
@@ -519,9 +523,10 @@ evidence = [
   "note:author_20261107_sequence_meson_paper_then_arena313_then_palc_and_full_temperature_pr3",
   "note:author_20261111_rescope_pr3_to_low_temperature_consumer_and_target_derivative_convergence_after_palc",
   "pr:345",
-  "note:palc_anchor_optimization_complete_pr3_ready_computation_not_started",
+  "pr:346",
+  "note:palc_path_optimization_accepted_pr3_ready_computation_not_started",
 ]
-updated_at = "2026-11-11"
+updated_at = "2026-11-12"
 
 [[tracks]]
 id = "analysis-docs-cleanup"
@@ -1243,14 +1248,14 @@ evidence = [
 id = "palc-path-reuse-verification"
 track_id = "palc-path-reuse"
 classification = "required_follow_up"
-status = "active"
+status = "archived"
 parent = "item:palc-anchor-search-optimization"
 task_file = "docs/analysis/pnjl/algorithmic_feasibility/palc_matched_20261108_analysis/path_reuse.md"
 reason = "作者要求继续优化相邻温度路径与目标点校正，并实测 Jacobian、积分和分配成本；磁场验证由独立对话负责。"
-next_action = "远端分项基准、全部根一致性和实际扫描验证；完成后再回到 PR3。"
+next_action = ""
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:345"]
+evidence = ["pr:346", "run:43169410396", "file:data/outputs/results/analysis/palc_matched_20261108/path_reuse_optimization.json"]
 
 [[items]]
 id = "full-temperature-reference-pr3"
