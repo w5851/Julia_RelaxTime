@@ -186,6 +186,8 @@ points = Models.selected_path_results(model, result)
 PALC 默认 `anchor_strategy=nothing` 按上述模型和路径选择锚点策略；可显式传入
 `EndpointAnchor()`、`SeedPoolAnchor()` 或 `SingleSeedAnchor(value,seed)`。
 `EndpointAnchor` 使用双向延拓的全部目标交点；`anchor_values` 仅用于目录策略。
+`EndpointAnchor(seed)` 可把相邻温度的端点解作为最高参数端的首个初值；数组长度应为
+Tμ 的 5 或联立约束的 8。入口复制初值并在当前路径重新校正，失败继续尝试普通端点初值。
 诊断的 `anchor_strategy` 为 `:endpoint_anchor` 或实际触发恢复时的 `:endpoint_catalog_recovery`。
 有限起点搜索需要通过对照检查分支覆盖。每个目标的全部合格根交给
 `GroundStateBranchPolicy`；相图中的相共存仍由上层 Maxwell 等构造判断。
@@ -204,6 +206,16 @@ Tμ 路径（至少 31 点）启用 PALC；RPNJL、短路径、自定义选择�
 其中 `root_time_s` 包含直接求根及候选后处理，`root_candidate_time_s` 是其中的后处理子项；
 `continuation_time_s` 记录 BifurcationKit 延拓，`selected_rebuild_time_s` 记录选中结果重构。
 后者需将同一个 `path_work` 传给 `selected_path_results`；这些计时不含序列化和独立验证。
+
+路径优化比较选项：`PALCContinuation(jacobian=:finite_difference, target_predictor=:linear)`
+也支持 `jacobian=:forwarddiff` 与 `target_predictor=:cubic`。三次插值在单调曲线段内进行，
+邻接回弯或不规则间距时使用线性初值，所有交点仍单独校正。
+`solve_path(...; reuse_corrector=false, corrector_residual_first=false,
+corrector_method=:trust_region)` 可比较工作区复用和 `corrector_method=:newton`。
+局部 Newton 先检查残差（上限 1e-9），最多进行 8 步带回溯的校正；失败时从原初值恢复
+trust-region。最终候选仍通过残差和硬约束检查。工作区仅在单条路径请求内部使用，外部参数
+改变时清空数值/Jacobian 缓存。`root_iterations`、`root_jacobian_calls`、`workspace_builds`、
+`newton_corrections`、`corrector_fallbacks` 和 `reused_anchor_solves` 可用于诊断实际工作量。
 
 `FixedAsymmetricRho` 可显式传入 `fixedasymrho_seed_policy=:single_pass`，并设置
 `evaluate_all_attempts=true`。它展开既有外层和内层种子的并集，对每个不同起点进行一次

@@ -21,7 +21,7 @@ on:
     inputs:
       profile:
         type: choice
-        options: [quick, medium, constraints, endpoints, anchors, promotion]
+        options: [quick, medium, constraints, endpoints, anchors, promotion, reuse]
         default: medium
       repetitions:
         type: choice
@@ -71,7 +71,7 @@ jobs:
         timeout-minutes: 3
         run: julia --project=. -e 'include("tests/unit/models/test_path_continuation.jl"); include("tests/unit/models/test_palc_production_contract.jl")'
       - name: Compare production scans within a shared budget
-        if: inputs.profile != 'constraints' && inputs.profile != 'endpoints' && inputs.profile != 'anchors' && inputs.profile != 'promotion'
+        if: inputs.profile != 'constraints' && inputs.profile != 'endpoints' && inputs.profile != 'anchors' && inputs.profile != 'promotion' && inputs.profile != 'reuse'
         env:
           PROFILE: ${{ inputs.profile }}
           REPETITIONS: ${{ inputs.repetitions }}
@@ -85,6 +85,14 @@ jobs:
           BUDGET: ${{ inputs.budget_seconds }}
           CASES: ${{ inputs.cases }}
         run: python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
+      - name: Compare path corrector, Jacobian and reuse
+        if: inputs.profile == 'reuse'
+        env:
+          REPETITIONS: ${{ inputs.repetitions }}
+          BUDGET: ${{ inputs.budget_seconds }}
+          CASES: ${{ inputs.cases }}
+          PALC_TIMING_SAMPLES: "5"
+        run: python scripts/analysis/pnjl_bifurcation_spike/compare_path_reuse.py --output temp_palc_production --repetitions "$REPETITIONS" --budget-seconds "$BUDGET" --cases "$CASES"
       - name: Compare two endpoint continuation and PALC
         if: inputs.profile == 'endpoints' || inputs.profile == 'anchors' || inputs.profile == 'promotion'
         env:
@@ -102,7 +110,9 @@ jobs:
         env:
           PROFILE: ${{ inputs.profile }}
         run: |
-          if [ "$PROFILE" = "endpoints" ] || [ "$PROFILE" = "anchors" ] || [ "$PROFILE" = "promotion" ]; then
+          if [ "$PROFILE" = "reuse" ]; then
+            python scripts/analysis/pnjl_bifurcation_spike/compare_path_reuse.py --output temp_palc_production --summarize-only
+          elif [ "$PROFILE" = "endpoints" ] || [ "$PROFILE" = "anchors" ] || [ "$PROFILE" = "promotion" ]; then
             python scripts/analysis/pnjl_bifurcation_spike/compare_endpoints.py --output temp_palc_production --summarize-only
           elif [ "$PROFILE" = "constraints" ]; then
             python scripts/analysis/pnjl_bifurcation_spike/compare_constraints.py --output temp_palc_production --summarize-only

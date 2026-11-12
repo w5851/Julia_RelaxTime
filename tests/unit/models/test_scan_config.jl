@@ -47,6 +47,8 @@ using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, FreezeoutScanConfig, scan_
         cfg = TrhoScanConfig(continuation=:palc, palc_options=(; ds=0.02, dsmax=0.08))
         @test scan_kwargs(cfg).continuation === :palc
         @test scan_kwargs(cfg).palc_options.ds == 0.02
+        @test scan_kwargs(TmuScanConfig(reuse_temperature_anchor=true)).reuse_temperature_anchor
+        @test !scan_kwargs(TrhoScanConfig(reuse_temperature_anchor=false)).reuse_temperature_anchor
     end
 
     @testset "scan config 保留显式热积分策略" begin

@@ -15,6 +15,13 @@ Base.@kwdef mutable struct PALCWorkTelemetry
     fallback_solves::Int = 0
     rejected_roots::Int = 0
     exceptions::Int = 0
+    root_iterations::Int = 0
+    root_jacobian_calls::Int = 0
+    workspace_builds::Int = 0
+    residual_first_accepts::Int = 0
+    reused_anchor_solves::Int = 0
+    newton_corrections::Int = 0
+    corrector_fallbacks::Int = 0
     root_time_s::Float64 = 0.0
     root_candidate_time_s::Float64 = 0.0
     continuation_time_s::Float64 = 0.0
@@ -27,7 +34,8 @@ palc_work_snapshot(work::PALCWorkTelemetry) =
 const PATH_SOLVER_KEYWORDS = (:residual_norm_max, :iterations,
     :thermo_quadrature_policy, :thermo_quadrature_rtol, :thermo_quadrature_atol,
     :thermo_quadrature_maxevals, :physicality_check, :hard_constraints,
-    :work_telemetry, :path_work, :evaluate_all_attempts)
+    :work_telemetry, :path_work, :evaluate_all_attempts,
+    :reuse_corrector, :corrector_residual_first, :corrector_method)
 
 function _scan_path_controls_supported(kwargs)
     return all(key -> key in PATH_SOLVER_KEYWORDS, keys(kwargs)) &&
@@ -38,7 +46,8 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
     iterations::Integer=300, thermo_quadrature_policy::Symbol=:tensor_gauss,
     thermo_quadrature_rtol::Real=1e-8, thermo_quadrature_atol::Real=1e-10,
     thermo_quadrature_maxevals::Integer=10^7, physicality_check::Function=((_, _) -> true),
-    hard_constraints=nothing, kwargs...)
+    hard_constraints=nothing, reuse_corrector::Bool=false,
+    corrector_residual_first::Bool=false, corrector_method::Symbol=:trust_region, kwargs...)
     unknown = setdiff(collect(keys(kwargs)), PATH_SOLVER_KEYWORDS)
     isempty(unknown) || throw(ArgumentError("unsupported path solver keywords: $(join(unknown, ", "))"))
     get(kwargs, :evaluate_all_attempts, true) === true || throw(ArgumentError(
@@ -64,28 +73,141 @@ function _path_options(model, path; residual_norm_max::Real=1e-6,
         Float64(thermo_quadrature_rtol), Float64(thermo_quadrature_atol),
         Int(thermo_quadrature_maxevals))
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check) : hard_constraints
-    return (; residual_tol, iteration_limit, rules,
+    corrector_method in (:trust_region, :newton) ||
+        throw(ArgumentError("corrector_method must be :trust_region or :newton"))
+    return (; residual_tol, iteration_limit, rules, reuse_corrector, corrector_residual_first, corrector_method,
         thermo=(; xi=path.xi, p_num=path.p_num, t_num=path.t_num,
             thermo_quadrature_policy, thermo_quadrature_rtol=Float64(thermo_quadrature_rtol),
             thermo_quadrature_atol=Float64(thermo_quadrature_atol),
             thermo_quadrature_maxevals=Int(thermo_quadrature_maxevals)))
 end
 
+struct FixedMuPathResidual{M,P,O}
+    model::M
+    path::P
+    options::O
+end
+
+function (r::FixedMuPathResidual)(x, value)
+    return collect(gap_residual(r.model, x, r.path.T_fm,
+        normalize_mu_vec(value); r.options.thermo...))
+end
+
+function _path_residual!(out, r::FixedMuPathResidual, x, value)
+    copyto!(out, gap_residual(r.model, x, r.path.T_fm,
+        normalize_mu_vec(value); r.options.thermo...))
+    return out
+end
+
+struct JointPathResidual{P,G}
+    path::P
+    params::G
+end
+
+function _path_residual!(out, r::JointPathResidual, x, value)
+    explicit_residual!(out, x, SVector(_path_temperature(r.path, value)),
+        r.params, _path_mode(r.path, value))
+    return out
+end
+
+(r::JointPathResidual)(x, value) = _path_residual!(similar(x), r, x, value)
+_path_residual!(out, residual, x, value) = copyto!(out, residual(x, value))
+
 function _path_residual(model, path, options)
     if path isa FixedMuPath
         # Use the same model object and stationarity equation as FixedMu production.
-        return (x, value) -> collect(gap_residual(model, x, path.T_fm,
-            normalize_mu_vec(value); options.thermo...))
+        return FixedMuPathResidual(model, path, options)
     end
     nodes = cached_nodes(path.p_num, path.t_num;
         p_max_inv_fm=thermal_p_max_inv_fm(model))
     params = GapParams(_path_temperature(path, first(_path_values(path))), nodes, path.xi;
         p_num=path.p_num, t_num=path.t_num, model_kind=_joint_model_kind(model))
-    return function (x, value)
-        out = similar(x, length(x))
-        explicit_residual!(out, x, [_path_temperature(path, value)], params, _path_mode(path, value))
-        return out
+    return JointPathResidual(path, params)
+end
+
+mutable struct PathRootFunction{R}
+    residual::R
+    value::Float64
+    work::PALCWorkTelemetry
+end
+
+function (f::PathRootFunction)(out, x)
+    f.work.root_residual_calls += 1
+    _path_residual!(out, f.residual, x, f.value)
+    return nothing
+end
+
+struct PathRootWorkspace{F,D,C}
+    f!::F
+    objective::D
+    cache::C
+end
+
+function PathRootWorkspace(residual, value, seed, work)
+    f! = PathRootFunction(residual, Float64(value), work)
+    x = Float64.(seed)
+    objective = NLsolve.OnceDifferentiable(f!, x, similar(x); autodiff=:forward)
+    work.workspace_builds += 1
+    return PathRootWorkspace(f!, objective, NLsolve.NewtonTrustRegionCache(objective))
+end
+
+function _path_workspace(residual, path, options, work)
+    options === nothing && return nothing
+    get(options, :reuse_corrector, false) || get(options, :corrector_method, :trust_region) === :newton || return nothing
+    attempt = first(_endpoint_anchor_attempts(path))
+    return PathRootWorkspace(residual, attempt.value, attempt.seed, work)
+end
+
+"""Local Newton correction with residual acceptance before building the next Jacobian."""
+function _newton_corrector!(workspace::PathRootWorkspace, value, seed, iteration_limit)
+    workspace.f!.value = Float64(value)
+    df, cache = workspace.objective, workspace.cache
+    NLsolve.NLSolversBase.clear!(df)
+    copyto!(cache.x, seed)
+    NLsolve.NLSolversBase.value!!(df, cache.x)
+    iterations = 0
+    accepted = false
+    for iteration in 0:min(iteration_limit, 8)
+        residual_norm = maximum(abs, df.F)
+        if isfinite(residual_norm) && residual_norm <= 1e-9
+            accepted = true
+            break
+        end
+        isfinite(residual_norm) && iteration < min(iteration_limit, 8) || break
+        NLsolve.NLSolversBase.jacobian!!(df, cache.x)
+        all(isfinite, df.DF) || break
+        try
+            copyto!(cache.p, df.DF \ df.F)
+        catch err
+            err isa Union{LinearAlgebra.SingularException,LinearAlgebra.LAPACKException} || rethrow()
+            break
+        end
+        all(isfinite, cache.p) || break
+        copyto!(cache.xold, cache.x)
+        improved = false
+        for reduction in 0:5
+            @. cache.x = cache.xold - (0.5^reduction) * cache.p
+            NLsolve.NLSolversBase.value!!(df, cache.x)
+            trial_norm = maximum(abs, df.F)
+            if isfinite(trial_norm) && trial_norm < residual_norm
+                improved = true
+                break
+            end
+        end
+        iterations += 1
+        improved || break
     end
+    return (; zero=copy(cache.x), iterations, f_calls=first(df.f_calls),
+        g_calls=first(df.df_calls), accepted)
+end
+
+function _workspace_root!(workspace::PathRootWorkspace, value, seed, iterations)
+    workspace.f!.value = Float64(value)
+    # The external parameter may change at exactly the same x. Invalidate both
+    # value and Jacobian caches as well as the per-solve counters.
+    NLsolve.NLSolversBase.clear!(workspace.objective)
+    return NLsolve.trust_region(workspace.objective, Float64.(seed), 1e-9, 1e-9,
+        iterations, false, false, false, 1.0, true, workspace.cache)
 end
 
 function _path_candidate(model, path, value, solution, residual, iterations, options)
@@ -103,7 +225,7 @@ function _path_candidate(model, path, value, solution, residual, iterations, opt
 end
 
 function _path_root(model, path, value, seed, residual, options, work;
-    source::Symbol=:correction, work_telemetry=nothing)
+    source::Symbol=:correction, work_telemetry=nothing, workspace=nothing)
     started = time_ns()
     work.root_solves += 1
     source === :anchor && (work.anchor_solves += 1)
@@ -117,13 +239,62 @@ function _path_root(model, path, value, seed, residual, options, work;
         return nothing
     end
     try
-        root = nlsolve(f!, Float64.(seed); autodiff=:forward, method=:trust_region,
-            ftol=1e-9, xtol=1e-9, iterations=options.iteration_limit)
-        record_nlsolve_work!(work_telemetry, root, :trust_region)
+        local_root = nothing
+        if source === :correction && options.corrector_method === :newton
+            workspace = workspace === nothing ? PathRootWorkspace(residual, value, seed, work) : workspace
+            local_root = try
+                _newton_corrector!(workspace, value, seed, options.iteration_limit)
+            catch err
+                err isa Union{InterruptException,MethodError,UndefVarError} && rethrow()
+                nothing
+            end
+            work.newton_corrections += 1
+            if local_root !== nothing
+                work.root_iterations += local_root.iterations
+                work.root_jacobian_calls += local_root.g_calls
+                record_nlsolve_work!(work_telemetry, local_root, :newton)
+            end
+            if local_root === nothing || !local_root.accepted
+                work.corrector_fallbacks += 1
+                local_root = nothing
+            end
+        end
+        accepted_seed = local_root !== nothing
+        if !accepted_seed && source === :correction && options.corrector_residual_first
+            work.root_residual_calls += 1
+            seed_residual = residual(seed, value)
+            accepted_seed = all(isfinite, seed_residual) && maximum(abs, seed_residual) <= 1e-9
+        end
+        root = if local_root !== nothing
+            local_root
+        elseif accepted_seed
+            work.residual_first_accepts += 1
+            (; zero=Float64.(seed), iterations=0)
+        elseif workspace === nothing
+            nlsolve(f!, Float64.(seed); autodiff=:forward, method=:trust_region,
+                ftol=1e-9, xtol=1e-9, iterations=options.iteration_limit)
+        else
+            _workspace_root!(workspace, value, seed, options.iteration_limit)
+        end
+        if !accepted_seed
+            record_nlsolve_work!(work_telemetry, root, :trust_region)
+            work.root_iterations += root.iterations
+            work.root_jacobian_calls += root.g_calls
+        end
         work.postprocess_residual_calls += 1
         candidate_started = time_ns()
         candidate = _path_candidate(model, path, value, Float64.(root.zero),
             residual, root.iterations, options)
+        if !candidate.converged && local_root !== nothing
+            work.corrector_fallbacks += 1
+            root = _workspace_root!(workspace, value, seed, options.iteration_limit)
+            record_nlsolve_work!(work_telemetry, root, :trust_region)
+            work.root_iterations += root.iterations
+            work.root_jacobian_calls += root.g_calls
+            work.postprocess_residual_calls += 1
+            candidate = _path_candidate(model, path, value, Float64.(root.zero),
+                residual, root.iterations, options)
+        end
         work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         !candidate.converged && (work.rejected_roots += 1)
         return candidate
@@ -227,7 +398,50 @@ function _constraint_path_route(strategy, model, path::ConstraintTPath; kwargs..
 end
 
 """Return every crossing of a target, including folds; interpolation is only a seed."""
-function _palc_target_seeds(points, target; nearest::Bool=false)
+function _palc_interpolate(points, i, target, predictor)
+    a, b = points[i-1], points[i]
+    weight = (target-a.param)/(b.param-a.param)
+    linear = (1-weight) .* a.solution .+ weight .* b.solution
+    predictor === :linear && return linear
+    # Interpolate within one monotone piece only. Stencils spanning a turning
+    # point would mix different roots of the same target parameter.
+    3 <= i <= length(points)-1 || return linear
+    stencil = points[i-2:i+1]
+    steps = diff([p.param for p in stencil])
+    all(d -> d * (b.param-a.param) > 0, steps) || return linear
+    maximum(abs, steps) <= 20 * minimum(abs, steps) || return linear
+    cubic = zero(linear)
+    for j in 1:4
+        w = prod((target-stencil[k].param)/(stencil[j].param-stencil[k].param)
+            for k in 1:4 if k != j)
+        cubic .+= w .* stencil[j].solution
+    end
+    # Retain a local seed even when the inverse curve has large curvature.
+    all(isfinite, cubic) && LinearAlgebra.norm(cubic-linear) <=
+        LinearAlgebra.norm(b.solution-a.solution) || return linear
+    return cubic
+end
+
+"""A previous slice supplies an initial guess only; every new slice is solved again."""
+function _reusable_endpoint_anchor(previous, path)
+    previous === nothing && return EndpointAnchor()
+    old = previous.path
+    typeof(old) === typeof(path) || return EndpointAnchor()
+    old.xi == path.xi && old.p_num == path.p_num && old.t_num == path.t_num || return EndpointAnchor()
+    if path isa FixedAsymmetricRhoPath
+        old.ud_ratio_target == path.ud_ratio_target && old.s_target == path.s_target || return EndpointAnchor()
+    end
+    path isa Union{FixedMuPath,FixedRhoPath,FixedAsymmetricRhoPath} || return EndpointAnchor()
+    high = maximum(_path_values(path))
+    points = [point for branch in previous.branches for point in branch.points
+        if point.param_value == high && point.converged && all(isfinite, point.solution)]
+    isempty(points) && return EndpointAnchor()
+    point = points[argmax(p.pressure for p in points)]
+    return EndpointAnchor(point.solution)
+end
+
+function _palc_target_seeds(points, target; nearest::Bool=false, predictor::Symbol=:linear)
+    predictor in (:linear, :cubic) || throw(ArgumentError("unknown target predictor $(predictor)"))
     seeds = Vector{Vector{Float64}}()
     for point in points
         abs(point.param - target) <= 1e-12 && push!(seeds, copy(point.solution))
@@ -236,8 +450,7 @@ function _palc_target_seeds(points, target; nearest::Bool=false)
         a, b = points[i-1], points[i]
         a.param == b.param && continue
         if min(a.param, b.param) < target < max(a.param, b.param)
-            weight = (target - a.param) / (b.param - a.param)
-            push!(seeds, (1 - weight) .* a.solution .+ weight .* b.solution)
+            push!(seeds, _palc_interpolate(points, i, target, predictor))
         end
     end
     if nearest && isempty(seeds) && !isempty(points)
@@ -246,24 +459,57 @@ function _palc_target_seeds(points, target; nearest::Bool=false)
     return _unique_path_seeds(seeds)
 end
 
+mutable struct PALCJacobianFunction{R}
+    residual::R
+    value::Float64
+    work::PALCWorkTelemetry
+end
+
+function (f::PALCJacobianFunction)(out, x)
+    f.work.continuation_residual_calls += 1
+    _path_residual!(out, f.residual, x, f.value)
+    return nothing
+end
+
+function _palc_jacobian(residual, seed, value, work, backend)
+    f! = PALCJacobianFunction(residual, Float64(value), work)
+    x, out = Float64.(seed), similar(seed, Float64)
+    matrix = Matrix{Float64}(undef, length(x), length(x))
+    if backend === :forwarddiff
+        config = ForwardDiff.JacobianConfig(f!, out, x)
+        return function (x, p)
+            work.continuation_jacobians += 1
+            f!.value = p.value
+            ForwardDiff.jacobian!(matrix, f!, out, x, config)
+            return matrix
+        end
+    end
+    plus, minus, fplus, fminus = copy(x), copy(x), similar(x), similar(x)
+    return function (x, p)
+        work.continuation_jacobians += 1
+        f!.value = p.value
+        copyto!(plus, x)
+        copyto!(minus, x)
+        for j in eachindex(x)
+            delta = cbrt(eps(Float64)) * max(1.0, abs(x[j]))
+            plus[j], minus[j] = x[j]+delta, x[j]-delta
+            f!(fplus, plus)
+            f!(fminus, minus)
+            for i in eachindex(x)
+                matrix[i,j] = (fplus[i]-fminus[i])/(2delta)
+            end
+            plus[j] = minus[j] = x[j]
+        end
+        return matrix
+    end
+end
+
 function _palc_curve(residual, root, value, bounds, strategy, work; positive_parameter::Bool=false)
     f = function (x, p)
         work.continuation_residual_calls += 1
         residual(x, p.value)
     end
-    jac = function (x, p)
-        work.continuation_jacobians += 1
-        # Same centered finite difference as the qualified BifurcationKit pilot.
-        matrix = Matrix{Float64}(undef, length(x), length(x))
-        for j in eachindex(x)
-            delta = cbrt(eps(Float64)) * max(1.0, abs(x[j]))
-            plus, minus = copy(x), copy(x)
-            plus[j] += delta
-            minus[j] -= delta
-            matrix[:, j] = (f(plus, p) - f(minus, p)) / (2 * delta)
-        end
-        return matrix
-    end
+    jac = _palc_jacobian(residual, root.solution, value, work, strategy.jacobian)
     record = (x, p; kwargs...) -> (; solution=Float64.(x))
     problem = BifurcationKit.BifurcationProblem(f, copy(root.solution), (; value),
         (@optic _.value); J=jac, record_from_solution=record)
@@ -293,7 +539,7 @@ function _default_path_anchor(model, path)
 end
 
 """Cheap starting guesses at the high endpoint, then the opposite endpoint."""
-function _endpoint_anchor_attempts(path)
+function _endpoint_anchor_attempts(path, anchor::EndpointAnchor=EndpointAnchor())
     low, high = extrema(_path_values(path))
     temperature = _path_temperature(path, high)
     hot = temperature * 197.327 > 150.0
@@ -305,6 +551,11 @@ function _endpoint_anchor_attempts(path)
         hot ? :quark : :hadron
     end
     attempts = NamedTuple[]
+    if anchor.seed !== nothing
+        length(anchor.seed) == state_dim(_path_mode(path, high)) ||
+            throw(ArgumentError("EndpointAnchor seed length must match the path state dimension"))
+        push!(attempts, (; value=high, seed=copy(anchor.seed)))
+    end
     for (value, phase) in ((high, hint), (high, hint === :quark ? :hadron : :quark),
                            (low, :auto), (low,:quark))
         theta = path isa FixedMuPath ? [_path_temperature(path, value), value] :
@@ -322,15 +573,18 @@ function _endpoint_anchor_attempts(path)
 end
 
 function _solve_endpoint_palc_path(model, path, strategy;
-    branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+    branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry,
+    anchor_strategy::EndpointAnchor=EndpointAnchor(), kwargs...)
     started = time()
     options = _path_options(model, path; kwargs...)
     residual = _path_residual(model, path, options)
+    workspace = _path_workspace(residual, path, options, path_work)
     messages = String[]
     attempted_roots = NamedTuple[]
-    for attempt in _endpoint_anchor_attempts(path)
+    for (attempt_index, attempt) in enumerate(_endpoint_anchor_attempts(path, anchor_strategy))
+        attempt_index == 1 && anchor_strategy.seed !== nothing && (path_work.reused_anchor_solves += 1)
         root = _path_root(model, path, attempt.value, attempt.seed, residual, options, path_work;
-            source=:anchor, work_telemetry)
+            source=:anchor, work_telemetry, workspace)
         root === nothing && continue
         root.converged || continue
         any(r -> r.value == attempt.value && _solution_distance(r.solution,root.solution) <= 1e-5,
@@ -339,7 +593,8 @@ function _solve_endpoint_palc_path(model, path, strategy;
         exceptions_before = path_work.exceptions
         result = _solve_palc_path(model, path, strategy;
             anchor_strategy=SingleSeedAnchor(attempt.value, root.solution),
-            initial_anchor=root, boundary_correction=true,
+            initial_anchor=root, initial_residual=residual, initial_workspace=workspace,
+            boundary_correction=true,
             branch_policy, diagnostic_level, branch_jump_tol,
             path_work, work_telemetry, kwargs...)
         if result.diagnostics.failure_count > 0 && path_work.exceptions > exceptions_before
@@ -347,10 +602,12 @@ function _solve_endpoint_palc_path(model, path, strategy;
             push!(messages,"Retrying endpoint PALC from the same root with smaller steps.")
             reduced = PALCContinuation(ds=strategy.ds/10,dsmax=strategy.dsmax/5,
                 max_steps=strategy.max_steps,newton_tol=strategy.newton_tol,
-                newton_max_iterations=strategy.newton_max_iterations)
+                newton_max_iterations=strategy.newton_max_iterations,
+                jacobian=strategy.jacobian, target_predictor=strategy.target_predictor)
             result = _solve_palc_path(model,path,reduced;
                 anchor_strategy=SingleSeedAnchor(attempt.value,root.solution),
-                initial_anchor=root,boundary_correction=true,
+                initial_anchor=root,initial_residual=residual,initial_workspace=workspace,
+                boundary_correction=true,
                 branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
         end
         if result.diagnostics.failure_count == 0
@@ -385,7 +642,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary, branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
     path_work::PALCWorkTelemetry=PALCWorkTelemetry(), work_telemetry=nothing,
-    anchor_values=nothing, initial_anchor=nothing, boundary_correction::Bool=false, kwargs...)
+    anchor_values=nothing, initial_anchor=nothing, initial_residual=nothing,
+    initial_workspace=nothing, boundary_correction::Bool=false, kwargs...)
     diagnostic_level in (:summary, :full) || throw(ArgumentError("diagnostic_level must be :summary or :full"))
     if anchor_strategy === nothing
         anchor_strategy = anchor_values === nothing ? _default_path_anchor(model, path) : SeedPoolAnchor()
@@ -393,7 +651,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     if anchor_strategy isa EndpointAnchor
         anchor_values === nothing || throw(ArgumentError("EndpointAnchor selects its own endpoint; omit anchor_values"))
         return _solve_endpoint_palc_path(model, path, strategy;
-            branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+            branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry,
+            anchor_strategy, kwargs...)
     end
     anchor_strategy isa Union{SeedPoolAnchor,MultiSeedAnchor,SingleSeedAnchor} || throw(ArgumentError(
         "select SeedPoolAnchor, MultiSeedAnchor or SingleSeedAnchor"))
@@ -402,7 +661,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     jump_tol = _path_positive_real(branch_jump_tol, :branch_jump_tol)
     started = time()
     options = _path_options(model, path; kwargs...)
-    residual = _path_residual(model, path, options)
+    residual = initial_residual === nothing ? _path_residual(model, path, options) : initial_residual
+    workspace = initial_workspace === nothing ? _path_workspace(residual, path, options, path_work) : initial_workspace
     values = sort!(unique(_path_values(path)))
     single_seed = anchor_strategy isa SingleSeedAnchor
     single_seed && anchor_values !== nothing && throw(ArgumentError(
@@ -425,12 +685,12 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         for seed in seeds
             candidate = single_seed && initial_anchor !== nothing ? initial_anchor :
                 _path_root(model, path, value, seed, residual, options, path_work;
-                    source=:anchor, work_telemetry)
+                    source=:anchor, work_telemetry, workspace)
             _push_distinct_path_root!(roots, candidate)
         end
         covered = NamedTuple[]
-        for curve in curves, seed in _palc_target_seeds(curve, value)
-            candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry)
+        for curve in curves, seed in _palc_target_seeds(curve, value; predictor=strategy.target_predictor)
+            candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry, workspace)
             _push_distinct_path_root!(covered, candidate)
         end
         sort!(roots; by=root -> -root.pressure)
@@ -461,8 +721,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         accepted = NamedTuple[]
         for (i, curve) in enumerate(curves)
             nearest = boundary_correction && value in extrema(values)
-            for seed in _palc_target_seeds(curve, value; nearest)
-                candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry)
+            for seed in _palc_target_seeds(curve, value; nearest, predictor=strategy.target_predictor)
+                candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry, workspace)
                 if _push_distinct_path_root!(accepted, candidate)
                     push!(branch_points[i], _candidate_path_point(value, candidate, :palc_corrected, step))
                 end
@@ -471,7 +731,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         if isempty(accepted) && !single_seed
             for seed in _path_catalog(path, value)
                 candidate = _path_root(model, path, value, seed, residual, options, path_work;
-                    source=:fallback, work_telemetry)
+                    source=:fallback, work_telemetry, workspace)
                 if _push_distinct_path_root!(accepted, candidate)
                     push!(fallback_points, _candidate_path_point(value, candidate, :catalog_fallback, step))
                 end
@@ -515,12 +775,15 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
     started = time()
     options = _path_options(model,path;kwargs...)
     residual = _path_residual(model,path,options)
+    workspace = _path_workspace(residual, path, options, path_work)
     values = sort!(unique(_path_values(path));rev=true)
     root = nothing
-    for attempt in _endpoint_anchor_attempts(path)
+    for (attempt_index, attempt) in enumerate(_endpoint_anchor_attempts(path, something(anchor_strategy, EndpointAnchor())))
         attempt.value == first(values) || continue
+        attempt_index == 1 && anchor_strategy !== nothing && anchor_strategy.seed !== nothing &&
+            (path_work.reused_anchor_solves += 1)
         candidate = _path_root(model,path,attempt.value,attempt.seed,residual,options,path_work;
-            source=:anchor,work_telemetry)
+            source=:anchor,work_telemetry,workspace)
         candidate === nothing && continue
         candidate.converged || continue
         root = candidate
@@ -531,7 +794,7 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
     for (step,value) in enumerate(values)
         root === nothing && break
         if step > 1
-            root = _path_root(model,path,value,root.solution,residual,options,path_work;work_telemetry)
+            root = _path_root(model,path,value,root.solution,residual,options,path_work;work_telemetry,workspace)
             root === nothing && break
             root.converged || break
         end

@@ -183,6 +183,7 @@ function run_tmu_scan(;
     bootstrap_multiseed::Bool=true,
     continuation::Symbol=:auto,
     palc_options::NamedTuple=(;),
+    reuse_temperature_anchor::Bool=false,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     semantic_mode::Symbol=:ground_state,
@@ -239,6 +240,7 @@ function run_tmu_scan(;
         end
 
         for xi in xi_values
+            previous_path = nothing
             for T in T_values
                 # 每个新温度重置连续性缓存
                 seed_key = _seed_continuation_key(T, xi)
@@ -249,9 +251,11 @@ function run_tmu_scan(;
                 single_previous = nothing
                 if continuation_mode === :palc && any(mu -> !(ScanCommon.key3(T, mu, xi; digits=6) in completed), mu_values)
                     path_result = Models.solve_path(create_model(model_kind), path;
+                        anchor_strategy=reuse_temperature_anchor ? Models._reusable_endpoint_anchor(previous_path, path) : nothing,
                         continuation_strategy=Models.PALCContinuation(; palc_options...), solver_kwargs...)
                     path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
                     path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
+                    previous_path = path_result
                 end
                 
                 for (mu_index, mu) in enumerate(mu_values)

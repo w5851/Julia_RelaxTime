@@ -21,6 +21,7 @@ Base.@kwdef struct TmuScanConfig
     bootstrap_multiseed::Union{Nothing, Bool} = nothing
     continuation::Union{Nothing, Symbol} = nothing
     palc_options::NamedTuple = (;)
+    reuse_temperature_anchor::Union{Nothing, Bool} = nothing
     thermo_backend::Union{Nothing, Symbol} = nothing
     solver_backend::Union{Nothing, Symbol} = nothing
     auto_pnjl_backend::Union{Nothing, Symbol} = nothing
@@ -48,6 +49,7 @@ Base.@kwdef struct TrhoScanConfig
     seed_policy::Union{Nothing, Symbol} = nothing
     continuation::Union{Nothing, Symbol} = nothing
     palc_options::NamedTuple = (;)
+    reuse_temperature_anchor::Union{Nothing, Bool} = nothing
     hybrid_weighted_fallback::Union{Nothing, Bool} = nothing
     hybrid_weighted_max_seed_candidates::Union{Nothing, Int} = nothing
     constraint_mode::Union{Nothing, Symbol} = nothing
@@ -106,6 +108,7 @@ function scan_kwargs(cfg::TmuScanConfig)::NamedTuple
         bootstrap_multiseed=cfg.bootstrap_multiseed,
         continuation=cfg.continuation,
         palc_options=cfg.palc_options,
+        reuse_temperature_anchor=cfg.reuse_temperature_anchor,
         thermo_backend=cfg.thermo_backend,
         solver_backend=cfg.solver_backend,
         auto_pnjl_backend=cfg.auto_pnjl_backend,
@@ -134,6 +137,7 @@ function scan_kwargs(cfg::TrhoScanConfig)::NamedTuple
         seed_policy=cfg.seed_policy,
         continuation=cfg.continuation,
         palc_options=cfg.palc_options,
+        reuse_temperature_anchor=cfg.reuse_temperature_anchor,
         hybrid_weighted_fallback=cfg.hybrid_weighted_fallback,
         hybrid_weighted_max_seed_candidates=cfg.hybrid_weighted_max_seed_candidates,
         constraint_mode=cfg.constraint_mode,

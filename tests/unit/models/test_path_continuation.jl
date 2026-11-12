@@ -26,7 +26,7 @@ end
 Models._path_options(::Main.EndpointPathTestModel,path;kwargs...) = nothing
 Models._path_residual(::Main.EndpointPathTestModel,path,options) = (x,value) -> x .- value
 function Models._path_root(model::Main.EndpointPathTestModel,path,value,seed,residual,options,work;
-    source::Symbol=:correction,work_telemetry=nothing)
+    source::Symbol=:correction,work_telemetry=nothing,workspace=nothing)
     push!(model.calls,source)
     work.root_solves += 1
     source === :anchor && (work.anchor_solves += 1)
@@ -386,6 +386,72 @@ end
         selection = only(Models.apply_branch_policy([folded], Models.GroundStateBranchPolicy()).selections)
         @test selection.candidate_branch_count == 2
         @test selection.pressure_gap == 0.5
+    end
+
+    @testset "Cubic target prediction stays on one monotone segment" begin
+        points = [(param=p, solution=[p^3]) for p in 0.0:0.25:1.0]
+        cubic = only(Models._palc_target_seeds(points, 0.4; predictor=:cubic))
+        linear = only(Models._palc_target_seeds(points, 0.4; predictor=:linear))
+        @test cubic[1] ≈ 0.4^3 atol=1e-14
+        @test abs(cubic[1]-0.4^3) < abs(linear[1]-0.4^3)
+        folded = [(param=0.0, solution=[-2.0]), (param=1.0, solution=[-1.0]),
+            (param=2.0, solution=[0.0]), (param=1.0, solution=[1.0]),
+            (param=0.0, solution=[2.0])]
+        @test Models._palc_target_seeds(folded, 1.5; predictor=:cubic) == [[-0.5], [0.5]]
+        @test_throws ArgumentError Models.PALCContinuation(target_predictor=:unknown)
+        @test_throws ArgumentError Models.PALCContinuation(jacobian=:unknown)
+    end
+
+    @testset "PALC Jacobians reuse storage and update the parameter" begin
+        residual = (x,p) -> [x[1]^2+p*x[2], sin(x[2])+p*x[1]]
+        x = [0.4, -0.2]
+        for backend in (:finite_difference, :forwarddiff)
+            work = Models.PALCWorkTelemetry()
+            jac = Models._palc_jacobian(residual, x, 0.3, work, backend)
+            storage = jac(x, (;value=0.3))
+            @test storage ≈ [0.8 0.3; 0.3 cos(-0.2)] atol=1e-9
+            @test jac(x, (;value=0.7)) === storage
+            @test storage ≈ [0.8 0.7; 0.7 cos(-0.2)] atol=1e-9
+            @test work.continuation_jacobians == 2
+        end
+    end
+
+    @testset "Root workspace invalidates a changed parameter at the same seed" begin
+        residual = (x,p) -> [x[1]^2-p, x[2]-p]
+        work = Models.PALCWorkTelemetry()
+        workspace = Models.PathRootWorkspace(residual, 1.0, [1.0,1.0], work)
+        first_root = Models._workspace_root!(workspace, 1.0, [1.0,1.0], 50)
+        second_root = Models._workspace_root!(workspace, 4.0, [1.0,1.0], 50)
+        @test first_root.zero ≈ [1.0,1.0] atol=1e-9
+        @test second_root.zero ≈ [2.0,4.0] atol=1e-9
+        third_root = Models._workspace_root!(workspace, 1.0, [1.0,1.0], 50)
+        @test third_root.f_calls == first_root.f_calls
+        @test third_root.g_calls == first_root.g_calls
+        @test work.workspace_builds == 1
+        @test first_root.zero == [1.0,1.0]
+        local_root = Models._newton_corrector!(workspace, 4.0, [1.8,3.5], 50)
+        @test local_root.accepted
+        @test local_root.zero ≈ [2.0,4.0] atol=1e-9
+        @test local_root.g_calls == local_root.iterations
+        already_solved = Models._newton_corrector!(workspace, 4.0, [2.0,4.0], 50)
+        @test already_solved.accepted
+        @test already_solved.g_calls == 0
+        singular = Models._newton_corrector!(workspace, 4.0, [0.0,4.0], 50)
+        @test !singular.accepted
+    end
+
+    @testset "Warm endpoint is a guess with ordinary recovery" begin
+        path = Models.FixedRhoPath(0.7, [0.1,0.2,0.3])
+        model = Main.EndpointPathTestModel(1, Symbol[])
+        result = Models.solve_path(model, path; continuation_strategy=Models.NaturalContinuation(),
+            anchor_strategy=Models.EndpointAnchor(fill(0.25, 8)))
+        @test result.diagnostics.failure_count == 0
+        @test result.diagnostics.anchor_solve_count == 2
+        @test Models._reusable_endpoint_anchor(result, Models.FixedRhoPath(0.8,[0.1,0.3])).seed == fill(0.3,8)
+        @test Models._reusable_endpoint_anchor(result, Models.FixedRhoPath(0.8,[0.1,0.3];xi=0.4)).seed === nothing
+        @test Models._reusable_endpoint_anchor(result, Models.FixedRhoPath(0.8,[0.1,0.4])).seed === nothing
+        @test Models._reusable_endpoint_anchor(result, Models.FixedMuPath(0.8,[0.1,0.3])).seed === nothing
+        @test_throws ArgumentError Models._endpoint_anchor_attempts(path, Models.EndpointAnchor(ones(5)))
     end
 
     @testset "Pseudo-arclength crosses a fold on an analytic equation" begin
