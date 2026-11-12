@@ -324,7 +324,8 @@ function run_trho_scan(;
             single_previous = nothing
             if continuation_mode in (:palc,:natural) && any(rho -> !(ScanCommon.key3(T, rho, xi; digits=6) in completed), rho_scan_order)
                 path_result = Models.solve_path(create_model(model_kind), path;
-                    anchor_strategy=reuse_temperature_anchor ? Models._reusable_endpoint_anchor(previous_path, path) : nothing,
+                    anchor_strategy=reuse_temperature_anchor && model_kind === :PNJL ?
+                        Models._reusable_endpoint_anchor(previous_path, path) : nothing,
                     continuation_strategy=continuation_mode === :palc ?
                         Models.PALCContinuation(; palc_options...) : Models.NaturalContinuation(),
                     (continuation_mode === :natural ? (;recovery_strategy=Models.PALCContinuation(;palc_options...)) : (;))...,
@@ -1094,7 +1095,8 @@ function prepare_rho_path!(session::RhoPointSession, T::Real, xi::Real, values)
     model = create_model(session.model_kind)
     common = (; iterations=session.iterations, work_telemetry=session.telemetry)
     result = Models.solve_path(model, path;
-        anchor_strategy=session.reuse_temperature_anchor ? Models._reusable_endpoint_anchor(session.previous_path, path) : nothing,
+        anchor_strategy=session.reuse_temperature_anchor && session.model_kind === :PNJL ?
+            Models._reusable_endpoint_anchor(session.previous_path, path) : nothing,
         continuation_strategy=strategy === :palc ? Models.PALCContinuation(; session.palc_options...) :
             Models.NaturalContinuation(),
         (strategy === :natural ? (;recovery_strategy=Models.PALCContinuation(;session.palc_options...)) : (;))...,

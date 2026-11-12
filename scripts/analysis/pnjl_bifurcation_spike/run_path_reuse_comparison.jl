@@ -99,6 +99,7 @@ function run_comparison(destination; repetitions=3, cases_filter="all")
         cases = filter(c -> first(c) in requested,cases)
         sequences = filter(s -> Symbol(s.name) in requested,sequences)
     end
+    records = NamedTuple[]
     for sequence in sequences, repetition in 1:repetitions
         for method in circshift([:baseline,:anchor,:optimized],repetition-1)
             previous = nothing
@@ -111,7 +112,6 @@ function run_comparison(destination; repetitions=3, cases_filter="all")
             write_records(destination,records)
         end
     end
-    records = NamedTuple[]
     for (name,path) in cases, repetition in 1:repetitions
         methods = path isa Union{Models.FixedRhoPath,Models.FixedAsymmetricRhoPath} ?
             (:baseline,:workspace,:newton,:combined) : METHODS

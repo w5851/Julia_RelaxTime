@@ -251,7 +251,8 @@ function run_tmu_scan(;
                 single_previous = nothing
                 if continuation_mode === :palc && any(mu -> !(ScanCommon.key3(T, mu, xi; digits=6) in completed), mu_values)
                     path_result = Models.solve_path(create_model(model_kind), path;
-                        anchor_strategy=reuse_temperature_anchor ? Models._reusable_endpoint_anchor(previous_path, path) : nothing,
+                        anchor_strategy=reuse_temperature_anchor && model_kind === :PNJL ?
+                            Models._reusable_endpoint_anchor(previous_path, path) : nothing,
                         continuation_strategy=Models.PALCContinuation(; palc_options...), solver_kwargs...)
                     path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
                     path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)

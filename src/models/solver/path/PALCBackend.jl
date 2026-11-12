@@ -285,6 +285,7 @@ function _path_root(model, path, value, seed, residual, options, work;
         candidate_started = time_ns()
         candidate = _path_candidate(model, path, value, Float64.(root.zero),
             residual, root.iterations, options)
+        work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         if !candidate.converged && local_root !== nothing
             work.corrector_fallbacks += 1
             root = _workspace_root!(workspace, value, seed, options.iteration_limit)
@@ -292,10 +293,11 @@ function _path_root(model, path, value, seed, residual, options, work;
             work.root_iterations += root.iterations
             work.root_jacobian_calls += root.g_calls
             work.postprocess_residual_calls += 1
+            candidate_started = time_ns()
             candidate = _path_candidate(model, path, value, Float64.(root.zero),
                 residual, root.iterations, options)
+            work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         end
-        work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         !candidate.converged && (work.rejected_roots += 1)
         return candidate
     catch err
