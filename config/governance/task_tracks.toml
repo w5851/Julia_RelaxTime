@@ -506,7 +506,7 @@ updated_at = "2026-11-12"
 id = "full-temperature-reference-research"
 title = "Low-temperature consumer and target-derivative convergence"
 status = "archived"
-current_task = "full-temperature-reference-pr3"
+current_task = "zero-temperature-self-consistent-gap"
 blocked_by = []
 unlocks = []
 next_action = ""
@@ -514,9 +514,13 @@ required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = ""
-current_sha = "92ba28fff696d7945779db63aa95aa46d3acc9ab"
-run_ids = ["43351964859", "43351964858", "43351964990", "43351964856"]
+current_sha = "f29f4207d9fd0a4a4fc3d60accd20c3c9e729cc0"
+run_ids = ["43367133582", "43367133785", "43367133657", "43367133779"]
 evidence = [
+  "pr:348",
+  "sha:f29f4207d9fd0a4a4fc3d60accd20c3c9e729cc0",
+  "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/zero_temperature_extension.json",
+  "note:zero_temperature_three_field_solve_same_branch_limit_and_pinned_temperature_performance_completed_remote",
   "pr:347",
   "sha:92ba28fff696d7945779db63aa95aa46d3acc9ab",
   "note:representative_point_scope_accepted_remote_and_ci_pass_no_further_numerical_production_required",
@@ -1287,6 +1291,26 @@ evidence = [
   "note:author_20261112_starts_pr3_including_exact_zero_and_near_zero_temperature_representatives",
   "file:docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md",
   "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/summary.json",
+]
+
+[[items]]
+id = "zero-temperature-self-consistent-gap"
+track_id = "full-temperature-reference-research"
+classification = "required_follow_up"
+status = "archived"
+parent = "item:full-temperature-reference-pr3"
+task_file = "docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md"
+reason = "作者要求补充独立 T=0 自洽手征平均场，并比较零温、近零温和普通温度的积分与求解性能。"
+next_action = ""
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "pr:348",
+  "sha:f29f4207d9fd0a4a4fc3d60accd20c3c9e729cc0",
+  "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/zero_temperature_extension.json",
+  "note:remote_unit194_integration20_regression194_validation66_pass_same_branch_T_squared_limit_and_30_sample_pinned_timings",
+  "review:author_20261113_authorized_zero_temperature_gap_and_temperature_performance_comparison",
+  "pr:347",
 ]
 
 [[items]]

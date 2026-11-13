@@ -145,7 +145,7 @@ end
     if model_kind === :PNJL
         T_value = Models.PNJLIntegrals._primal_float(T_fm)
         isfinite(T_value) && T_value > 0.0 || throw(ArgumentError(
-            "PNJL five-field gap residual requires finite T_fm > 0; strict T=0 is supported only for fixed-state thermodynamic kernels",
+            "PNJL five-field gap residual requires finite T_fm > 0; use Models.solve_gap for the reduced T=0 chiral system",
         ))
     end
     policy = Models.PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)

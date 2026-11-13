@@ -153,7 +153,9 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 当只需要零化学势 crossover 时，设置 `crossover_mu0_only=true`。research 与 production 路径都会只求解
 `mu_q=0`，并把这一有效采样策略写入 `config_snapshot` 与 config hash；它不是仅供 manifest 使用的标签。
 
-固定状态热核和直接数密度定义了严格 `T=0` 极限；五变量 PNJL gap/phase solve 因 Polyakov 场在严格零温退化而显式要求 `T>0`。因此正式“全温区”reference 的下限必须是经收敛验证的严格正温，除非后续引入独立零温求解合同。
+严格 `T=0` 的独立平均场可通过 [零温 `solve_gap` 入口](../solver/Overview.md#pnjl-的严格零温入口)
+求解三个手征场，随后直接计算零温压强与密度。五场约束扫描、PALC 和 phase pipeline
+继续要求 `T>0`；本入口可用于核对低温分支的零温端点。
 
 ## 输入与输出约定
 
