@@ -24,6 +24,9 @@ inbox -> triaged -> ready -> active -> review -> accepted -> promoted -> archive
 - `accepted -> archived` 适用于 `promotion_required=false`；需要晋升的工作保留 gate evidence。
 - `blocked` 保留可解析依赖；`deferred` 记录父任务、原因、下一步与 backlog。
 - 数值 verdict 标签与任务状态分别记录。
+- 所有 track 和 item 均为 `archived` / `cancelled` 时，`primary_track=""` 表示当前无待办；
+  preflight 返回 `status=no_pending_tasks`。仍可用 `--track <id>` 查看已结束任务的证据。
+  有未结束任务时继续指定主线。
 
 字段与转换由 `scripts/dev/check_task_ledger.jl` 校验；真实实现、验证或作者决策成立时更新。`current_sha` 锚定代码/证据来源，允许主线按事实变化，不表示 ledger 文件自身的提交。
 

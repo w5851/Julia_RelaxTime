@@ -132,3 +132,7 @@ julia --threads=1 --project=. scripts/analysis/pnjl/low_temperature_consumers.jl
 验证：受影响 unit **330/330**，已有二维积分 validation **66/66**，
 热力学/Taylor/mixed-jet regression **114/114**，consumer/phase integration **46/46**。
 新增零温、近零温、正负化学势、切换邻域及策略传递用例已加入 unit core；未改回归基线。
+
+[PR #347](https://github.com/w5851/Julia_RelaxTime/pull/347) 的实现提交 `92ba28ff`
+已通过 GitHub unit core、integration core、regression/validation core 及 benchmark，
+对应运行 `43351964859`、`43351964858`、`43351964990`、`43351964856`。

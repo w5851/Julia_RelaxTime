@@ -1,6 +1,6 @@
 schema_version = 1
-primary_track = "full-temperature-reference-research"
-updated_at = "2026-11-12"
+primary_track = ""
+updated_at = "2026-11-13"
 
 [[tracks]]
 id = "meson-freezeout-experiment"
@@ -505,18 +505,21 @@ updated_at = "2026-11-12"
 [[tracks]]
 id = "full-temperature-reference-research"
 title = "Low-temperature consumer and target-derivative convergence"
-status = "active"
+status = "archived"
 current_task = "full-temperature-reference-pr3"
 blocked_by = []
 unlocks = []
-next_action = "远端代表点及导数核验完成；提交 PR 并核对代码审查与 CI，通过后完成本任务交付。"
+next_action = ""
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = "codex/pr3-low-temperature-consumers"
-current_sha = "abe6dd2b83587c587b0e87deee82aa4526e8608b"
-run_ids = []
+current_branch = ""
+current_sha = "92ba28fff696d7945779db63aa95aa46d3acc9ab"
+run_ids = ["43351964859", "43351964858", "43351964990", "43351964856"]
 evidence = [
+  "pr:347",
+  "sha:92ba28fff696d7945779db63aa95aa46d3acc9ab",
+  "note:representative_point_scope_accepted_remote_and_ci_pass_no_further_numerical_production_required",
   "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
   "pr:137",
   "pr:139",
@@ -1264,14 +1267,17 @@ evidence = ["pr:346", "run:43169410396", "file:data/outputs/results/analysis/pal
 id = "full-temperature-reference-pr3"
 track_id = "full-temperature-reference-research"
 classification = "research"
-status = "active"
+status = "archived"
 parent = "track:full-temperature-reference-research"
 task_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
 reason = "低温积分算法已由 PR #137 交付；作者将 PR3 收敛为实际低温消费者及目标导数的代表点核验，安排在 PALC 锚点搜索优化之后。"
-next_action = "数值验收完成；完成 PR 审查与 CI 交付，保留紧凑结果摘要，不启动全相图或输运重计算。"
+next_action = ""
 blocked_by = []
-backlog_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
+backlog_file = ""
 evidence = [
+  "pr:347",
+  "sha:92ba28fff696d7945779db63aa95aa46d3acc9ab",
+  "note:representative_point_scope_accepted_remote_and_ci_pass_no_further_numerical_production_required",
   "pr:137",
   "pr:139",
   "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
