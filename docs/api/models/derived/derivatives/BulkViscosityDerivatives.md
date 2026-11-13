@@ -11,7 +11,7 @@
 
 接口形式：
 
-- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto, base_state=nothing, base_masses=nothing, base_mu_vec=nothing)`
+- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto, base_state=nothing, base_masses=nothing, base_mu_vec=nothing, thermo_quadrature_kwargs=(;))`
 
 它返回体粘滞公式所需的一组派生量，包括：
 
@@ -35,6 +35,16 @@ PNJL 默认后端同样是 TaylorDiff series gap：先从压强 Taylor series �
 未提供 `base_state` 时，接口保持独立调用兼容性并自行求一次零阶 gap 解。已经有主平衡态的 workflow 应同时传入 `base_state`、`base_masses` 和 `base_mu_vec`：该路径不会重新进行全局 gap 求解，而是锁定输入分支，最多执行不允许跨支的局部 Newton polish。三个二阶方向 `T`、`mu`、`T+mu` 复用同一个 Jacobian 与一次分解，并同时读出压力和质量 series。
 
 `solve_transport_from_equilibrium` 已采用上述复用路径，并要求 bulk 返回质量与主 equilibrium 质量一致；不匹配时该点的 bulk 计算失败，不会静默拼接两个相分支。
+
+`thermo_quadrature_kwargs::NamedTuple` 接受热力学积分策略与控制参数，格式见
+[低温积分示例](Overview.md#低温积分与同支响应)。它同时作用于基态残差、局部 polish、
+Jacobian、三个 Taylor 方向及末端压强。已有低温平衡态的调用者应传入生成该态所用的
+积分设置。本接口内部构造复用 context，对外使用 `base_state` 传入平衡态。
+
+输入温度要求 `T_fm > 0`。`v_n_sq` 和 `dμB_dT_sigma` 是导数的比值，
+在密度与分母同时趋零时可能返回 `NaN`、`Inf` 或对微小误差敏感的有限值。
+此时应检查原始 `s`、`n_B` 和二阶压强响应；积分容差收敛本身不能确定未定比值的极限。
+`c_p` 在 `abs(n_B) <= sqrt(eps(Float64))` 时按现有约定返回 `NaN`。
 
 ## `compute_B_bracket`
 

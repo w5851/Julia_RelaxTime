@@ -505,16 +505,16 @@ updated_at = "2026-11-12"
 [[tracks]]
 id = "full-temperature-reference-research"
 title = "Low-temperature consumer and target-derivative convergence"
-status = "ready"
+status = "active"
 current_task = "full-temperature-reference-pr3"
 blocked_by = []
 unlocks = []
-next_action = "识别实际低温消费者，确定温区、导数阶数和误差目标，再检查少量代表点的积分与求解收敛。"
+next_action = "远端代表点及导数核验完成；提交 PR 并核对代码审查与 CI，通过后完成本任务交付。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = ""
-current_sha = ""
+current_branch = "codex/pr3-low-temperature-consumers"
+current_sha = "abe6dd2b83587c587b0e87deee82aa4526e8608b"
 run_ids = []
 evidence = [
   "file:docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md",
@@ -524,9 +524,12 @@ evidence = [
   "note:author_20261111_rescope_pr3_to_low_temperature_consumer_and_target_derivative_convergence_after_palc",
   "pr:345",
   "pr:346",
-  "note:palc_path_optimization_accepted_pr3_ready_computation_not_started",
+  "note:author_20261112_starts_pr3_including_exact_zero_and_near_zero_temperature_representatives",
+  "file:docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md",
+  "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/summary.json",
+  "note:remote_35_fixed_30_consumers_11_audits_pass_unit330_validation66_regression114_integration46_no_baseline_change",
 ]
-updated_at = "2026-11-12"
+updated_at = "2026-11-13"
 
 [[tracks]]
 id = "analysis-docs-cleanup"
@@ -1261,11 +1264,11 @@ evidence = ["pr:346", "run:43169410396", "file:data/outputs/results/analysis/pal
 id = "full-temperature-reference-pr3"
 track_id = "full-temperature-reference-research"
 classification = "research"
-status = "ready"
+status = "active"
 parent = "track:full-temperature-reference-research"
 task_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
 reason = "低温积分算法已由 PR #137 交付；作者将 PR3 收敛为实际低温消费者及目标导数的代表点核验，安排在 PALC 锚点搜索优化之后。"
-next_action = "确定消费者、低温窗口、导数阶数和误差目标；比较少量固定态与自洽点的容差/节点收敛，发现具体精度问题时再优化积分器。"
+next_action = "数值验收完成；完成 PR 审查与 CI 交付，保留紧凑结果摘要，不启动全相图或输运重计算。"
 blocked_by = []
 backlog_file = "docs/dev/backlog/2026-07-17_PNJL全温区相图热积分与参考生产.md"
 evidence = [
@@ -1275,7 +1278,9 @@ evidence = [
   "note:issue130_phase_and_transport_v15_completed_independently_new_full_temperature_production_deferred",
   "note:author_20261111_pr3_consumer_targeted_convergence_replaces_full_temperature_reference_production_scope",
   "pr:345",
-  "note:palc_complete_pr3_ready_no_new_low_temperature_computation_yet",
+  "note:author_20261112_starts_pr3_including_exact_zero_and_near_zero_temperature_representatives",
+  "file:docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md",
+  "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/summary.json",
 ]
 
 [[items]]

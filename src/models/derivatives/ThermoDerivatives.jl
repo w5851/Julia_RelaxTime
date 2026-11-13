@@ -47,13 +47,6 @@ if !isdefined(Main, :EquilibriumFacade)
 end
 const EquilibriumFacade = Main.EquilibriumFacade
 
-# 导入常量
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "constants", "Constants_PNJL.jl"))
-if !isdefined(Main, :Constants_PNJL)
-    Base.include(Main, _CONSTANTS_PATH)
-end
-using Main.Constants_PNJL: G_fm2, K_fm5
-
 export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
@@ -164,16 +157,8 @@ end
 # 质量计算
 # ============================================================================
 
-function compute_masses_from_state(x::AbstractVector)
-    φ_u, φ_d, φ_s = x[1], x[2], x[3]
-    m_u0 = 0.0055 / 0.197327
-    m_s0 = 0.140 / 0.197327
-    
-    m_u = m_u0 - 4G_fm2 * φ_u + 2K_fm5 * φ_d * φ_s
-    m_d = m_u0 - 4G_fm2 * φ_d + 2K_fm5 * φ_u * φ_s
-    m_s = m_s0 - 4G_fm2 * φ_s + 2K_fm5 * φ_u * φ_d
-    
-    return SVector{3}(m_u, m_d, m_s)
+function compute_masses_from_state(model::Models.AbstractPNJLModel, x::AbstractVector)
+    return Models.calculate_mass_vec(model, SVector(x[1], x[2], x[3]))
 end
 
 # ============================================================================
@@ -204,7 +189,8 @@ end
 @inline _zero_mu_direction() = SVector{3, Float64}(0.0, 0.0, 0.0)
 @inline _symmetric_mu_direction() = SVector{3, Float64}(1.0, 1.0, 1.0)
 
-@inline function _series_kwargs(; xi, p_num, t_num, model, series_iterations, linear_solve, series_residual_tol)
+@inline function _series_kwargs(; xi, p_num, t_num, model, series_iterations, linear_solve,
+    series_residual_tol, base_context=nothing, thermo_quadrature_kwargs::NamedTuple=(;))
     return (;
         xi=xi,
         p_num=p_num,
@@ -213,6 +199,8 @@ end
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -233,6 +221,8 @@ function _gap_state_series_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     return gap_series_parameter_direction(
         T_fm,
@@ -248,6 +238,8 @@ function _gap_state_series_taylordiff(
             series_iterations=series_iterations,
             linear_solve=linear_solve,
             series_residual_tol=series_residual_tol,
+            base_context=base_context,
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs,
         )...,
     )
 end
@@ -265,6 +257,8 @@ function _pressure_series_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     return pressure_series_parameter_direction(
         T_fm,
@@ -280,6 +274,8 @@ function _pressure_series_taylordiff(
             series_iterations=series_iterations,
             linear_solve=linear_solve,
             series_residual_tol=series_residual_tol,
+            base_context=base_context,
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs,
         )...,
     )
 end
@@ -297,6 +293,8 @@ function _mass_series_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     result = _gap_state_series_taylordiff(
         model,
@@ -311,8 +309,10 @@ function _mass_series_taylordiff(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
-    return compute_masses_from_state(result.x_state)
+    return compute_masses_from_state(model, result.x_state)
 end
 
 function _pressure_derivatives_order2_taylordiff(
@@ -325,6 +325,8 @@ function _pressure_derivatives_order2_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     zero_mu = _zero_mu_direction()
     sym_mu = _symmetric_mu_direction()
@@ -334,18 +336,21 @@ function _pressure_derivatives_order2_taylordiff(
         order=2, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     p_mu = _pressure_series_taylordiff(
         model, T_fm, mu_fm, 0.0, sym_mu;
         order=2, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     p_Tmu = _pressure_series_taylordiff(
         model, T_fm, mu_fm, 1.0, sym_mu;
         order=2, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     pressure = nth_derivative_from_series(p_T, 0)
@@ -376,6 +381,8 @@ function _mass_derivatives_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     order == 1 || order == 2 || throw(ArgumentError("order must be 1 or 2, got $order"))
     zero_mu = _zero_mu_direction()
@@ -386,12 +393,14 @@ function _mass_derivatives_taylordiff(
         order=order, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     m_mu = _mass_series_taylordiff(
         model, T_fm, mu_fm, 0.0, sym_mu;
         order=order, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     masses = _extract_series_vector(m_T, 0)
@@ -407,6 +416,7 @@ function _mass_derivatives_taylordiff(
         order=2, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     d2M_dT2 = _extract_series_vector(m_T, 2)
@@ -456,6 +466,7 @@ function _bulk_direction_series_taylordiff(
         p_num=context.p_num,
         t_num=context.t_num,
         xi=context.xi,
+        context.thermo_quadrature_kwargs...,
     )
     phi = SVector{3}(result.x_state[1], result.x_state[2], result.x_state[3])
     masses = Models.calculate_mass_vec(context.model, phi)
@@ -472,6 +483,8 @@ function _thermo_derivatives_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     pd = _pressure_derivatives_order2_taylordiff(
         model,
@@ -483,6 +496,7 @@ function _thermo_derivatives_taylordiff(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     T_val = Float64(T_fm)
@@ -511,6 +525,7 @@ function _thermo_derivatives_taylordiff(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     return (
@@ -553,6 +568,7 @@ function _bulk_viscosity_coefficients_taylordiff(
     base_residual_tol::Real,
     allow_local_polish::Bool,
     polish_max_iterations::Int,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     symmetric_mu = _symmetric_mu_vec(mu_fm)
     if base_mu_vec !== nothing
@@ -573,6 +589,7 @@ function _bulk_viscosity_coefficients_taylordiff(
         base_residual_tol=base_residual_tol,
         allow_local_polish=allow_local_polish,
         polish_max_iterations=polish_max_iterations,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     zero_mu = _zero_mu_direction()
@@ -691,7 +708,9 @@ function mass_derivatives(T_fm::Real, mu_fm::Real;
                           derivative_backend::Symbol=:auto,
                           series_iterations::Union{Nothing, Int}=nothing,
                           linear_solve::Symbol=:auto,
-                          series_residual_tol::Real=1e-7)
+                          series_residual_tol::Real=1e-7,
+                          base_context=nothing,
+                          thermo_quadrature_kwargs::NamedTuple=(;))
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -706,6 +725,7 @@ function mass_derivatives(T_fm::Real, mu_fm::Real;
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -726,7 +746,9 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
                             derivative_backend::Symbol=:auto,
                             series_iterations::Union{Nothing, Int}=nothing,
                             linear_solve::Symbol=:auto,
-                            series_residual_tol::Real=1e-7)
+                            series_residual_tol::Real=1e-7,
+                            base_context=nothing,
+                            thermo_quadrature_kwargs::NamedTuple=(;))
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -740,6 +762,7 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -769,7 +792,9 @@ function dP_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
                derivative_backend::Symbol=:auto,
                series_iterations::Union{Nothing, Int}=nothing,
                linear_solve::Symbol=:auto,
-               series_residual_tol::Real=1e-7)
+               series_residual_tol::Real=1e-7,
+               base_context=nothing,
+               thermo_quadrature_kwargs::NamedTuple=(;))
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -787,6 +812,7 @@ function dP_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return nth_derivative_from_series(series, order)
 end
@@ -802,7 +828,9 @@ function dP_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
                 derivative_backend::Symbol=:auto,
                 series_iterations::Union{Nothing, Int}=nothing,
                 linear_solve::Symbol=:auto,
-                series_residual_tol::Real=1e-7)
+                series_residual_tol::Real=1e-7,
+                base_context=nothing,
+                thermo_quadrature_kwargs::NamedTuple=(;))
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -820,6 +848,7 @@ function dP_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context, thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return nth_derivative_from_series(series, order)
 end
@@ -856,7 +885,8 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
                                      base_state_source::Symbol=base_state === nothing ? :internal_gap_solve : :explicit_base_state,
                                      base_residual_tol::Real=series_residual_tol,
                                      allow_local_polish::Bool=true,
-                                     polish_max_iterations::Int=4)
+                                     polish_max_iterations::Int=4,
+                                     thermo_quadrature_kwargs::NamedTuple=(;))
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -877,6 +907,7 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
         base_residual_tol=base_residual_tol,
         allow_local_polish=allow_local_polish,
         polish_max_iterations=polish_max_iterations,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 

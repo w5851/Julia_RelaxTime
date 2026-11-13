@@ -42,15 +42,16 @@ const _BQS_TO_FLAVOR = @SMatrix [
 
 Branch-locked zero-order state and reusable linearization for PNJL Taylor
 series derivatives. The context is tied to one model instance and one exact
-`(T, mu_vec, xi, p_num, t_num)` point.
+`(T, mu_vec, xi, p_num, t_num)` point and `thermo_quadrature_kwargs`.
 """
-struct PNJLTaylorBaseContext{M, F}
+struct PNJLTaylorBaseContext{M, F, Q}
     model::M
     T_fm::Float64
     mu_vec::SVector{3, Float64}
     xi::Float64
     p_num::Int
     t_num::Int
+    thermo_quadrature_kwargs::Q
     x0::SVector{5, Float64}
     J0::Matrix{Float64}
     factorization::F
@@ -296,13 +297,16 @@ function _polish_base_state(
     residual_tol::Float64,
     max_iterations::Int,
     expected_masses=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     x_state = initial_state
-    residual, residual_norm = _primal_residual(model, x_state, T_fm, mu_vec, xi, p_num, t_num)
+    residual, residual_norm = _primal_residual(model, x_state, T_fm, mu_vec, xi, p_num, t_num;
+        thermo_quadrature_kwargs)
     residual_norm <= residual_tol && return x_state, residual_norm, 0
 
     for iteration in 1:max_iterations
-        J = _jacobian_primal(model, x_state, T_fm, mu_vec, xi, p_num, t_num)
+        J = _jacobian_primal(model, x_state, T_fm, mu_vec, xi, p_num, t_num;
+            thermo_quadrature_kwargs)
         step = J \ Vector(residual)
         all(isfinite, step) || throw(ArgumentError("local PNJL base-state polish produced a non-finite Newton step"))
 
@@ -311,7 +315,8 @@ function _polish_base_state(
         for _ in 1:12
             candidate = x_state - alpha * SVector{5, Float64}(Tuple(step))
             _assert_same_branch(model, initial_state, candidate; expected_masses=expected_masses)
-            candidate_residual, candidate_norm = _primal_residual(model, candidate, T_fm, mu_vec, xi, p_num, t_num)
+            candidate_residual, candidate_norm = _primal_residual(model, candidate, T_fm, mu_vec, xi, p_num, t_num;
+                thermo_quadrature_kwargs)
             if candidate_norm < residual_norm
                 x_state = candidate
                 residual = candidate_residual
@@ -361,6 +366,11 @@ Build one reusable PNJL zero-order state, Jacobian, and factorization. When
 `base_state` is supplied, no global gap solve is performed. A residual-only
 local Newton polish may refine that same branch; a large state or mass drift is
 rejected instead of silently selecting another phase branch.
+
+`thermo_quadrature_kwargs` binds the thermodynamic integration policy and controls
+to the context. Derivative consumers inherit these settings; an explicitly
+supplied, different nonempty NamedTuple is rejected. The same settings are used
+for the gap residual, Jacobian, Taylor recursion and final pressure.
 """
 function build_taylor_base_context(
     T_fm::Real,
@@ -375,6 +385,7 @@ function build_taylor_base_context(
     base_residual_tol::Real=1e-7,
     allow_local_polish::Bool=true,
     polish_max_iterations::Int=4,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     _validate_common_inputs(T_fm, 1, p_num, t_num)
     base_residual_tol > 0 || throw(ArgumentError("base_residual_tol must be positive, got $(base_residual_tol)"))
@@ -390,7 +401,7 @@ function build_taylor_base_context(
 
     primal_solve_count = base_state === nothing ? 1 : 0
     initial_state = base_state === nothing ?
-        _primal_state(m, T0, mu0, xi0, p_num, t_num) :
+        _primal_state(m, T0, mu0, xi0, p_num, t_num; thermo_quadrature_kwargs) :
         _as_state5(base_state, "base_state")
 
     if base_masses !== nothing
@@ -400,7 +411,8 @@ function build_taylor_base_context(
             throw(ArgumentError("base_masses are inconsistent with base_state for the resolved PNJL model"))
     end
 
-    _, initial_residual_norm = _primal_residual(m, initial_state, T0, mu0, xi0, p_num, t_num)
+    _, initial_residual_norm = _primal_residual(m, initial_state, T0, mu0, xi0, p_num, t_num;
+        thermo_quadrature_kwargs)
     x0, base_residual_norm, polish_iteration_count = if initial_residual_norm <= Float64(base_residual_tol)
         initial_state, initial_residual_norm, 0
     elseif allow_local_polish && polish_max_iterations > 0
@@ -415,13 +427,14 @@ function build_taylor_base_context(
             residual_tol=Float64(base_residual_tol),
             max_iterations=polish_max_iterations,
             expected_masses=base_masses,
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs,
         )
     else
         throw(ArgumentError("PNJL TaylorDiff base_state residual exceeds tolerance and local polish is disabled: residual_norm=$(initial_residual_norm), tolerance=$(base_residual_tol)"))
     end
 
     _assert_same_branch(m, initial_state, x0; expected_masses=base_masses)
-    J0 = _jacobian_primal(m, x0, T0, mu0, xi0, p_num, t_num)
+    J0 = _jacobian_primal(m, x0, T0, mu0, xi0, p_num, t_num; thermo_quadrature_kwargs)
     Jfac = factorize(J0)
     return PNJLTaylorBaseContext(
         m,
@@ -430,6 +443,7 @@ function build_taylor_base_context(
         xi0,
         p_num,
         t_num,
+        thermo_quadrature_kwargs,
         x0,
         J0,
         Jfac,
@@ -630,16 +644,16 @@ function _solve_gap_series_parameter_direction(
     context = if base_context === nothing
         nothing
     else
-        isempty(thermo_quadrature_kwargs) || throw(ArgumentError(
-            "custom thermo quadrature is not supported with a prebuilt PNJLTaylorBaseContext",
-        ))
+        isempty(thermo_quadrature_kwargs) || thermo_quadrature_kwargs == base_context.thermo_quadrature_kwargs ||
+            throw(ArgumentError("thermo quadrature does not match the prebuilt PNJLTaylorBaseContext"))
         _validate_base_context(base_context, model, T_fm, base_mu_vec, xi, p_num, t_num)
     end
+    quadrature = context === nothing ? thermo_quadrature_kwargs : context.thermo_quadrature_kwargs
     x0 = context === nothing ?
-        _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=thermo_quadrature_kwargs) :
+        _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=quadrature) :
         context.x0
     J0 = context === nothing ?
-        _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=thermo_quadrature_kwargs) :
+        _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=quadrature) :
         context.J0
     linear_operator = if resolved_linear_solve === :refactor_each_order
         J0
@@ -668,7 +682,7 @@ function _solve_gap_series_parameter_direction(
     for n in 1:order
         x_series_n = _series_from_coeff_matrix(coeffs, Val(order))
         residual_n = _gap_residual(model, x_series_n, mu_vec, T_series, Float64(xi), p_num, t_num;
-            thermo_quadrature_kwargs=thermo_quadrature_kwargs)
+            thermo_quadrature_kwargs=quadrature)
         @inbounds for i in 1:5
             rhs_n[i] = _coefficient(residual_n[i], n)
         end
@@ -682,13 +696,13 @@ function _solve_gap_series_parameter_direction(
 
     for _ in 1:iterations
         residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num;
-            thermo_quadrature_kwargs=thermo_quadrature_kwargs)
+            thermo_quadrature_kwargs=quadrature)
         step = _solve_series_linear(linear_operator, residual, Val(order), resolved_linear_solve)
         x_series = x_series - step
     end
 
     residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num;
-        thermo_quadrature_kwargs=thermo_quadrature_kwargs)
+        thermo_quadrature_kwargs=quadrature)
     residual_norm = _series_residual_norm(residual, order)
     _assert_series_residual!(residual, x_series, order, residual_norm, series_residual_tol)
 
@@ -701,6 +715,7 @@ function _solve_gap_series_parameter_direction(
         iterations=iterations,
         linear_solve=resolved_linear_solve,
         base_context=context,
+        thermo_quadrature_kwargs=quadrature,
     )
 end
 
@@ -753,6 +768,8 @@ function pressure_series_direction(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     _validate_common_inputs(T_fm, order, p_num, t_num)
     m = model === nothing ? _get_model() : model
@@ -770,8 +787,11 @@ function pressure_series_direction(
         iterations=iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
-    pressure = model_pressure(m, result.x_state, result.mu_vec, result.T_series; p_num=p_num, t_num=t_num, xi=xi)
+    pressure = model_pressure(m, result.x_state, result.mu_vec, result.T_series;
+        p_num=p_num, t_num=t_num, xi=xi, result.thermo_quadrature_kwargs...)
     isfinite(TaylorDiff.value(pressure)) || throw(ArgumentError("PNJL TaylorDiff pressure series value is not finite"))
     all(isfinite, TaylorDiff.partials(pressure)) || throw(ArgumentError("PNJL TaylorDiff pressure series contains non-finite coefficients"))
     return pressure
@@ -848,6 +868,7 @@ function pressure_series_parameter_direction(
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
     base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     result = gap_series_parameter_direction(
         T_fm,
@@ -863,9 +884,11 @@ function pressure_series_parameter_direction(
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
         base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     m = model === nothing ? _get_model() : model
-    pressure = model_pressure(m, result.x_state, result.mu_vec, result.T_series; p_num=p_num, t_num=t_num, xi=xi)
+    pressure = model_pressure(m, result.x_state, result.mu_vec, result.T_series;
+        p_num=p_num, t_num=t_num, xi=xi, result.thermo_quadrature_kwargs...)
     isfinite(TaylorDiff.value(pressure)) || throw(ArgumentError("PNJL TaylorDiff pressure series value is not finite"))
     all(isfinite, TaylorDiff.partials(pressure)) || throw(ArgumentError("PNJL TaylorDiff pressure series contains non-finite coefficients"))
     return pressure
@@ -1179,6 +1202,8 @@ function pressure_series_B(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     base_mu_vec = _flavor_mu_from_bqs(Float64(muB_fm), Float64(muQ_fm), Float64(muS_fm))
     direction = _flavor_direction_from_bqs((1.0, 0.0, 0.0))
@@ -1194,6 +1219,8 @@ function pressure_series_B(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -1214,6 +1241,8 @@ function chi_direction_taylordiff(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     pressure = pressure_series_direction(
         T_fm,
@@ -1227,6 +1256,8 @@ function chi_direction_taylordiff(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return nth_derivative_from_series(pressure, order) * Float64(T_fm)^(order - 4)
 end
@@ -1243,6 +1274,8 @@ function chi_direction_taylordiff_all(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     pressure = pressure_series_direction(
         T_fm,
@@ -1256,6 +1289,8 @@ function chi_direction_taylordiff_all(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return [
         nth_derivative_from_series(pressure, n) * Float64(T_fm)^(n - 4)
@@ -1283,6 +1318,8 @@ function chi_B_taylordiff(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     base_mu_vec = _flavor_mu_from_bqs(Float64(muB_fm), Float64(muQ_fm), Float64(muS_fm))
     direction = _flavor_direction_from_bqs((1.0, 0.0, 0.0))
@@ -1298,6 +1335,8 @@ function chi_B_taylordiff(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return nth_derivative_from_series(pressure, order) * Float64(T_fm)^(order - 4)
 end
@@ -1315,6 +1354,8 @@ function chi_B_taylordiff_all(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     base_mu_vec = _flavor_mu_from_bqs(Float64(muB_fm), Float64(muQ_fm), Float64(muS_fm))
     direction = _flavor_direction_from_bqs((1.0, 0.0, 0.0))
@@ -1330,6 +1371,8 @@ function chi_B_taylordiff_all(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     return [
         nth_derivative_from_series(pressure, n) * Float64(T_fm)^(n - 4)

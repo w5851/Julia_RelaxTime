@@ -51,6 +51,49 @@ d1mu = Models.dP_dmu(T_fm, mu_fm)
 - PNJL derivatives 默认 `derivative_backend=:auto` 会解析为 `:taylordiff`；ThermoDerivatives 主题已下线 `derivative_backend=:forwarddiff`
 - 本主题默认采用 `Models` 聚合导出接口，而不是旧 `PNJL.*` 兼容路径
 
+## 低温积分与同支响应
+
+`mass_derivatives`、`thermo_derivatives`、`dP_dT` 和 `dP_dmu` 接受
+`thermo_quadrature_kwargs::NamedTuple=(;)` 与 `base_context=nothing`。
+空 NamedTuple 使用模型的默认张量 Gauss 路线；需要解析低温费米面时，可显式选用
+一维自适应积分。下例复用一个已锁定的平均场和 Jacobian：
+
+```julia
+using StaticArrays
+
+model = Models.create_model(:PNJL)
+T_fm = 60.0 / 197.327
+mu_fm = 2.2
+quadrature = (;
+    thermo_quadrature_policy=:rs_reduced_adaptive,
+    thermo_quadrature_rtol=1e-8,
+    thermo_quadrature_atol=1e-11,
+    thermo_quadrature_maxevals=200000,
+)
+context = Models.PNJLChiBTaylorDiff.build_taylor_base_context(
+    T_fm, SVector(mu_fm, mu_fm, mu_fm);
+    model, p_num=12, t_num=4, thermo_quadrature_kwargs=quadrature,
+)
+common = (; model, p_num=12, t_num=4, base_context=context)
+md = Models.mass_derivatives(T_fm, mu_fm; common...)
+td = Models.thermo_derivatives(T_fm, mu_fm; common...)
+d4mu = Models.dP_dmu(T_fm, mu_fm; order=4, common...)
+```
+
+已有平衡态时，可以在构造 context 时传入 `base_state`；局部 polish 和既有分支检查
+继续生效。context 绑定模型、点位、节点配置和积分 NamedTuple，消费者省略积分选项时
+继承它的设置，显式传入不同的非空设置会抛出 `ArgumentError`。
+残差、Jacobian、Taylor 递推及最终压强均使用该策略。
+
+`dP_dmu(...; order=n)` 沿三味共同的夸克化学势求导，结果单位为 `fm^(n-4)`；
+重子方向导数另有 `3^-n` 因子。质量及其导数使用传入模型的质量公式和参数。
+自适应控制参数及 `xi > -1` 的适用域见 [phase 积分策略](../../phase/Overview.md#phase-热积分策略)。
+
+上述自洽 Taylor 入口要求 `T_fm > 0`。精确零温可使用
+`Models.model_pressure` 与 `Models.number_densities` 的固定态自适应路线，
+在远离 `|mu|=M` 的点对解析费米海求化学势导数；五场 PNJL 的 Polyakov 方向在
+零温退化。近零温宜先检查有量纲响应，再解释归一化 susceptibility 或密度趋零时的比值。
+
 ## 推荐使用顺序
 
 多数业务场景建议按以下顺序进入：

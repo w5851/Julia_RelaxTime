@@ -109,6 +109,8 @@ function _single_axis_susceptibility(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     T_fm > 0 || throw(ArgumentError("T_fm must be positive, got $T_fm"))
     order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
@@ -130,6 +132,8 @@ function _single_axis_susceptibility(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -215,6 +219,8 @@ function conserved_charge_susceptibility(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     pure_axis = _single_axis_order(orders)
 
@@ -236,9 +242,13 @@ function conserved_charge_susceptibility(
             series_iterations=series_iterations,
             linear_solve=linear_solve,
             series_residual_tol=series_residual_tol,
+            base_context=base_context,
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs,
         )
     else
         _validate_derivative_backend(derivative_backend)
+        base_context === nothing && isempty(thermo_quadrature_kwargs) || throw(ArgumentError(
+            "mixed BQS jets do not yet support a custom quadrature or base context; use a single-axis response for this route"))
         return chi_BQS_mixed_taylorjet(
             T_fm,
             muB_fm,
@@ -324,6 +334,8 @@ function chi_B(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     _validate_baryon_inputs(T_fm, order)
     return _single_axis_susceptibility(
@@ -341,6 +353,8 @@ function chi_B(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 

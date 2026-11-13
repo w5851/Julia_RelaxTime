@@ -103,6 +103,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraint_modes.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_pnjl_core.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_core_integrals.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_low_temperature_responses.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_build_dense_phase_reference.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_dense_reference_xi_refinement_plan.jl"),
 

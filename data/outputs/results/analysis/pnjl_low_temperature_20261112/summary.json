@@ -1,0 +1,6005 @@
+{
+  "schema": "pnjl_low_temperature_pr3_summary_v1",
+  "created_utc": "2026-11-13T02:21:18.694210+00:00",
+  "execution": {
+    "host": "quote-remote",
+    "julia": "1.12.5",
+    "threads": 1,
+    "openblas_threads": 1,
+    "model_profile": "PNJL default",
+    "source_base_commit": "abe6dd2b83587c587b0e87deee82aa4526e8608b",
+    "reproduction_source_sha256_lf": {
+      "src/models/pnjl_physics/PNJLIntegrals.jl": "1d20c5de92e31eff7e247ffbbd1399306364b2d682c2c58dfd237a88dcc93c5c",
+      "src/models/derivatives/PNJLChiBTaylorDiff.jl": "570576242aa5f3743ca5c04a04e1fe25b5821cc222605e9929d622aa0a5cb87c",
+      "src/models/derivatives/TaylorDiffForwardDiffCompat.jl": "77e72536610721d7ceeaa8bc80a377a69e95186061f1b55d1da7571f93ca7498",
+      "src/models/derivatives/ThermoDerivatives.jl": "b577e93b5652a56f84d905a5493fcb942406a5774ece5d394ce985e679ce0faf",
+      "src/models/derivatives/ConservedChargeSusceptibilities.jl": "5001a35bfe48f50e43fc574b560ddd76e7f9a0445ee655ee4c89b6d78b8bae52",
+      "scripts/analysis/pnjl/low_temperature_consumers.jl": "858978d75fd718ddd5f00ac111b528b44f14239456cf1c7bf38bc461972d1861"
+    }
+  },
+  "controls": {
+    "rtol": [
+      1e-06,
+      1e-08,
+      1e-10
+    ],
+    "atol_over_rtol": 0.001,
+    "maxevals": 200000,
+    "base_residual_tol": 1e-09,
+    "strict_base_residual_tol": 1e-13,
+    "vanishing_density_reporting_threshold_inv_fm3": 1e-08,
+    "fixed_masses_inv_fm": [
+      1.5,
+      1.5,
+      2.5
+    ],
+    "fixed_phi": 0.1,
+    "fixed_phibar": 0.1,
+    "audit_oracle_phi": 0.12,
+    "audit_oracle_phibar": 0.28,
+    "oracle_bits": 192,
+    "oracle_nodes": [
+      96,
+      128
+    ],
+    "oracle_tail_in_T": [
+      56,
+      72
+    ]
+  },
+  "units": {
+    "T_MeV": "MeV",
+    "mu_q_inv_fm": "fm^-1",
+    "state": "[phi_u,phi_d,phi_s,Phi,PhiBar]; condensates fm^-3, loops dimensionless",
+    "pressure_mu_0_to_4": "d^n P / d mu_q^n, n=0:4, fm^(n-4)",
+    "chemical": "same as pressure_mu_0_to_4; fixed mean fields",
+    "thermal": "[dP/dT, d2P/dT2], fixed mean fields, fm^-3 and fm^-2",
+    "temperature_derivatives": "with respect to T in fm^-1",
+    "nonfinite": "NaN and +/-Inf are strings",
+    "scaled_difference": "abs(candidate-reference)/max(abs(reference),1e-9), componentwise; not a per-component relative-error guarantee"
+  },
+  "counts": {
+    "fixed_points": 35,
+    "self_consistent_points": 30,
+    "audit_checks": 11,
+    "capture_failures": 0
+  },
+  "legacy_counterexample": {
+    "source_commit": "abe6dd2b83587c587b0e87deee82aa4526e8608b",
+    "T_MeV": 0.01,
+    "mu_q_inv_fm": 1.8,
+    "xi": 0,
+    "masses_inv_fm": [
+      1.5,
+      1.5,
+      2.5
+    ],
+    "phi": 0.1,
+    "phibar": 0.1,
+    "at_fermi_threshold": false,
+    "zero_limit": [
+      0.023029504355575103,
+      0.19961034357705976,
+      1.0887836922385077,
+      2.584486542182316,
+      -0.29994041108498787
+    ],
+    "methods": [
+      {
+        "method": "adaptive",
+        "rtol": 1e-06,
+        "result": {
+          "status": "ok",
+          "elapsed_seconds": 0.0252808,
+          "value": {
+            "chemical": [
+              0.023029504361385938,
+              0.19961045820783596,
+              0.0022696083737353346,
+              44.91228048437508,
+              894779.9018326334
+            ],
+            "thermal": [
+              8.872617819371017e-07,
+              0.10292671552387224
+            ]
+          }
+        }
+      },
+      {
+        "method": "adaptive",
+        "rtol": 1e-08,
+        "result": {
+          "status": "ok",
+          "elapsed_seconds": 0.0003952,
+          "value": {
+            "chemical": [
+              0.023029504922418485,
+              0.19962791879708117,
+              0.5444343405163184,
+              12809.757005493477,
+              151562.1535907919
+            ],
+            "thermal": [
+              2.2372717946615216e-05,
+              0.4418357734397685
+            ]
+          }
+        }
+      },
+      {
+        "method": "adaptive",
+        "rtol": 1e-10,
+        "result": {
+          "status": "ok",
+          "elapsed_seconds": 0.0003808,
+          "value": {
+            "chemical": [
+              0.023029504922418575,
+              0.19962791881128078,
+              0.5444350461503878,
+              12809.415869771878,
+              31301.574481893753
+            ],
+            "thermal": [
+              2.237270930841421e-05,
+              0.44183432475815054
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "fixed": [
+    {
+      "T_MeV": 0,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "thermal": []
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_method": "analytic sea",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 0.0,
+      "window_64_to_96_max_scaled_difference": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "thermal": [
+          0,
+          0
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 0.0,
+      "window_64_to_96_max_scaled_difference": 0.0
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0,
+          9.088151336268446e-221,
+          1.7933376387318435e-217,
+          3.5387393623803844e-214,
+          6.982888221604342e-211
+        ],
+        "thermal": [
+          4.496982078926765e-218,
+          4.390924195241363e-212
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        0,
+        9.088151336267452e-221,
+        1.793337638731648e-217,
+        3.538739362379998e-214,
+        6.982888221603577e-211
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 7.648943518849437e-215,
+      "window_64_to_96_max_scaled_difference": 1.4014620575375349e-215
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0,
+          1.9120895247688672e-26,
+          3.773068896540661e-24,
+          7.445283661476787e-22,
+          1.4691554890682297e-19
+        ],
+        "thermal": [
+          9.720692829937649e-25,
+          9.757236478440844e-21
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        0,
+        1.9120895247688485e-26,
+        3.7730688965406305e-24,
+        7.445283661476724e-22,
+        1.469155489068217e-19
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 1.2759285881565438e-24,
+      "window_64_to_96_max_scaled_difference": 4.814824860968089e-26
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          7.660418157848888e-10,
+          3.0232610907029566e-08,
+          1.1931787281054105e-06,
+          4.709216868309542e-05,
+          0.0018587396654031725
+        ],
+        "thermal": [
+          3.7480741390438517e-07,
+          0.0001568594531288281
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        7.660418158561025e-10,
+        3.023261090702959e-08,
+        1.1931787281054113e-06,
+        4.709216868309546e-05,
+        0.0018587396654031732
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 7.121363329591526e-11,
+      "window_64_to_96_max_scaled_difference": 6.3374442630750215e-12
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          4.51438821942938e-05,
+          0.0004591042694186427,
+          0.004831423958961285,
+          0.05453054980201735,
+          0.6993790790602066
+        ],
+        "thermal": [
+          0.00229820810318396,
+          0.08459804896887736
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        4.514388219430349e-05,
+        0.00045910426941864213,
+        0.004831423958961282,
+        0.05453054980201731,
+        0.6993790790602062
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.0912538713504135e-13,
+      "max_scaled_chemical_reference_difference": 2.146482855613145e-13,
+      "window_64_to_96_max_scaled_difference": 3.3923435340459495e-14
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.005435910328551292,
+          0.021640011691893626,
+          0.10085190484701612,
+          0.5577841029178553,
+          3.396276094778554
+        ],
+        "thermal": [
+          0.06931109440672725,
+          0.6287932859463172
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chemical_reference": [
+        0.005435910328551163,
+        0.021640011691893626,
+        0.1008519048470161,
+        0.5577841029178551,
+        3.3962760947785546
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3615094706041287e-14,
+      "window_64_to_96_max_scaled_difference": 5.712299935650527e-14
+    },
+    {
+      "T_MeV": 0,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          0
+        ],
+        "thermal": []
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "reference_method": "analytic sea",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 0.0,
+      "window_64_to_96_max_scaled_difference": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          4.312885951132952e-12,
+          1.2705106934465279e-07,
+          0.004024309091428155,
+          114.49908895030737,
+          1728374.7408147561
+        ],
+        "thermal": [
+          2.127663645113588e-07,
+          0.006297969087676239
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        4.312885951131672e-12,
+        1.2705106934460922e-07,
+        0.0040243090914272315,
+        114.49908895033482,
+        1728374.7408188926
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 8.748115580394743e-13,
+      "max_scaled_chemical_reference_difference": 2.39327104097507e-12,
+      "window_64_to_96_max_scaled_difference": 8.907074255841024e-13
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          1.3644533452272136e-09,
+          4.019242036240569e-06,
+          0.012730502958868517,
+          36.22210872527804,
+          54696.74488112981
+        ],
+        "thermal": [
+          6.732400726440386e-06,
+          0.019936339510562208
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        1.3644533452272843e-09,
+        4.0192420362408445e-06,
+        0.01273050295886906,
+        36.22210872527572,
+        54696.744881099265
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 5.307641422480242e-13,
+      "max_scaled_chemical_reference_difference": 5.584330499143984e-13,
+      "window_64_to_96_max_scaled_difference": 2.550062307493811e-13
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          4.3337482156831976e-07,
+          0.00012758537603398029,
+          0.04040046700557342,
+          11.499754029680552,
+          1742.5580389464565
+        ],
+        "thermal": [
+          0.00021420773791821758,
+          0.06369121827085542
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        4.333748215683182e-07,
+        0.00012758537603398004,
+        0.040400467005573336,
+        11.499754029680552,
+        1742.5580389464808
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 2.1138197178255022e-14,
+      "max_scaled_chemical_reference_difference": 1.3961648753538616e-14,
+      "window_64_to_96_max_scaled_difference": 1.2704277874816542e-14
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          2.4700593286216552e-05,
+          0.0014507202435445467,
+          0.09176700050250781,
+          5.233324076613803,
+          161.01082616490115
+        ],
+        "thermal": [
+          0.00246055817688458,
+          0.14891951994768823
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        2.4700593286216786e-05,
+        0.0014507202435445489,
+        0.09176700050250791,
+        5.233324076613808,
+        161.01082616490078
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 4.236491685541032e-15,
+      "max_scaled_chemical_reference_difference": 9.464594260277928e-15,
+      "window_64_to_96_max_scaled_difference": 3.977872949971882e-15
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          0.0008486906549199199,
+          0.01234943191524694,
+          0.19444837000401952,
+          2.7892242832583847,
+          22.58730552791739
+        ],
+        "thermal": [
+          0.021716240160603997,
+          0.3489780634424959
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        0.0008486906549199165,
+        0.012349431915246935,
+        0.1944483700040195,
+        2.789224283258384,
+        22.587305527917415
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 4.718642081158501e-16,
+      "max_scaled_chemical_reference_difference": 3.96024949163864e-15,
+      "window_64_to_96_max_scaled_difference": 5.8764992456573366e-15
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.5,
+      "xi": 0,
+      "at_fermi_threshold": true,
+      "adaptive": {
+        "chemical": [
+          0.016161991907408108,
+          0.07623926001916709,
+          0.3937051900942579,
+          1.9021861527896047,
+          5.725712863261699
+        ],
+        "thermal": [
+          0.15027835444493498,
+          0.9699323268631895
+        ]
+      },
+      "zero_limit": [
+        0,
+        0,
+        0,
+        null,
+        null
+      ],
+      "chemical_reference": [
+        0.01616199190740698,
+        0.0762392600191671,
+        0.3937051900942577,
+        1.9021861527896045,
+        5.725712863261701
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.5026692750998944e-15,
+      "max_scaled_chemical_reference_difference": 6.976678777249996e-14,
+      "window_64_to_96_max_scaled_difference": 3.1770721816399985e-14
+    },
+    {
+      "T_MeV": 0,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.023029504355575155,
+          0.1996103435770602,
+          1.0887836922385075,
+          2.584486542182317,
+          -0.29994041108498093
+        ],
+        "thermal": []
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "reference_method": "analytic sea",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3134241494191653e-14,
+      "window_64_to_96_max_scaled_difference": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.023029505489156714,
+          0.19961034626788512,
+          1.088783691926226,
+          2.5844865520396865,
+          -0.29994050069744366
+        ],
+        "thermal": [
+          4.4737249691112135e-05,
+          0.882786725505596
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.023029505489156665,
+        0.19961034626788468,
+        1.0887836919262261,
+        2.5844865520396856,
+        -0.29994050069745065
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.331930845909245e-14,
+      "window_64_to_96_max_scaled_difference": 0.004979631292045931
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.0230296177137265,
+          0.1996106126597013,
+          1.0887836610090071,
+          2.584487527935659,
+          -0.29994937258276766
+        ],
+        "thermal": [
+          0.00044737245992659483,
+          0.8827865065500787
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.023029617713726448,
+        0.19961061265970084,
+        1.0887836610090074,
+        2.5844875279356576,
+        -0.2999493725827746
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3133550319370508e-14,
+      "window_64_to_96_max_scaled_difference": 6.907410531541095e-07
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.02304084012355315,
+          0.19963725332380403,
+          1.0887805557865102,
+          2.584585282232206,
+          -0.30083909797140473
+        ],
+        "thermal": [
+          0.004473687257804024,
+          0.8827642579318333
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.023040840123553147,
+        0.199637253323804,
+        1.0887805557865113,
+        2.5845852822306496,
+        -0.3008390991421104
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.2750221180670075e-11,
+      "max_scaled_chemical_reference_difference": 3.8914677210403605e-09,
+      "window_64_to_96_max_scaled_difference": 4.318518109316854e-10
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.02331286464234559,
+          0.20028405743946517,
+          1.0886958665448603,
+          2.5870802763914593,
+          -0.3245393197324612
+        ],
+        "thermal": [
+          0.022362565372170275,
+          0.8819330467672988
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.023312864642345592,
+        0.20028405743946512,
+        1.0886958665448598,
+        2.5870802763915046,
+        -0.32453931972523437
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 2.2187573481700488e-11,
+      "max_scaled_chemical_reference_difference": 2.2267965100383627e-11,
+      "window_64_to_96_max_scaled_difference": 9.04149135632804e-13
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.027551652436076365,
+          0.2105815020477747,
+          1.086689989104267,
+          2.6256632150547397,
+          -0.592952067844525
+        ],
+        "thermal": [
+          0.0892300301629229,
+          0.8918171201071702
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.027551652436076338,
+        0.21058150204777484,
+        1.0866899891042665,
+        2.6256632150547436,
+        -0.5929520678443949
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.565297599788446e-13,
+      "max_scaled_chemical_reference_difference": 2.194412424584284e-13,
+      "window_64_to_96_max_scaled_difference": 1.9753456552358528e-13
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.06677256999216195,
+          0.29787464733317076,
+          1.1192337296187833,
+          2.6548861316231136,
+          0.5764077948677102
+        ],
+        "thermal": [
+          0.3177248719008738,
+          1.471051225342068
+        ]
+      },
+      "zero_limit": [
+        0.023029504355575103,
+        0.19961034357705976,
+        1.0887836922385077,
+        2.584486542182316,
+        -0.29994041108498787
+      ],
+      "chemical_reference": [
+        0.06677256999216258,
+        0.29787464733317076,
+        1.1192337296187833,
+        2.6548861316231145,
+        0.5764077948677206
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.136403064568509e-14,
+      "max_scaled_chemical_reference_difference": 1.810540475753185e-14,
+      "window_64_to_96_max_scaled_difference": 1.694974062407237e-14
+    },
+    {
+      "T_MeV": 0,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.027525522464574452,
+          0.23857999336237015,
+          1.3013454183401976,
+          3.0890522556560267,
+          -0.35849736042428804
+        ],
+        "thermal": []
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "reference_method": "analytic sea",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3381438083670327e-14,
+      "window_64_to_96_max_scaled_difference": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.027525523819463563,
+          0.2385799965785211,
+          1.3013454179669497,
+          3.089052267437836,
+          -0.35849746753166734
+        ],
+        "thermal": [
+          5.3471240733753485e-05,
+          1.0551319502649166
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.027525523819463507,
+        0.23857999657852058,
+        1.3013454179669501,
+        3.089052267437835,
+        -0.35849746753167566
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3226587183500695e-14,
+      "window_64_to_96_max_scaled_difference": 0.004979631292046233
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.02752565795348004,
+          0.23858031497764107,
+          1.3013453810138054,
+          3.0890534338566225,
+          -0.35850807146282526
+        ],
+        "thermal": [
+          0.0005347123631325707,
+          1.0551316885630182
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.02752565795347998,
+        0.23858031497764054,
+        1.3013453810138058,
+        3.089053433856621,
+        -0.3585080714628336
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.322590018883828e-14,
+      "window_64_to_96_max_scaled_difference": 6.907410530786636e-07
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.027539071298770527,
+          0.2386121566615483,
+          1.3013416695630386,
+          3.0891702725885413,
+          -0.35957149670177546
+        ],
+        "thermal": [
+          0.0053470789997421,
+          1.0551050963779731
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.027539071298770527,
+        0.2386121566615483,
+        1.3013416695630402,
+        3.0891702725866805,
+        -0.35957149810103634
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.2750359865125945e-11,
+      "max_scaled_chemical_reference_difference": 3.891467708718095e-09,
+      "window_64_to_96_max_scaled_difference": 4.318518617716495e-10
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.02786420278607167,
+          0.23938523544522175,
+          1.3012404465585157,
+          3.092152360987802,
+          -0.38789867979815973
+        ],
+        "thermal": [
+          0.026728377910928542,
+          1.0541116090137232
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.027864202786071678,
+        0.23938523544522172,
+        1.3012404465585155,
+        3.0921523609878574,
+        -0.38789867978952197
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 2.2187649397711375e-11,
+      "max_scaled_chemical_reference_difference": 2.226807572759872e-11,
+      "window_64_to_96_max_scaled_difference": 9.044384373051073e-13
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.03293052322603611,
+          0.2516930358441095,
+          1.2988429644547002,
+          3.138267793110349,
+          -0.7087132754517647
+        ],
+        "thermal": [
+          0.10665028486249632,
+          1.0659253362462968
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.03293052322603608,
+        0.25169303584410974,
+        1.2988429644547,
+        3.138267793110354,
+        -0.7087132754516091
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.566533410732926e-13,
+      "max_scaled_chemical_reference_difference": 2.194713308437311e-13,
+      "window_64_to_96_max_scaled_difference": 1.9769651643453864e-13
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.8,
+      "xi": -0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.0798084859734152,
+          0.3560283004879986,
+          1.337740174172405,
+          3.173195859041062,
+          0.6889390870692378
+        ],
+        "thermal": [
+          0.3797538567930297,
+          1.7582425103252555
+        ]
+      },
+      "zero_limit": [
+        0.027525522464574393,
+        0.23857999336236965,
+        1.3013454183401978,
+        3.089052255656025,
+        -0.3584973604242964
+      ],
+      "chemical_reference": [
+        0.07980848597341594,
+        0.35602830048799866,
+        1.3377401741724053,
+        3.173195859041063,
+        0.6889390870692503
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.1280476486588227e-14,
+      "max_scaled_chemical_reference_difference": 1.820991204263495e-14,
+      "window_64_to_96_max_scaled_difference": 1.724301405807026e-14
+    },
+    {
+      "T_MeV": 0,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.020198211475723347,
+          0.175069852570892,
+          0.9549264685684994,
+          2.2667446476120956,
+          -0.2630651428563294
+        ],
+        "thermal": []
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "reference_method": "analytic sea",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.342285914342764e-14,
+      "window_64_to_96_max_scaled_difference": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.020198212469940146,
+          0.1750698549309016,
+          0.9549264682946105,
+          2.266744656257581,
+          -0.26306522145165856
+        ],
+        "thermal": [
+          3.923716360333082e-05,
+          0.7742551769424763
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.0201982124699401,
+        0.1750698549309012,
+        0.9549264682946106,
+        2.26674465625758,
+        -0.26306522145166467
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3211835459444466e-14,
+      "window_64_to_96_max_scaled_difference": 0.004979631292046151
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.02019831089739904,
+          0.17507008857198023,
+          0.9549264411784159,
+          2.2667455121749693,
+          -0.26307300260982835
+        ],
+        "thermal": [
+          0.0003923716035957326,
+          0.7742549849057839
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.020198310897398992,
+        0.17507008857197984,
+        0.954926441178416,
+        2.2667455121749684,
+        -0.26307300260983446
+      ],
+      "reference_method": "192-bit q window",
+      "max_scaled_tolerance_spread": 0.0,
+      "max_scaled_chemical_reference_difference": 2.3211148901107694e-14,
+      "window_64_to_96_max_scaled_difference": 6.9074105320752e-07
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.020208153601933454,
+          0.1750934539800712,
+          0.9549237177181231,
+          2.266831248364678,
+          -0.2638533433969136
+        ],
+        "thermal": [
+          0.003923683285328693,
+          0.7742354715767333
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.02020815360193345,
+        0.17509345398007115,
+        0.954923717718124,
+        2.2668312483633124,
+        -0.2638533444236903
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.2750256509573196e-11,
+      "max_scaled_chemical_reference_difference": 3.8914675174829685e-09,
+      "window_64_to_96_max_scaled_difference": 4.318519268587835e-10
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.020446734887588497,
+          0.1756607387166326,
+          0.954849440339585,
+          2.269019503000175,
+          -0.2846398129518031
+        ],
+        "thermal": [
+          0.019613267291939622,
+          0.7735064511591407
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.020446734887588497,
+        0.17566073871663254,
+        0.9548494403395845,
+        2.269019503000215,
+        -0.2846398129454647
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 2.2187508131542868e-11,
+      "max_scaled_chemical_reference_difference": 2.2268052400322075e-11,
+      "window_64_to_96_max_scaled_difference": 9.041240381837167e-13
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.024164397714220825,
+          0.18469219508872042,
+          0.9530901694445656,
+          2.3028589787632363,
+          -0.5200533661677265
+        ],
+        "thermal": [
+          0.07825991351739964,
+          0.7821753569452937
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.024164397714220798,
+        0.1846921950887205,
+        0.9530901694445651,
+        2.30285897876324,
+        -0.5200533661676121
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.5669616871820112e-13,
+      "max_scaled_chemical_reference_difference": 2.1988699425038507e-13,
+      "window_64_to_96_max_scaled_difference": 1.9768481230665685e-13
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "at_fermi_threshold": false,
+      "adaptive": {
+        "chemical": [
+          0.058563417981365544,
+          0.2612533481918106,
+          0.9816329180410692,
+          2.3284891720870693,
+          0.5055430788798064
+        ],
+        "thermal": [
+          0.27866314683395993,
+          1.2901972739976926
+        ]
+      },
+      "zero_limit": [
+        0.020198211475723305,
+        0.1750698525708916,
+        0.9549264685684996,
+        2.2667446476120947,
+        -0.2630651428563356
+      ],
+      "chemical_reference": [
+        0.058563417981366085,
+        0.26125334819181056,
+        0.9816329180410691,
+        2.3284891720870693,
+        0.5055430788798154
+      ],
+      "reference_method": "96-node q window",
+      "max_scaled_tolerance_spread": 1.1200108679431608e-14,
+      "max_scaled_chemical_reference_difference": 1.7788407902626356e-14,
+      "window_64_to_96_max_scaled_difference": 1.7129577980306863e-14
+    }
+  ],
+  "consumers": [
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8430779002065205,
+        -1.8430779002065205,
+        -2.2269785989751747,
+        0.0003227047738919994,
+        0.0059057826809129944
+      ],
+      "masses": [
+        1.8629206798043034,
+        1.8629206798043034,
+        2.7845133099141615
+      ],
+      "pressure_mu_0_to_4": [
+        21.60804204333086,
+        0.00021017114731838833,
+        0.0020756256153715287,
+        0.02051844064980892,
+        0.20322506365479562
+      ],
+      "density": {
+        "quark": [
+          0.00010472262730532026,
+          0.00010472262730532026,
+          8.206712629854323e-07
+        ],
+        "antiquark": [
+          4.555070431474721e-08,
+          4.555070431474721e-08,
+          3.6771466501235994e-09
+        ]
+      },
+      "dM_dT": [
+        -0.0058856986742398905,
+        -0.00588569867423989,
+        -0.0026491355664258567
+      ],
+      "dM_dmu_q": [
+        -0.002187390355334538,
+        -0.002187390355334538,
+        -0.0009800226074028271
+      ],
+      "chi2_B": 0.0024944628365603985,
+      "chi4_B": 0.0025089514031455384,
+      "thermo": {
+        "dP_dT": 0.0006461137690696263,
+        "dP_dmu": 0.00021017114731838833,
+        "dEpsilon_dT": 0.012088894113244824,
+        "dEpsilon_dmu": 0.004319483370361765,
+        "dn_dT": 0.0018909970848214111,
+        "dn_dmu": 0.0006918752051238429
+      },
+      "bulk": {
+        "v_n_sq": 0.25320693976970005,
+        "dμB_dT_sigma": -4.253916224697786,
+        "ds_dT": 0.016436204618286362,
+        "ds_dμB": 0.0018909970848214111,
+        "dn_dT": 0.0018909970848214111,
+        "dn_dμB": 0.0002306250683746143,
+        "c_p": -0.00030523658944781924,
+        "s": 0.0006461137690696263,
+        "n_B": 7.005704910612944e-05
+      },
+      "residual_norm": 2.6549942799825033e-15,
+      "jacobian_condition": 7.913975364901403,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.6549942799825033e-15,
+      "zero_fixed_state": {
+        "pressure": 21.608020701886247,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8432951289919817,
+        -1.8432951289919817,
+        -2.227009820890035,
+        1.1377815346114983e-08,
+        1.381195037252381e-05
+      ],
+      "masses": [
+        1.8631423321471776,
+        1.8631423321471776,
+        2.7846126274467964
+      ],
+      "pressure_mu_0_to_4": [
+        21.608020723009798,
+        1.6882042158473663e-10,
+        4.996924103351563e-09,
+        1.4790420660886208e-07,
+        4.377824020096721e-06
+      ],
+      "density": {
+        "quark": [
+          8.441011845521663e-11,
+          8.441011845521663e-11,
+          1.8466837494887873e-16
+        ],
+        "antiquark": [
+          2.1821347022852496e-20,
+          2.1821347022852496e-20,
+          4.347493718877301e-24
+        ]
+      },
+      "dM_dT": [
+        -3.713593461365025e-08,
+        -3.713593461365026e-08,
+        -1.652878875749966e-08
+      ],
+      "dM_dmu_q": [
+        -5.652979122221667e-09,
+        -5.652979122221667e-09,
+        -2.5160750740205623e-09
+      ],
+      "chi2_B": 5.404720987519071e-08,
+      "chi4_B": 5.4047210124653446e-08,
+      "thermo": {
+        "dP_dT": 1.166927663597914e-09,
+        "dP_dmu": 1.6882042158473663e-10,
+        "dEpsilon_dT": 6.311031953255617e-08,
+        "dEpsilon_dmu": 9.578117786993969e-09,
+        "dn_dT": 1.0958103256276524e-08,
+        "dn_dmu": 1.6656413677838543e-09
+      },
+      "bulk": {
+        "v_n_sq": 0.5816216714607495,
+        "dμB_dT_sigma": -18.017396781717427,
+        "ds_dT": 2.1723169338542095e-07,
+        "ds_dμB": 1.0958103256276524e-08,
+        "dn_dT": 1.0958103256276524e-08,
+        "dn_dμB": 5.552137892612847e-10,
+        "c_p": "NaN",
+        "s": 1.166927663597914e-09,
+        "n_B": 5.627347386157888e-11
+      },
+      "residual_norm": 3.9854573582482124e-16,
+      "jacobian_condition": 3.028937831964001,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 3.9854573582482124e-16,
+      "zero_fixed_state": {
+        "pressure": 21.608020723004095,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "vanishing_density_ratios_unqualified",
+      "oracle": null
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8432951291792918,
+        -1.8432951291792918,
+        -2.2270098209161464,
+        2.0679515313825692e-25,
+        1.9960177348496992e-14
+      ],
+      "masses": [
+        1.8631423323381633,
+        1.8631423323381633,
+        2.7846126275318004
+      ],
+      "pressure_mu_0_to_4": [
+        21.608020723004095,
+        4.523267173143385e-35,
+        5.355376448848583e-33,
+        6.340562211132113e-31,
+        7.50698471661675e-29
+      ],
+      "density": {
+        "quark": [
+          2.2615111863328508e-35,
+          2.2615111863328508e-35,
+          7.481099649949986e-54
+        ],
+        "antiquark": [
+          3.5079905255473366e-70,
+          3.5079905255473366e-70,
+          1.022294124127913e-85
+        ]
+      },
+      "dM_dT": [
+        -1.5281772089790758e-31,
+        -1.5281772089790758e-31,
+        -6.801725376832188e-32
+      ],
+      "dM_dmu_q": [
+        -6.186880106612849e-33,
+        -6.18688010661285e-33,
+        -2.753702854440557e-33
+      ],
+      "chi2_B": 9.267882366193568e-31,
+      "chi4_B": 9.267882366194577e-31,
+      "thermo": {
+        "dP_dT": 1.1173639110495983e-33,
+        "dP_dmu": 4.523267173143385e-35,
+        "dEpsilon_dT": 2.4819270101800695e-31,
+        "dEpsilon_dmu": 1.0046309603312616e-32,
+        "dn_dT": 4.4097178296029195e-32,
+        "dn_dmu": 1.7851254829495277e-33
+      },
+      "bulk": {
+        "v_n_sq": 3.885504467278682e-05,
+        "dμB_dT_sigma": 25662.576136413933,
+        "ds_dT": 3.2688512965406366e-30,
+        "ds_dμB": 4.4097178296029195e-32,
+        "dn_dT": 4.4097178296029195e-32,
+        "dn_dμB": 5.950418276498426e-34,
+        "c_p": "NaN",
+        "s": 1.1173639110495983e-33,
+        "n_B": 1.5077557243811283e-35
+      },
+      "residual_norm": 2.220446049250313e-15,
+      "jacobian_condition": 1.8460682834676976,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.220446049250313e-15,
+      "zero_fixed_state": {
+        "pressure": 21.608020723004095,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "vanishing_density_ratios_unqualified",
+      "oracle": null
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8432951291792918,
+        -1.8432951291792918,
+        -2.2270098209161464,
+        2.0679515313825692e-25,
+        1.9960177348496992e-14
+      ],
+      "masses": [
+        1.8631423323381633,
+        1.8631423323381633,
+        2.7846126275318004
+      ],
+      "pressure_mu_0_to_4": [
+        21.608020723004095,
+        -1.6013321475943402e-83,
+        -3.15986068719213e-81,
+        -6.235258297895953e-79,
+        -1.230384814140216e-76
+      ],
+      "density": {
+        "quark": [
+          2.070783406081201e-81,
+          2.070783406081201e-81,
+          4.064387230355144e-160
+        ],
+        "antiquark": [
+          1.1368172110082892e-284,
+          1.1368172110082892e-284,
+          0.0
+        ]
+      },
+      "dM_dT": [
+        -1.1501887983955002e-76,
+        -1.1501887983954999e-76,
+        -5.119346298471012e-77
+      ],
+      "dM_dmu_q": [
+        -9.467340603395117e-79,
+        -9.467340603395117e-79,
+        -4.213794738912903e-79
+      ],
+      "chi2_B": -1.3670942378872256e-77,
+      "chi4_B": -1.518993597673201e-78,
+      "thermo": {
+        "dP_dT": 1.041170548245719e-37,
+        "dP_dmu": -1.6013321475943402e-83,
+        "dEpsilon_dT": -1.0415744149076565e-37,
+        "dEpsilon_dmu": -3.941819198251409e-81,
+        "dn_dT": 5.26643447865355e-82,
+        "dn_dmu": -1.05328689573071e-81
+      },
+      "bulk": {
+        "v_n_sq": -0.9996122536650699,
+        "dμB_dT_sigma": -1.5011636899282634,
+        "ds_dT": -2.0553075457048314e-35,
+        "ds_dμB": 5.26643447865355e-82,
+        "dn_dT": 5.26643447865355e-82,
+        "dn_dμB": -3.510956319102367e-82,
+        "c_p": "NaN",
+        "s": 1.041170548245719e-37,
+        "n_B": -5.337773825314467e-84
+      },
+      "residual_norm": 2.220446049250313e-15,
+      "jacobian_condition": 9.103216469237317,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.220446049250313e-15,
+      "zero_fixed_state": {
+        "pressure": 21.608020723004095,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "vanishing_density_ratios_unqualified",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8432951291792918,
+        -1.8432951291792918,
+        -2.2270098209161464,
+        2.0679515313825692e-25,
+        1.9960177348496992e-14
+      ],
+      "masses": [
+        1.8631423323381633,
+        1.8631423323381633,
+        2.7846126275318004
+      ],
+      "pressure_mu_0_to_4": [
+        21.608020723004095,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "density": {
+        "quark": [
+          0,
+          0,
+          0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        0,
+        0,
+        0
+      ],
+      "dM_dmu_q": [
+        0,
+        0,
+        0
+      ],
+      "chi2_B": 0,
+      "chi4_B": 0,
+      "thermo": {
+        "dP_dT": 1.0444136375499041e-37,
+        "dP_dmu": 0,
+        "dEpsilon_dT": -1.0480758995993847e-37,
+        "dEpsilon_dmu": 0,
+        "dn_dT": 0,
+        "dn_dmu": 0
+      },
+      "bulk": {
+        "v_n_sq": "NaN",
+        "dμB_dT_sigma": "NaN",
+        "ds_dT": -2.0681367304024777e-34,
+        "ds_dμB": 0,
+        "dn_dT": 0,
+        "dn_dμB": 0,
+        "c_p": "NaN",
+        "s": 1.0444136375499041e-37,
+        "n_B": 0
+      },
+      "residual_norm": 2.220446049250313e-15,
+      "jacobian_condition": 90.74992067858037,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.220446049250313e-15,
+      "zero_fixed_state": {
+        "pressure": 21.608020723004095,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "vanishing_density_ratios_unqualified",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.25,
+      "xi": 0,
+      "state": [
+        -1.8432951291792918,
+        -1.8432951291792918,
+        -2.2270098209161464,
+        2.0679515313825692e-25,
+        1.9960177348496992e-14
+      ],
+      "masses": [
+        1.8631423323381633,
+        1.8631423323381633,
+        2.7846126275318004
+      ],
+      "pressure_mu_0_to_4": [
+        21.608020723004095,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "density": {
+        "quark": [
+          0,
+          0,
+          0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        0,
+        0,
+        0
+      ],
+      "dM_dmu_q": [
+        0,
+        0,
+        0
+      ],
+      "chi2_B": 0,
+      "chi4_B": 0,
+      "thermo": {
+        "dP_dT": 1.0447383139809558e-37,
+        "dP_dmu": 0,
+        "dEpsilon_dT": -1.0487276538926573e-37,
+        "dEpsilon_dmu": 0,
+        "dn_dT": 0,
+        "dn_dmu": 0
+      },
+      "bulk": {
+        "v_n_sq": "NaN",
+        "dμB_dT_sigma": "NaN",
+        "ds_dT": -2.069422817596764e-33,
+        "ds_dμB": 0,
+        "dn_dT": 0,
+        "dn_dμB": 0,
+        "c_p": "NaN",
+        "s": 1.0447383139809558e-37,
+        "n_B": 0
+      },
+      "residual_norm": 2.220446049250313e-15,
+      "jacobian_condition": 907.217711098965,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.220446049250313e-15,
+      "zero_fixed_state": {
+        "pressure": 21.608020723004095,
+        "density": {
+          "quark": [
+            0,
+            0,
+            0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "vanishing_density_ratios_unqualified",
+      "oracle": null
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.2595110928239476,
+        -0.2595110928239476,
+        -2.070593686185855,
+        0.07006102267223381,
+        0.09210102392434183
+      ],
+      "masses": [
+        0.28246624389872976,
+        0.28246624389872976,
+        2.3506298371679595
+      ],
+      "pressure_mu_0_to_4": [
+        21.623727416278157,
+        1.2158601148856938,
+        2.587343803324437,
+        -7.700544146507596,
+        301.6919883085516
+      ],
+      "density": {
+        "quark": [
+          0.6059755855030227,
+          0.6059755855030227,
+          0.003916024637396443
+        ],
+        "antiquark": [
+          3.5246799544009268e-06,
+          3.5246799544009268e-06,
+          3.1397838464357764e-08
+        ]
+      },
+      "dM_dT": [
+        -0.3214043881905255,
+        -0.3214043881905255,
+        -0.08952393355168074
+      ],
+      "dM_dmu_q": [
+        -1.742663235508601,
+        -1.742663235508601,
+        -0.14837551426173862
+      ],
+      "chi2_B": 3.1094398310566724,
+      "chi4_B": 3.7245924482537944,
+      "thermo": {
+        "dP_dT": 0.426526521819775,
+        "dP_dmu": 1.2158601148856938,
+        "dEpsilon_dT": 2.323785661028933,
+        "dEpsilon_dmu": 4.90830948465793,
+        "dn_dT": 0.27526090254228724,
+        "dn_dmu": 0.8624479344414805
+      },
+      "bulk": {
+        "v_n_sq": 0.050802725777935036,
+        "dμB_dT_sigma": 90.3064025369559,
+        "ds_dT": 2.7539508217943642,
+        "ds_dμB": 0.27526090254228724,
+        "dn_dT": 0.27526090254228724,
+        "dn_dμB": 0.28748264481382685,
+        "c_p": 0.7492936143566543,
+        "s": 0.426526521819775,
+        "n_B": 0.40528670496189795
+      },
+      "residual_norm": 6.453171330633722e-16,
+      "jacobian_condition": 52.496558219457214,
+      "max_scaled_tolerance_spread": 5.114286089018573e-14,
+      "max_residual_across_tolerances": 6.453171330633722e-16,
+      "zero_fixed_state": {
+        "pressure": 21.573124758840592,
+        "density": {
+          "quark": [
+            0.5692129219646497,
+            0.5692129219646497,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              0.5621395729117844,
+              1.2158601148856945,
+              2.0018613625797883,
+              2.260250086227858,
+              1.6202503863841538
+            ],
+            "thermal": [
+              0.4675358096499013,
+              1.8172292388792912
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              0.5621395729117844,
+              1.2158601148856945,
+              2.0018613625797883,
+              2.2602500862278605,
+              1.6202503863841287
+            ],
+            "thermal": [
+              0.4675358096499016,
+              1.8172292388792888
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          -2.7755575615628914e-17,
+          -2.7755575615628914e-17,
+          -6.418476861114186e-16,
+          5.551115123125783e-17,
+          -2.7755575615628914e-17
+        ]
+      }
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.29761426620268994,
+        -0.29761426620268994,
+        -2.076610234399057,
+        0.019113518006144917,
+        0.021658833769255616
+      ],
+      "masses": [
+        0.32001449345352756,
+        0.32001449345352756,
+        2.3573507259325925
+      ],
+      "pressure_mu_0_to_4": [
+        21.577381065904444,
+        1.1314234013854276,
+        2.749404135373485,
+        -17.12206964587449,
+        771.1012229099033
+      ],
+      "density": {
+        "quark": [
+          0.5657098123840355,
+          0.5657098123840355,
+          3.7766174882441537e-06
+        ],
+        "antiquark": [
+          6.627062280326422e-14,
+          6.627062280326422e-14,
+          1.6008520825593139e-21
+        ]
+      },
+      "dM_dT": [
+        -0.07018291800317628,
+        -0.07018291800317628,
+        -0.0061272509246082995
+      ],
+      "dM_dmu_q": [
+        -2.341008851370596,
+        -2.341008851370596,
+        -0.19360416498759792
+      ],
+      "chi2_B": 29.737818558538304,
+      "chi4_B": 9.5197681840732,
+      "thermo": {
+        "dP_dT": 0.08669279638688836,
+        "dP_dmu": 1.1314234013854276,
+        "dEpsilon_dT": 0.35296391907550784,
+        "dEpsilon_dmu": 4.962966284175983,
+        "dn_dT": 0.046170704667885344,
+        "dn_dmu": 0.9164680451244974
+      },
+      "bulk": {
+        "v_n_sq": 0.28846269724749235,
+        "dμB_dT_sigma": 42.074352138685846,
+        "ds_dT": 1.0225693701706873,
+        "ds_dμB": 0.046170704667885344,
+        "dn_dT": 0.046170704667885344,
+        "dn_dμB": 0.3054893483748325,
+        "c_p": 0.10256641900544368,
+        "s": 0.08669279638688836,
+        "n_B": 0.3771411337951425
+      },
+      "residual_norm": 6.276229536084088e-15,
+      "jacobian_condition": 18.301859885880667,
+      "max_scaled_tolerance_spread": 7.076850676030078e-14,
+      "max_residual_across_tolerances": 6.276229536084088e-15,
+      "zero_fixed_state": {
+        "pressure": 21.57325386532184,
+        "density": {
+          "quark": [
+            0.5631118844053725,
+            0.5631118844053725,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.30073052857600513,
+        -0.30073052857600513,
+        -2.0767175693521147,
+        0.004698543310593433,
+        0.004860190622028489
+      ],
+      "masses": [
+        0.32307646836418913,
+        0.32307646836418913,
+        2.3576092708084775
+      ],
+      "pressure_mu_0_to_4": [
+        21.573489184658822,
+        1.1254367448255507,
+        2.772282830942636,
+        -18.226526444855068,
+        836.9283216521089
+      ],
+      "density": {
+        "quark": [
+          0.5627183724127709,
+          0.5627183724127709,
+          7.391451446570924e-15
+        ],
+        "antiquark": [
+          6.455256739865368e-43,
+          6.455256739865368e-43,
+          1.5164922352842077e-76
+        ]
+      },
+      "dM_dT": [
+        -0.01396733705763941,
+        -0.013967337057639409,
+        -0.0011667648304069503
+      ],
+      "dM_dmu_q": [
+        -2.399178525223898,
+        -2.399178525223898,
+        -0.20041594859184397
+      ],
+      "chi2_B": 479.7644275504693,
+      "chi4_B": 10.332448415458629,
+      "thermo": {
+        "dP_dT": 0.018802550749649517,
+        "dP_dmu": 1.1254367448255507,
+        "dEpsilon_dT": 0.06837810229720571,
+        "dEpsilon_dmu": 4.990794638004534,
+        "dn_dT": 0.00901840046481106,
+        "dn_dmu": 0.9240942769808758
+      },
+      "bulk": {
+        "v_n_sq": 0.3974783275549992,
+        "dμB_dT_sigma": 120.89343063685492,
+        "ds_dT": 0.7766293371987883,
+        "ds_dμB": 0.00901840046481106,
+        "dn_dT": 0.00901840046481106,
+        "dn_dμB": 0.3080314256602919,
+        "c_p": 0.01966728650556196,
+        "s": 0.018802550749649517,
+        "n_B": 0.3751455816085169
+      },
+      "residual_norm": 2.1192422816618262e-13,
+      "jacobian_condition": 7.68466601976635,
+      "max_scaled_tolerance_spread": 2.5249441402606906e-13,
+      "max_residual_across_tolerances": 2.1192422816618262e-13,
+      "zero_fixed_state": {
+        "pressure": 21.573254622117524,
+        "density": {
+          "quark": [
+            0.562581860398256,
+            0.562581860398256,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              0.4832728490037427,
+              1.1254367448255493,
+              1.937848449782584,
+              2.18883106020184,
+              1.215354070967555
+            ],
+            "thermal": [
+              0.019079828175690428,
+              0.7531852794069571
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              0.4832728490037427,
+              1.1254367448255496,
+              1.937848449782582,
+              2.188831060202096,
+              1.2153540709516308
+            ],
+            "thermal": [
+              0.019079828175690185,
+              0.7531852794069664
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          5.551115123125783e-17,
+          5.551115123125783e-17,
+          -3.4867941867133823e-16,
+          4.74802488992232e-14,
+          2.1192401132574812e-13
+        ]
+      }
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.30089882674625185,
+        -0.30089882674625185,
+        -2.076723115621946,
+        0.0009383835784132243,
+        0.0009448730285010351
+      ],
+      "masses": [
+        0.32324182940631296,
+        0.32324182940631296,
+        2.3576230881088196
+      ],
+      "pressure_mu_0_to_4": [
+        21.573263776081017,
+        1.1251165974804318,
+        2.773615137074975,
+        -18.288829036733887,
+        840.7057582966318
+      ],
+      "density": {
+        "quark": [
+          0.5625582987402161,
+          0.5625582987402161,
+          7.651446064543845e-55
+        ],
+        "antiquark": [
+          2.7089271550674083e-190,
+          2.7089271550674083e-190,
+          0.0
+        ]
+      },
+      "dM_dT": [
+        -0.0026025553478500945,
+        -0.0026025553478500945,
+        -0.00021752552271409704
+      ],
+      "dM_dmu_q": [
+        -2.402395075382855,
+        -2.402395075382855,
+        -0.20079582360087753
+      ],
+      "chi2_B": 11999.874829074059,
+      "chi4_B": 10.379083435760691,
+      "thermo": {
+        "dP_dT": 0.003623019732127773,
+        "dP_dmu": 1.1251165974804318,
+        "dEpsilon_dT": 0.012721738335435712,
+        "dEpsilon_dmu": 4.992532768367745,
+        "dn_dT": 0.0016787024112262887,
+        "dn_dmu": 0.9245383790249916
+      },
+      "bulk": {
+        "v_n_sq": 0.4321174750550659,
+        "dμB_dT_sigma": 555.7161442938665,
+        "ds_dT": 0.7215745827362534,
+        "ds_dμB": 0.0016787024112262887,
+        "dn_dT": 0.0016787024112262887,
+        "dn_dμB": 0.3081794596749972,
+        "c_p": 0.0036566631318831985,
+        "s": 0.003623019732127773,
+        "n_B": 0.3750388658268106
+      },
+      "residual_norm": 3.3133218391157016e-16,
+      "jacobian_condition": 8.425446179753282,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 3.3133218391157016e-16,
+      "zero_fixed_state": {
+        "pressure": 21.573254624254943,
+        "density": {
+          "quark": [
+            0.5625530977223128,
+            0.5625530977223128,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.3009054314830861,
+        -0.3009054314830861,
+        -2.076723333343016,
+        9.382279922785677e-05,
+        9.38877394360909e-05
+      ],
+      "masses": [
+        0.323248318883021,
+        0.323248318883021,
+        2.3576236305150178
+      ],
+      "pressure_mu_0_to_4": [
+        21.57325471526629,
+        1.125104040191704,
+        2.7736683160343727,
+        -18.29128871826788,
+        840.8550690025822
+      ],
+      "density": {
+        "quark": [
+          0.5625520200958518,
+          0.5625520200958518,
+          0.0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -0.0002559701479298241,
+        -0.0002559701479298241,
+        -2.13948380214231e-05
+      ],
+      "dM_dmu_q": [
+        -2.4025218236365022,
+        -2.4025218236365022,
+        -0.20081078077014308
+      ],
+      "chi2_B": 1200010.4904562035,
+      "chi4_B": 10.380926777809464,
+      "thermo": {
+        "dP_dT": 0.0003592791058828902,
+        "dP_dmu": 1.125104040191704,
+        "dEpsilon_dT": 0.0012511503009974376,
+        "dEpsilon_dmu": 4.992603219865617,
+        "dn_dT": 0.00016509938695197235,
+        "dn_dmu": 0.9245561053447909
+      },
+      "bulk": {
+        "v_n_sq": 0.44038263436782915,
+        "dμB_dT_sigma": 5452.751412416099,
+        "ds_dT": 0.7096147510793338,
+        "ds_dμB": 0.00016509938695197235,
+        "dn_dT": 0.00016509938695197235,
+        "dn_dμB": 0.30818536844826366,
+        "c_p": 0.0003596135313038428,
+        "s": 0.0003592791058828902,
+        "n_B": 0.37503468006390134
+      },
+      "residual_norm": 2.673964662803271e-14,
+      "jacobian_condition": 83.83828034432281,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.673964662803271e-14,
+      "zero_fixed_state": {
+        "pressure": 21.57325462425806,
+        "density": {
+          "quark": [
+            0.5625519686613821,
+            0.5625519686613821,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "state": [
+        -0.30090549679456396,
+        -0.30090549679456396,
+        -2.07672333549599,
+        9.367874172070987e-06,
+        9.368545346642149e-06
+      ],
+      "masses": [
+        0.3232483830547417,
+        0.3232483830547417,
+        2.357623635878703
+      ],
+      "pressure_mu_0_to_4": [
+        21.573254625167632,
+        1.1251039160204634,
+        2.7736688438260266,
+        -18.291313066860653,
+        840.8565472116261
+      ],
+      "density": {
+        "quark": [
+          0.5625519580102324,
+          0.5625519580102324,
+          0.0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -2.555418948369956e-05,
+        -2.555418948369956e-05,
+        -2.1359047790041228e-06
+      ],
+      "dM_dmu_q": [
+        -2.4025230780139823,
+        -2.4025230780139823,
+        -0.20081092876262285
+      ],
+      "chi2_B": 120001071.88020104,
+      "chi4_B": 10.38094502730388,
+      "thermo": {
+        "dP_dT": 3.5897817277586344e-05,
+        "dP_dmu": 1.1251039160204634,
+        "dEpsilon_dT": 0.00012490564185795152,
+        "dEpsilon_dmu": 4.992603921392686,
+        "dn_dT": 1.6482311525845006e-05,
+        "dn_dmu": 0.9245562812753422
+      },
+      "bulk": {
+        "v_n_sq": 0.441219440905437,
+        "dμB_dT_sigma": 54424.087438961375,
+        "ds_dT": 0.7084268124017743,
+        "ds_dμB": 1.6482311525845006e-05,
+        "dn_dT": 1.6482311525845006e-05,
+        "dn_dμB": 0.3081854270917807,
+        "c_p": 3.5901159538436675e-05,
+        "s": 3.5897817277586344e-05,
+        "n_B": 0.3750346386734878
+      },
+      "residual_norm": 9.156961214152764e-12,
+      "jacobian_condition": 837.9688323702165,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 9.156961214152764e-12,
+      "zero_fixed_state": {
+        "pressure": 21.573254624258055,
+        "density": {
+          "quark": [
+            0.5625519574964615,
+            0.5625519574964615,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              0.48298154784125563,
+              1.125103916020464,
+              1.937662519700318,
+              2.18883155293119,
+              1.2153533857020644
+            ],
+            "thermal": [
+              3.589892450459298e-05,
+              0.7083827081560233
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              0.48298154784125574,
+              1.1251039160204641,
+              1.937662519706333,
+              2.188831527194957,
+              1.2046672153423716
+            ],
+            "thermal": [
+              3.589892424146566e-05,
+              0.708382695490185
+            ]
+          },
+          "high": [
+            0.4829815478412557,
+            1.125103916020464,
+            1.9376625197003199,
+            2.188831552931189,
+            1.2153533857020649
+          ]
+        },
+        "residual": [
+          -3.3306690738754696e-16,
+          -3.3306690738754696e-16,
+          -3.2959746043559335e-16,
+          9.14302654239981e-12,
+          9.156961222867112e-12
+        ]
+      }
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05345690949071602,
+        -0.05345690949071602,
+        -2.0153535158496054,
+        0.11769992422840936,
+        0.14337691450938525
+      ],
+      "masses": [
+        0.08004096156921534,
+        0.08004096156921534,
+        2.301091648075988
+      ],
+      "pressure_mu_0_to_4": [
+        22.31665321019902,
+        2.3123047393953984,
+        3.403457998484061,
+        5.519624837599938,
+        31.063143541267692
+      ],
+      "density": {
+        "quark": [
+          1.1341666589997834,
+          1.1341666589997834,
+          0.04397490972756495
+        ],
+        "antiquark": [
+          1.736655882067865e-06,
+          1.736655882067865e-06,
+          1.5019969017062766e-08
+        ]
+      },
+      "dM_dT": [
+        -0.03780168978581454,
+        -0.03780168978581454,
+        -0.5425579716367133
+      ],
+      "dM_dmu_q": [
+        -0.15836819523232595,
+        -0.15836819523232595,
+        -0.3265838843260979
+      ],
+      "chi2_B": 4.090236423244965,
+      "chi4_B": 0.38349559927490906,
+      "thermo": {
+        "dP_dT": 0.8673654641767125,
+        "dP_dmu": 2.3123047393953975,
+        "dEpsilon_dT": 5.503804548736238,
+        "dEpsilon_dmu": 7.98685414943033,
+        "dn_dT": 0.5473045806529856,
+        "dn_dmu": 1.1344859994946868
+      },
+      "bulk": {
+        "v_n_sq": -0.150325136575013,
+        "dμB_dT_sigma": -46.03851904864308,
+        "ds_dT": 6.221043861291642,
+        "ds_dμB": 0.5473045806529856,
+        "dn_dT": 0.5473045806529856,
+        "dn_dμB": 0.37816199983156223,
+        "c_p": 1.7043226257188426,
+        "s": 0.8673654641767125,
+        "n_B": 0.7707682464651325
+      },
+      "residual_norm": 2.636779683484747e-16,
+      "jacobian_condition": 16.645499876156226,
+      "max_scaled_tolerance_spread": 2.5399357189406227e-12,
+      "max_residual_across_tolerances": 1.527250548249981e-14,
+      "zero_fixed_state": {
+        "pressure": 22.22094405954685,
+        "density": {
+          "quark": [
+            1.0767265771315295,
+            1.0767265771315295,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.3208357594106692,
+              2.3123047393953984,
+              3.212443742493206,
+              3.8181167736497192,
+              6.186821894974319
+            ],
+            "thermal": [
+              0.9664484603521916,
+              3.7626569731209627
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.3208357594106703,
+              2.312304739395398,
+              3.2124437424932055,
+              3.818116773649717,
+              6.186821894974374
+            ],
+            "thermal": [
+              0.966448460352195,
+              3.762656973120959
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          0,
+          -6.938893903907228e-18,
+          -2.636779683484747e-16,
+          -1.1102230246251565e-16,
+          -1.1102230246251565e-16
+        ]
+      }
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.057008911470264344,
+        -0.057008911470264344,
+        -2.07120040405645,
+        0.029614466204184176,
+        0.03332238877408894
+      ],
+      "masses": [
+        0.08380441959072932,
+        0.08380441959072932,
+        2.3451272035599904
+      ],
+      "pressure_mu_0_to_4": [
+        22.228475043923126,
+        2.160605822840994,
+        2.9725413060991337,
+        2.7640114323031577,
+        5.845354792793938
+      ],
+      "density": {
+        "quark": [
+          1.080046894712176,
+          1.080046894712176,
+          0.0005120334166196613
+        ],
+        "antiquark": [
+          6.8121382134832846e-15,
+          6.8121382134832846e-15,
+          5.329131452001227e-23
+        ]
+      },
+      "dM_dT": [
+        -0.005077552039862533,
+        -0.005077552039862533,
+        -0.02574445250563688
+      ],
+      "dM_dmu_q": [
+        -0.16616508849327277,
+        -0.16616508849327277,
+        -0.011905481404423629
+      ],
+      "chi2_B": 32.15129157668497,
+      "chi4_B": 0.07216487398511355,
+      "thermo": {
+        "dP_dT": 0.14476475758104732,
+        "dP_dmu": 2.160605822840995,
+        "dEpsilon_dT": 0.596141888729508,
+        "dEpsilon_dmu": 6.558362954095373,
+        "dn_dT": 0.061737306063428234,
+        "dn_dmu": 0.9908471020330443
+      },
+      "bulk": {
+        "v_n_sq": 0.054092083941394344,
+        "dμB_dT_sigma": 397.5461476819342,
+        "ds_dT": 1.8615401839856072,
+        "ds_dμB": 0.061737306063428234,
+        "dn_dT": 0.061737306063428234,
+        "dn_dμB": 0.33028236734434807,
+        "c_p": 0.18741790309727008,
+        "s": 0.14476475758104732,
+        "n_B": 0.7202019409469983
+      },
+      "residual_norm": 1.3628195794090914e-12,
+      "jacobian_condition": 4.187412043765177,
+      "max_scaled_tolerance_spread": 4.769585693713042e-13,
+      "max_residual_across_tolerances": 1.3628195794090914e-12,
+      "zero_fixed_state": {
+        "pressure": 22.221803331617913,
+        "density": {
+          "quark": [
+            1.0765205454528706,
+            1.0765205454528706,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.057210396432093254,
+        -0.057210396432093254,
+        -2.0719161970747666,
+        0.00715677478866819,
+        0.007353506931326983
+      ],
+      "masses": [
+        0.08400591912059224,
+        0.08400591912059224,
+        2.3456932880740764
+      ],
+      "pressure_mu_0_to_4": [
+        22.222165006161667,
+        2.1533624468130643,
+        2.9591292709257284,
+        2.588906993265023,
+        1.8245609784397618
+      ],
+      "density": {
+        "quark": [
+          1.076681159082418,
+          1.076681159082418,
+          1.286481824291328e-07
+        ],
+        "antiquark": [
+          3.2040023530918456e-46,
+          3.2040023530918456e-46,
+          5.079459857314994e-83
+        ]
+      },
+      "dM_dT": [
+        -0.0008049834633122954,
+        -0.0008049834633122954,
+        -6.06614564082016e-05
+      ],
+      "dM_dmu_q": [
+        -0.16673205112421985,
+        -0.16673205112421985,
+        -0.0026685495291983254
+      ],
+      "chi2_B": 512.0996115071019,
+      "chi4_B": 0.0225254441782686,
+      "thermo": {
+        "dP_dT": 0.029197047506881593,
+        "dP_dmu": 2.1533624468130643,
+        "dEpsilon_dT": 0.09383705211988175,
+        "dEpsilon_dmu": 6.510805727082827,
+        "dn_dT": 0.009489206090563584,
+        "dn_dmu": 0.9863764236419095
+      },
+      "bulk": {
+        "v_n_sq": 0.2718190651647605,
+        "dμB_dT_sigma": 316.93594732851983,
+        "ds_dT": 1.2316477240248953,
+        "ds_dμB": 0.009489206090563584,
+        "dn_dT": 0.009489206090563584,
+        "dn_dμB": 0.3287921412139698,
+        "c_p": 0.031198511526457685,
+        "s": 0.029197047506881593,
+        "n_B": 0.7177874822710214
+      },
+      "residual_norm": 5.8066277480728345e-12,
+      "jacobian_condition": 1.7301143645443902,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 5.8066277480728345e-12,
+      "zero_fixed_state": {
+        "pressure": 22.221803483688234,
+        "density": {
+          "quark": [
+            1.076509247731461,
+            1.076509247731461,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.1819594599438181,
+              2.1533624468130186,
+              2.940382696918739,
+              2.6750821202558583,
+              1.2239411927084274
+            ],
+            "thermal": [
+              0.02983393023745085,
+              1.1778594912505267
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.1819594599438186,
+              2.153362446813018,
+              2.9403826969187796,
+              2.675082120255795,
+              1.2239411923981307
+            ],
+            "thermal": [
+              0.029833930237449305,
+              1.1778594912504572
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          -1.734723475976807e-16,
+          -1.8041124150158794e-16,
+          4.0635897424756706e-16,
+          1.193135434202075e-12,
+          5.806640758498904e-12
+        ]
+      }
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05721997223486045,
+        -0.05721997223486045,
+        -2.071916443564454,
+        0.0014249890544649566,
+        0.0014329021937663628
+      ],
+      "masses": [
+        0.08401531597312842,
+        0.08401531597312842,
+        2.345693584513718
+      ],
+      "pressure_mu_0_to_4": [
+        22.221817415162896,
+        2.1530302330913655,
+        2.95895223895582,
+        2.5886122686727515,
+        1.8159911869141807
+      ],
+      "density": {
+        "quark": [
+          1.0765151165456828,
+          1.0765151165456828,
+          2.309004108240459e-19
+        ],
+        "antiquark": [
+          9.845894410275225e-205,
+          9.845894410275225e-205,
+          0.0
+        ]
+      },
+      "dM_dT": [
+        -0.00014461557676040393,
+        -0.00014461557676040393,
+        -2.3098069366321213e-06
+      ],
+      "dM_dmu_q": [
+        -0.16676872132085543,
+        -0.16676872132085546,
+        -0.002663638023480192
+      ],
+      "chi2_B": 12801.724369778107,
+      "chi4_B": 0.022419644282891154,
+      "thermo": {
+        "dP_dT": 0.005523899831480408,
+        "dP_dmu": 2.1530302330913655,
+        "dEpsilon_dT": 0.01684744995803556,
+        "dEpsilon_dmu": 6.509720831013094,
+        "dn_dT": 0.0017039390544503579,
+        "dn_dmu": 0.9863174129852733
+      },
+      "bulk": {
+        "v_n_sq": 0.3221288265030675,
+        "dμB_dT_sigma": 1337.1762899783641,
+        "ds_dT": 1.1053177580056128,
+        "ds_dμB": 0.0017039390544503579,
+        "dn_dT": 0.0017039390544503579,
+        "dn_dμB": 0.3287724709950911,
+        "c_p": 0.005601385734970798,
+        "s": 0.005523899831480408,
+        "n_B": 0.7176767443637885
+      },
+      "residual_norm": 7.916844263489153e-16,
+      "jacobian_condition": 8.424214584967592,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 7.916844263489153e-16,
+      "zero_fixed_state": {
+        "pressure": 22.22180348372026,
+        "density": {
+          "quark": [
+            1.0765087202054249,
+            1.0765087202054249,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05722033861497209,
+        -0.05722033861497209,
+        -2.0719164458867727,
+        0.0001423780554234562,
+        0.00014245739849726207
+      ],
+      "masses": [
+        0.08401567546847441,
+        0.08401567546847441,
+        2.345693590255613
+      ],
+      "pressure_mu_0_to_4": [
+        22.22180362186108,
+        2.1530175258378987,
+        2.9589464876664335,
+        2.5886103830842,
+        1.8160052616073556
+      ],
+      "density": {
+        "quark": [
+          1.0765087629189496,
+          1.0765087629189496,
+          3.094531532731467e-134
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -1.410278118786977e-05,
+        -1.410278118786977e-05,
+        -2.252517399518868e-07
+      ],
+      "dM_dmu_q": [
+        -0.16677015210604063,
+        -0.1667701521060406,
+        -0.0026636779251909184
+      ],
+      "chi2_B": 1280169.9487179292,
+      "chi4_B": 0.022419818044535175,
+      "thermo": {
+        "dP_dT": 0.0005454347454890662,
+        "dP_dmu": 2.1530175258378987,
+        "dEpsilon_dT": 0.0016428952403348984,
+        "dEpsilon_dmu": 6.509682525490291,
+        "dn_dT": 0.00016616521025010952,
+        "dn_dmu": 0.9863154958888112
+      },
+      "bulk": {
+        "v_n_sq": 0.33451644036316314,
+        "dμB_dT_sigma": 12876.586161599118,
+        "ds_dT": 1.077809649656103,
+        "ds_dμB": 0.00016616521025010952,
+        "dn_dT": 0.00016616521025010952,
+        "dn_dμB": 0.3287718319629371,
+        "c_p": 0.000546204788685634,
+        "s": 0.0005454347454890662,
+        "n_B": 0.7176725086126329
+      },
+      "residual_norm": 1.4087925374138403e-13,
+      "jacobian_condition": 83.74652954183897,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 1.4087925374138403e-13,
+      "zero_fixed_state": {
+        "pressure": 22.22180348372031,
+        "density": {
+          "quark": [
+            1.0765087000226934,
+            1.0765087000226934,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05722034221711734,
+        -0.05722034221711734,
+        -2.071916445909605,
+        1.423664262462094e-05,
+        1.4237436270434015e-05
+      ],
+      "masses": [
+        0.0840156790029306,
+        0.0840156790029306,
+        2.345693590312066
+      ],
+      "pressure_mu_0_to_4": [
+        22.221803485100544,
+        2.15301740090432,
+        2.95894643303504,
+        2.5886103670415945,
+        1.8160054020308372
+      ],
+      "density": {
+        "quark": [
+          1.0765087004521599,
+          1.0765087004521599,
+          0.0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -1.4067006456431442e-06,
+        -1.4067006456431442e-06,
+        -2.2468035470539992e-08
+      ],
+      "dM_dmu_q": [
+        -0.16677016622727642,
+        -0.16677016622727642,
+        -0.002663678318359745
+      ],
+      "chi2_B": 128016992.50819926,
+      "chi4_B": 0.022419819778158514,
+      "thermo": {
+        "dP_dT": 5.447418895341418e-05,
+        "dP_dmu": 2.15301740090432,
+        "dEpsilon_dT": 0.0001638727151693548,
+        "dEpsilon_dmu": 6.509682155196922,
+        "dn_dT": 1.6574368255565613e-05,
+        "dn_dmu": 0.9863154776783466
+      },
+      "bulk": {
+        "v_n_sq": 0.3357846312514937,
+        "dμB_dT_sigma": 128279.53881361164,
+        "ds_dT": 1.07507468587677,
+        "ds_dμB": 1.6574368255565613e-05,
+        "dn_dT": 1.6574368255565613e-05,
+        "dn_dμB": 0.3287718258927822,
+        "c_p": 5.448188461886663e-05,
+        "s": 5.447418895341418e-05,
+        "n_B": 0.7176724669681067
+      },
+      "residual_norm": 3.9367380882948666e-16,
+      "jacobian_condition": 836.9723654830722,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 3.9367380882948666e-16,
+      "zero_fixed_state": {
+        "pressure": 22.221803483720304,
+        "density": {
+          "quark": [
+            1.0765086998242626,
+            1.0765086998242626,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.1815803139615828,
+              2.153017400904322,
+              2.940220823149737,
+              2.6748799603522206,
+              1.2158532315882895
+            ],
+            "thermal": [
+              5.4476753962780424e-05,
+              1.0749734435060356
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.181580313961583,
+              2.153017400904321,
+              2.940220823139299,
+              2.6748799298649204,
+              1.2417604584595061
+            ],
+            "thermal": [
+              5.4476752787614096e-05,
+              1.0749734461210123
+            ]
+          },
+          "high": [
+            1.1815803139615826,
+            2.1530174009043206,
+            2.9402208231497347,
+            2.674879960352218,
+            1.2158532315882893
+          ]
+        },
+        "residual": [
+          -4.85722573273506e-17,
+          -4.85722573273506e-17,
+          -3.939990694812323e-16,
+          1.3743721682854312e-18,
+          1.3699963828450257e-18
+        ]
+      }
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.029363062226297098,
+        -0.029363062226297098,
+        -1.9893342239074436,
+        0.14362968887945934,
+        0.17065100898501762
+      ],
+      "masses": [
+        0.05645655855297771,
+        0.05645655855297771,
+        2.280406170859743
+      ],
+      "pressure_mu_0_to_4": [
+        22.57646685258606,
+        2.7932419393741204,
+        4.191885001987826,
+        8.287529118001459,
+        67.310619769486
+      ],
+      "density": {
+        "quark": [
+          1.3644852840946953,
+          1.3644852840946953,
+          0.06427637624737129
+        ],
+        "antiquark": [
+          2.4912271365171858e-06,
+          2.4912271365171858e-06,
+          2.2608367090289038e-08
+        ]
+      },
+      "dM_dT": [
+        -0.024563887580583765,
+        -0.02456388758058376,
+        -0.837028382966548
+      ],
+      "dM_dmu_q": [
+        -0.09413717842050189,
+        -0.09413717842050189,
+        -0.4998554558811116
+      ],
+      "chi2_B": 5.037758869015523,
+      "chi4_B": 0.8309953057961521,
+      "thermo": {
+        "dP_dT": 1.1628757107900916,
+        "dP_dmu": 2.7932419393741204,
+        "dEpsilon_dT": 7.753312880174142,
+        "dEpsilon_dmu": 9.927741855844998,
+        "dn_dT": 0.773516195868746,
+        "dn_dmu": 1.3972950006626068
+      },
+      "bulk": {
+        "v_n_sq": -0.1698383544669722,
+        "dμB_dT_sigma": -40.37045534605973,
+        "ds_dT": 8.709046836394254,
+        "ds_dμB": 0.773516195868746,
+        "dn_dT": 0.773516195868746,
+        "dn_dμB": 0.4657650002208689,
+        "c_p": 2.35435444989228,
+        "s": 1.1628757107900916,
+        "n_B": 0.9310806464580401
+      },
+      "residual_norm": 5.412337245047638e-16,
+      "jacobian_condition": 16.9385926876295,
+      "max_scaled_tolerance_spread": 3.5060303244394945e-11,
+      "max_residual_across_tolerances": 2.1719431808620016e-13,
+      "zero_fixed_state": {
+        "pressure": 22.450966551563702,
+        "density": {
+          "quark": [
+            1.2882202866269103,
+            1.2882202866269103,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.6020805421346436,
+              2.7932419393741217,
+              3.8899802417750102,
+              4.665547244193434,
+              7.044436720344578
+            ],
+            "thermal": [
+              1.3014553260116637,
+              5.0957856808693105
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.6020805421346478,
+              2.793241939374122,
+              3.8899802417750107,
+              4.665547244193434,
+              7.044436720344607
+            ],
+            "thermal": [
+              1.3014553260116775,
+              5.095785680869305
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          -2.0816681711721685e-17,
+          -2.0816681711721685e-17,
+          -5.134781488891349e-16,
+          2.220446049250313e-16,
+          0.0
+        ]
+      }
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.03157997054572604,
+        -0.03157997054572604,
+        -2.0708006254043387,
+        0.03551766132096753,
+        0.03982755219378314
+      ],
+      "masses": [
+        0.05885470352938203,
+        0.05885470352938203,
+        2.3446020423603042
+      ],
+      "pressure_mu_0_to_4": [
+        22.461022921358804,
+        2.585822295088099,
+        3.543044802732074,
+        3.3915682677386676,
+        6.78919231469502
+      ],
+      "density": {
+        "quark": [
+          1.2925562634483523,
+          1.2925562634483523,
+          0.0007097681911852926
+        ],
+        "antiquark": [
+          1.0445019976238637e-14,
+          1.0445019976238637e-14,
+          7.650094814786498e-23
+        ]
+      },
+      "dM_dT": [
+        -0.003155710638723732,
+        -0.0031557106387237314,
+        -0.03524339583327647
+      ],
+      "dM_dmu_q": [
+        -0.09788069406605315,
+        -0.09788069406605315,
+        -0.013288445391429643
+      ],
+      "chi2_B": 38.32191205826705,
+      "chi4_B": 0.08381718907030666,
+      "thermo": {
+        "dP_dT": 0.18123976657596344,
+        "dP_dmu": 2.5858222950881,
+        "dEpsilon_dT": 0.7697824562077904,
+        "dEpsilon_dmu": 7.818946891249821,
+        "dn_dT": 0.07974748790806722,
+        "dn_dmu": 1.181014934244027
+      },
+      "bulk": {
+        "v_n_sq": 0.027431721049928186,
+        "dμB_dT_sigma": 787.2905097064198,
+        "ds_dT": 2.4019533964821234,
+        "ds_dμB": 0.07974748790806722,
+        "dn_dT": 0.07974748790806722,
+        "dn_dμB": 0.39367164474800903,
+        "c_p": 0.24174947575684214,
+        "s": 0.18123976657596344,
+        "n_B": 0.8619407650293667
+      },
+      "residual_norm": 7.313233352235216e-12,
+      "jacobian_condition": 3.4515356103355535,
+      "max_scaled_tolerance_spread": 1.853753380930134e-12,
+      "max_residual_across_tolerances": 7.313233352235216e-12,
+      "zero_fixed_state": {
+        "pressure": 22.452781779976874,
+        "density": {
+          "quark": [
+            1.2881098118637964,
+            1.2881098118637964,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.031703756158743886,
+        -0.031703756158743886,
+        -2.071790482655001,
+        0.008560045397145333,
+        0.008793693259791164
+      ],
+      "masses": [
+        0.058979074164037366,
+        0.058979074164037366,
+        2.3453826318534134
+      ],
+      "pressure_mu_0_to_4": [
+        22.453218153381552,
+        2.5766260035972794,
+        3.525025528762826,
+        3.163770878080109,
+        1.6554457278690695
+      ],
+      "density": {
+        "quark": [
+          1.2883129087273077,
+          1.2883129087273077,
+          1.8614266183068282e-07
+        ],
+        "antiquark": [
+          8.587198498563647e-46,
+          8.587198498563647e-46,
+          7.348263411154157e-83
+        ]
+      },
+      "dM_dT": [
+        -0.0004850965442896982,
+        -0.00048509654428969824,
+        -7.337514986669029e-05
+      ],
+      "dM_dmu_q": [
+        -0.09816532520432708,
+        -0.09816532520432707,
+        -0.0008774195411101224
+      ],
+      "chi2_B": 610.0322218323829,
+      "chi4_B": 0.020437601578630442,
+      "thermo": {
+        "dP_dT": 0.035366552257763466,
+        "dP_dmu": 2.5766260035972794,
+        "dEpsilon_dT": 0.11479381755836976,
+        "dEpsilon_dmu": 7.755937923061049,
+        "dn_dT": 0.01159966751112925,
+        "dn_dmu": 1.1750085095876086
+      },
+      "bulk": {
+        "v_n_sq": 0.2597655245190831,
+        "dμB_dT_sigma": 333.12464374554736,
+        "ds_dT": 1.5089995073895324,
+        "ds_dμB": 0.01159966751112925,
+        "dn_dT": 0.01159966751112925,
+        "dn_dμB": 0.3916695031958695,
+        "c_p": 0.038223909024147566,
+        "s": 0.035366552257763466,
+        "n_B": 0.8588753345324265
+      },
+      "residual_norm": 1.6886448836461732e-16,
+      "jacobian_condition": 1.7352046867629825,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 1.6886448836461732e-16,
+      "zero_fixed_state": {
+        "pressure": 22.45278205094235,
+        "density": {
+          "quark": [
+            1.2881039572664141,
+            1.2881039572664141,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.4158500323524057,
+              2.576626003597278,
+              3.5157347501239182,
+              3.1973848490530066,
+              1.4649164095972271
+            ],
+            "thermal": [
+              0.036275769611999915,
+              1.4322520919082462
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.4158500323524053,
+              2.576626003597278,
+              3.515734750123897,
+              3.197384849053486,
+              1.4649164097176206
+            ],
+            "thermal": [
+              0.03627576961199756,
+              1.4322520919082076
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          2.0816681711721685e-17,
+          2.0816681711721685e-17,
+          1.691355389077387e-16,
+          -1.734723475976807e-18,
+          -9.107298248878237e-18
+        ]
+      }
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.031709487902576834,
+        -0.031709487902576834,
+        -2.0717907716503925,
+        0.0017039083120258935,
+        0.0017133544420013175
+      ],
+      "masses": [
+        0.0589846987945623,
+        0.0589846987945623,
+        2.3453828934526237
+      ],
+      "pressure_mu_0_to_4": [
+        22.452798738853144,
+        2.576222729956275,
+        3.52479884258547,
+        3.1633919269461885,
+        1.6427022356116923
+      ],
+      "density": {
+        "quark": [
+          1.2881113649781377,
+          1.2881113649781377,
+          3.507922030973817e-19
+        ],
+        "antiquark": [
+          1.2095112575598516e-202,
+          1.2095112575598516e-202,
+          0.0
+        ]
+      },
+      "dM_dT": [
+        -8.553619669650675e-05,
+        -8.553619669650675e-05,
+        -7.57195102843969e-07
+      ],
+      "dM_dmu_q": [
+        -0.09818353811086,
+        -0.09818353811086002,
+        -0.0008691536082308585
+      ],
+      "chi2_B": 15249.824802043997,
+      "chi4_B": 0.020280274513724612,
+      "thermo": {
+        "dP_dT": 0.00662281727495204,
+        "dP_dmu": 2.576222729956275,
+        "dEpsilon_dT": 0.020222365500755936,
+        "dEpsilon_dmu": 7.7545885251502735,
+        "dn_dT": 0.0020437461430412216,
+        "dn_dmu": 1.17493294752849
+      },
+      "bulk": {
+        "v_n_sq": 0.31804547592521687,
+        "dμB_dT_sigma": 1360.3978919232643,
+        "ds_dT": 1.328729169059559,
+        "ds_dμB": 0.0020437461430412216,
+        "dn_dT": 0.0020437461430412216,
+        "dn_dμB": 0.39164431584283,
+        "c_p": 0.006733561079810468,
+        "s": 0.00662281727495204,
+        "n_B": 0.858740909985425
+      },
+      "residual_norm": 4.2961511084738113e-16,
+      "jacobian_condition": 8.429065241542355,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 4.2961511084738113e-16,
+      "zero_fixed_state": {
+        "pressure": 22.452782050958703,
+        "density": {
+          "quark": [
+            1.2881036922018367,
+            1.2881036922018367,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.03170970424105868,
+        -0.03170970424105868,
+        -2.0717907724105293,
+        0.00017023815753621082,
+        0.00017033297833399667
+      ],
+      "masses": [
+        0.05898491106014957,
+        0.05898491106014957,
+        2.345382895331677
+      ],
+      "pressure_mu_0_to_4": [
+        22.45278221616008,
+        2.5762075148024595,
+        3.5247917186463242,
+        3.1633909786879464,
+        1.642705883960908
+      ],
+      "density": {
+        "quark": [
+          1.28810375740123,
+          1.28810375740123,
+          8.162682384244129e-134
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -8.301300293811909e-06,
+        -8.301300293811909e-06,
+        -7.348639559924368e-08
+      ],
+      "dM_dmu_q": [
+        -0.09818424396761155,
+        -0.09818424396761152,
+        -0.0008691657858944137
+      ],
+      "chi2_B": 1524979.398076063,
+      "chi4_B": 0.020280319555072958,
+      "thermo": {
+        "dP_dT": 0.000652340662492915,
+        "dP_dmu": 2.5762075148024595,
+        "dEpsilon_dT": 0.0019625150798062156,
+        "dEpsilon_dmu": 7.7545420825687925,
+        "dn_dT": 0.00019834446920152793,
+        "dn_dmu": 1.174930572882108
+      },
+      "bulk": {
+        "v_n_sq": 0.3327632659262957,
+        "dμB_dT_sigma": 13002.287248359522,
+        "ds_dT": 1.2894166726366376,
+        "ds_dμB": 0.00019834446920152793,
+        "dn_dT": 0.00019834446920152793,
+        "dn_dμB": 0.391643524294036,
+        "c_p": 0.0006534415067192041,
+        "s": 0.000652340662492915,
+        "n_B": 0.8587358382674865
+      },
+      "residual_norm": 2.8739188983386297e-13,
+      "jacobian_condition": 83.74930477007133,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.8739188983386297e-13,
+      "zero_fixed_state": {
+        "pressure": 22.452782050958728,
+        "density": {
+          "quark": [
+            1.28810368219818,
+            1.28810368219818,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": -0.3,
+      "state": [
+        -0.03170970636107863,
+        -0.03170970636107863,
+        -2.071790772417978,
+        1.7022351066727562e-05,
+        1.7023299642871773e-05
+      ],
+      "masses": [
+        0.05898491314025698,
+        0.05898491314025698,
+        2.345382895350091
+      ],
+      "pressure_mu_0_to_4": [
+        22.452782052609074,
+        2.5762073657013147,
+        3.5247916515472495,
+        3.163390973033211,
+        1.6427059217088105
+      ],
+      "density": {
+        "quark": [
+          1.2881036828506585,
+          1.2881036828506585,
+          0.0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -8.276136201883458e-07,
+        -8.27613620188346e-07,
+        -7.326363799596216e-09
+      ],
+      "dM_dmu_q": [
+        -0.09818425092253959,
+        -0.09818425092253957,
+        -0.0008691659055655238
+      ],
+      "chi2_B": 152497936.90460643,
+      "chi4_B": 0.02028032002109641,
+      "thermo": {
+        "dP_dT": 6.513501586388726e-05,
+        "dP_dmu": 2.5762073657013147,
+        "dEpsilon_dT": 0.00019565653315766558,
+        "dEpsilon_dmu": 7.754541636410277,
+        "dn_dT": 1.977432049993233e-05,
+        "dn_dmu": 1.17493055051575
+      },
+      "bulk": {
+        "v_n_sq": 0.3342786229385433,
+        "dμB_dT_sigma": 129433.45075526231,
+        "ds_dT": 1.285506826588771,
+        "ds_dμB": 1.977432049993233e-05,
+        "dn_dT": 1.977432049993233e-05,
+        "dn_dμB": 0.3916435168385833,
+        "c_p": 6.514601778210234e-05,
+        "s": 6.513501586388726e-05,
+        "n_B": 0.8587357885671049
+      },
+      "residual_norm": 2.959871930885427e-16,
+      "jacobian_condition": 836.9545224987301,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.959871930885427e-16,
+      "zero_fixed_state": {
+        "pressure": 22.45278205095873,
+        "density": {
+          "quark": [
+            1.2881036821001492,
+            1.2881036821001492,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.4153898767889728,
+              2.5762073657013174,
+              3.5155371764876553,
+              3.1970924105701632,
+              1.4532234471109604
+            ],
+            "thermal": [
+              6.513868286708633e-05,
+              1.2853620881103078
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.415389876788973,
+              2.5762073657013165,
+              3.515537176484575,
+              3.1970922689570553,
+              1.4597391527886108
+            ],
+            "thermal": [
+              6.513868203742091e-05,
+              1.2853621030283204
+            ]
+          },
+          "high": [
+            1.4153898767889725,
+            2.576207365701316,
+            3.5155371764876535,
+            3.1970924105701664,
+            1.45322344711096
+          ]
+        },
+        "residual": [
+          2.0816681711721685e-17,
+          2.0816681711721685e-17,
+          -2.9571614254542133e-16,
+          2.8218538678307492e-18,
+          2.8227786557555835e-18
+        ]
+      }
+    },
+    {
+      "T_MeV": 60,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08245311734671072,
+        -0.08245311734671078,
+        -2.0285400521986325,
+        0.10159469833307502,
+        0.12601124166575287
+      ],
+      "masses": [
+        0.10843972707994155,
+        0.1084397270799416,
+        2.3118483675733734
+      ],
+      "pressure_mu_0_to_4": [
+        22.155139955756535,
+        2.0129119639183997,
+        2.952038522431087,
+        4.263811394879474,
+        21.315569657077468
+      ],
+      "density": {
+        "quark": [
+          0.9895497324124864,
+          0.9895497324124864,
+          0.03381515173917083
+        ],
+        "antiquark": [
+          1.3207026801938368e-06,
+          1.3207026801938368e-06,
+          1.1242470350686516e-08
+        ]
+      },
+      "dM_dT": [
+        -0.05669256318992208,
+        -0.056692563189922066,
+        -0.4072165552977595
+      ],
+      "dM_dmu_q": [
+        -0.25445722834398776,
+        -0.25445722834398776,
+        -0.25196228706679746
+      ],
+      "chi2_B": 3.5477257226761787,
+      "chi4_B": 0.26315518095157375,
+      "thermo": {
+        "dP_dT": 0.7023835847966786,
+        "dP_dmu": 2.0129119639183997,
+        "dEpsilon_dT": 4.32601173001048,
+        "dEpsilon_dmu": 6.887309728004406,
+        "dn_dT": 0.4306387475736438,
+        "dn_dmu": 0.984012840810362
+      },
+      "bulk": {
+        "v_n_sq": -0.1360928363378269,
+        "dμB_dT_sigma": -50.74670777943727,
+        "ds_dT": 4.87988354179188,
+        "ds_dμB": 0.4306387475736438,
+        "dn_dT": 0.4306387475736438,
+        "dn_dμB": 0.3280042802701207,
+        "c_p": 1.3467240218636782,
+        "s": 0.7023835847966786,
+        "n_B": 0.6709706546394666
+      },
+      "residual_norm": 5.158849042397051e-12,
+      "jacobian_condition": 20.85218316599042,
+      "max_scaled_tolerance_spread": 7.61298881022131e-13,
+      "max_residual_across_tolerances": 5.158855981290955e-12,
+      "zero_fixed_state": {
+        "pressure": 22.076250879608892,
+        "density": {
+          "quark": [
+            0.9427834808864732,
+            0.9427834808864732,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.1454670336837547,
+              2.012911963916314,
+              2.7953877139158307,
+              3.3042769613614613,
+              5.558760120277058
+            ],
+            "thermal": [
+              0.7795138519133417,
+              3.020593886634649
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.1454670336837538,
+              2.0129119639163147,
+              2.7953877139158303,
+              3.3042769613614635,
+              5.55876012027702
+            ],
+            "thermal": [
+              0.7795138519133413,
+              3.020593886634644
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          3.717859353713493e-14,
+          3.723410468836619e-14,
+          5.158849042397051e-12,
+          -5.667688540711424e-14,
+          3.1661340216260214e-12
+        ]
+      }
+    },
+    {
+      "T_MeV": 20,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08796895021145029,
+        -0.08796895021145017,
+        -2.071602520862291,
+        0.02590280393332303,
+        0.02921033586747369
+      ],
+      "masses": [
+        0.11418286275004563,
+        0.11418286275004556,
+        2.345862823641323
+      ],
+      "pressure_mu_0_to_4": [
+        22.08249273397387,
+        1.891189240458813,
+        2.624393945928639,
+        2.2825117322982145,
+        6.213596346728959
+      ],
+      "density": {
+        "quark": [
+          0.9453937502026035,
+          0.9453937502026035,
+          0.00040174005360837944
+        ],
+        "antiquark": [
+          4.696161672847761e-15,
+          4.6961616728477664e-15,
+          4.0693670291702726e-23
+        ]
+      },
+      "dM_dT": [
+        -0.007941986296462412,
+        -0.007941986296462424,
+        -0.020513017909359672
+      ],
+      "dM_dmu_q": [
+        -0.27025922496357047,
+        -0.2702592249635704,
+        -0.014096990399451286
+      ],
+      "chi2_B": 28.385696371825137,
+      "chi4_B": 0.0767110660089956,
+      "thermo": {
+        "dP_dT": 0.1230918943770899,
+        "dP_dmu": 1.8911892404588135,
+        "dEpsilon_dT": 0.4967447873514135,
+        "dEpsilon_dmu": 5.789316981051796,
+        "dn_dT": 0.0514704458305452,
+        "dn_dmu": 0.8747979819762142
+      },
+      "bulk": {
+        "v_n_sq": 0.07571201378947881,
+        "dμB_dT_sigma": 281.544303922362,
+        "ds_dT": 1.5494100734313008,
+        "ds_dμB": 0.0514704458305452,
+        "dn_dT": 0.0514704458305452,
+        "dn_dμB": 0.2915993273254047,
+        "c_p": 0.15602121329427635,
+        "s": 0.1230918943770899,
+        "n_B": 0.6303964134862712
+      },
+      "residual_norm": 3.2681496398012655e-13,
+      "jacobian_condition": 5.611272246145087,
+      "max_scaled_tolerance_spread": 3.7050338248551604e-13,
+      "max_residual_across_tolerances": 3.2681496398012655e-13,
+      "zero_fixed_state": {
+        "pressure": 22.076767664306892,
+        "density": {
+          "quark": [
+            0.9424090222490449,
+            0.9424090222490449,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 5,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08828760204187558,
+        -0.08828760204187554,
+        -2.0721666148475903,
+        0.006271567319272502,
+        0.006444787596429037
+      ],
+      "masses": [
+        0.1145001535213177,
+        0.11450015352131768,
+        2.346312485381882
+      ],
+      "pressure_mu_0_to_4": [
+        22.077082874856366,
+        1.8850739677876058,
+        2.6136896084149117,
+        2.136666423408342,
+        2.8576041539626855
+      ],
+      "density": {
+        "quark": [
+          0.9425369356317908,
+          0.942536935631791,
+          9.652400944591751e-08
+        ],
+        "antiquark": [
+          1.0458105338985697e-46,
+          1.0458105338985697e-46,
+          3.811683257819429e-83
+        ]
+      },
+      "dM_dT": [
+        -0.0012916186078985121,
+        -0.001291618607898512,
+        -6.77844030695297e-05
+      ],
+      "dM_dmu_q": [
+        -0.27138055828739815,
+        -0.2713805582873981,
+        -0.006690693602569459
+      ],
+      "chi2_B": 452.31867570648654,
+      "chi4_B": 0.03527906362916906,
+      "thermo": {
+        "dP_dT": 0.02537994005867377,
+        "dP_dmu": 1.8850739677876058,
+        "dEpsilon_dT": 0.08120843802294267,
+        "dEpsilon_dmu": 5.750742327080964,
+        "dn_dT": 0.008224438972594209,
+        "dn_dmu": 0.8712298694716373
+      },
+      "bulk": {
+        "v_n_sq": 0.28173959766455786,
+        "dμB_dT_sigma": 303.0565509346818,
+        "ds_dT": 1.0626903826791128,
+        "ds_dμB": 0.008224438972594209,
+        "dn_dT": 0.008224438972594209,
+        "dn_dμB": 0.29040995649054574,
+        "c_p": 0.02691872349571714,
+        "s": 0.02537994005867377,
+        "n_B": 0.6283579892625353
+      },
+      "residual_norm": 2.157090912141557e-12,
+      "jacobian_condition": 2.2560172715683176,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 2.157090912141557e-12,
+      "zero_fixed_state": {
+        "pressure": 22.076767776148962,
+        "density": {
+          "quark": [
+            0.9423877728569668,
+            0.9423877728569668,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.0327727081630447,
+              1.8850739677875927,
+              2.577268658727583,
+              2.346178137851538,
+              1.0724415433974497
+            ],
+            "thermal": [
+              0.025869669912646578,
+              1.0213166032329717
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.0327727081630445,
+              1.8850739677875903,
+              2.577268658727566,
+              2.34617813785148,
+              1.072441543487344
+            ],
+            "thermal": [
+              0.02586966991264506,
+              1.0213166032329961
+            ]
+          },
+          "high": null
+        },
+        "residual": [
+          -1.6653345369377348e-16,
+          -1.6653345369377348e-16,
+          1.1839487723541708e-16,
+          4.571061411329236e-13,
+          2.1570841900880877e-12
+        ]
+      }
+    },
+    {
+      "T_MeV": 1,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08830303508204282,
+        -0.08830303508204278,
+        -2.0721669050877334,
+        0.0012489716362058378,
+        0.0012559174296504659
+      ],
+      "masses": [
+        0.11451529878365072,
+        0.11451529878365069,
+        2.3463129683411745
+      ],
+      "pressure_mu_0_to_4": [
+        22.076779973136283,
+        1.8847847084509446,
+        2.6135476374546984,
+        2.1363573842966748,
+        2.852083037338944
+      ],
+      "density": {
+        "quark": [
+          0.9423923542254717,
+          0.9423923542254717,
+          1.5713959615586752e-19
+        ],
+        "antiquark": [
+          2.8449895732416637e-207,
+          2.8449895732416637e-207,
+          0.0
+        ]
+      },
+      "dM_dT": [
+        -0.0002348865892166869,
+        -0.0002348865892166869,
+        -5.788098295870386e-06
+      ],
+      "dM_dmu_q": [
+        -0.2714515847396666,
+        -0.27145158473966663,
+        -0.006689136489139077
+      ],
+      "chi2_B": 11307.352664058793,
+      "chi4_B": 0.03521090169554246,
+      "thermo": {
+        "dP_dT": 0.00483339144973989,
+        "dP_dmu": 1.8847847084509446,
+        "dEpsilon_dT": 0.014760948058960555,
+        "dEpsilon_dmu": 5.7498275333786655,
+        "dn_dT": 0.0014951452534940717,
+        "dn_dmu": 0.8711825458182328
+      },
+      "bulk": {
+        "v_n_sq": 0.32673064621119435,
+        "dμB_dT_sigma": 1306.614622522093,
+        "ds_dT": 0.9655189165514264,
+        "ds_dμB": 0.0014951452534940717,
+        "dn_dT": 0.0014951452534940717,
+        "dn_dμB": 0.29039418193941097,
+        "c_p": 0.004892931093981352,
+        "s": 0.00483339144973989,
+        "n_B": 0.6282615694836482
+      },
+      "residual_norm": 4.0917789989602937e-16,
+      "jacobian_condition": 8.421559049019242,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 4.0917789989602937e-16,
+      "zero_fixed_state": {
+        "pressure": 22.076767776210062,
+        "density": {
+          "quark": [
+            0.9423867570877805,
+            0.9423867570877805,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.1,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.0883036307722137,
+        -0.08830363077221352,
+        -2.0721669109112826,
+        0.00012479516440685337,
+        0.00012486475856990893
+      ],
+      "masses": [
+        0.11451588332176173,
+        0.11451588332176162,
+        2.346312982745469
+      ],
+      "pressure_mu_0_to_4": [
+        22.076767897277627,
+        1.884773546063849,
+        2.613542955516129,
+        2.136352594869998,
+        2.852132632870018
+      ],
+      "density": {
+        "quark": [
+          0.9423867730319245,
+          0.9423867730319245,
+          7.010399044262555e-135
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -2.2976114011332254e-05,
+        -2.2976114011332227e-05,
+        -5.661834637590794e-07
+      ],
+      "dM_dmu_q": [
+        -0.27145436734030237,
+        -0.27145436734030226,
+        -0.006689250143756152
+      ],
+      "chi2_B": 1130733.2407940326,
+      "chi4_B": 0.03521151398604967,
+      "thermo": {
+        "dP_dT": 0.00047799482381717114,
+        "dP_dmu": 1.884773546063849,
+        "dEpsilon_dT": 0.0014438398461886807,
+        "dEpsilon_dmu": 5.749794724482921,
+        "dn_dT": 0.00014625050870435233,
+        "dn_dmu": 0.871180985172043
+      },
+      "bulk": {
+        "v_n_sq": 0.33763241532227967,
+        "dμB_dT_sigma": 12644.252217995645,
+        "ds_dT": 0.9443803606358913,
+        "ds_dμB": 0.00014625050870435233,
+        "dn_dT": 0.00014625050870435233,
+        "dn_dμB": 0.2903936617240143,
+        "c_p": 0.000478586432350728,
+        "s": 0.00047799482381717114,
+        "n_B": 0.6282578486879496
+      },
+      "residual_norm": 8.325109644203194e-14,
+      "jacobian_condition": 83.74886227091343,
+      "max_scaled_tolerance_spread": 9.907526118315988e-13,
+      "max_residual_across_tolerances": 8.325109644203194e-14,
+      "zero_fixed_state": {
+        "pressure": 22.076767776210147,
+        "density": {
+          "quark": [
+            0.9423867178810329,
+            0.9423867178810329,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": null
+    },
+    {
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08830363664104196,
+        -0.08830363664104186,
+        -2.072166910968656,
+        1.2478532952313413e-05,
+        1.2479229031678981e-05
+      ],
+      "masses": [
+        0.11451588908071825,
+        0.11451588908071818,
+        2.346312982887382
+      ],
+      "pressure_mu_0_to_4": [
+        22.07676777741992,
+        1.8847734360909036,
+        2.6135429108763906,
+        2.1363525494848434,
+        2.852133124664916
+      ],
+      "density": {
+        "quark": [
+          0.9423867180454519,
+          0.9423867180454519,
+          0.0
+        ],
+        "antiquark": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dM_dT": [
+        -2.292500959152324e-06,
+        -2.292500959152323e-06,
+        -5.6492417267503974e-08
+      ],
+      "dM_dmu_q": [
+        -0.27145439483284795,
+        -0.27145439483284795,
+        -0.006689251265423829
+      ],
+      "chi2_B": 113073322.14809248,
+      "chi4_B": 0.03521152005759144,
+      "thermo": {
+        "dP_dT": 4.77462517050047e-05,
+        "dP_dmu": 1.8847734360909036,
+        "dEpsilon_dT": 0.00014406279454960778,
+        "dEpsilon_dmu": 5.749794406146588,
+        "dn_dT": 1.4592519765580883e-05,
+        "dn_dmu": 0.8711809702921302
+      },
+      "bulk": {
+        "v_n_sq": 0.3387444517548484,
+        "dμB_dT_sigma": 126027.43414251658,
+        "ds_dT": 0.9422791284724111,
+        "ds_dμB": 1.4592519765580883e-05,
+        "dn_dT": 1.4592519765580883e-05,
+        "dn_dμB": 0.2903936567640434,
+        "c_p": 4.77521640405728e-05,
+        "s": 4.77462517050047e-05,
+        "n_B": 0.6282578120303012
+      },
+      "residual_norm": 3.664603343001005e-17,
+      "jacobian_condition": 837.0244521469918,
+      "max_scaled_tolerance_spread": 0.0,
+      "max_residual_across_tolerances": 3.664603343001005e-17,
+      "zero_fixed_state": {
+        "pressure": 22.076767776210144,
+        "density": {
+          "quark": [
+            0.9423867174947614,
+            0.9423867174947614,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "response_interpretation": "finite_density_branch",
+      "oracle": {
+        "fixed": {
+          "adaptive": {
+            "chemical": [
+              1.032442681019691,
+              1.884773436090905,
+              2.5771282741926207,
+              2.346026453977719,
+              1.0663717306544709
+            ],
+            "thermal": [
+              4.7748222320522714e-05,
+              0.9422013470969143
+            ]
+          },
+          "oracle": {
+            "chemical": [
+              1.0324426810196903,
+              1.8847734360909039,
+              2.5771282741928547,
+              2.346026406613338,
+              1.066578359373049
+            ],
+            "thermal": [
+              4.77482221870007e-05,
+              0.9422013121911772
+            ]
+          },
+          "high": [
+            1.0324426810196907,
+            1.8847734360909039,
+            2.5771282741926216,
+            2.3460264539777196,
+            1.0663717306544704
+          ]
+        },
+        "residual": [
+          -4.163336342344337e-17,
+          -4.163336342344337e-17,
+          3.5778671692021646e-17,
+          8.255427949401727e-19,
+          8.130457502457215e-19
+        ]
+      }
+    }
+  ],
+  "audit": [
+    {
+      "check": "tensor",
+      "T_MeV": 60,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05345690949071602,
+        -0.05345690949071602,
+        -2.0153535158496054,
+        0.11769992422840936,
+        0.14337691450938525
+      ],
+      "masses": [
+        0.08004096156921534,
+        0.08004096156921534,
+        2.301091648075988
+      ],
+      "adaptive": {
+        "seconds": 0.0004868,
+        "value": {
+          "chemical": [
+            1.3208357594106692,
+            2.3123047393953984,
+            3.212443742493206,
+            3.8181167736497192,
+            6.186821894974319
+          ],
+          "thermal": [
+            0.9664484603521916,
+            3.7626569731209627
+          ]
+        }
+      },
+      "fixed": [
+        {
+          "nodes": 24,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0003817,
+            "value": {
+              "chemical": [
+                1.3172669375743187,
+                2.2981031452759555,
+                3.654135836794368,
+                7.293025121360202,
+                -46.675397352027844
+              ],
+              "thermal": [
+                1.0050057971747375,
+                3.3939518872445333
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 96,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0015193,
+            "value": {
+              "chemical": [
+                1.3208357607601438,
+                2.3123047783325092,
+                3.212441156459476,
+                3.818014838851123,
+                6.1916238054596295
+              ],
+              "thermal": [
+                0.9664483898726361,
+                3.762660475366445
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 384,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.006043,
+            "value": {
+              "chemical": [
+                1.3208357594044768,
+                2.3123047393750724,
+                3.2124437424263426,
+                3.8181167734297707,
+                6.186821894250949
+              ],
+              "thermal": [
+                0.9664484597854641,
+                3.762656924761682
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "check": "tensor",
+      "T_MeV": 5,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.057210396432093254,
+        -0.057210396432093254,
+        -2.0719161970747666,
+        0.00715677478866819,
+        0.007353506931326983
+      ],
+      "masses": [
+        0.08400591912059224,
+        0.08400591912059224,
+        2.3456932880740764
+      ],
+      "adaptive": {
+        "seconds": 0.0001758,
+        "value": {
+          "chemical": [
+            1.1819594599438181,
+            2.1533624468130186,
+            2.940382696918739,
+            2.6750821202558583,
+            1.2239411927084274
+          ],
+          "thermal": [
+            0.02983393023745085,
+            1.1778594912505267
+          ]
+        }
+      },
+      "fixed": [
+        {
+          "nodes": 24,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0003129,
+            "value": {
+              "chemical": [
+                1.1555491060057037,
+                1.6148846944994468,
+                0.0602911417829033,
+                4.926908301422167,
+                487.035305111806
+              ],
+              "thermal": [
+                0.003575418681116105,
+                0.5206530001755709
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 96,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0012241,
+            "value": {
+              "chemical": [
+                1.182104285541066,
+                2.248836672194605,
+                1.1618443099694291,
+                -125.74899292306458,
+                13080.992233117384
+              ],
+              "thermal": [
+                0.017751933449723367,
+                1.7747138192839884
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 384,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0048608,
+            "value": {
+              "chemical": [
+                1.1819621369111286,
+                2.151307085972677,
+                2.837031836407254,
+                72.53894090576493,
+                4248.079985881428
+              ],
+              "thermal": [
+                0.029383342419947667,
+                1.2501231963087776
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "check": "tensor",
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "state": [
+        -0.05722034221711734,
+        -0.05722034221711734,
+        -2.071916445909605,
+        1.423664262462094e-05,
+        1.4237436270434015e-05
+      ],
+      "masses": [
+        0.0840156790029306,
+        0.0840156790029306,
+        2.345693590312066
+      ],
+      "adaptive": {
+        "seconds": 0.0001692,
+        "value": {
+          "chemical": [
+            1.1815803139615828,
+            2.153017400904322,
+            2.940220823149737,
+            2.6748799603522206,
+            1.2158532315882895
+          ],
+          "thermal": [
+            5.4476753962780424e-05,
+            1.0749734435060356
+          ]
+        }
+      },
+      "fixed": [
+        {
+          "nodes": 24,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0001607,
+            "value": {
+              "chemical": [
+                1.1555289143658656,
+                1.6139258068862028,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "thermal": [
+                1.4551915228366852e-11,
+                8.344650268554688e-07
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 96,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0006397,
+            "value": {
+              "chemical": [
+                1.1819931902322973,
+                2.2595709549319842,
+                1.0377901992373058e-266,
+                -2.0478402664489988e-262,
+                4.0409417625758167e-258
+              ],
+              "thermal": [
+                4.729372449219227e-11,
+                -1.0728836059570312e-06
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 384,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0051969,
+            "value": {
+              "chemical": [
+                1.181647494964195,
+                2.132509610273956,
+                1.1376169765311488e-87,
+                2.2448254512796204e-83,
+                4.4296467182465364e-79
+              ],
+              "thermal": [
+                2.546585164964199e-11,
+                4.76837158203125e-07
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "check": "tensor",
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0.3,
+      "state": [
+        -0.08830363664104196,
+        -0.08830363664104186,
+        -2.072166910968656,
+        1.2478532952313413e-05,
+        1.2479229031678981e-05
+      ],
+      "masses": [
+        0.11451588908071825,
+        0.11451588908071818,
+        2.346312982887382
+      ],
+      "adaptive": {
+        "seconds": 0.0002214,
+        "value": {
+          "chemical": [
+            1.032442681019691,
+            1.884773436090905,
+            2.5771282741926207,
+            2.346026453977719,
+            1.0663717306544709
+          ],
+          "thermal": [
+            4.7748222320522714e-05,
+            0.9422013470969143
+          ]
+        }
+      },
+      "fixed": [
+        {
+          "nodes": 24,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0002318,
+            "value": {
+              "chemical": [
+                1.0375507256747998,
+                1.6139258068862028,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "thermal": [
+                0,
+                1.1920928955078125e-07
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 96,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.0007485,
+            "value": {
+              "chemical": [
+                1.0321329446108747,
+                1.9210899902097631,
+                1.2045217384968633e-52,
+                -2.376846610923705e-48,
+                4.69016011193742e-44
+              ],
+              "thermal": [
+                -2.1827872842550278e-11,
+                -9.5367431640625e-07
+              ]
+            }
+          }
+        },
+        {
+          "nodes": 384,
+          "angular_nodes": 16,
+          "result": {
+            "seconds": 0.002992,
+            "value": {
+              "chemical": [
+                1.032398840964721,
+                1.8731446168695378,
+                0.00011262374655084544,
+                -6.276380793851468,
+                363738.69351563684
+              ],
+              "thermal": [
+                1.2292730389162898e-08,
+                0.0028390884399414062
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "check": "total_derivatives",
+      "T_MeV": 60,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "original": {
+        "state": [
+          -0.05345690949071602,
+          -0.05345690949071602,
+          -2.0153535158496054,
+          0.11769992422840936,
+          0.14337691450938525
+        ],
+        "masses": [
+          0.08004096156921534,
+          0.08004096156921534,
+          2.301091648075988
+        ],
+        "pressure_mu_0_to_4": [
+          22.31665321019902,
+          2.3123047393953984,
+          3.403457998484061,
+          5.519624837599938,
+          31.063143541267692
+        ],
+        "density": {
+          "quark": [
+            1.1341666589997834,
+            1.1341666589997834,
+            0.04397490972756495
+          ],
+          "antiquark": [
+            1.736655882067865e-06,
+            1.736655882067865e-06,
+            1.5019969017062766e-08
+          ]
+        },
+        "dM_dT": [
+          -0.03780168978581454,
+          -0.03780168978581454,
+          -0.5425579716367133
+        ],
+        "dM_dmu_q": [
+          -0.15836819523232595,
+          -0.15836819523232595,
+          -0.3265838843260979
+        ],
+        "chi2_B": 4.090236423244965,
+        "chi4_B": 0.38349559927490906,
+        "thermo": {
+          "dP_dT": 0.8673654641767125,
+          "dP_dmu": 2.3123047393953975,
+          "dEpsilon_dT": 5.503804548736238,
+          "dEpsilon_dmu": 7.98685414943033,
+          "dn_dT": 0.5473045806529856,
+          "dn_dmu": 1.1344859994946868
+        },
+        "bulk": {
+          "v_n_sq": -0.150325136575013,
+          "dμB_dT_sigma": -46.03851904864308,
+          "ds_dT": 6.221043861291642,
+          "ds_dμB": 0.5473045806529856,
+          "dn_dT": 0.5473045806529856,
+          "dn_dμB": 0.37816199983156223,
+          "c_p": 1.7043226257188426,
+          "s": 0.8673654641767125,
+          "n_B": 0.7707682464651325
+        },
+        "residual_norm": 2.636779683484747e-16,
+        "jacobian_condition": 16.645499876156226
+      },
+      "strict": {
+        "state": [
+          -0.05345690949071602,
+          -0.05345690949071602,
+          -2.0153535158496054,
+          0.11769992422840936,
+          0.14337691450938525
+        ],
+        "masses": [
+          0.08004096156921534,
+          0.08004096156921534,
+          2.301091648075988
+        ],
+        "pressure_mu_0_to_4": [
+          22.31665321019902,
+          2.3123047393953984,
+          3.403457998484061,
+          5.519624837599938,
+          31.063143541267692
+        ],
+        "density": {
+          "quark": [
+            1.1341666589997834,
+            1.1341666589997834,
+            0.04397490972756495
+          ],
+          "antiquark": [
+            1.736655882067865e-06,
+            1.736655882067865e-06,
+            1.5019969017062766e-08
+          ]
+        },
+        "dM_dT": [
+          -0.03780168978581454,
+          -0.03780168978581454,
+          -0.5425579716367133
+        ],
+        "dM_dmu_q": [
+          -0.15836819523232595,
+          -0.15836819523232595,
+          -0.3265838843260979
+        ],
+        "chi2_B": 4.090236423244965,
+        "chi4_B": 0.38349559927490906,
+        "thermo": {
+          "dP_dT": 0.8673654641767125,
+          "dP_dmu": 2.3123047393953975,
+          "dEpsilon_dT": 5.503804548736238,
+          "dEpsilon_dmu": 7.98685414943033,
+          "dn_dT": 0.5473045806529856,
+          "dn_dmu": 1.1344859994946868
+        },
+        "bulk": {
+          "v_n_sq": -0.150325136575013,
+          "dμB_dT_sigma": -46.03851904864308,
+          "ds_dT": 6.221043861291642,
+          "ds_dμB": 0.5473045806529856,
+          "dn_dT": 0.5473045806529856,
+          "dn_dμB": 0.37816199983156223,
+          "c_p": 1.7043226257188426,
+          "s": 0.8673654641767125,
+          "n_B": 0.7707682464651325
+        },
+        "residual_norm": 2.636779683484747e-16,
+        "jacobian_condition": 16.645499876156226
+      },
+      "observable_order": [
+        "pressure",
+        "net_quark_density",
+        "entropy",
+        "M_u",
+        "M_d",
+        "M_s"
+      ],
+      "fd": [
+        {
+          "direction": "mu",
+          "h": 0.001,
+          "first_derivatives": [
+            2.312304739382931,
+            3.403457998281937,
+            1.6419137418596148,
+            -0.15836819522628437,
+            -0.15836819522628437,
+            -0.3265838841279474
+          ],
+          "fourth_pressure": 31.064659511415012,
+          "fourth_pressure_order4": 31.063141503473442,
+          "max_state_drift": 0.0012536564314098442,
+          "max_residual": 8.326672684688674e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.00030000000000000003,
+          "first_derivatives": [
+            2.312304739410859,
+            3.4034579984862674,
+            1.6419137419663534,
+            -0.15836819523236476,
+            -0.15836819523236476,
+            -0.3265838843260729
+          ],
+          "fourth_pressure": 31.063217841586223,
+          "fourth_pressure_order4": 31.06305542006966,
+          "max_state_drift": 0.00037269188122301955,
+          "max_residual": 5.662137425588298e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.0001,
+          "first_derivatives": [
+            2.3123047394661236,
+            3.4034579984950257,
+            1.6419137419417436,
+            -0.1583681952337564,
+            -0.1583681952337564,
+            -0.32658388431731444
+          ],
+          "fourth_pressure": 31.062041827567555,
+          "fourth_pressure_order4": 31.061597738357705,
+          "max_state_drift": 0.00012390939331874407,
+          "max_residual": 9.679756995950584e-16
+        },
+        {
+          "direction": "T",
+          "h": 0.0030406381285885864,
+          "first_derivatives": [
+            0.8673654578704829,
+            1.6419137329479716,
+            6.221043831023662,
+            -0.037801690061483345,
+            -0.037801690061483345,
+            -0.5425579652211623
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 0.004453371243970161,
+          "max_residual": 8.326672684688674e-16
+        },
+        {
+          "direction": "T",
+          "h": 0.0009121914385765759,
+          "first_derivatives": [
+            0.8673654641250171,
+            1.6419137418861176,
+            6.221043861048678,
+            -0.03780168978817746,
+            -0.03780168978817746,
+            -0.5425579715853769
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 0.0013274757677102511,
+          "max_residual": 8.396061623727746e-16
+        },
+        {
+          "direction": "T",
+          "h": 0.00030406381285885865,
+          "first_derivatives": [
+            0.8673654641704552,
+            1.6419137419562222,
+            6.221043861290442,
+            -0.03780168978582441,
+            -0.03780168978582441,
+            -0.5425579716376713
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 0.00044168366701355377,
+          "max_residual": 1.1900203045200897e-15
+        }
+      ]
+    },
+    {
+      "check": "total_derivatives",
+      "T_MeV": 5,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "original": {
+        "state": [
+          -0.057210396432093254,
+          -0.057210396432093254,
+          -2.0719161970747666,
+          0.00715677478866819,
+          0.007353506931326983
+        ],
+        "masses": [
+          0.08400591912059224,
+          0.08400591912059224,
+          2.3456932880740764
+        ],
+        "pressure_mu_0_to_4": [
+          22.222165006161667,
+          2.1533624468130643,
+          2.9591292709257284,
+          2.588906993265023,
+          1.8245609784397618
+        ],
+        "density": {
+          "quark": [
+            1.076681159082418,
+            1.076681159082418,
+            1.286481824291328e-07
+          ],
+          "antiquark": [
+            3.2040023530918456e-46,
+            3.2040023530918456e-46,
+            5.079459857314994e-83
+          ]
+        },
+        "dM_dT": [
+          -0.0008049834633122954,
+          -0.0008049834633122954,
+          -6.06614564082016e-05
+        ],
+        "dM_dmu_q": [
+          -0.16673205112421985,
+          -0.16673205112421985,
+          -0.0026685495291983254
+        ],
+        "chi2_B": 512.0996115071019,
+        "chi4_B": 0.0225254441782686,
+        "thermo": {
+          "dP_dT": 0.029197047506881593,
+          "dP_dmu": 2.1533624468130643,
+          "dEpsilon_dT": 0.09383705211988175,
+          "dEpsilon_dmu": 6.510805727082827,
+          "dn_dT": 0.009489206090563584,
+          "dn_dmu": 0.9863764236419095
+        },
+        "bulk": {
+          "v_n_sq": 0.2718190651647605,
+          "dμB_dT_sigma": 316.93594732851983,
+          "ds_dT": 1.2316477240248953,
+          "ds_dμB": 0.009489206090563584,
+          "dn_dT": 0.009489206090563584,
+          "dn_dμB": 0.3287921412139698,
+          "c_p": 0.031198511526457685,
+          "s": 0.029197047506881593,
+          "n_B": 0.7177874822710214
+        },
+        "residual_norm": 5.8066277480728345e-12,
+        "jacobian_condition": 1.7301143645443902
+      },
+      "strict": {
+        "state": [
+          -0.05721039643209245,
+          -0.05721039643209245,
+          -2.0719161970747653,
+          0.007156774807065849,
+          0.007353506935484346
+        ],
+        "masses": [
+          0.08400591912059144,
+          0.08400591912059144,
+          2.3456932880740755
+        ],
+        "pressure_mu_0_to_4": [
+          22.222165006161664,
+          2.153362446813063,
+          2.959129270925731,
+          2.5889069932650233,
+          1.8245609784397505
+        ],
+        "density": {
+          "quark": [
+            1.076681159082441,
+            1.076681159082441,
+            1.286481827591635e-07
+          ],
+          "antiquark": [
+            3.2040023549033066e-46,
+            3.2040023549033066e-46,
+            5.079459860186945e-83
+          ]
+        },
+        "dM_dT": [
+          -0.0008049834633669634,
+          -0.0008049834633669634,
+          -6.066145650202496e-05
+        ],
+        "dM_dmu_q": [
+          -0.16673205112421582,
+          -0.16673205112421582,
+          -0.0026685495292130827
+        ],
+        "chi2_B": 512.0996115071022,
+        "chi4_B": 0.02252544417826855,
+        "thermo": {
+          "dP_dT": 0.029197047506881506,
+          "dP_dmu": 2.153362446813063,
+          "dEpsilon_dT": 0.09383705211987928,
+          "dEpsilon_dmu": 6.5108057270828334,
+          "dn_dT": 0.009489206090563215,
+          "dn_dmu": 0.9863764236419104
+        },
+        "bulk": {
+          "v_n_sq": 0.2718190651647848,
+          "dμB_dT_sigma": 316.93594732849107,
+          "ds_dT": 1.2316477240248942,
+          "ds_dμB": 0.009489206090563215,
+          "dn_dT": 0.009489206090563215,
+          "dn_dμB": 0.3287921412139701,
+          "c_p": 0.031198511526457657,
+          "s": 0.029197047506881506,
+          "n_B": 0.717787482271021
+        },
+        "residual_norm": 6.514970854465396e-16,
+        "jacobian_condition": 1.7301143646202943
+      },
+      "observable_order": [
+        "pressure",
+        "net_quark_density",
+        "entropy",
+        "M_u",
+        "M_d",
+        "M_s"
+      ],
+      "fd": [
+        {
+          "direction": "mu",
+          "h": 0.001,
+          "first_derivatives": [
+            2.1533624468125603,
+            2.9591292709236403,
+            0.028467618269148162,
+            -0.16673205111783265,
+            -0.16673205111783265,
+            -0.00266854952772159
+          ],
+          "fourth_pressure": 1.8245780442072144,
+          "fourth_pressure_order4": 1.8245595034827031,
+          "max_state_drift": 0.0005124924506317782,
+          "max_residual": 8.572786577842884e-16
+        },
+        {
+          "direction": "mu",
+          "h": 0.00030000000000000003,
+          "first_derivatives": [
+            2.153362446794599,
+            2.959129270931646,
+            0.028467618271716805,
+            -0.1667320511243575,
+            -0.1667320511243575,
+            -0.0026685495312249604
+          ],
+          "fourth_pressure": 1.8244500560521604,
+          "fourth_pressure_order4": 1.824355481498211,
+          "max_state_drift": 0.00015317625383797634,
+          "max_residual": 1.2237389920843889e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.0001,
+          "first_derivatives": [
+            2.1533624468321,
+            2.9591292709222707,
+            0.028467618269926186,
+            -0.16673205112479697,
+            -0.16673205112479697,
+            -0.002668549522466534
+          ],
+          "fourth_pressure": 1.8254286970886824,
+          "fourth_pressure_order4": 1.825983808600995,
+          "max_state_drift": 5.100458212299597e-05,
+          "max_residual": 6.298130419968295e-16
+        },
+        {
+          "direction": "T",
+          "h": 0.00025338651071571557,
+          "first_derivatives": [
+            0.029197047489910408,
+            0.028467618270318032,
+            1.2316477240327095,
+            -0.0008049834635936264,
+            -0.0008049834635936264,
+            -6.066145309209754e-05
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 0.00015209919120731056,
+          "max_residual": 1.3771535994910877e-15
+        },
+        {
+          "direction": "T",
+          "h": 7.601595321471466e-05,
+          "first_derivatives": [
+            0.029197047458752793,
+            0.028467618267883847,
+            1.2316477240212997,
+            -0.000804983463195028,
+            -0.000804983463195028,
+            -6.066145002501984e-05
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 4.560707759983847e-05,
+          "max_residual": 8.47954519100913e-16
+        },
+        {
+          "direction": "T",
+          "h": 2.5338651071571554e-05,
+          "first_derivatives": [
+            0.029197047665171994,
+            0.028467618283462656,
+            1.2316477240296142,
+            -0.0008049834674092172,
+            -0.0008049834674092172,
+            -6.0661477774770485e-05
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 1.520020453969241e-05,
+          "max_residual": 4.859394137080031e-16
+        }
+      ]
+    },
+    {
+      "check": "total_derivatives",
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 2.2,
+      "xi": 0,
+      "original": {
+        "state": [
+          -0.05722034221711734,
+          -0.05722034221711734,
+          -2.071916445909605,
+          1.423664262462094e-05,
+          1.4237436270434015e-05
+        ],
+        "masses": [
+          0.0840156790029306,
+          0.0840156790029306,
+          2.345693590312066
+        ],
+        "pressure_mu_0_to_4": [
+          22.221803485100544,
+          2.15301740090432,
+          2.95894643303504,
+          2.5886103670415945,
+          1.8160054020308372
+        ],
+        "density": {
+          "quark": [
+            1.0765087004521599,
+            1.0765087004521599,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        },
+        "dM_dT": [
+          -1.4067006456431442e-06,
+          -1.4067006456431442e-06,
+          -2.2468035470539992e-08
+        ],
+        "dM_dmu_q": [
+          -0.16677016622727642,
+          -0.16677016622727642,
+          -0.002663678318359745
+        ],
+        "chi2_B": 128016992.50819926,
+        "chi4_B": 0.022419819778158514,
+        "thermo": {
+          "dP_dT": 5.447418895341418e-05,
+          "dP_dmu": 2.15301740090432,
+          "dEpsilon_dT": 0.0001638727151693548,
+          "dEpsilon_dmu": 6.509682155196922,
+          "dn_dT": 1.6574368255565613e-05,
+          "dn_dmu": 0.9863154776783466
+        },
+        "bulk": {
+          "v_n_sq": 0.3357846312514937,
+          "dμB_dT_sigma": 128279.53881361164,
+          "ds_dT": 1.07507468587677,
+          "ds_dμB": 1.6574368255565613e-05,
+          "dn_dT": 1.6574368255565613e-05,
+          "dn_dμB": 0.3287718258927822,
+          "c_p": 5.448188461886663e-05,
+          "s": 5.447418895341418e-05,
+          "n_B": 0.7176724669681067
+        },
+        "residual_norm": 3.9367380882948666e-16,
+        "jacobian_condition": 836.9723654830722
+      },
+      "strict": {
+        "state": [
+          -0.05722034221711734,
+          -0.05722034221711734,
+          -2.071916445909605,
+          1.423664262462094e-05,
+          1.4237436270434015e-05
+        ],
+        "masses": [
+          0.0840156790029306,
+          0.0840156790029306,
+          2.345693590312066
+        ],
+        "pressure_mu_0_to_4": [
+          22.221803485100544,
+          2.15301740090432,
+          2.95894643303504,
+          2.5886103670415945,
+          1.8160054020308372
+        ],
+        "density": {
+          "quark": [
+            1.0765087004521599,
+            1.0765087004521599,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        },
+        "dM_dT": [
+          -1.4067006456431442e-06,
+          -1.4067006456431442e-06,
+          -2.2468035470539992e-08
+        ],
+        "dM_dmu_q": [
+          -0.16677016622727642,
+          -0.16677016622727642,
+          -0.002663678318359745
+        ],
+        "chi2_B": 128016992.50819926,
+        "chi4_B": 0.022419819778158514,
+        "thermo": {
+          "dP_dT": 5.447418895341418e-05,
+          "dP_dmu": 2.15301740090432,
+          "dEpsilon_dT": 0.0001638727151693548,
+          "dEpsilon_dmu": 6.509682155196922,
+          "dn_dT": 1.6574368255565613e-05,
+          "dn_dmu": 0.9863154776783466
+        },
+        "bulk": {
+          "v_n_sq": 0.3357846312514937,
+          "dμB_dT_sigma": 128279.53881361164,
+          "ds_dT": 1.07507468587677,
+          "ds_dμB": 1.6574368255565613e-05,
+          "dn_dT": 1.6574368255565613e-05,
+          "dn_dμB": 0.3287718258927822,
+          "c_p": 5.448188461886663e-05,
+          "s": 5.447418895341418e-05,
+          "n_B": 0.7176724669681067
+        },
+        "residual_norm": 3.9367380882948666e-16,
+        "jacobian_condition": 836.9723654830722
+      },
+      "observable_order": [
+        "pressure",
+        "net_quark_density",
+        "entropy",
+        "M_u",
+        "M_d",
+        "M_s"
+      ],
+      "fd": [
+        {
+          "direction": "mu",
+          "h": 0.001,
+          "first_derivatives": [
+            2.1530174009030865,
+            2.9589464330322577,
+            4.972310486475706e-05,
+            -0.16677016622077337,
+            -0.16677016622077337,
+            -0.002663678318063726
+          ],
+          "fourth_pressure": 1.8160197789995889,
+          "fourth_pressure_order4": 1.8160055126337225,
+          "max_state_drift": 0.0005126100806167738,
+          "max_residual": 1.5457470373125837e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.00030000000000000003,
+          "first_derivatives": [
+            2.1530174009153233,
+            2.9589464330362047,
+            4.972310459150723e-05,
+            -0.16677016622751448,
+            -0.16677016622751448,
+            -0.002663678318779203
+          ],
+          "fourth_pressure": 1.8159630178194703,
+          "fourth_pressure_order4": 1.815921898448188,
+          "max_state_drift": 0.00015321133453492786,
+          "max_residual": 8.977193988179977e-16
+        },
+        {
+          "direction": "mu",
+          "h": 0.0001,
+          "first_derivatives": [
+            2.153017400902494,
+            2.9589464330381783,
+            4.972310459147712e-05,
+            -0.16677016622769952,
+            -0.16677016622769952,
+            -0.00266367831569525
+          ],
+          "fourth_pressure": 1.815658734471981,
+          "fourth_pressure_order4": 1.8157142456232123,
+          "max_state_drift": 5.101625597211251e-05,
+          "max_residual": 1.3759609771013537e-15
+        },
+        {
+          "direction": "T",
+          "h": 5.067730214314311e-07,
+          "first_derivatives": [
+            5.448415251999942e-05,
+            4.972412095072265e-05,
+            1.0750746857078026,
+            -1.4067297935775138e-06,
+            -1.4067297935775138e-06,
+            -2.1980723537614228e-08
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 2.847673873478203e-07,
+          "max_residual": 3.765434145042157e-16
+        },
+        {
+          "direction": "T",
+          "h": 1.5203190642942932e-07,
+          "first_derivatives": [
+            5.443624768730615e-05,
+            4.972292819828262e-05,
+            1.0750746863362566,
+            -1.4066643747574615e-06,
+            -1.4066643747574615e-06,
+            -2.1664279012709482e-08
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 8.54301742619598e-08,
+          "max_residual": 5.080571380267074e-16
+        },
+        {
+          "direction": "T",
+          "h": 5.067730214314311e-08,
+          "first_derivatives": [
+            5.4412879476236256e-05,
+            4.9729013669915404e-05,
+            1.0750746892882785,
+            -1.4061318959895928e-06,
+            -1.4061318959895928e-06,
+            -2.628923745362499e-08
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 2.847672205564908e-08,
+          "max_residual": 9.238486711748983e-16
+        }
+      ]
+    },
+    {
+      "check": "total_derivatives",
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0,
+      "original": {
+        "state": [
+          -0.30090549679456396,
+          -0.30090549679456396,
+          -2.07672333549599,
+          9.367874172070987e-06,
+          9.368545346642149e-06
+        ],
+        "masses": [
+          0.3232483830547417,
+          0.3232483830547417,
+          2.357623635878703
+        ],
+        "pressure_mu_0_to_4": [
+          21.573254625167632,
+          1.1251039160204634,
+          2.7736688438260266,
+          -18.291313066860653,
+          840.8565472116261
+        ],
+        "density": {
+          "quark": [
+            0.5625519580102324,
+            0.5625519580102324,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        },
+        "dM_dT": [
+          -2.555418948369956e-05,
+          -2.555418948369956e-05,
+          -2.1359047790041228e-06
+        ],
+        "dM_dmu_q": [
+          -2.4025230780139823,
+          -2.4025230780139823,
+          -0.20081092876262285
+        ],
+        "chi2_B": 120001071.88020104,
+        "chi4_B": 10.38094502730388,
+        "thermo": {
+          "dP_dT": 3.5897817277586344e-05,
+          "dP_dmu": 1.1251039160204634,
+          "dEpsilon_dT": 0.00012490564185795152,
+          "dEpsilon_dmu": 4.992603921392686,
+          "dn_dT": 1.6482311525845006e-05,
+          "dn_dmu": 0.9245562812753422
+        },
+        "bulk": {
+          "v_n_sq": 0.441219440905437,
+          "dμB_dT_sigma": 54424.087438961375,
+          "ds_dT": 0.7084268124017743,
+          "ds_dμB": 1.6482311525845006e-05,
+          "dn_dT": 1.6482311525845006e-05,
+          "dn_dμB": 0.3081854270917807,
+          "c_p": 3.5901159538436675e-05,
+          "s": 3.5897817277586344e-05,
+          "n_B": 0.3750346386734878
+        },
+        "residual_norm": 9.156961214152764e-12,
+        "jacobian_condition": 837.9688323702165
+      },
+      "strict": {
+        "state": [
+          -0.3009054967945687,
+          -0.3009054967945687,
+          -2.076723335495991,
+          9.38215238637556e-06,
+          9.382801834134594e-06
+        ],
+        "masses": [
+          0.32324838305474635,
+          0.32324838305474635,
+          2.3576236358787037
+        ],
+        "pressure_mu_0_to_4": [
+          21.573254625167632,
+          1.125103916020462,
+          2.773668843826041,
+          -18.291313066859885,
+          840.8565472116425
+        ],
+        "density": {
+          "quark": [
+            0.5625519580102315,
+            0.5625519580102315,
+            0.0
+          ],
+          "antiquark": [
+            0,
+            0,
+            0
+          ]
+        },
+        "dM_dT": [
+          -2.555419189541278e-05,
+          -2.555419189541278e-05,
+          -2.135904980583224e-06
+        ],
+        "dM_dmu_q": [
+          -2.402523078014026,
+          -2.4025230780140254,
+          -0.2008109287626293
+        ],
+        "chi2_B": 120001071.88020122,
+        "chi4_B": 10.380945027303966,
+        "thermo": {
+          "dP_dT": 3.5897817275129176e-05,
+          "dP_dmu": 1.125103916020462,
+          "dEpsilon_dT": 0.00012490564183232787,
+          "dEpsilon_dmu": 4.992603921392711,
+          "dn_dT": 1.648231152014586e-05,
+          "dn_dmu": 0.924556281275347
+        },
+        "bulk": {
+          "v_n_sq": 0.44121944096686316,
+          "dμB_dT_sigma": 54424.08743138415,
+          "ds_dT": 0.7084268125034324,
+          "ds_dμB": 1.648231152014586e-05,
+          "dn_dT": 1.648231152014586e-05,
+          "dn_dμB": 0.3081854270917823,
+          "c_p": 3.590115954358843e-05,
+          "s": 3.5897817275129176e-05,
+          "n_B": 0.3750346386734873
+        },
+        "residual_norm": 7.7021722333370235e-16,
+        "jacobian_condition": 837.9688801914656
+      },
+      "observable_order": [
+        "pressure",
+        "net_quark_density",
+        "entropy",
+        "M_u",
+        "M_d",
+        "M_s"
+      ],
+      "fd": [
+        {
+          "direction": "mu",
+          "h": 0.001,
+          "first_derivatives": [
+            1.125103917703818,
+            2.773668706815613,
+            4.944693318502934e-05,
+            -2.402522840577644,
+            -2.402522840577644,
+            -0.20081089250049514
+          ],
+          "fourth_pressure": 841.8838639556725,
+          "fourth_pressure_order4": 840.8534208914631,
+          "max_state_drift": 0.007546002182200473,
+          "max_residual": 1.5768636396629176e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.00030000000000000003,
+          "first_derivatives": [
+            1.1251039160144038,
+            2.7736688427151512,
+            4.94469349622029e-05,
+            -2.4025230760843503,
+            -2.4025230760843503,
+            -0.2008109284665524
+          ],
+          "fourth_pressure": 840.9489195539387,
+          "fourth_pressure_order4": 840.8565489982899,
+          "max_state_drift": 0.0022191316848805265,
+          "max_residual": 1.052977149917922e-15
+        },
+        {
+          "direction": "mu",
+          "h": 0.0001,
+          "first_derivatives": [
+            1.125103916036115,
+            2.7736688438106945,
+            4.944693588594127e-05,
+            -2.402523077977605,
+            -2.402523077977605,
+            -0.20081092874694542
+          ],
+          "fourth_pressure": 840.8665985726316,
+          "fourth_pressure_order4": 840.8560514538976,
+          "max_state_drift": 0.0007355943913701646,
+          "max_residual": 3.4416913763379853e-15
+        },
+        {
+          "direction": "T",
+          "h": 5.067730214314311e-07,
+          "first_derivatives": [
+            3.589415640862607e-05,
+            4.944669646992731e-05,
+            0.7084268122552605,
+            -2.5554179420572698e-05,
+            -2.5554179420572698e-05,
+            -2.1360005431070306e-06
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 1.8766949968301806e-07,
+          "max_residual": 3.5214886562329184e-16
+        },
+        {
+          "direction": "T",
+          "h": 1.5203190642942932e-07,
+          "first_derivatives": [
+            3.589162485242683e-05,
+            4.9446526076721594e-05,
+            0.7084268120881713,
+            -2.5553899488877588e-05,
+            -2.5553899488877588e-05,
+            -2.1345400299151627e-06
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 5.6300809251867435e-08,
+          "max_residual": 4.40619762898109e-16
+        },
+        {
+          "direction": "T",
+          "h": 5.067730214314311e-08,
+          "first_derivatives": [
+            3.584683578120954e-05,
+            4.944859513707674e-05,
+            0.7084268129868108,
+            -2.5558980857690962e-05,
+            -2.5558980857690962e-05,
+            -2.1418425958745027e-06
+          ],
+          "fourth_pressure": null,
+          "fourth_pressure_order4": null,
+          "max_state_drift": 1.8766932790217832e-08,
+          "max_residual": 9.228728892196614e-16
+        }
+      ]
+    },
+    {
+      "check": "oracle_self_convergence",
+      "T_MeV": 0.01,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "ratio": 5919.8099999999995,
+      "adaptive": {
+        "chemical": [
+          0.020198212940377366,
+          0.17506985604767292,
+          0.9549264681648916,
+          2.266744660349695,
+          -0.26306525865587177
+        ],
+        "thermal": [
+          5.7802547179027315e-05,
+          1.14056423640024
+        ]
+      },
+      "oracle_96_56T": [
+        0.020198212940377325,
+        0.17506985604767253,
+        0.9549264681648917,
+        2.2667446603496937,
+        -0.2630652586558779
+      ],
+      "oracle_128_72T": [
+        0.020198212940377325,
+        0.17506985604767253,
+        0.9549264681648917,
+        2.2667446603496937,
+        -0.2630652586558779
+      ]
+    },
+    {
+      "check": "oracle_self_convergence",
+      "T_MeV": 0.9264178403755868,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "ratio": 63.9,
+      "adaptive": {
+        "chemical": [
+          0.02021075751356026,
+          0.175099696687771,
+          0.9549228989117632,
+          2.2668549817121284,
+          -0.2640720073727748
+        ],
+        "thermal": [
+          0.005339354420509555,
+          1.133916725450132
+        ]
+      },
+      "oracle_96_56T": [
+        0.020210757513560263,
+        0.17509969668777095,
+        0.954922898911768,
+        2.266854981713566,
+        -0.26407200744027276
+      ],
+      "oracle_128_72T": [
+        0.020210757513560263,
+        0.17509969668777095,
+        0.954922898911768,
+        2.266854981713566,
+        -0.26407200744027276
+      ]
+    },
+    {
+      "check": "oracle_self_convergence",
+      "T_MeV": 0.9235273010920437,
+      "mu_q_inv_fm": 1.8,
+      "xi": 0.3,
+      "ratio": 64.1,
+      "adaptive": {
+        "chemical": [
+          0.020210679421827252,
+          0.17509951072333138,
+          0.9549229215362386,
+          2.2668542904504996,
+          -0.2640656832378868
+        ],
+        "thermal": [
+          0.005322744117260778,
+          1.1339378079042333
+        ]
+      },
+      "oracle_96_56T": [
+        0.02021067942182721,
+        0.175099510723331,
+        0.9549229215362386,
+        2.2668542904504982,
+        -0.26406568323789287
+      ],
+      "oracle_128_72T": [
+        0.02021067942182721,
+        0.175099510723331,
+        0.9549229215362386,
+        2.2668542904504982,
+        -0.26406568323789287
+      ]
+    }
+  ]
+}
