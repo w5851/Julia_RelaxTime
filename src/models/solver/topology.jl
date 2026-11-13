@@ -1,4 +1,5 @@
 include(joinpath(@__DIR__, "runtime", "GapSolver.jl"))
+include(joinpath(@__DIR__, "runtime", "ZeroTemperatureGapSolver.jl"))
 include(joinpath(@__DIR__, "compat", "ImplicitGapLegacy.jl"))
 include(joinpath(@__DIR__, "runtime", "ConstraintSolver.jl"))
 include(joinpath(@__DIR__, "ImplicitProblem.jl"))

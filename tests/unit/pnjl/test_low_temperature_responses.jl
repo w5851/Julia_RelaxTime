@@ -130,7 +130,9 @@ end
     @test all(isfinite, md.dM_dmu)
     @test_throws ArgumentError td.pressure_series_direction(T, mu, SVector(1.0, 0.0, 0.0);
         order=1, kwargs..., thermo_quadrature_kwargs=(; thermo_quadrature_policy=:tensor_gauss))
-    @test_throws ArgumentError Models.solve_gap(model, 0.0, mu; quadrature...)
+    zero_state = Models.solve_gap(model, 0.0, mu; initial_guess=context.x0, quadrature...)
+    @test maximum(abs, Models.gap_residual(model, zero_state, 0.0, mu; quadrature...)) < 1e-8
+    @test zero_state.Phi == zero_state.PhiBar == 0.0
     @test_throws ArgumentError Models.chi2_B(0.0, 3mu[1]; thermo_quadrature_kwargs=quadrature)
     @test_throws ArgumentError Models.chi_BQS(T, 3mu[1], 0.0, 0.0;
         orders=(1, 1, 0), thermo_quadrature_kwargs=quadrature)

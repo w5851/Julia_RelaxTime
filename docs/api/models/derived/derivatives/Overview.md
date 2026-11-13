@@ -90,9 +90,11 @@ d4mu = Models.dP_dmu(T_fm, mu_fm; order=4, common...)
 自适应控制参数及 `xi > -1` 的适用域见 [phase 积分策略](../../phase/Overview.md#phase-热积分策略)。
 
 上述自洽 Taylor 入口要求 `T_fm > 0`。精确零温可使用
-`Models.model_pressure` 与 `Models.number_densities` 的固定态自适应路线，
-在远离 `|mu|=M` 的点对解析费米海求化学势导数；五场 PNJL 的 Polyakov 方向在
-零温退化。近零温宜先检查有量纲响应，再解释归一化 susceptibility 或密度趋零时的比值。
+[约化 `solve_gap`](../../solver/Overview.md#pnjl-的严格零温入口) 独立求出手征场，
+再调用 `Models.model_pressure` 与 `Models.number_densities`。远离 `|mu|=M` 时，
+对解析费米海求化学势导数得到固定态响应；总响应还需加入三个手征场的隐式响应。
+五场 PNJL 的 Polyakov 方向在零温退化。近零温宜先检查有量纲响应，
+再解释归一化 susceptibility 或密度趋零时的比值。
 
 ## 推荐使用顺序
 

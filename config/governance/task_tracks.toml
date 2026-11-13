@@ -1,5 +1,5 @@
 schema_version = 1
-primary_track = ""
+primary_track = "full-temperature-reference-research"
 updated_at = "2026-11-13"
 
 [[tracks]]
@@ -505,15 +505,15 @@ updated_at = "2026-11-12"
 [[tracks]]
 id = "full-temperature-reference-research"
 title = "Low-temperature consumer and target-derivative convergence"
-status = "archived"
-current_task = "full-temperature-reference-pr3"
+status = "active"
+current_task = "zero-temperature-self-consistent-gap"
 blocked_by = []
 unlocks = []
-next_action = ""
+next_action = "Complete exact-zero-temperature chiral solve, same-branch low-T comparison and remote integration/solver timing."
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
-current_branch = ""
+current_branch = "codex/zero-temperature-gap"
 current_sha = "92ba28fff696d7945779db63aa95aa46d3acc9ab"
 run_ids = ["43351964859", "43351964858", "43351964990", "43351964856"]
 evidence = [
@@ -1288,6 +1288,19 @@ evidence = [
   "file:docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md",
   "file:data/outputs/results/analysis/pnjl_low_temperature_20261112/summary.json",
 ]
+
+[[items]]
+id = "zero-temperature-self-consistent-gap"
+track_id = "full-temperature-reference-research"
+classification = "required_follow_up"
+status = "active"
+parent = "item:full-temperature-reference-pr3"
+task_file = "docs/analysis/pnjl/low_temperature_consumers_20261112_analysis/README.md"
+reason = "作者要求补充独立 T=0 自洽手征平均场，并比较零温、近零温和普通温度的积分与求解性能。"
+next_action = "Validate reduced chiral solve and T-to-zero convergence on representative points; benchmark kernels and complete solve on quote-remote."
+blocked_by = []
+backlog_file = ""
+evidence = ["review:author_20261113_authorized_zero_temperature_gap_and_temperature_performance_comparison", "pr:347"]
 
 [[items]]
 id = "charged-gbu-phase-contours"

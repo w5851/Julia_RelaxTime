@@ -13,6 +13,11 @@ using StaticArrays
 const _pnjl_model_cached_nodes = PNJLCore.cached_nodes
 const _pnjl_model_log_sum = PNJLCore.calculate_log_sum
 
+# At exact zero temperature the medium term is the analytic Fermi sea.
+# Positive-temperature callers retain their existing tensor-grid default.
+@inline _pnjl_default_thermal_policy(T) =
+    iszero(PNJLCore.PNJLIntegrals._primal_float(T)) ? :rs_reduced_adaptive : :tensor_gauss
+
 export PNJLModel
 
 """采用 RS 各向异性分布自变量的 PNJL 模型（参数通过 `PNJLCore.PNJLParams` 注入）。
@@ -83,7 +88,7 @@ function thermal_contribution(
     p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
     t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
     xi=0.0,
-    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_policy::Symbol=_pnjl_default_thermal_policy(T_fm),
     thermo_quadrature_rtol::Float64=1e-8,
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
@@ -140,7 +145,7 @@ function number_densities(
     p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
     t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
     xi=0.0,
-    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_policy::Symbol=_pnjl_default_thermal_policy(T_fm),
     thermo_quadrature_rtol::Float64=1e-8,
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
@@ -281,6 +286,7 @@ end
     solve_gap(::PNJLModel, T, mu_vec; kwargs...) -> MeanFieldState
 
 统一通过 Models 求解链路完成平衡态求解。
+精确零温求解三个手征场，返回的 `Phi=PhiBar=0` 是退化方向的统一占位值。
 """
 function solve_gap(
     model::PNJLModel,
@@ -289,12 +295,17 @@ function solve_gap(
     xi::Real=0.0,
     p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
     t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+    thermo_quadrature_policy::Symbol=_pnjl_default_thermal_policy(T_fm),
     kwargs...
 )
     T_value = Float64(T_fm)
-    isfinite(T_value) && T_value > 0.0 || throw(ArgumentError(
-        "PNJL five-field gap solve requires finite T_fm > 0; at T=0 the Polyakov fields are degenerate",
+    isfinite(T_value) && T_value >= 0.0 || throw(ArgumentError(
+        "PNJL gap solve requires finite T_fm >= 0",
     ))
+    if T_value == 0.0
+        return _solve_gap_zero_temperature(model, mu_vec;
+            xi, p_num, t_num, thermo_quadrature_policy, kwargs...)
+    end
     return invoke(
         solve_gap,
         Tuple{AbstractPNJLModel, Any, Any},
@@ -304,6 +315,7 @@ function solve_gap(
         xi=xi,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_policy=thermo_quadrature_policy,
         kwargs...,
     )
 end

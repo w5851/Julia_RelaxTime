@@ -48,6 +48,36 @@ NLsolve 尝试。FixedMu 的 `solve` / `solve_constraint` 同样透传 `iteratio
 输运扫描显式使用每次 40（底层 CLI 可用 `--max-iter` 覆盖）。
 FixedRho 等其他约束模式继续使用各自既有的联合求解合同。
 
+### PNJL 的严格零温入口
+
+`Models.solve_gap(model::PNJLModel, 0.0, mu_vec; ...)` 在零温热力学势上求解
+三个手征凝聚。真空项与费米海项使用闭式表达式，NLsolve 的 Jacobian 默认由
+ForwardDiff 给出。温度、化学势与质量单位为 `fm^-1`，凝聚单位为 `fm^-3`，
+各向异性要求有限的 `xi > -1`。
+
+```julia
+model = Models.create_model(:PNJL)
+mu_vec = [2.2, 2.2, 2.2]
+state = Models.solve_gap(model, 0.0, mu_vec)
+masses = Models.calculate_mass_vec(model, state.phi)
+pressure = Models.model_pressure(model, state, mu_vec, 0.0)
+density = Models.number_densities(model, state, 0.0, mu_vec)
+```
+
+无 `initial_guess` 时，从既有真空、高密和高温初值的不同手征部分寻找候选，
+在收敛且质量为正的局部极小值中选取最低 `omega`。显式初值接受三个手征分量、
+五个平均场分量或 `MeanFieldState` / NamedTuple；此时只求该初值对应的驻点，
+可用于追踪亚稳分支及中间不稳定分支，失败按既有单初值语义报错。
+
+返回值仍为 `MeanFieldState`。`Phi=PhiBar=0` 是零温退化方向的统一占位值，
+零温手征解、压强与密度独立于这两个值；它们的有限温趋零行为由有限温方程确定。
+`gap_residual` 保留五分量格式，末两项为零，内部求根只使用三维手征 Jacobian。
+
+零温 `solve_gap`、`omega` / `model_pressure`、`number_densities` 自动使用
+`:rs_reduced_adaptive` 的解析零温分支；显式给入 `:tensor_gauss` 会抛出
+`ArgumentError`。正温默认仍是张量 Gauss。有限温 Taylor 响应与五场约束扫描
+沿用各自正温合同；零温下可直接对解析势求固定态导数，或用三维场方程计算同支响应。
+
 ## 什么时候用 `solve`
 
 `Models.solve` 适合“我已经确定约束模式，希望拿到完整的求解结果载荷”的场景。
