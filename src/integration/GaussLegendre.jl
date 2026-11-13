@@ -26,11 +26,12 @@ const _STANDARD_NODES_WEIGHTS_LOCK = ReentrantLock()
 """
     standard_nodes_weights(n::Int) -> (nodes_std, weights_std)
 
-返回标准区间 [-1, 1] 上的 n 个高斯-勒让德节点与权重，并在模块内缓存。
+返回标准区间 [-1, 1] 上的 n 个高斯-勒让德节点与权重，并在模块内缓存；n 必须为正。
 
 注意：返回的向量应视为只读。
 """
 function standard_nodes_weights(n::Int)
+    n > 0 || throw(ArgumentError("节点数 n 必须大于 0，当前值: $n"))
     lock(_STANDARD_NODES_WEIGHTS_LOCK)
     try
         return get!(_STANDARD_NODES_WEIGHTS_CACHE, n) do
@@ -80,12 +81,12 @@ result = sum(weights .* f.(nodes))
 
 # 注意事项
 - 节点数 n 必须大于 0
-- 要求 a < b
+- 要求端点有限且 a < b
 - 对于光滑函数，节点数越多精度越高（指数收敛）
 - 典型应用中 n = 10-100 已足够精确
 
 # 异常
-- `ArgumentError`: 如果 n ≤ 0 或 a ≥ b
+- `ArgumentError`: 如果 n ≤ 0、端点非有限或 a ≥ b
 
 # 参考
 - FastGaussQuadrature.jl: https://github.com/JuliaApproximation/FastGaussQuadrature.jl
@@ -97,8 +98,8 @@ function gauleg(a::Float64, b::Float64, n::Int)
         throw(ArgumentError("节点数 n 必须大于 0，当前值: $n"))
     end
 
-    if a >= b
-        throw(ArgumentError("区间端点必须满足 a < b，当前值: a=$a, b=$b"))
+    if !(isfinite(a) && isfinite(b) && a < b)
+        throw(ArgumentError("区间端点必须有限且满足 a < b，当前值: a=$a, b=$b"))
     end
 
     # 获取标准区间 [-1,1] 上的节点和权重（带缓存）

@@ -17,6 +17,7 @@ using LinearAlgebra
 # 导入计算模块
 include(joinpath(@__DIR__, "MomentumMapping.jl"))
 using .MomentumMapping
+include(joinpath(@__DIR__, "ComputeRequest.jl"))
 
 export start_server, handle_compute
 
@@ -83,29 +84,7 @@ end
 """
 function handle_compute(req::HTTP.Request)
     try
-        # 解析请求体
-        body = JSON3.read(String(req.body))
-        
-        # 提取参数
-        p1 = [Float64(body.p1x), Float64(body.p1y), Float64(body.p1z)]
-        p2 = [Float64(body.p2x), Float64(body.p2y), Float64(body.p2z)]
-        m1 = Float64(body.m1)
-        m2 = Float64(body.m2)
-        m3 = Float64(body.m3)
-        m4 = Float64(body.m4)
-        
-        # 可选参数，提供默认值
-        theta_star = haskey(body, :theta_star) ? Float64(body.theta_star) : π/4
-        phi_star = haskey(body, :phi_star) ? Float64(body.phi_star) : π/6
-        
-        # 输入验证
-        if any(isnan.([p1; p2; m1; m2; m3; m4; theta_star; phi_star]))
-            return _error_response(400, "INVALID_INPUT", "Invalid input: NaN detected")
-        end
-        
-        if any([m1, m2, m3, m4] .<= 0)
-            return _error_response(400, "INVALID_INPUT", "Invalid input: masses must be positive")
-        end
+        (; p1, p2, m1, m2, m3, m4, theta_star, phi_star) = _parse_compute_request(req)
         
         # 计算散射运动学
         result = calculate_outgoing_momenta(p1, p2, m1, m2, m3, m4, 

@@ -3,7 +3,8 @@
 
 ## 使用示例
 ```julia
-using PNJL.TmuScan
+include("src/models/Models.jl")
+using .Models: run_tmu_scan
 
 # 基本扫描
 result = run_tmu_scan()

@@ -6,6 +6,7 @@ on:
       - "src/**"
       - "tests/unit/**"
       - "config/**"
+      - "web/**"
       - "scripts/dev/check_model_profile_matrix.jl"
       - "Project.toml"
       - "Manifest.toml"
@@ -16,6 +17,7 @@ on:
       - "src/**"
       - "tests/unit/**"
       - "config/**"
+      - "web/**"
       - "scripts/dev/check_model_profile_matrix.jl"
       - "Project.toml"
       - "Manifest.toml"
@@ -23,6 +25,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  frontend-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run offline frontend contracts
+        run: node --test web/js/runtime_config.contract.test.mjs web/js/api.scan.test.mjs web/js/api.timeout.test.mjs web/js/task_store.test.mjs
+
   unit-smoke:
     runs-on: ubuntu-latest
     steps:

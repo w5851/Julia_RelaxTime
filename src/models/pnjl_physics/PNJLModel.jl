@@ -10,6 +10,11 @@
 
 using StaticArrays
 
+if !isdefined(@__MODULE__, :ValidationUtils)
+    include(joinpath(@__DIR__, "..", "..", "utils", "ValidationUtils.jl"))
+end
+using .ValidationUtils: require_finite
+
 const _pnjl_model_cached_nodes = PNJLCore.cached_nodes
 const _pnjl_model_log_sum = PNJLCore.calculate_log_sum
 
@@ -133,8 +138,7 @@ end
 
 """返回 (quark, antiquark) 数密度（单位 fm⁻³）。
 
-注意：此处不再委托 legacy `Thermodynamics.calculate_number_densities`，
-而是在 models 侧直接按分布函数进行数值积分（便于后续彻底解耦 legacy core）。
+输入平均场与化学势须为有限实数。正温按分布函数积分，零温使用解析费米球。
 """
 function number_densities(
     model::PNJLModel,
@@ -160,6 +164,11 @@ function number_densities(
     φ = SVector{3, Float64}(st.phi)
     masses = SVector{3, Float64}(calculate_mass_vec(model, φ))
     μ_values = SVector{3, Float64}(normalize_mu_vec(mu_vec))
+    foreach(value -> require_finite("mean-field chiral component", value), φ)
+    foreach(value -> require_finite("quark mass", value), masses)
+    foreach(value -> require_finite("mu_vec component", value), μ_values)
+    require_finite("Phi", Φ)
+    require_finite("PhiBar", Φbar)
 
     policy = PNJLCore.PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
     PNJLCore.PNJLIntegrals.validate_thermal_quadrature_controls(

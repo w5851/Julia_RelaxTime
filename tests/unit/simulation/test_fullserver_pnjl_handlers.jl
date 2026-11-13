@@ -27,6 +27,16 @@ function _decode(resp::HTTP.Response)
 end
 
 @testset "FullServer PNJL handlers" begin
+    @testset "malformed JSON and non-object inputs return 400" begin
+        for raw in ("{", "null", "[]", "1", "\"text\"", "{\"params\":null}", "{\"params\":[]}")
+            resp = FPH.handle_pnjl_single_point(HTTP.Request("POST", "/api/modules/pnjl-gap/run", [], raw))
+            body = _decode(resp)
+            @test resp.status == 400
+            @test body.error_code == "INVALID_REQUEST"
+            @test !isempty(body.message_id)
+        end
+    end
+
     @testset "happy path returns sync point payload" begin
         req = _pnjl_req(Dict(
             "params" => Dict(
@@ -65,5 +75,15 @@ end
         @test body.error_code == "INVALID_REQUEST"
         @test haskey(body, :message_id)
         @test length(String(body.message_id)) > 0
+    end
+
+    @testset "invalid numeric and boolean types return 400" begin
+        for (key, value) in (("T_mev", true), ("mu_mev", []), ("p_num", 1.5), ("allow_seed_fallback", "invalid"))
+            params = Dict{String,Any}("T_mev" => 150.0, "mu_mev" => 0.0)
+            params[key] = value
+            resp = FPH.handle_pnjl_single_point(_pnjl_req(Dict("params" => params)))
+            @test resp.status == 400
+            @test _decode(resp).error_code == "INVALID_REQUEST"
+        end
     end
 end

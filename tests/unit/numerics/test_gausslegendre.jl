@@ -42,6 +42,12 @@ using .GaussLegendre
         # 测试无效区间
         @test_throws ArgumentError gauleg(1.0, 0.0, 5)
         @test_throws ArgumentError gauleg(1.0, 1.0, 5)
+        for endpoint in (NaN, Inf, -Inf)
+            @test_throws ArgumentError gauleg(endpoint, 1.0, 5)
+            @test_throws ArgumentError gauleg(0.0, endpoint, 5)
+        end
+        @test_throws ArgumentError GaussLegendre.standard_nodes_weights(0)
+        @test_throws ArgumentError GaussLegendre.standard_nodes_weights(-1)
     end
     
     @testset "积分精度测试 - 多项式" begin

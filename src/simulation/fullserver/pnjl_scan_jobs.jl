@@ -7,10 +7,10 @@ const _PNJL_SCAN_JOBS = Dict{String, Dict{String, Any}}()
 const _PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const _SCAN_OUTPUT_ROOT = abspath(normpath(joinpath(_PROJECT_ROOT, "data", "outputs")))
 const _PNJL_SCAN_JOB_SEQ = Ref(0)
-const _PNJL_SCAN_MAX_RUNNING = 2
-const _PNJL_SCAN_MAX_PENDING = 32
+_PNJL_SCAN_MAX_RUNNING::Int = 2
+_PNJL_SCAN_MAX_PENDING::Int = 32
 const _PNJL_SCAN_MAX_XI_POINTS = 64
-const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
+_PNJL_SCAN_SEMAPHORE::Base.Semaphore = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
 const _PNJL_SCAN_DEFAULT_TIMEOUT_SECONDS = 0
 const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
 const _PNJL_SCAN_FINISHED_TTL_SECONDS = 86400
@@ -54,7 +54,6 @@ const _PNJL_SCAN_RUNTIME_METRICS = Dict{String, Int}(
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
         "Content-Type" => "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin" => "*",
     ]
     return HTTP.Response(status, headers, JSON3.write(payload))
 end
@@ -81,6 +80,22 @@ end
 
 @inline function _default_scan_job_timeout_seconds()
     return _env_nonneg_int("PNJL_SCAN_JOB_TIMEOUT_SECONDS", _PNJL_SCAN_DEFAULT_TIMEOUT_SECONDS)
+end
+
+function _configure_scan_queue!()
+    running = _env_nonneg_int("PNJL_SCAN_MAX_RUNNING", 2)
+    pending = _env_nonneg_int("PNJL_SCAN_MAX_PENDING", 32)
+    running > 0 || throw(ArgumentError("PNJL_SCAN_MAX_RUNNING must be positive"))
+    pending > 0 || throw(ArgumentError("PNJL_SCAN_MAX_PENDING must be positive"))
+    lock(_PNJL_SCAN_JOBS_LOCK) do
+        (running == _PNJL_SCAN_MAX_RUNNING && pending == _PNJL_SCAN_MAX_PENDING) && return nothing
+        any(job -> get(job, "status", "") in (_SCAN_JOB_STATUS_QUEUED, _SCAN_JOB_STATUS_RUNNING),
+            values(_PNJL_SCAN_JOBS)) && throw(ArgumentError("Cannot reconfigure the scan queue while jobs are active"))
+        global _PNJL_SCAN_MAX_RUNNING = running
+        global _PNJL_SCAN_MAX_PENDING = pending
+        global _PNJL_SCAN_SEMAPHORE = Base.Semaphore(running)
+    end
+    return nothing
 end
 
 @inline function _scan_jobs_policy()
@@ -221,23 +236,6 @@ function _maybe_mark_job_timeout!(job_id::String; now_ts::Union{Nothing, String}
         _mark_job_timeout!(job)
         return true
     end
-end
-
-@inline function _to_bool(x, default::Bool)
-    x === nothing && return default
-    if x isa Bool
-        return x
-    end
-    if x isa Number
-        return Int(x) != 0
-    end
-    s = lowercase(String(x))
-    if s in ("1", "true", "yes", "y", "on")
-        return true
-    elseif s in ("0", "false", "no", "n", "off")
-        return false
-    end
-    error("Invalid boolean value: $(x)")
 end
 
 function _request_header(req::HTTP.Request, name::String)
@@ -552,13 +550,7 @@ function _prune_finished_jobs_locked!(
     end
 
     excess = length(finished) - keep_max
-    if excess <= 0
-        _PNJL_SCAN_PRUNE_METRICS["ttl"] = get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0) + removed_ttl
-        _PNJL_SCAN_PRUNE_METRICS["total"] = get(_PNJL_SCAN_PRUNE_METRICS, "total", 0) + removed
-        return removed
-    end
-
-    sort!(finished; by=last)
+    excess > 0 && sort!(finished; by=last)
     removed_keep_max = 0
     for i in 1:excess
         job_id = finished[i][1]
@@ -568,6 +560,7 @@ function _prune_finished_jobs_locked!(
             removed_keep_max += 1
         end
     end
+    filter!(entry -> haskey(_PNJL_SCAN_JOBS, get(last(entry), "job_id", "")), _PNJL_SCAN_IDEMPOTENCY_CACHE)
     _PNJL_SCAN_PRUNE_METRICS["ttl"] = get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0) + removed_ttl
     _PNJL_SCAN_PRUNE_METRICS["keep_max"] = get(_PNJL_SCAN_PRUNE_METRICS, "keep_max", 0) + removed_keep_max
     _PNJL_SCAN_PRUNE_METRICS["total"] = get(_PNJL_SCAN_PRUNE_METRICS, "total", 0) + removed
@@ -763,8 +756,9 @@ function _execute_scan_job!(job_id::String, kind::String, params::Dict{Symbol, A
 end
 
 function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any})
+    semaphore = _PNJL_SCAN_SEMAPHORE
     Threads.@spawn begin
-        Base.acquire(_PNJL_SCAN_SEMAPHORE)
+        Base.acquire(semaphore)
         try
             started = _with_job(job_id) do job
                 if String(get(job, "status", "")) != _SCAN_JOB_STATUS_QUEUED
@@ -826,8 +820,44 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                 end
             end
         finally
-            Base.release(_PNJL_SCAN_SEMAPHORE)
+            Base.release(semaphore)
         end
+    end
+end
+
+function _reserve_scan_job(kind::String, params::Dict{Symbol,Any}, idempotency_key, fingerprint::String)
+    # Admission, duplicate detection and registration form one transaction.
+    # Numerical execution starts after this lock is released.
+    return lock(_PNJL_SCAN_JOBS_LOCK) do
+        if idempotency_key !== nothing
+            idem = _check_idempotency_conflict_or_replay(idempotency_key, fingerprint)
+            idem.mode === :new || return idem
+        end
+        _queue_snapshot().queued >= _PNJL_SCAN_MAX_PENDING && return (mode=:full, job_id=nothing)
+
+        max_retries = _to_nonneg_int(get(params, :max_retries, 0), 0; name="max_retries")
+        max_retries <= 3 || error("max_retries must be <= 3")
+        timeout_default = _default_scan_job_timeout_seconds()
+        timeout_seconds = _to_nonneg_int(get(params, :timeout_seconds, timeout_default), timeout_default; name="timeout_seconds")
+        total_points = _estimate_total_points(kind, params)
+        mode = _resolve_scan_mode(params)
+        request_snapshot = Dict{String,Any}(
+            "kind" => kind,
+            "params" => Dict(string(k) => v for (k, v) in params),
+        )
+        job_id = _new_job(kind, request_snapshot; total_points=total_points)
+        _with_job(job_id) do job
+            job["policy"] = Dict(
+                "max_retries" => max_retries,
+                "timeout_seconds" => timeout_seconds,
+                "max_running" => _PNJL_SCAN_MAX_RUNNING,
+                "max_pending" => _PNJL_SCAN_MAX_PENDING,
+                "mode" => mode,
+                "xi_strategy" => haskey(params, :xi_grid) ? "xi_grid" : (haskey(params, :xi_values) ? "xi_values" : (haskey(params, :xi) ? "xi" : "default")),
+            )
+        end
+        idempotency_key === nothing || _record_idempotency_entry!(idempotency_key, fingerprint, job_id)
+        return (mode=:new, job_id=job_id)
     end
 end
 
@@ -842,51 +872,22 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
 
         idempotency_key = _extract_idempotency_key(req, body_dict, params)
         req_fingerprint = _request_fingerprint(kind, params)
-        replay_mode = nothing
-        replay_job_id = nothing
-        if idempotency_key !== nothing
-            idem = _check_idempotency_conflict_or_replay(idempotency_key, req_fingerprint)
-            replay_mode = idem.mode
-            replay_job_id = idem.job_id
-            if replay_mode == :conflict
-                return _error_response(
-                    409,
-                    "IDEMPOTENCY_KEY_CONFLICT",
-                    "idempotency key reused with different payload";
-                    extras=Dict(
-                        "idempotency" => Dict(
-                            "key" => idempotency_key,
-                            "replayed" => false,
-                            "conflict" => true,
-                        ),
-                        "job_id" => replay_job_id,
-                    ),
-                )
-            elseif replay_mode == :replay && replay_job_id !== nothing
-                pos = _queue_position(replay_job_id)
-                return _json_response(202, Dict(
-                    "status" => "accepted",
-                    "job_id" => replay_job_id,
-                    "kind" => kind,
-                    "status_url" => "/api/modules/pnjl-scan/jobs/$(replay_job_id)",
-                    "result_url" => "/api/modules/pnjl-scan/jobs/$(replay_job_id)/result",
-                    "queue" => Dict(
-                        "position" => pos,
-                        "max_running" => _PNJL_SCAN_MAX_RUNNING,
-                        "max_pending" => _PNJL_SCAN_MAX_PENDING,
-                    ),
+        admission = _reserve_scan_job(kind, params, idempotency_key, req_fingerprint)
+        if admission.mode === :conflict
+            return _error_response(
+                409,
+                "IDEMPOTENCY_KEY_CONFLICT",
+                "idempotency key reused with different payload";
+                extras=Dict(
                     "idempotency" => Dict(
                         "key" => idempotency_key,
-                        "replayed" => true,
-                        "conflict" => false,
+                        "replayed" => false,
+                        "conflict" => true,
                     ),
-                    "diagnostics" => _build_job_diagnostics(replay_job_id, kind, _SCAN_JOB_STATUS_QUEUED),
-                ))
-            end
-        end
-
-        snap = _queue_snapshot()
-        if snap.queued >= _PNJL_SCAN_MAX_PENDING
+                    "job_id" => admission.job_id,
+                ),
+            )
+        elseif admission.mode === :full
             return _error_response(
                 429,
                 "QUEUE_FULL",
@@ -900,31 +901,8 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
             )
         end
 
-        max_retries = _to_nonneg_int(get(params, :max_retries, 0), 0; name="max_retries")
-        max_retries <= 3 || error("max_retries must be <= 3")
-        timeout_default = _default_scan_job_timeout_seconds()
-        timeout_seconds = _to_nonneg_int(get(params, :timeout_seconds, timeout_default), timeout_default; name="timeout_seconds")
-
-        total_points = _estimate_total_points(kind, params)
-        request_snapshot = Dict{String, Any}(
-            "kind" => kind,
-            "params" => Dict(string(k) => v for (k, v) in params),
-        )
-        job_id = _new_job(kind, request_snapshot; total_points=total_points)
-        _with_job(job_id) do job
-            job["policy"] = Dict(
-                "max_retries" => max_retries,
-                "timeout_seconds" => timeout_seconds,
-                "max_running" => _PNJL_SCAN_MAX_RUNNING,
-                "max_pending" => _PNJL_SCAN_MAX_PENDING,
-                "mode" => _resolve_scan_mode(params),
-                "xi_strategy" => haskey(params, :xi_grid) ? "xi_grid" : (haskey(params, :xi_values) ? "xi_values" : (haskey(params, :xi) ? "xi" : "default")),
-            )
-        end
-        if idempotency_key !== nothing
-            _record_idempotency_entry!(idempotency_key, req_fingerprint, job_id)
-        end
-        _launch_scan_job(job_id, kind, params)
+        job_id = admission.job_id
+        admission.mode === :new && _launch_scan_job(job_id, kind, params)
 
         pos = _queue_position(job_id)
 
@@ -941,7 +919,7 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
             ),
             "idempotency" => Dict(
                 "key" => idempotency_key,
-                "replayed" => false,
+                "replayed" => admission.mode === :replay,
                 "conflict" => false,
             ),
             "diagnostics" => _build_job_diagnostics(job_id, kind, _SCAN_JOB_STATUS_QUEUED),

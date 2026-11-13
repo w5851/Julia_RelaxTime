@@ -78,6 +78,8 @@ density = Models.number_densities(model, state, 0.0, mu_vec)
 `ArgumentError`。正温默认仍是张量 Gauss。有限温 Taylor 响应与五场约束扫描
 沿用各自正温合同；零温下可直接对解析势求固定态导数，或用三维场方程计算同支响应。
 
+`number_densities` 返回各味的 `quark`、`antiquark` 数密度（fm⁻³）；平均场、质量与化学势分量必须有限，含 `NaN` 或 `Inf` 的输入抛出 `ArgumentError`。
+
 ## 什么时候用 `solve`
 
 `Models.solve` 适合“我已经确定约束模式，希望拿到完整的求解结果载荷”的场景。

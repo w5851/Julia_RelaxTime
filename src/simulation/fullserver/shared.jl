@@ -108,12 +108,16 @@ function _error_payload(code::String, message::String; message_id::String=_new_m
 end
 
 @inline function _to_float64(x)
-    return x isa Number ? Float64(x) : parse(Float64, String(x))
+    x isa Real && !(x isa Bool) && return Float64(x)
+    x isa AbstractString && return parse(Float64, x)
+    throw(ArgumentError("Expected a number or numeric string"))
 end
 
 @inline function _to_int(x, default::Int)
     x === nothing && return default
-    return x isa Integer ? Int(x) : parse(Int, String(x))
+    x isa Integer && !(x isa Bool) && return Int(x)
+    x isa AbstractString && return parse(Int, x)
+    throw(ArgumentError("Expected an integer or integer string"))
 end
 
 @inline function _to_bool(x, default::Bool)
@@ -121,23 +125,31 @@ end
     if x isa Bool
         return x
     end
-    if x isa Number
-        return Int(x) != 0
+    if x isa Real && isfinite(x) && isinteger(x)
+        return !iszero(x)
     end
-    s = lowercase(String(x))
+    x isa AbstractString || throw(ArgumentError("Invalid boolean value"))
+    s = lowercase(strip(x))
     if s in ("1", "true", "yes", "y", "on")
         return true
     elseif s in ("0", "false", "no", "n", "off")
         return false
     end
-    error("Invalid boolean value: $(x)")
+    throw(ArgumentError("Invalid boolean value: $(x)"))
 end
 
 function _to_symbol_dict(obj)
+    obj isa AbstractDict || obj isa NamedTuple || throw(ArgumentError("Expected a JSON object"))
     data = Dict{Symbol,Any}()
     for (k, v) in pairs(obj)
-        key = k isa Symbol ? k : Symbol(string(k))
+        k isa Symbol || k isa AbstractString || throw(ArgumentError("Object keys must be strings"))
+        key = k isa Symbol ? k : Symbol(k)
         data[key] = v
     end
     return data
+end
+
+function _point_request_params(req::HTTP.Request)
+    body = isempty(req.body) ? Dict{Symbol,Any}() : _to_symbol_dict(JSON3.read(req.body))
+    return haskey(body, :params) ? _to_symbol_dict(body[:params]) : body
 end

@@ -27,6 +27,22 @@ function _transport_decode(resp::HTTP.Response)
 end
 
 @testset "FullServer transport-point handlers" begin
+    @testset "malformed JSON and invalid parameter types return 400" begin
+        for raw in ("{", "null", "[]", "1", "\"text\"", "{\"params\":null}", "{\"params\":[]}")
+            resp = FTH.handle_transport_point(HTTP.Request("POST", "/api/modules/transport-point/run", [], raw))
+            @test resp.status == 400
+            @test _transport_decode(resp).error_code == "INVALID_REQUEST"
+        end
+        for (key, value) in (("T_mev", true), ("tau", []), ("tau", true), ("p_num", 1.5),
+                             ("compute_bulk", "invalid"), ("transport", []))
+            params = Dict{String,Any}("T_mev" => 150.0, "mu_mev" => 0.0, "tau" => 1.0)
+            params[key] = value
+            resp = FTH.handle_transport_point(_transport_req(Dict("params" => params)))
+            @test resp.status == 400
+            @test _transport_decode(resp).error_code == "INVALID_REQUEST"
+        end
+    end
+
     @testset "invalid request includes message_id" begin
         req = _transport_req(Dict(
             "params" => Dict(

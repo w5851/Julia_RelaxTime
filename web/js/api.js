@@ -58,9 +58,12 @@ async function request_json(path, options = {}) {
                     ...(fetchOptions.headers || {}),
                 },
             });
-            clearTimeout(timeoutId);
-
-            const payload = await response.json().catch(() => ({}));
+            const payload = await response.json().catch((error) => {
+                if (error?.name === 'AbortError' || response.ok) {
+                    throw error;
+                }
+                return {};
+            });
             if (!response.ok) {
                 throw normalize_api_error({
                     status: response.status,
@@ -70,7 +73,6 @@ async function request_json(path, options = {}) {
             }
             return payload;
         } catch (error) {
-            clearTimeout(timeoutId);
             if (attempt < retries && is_retryable_error(error)) {
                 attempt += 1;
                 continue;
@@ -84,6 +86,8 @@ async function request_json(path, options = {}) {
                 message: error?.message || '请求失败',
                 originalError: error,
             });
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 }
@@ -104,7 +108,8 @@ export function normalize_api_error({ status, payload = {}, message = '', origin
 }
 
 function _is_number(value) {
-    return Number.isFinite(Number(value));
+    return (typeof value === 'number' || (typeof value === 'string' && value.trim() !== ''))
+        && Number.isFinite(Number(value));
 }
 
 function _has_nonempty_numeric_array(value) {
@@ -445,9 +450,9 @@ export class API {
 
         const maxAttempts = 2;
         for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
@@ -455,7 +460,6 @@ export class API {
                     },
                     signal: controller.signal,
                 });
-                clearTimeout(timeoutId);
                 console.log(`[API] Health check response: ${response.status} ${response.statusText}`);
                 return response.ok;
             } catch (error) {
@@ -463,6 +467,8 @@ export class API {
                 if (attempt === maxAttempts) {
                     return false;
                 }
+            } finally {
+                clearTimeout(timeoutId);
             }
         }
         return false;
@@ -486,31 +492,16 @@ export class API {
      * @returns {Promise<Object>} 计算结果
      */
     static async computeScattering(params) {
-        try {
-            const response = await fetch(build_api_url('/compute'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(params),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Computation failed');
-            }
-
-            return result.data;
-        } catch (error) {
-            console.error('API call failed:', error);
-            throw error;
+        const result = await request_json('/compute', {
+            method: 'POST',
+            body: JSON.stringify(params),
+            timeoutMs: 20000,
+            retries: 0,
+        });
+        if (!result.success) {
+            throw normalize_api_error({ payload: result, message: result.error || 'Computation failed' });
         }
+        return result.data;
     }
 
     static async createScanJob(payload) {

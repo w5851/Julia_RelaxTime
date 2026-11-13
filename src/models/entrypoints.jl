@@ -160,12 +160,21 @@ end
 end
 
 @inline function _resolve_numeric_option(value, fallback::Int, name::Symbol)
-    resolved = value === nothing ? fallback : Int(value)
+    value === nothing && return fallback
+    value isa Real && !(value isa Bool) && isfinite(value) && isinteger(value) ||
+        throw(ArgumentError("$(name) must be a positive integer"))
+    resolved = try
+        Int(value)
+    catch err
+        err isa InexactError || rethrow()
+        throw(ArgumentError("$(name) is outside the supported integer range"))
+    end
     resolved > 0 || throw(ArgumentError("$(name) must be positive, got $(resolved)"))
     return resolved
 end
 
 @inline function _resolve_real_option(value, name::Symbol)
+    value isa Real && !(value isa Bool) || throw(ArgumentError("$(name) must be a real number"))
     val = Float64(value)
     isfinite(val) || throw(ArgumentError("$(name) must be finite, got $(value)"))
     return val
@@ -263,7 +272,7 @@ function solve_pnjl_point(;
     omega_val = omega(model, x_state, T_fm, mu_vec; p_num=resolved_p_num, t_num=resolved_t_num, xi=resolved_xi)
     pressure = -omega_val
     rho = number_densities(model, x_state, T_fm, mu_vec; p_num=resolved_p_num, t_num=resolved_t_num, xi=resolved_xi)
-    rho_norm = sum(rho.quark) / 3.0
+    rho_norm = sum(rho.quark - rho.antiquark) / (3.0 * Main.Constants_PNJL.ρ0_inv_fm3)
     masses = calculate_mass_vec(model, meanfield_state(x_state).phi)
     return (
         converged=true,

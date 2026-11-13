@@ -90,5 +90,27 @@ Models.pnjl_module()
     @testset "solve_pnjl_point 参数校验" begin
         @test_throws ArgumentError Models.solve_pnjl_point(T_mev=150.0)
         @test_throws ArgumentError Models.solve_pnjl_point(T_mev=NaN, mu_mev=0.0)
+        @test_throws ArgumentError Models.solve_pnjl_point(T_mev=true, mu_mev=0.0)
+        @test_throws ArgumentError Models.solve_pnjl_point(T_mev=150.0, mu_mev="invalid")
+        for invalid in (true, 1.5, NaN, Inf)
+            @test_throws ArgumentError Models.solve_pnjl_point(T_mev=150.0, mu_mev=0.0, p_num=invalid)
+        end
+    end
+
+    @testset "同步单点密度使用归一化净重子数" begin
+        model = Models.PNJLModel()
+        rho0 = Main.Constants_PNJL.ρ0_inv_fm3
+        for mu_mev in (0.0, 80.0, -80.0)
+            point = Models.solve_pnjl_point(T_mev=150.0, mu_mev=mu_mev, p_num=24, t_num=8)
+            T_fm = 150.0 / Main.Constants_PNJL.ħc_MeV_fm
+            density = Models.number_densities(model, point.x_state, T_fm, point.mu_vec; p_num=24, t_num=8)
+            expected = sum(density.quark - density.antiquark) / (3 * rho0)
+            @test point.rho_norm ≈ expected atol=1e-12
+            if iszero(mu_mev)
+                @test abs(point.rho_norm) < 1e-10
+            else
+                @test sign(point.rho_norm) == sign(mu_mev)
+            end
+        end
     end
 end

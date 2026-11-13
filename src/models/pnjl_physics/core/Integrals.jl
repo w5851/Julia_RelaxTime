@@ -61,6 +61,7 @@ const THERMAL_DEFAULT_WEIGHTS = DEFAULT_MOMENTUM_WEIGHTS
 
 """积分节点缓存：(p_num, t_num) -> (p_mesh, cosθ_mesh, coefficients)"""
 const NODE_CACHE = Dict{Tuple{Int, Int}, NTuple{3, Matrix{Float64}}}()
+const NODE_CACHE_LOCK = ReentrantLock()
 
 # ============================================================================
 # 节点生成函数
@@ -105,8 +106,10 @@ end
 """
 function cached_nodes(p_num::Int, t_num::Int)
     key = (p_num, t_num)
-    return get!(NODE_CACHE, key) do
-        build_nodes(p_num, t_num)
+    return lock(NODE_CACHE_LOCK) do
+        get!(NODE_CACHE, key) do
+            build_nodes(p_num, t_num)
+        end
     end
 end
 

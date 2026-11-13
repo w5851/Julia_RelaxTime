@@ -8,18 +8,14 @@
 # - 传播子/极化：src/relaxtime/TotalPropagator.jl / src/relaxtime/PolarizationCache.jl
 #
 # 运行：
-# - julia --project=. tests/perf/relaxtime/benchmark_total_cross_section_hotspot.jl
+# - julia --project=. benchmark/relaxtime/benchmark_total_cross_section_hotspot.jl
+# - BENCH_PROFILE=0 disables the long profiling loops for a quick benchmark.
 
 using BenchmarkTools
 using Statistics
 using Profile
 
-include(joinpath(@__DIR__, "../../src/constants/Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "../../src/integration/GaussLegendre.jl"))
-include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegrals.jl"))
-include(joinpath(@__DIR__, "../../src/relaxtime/EffectiveCouplings.jl"))
-include(joinpath(@__DIR__, "../../src/relaxtime/ScatteringAmplitude.jl"))
-include(joinpath(@__DIR__, "../../src/relaxtime/TotalCrossSection.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/RelaxTime.jl"))
 
 using .Constants_PNJL
 using .GaussLegendre: gausslegendre
@@ -94,20 +90,22 @@ println()
 # -----------------------------
 # 4) Profile：看调用栈热点（输出可能较长）
 # -----------------------------
-println("\nProfile: total_cross_section (n_points=64, looped)")
-Profile.clear()
-@profile begin
-    for _ in 1:200
-        total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points=64)
+if get(ENV, "BENCH_PROFILE", "1") != "0"
+    println("\nProfile: total_cross_section (n_points=64, looped)")
+    Profile.clear()
+    @profile begin
+        for _ in 1:200
+            total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points=64)
+        end
     end
-end
-Profile.print(maxdepth=18)
+    Profile.print(maxdepth=18)
 
-println("\nProfile: scattering_amplitude_squared (looped)")
-Profile.clear()
-@profile begin
-    for _ in 1:10_000
-        scattering_amplitude_squared(process, s, t, quark_params, thermo_params, K_coeffs)
+    println("\nProfile: scattering_amplitude_squared (looped)")
+    Profile.clear()
+    @profile begin
+        for _ in 1:10_000
+            scattering_amplitude_squared(process, s, t, quark_params, thermo_params, K_coeffs)
+        end
     end
-end
-Profile.print(maxdepth=18)
+    Profile.print(maxdepth=18)
+end # optional profiling

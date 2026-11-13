@@ -34,9 +34,11 @@ gauleg(a::Float64, b::Float64, n::Int) -> (nodes::Vector{Float64}, weights::Vect
 
 | 参数 | 类型 | 说明 | 单位 |
 |------|------|------|------|
-| `a` | `Float64` | 积分区间左端点 | fm⁻¹ |
-| `b` | `Float64` | 积分区间右端点 | fm⁻¹ |
+| `a` | `Float64` | 有限的积分区间左端点 | fm⁻¹ |
+| `b` | `Float64` | 有限的积分区间右端点，须满足 `a < b` | fm⁻¹ |
 | `n` | `Int` | 节点数量（必须 > 0） | 无量纲 |
+
+非有限端点、非递增区间或非正节点数均抛出 `ArgumentError`。`standard_nodes_weights(n)` 同样要求 `n > 0`。
 
 #### 返回值
 

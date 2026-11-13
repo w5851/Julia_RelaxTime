@@ -43,31 +43,6 @@ function print_summary(summary)
     @printf("%-44s %10.3f ms %10.1f KiB %8d allocs\n", summary.name, summary.time_ms, summary.memory_kib, summary.allocs)
 end
 
-function register_suite!()
-    isdefined(Main, :SUITE) || return nothing
-
-    Main.SUITE["pnjl"]["number_densities_default"] = @benchmarkable Models.number_densities(
-        $MODEL,
-        $STATE,
-        $TEMPERATURE,
-        $MU_VEC;
-        p_num=$P_NUM,
-        t_num=$T_NUM,
-        xi=$XI,
-    ) evals=1
-
-    Main.SUITE["pnjl"]["number_densities_reuse_thermal_nodes"] = @benchmarkable Models.number_densities(
-        $MODEL,
-        $STATE,
-        $TEMPERATURE,
-        $MU_VEC;
-        thermal_nodes=$THERMAL_NODES,
-        xi=$XI,
-    ) evals=1
-
-    return nothing
-end
-
 function run_report(; samples::Int=20)
     bench_default = @benchmark Models.number_densities(
         $MODEL,
@@ -100,8 +75,6 @@ function run_report(; samples::Int=20)
     @printf("reuse_thermal_nodes / default median time: %.2f%%\n", 100 * ratio)
     return nothing
 end
-
-register_suite!()
 
 if abspath(PROGRAM_FILE) == @__FILE__
     samples = parse(Int, get(ENV, "BENCH_SAMPLES_PNJL_DENSITY", "20"))

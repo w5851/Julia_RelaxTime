@@ -1,5 +1,5 @@
 function route_request(req::HTTP.Request, repo_root::String)
-    path = String(split(String(HTTP.URIs.unescapeuri(req.target)), '?')[1])
+    path = String(HTTP.URIs.unescapeuri(first(split(req.target, '?'; limit=2))))
     job_prefix = "/api/modules/pnjl-scan/jobs/"
     script_task_prefix = "/api/modules/script-tasks/jobs/"
 
@@ -63,5 +63,6 @@ function route_request(req::HTTP.Request, repo_root::String)
 end
 
 function build_app(repo_root::String)
+    _configure_scan_queue!()
     return cors_middleware(req -> route_request(req, repo_root))
 end

@@ -141,6 +141,24 @@ using Main.ConfigLoader: config_loader_cache_stats, deep_merge, load_config, res
         end
     end
 
+    @testset "nested NamedTuple defaults retain values and cache identity" begin
+        reset_config_loader_cache!()
+        mktempdir() do dir
+            settings = (solver=(tol=1.0e-8, max_iter=128), enabled=true)
+            defaults = Dict{String,Any}("settings" => settings)
+            first = load_config(dir, defaults)
+            second = load_config(dir, deepcopy(defaults))
+            @test first.config["settings"] === settings
+            @test second.config == first.config
+            @test config_loader_cache_stats() == (entries=1, hit=1, miss=1)
+
+            changed = merge(settings, (solver=(tol=1.0e-10, max_iter=128),))
+            third = load_config(dir, Dict{String,Any}("settings" => changed))
+            @test third.config["settings"].solver.tol == 1.0e-10
+            @test config_loader_cache_stats() == (entries=2, hit=1, miss=2)
+        end
+    end
+
     @testset "test_config_loader_cache_concurrent_reads_no_crash_no_dirty_write" begin
         reset_config_loader_cache!()
         dir = mktempdir()

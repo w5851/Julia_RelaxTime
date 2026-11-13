@@ -1,28 +1,6 @@
 function handle_compute(req::HTTP.Request)
     try
-        body = JSON3.read(String(req.body))
-
-        p1 = [Float64(body.p1x), Float64(body.p1y), Float64(body.p1z)]
-        p2 = [Float64(body.p2x), Float64(body.p2y), Float64(body.p2z)]
-        m1 = Float64(body.m1)
-        m2 = Float64(body.m2)
-        m3 = Float64(body.m3)
-        m4 = Float64(body.m4)
-
-        theta_star = haskey(body, :theta_star) ? Float64(body.theta_star) : π / 4
-        phi_star = haskey(body, :phi_star) ? Float64(body.phi_star) : π / 6
-
-        if any(isnan.([p1; p2; m1; m2; m3; m4; theta_star; phi_star]))
-            message_id = _new_message_id()
-            return HTTP.Response(
-                400,
-                ["Content-Type" => "application/json"],
-                JSON3.write(merge(Dict(
-                    "success" => false,
-                    "data" => nothing,
-                ), _error_payload("INVALID_INPUT", "Invalid input: NaN detected"; message_id=message_id))),
-            )
-        end
+        (; p1, p2, m1, m2, m3, m4, theta_star, phi_star) = _parse_compute_request(req)
 
         result = calculate_outgoing_momenta(p1, p2, m1, m2, m3, m4, theta_star, phi_star)
         is_valid, checks = validate_kinematics(result, m1, m2, m3, m4, tol = 1e-9)
@@ -66,7 +44,6 @@ function handle_compute(req::HTTP.Request)
 
         headers = [
             "Content-Type" => "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin" => "*",
         ]
         return HTTP.Response(200, headers, JSON3.write(response_data))
     catch e
@@ -88,7 +65,6 @@ function handle_compute(req::HTTP.Request)
         status = e isa ArgumentError || e isa DomainError ? 400 : 500
         headers = [
             "Content-Type" => "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin" => "*",
         ]
         return HTTP.Response(status, headers, JSON3.write(response_data))
     end

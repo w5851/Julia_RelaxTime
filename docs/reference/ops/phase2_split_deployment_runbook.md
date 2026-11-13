@@ -24,18 +24,19 @@ julia --project=. scripts/server/server_full.jl
 
 - No extra env required.
 - `ServerLauncher` fills missing env with localhost defaults.
+- `PNJL_SCAN_MAX_RUNNING` and `PNJL_SCAN_MAX_PENDING` override positive queue limits when the app is built. Restart the server to apply changed limits; active jobs prevent reconfiguration. The startup banner reports effective values.
 
 ### 3.2 Staging profile
 
-```bash
-set JRT_DEPLOY_PROFILE=staging
+```powershell
+$env:JRT_DEPLOY_PROFILE = 'staging'
 julia --project=. scripts/server/server_full.jl
 ```
 
 ### 3.3 Remote profile
 
-```bash
-set JRT_DEPLOY_PROFILE=remote
+```powershell
+$env:JRT_DEPLOY_PROFILE = 'remote'
 julia --project=. scripts/server/server_full.jl
 ```
 
@@ -46,13 +47,15 @@ Frontend profile priority:
 1. `globalThis.__JRT_DEPLOY_PROFILE__`
 2. URL query `?deploy_profile=...`
 3. `localStorage.JRT_DEPLOY_PROFILE`
-4. fallback `localhost`
+4. without an explicit profile, HTTP(S) pages use their own origin and port; other contexts fall back to `http://localhost:8080`
 
 Manual override (stronger than profile URL mapping):
 
 - `globalThis.__JRT_API_BASE_URL__`
 - URL query `?api_base_url=...`
 - `localStorage.JRT_API_BASE_URL`
+
+For split deployment, set `JRT_CORS_ALLOW_ORIGINS` to the frontend origin(s), separated by commas. The middleware reads it when the app is built. `*` permits all origins; an explicit list rejects requests with an unlisted `Origin` with HTTP 403. Requests without `Origin` remain available. Allowed responses include `Vary: Origin`; preflight supports `Content-Type` and `Idempotency-Key`.
 
 ## 5. Health Checks
 
@@ -80,7 +83,8 @@ node web/js/runtime_config.contract.test.mjs
 If staging/remote profile causes issue:
 
 1. reset profile to localhost
-   - `set JRT_DEPLOY_PROFILE=localhost`
+   - `$env:JRT_DEPLOY_PROFILE = 'localhost'`
+   - clear any explicit backend CORS override: `Remove-Item Env:JRT_CORS_ALLOW_ORIGINS -ErrorAction SilentlyContinue`
 2. clear frontend profile overrides
    - remove query params `deploy_profile` / `api_base_url`
    - clear `localStorage` keys `JRT_DEPLOY_PROFILE`, `JRT_API_BASE_URL`

@@ -443,7 +443,6 @@ end
 @inline function _script_task_json_response(status::Int, payload::AbstractDict)
     headers = [
         "Content-Type" => "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin" => "*",
     ]
     return HTTP.Response(status, headers, JSON3.write(_pnjl_json_safe_value(payload)))
 end
@@ -775,19 +774,27 @@ function _launch_script_task_job(job_id::String)
     end
 end
 
+function _reserve_script_task_job(body_dict::Dict{Symbol,Any})
+    return lock(_SCRIPT_TASK_JOBS_LOCK) do
+        _script_task_queue_snapshot().queued >= _SCRIPT_TASK_MAX_PENDING && return nothing
+        job_id = string(uuid4())
+        resolved = _script_task_resolve_request(body_dict, job_id)
+        _new_script_task_job(job_id, resolved)
+        return (job_id=job_id, resolved=resolved)
+    end
+end
+
 function handle_script_task_job_create(req::HTTP.Request)
     req.method == "POST" || return HTTP.Response(405, ["Content-Type" => "text/plain"], "Method Not Allowed")
     try
         body = isempty(req.body) ? Dict{Symbol,Any}() : JSON3.read(String(req.body))
         body_dict = body isa Dict ? body : _to_symbol_dict(body)
-        snap = _script_task_queue_snapshot()
-        if snap.queued >= _SCRIPT_TASK_MAX_PENDING
+        admission = _reserve_script_task_job(body_dict)
+        if admission === nothing
             return _script_task_error_response(429, "QUEUE_FULL", "script task queue is full")
         end
 
-        job_id = string(uuid4())
-        resolved = _script_task_resolve_request(body_dict, job_id)
-        job_id = _new_script_task_job(job_id, resolved)
+        (; job_id, resolved) = admission
         _launch_script_task_job(job_id)
         pos = _script_task_queue_position(job_id)
         return _script_task_json_response(202, Dict(

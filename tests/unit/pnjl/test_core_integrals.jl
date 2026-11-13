@@ -22,6 +22,15 @@ import .Integrals
 # ============================================================================
 
 @testset "cached_nodes" begin
+    @testset "并发节点请求" begin
+        tasks = [Threads.@spawn Integrals.cached_nodes(19 + i % 3, 5) for i in 1:48]
+        for (i, task) in enumerate(tasks)
+            nodes = fetch(task)
+            @test nodes === Integrals.cached_nodes(19 + i % 3, 5)
+            @test all(values -> all(isfinite, values), nodes)
+        end
+    end
+
     @testset "默认节点数" begin
         p_mesh, cosθ_mesh, coefficients = Integrals.cached_nodes(Integrals.DEFAULT_MOMENTUM_COUNT, Integrals.DEFAULT_THETA_COUNT)
         @test size(p_mesh) == (Integrals.DEFAULT_MOMENTUM_COUNT, Integrals.DEFAULT_THETA_COUNT)

@@ -5,7 +5,8 @@
 当前推荐入口：
 
 - `benchmark_quadgk_oracle_smoke.jl`：用隔离 QuadGK 对照当前固定 hybrid B0 实部，并报告 oracle error estimate 与相对差；不设 correctness gate。
-- `benchmark_total_cross_section_hotspot.jl`：总截面热点路径。
+- `benchmark_total_cross_section_hotspot.jl`：总截面热点路径；`BENCH_PROFILE=0` 仅运行 benchmark，省略长循环 profiling。
+- `bench_differential_cross_section.jl`：微分截面、阈值、积分边界与振幅组合计时；`BENCH_SAMPLES` 控制采样数。
 - `benchmark_transport_cache_stages.jl`：当前 thermal-weighted 缓存的热测度、特征发现和自适应建表分项成本。
 - `benchmark_transport_production_entrypoint.jl`：当前默认扫描入口的两点重复与完整计时；读取已审阅的生产基线，保留首次完整预热和各点全部通道诊断。
 - `transport_runner_timing.jl`：原样调用 phase-guided CLI，记录加载/扫描的 wall、GC、JIT 与累计分配，以及实际主机和线程信息；`TRANSPORT_RUNNER_TIMING_PATH` 指定新的 TOML 输出。JIT 已包含在各阶段耗时中，完整进程时间与峰值 RSS 仍由外层 GNU time 记录。

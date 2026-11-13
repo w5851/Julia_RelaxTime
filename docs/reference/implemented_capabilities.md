@@ -223,7 +223,7 @@ T/rho/xi grid
 - **稳定 CLI**：`scripts/models/run_unified_scan.jl scan trho`。
 - **算法/合同**：[`TrhoScan.md`](../api/models/scans/TrhoScan.md)。
 - **回归**：`test_constraint_fixedpoint_regression.jl`、`test_constraint_selection_regression.jl`、`test_wavee_unified_scan_stability.jl`。
-- **边界**：`rho` 分辨率直接影响 S-shape/Maxwell；默认 `reverse_rho=true` 是稳定性合同。`rs_reduced_adaptive` 目前只允许 PNJL + fixed-rho。
+- **边界**：`rho` 分辨率直接影响 S-shape/Maxwell；默认 `reverse_rho=true` 是稳定性合同。本 Trho 扫描的 `rs_reduced_adaptive` 选项限于 PNJL + fixed-rho；底层 PNJL 固定态热核、FixedMu 及对应热力学导数也支持该积分策略。零温自洽入口为 `Models.solve_gap(model, 0.0, mu_vec)`。
 
 ## 6. 路线 D：相结构、Maxwell 与 CEP
 

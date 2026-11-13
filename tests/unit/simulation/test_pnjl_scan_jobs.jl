@@ -2,6 +2,7 @@ using Test
 using HTTP
 using JSON3
 using Dates: DateTime
+using Logging: NullLogger, with_logger
 
 const PROJECT_ROOT_PSJ = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -30,6 +31,7 @@ end
 function _reset_jobs_state!()
     lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
         empty!(PSJ._PNJL_SCAN_JOBS)
+        empty!(PSJ._PNJL_SCAN_IDEMPOTENCY_CACHE)
         PSJ._PNJL_SCAN_JOB_SEQ[] = 0
         if isdefined(PSJ, :_PNJL_SCAN_PRUNE_METRICS)
             empty!(PSJ._PNJL_SCAN_PRUNE_METRICS)
@@ -250,6 +252,90 @@ end
         @test body.error_code == "QUEUE_FULL"
         @test body.error == "queue is full"
         @test haskey(body, :message_id)
+    end
+
+    @testset "runtime queue limits reach the scheduler" begin
+        _reset_jobs_state!()
+        try
+            withenv("PNJL_SCAN_MAX_RUNNING" => "3", "PNJL_SCAN_MAX_PENDING" => "7") do
+                PSJ.build_app(PROJECT_ROOT_PSJ)
+                semaphore = PSJ._PNJL_SCAN_SEMAPHORE
+                for _ in 1:3
+                    Base.acquire(semaphore)
+                end
+                acquired = Channel{Bool}(1)
+                waiter = @async begin
+                    Base.acquire(semaphore)
+                    put!(acquired, true)
+                    Base.release(semaphore)
+                end
+                yield()
+                @test !isready(acquired)
+                Base.release(semaphore)
+                @test take!(acquired)
+                wait(waiter)
+                Base.release(semaphore)
+                Base.release(semaphore)
+
+                ids = [PSJ._new_job("tmu", Dict{String,Any}(); total_points=1) for _ in 1:7]
+                status = _body_dict(PSJ.handle_pnjl_scan_job_status(first(ids)))
+                @test status.queue.max_running == 3
+                @test status.queue.max_pending == 7
+                @test PSJ.handle_pnjl_scan_job_create(_post_jobs_request(Dict("kind" => "tmu"))).status == 429
+                withenv("PNJL_SCAN_MAX_RUNNING" => "4") do
+                    @test_throws ArgumentError PSJ.build_app(PROJECT_ROOT_PSJ)
+                end
+            end
+        finally
+            _reset_jobs_state!()
+            withenv("PNJL_SCAN_MAX_RUNNING" => "2", "PNJL_SCAN_MAX_PENDING" => "32") do
+                PSJ._configure_scan_queue!()
+            end
+        end
+    end
+
+    @testset "concurrent admission preserves idempotency and capacity" begin
+        _reset_jobs_state!()
+        params = Dict{Symbol,Any}(:mode => "point", :T_mev => 150.0, :mu_mev => 0.0)
+        fingerprint = PSJ._request_fingerprint("tmu", params)
+        admissions = with_logger(NullLogger()) do
+            fetch.([Threads.@spawn PSJ._reserve_scan_job("tmu", params, "shared-key", fingerprint) for _ in 1:48])
+        end
+        @test count(item -> item.mode === :new, admissions) == 1
+        @test count(item -> item.mode === :replay, admissions) == 47
+        @test length(unique(item.job_id for item in admissions)) == 1
+        @test PSJ._queue_snapshot().queued == 1
+        @test PSJ._reserve_scan_job("tmu", params, "shared-key", "different").mode === :conflict
+
+        _reset_jobs_state!()
+        attempts = PSJ._PNJL_SCAN_MAX_PENDING + 16
+        admissions = with_logger(NullLogger()) do
+            fetch.([Threads.@spawn PSJ._reserve_scan_job("tmu", params, nothing, fingerprint) for _ in 1:attempts])
+        end
+        @test count(item -> item.mode === :new, admissions) == PSJ._PNJL_SCAN_MAX_PENDING
+        @test count(item -> item.mode === :full, admissions) == 16
+        @test PSJ._queue_snapshot().queued == PSJ._PNJL_SCAN_MAX_PENDING
+        _reset_jobs_state!()
+    end
+
+    @testset "pruning releases idempotency records with their jobs" begin
+        _reset_jobs_state!()
+        params = Dict{Symbol,Any}(:mode => "point", :T_mev => 150.0, :mu_mev => 0.0)
+        fingerprint = PSJ._request_fingerprint("tmu", params)
+        expired = PSJ._reserve_scan_job("tmu", params, "expired-key", fingerprint)
+        active = PSJ._reserve_scan_job("tmu", params, "active-key", fingerprint)
+        PSJ._with_job(expired.job_id) do job
+            job["status"] = "succeeded"
+            job["ended_at"] = "2026-03-01T00:00:00"
+        end
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            @test PSJ._prune_finished_jobs_locked!(10; now=DateTime(2026, 3, 28), ttl_seconds=10) == 1
+            @test !haskey(PSJ._PNJL_SCAN_IDEMPOTENCY_CACHE, "expired-key")
+            @test haskey(PSJ._PNJL_SCAN_IDEMPOTENCY_CACHE, "active-key")
+        end
+        @test PSJ._reserve_scan_job("tmu", params, "expired-key", fingerprint).mode === :new
+        @test PSJ._reserve_scan_job("tmu", params, "active-key", fingerprint).job_id == active.job_id
+        _reset_jobs_state!()
     end
 
     @testset "finished jobs pruning keeps active jobs" begin
