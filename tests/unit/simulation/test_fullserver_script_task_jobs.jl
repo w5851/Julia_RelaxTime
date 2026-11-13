@@ -2,6 +2,7 @@ using Test
 using HTTP
 using JSON3
 using Logging: NullLogger, with_logger
+using Dates: DateTime, Second, Day
 
 const PROJECT_ROOT_STJ = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -207,5 +208,69 @@ end
         @test !occursin(repeat("a", 100), tail)
         @test occursin("tail-window", tail)
         @test length(tail) <= 64
+    end
+end
+
+@testset "script task terminal history retention" begin
+    now = DateTime(2026, 11, 13, 12)
+    fixture(id, status; ended_at=now, seq=0, worker_active=false, process=nothing) = Dict{String,Any}(
+        "job_id" => id, "status" => status, "ended_at" => ended_at, "seq" => seq,
+        "worker_active" => worker_active, "process" => process,
+    )
+    lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+        saved = copy(STJ._SCRIPT_TASK_JOBS)
+        empty!(STJ._SCRIPT_TASK_JOBS)
+        try
+            @test STJ._SCRIPT_TASK_FINISHED_KEEP_MAX == 64
+            @test STJ._SCRIPT_TASK_FINISHED_TTL_SECONDS == 86400
+            @test_throws ArgumentError STJ._prune_finished_script_tasks_locked!(-1; now)
+            @test_throws ArgumentError STJ._prune_finished_script_tasks_locked!(1; now, ttl_seconds=-1)
+
+            STJ._SCRIPT_TASK_JOBS["expired"] = fixture("expired", "succeeded"; ended_at=string(now - Second(11)))
+            STJ._SCRIPT_TASK_JOBS["boundary"] = fixture("boundary", "failed"; ended_at=now - Second(10))
+            STJ._SCRIPT_TASK_JOBS["queued"] = fixture("queued", "queued"; ended_at=now - Day(2))
+            STJ._SCRIPT_TASK_JOBS["running"] = fixture("running", "running"; ended_at=now - Day(2))
+            STJ._SCRIPT_TASK_JOBS["cancelling"] = fixture("cancelling", "cancelled"; ended_at=now - Day(2), worker_active=true)
+            STJ._SCRIPT_TASK_JOBS["process-live"] = fixture("process-live", "cancelled"; ended_at=now - Day(2), process=:occupied)
+            @test STJ._prune_finished_script_tasks_locked!(10; now, ttl_seconds=10) == 1
+            @test !haskey(STJ._SCRIPT_TASK_JOBS, "expired")
+            @test Set(keys(STJ._SCRIPT_TASK_JOBS)) == Set(("boundary", "queued", "running", "cancelling", "process-live"))
+
+            # Retain most recently completed tasks, regardless of submission order.
+            STJ._SCRIPT_TASK_JOBS["recent"] = fixture("recent", "succeeded"; seq=1)
+            STJ._SCRIPT_TASK_JOBS["older"] = fixture("older", "cancelled"; ended_at=now - Second(2), seq=100)
+            @test STJ._prune_finished_script_tasks_locked!(1; now, ttl_seconds=10) == 2
+            @test haskey(STJ._SCRIPT_TASK_JOBS, "recent")
+            @test !haskey(STJ._SCRIPT_TASK_JOBS, "older")
+            STJ._SCRIPT_TASK_JOBS["cancelling"]["worker_active"] = false
+            STJ._SCRIPT_TASK_JOBS["process-live"]["process"] = nothing
+            @test STJ._prune_finished_script_tasks_locked!(0; now, ttl_seconds=10) == 3
+            @test Set(keys(STJ._SCRIPT_TASK_JOBS)) == Set(("queued", "running"))
+
+            mktempdir() do output
+                result = joinpath(output, "result.csv")
+                log = joinpath(output, "stdout.log")
+                write(result, "value\n42\n")
+                write(log, "completed")
+                stale = fixture("stale", "succeeded"; ended_at=STJ.Dates.now() - Day(2))
+                merge!(stale, Dict("output_dir" => output, "stdout_path" => log))
+                STJ._SCRIPT_TASK_JOBS["stale"] = stale
+                withenv("SCRIPT_TASK_FINISHED_KEEP_MAX" => "2", "SCRIPT_TASK_FINISHED_TTL_SECONDS" => "5") do
+                    @test STJ._script_task_history_policy() == (keep_max=2, ttl_seconds=5)
+                    for handler in (STJ.handle_script_task_job_status, STJ.handle_script_task_job_result, STJ.handle_script_task_job_cancel)
+                        STJ._SCRIPT_TASK_JOBS["stale"] = copy(stale)
+                        response = handler("stale")
+                        @test response.status == 404
+                        @test _script_task_body(response).error_code == "JOB_NOT_FOUND"
+                        @test !haskey(STJ._SCRIPT_TASK_JOBS, "stale")
+                    end
+                end
+                @test read(result, String) == "value\n42\n"
+                @test read(log, String) == "completed"
+            end
+        finally
+            empty!(STJ._SCRIPT_TASK_JOBS)
+            merge!(STJ._SCRIPT_TASK_JOBS, saved)
+        end
     end
 end

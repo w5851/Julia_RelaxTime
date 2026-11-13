@@ -29,44 +29,57 @@ end
 
 module RelaxTime
 
+# Reuse legacy Main modules and publish new modules immediately, so later
+# includes resolve the same types, functions and caches through either path.
+macro shared_module(name, source)
+    return esc(quote
+        if isdefined(Main, $(QuoteNode(name)))
+            const $name = getfield(Main, $(QuoteNode(name)))
+        else
+            $source
+            Core.eval(Main, Expr(:const, Expr(:(=), $(QuoteNode(name)), $name)))
+        end
+    end)
+end
+
 # ── Integration & utility submodules ──
-include(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl"))
-include(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl"))
-include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
-include(joinpath(@__DIR__, "..", "utils", "ParticleSymbols.jl"))
-include(joinpath(@__DIR__, "..", "integration", "PhaseSpaceSampling.jl"))
-include("KinematicChecks.jl")
+@shared_module ParameterAdapters include(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl"))
+@shared_module ValidationUtils include(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl"))
+@shared_module GaussLegendre include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
+@shared_module ParticleSymbols include(joinpath(@__DIR__, "..", "utils", "ParticleSymbols.jl"))
+@shared_module PhaseSpaceSampling include(joinpath(@__DIR__, "..", "integration", "PhaseSpaceSampling.jl"))
+@shared_module KinematicChecks include("KinematicChecks.jl")
 
 # ── Relaxtime submodules (dependency order) ──
-include("OneLoopIntegrals.jl")
-include("CausalSpectralBubble.jl")
-include("OneLoopIntegralsAniso.jl")
-include("PolarizationAniso.jl")
-include("PolarizationCache.jl")
-include("AFieldBuilder.jl")
-include("EffectiveCouplings.jl")
-include("MesonInteractionKernel.jl")
-include("ChargedRPAKernel.jl")
-include("ChargedRPAProvider.jl")
-include("MesonRPA.jl")
-include("MesonRPAAdapter.jl")
-include("MesonPropagator.jl")
-include("TotalPropagator.jl")
-include("MesonMass.jl")
-include("MottTransition.jl")
-include("BUPhaseGates.jl")
-include("PhaseNormalization.jl")
-include("ChargedPhaseBackend.jl")
-include("MesonDensity.jl")
-include("MesonThermodynamics.jl")
-include("DifferentialCrossSection.jl")
-include("ScatteringAmplitude.jl")
-include("TotalCrossSection.jl")
-include("PairLoopQuadrature.jl")
-include("AverageScatteringRate.jl")
-include("RelaxationTime.jl")
-include("TransportCoefficientsValidation.jl")
-include("TransportCoefficients.jl")
+@shared_module OneLoopIntegrals include("OneLoopIntegrals.jl")
+@shared_module CausalSpectralBubble include("CausalSpectralBubble.jl")
+@shared_module OneLoopIntegralsCorrection include("OneLoopIntegralsAniso.jl")
+@shared_module PolarizationAniso include("PolarizationAniso.jl")
+@shared_module PolarizationCache include("PolarizationCache.jl")
+@shared_module AFieldBuilder include("AFieldBuilder.jl")
+@shared_module EffectiveCouplings include("EffectiveCouplings.jl")
+@shared_module MesonInteractionKernel include("MesonInteractionKernel.jl")
+@shared_module ChargedRPAKernel include("ChargedRPAKernel.jl")
+@shared_module ChargedRPAProvider include("ChargedRPAProvider.jl")
+@shared_module MesonRPA include("MesonRPA.jl")
+@shared_module MesonRPAAdapter include("MesonRPAAdapter.jl")
+@shared_module MesonPropagator include("MesonPropagator.jl")
+@shared_module TotalPropagator include("TotalPropagator.jl")
+@shared_module MesonMass include("MesonMass.jl")
+@shared_module MottTransition include("MottTransition.jl")
+@shared_module BUPhaseGates include("BUPhaseGates.jl")
+@shared_module PhaseNormalization include("PhaseNormalization.jl")
+@shared_module ChargedPhaseBackend include("ChargedPhaseBackend.jl")
+@shared_module MesonDensity include("MesonDensity.jl")
+@shared_module MesonThermodynamics include("MesonThermodynamics.jl")
+@shared_module DifferentialCrossSection include("DifferentialCrossSection.jl")
+@shared_module ScatteringAmplitude include("ScatteringAmplitude.jl")
+@shared_module TotalCrossSection include("TotalCrossSection.jl")
+@shared_module PairLoopQuadrature include("PairLoopQuadrature.jl")
+@shared_module AverageScatteringRate include("AverageScatteringRate.jl")
+@shared_module RelaxationTime include("RelaxationTime.jl")
+@shared_module TransportCoefficientsValidation include("TransportCoefficientsValidation.jl")
+@shared_module TransportCoefficients include("TransportCoefficients.jl")
 
 # ── Re-exports ──
 using .OneLoopIntegrals
@@ -98,16 +111,3 @@ using .TransportCoefficients
 using .KinematicChecks
 
 end # module RelaxTime
-
-# ── 向后兼容：将子模块提升到 Main 作用域 ──
-# 使现有代码中 `using Main.OneLoopIntegrals` 等引用继续工作。
-for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso,
-              :PolarizationCache, :AFieldBuilder, :EffectiveCouplings,
-              :MesonInteractionKernel, :ChargedRPAKernel, :ChargedRPAProvider, :MesonRPA, :MesonRPAAdapter, :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :BUPhaseGates, :PhaseNormalization, :MesonDensity, :MesonThermodynamics,
-              :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
-              :ChargedPhaseBackend, :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
-              :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)
-    if !isdefined(@__MODULE__, _name)
-        Core.eval(@__MODULE__, :(const $_name = RelaxTime.$_name))
-    end
-end
