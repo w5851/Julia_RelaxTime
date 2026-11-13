@@ -17,23 +17,6 @@ end
     return parsed
 end
 
-@inline function _json_safe_value(value)
-    if value isa AbstractFloat
-        return isfinite(value) ? value : nothing
-    elseif value isa Integer || value isa Bool || value isa Nothing || value isa AbstractString
-        return value
-    elseif value isa AbstractDict
-        return Dict(string(k) => _json_safe_value(v) for (k, v) in pairs(value))
-    elseif value isa NamedTuple
-        return Dict(string(k) => _json_safe_value(v) for (k, v) in pairs(value))
-    elseif value isa AbstractVector
-        return [_json_safe_value(v) for v in value]
-    elseif value isa Tuple
-        return [_json_safe_value(v) for v in value]
-    end
-    return value
-end
-
 function _transport_tau_payload(tau_value)
     tau_value === nothing && throw(ArgumentError("Missing required parameter: tau"))
     if tau_value isa Number
@@ -42,7 +25,7 @@ function _transport_tau_payload(tau_value)
         return (u=tau, d=tau, s=tau, ubar=tau, dbar=tau, sbar=tau)
     end
 
-    tau_dict = tau_value isa Dict ? tau_value : _to_symbol_dict(tau_value)
+    tau_dict = _to_symbol_dict(tau_value)
     required = (:u, :d, :s, :ubar, :dbar, :sbar)
     values = Dict{Symbol, Float64}()
     for key in required
@@ -64,7 +47,7 @@ end
 function _transport_integration_config(params_dict::Dict{Symbol,Any})
     haskey(params_dict, :transport) || return nothing
     transport_obj = params_dict[:transport]
-    transport_dict = transport_obj isa Dict ? transport_obj : _to_symbol_dict(transport_obj)
+    transport_dict = _to_symbol_dict(transport_obj)
     isempty(transport_dict) && return nothing
 
     workflow = Models.transport_workflow_module()
@@ -98,17 +81,17 @@ end
         "equilibrium" => Dict(
             "converged" => eq.converged,
             "iterations" => eq.iterations,
-            "residual_norm" => _json_safe_value(eq.residual_norm),
-            "x_state" => _json_safe_value(eq.x_state),
-            "mu_vec" => _json_safe_value(eq.mu_vec),
-            "masses" => _json_safe_value(eq.masses),
+            "residual_norm" => _pnjl_json_safe_value(eq.residual_norm),
+            "x_state" => _pnjl_json_safe_value(eq.x_state),
+            "mu_vec" => _pnjl_json_safe_value(eq.mu_vec),
+            "masses" => _pnjl_json_safe_value(eq.masses),
         ),
         "thermo_background" => Dict(
-            "pressure" => _json_safe_value(result.thermo_background.pressure),
-            "entropy" => _json_safe_value(result.thermo_background.entropy),
-            "energy" => _json_safe_value(result.thermo_background.energy),
-            "rho_mass" => _json_safe_value(result.thermo_background.rho_mass),
-            "c_p" => _json_safe_value(result.thermo_background.c_p),
+            "pressure" => _pnjl_json_safe_value(result.thermo_background.pressure),
+            "entropy" => _pnjl_json_safe_value(result.thermo_background.entropy),
+            "energy" => _pnjl_json_safe_value(result.thermo_background.energy),
+            "rho_mass" => _pnjl_json_safe_value(result.thermo_background.rho_mass),
+            "c_p" => _pnjl_json_safe_value(result.thermo_background.c_p),
         ),
         "densities" => Dict(
             "u" => result.densities.u,
@@ -119,21 +102,21 @@ end
             "sbar" => result.densities.sbar,
         ),
         "transport" => Dict(
-            "eta" => _json_safe_value(tr.eta),
-            "zeta" => _json_safe_value(tr.zeta),
-            "sigma" => _json_safe_value(tr.sigma),
-            "kappa_BB" => _json_safe_value(tr.kappa_BB),
-            "kappa_BQ" => _json_safe_value(tr.kappa_BQ),
-            "kappa_BS" => _json_safe_value(tr.kappa_BS),
-            "kappa_QQ" => _json_safe_value(tr.kappa_QQ),
-            "kappa_QS" => _json_safe_value(tr.kappa_QS),
-            "kappa_SS" => _json_safe_value(tr.kappa_SS),
-            "lambda" => _json_safe_value(tr.lambda),
-            "lorenz_number" => _json_safe_value(tr.lorenz_number),
-            "lorentz_legacy" => _json_safe_value(tr.lorentz_legacy),
-            "viscous_conductive_coupling_ratio" => _json_safe_value(tr.viscous_conductive_coupling_ratio),
-            "prandtl_number" => _json_safe_value(tr.prandtl_number),
-            "bulk_to_shear_viscosity_ratio" => _json_safe_value(tr.bulk_to_shear_viscosity_ratio),
+            "eta" => _pnjl_json_safe_value(tr.eta),
+            "zeta" => _pnjl_json_safe_value(tr.zeta),
+            "sigma" => _pnjl_json_safe_value(tr.sigma),
+            "kappa_BB" => _pnjl_json_safe_value(tr.kappa_BB),
+            "kappa_BQ" => _pnjl_json_safe_value(tr.kappa_BQ),
+            "kappa_BS" => _pnjl_json_safe_value(tr.kappa_BS),
+            "kappa_QQ" => _pnjl_json_safe_value(tr.kappa_QQ),
+            "kappa_QS" => _pnjl_json_safe_value(tr.kappa_QS),
+            "kappa_SS" => _pnjl_json_safe_value(tr.kappa_SS),
+            "lambda" => _pnjl_json_safe_value(tr.lambda),
+            "lorenz_number" => _pnjl_json_safe_value(tr.lorenz_number),
+            "lorentz_legacy" => _pnjl_json_safe_value(tr.lorentz_legacy),
+            "viscous_conductive_coupling_ratio" => _pnjl_json_safe_value(tr.viscous_conductive_coupling_ratio),
+            "prandtl_number" => _pnjl_json_safe_value(tr.prandtl_number),
+            "bulk_to_shear_viscosity_ratio" => _pnjl_json_safe_value(tr.bulk_to_shear_viscosity_ratio),
         ),
         "reproducibility" => Dict(
             "physics_profile" => result.reproducibility.physics_profile,
@@ -147,11 +130,8 @@ function handle_transport_point(req::HTTP.Request)
         return _transport_error_response(405, "METHOD_NOT_ALLOWED", "Method Not Allowed")
     end
 
-    body = isempty(req.body) ? Dict{Symbol,Any}() : JSON3.read(req.body)
-    params_obj = haskey(body, :params) ? body[:params] : body
-    params_dict = params_obj isa Dict ? params_obj : _to_symbol_dict(params_obj)
-
     try
+        params_dict = _point_request_params(req)
         numeric = Models.default_scan_numeric_options()
         T_mev = _transport_real_option(get(params_dict, :T_mev, get(params_dict, :t_mev, nothing)), "T_mev")
         mu_mev = _transport_real_option(get(params_dict, :mu_mev, get(params_dict, :mu, nothing)), "mu_mev")

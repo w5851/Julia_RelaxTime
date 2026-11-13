@@ -94,17 +94,6 @@ function print_summary(summary)
         summary.name, summary.time_ms, summary.memory_kib, summary.allocs)
 end
 
-function register_suite!()
-    isdefined(Main, :SUITE) || return nothing
-    Main.SUITE["relaxtime"]["bu_phase_e3_equilibrium_point"] =
-        @benchmarkable Main.solve_equilibrium_meson_point($T_MeV) evals=1
-    Main.SUITE["relaxtime"]["bu_phase_e3_post_equilibrium"] =
-        @benchmarkable bu_post_equilibrium() evals=1
-    Main.SUITE["relaxtime"]["bu_phase_e3_full_point"] =
-        @benchmarkable bu_full_point() evals=1
-    return nothing
-end
-
 function run_report()
     eq_trial = @benchmark Main.solve_equilibrium_meson_point($T_MeV) samples=EQ_SAMPLES evals=1
     post_trial = @benchmark bu_post_equilibrium() samples=POST_SAMPLES evals=1
@@ -129,8 +118,6 @@ function run_report()
     @printf("post-equilibrium integral / full point: %.2f%%\n", 100 * post_t / full_t)
     return nothing
 end
-
-register_suite!()
 
 if abspath(PROGRAM_FILE) == @__FILE__
     run_report()

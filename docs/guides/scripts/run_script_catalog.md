@@ -44,7 +44,6 @@
 | `scripts/relaxtime/run_xi_smoothness_batch.jl` | xi smoothness 批处理扫描入口 | `analysis-experimental` | 研究分析资产，不作为稳定用户白名单 |
 | `scripts/analysis/convergence/run_convergence.jl` | 收敛性分析扫描 | `gate` | 分析脚本 |
 | `scripts/analysis/relaxtime/meson_mixed/run_globalmin_window_experiment.jl` | mixed-meson global-min 窗口实验脚本 | `analysis-experimental` | 研究实验资产，不作为稳定用户白名单 |
-| `scripts/dev/run_prune_wave_gate.jl` | 裁剪波次门禁（快照 + smoke + 回滚） | `gate` | 维护治理脚本 |
 | `scripts/relaxtime/run_outputs_2026_02_05.jl` | 历史日期任务的一次性产物脚本 | `analysis-experimental` | deprecate-candidate，替代方向：`run_manual_relaxation_scan_workflow.jl` / orchestrator |
 
 ## 维护规则

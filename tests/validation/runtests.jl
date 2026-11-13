@@ -119,6 +119,10 @@ end
         @testset "RelaxTime Baselines" begin
             _include_validation_dir(joinpath(VALIDATION_DIR, "relaxtime"))
         end
+
+        @testset "Models References" begin
+            _include_validation_dir(joinpath(VALIDATION_DIR, "models"))
+        end
     else
         error("Unknown VALIDATION_PROFILE=$(profile). Use smoke, core, or full")
     end

@@ -102,6 +102,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_solver_seed_strategies.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraint_modes.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_pnjl_core.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_pnjl_model.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_core_integrals.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_low_temperature_responses.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_zero_temperature_gap.jl"),
@@ -176,6 +177,8 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "simulation", "test_momentum_mapping.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_compute_handlers.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_pnjl_handlers.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_fullserver_http_utils.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_fullserver_transport_handlers.jl"),
 ]
 
 function _selected_unit_files()

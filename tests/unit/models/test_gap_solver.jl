@@ -18,7 +18,17 @@ end
 
 # ============================================================================
 
+struct OmegaFailureProbe
+    exception::Exception
+end
+Models.omega(model::OmegaFailureProbe, x, T, mu; kwargs...) = throw(model.exception)
+
 @testset "gap_solver" begin
+    @testset "候选势计算允许用户中断" begin
+        state = Models.MeanFieldState(SVector(-1.5, -1.5, -2.0); Phi=0.3, PhiBar=0.3)
+        @test Models._safe_omega(OmegaFailureProbe(DomainError(-1.0)), state, 0.5, 0.0) == Inf
+        @test_throws InterruptException Models._safe_omega(OmegaFailureProbe(InterruptException()), state, 0.5, 0.0)
+    end
 
     # --- NLsolveGapSolver 构造 ---
     @testset "NLsolveGapSolver 默认" begin

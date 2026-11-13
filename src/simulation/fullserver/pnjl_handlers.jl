@@ -1,7 +1,6 @@
 function handle_modules_list()
     headers = [
         "Content-Type" => "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin" => "*",
     ]
     return HTTP.Response(200, headers, JSON3.write(MODULE_REGISTRY))
 end
@@ -26,7 +25,6 @@ end
 @inline function _pnjl_json_response(status::Int, payload::AbstractDict)
     headers = [
         "Content-Type" => "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin" => "*",
     ]
     return HTTP.Response(status, headers, JSON3.write(_pnjl_json_safe_value(payload)))
 end
@@ -39,11 +37,8 @@ function handle_pnjl_single_point(req::HTTP.Request)
     if req.method != "POST"
         return HTTP.Response(405, ["Content-Type" => "text/plain"], "Method Not Allowed")
     end
-    body = isempty(req.body) ? Dict{Symbol,Any}() : JSON3.read(String(req.body))
-    params_obj = haskey(body, :params) ? body[:params] : body
-    params_dict = params_obj isa Dict ? params_obj : _to_symbol_dict(params_obj)
-
     try
+        params_dict = _point_request_params(req)
         scan_opts = Models.default_scan_numeric_options()
         solver_result = Models.solve_pnjl_point(
             T_mev=get(params_dict, :T_mev, nothing),
@@ -54,7 +49,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
             xi=get(params_dict, :xi, 0.0),
             p_num=get(params_dict, :p_num, scan_opts.p_num),
             t_num=get(params_dict, :t_num, scan_opts.t_num),
-            allow_seed_fallback=get(params_dict, :allow_seed_fallback, true),
+            allow_seed_fallback=_to_bool(get(params_dict, :allow_seed_fallback, true), true),
         )
 
         result = Dict(

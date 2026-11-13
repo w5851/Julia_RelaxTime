@@ -13,3 +13,12 @@
   "pA\\s*=\\s*Base\\.invokelatest",
   "pB\\s*=\\s*Base\\.invokelatest"
 ]
+
+# The charged-GBU workflow and optional plotter are loaded on first use.
+# These calls cross that include/world-age boundary, outside numerical kernels.
+"src/models/entrypoints.jl" = [
+  'return Base\.invokelatest\(\(\) -> Main\.ChargedGBUResearchWorkflow\.run_scan'
+]
+"src/models/workflow_apps/ChargedGBUResearchWorkflow.jl" = [
+  'Base\.invokelatest\(\(\) -> render_ratio'
+]

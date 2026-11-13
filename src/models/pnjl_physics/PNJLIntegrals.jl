@@ -55,6 +55,7 @@ const _ADAPTIVE_ERROR_SAFETY = 2.0
 
 """积分节点缓存：(p_num, t_num, p_max_inv_fm) -> (p_mesh, cosθ_mesh, coefficients)"""
 const NODE_CACHE = Dict{Tuple{Int, Int, Float64}, NTuple{3, Matrix{Float64}}}()
+const NODE_CACHE_LOCK = ReentrantLock()
 
 @inline function validate_thermal_quadrature_policy(policy::Symbol)
     policy in SUPPORTED_THERMAL_QUADRATURE_POLICIES || throw(ArgumentError(
@@ -125,8 +126,10 @@ end
 
 function cached_nodes(p_num::Int, t_num::Int; p_max_inv_fm::Float64=DEFAULT_THERMAL_P_MAX_INV_FM)
     key = (p_num, t_num, p_max_inv_fm)
-    return get!(NODE_CACHE, key) do
-        build_nodes(p_num, t_num, p_max_inv_fm)
+    return lock(NODE_CACHE_LOCK) do
+        get!(NODE_CACHE, key) do
+            build_nodes(p_num, t_num, p_max_inv_fm)
+        end
     end
 end
 

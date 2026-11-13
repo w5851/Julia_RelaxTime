@@ -1,6 +1,7 @@
 using Test
 using HTTP
 using JSON3
+using Logging: NullLogger, with_logger
 
 const PROJECT_ROOT_STJ = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -109,6 +110,32 @@ end
         ),
         job_id,
     )
+end
+
+@testset "concurrent script reservations respect the pending limit" begin
+    lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+        empty!(STJ._SCRIPT_TASK_JOBS)
+    end
+    request = Dict{Symbol,Any}(:task_id => "run-unified-scan", :preset => "smoke")
+    try
+        attempts = STJ._SCRIPT_TASK_MAX_PENDING + 8
+        results = with_logger(NullLogger()) do
+            fetch.([Threads.@spawn STJ._reserve_script_task_job(request) for _ in 1:attempts])
+        end
+        @test count(!isnothing, results) == STJ._SCRIPT_TASK_MAX_PENDING
+        @test count(isnothing, results) == 8
+        @test STJ._script_task_queue_snapshot().queued == STJ._SCRIPT_TASK_MAX_PENDING
+        @test STJ._script_task_queue_snapshot().running == 0
+    finally
+        lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+            for job in values(STJ._SCRIPT_TASK_JOBS)
+                path = abspath(job["output_dir"])
+                dirname(path) == abspath(STJ._SCRIPT_TASK_JOB_ROOT) || error("unexpected test output directory")
+                rm(path; recursive=true, force=true)
+            end
+            empty!(STJ._SCRIPT_TASK_JOBS)
+        end
+    end
 end
 
 @testset "FullServer script task HTTP guards" begin

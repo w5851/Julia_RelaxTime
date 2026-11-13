@@ -52,8 +52,8 @@ end
 
 function _canonical_json(io::IO, value)
     if value isa Dict
-        pairs = collect(value)
-        normalized = map(pairs) do (k, v)
+        entries = collect(value)
+        normalized = map(entries) do (k, v)
             (String(k), v)
         end
         sort!(normalized; by=first)

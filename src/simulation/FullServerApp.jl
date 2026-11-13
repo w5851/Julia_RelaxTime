@@ -21,6 +21,7 @@ end
 using Main.Constants_PNJL: ħc_MeV_fm
 
 include(joinpath(@__DIR__, "fullserver", "shared.jl"))
+include(joinpath(@__DIR__, "ComputeRequest.jl"))
 include(joinpath(@__DIR__, "fullserver", "compute_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "pnjl_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "transport_handlers.jl"))

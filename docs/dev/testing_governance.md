@@ -1,6 +1,6 @@
 # 测试组织与入口规范（Julia_RelaxTime）
 
-更新时间：2026-11-06
+更新时间：2026-11-13
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
 - 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
@@ -63,14 +63,15 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
 
 ### Validation（验证测试）
 - Fortran / Mathematica 参考值对照。
+- `VALIDATION_PROFILE=full` 递归执行 `pnjl/`、`relaxtime/` 和 `models/` 下的现有验证测试。
 - 使用固定参考数据文件，容差在 `isapprox` 层显式标注。
 - 若某个 digitized literature target 经多份 legacy 实现交叉验证后被判定为 disputed，则保留原始数据文件不改写，在 acceptance target 中禁用该点，并以单独记录 provenance 的 legacy consensus target 替补。
 - 允许更宽松的运行时间。
 
 ### Benchmark（性能基准）
-- 使用 `BenchmarkTools.jl` / `PkgBenchmark.jl`。
+- 使用 `BenchmarkTools.jl`。
 - 可选比较 oracle 与额外 benchmark 依赖放入独立 `benchmark/Project.toml`；环境叠加方式见命令参考。
-- 入口：`benchmark/benchmarks.jl`（PkgBenchmark 标准布局）。
+- 入口：`benchmark/` 下的独立脚本，批量趋势比较见 [benchmark trend guide](../guides/benchmark_trends.md)。
 - 现有 PNJL 单点/扫描 benchmark 使用根环境已有的 BenchmarkTools；定时观测、环境记录、比较口径和历史 artifact 入口见 [benchmark 趋势观测](../guides/benchmark_trends.md)。相对波动仅作预警，不代替数值回归。
 
 ## 子系统分目录
@@ -174,8 +175,7 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
 
 ```
 benchmark/
-├── Project.toml       # 独立依赖（BenchmarkTools）
-├── benchmarks.jl      # PkgBenchmark 入口
+├── Project.toml       # 独立依赖（BenchmarkTools、可选 QuadGK oracle）
 ├── README.md          # 说明与运行方法
 ├── relaxtime/         # 输运相关 benchmark
 │   ├── bench_*.jl
@@ -185,11 +185,11 @@ benchmark/
 ```
 
 运行方式：
-```julia
-using PkgBenchmark
-benchmarkpkg(".")
-judge(benchmarkpkg("."), "main")
+```sh
+julia --project=. benchmark/pnjl/bench_number_densities.jl
 ```
+
+各基准使用独立 Julia 进程；需要可选 oracle 时按 [benchmark/README.md](../../benchmark/README.md) 叠加环境。
 
 ## Models 入口契约检查（新增）
 

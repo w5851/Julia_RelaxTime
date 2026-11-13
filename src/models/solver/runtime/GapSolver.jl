@@ -495,14 +495,13 @@ function _try_nlsolve_pnjl(residual!, x0, autodiff_mode, method, xtol, ftol, res
     return nothing
 end
 
-"""检查 PNJL 解的物理性：Φ, Φbar ∈ [0,1]，质量有限正定。"""
+"""检查 PNJL 状态：Φ, Φbar 位于带 0.01 容差的 [0,1] 区间，手征场有限。"""
 function _is_physical_pnjl(st::MeanFieldState)
     Φ  = st.Phi
     Φb = st.PhiBar
     tol = 0.01
     (Φ >= -tol && Φ <= 1.0 + tol) || return false
     (Φb >= -tol && Φb <= 1.0 + tol) || return false
-    # 质量检查（粗略）：有效质量应为正 — 但此处只有 φ，不做质量计算
     all(isfinite, st.phi) || return false
     return true
 end
@@ -514,7 +513,8 @@ function _safe_omega(model, st::MeanFieldState, T, mu_vec; kwargs...)
         μ = normalize_mu_vec(mu_vec)
         ω = omega(model, x_sv, T, μ; kwargs...)
         return isfinite(ω) ? ω : Inf
-    catch
+    catch err
+        err isa InterruptException && rethrow()
         return Inf
     end
 end

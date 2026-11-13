@@ -32,11 +32,13 @@ JULIA_LOAD_PATH='@:benchmark:@stdlib' julia --project=. benchmark/relaxtime/benc
 ## 目录与命名
 
 - `bench_<feature>.jl` / `benchmark_<feature>.jl`：可复现性能或 oracle 探针。
-- `benchmark/benchmarks.jl`：收集符合 `bench_*.jl` 命名的 BenchmarkTools suite；它不是当前仓库的 PkgBenchmark package entrypoint。
+- 各基准作为独立脚本运行，避免全局常量、预计算状态与函数在同一 `Main` 中相互覆盖。批量趋势比较使用[benchmark trend guide](../docs/guides/benchmark_trends.md)中的入口。
 - `benchmark/pnjl/`：PNJL 求解与热力学基准。
 - `benchmark/relaxtime/`：散射、传播子、数密度与输运基准。
 
 benchmark 输出不得自动晋升为 production 正确性证据。数值 claim 仍需独立节点/容差收敛、对应 validation/regression 和 provenance。
+
+微分截面的独立计时入口为 `relaxtime/bench_differential_cross_section.jl`，`BENCH_SAMPLES` 控制采样数；对应单元测试只检查公式与行为，不再执行计时或写报告。
 
 ## charged GBU 相图单点成本
 

@@ -240,7 +240,7 @@ s = 31.0  # fm⁻²
 mi = mj = mc = md = 1.52  # fm⁻¹ (u 夸克)
 
 t_bounds = calculate_t_bounds(s, mi, mj, mc, md)
-# 对于相同质量: t_min ≈ -t_max (对称性)
+# 对于弹性等质量散射: t_min = 4mi^2 - s，t_max = 0
 ```
 """
 function calculate_t_bounds(

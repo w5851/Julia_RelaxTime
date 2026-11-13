@@ -30,45 +30,39 @@ function normalize_base_url(raw) {
     return value.replace(/\/+$/, '');
 }
 
+function stored_value(key) {
+    try {
+        return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function query_value(key) {
+    return typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get(key) : null;
+}
+
+function nonempty_string(value) {
+    return typeof value === 'string' && value.trim() ? value : null;
+}
+
 export function get_api_base_url() {
-    if (typeof globalThis !== 'undefined') {
-        const injectedProfile = globalThis.__JRT_DEPLOY_PROFILE__;
-        if (typeof injectedProfile === 'string' && injectedProfile.trim()) {
-            return resolve_profile_api_base_url(injectedProfile);
-        }
-
-        const injected = globalThis.__JRT_API_BASE_URL__;
-        if (typeof injected === 'string' && injected.trim()) {
-            return normalize_base_url(injected);
-        }
+    const manual = nonempty_string(globalThis.__JRT_API_BASE_URL__)
+        || nonempty_string(query_value('api_base_url'))
+        || nonempty_string(stored_value('JRT_API_BASE_URL'));
+    if (manual) {
+        return normalize_base_url(manual);
     }
-
-    if (typeof window !== 'undefined') {
-        const profileParam = new URLSearchParams(window.location.search).get('deploy_profile');
-        if (profileParam && profileParam.trim()) {
-            return resolve_profile_api_base_url(profileParam);
-        }
-
-        const urlParam = new URLSearchParams(window.location.search).get('api_base_url');
-        if (urlParam && urlParam.trim()) {
-            return normalize_base_url(urlParam);
-        }
-
-        try {
-            const profileStorageValue = window.localStorage.getItem('JRT_DEPLOY_PROFILE');
-            if (profileStorageValue && profileStorageValue.trim()) {
-                return resolve_profile_api_base_url(profileStorageValue);
-            }
-
-            const storageValue = window.localStorage.getItem('JRT_API_BASE_URL');
-            if (storageValue && storageValue.trim()) {
-                return normalize_base_url(storageValue);
-            }
-        } catch (_error) {
-            return DEFAULT_API_BASE_URL;
-        }
+    const profile = nonempty_string(globalThis.__JRT_DEPLOY_PROFILE__)
+        || nonempty_string(query_value('deploy_profile'))
+        || nonempty_string(stored_value('JRT_DEPLOY_PROFILE'));
+    if (profile) {
+        return resolve_profile_api_base_url(profile);
     }
-
+    if (typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol)) {
+        return window.location.origin;
+    }
     return DEFAULT_API_BASE_URL;
 }
 

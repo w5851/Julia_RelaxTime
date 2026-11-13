@@ -85,6 +85,16 @@ Models.pnjl_module()
     # number_densities
     # ============================================================================
 
+    @testset "并发节点请求复用完整缓存项" begin
+        tasks = [Threads.@spawn Models.cached_nodes(17 + i % 3, 5; p_max_inv_fm=11.0) for i in 1:48]
+        for (i, task) in enumerate(tasks)
+            nodes = fetch(task)
+            @test size(nodes[1]) == (17 + i % 3, 5)
+            @test all(values -> all(isfinite, values), nodes)
+            @test nodes === Models.cached_nodes(17 + i % 3, 5; p_max_inv_fm=11.0)
+        end
+    end
+
     @testset "number_densities" begin
         m = Models.PNJLModel()
         st = Models.MeanFieldState(SVector{3}(-1.5, -1.5, -2.0); Phi=0.3, PhiBar=0.3)
@@ -98,6 +108,19 @@ Models.pnjl_module()
         @test length(nd.antiquark) == 3
         @test all(isfinite.(nd.quark))
         @test all(isfinite.(nd.antiquark))
+
+        for (temperature, policy) in ((0.0, :rs_reduced_adaptive), (0.5, :tensor_gauss), (0.5, :rs_reduced_adaptive))
+            for invalid in (NaN, Inf, -Inf)
+                @test_throws ArgumentError Models.number_densities(m, st, temperature, SVector(invalid, 1.0, 1.0);
+                    thermo_quadrature_policy=policy)
+                invalid_state = Models.MeanFieldState(SVector(invalid, -1.5, -2.0); Phi=0.3, PhiBar=0.3)
+                @test_throws ArgumentError Models.number_densities(m, invalid_state, temperature, μ;
+                    thermo_quadrature_policy=policy)
+                invalid_polyakov = Models.MeanFieldState(st.phi; Phi=invalid, PhiBar=0.3)
+                @test_throws ArgumentError Models.number_densities(m, invalid_polyakov, temperature, μ;
+                    thermo_quadrature_policy=policy)
+            end
+        end
     end
 
     @testset "自适应热积分与直接密度使用同一 RS 分布口径" begin
@@ -127,7 +150,7 @@ Models.pnjl_module()
         @test rho_ad ≈ nd.quark - nd.antiquark rtol=2e-7 atol=1e-10
     end
 
-    @testset "严格零温只支持固定态内核" begin
+    @testset "严格零温固定态内核与自洽求解" begin
         m = Models.PNJLModel()
         st = Models.MeanFieldState(SVector{3}(-1.5, -1.5, -2.0); Phi=0.3, PhiBar=0.25)
         μ = SVector(2.0, 2.0, 2.0)
@@ -139,10 +162,12 @@ Models.pnjl_module()
         @test all(isfinite, nd.quark)
         @test all(iszero, nd.antiquark)
         @test Models.PNJLCore.polyakov_potential(m.params, 0.3, 0.25, 0.0) == 0.0
-        @test_throws ArgumentError Models.solve_gap(
+        equilibrium = Models.solve_gap(
             m, 0.0, μ;
             thermo_quadrature_policy=:rs_reduced_adaptive,
         )
+        @test equilibrium.Phi == equilibrium.PhiBar == 0.0
+        @test maximum(abs, Models.gap_residual(m, equilibrium, 0.0, μ)) < 1e-8
     end
 
     # ============================================================================

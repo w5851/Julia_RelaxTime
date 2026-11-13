@@ -751,4 +751,4 @@ println("Integrand at t_max: ", integrand_test(t_bounds.t_max))
 - **微分截面**: `docs/api/relaxtime/scattering/DifferentialCrossSection.md`
 - **散射矩阵元**: `docs/api/relaxtime/scattering/ScatteringAmplitude.md`
 - **测试用例**: `tests/unit/relaxtime/test_total_cross_section.jl`
-- **性能测试**: `tests/unit/relaxtime/test_total_cross_section_performance.md`
+- **性能测试**: `benchmark/relaxtime/benchmark_total_cross_section_hotspot.jl`；使用模型配置中的耦合常数，设置 `BENCH_PROFILE=0` 可仅运行 benchmark。

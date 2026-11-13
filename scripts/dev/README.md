@@ -319,7 +319,7 @@ julia --project=. scripts/dev/check_agent_instructions.jl
 ```
 
 - `check_dependency_policy.jl` 强制可选数值 oracle 与根 runtime/test 环境隔离。
-- `check_agent_instructions.jl` 强制根 `AGENTS.md` 保持精简，并验证详细命令指南存在且结构完整。
+- `check_agent_instructions.jl` 检查共享指令来源与命令指南链接；篇幅建议仅用于维护提示。
 
 数据与图像输出路径门禁：
 
@@ -336,45 +336,7 @@ PNJL 迁移门禁检查（限制 src/pnjl 新增核心实现）：
 julia --project=. scripts/dev/check_pnjl_migration_guard.jl
 ```
 
-PNJL 裁剪波次门禁（删除前快照 + 删除后 smoke + 失败回滚提示）：
-
-```powershell
-julia --project=. scripts/dev/run_prune_wave_gate.jl
-```
-
-PNJL 下线前检查表生成（`src/models/scans/*` + `src/pnjl/PNJL.jl`）：
-
-```powershell
-julia --project=. scripts/dev/generate_pnjl_decommission_checklist.jl --base HEAD --head HEAD
-```
-
-产物路径：
-- `outputs/results/pnjl_decommission_checklist_<timestamp>.md`
-
 开发执行记录仅在任务明确要求时按指定文件的现有格式补充，不需要专用追加脚本，也不自动创建台账。记录与历史保留规则见[任务跟踪治理](../../docs/dev/task_tracking_governance.md)。
-
-检查表新增内容：
-- `PNJL` 顶层 `scans/*` 默认 include 审计（排除白名单）
-- `PNJL` scan loader 可见性清单（`load_*scan*!`）
-- `PNJL.solve/PNJL.solve_multi` 外部调用方审计（排除 `src/pnjl/**`）
-
-说明：`run_prune_wave_gate.jl` 会在执行前输出 `models_invokelatest_allowlist.toml` 的增删摘要（若当前 diff 有变更），并将摘要写入快照文件，便于统一入口审阅。
-
-同时会额外生成独立审计产物：
-- `outputs/results/models_invokelatest_allowlist_delta_<timestamp>.txt`
-- `outputs/results/pnjl_scan_default_include_audit_<timestamp>.txt`
-
-PR 范围裁剪门禁示例：
-
-```powershell
-julia --project=. scripts/dev/run_prune_wave_gate.jl --base origin/main --head HEAD
-```
-
-失败自动回滚（仅 working-tree 模式）：
-
-```powershell
-julia --project=. scripts/dev/run_prune_wave_gate.jl --auto-rollback
-```
 
 PR 范围检查示例：
 

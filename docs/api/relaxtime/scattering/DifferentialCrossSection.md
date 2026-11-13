@@ -22,7 +22,7 @@ $$\frac{d\sigma}{dt} = \frac{1}{16\pi s_{12}^+ s_{12}^-} \cdot \frac{1}{4N_C^2} 
 ### 运动学约束
 
 - **阈值条件**: $s \geq (m_1 + m_2)^2$ 确保质心系动量为实数
-- **t 积分边界**: $t \in [t_{\min}, 0]$，其中 $t_{\min} = -\frac{[s - (m_1+m_2)^2][s - (m_3+m_4)^2]}{4s}$
+- **t 积分边界**: 调用 `TotalCrossSection.calculate_t_bounds` 获取一般质量组合的边界；弹性散射时 $t_{\max}=0$、$t_{\min}=-\lambda(s,m_1^2,m_2^2)/s$，其中 $\lambda=[s-(m_1+m_2)^2][s-(m_1-m_2)^2]$。
 
 ## 设计原则
 
@@ -47,16 +47,16 @@ differential_cross_section(s_12_plus, s_12_minus, M_squared) -> Float64
 
 - `s_12_plus::Float64`: $s - (m_1 + m_2)^2$ [fm⁻²]
 - `s_12_minus::Float64`: $s - (m_1 - m_2)^2$ [fm⁻²]
-- `M_squared::Float64`: 散射矩阵元平方 $|\mathcal{M}|^2$ [fm⁻⁴]
+- `M_squared::Float64`: 散射矩阵元平方 $|\mathcal{M}|^2$ [无量纲]
 
 #### 返回值
 
-- `Float64`: 微分散射截面 $d\sigma/dt$ [fm²]
+- `Float64`: 微分散射截面 $d\sigma/dt$ [fm⁴]
 
 #### 运动学约束
 
 - `s_12_plus > 0`: 必须超过阈值，否则抛出错误
-- `|s_12_minus| > 0`: 当 $m_1 = m_2$ 时自动正则化（$\epsilon = 10^{-14}$）
+- `s_12_minus = s` 当 $m_1=m_2$，等质量本身不触发正则化；接近零的分母按 $\epsilon=10^{-14}$ 处理。
 
 #### 示例
 
@@ -83,8 +83,7 @@ dsigma_dt = differential_cross_section(
     M_squared
 )
 
-println("dσ/dt = ", dsigma_dt, " fm²")
-# 输出: dσ/dt = 0.065074 fm²
+println("dσ/dt = ", dsigma_dt, " fm⁴")
 ```
 
 #### 错误处理
@@ -265,7 +264,7 @@ end
 # 使用
 all_dsigma = calculate_all_dsigma_dt(31.0, -2.0, quark_params, thermo_params, K_coeffs)
 for (process, dsigma) in pairs(all_dsigma)
-    println("$process: dσ/dt = $dsigma fm²")
+    println("$process: dσ/dt = $dsigma fm⁴")
 end
 ```
 
@@ -287,41 +286,21 @@ end
    - 先调用 `calculate_all_scattering_amplitudes_squared`
    - 传播子只计算一次（最耗时部分）
 
-### 典型耗时
+### 性能与验证入口
 
-| 操作 | 耗时 | 说明 |
-|------|------|------|
-| `differential_cross_section` | ~1 ns | 纯算术运算 |
-| `calculate_mandelstam_variables` | ~10 ns | 18个变量计算 |
-| `scattering_amplitude_squared` | ~50 ms | 含传播子计算 |
-| 总截面 t 积分（100点） | ~5 s | 主要是矩阵元计算 |
+`benchmark/relaxtime/bench_differential_cross_section.jl` 测量核心算术与振幅组合调用；
+`benchmark/relaxtime/benchmark_total_cross_section_hotspot.jl` 测量总截面热点。
+耗时需结合缓存状态、积分节点与主机报告。
 
-**结论**: 微分截面计算本身开销极小，瓶颈在散射矩阵元的传播子计算。
-
----
-
-## 物理验证
-
-### 测试结果示例
-
-```julia
-# 参数: T=150 MeV, μ=0, m_u≈1.52 fm⁻¹, m_s≈2.53 fm⁻¹
-# s=31.0 fm⁻², t=-2.0 fm⁻²
-
-过程                 dσ/dt (fm²)
-----------------------------------
-uu→uu                0.065074
-ss→ss                0.008253
-udbar→udbar          0.262862
-uubar→uubar          0.094940
-```
+行为与对称性检查见 `tests/unit/relaxtime/test_differential_cross_section.jl`；
+测试使用模型配置构造有效耦合。
 
 ### 物理一致性
 
 - ✅ **同位旋对称**: $d\sigma/dt(uu) = d\sigma/dt(dd)$ 当 $m_u = m_d$
 - ✅ **电荷共轭**: $d\sigma/dt(\text{dubar}) = d\sigma/dt(\text{udbar})$ （相对误差 < $10^{-12}$）
-- ✅ **阈值行为**: 接近 $s \to (m_1+m_2)^2$ 时截面发散
-- ✅ **正定性**: $d\sigma/dt > 0$ 对所有物理参数
+- **阈值行为**: 通量分母趋于零；最终极限还取决于矩阵元的阈值阶数及积分权重。
+- **非负性**: 物理可达区的色自旋平均矩阵元平方给出非负微分截面。
 
 ---
 
@@ -353,10 +332,10 @@ RelaxationTime (τ)
 
 ### 常见陷阱
 
-1. **阈值检查**: 必须确保 $s \geq (m_1 + m_2)^2$，否则 `s_12_plus ≤ 0` 导致错误
-2. **退化情况**: 当 $m_1 = m_2$ 时，`s_12_minus = s`，不影响计算
-3. **单位一致性**: 输入 [fm⁻²], [fm⁻⁴] → 输出 [fm²]
-4. **t 边界**: 正向散射 $t_{\max} = 0$，后向散射 $t_{\min} < 0$
+1. **阈值检查**: 核心函数要求 $s > (m_1 + m_2)^2$，否则 `s_12_plus ≤ 0` 导致错误
+2. **等质量情况**: 当 $m_1 = m_2$ 时，`s_12_minus = s`，不影响计算
+3. **单位一致性**: 两个运动学因子均为 fm⁻²，矩阵元平方无量纲，故 $d\sigma/dt$ 为 fm⁴；对 $t$ 积分后总截面为 fm²。
+4. **弹性散射 t 边界**: 正向散射 $t_{\max} = 0$，后向散射 $t_{\min} < 0$
 
 ### 调试建议
 

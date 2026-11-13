@@ -210,7 +210,12 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 
 - `status="ok"`
 - `result`：`converged/omega/pressure/rho_norm/entropy/energy/iterations/residual_norm/xi/seed_fallback_used/x_state/mu_vec/masses`
+- `rho_norm`：净重子密度除以 `rho0`，即 `sum(n_quark - n_antiquark)/(3*rho0)`，与 `FixedRho` 的 `rho_target` 使用同一无量纲口径。旧版 FixedMu 单点漏减反夸克且漏除 `rho0`，该返回值已修正。
 - 对当前单点口径下未计算或不可得的浮点量，HTTP 响应中统一返回 `null`，不返回 JSON `NaN` 字面量。
+
+PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为对象；损坏的 JSON、错误对象形状或参数类型返回 `400 INVALID_REQUEST` 并携带 `message_id`。整数节点数与实数参数均不接受布尔值。
+
+`POST /compute` 的独立服务和完整服务共用输入校验：必填动量/质量必须是有限 JSON 数值，质量必须为正；缺失字段、损坏 JSON、布尔值或错误类型返回 `400 INVALID_INPUT`。角度可省略，默认 `theta_star=π/4`、`phi_star=π/6`。内部计算故障仍返回 `500 COMPUTATION_ERROR`。
 
 #### 0.6.3 `POST /api/modules/pnjl-scan/jobs`（异步创建）
 
@@ -236,6 +241,9 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `queue.position/max_running/max_pending`
 - `idempotency.key/replayed/conflict`
 - `diagnostics.job_id/kind/job_status`
+
+同一幂等键和请求内容在并发提交时复用一个任务；队列容量检查与任务登记原子执行。
+幂等记录随对应已结束任务的 TTL/数量清理一起释放，清理后再次提交会创建新任务。
 
 #### 0.6.3 `POST /api/modules/transport-point/run`（同步）
 

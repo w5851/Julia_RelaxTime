@@ -138,7 +138,15 @@ function run_full_server(repo_root::String, args::Vector{String}=String[])
     warmup_profile = resolve_server_warmup_profile(get(ENV, "JRT_SERVER_WARMUP_PROFILE", policy.warmup_profile))
     warmup_strict = get(ENV, "JRT_SERVER_WARMUP_STRICT", policy.warmup_strict ? "1" : "0")
 
-    print_banner(port, policy)
+    effective_policy = merge(policy, (
+        cors_allow_origins=ENV["JRT_CORS_ALLOW_ORIGINS"],
+        scan_max_running=FullServerApp._PNJL_SCAN_MAX_RUNNING,
+        scan_max_pending=FullServerApp._PNJL_SCAN_MAX_PENDING,
+        scan_job_timeout_seconds=FullServerApp._default_scan_job_timeout_seconds(),
+        warmup_profile=warmup_profile,
+        warmup_strict=warmup_strict,
+    ))
+    print_banner(port, effective_policy)
 
     if warmup_profile !== :none
         @info "Running server warmup" warmup_profile=warmup_profile strict=warmup_strict

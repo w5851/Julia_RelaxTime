@@ -20,7 +20,7 @@ julia --project=. scripts/server/server_full.jl
 成功启动后会看到：
 ```
 🚀 散射计算服务器启动中...
-📍 服务地址: http://0.0.0.0:8080
+📍 服务地址: http://localhost:8080
 📡 API端点:
    POST http://localhost:8080/compute
    GET  http://localhost:8080/health
@@ -30,10 +30,10 @@ julia --project=. scripts/server/server_full.jl
 
 在浏览器中打开：
 ```
-web/index.html
+http://localhost:8080/
 ```
 
-或者双击 `web/index.html` 文件。
+前端通过 HTTP 加载 ES modules。若启动时指定其他端口，使用对应地址；默认 API 地址会跟随页面的来源与端口。
 
 ### 3. 输入参数并计算
 
@@ -53,8 +53,8 @@ web/index.html
 
 | 参数 | 说明 | 单位 |
 |------|------|------|
-| p₁ₓ, p₁ᵧ, p₁ᵧ | 入射粒子1的三动量分量 | fm⁻¹ |
-| p₂ₓ, p₂ᵧ, p₂ᵧ | 入射粒子2的三动量分量 | fm⁻¹ |
+| p₁ₓ, p₁ᵧ, p₁𝓏 | 入射粒子1的三动量分量 | fm⁻¹ |
+| p₂ₓ, p₂ᵧ, p₂𝓏 | 入射粒子2的三动量分量 | fm⁻¹ |
 | m₁, m₂, m₃, m₄ | 四个粒子的静止质量 | fm⁻¹ |
 | θ* | 质心系中出射粒子的极角 | 弧度 (0 ~ π) |
 | φ* | 质心系中出射粒子的方位角 | 弧度 (0 ~ 2π) |

@@ -107,19 +107,6 @@ function print_summary(summary)
         summary.name, summary.time_ms, summary.memory_kib, summary.allocs)
 end
 
-function register_suite!()
-    isdefined(Main, :SUITE) || return nothing
-    Main.SUITE["relaxtime"]["meson_density_equilibrium_point"] =
-        @benchmarkable build_equilibrium_point() evals=1
-    Main.SUITE["relaxtime"]["meson_density_ad_diag_post_eq"] =
-        @benchmarkable ad_diag_post_equilibrium() evals=1
-    Main.SUITE["relaxtime"]["meson_density_phase_shift_post_eq"] =
-        @benchmarkable density_post_equilibrium() evals=1
-    Main.SUITE["relaxtime"]["meson_density_phase_shift_full_point"] =
-        @benchmarkable density_full_point() evals=1
-    return nothing
-end
-
 function run_report()
     # warmup
     ad_diag_post_equilibrium()
@@ -154,8 +141,6 @@ function run_report()
     @printf("equilibrium / full density point: %.2f%%\n", 100 * eq_t / full_t)
     return nothing
 end
-
-register_suite!()
 
 if abspath(PROGRAM_FILE) == abspath(@__FILE__)
     run_report()
