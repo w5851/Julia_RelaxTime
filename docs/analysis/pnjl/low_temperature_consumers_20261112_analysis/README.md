@@ -260,7 +260,13 @@ Windows 固定核心时，可在 PowerShell 中设置
 `[Diagnostics.Process]::GetCurrentProcess().ProcessorAffinity = [IntPtr]1`，
 由该进程直接启动 Julia；Linux 可使用 `taskset -c 0`。
 
-远端受影响 unit **194/194**（其中新增零温测试 **47/47**），integration **20/20**，
+远端受影响 unit 合计 **194 项通过**（初轮 191/191；补充 MeV 入口检查后，
+零温文件最新 47/47），integration **20/20**，
 regression **194/194**，独立二维积分 validation **66/66**；沿用既有回归基线。
 新增测试包含真空 Silver Blaze 区、正负与非对称化学势、各向异性、
 多解默认选支、显式鞍点、五场状态兼容、MeV 入口与输入错误。
+
+本次扩展由 [PR #348](https://github.com/w5851/Julia_RelaxTime/pull/348) 交付，
+数值摘要对应实现提交 `f29f4207`。该提交的 unit core、integration core、
+regression/validation core 及 benchmark 运行分别为 `43367133582`、`43367133785`、
+`43367133657`、`43367133779`；最终提交检查与合并状态以 PR 为准。
