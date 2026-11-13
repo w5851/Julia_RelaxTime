@@ -9,6 +9,13 @@
 - meson_density：稳定粒子极限数密度与 `K/\pi` 比值主线
 - meson_thermo：介子 pressure 与最小 EOS 组合量
 
+## 模块加载
+
+使用 `src/relaxtime/RelaxTime.jl` 加载底层模块，计算 workflow 使用 `Models` 统一入口。
+`Main.PolarizationCache` 等历史名称与 `RelaxTime.PolarizationCache` 指向同一个模块，
+共享类型、函数与缓存；若旧脚本已加载某个子模块，统一入口复用该实例。
+这一兼容行为适用于同一源码版本的 include-once 加载。模块共享本身不提供缓存线程同步。
+
 ## 推荐阅读入口
 
 如果你的目标是“直接算输运系数”或“理解 transport provider 契约”，优先从以下页面开始：

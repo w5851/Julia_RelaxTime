@@ -5,6 +5,8 @@ const _SCRIPT_TASK_JOBS = Dict{String, Dict{String, Any}}()
 const _SCRIPT_TASK_JOB_SEQ = Ref(0)
 const _SCRIPT_TASK_MAX_RUNNING = 1
 const _SCRIPT_TASK_MAX_PENDING = 16
+const _SCRIPT_TASK_FINISHED_KEEP_MAX = 64
+const _SCRIPT_TASK_FINISHED_TTL_SECONDS = 86400
 const _SCRIPT_TASK_SEMAPHORE = Base.Semaphore(_SCRIPT_TASK_MAX_RUNNING)
 const _SCRIPT_TASK_STATUS_QUEUED = "queued"
 const _SCRIPT_TASK_STATUS_RUNNING = "running"
@@ -532,6 +534,51 @@ function _script_task_command_preview(task::Dict{String, Any}, args::Vector{Stri
     )
 end
 
+@inline function _script_task_history_policy()
+    return (
+        keep_max=_env_nonneg_int("SCRIPT_TASK_FINISHED_KEEP_MAX", _SCRIPT_TASK_FINISHED_KEEP_MAX),
+        ttl_seconds=_env_nonneg_int("SCRIPT_TASK_FINISHED_TTL_SECONDS", _SCRIPT_TASK_FINISHED_TTL_SECONDS),
+    )
+end
+
+# Caller holds _SCRIPT_TASK_JOBS_LOCK. Only process-local metadata is removed.
+function _prune_finished_script_tasks_locked!(
+    keep_max::Int=_SCRIPT_TASK_FINISHED_KEEP_MAX;
+    now::DateTime=Dates.now(),
+    ttl_seconds::Int=_SCRIPT_TASK_FINISHED_TTL_SECONDS,
+)
+    keep_max >= 0 || throw(ArgumentError("keep_max must be >= 0"))
+    ttl_seconds >= 0 || throw(ArgumentError("ttl_seconds must be >= 0"))
+    finished = Tuple{DateTime,Int,String}[]
+    expired = String[]
+    for (job_id, job) in _SCRIPT_TASK_JOBS
+        get(job, "status", "") in _SCRIPT_TASK_TERMINAL || continue
+        # Cancellation can precede worker/process teardown.
+        get(job, "worker_active", false) && continue
+        get(job, "process", nothing) === nothing || continue
+        ended_at = _parse_job_ended_at(get(job, "ended_at", nothing))
+        if ended_at !== nothing && now - ended_at > Dates.Second(ttl_seconds)
+            push!(expired, job_id)
+        else
+            push!(finished, (something(ended_at, DateTime(0)), Int(get(job, "seq", 0)), job_id))
+        end
+    end
+    excess = length(finished) - keep_max
+    if excess > 0
+        sort!(finished)
+        append!(expired, (finished[i][3] for i in 1:excess))
+    end
+    foreach(job_id -> delete!(_SCRIPT_TASK_JOBS, job_id), expired)
+    return length(expired)
+end
+
+function _prune_script_task_history!()
+    policy = _script_task_history_policy()
+    return lock(_SCRIPT_TASK_JOBS_LOCK) do
+        _prune_finished_script_tasks_locked!(policy.keep_max; ttl_seconds=policy.ttl_seconds)
+    end
+end
+
 function _script_task_queue_snapshot()
     lock(_SCRIPT_TASK_JOBS_LOCK) do
         queued = count(job -> get(job, "status", "") == _SCRIPT_TASK_STATUS_QUEUED, values(_SCRIPT_TASK_JOBS))
@@ -628,10 +675,12 @@ function _new_script_task_job(job_id::String, resolved)
         "error" => nothing,
         "reason_code" => nothing,
         "process" => nothing,
+        "worker_active" => false,
     )
     _append_script_task_event!(job, "created")
     lock(_SCRIPT_TASK_JOBS_LOCK) do
         _SCRIPT_TASK_JOBS[job_id] = job
+        _prune_script_task_history!()
     end
     return job_id
 end
@@ -710,6 +759,7 @@ function _launch_script_task_job(job_id::String)
         try
             job_snapshot = _with_script_task_job(job_id) do job
                 String(get(job, "status", "")) == _SCRIPT_TASK_STATUS_QUEUED || return nothing
+                job["worker_active"] = true
                 _set_script_task_status!(job, _SCRIPT_TASK_STATUS_RUNNING)
                 _append_script_task_event!(job, "started")
                 return Dict(
@@ -770,6 +820,14 @@ function _launch_script_task_job(job_id::String)
             end
         finally
             Base.release(_SCRIPT_TASK_SEMAPHORE)
+            _with_script_task_job(job_id) do job
+                job["worker_active"] = false
+                proc = get(job, "process", nothing)
+                if proc !== nothing && !process_running(proc)
+                    job["process"] = nothing
+                end
+            end
+            _prune_script_task_history!()
         end
     end
 end
@@ -820,6 +878,7 @@ function handle_script_task_job_create(req::HTTP.Request)
 end
 
 function _script_task_status_payload(job_id::String)
+    _prune_script_task_history!()
     pos = _script_task_queue_position(job_id)
     snap = _script_task_queue_snapshot()
     return _with_script_task_job(job_id) do job
@@ -857,6 +916,7 @@ function handle_script_task_job_status(job_id::String)
 end
 
 function handle_script_task_job_cancel(job_id::String)
+    _prune_script_task_history!()
     payload = _with_script_task_job(job_id) do job
         status = String(get(job, "status", ""))
         status in _SCRIPT_TASK_TERMINAL && return _error_payload("JOB_NOT_CANCELLABLE", "job already in terminal state"; extras=Dict("job_id" => job_id, "job_status" => status))
@@ -878,10 +938,12 @@ function handle_script_task_job_cancel(job_id::String)
     if payload["status"] == "error"
         return _script_task_json_response(409, payload)
     end
+    _prune_script_task_history!()
     return _script_task_json_response(200, payload)
 end
 
 function handle_script_task_job_result(job_id::String)
+    _prune_script_task_history!()
     payload = _with_script_task_job(job_id) do job
         status = String(job["status"])
         if !(status in _SCRIPT_TASK_TERMINAL)

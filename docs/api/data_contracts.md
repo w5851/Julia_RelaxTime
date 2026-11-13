@@ -137,6 +137,12 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - **模块发现**
   - `GET /api/modules`
 
+脚本任务的终态记录默认在进程内保留 24 小时、最多 64 条，按结束时间保留较新的记录。
+可通过 `SCRIPT_TASK_FINISHED_TTL_SECONDS` 和 `SCRIPT_TASK_FINISHED_KEEP_MAX` 设置非负整数；
+数量设为 `0` 时不保留已退出的终态记录。创建任务、查询状态/结果、取消和 worker 收尾时触发回收。
+排队、运行中以及取消后尚未退出的 worker/子进程记录继续保留。
+记录回收后状态、结果和取消接口返回 `404 JOB_NOT_FOUND`；磁盘结果与日志按原路径保留。
+
 边界约束：
 
 - 前端不直接调用 `run_*.jl`，仅通过上述 HTTP 契约访问能力。

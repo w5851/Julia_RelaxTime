@@ -179,6 +179,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "simulation", "test_fullserver_pnjl_handlers.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_http_utils.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_transport_handlers.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_fullserver_script_task_jobs.jl"),
 ]
 
 function _selected_unit_files()
