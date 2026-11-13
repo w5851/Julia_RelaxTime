@@ -70,6 +70,19 @@ TaylorDiff 路径还接受生产调优关键字：
 
 这些关键字只影响 TaylorDiff / MixedTaylorJet backend；旧 ForwardDiff backend 已下线。
 
+纯 `B/Q/S` 方向还接受 `base_context=nothing` 与
+`thermo_quadrature_kwargs::NamedTuple=(;)`，可复用锁定分支的 Taylor context 或
+选用低温自适应热积分，完整参数格式见
+[导数入口示例](../derivatives/Overview.md#低温积分与同支响应)。
+同一设置贯穿 gap、Jacobian、级数递推和压强求值。
+mixed BQS jet 与 `flavor_pressure_derivatives` 本轮仍使用其既有积分入口；
+对 mixed BQS 显式传入 context 或非空积分设置会抛出 `ArgumentError`。
+
+归一化定义为 `chi_n^B = T^(n-4) * d^nP/dmu_B^n`，所有 `chi` 入口要求
+`T_fm > 0`。在三味共同 `mu_q=mu_B/3` 的路径上，它等于
+`T^(n-4) / 3^n * d^nP/dmu_q^n`。例如有限的零温二阶有量纲响应可对应随
+`T^-2` 增长的 `chi2_B`；这并不代表积分发散。零温极限应首先比较有量纲压强导数。
+
 对 mixed BQS 高阶导数，这些关键字同样传入内部 mixed jet gap-series Newton。jet 阶数等于 `sum(orders)`，变量维度等于非零 B/Q/S 轴数量；单方向不会走 mixed jet，以保留已验证的单变量 TaylorDiff 性能路径。
 
 ## `chi_Q` / `chi_S` 家族

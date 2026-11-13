@@ -79,8 +79,10 @@ end
 
 @inline _error_norm(x::Number) = abs(_primal_float(x))
 @inline _error_norm(x) = maximum(_error_norm, x)
-@inline _all_primal_finite(x::Number) = isfinite(_primal_float(x))
-@inline _all_primal_finite(x) = all(_all_primal_finite, x)
+@inline _error_norm(x::ForwardDiff.Dual) = max(
+    _error_norm(ForwardDiff.value(x)), maximum(_error_norm, ForwardDiff.partials(x)))
+@inline _all_components_finite(x::Number) = isfinite(_error_norm(x))
+@inline _all_components_finite(x) = all(_all_components_finite, x)
 
 @inline function validate_rs_anisotropy(xi)
     xi_value = _primal_float(xi)
@@ -216,7 +218,7 @@ end
 @inline function _estimate_adaptive_panel(f, a::Float64, b::Float64)
     low = _gauss_legendre_rule(f, a, b, _ADAPTIVE_LOW_NODES, _ADAPTIVE_LOW_WEIGHTS)
     high = _gauss_legendre_rule(f, a, b, _ADAPTIVE_HIGH_NODES, _ADAPTIVE_HIGH_WEIGHTS)
-    _all_primal_finite(high) || throw(DomainError(
+    _all_components_finite(high) || throw(DomainError(
         (a, b),
         "non-finite adaptive quadrature value on transformed interval",
     ))
@@ -228,21 +230,29 @@ end
     return _AdaptivePanel(a, b, high, error)
 end
 
-function _adaptive_gauss_legendre_unit(
+function _adaptive_gauss_legendre_panels(
     f;
     rtol::Float64,
     atol::Float64,
     maxevals::Int,
+    breakpoints=(0.0, 1.0),
 )
-    maxevals >= _ADAPTIVE_PANEL_EVALS || throw(ArgumentError(
-        "adaptive quadrature maxevals must be at least $(_ADAPTIVE_PANEL_EVALS), got $(maxevals)",
+    initial_evaluations = (length(breakpoints) - 1) * _ADAPTIVE_PANEL_EVALS
+    maxevals >= initial_evaluations || throw(ArgumentError(
+        "adaptive quadrature maxevals must be at least $(initial_evaluations), got $(maxevals)",
     ))
 
-    first_panel = _estimate_adaptive_panel(f, 0.0, 1.0)
+    first_panel = _estimate_adaptive_panel(f, breakpoints[1], breakpoints[2])
     panels = [first_panel]
     total_value = first_panel.value
     total_error = first_panel.error
-    evaluations = _ADAPTIVE_PANEL_EVALS
+    evaluations = initial_evaluations
+    for i in 2:(length(breakpoints) - 1)
+        panel = _estimate_adaptive_panel(f, breakpoints[i], breakpoints[i + 1])
+        push!(panels, panel)
+        total_value += panel.value
+        total_error += panel.error
+    end
 
     while total_error > max(atol, rtol * _error_norm(total_value))
         evaluations + _ADAPTIVE_SPLIT_EVALS <= maxevals || error(
@@ -289,7 +299,7 @@ end
 )
     scale = b - a
     transformed = x -> scale * f(muladd(scale, x, a))
-    return _adaptive_gauss_legendre_unit(
+    return _adaptive_gauss_legendre_panels(
         transformed;
         rtol=rtol,
         atol=atol,
@@ -311,7 +321,7 @@ end
         jacobian = scale / (one_minus_x * one_minus_x)
         return jacobian * f(q)
     end
-    return _adaptive_gauss_legendre_unit(
+    return _adaptive_gauss_legendre_panels(
         transformed;
         rtol=rtol,
         atol=atol,
@@ -325,14 +335,28 @@ end
     return max(0.05, 0.25 * mass_value, 0.25 * mu_value, 4.0 * thermal_scale)
 end
 
+function _thermal_radial_breakpoints(mass, mu, temperature::Float64)
+    m = abs(_primal_float(mass))
+    a = abs(_primal_float(mu))
+    bounds = [0.0]
+    for width in (-48.0, -12.0, -3.0, 0.0, 3.0, 12.0, 48.0)
+        energy = max(m, a + width * temperature)
+        push!(bounds, sqrt(max((energy - m) * (energy + m), 0.0)))
+    end
+    upper = max(m, a) + 48.0 * temperature
+    push!(bounds, sqrt((upper - m) * (upper + m)))
+    return sort!(unique!(bounds))
+end
+
 """Integrate a radial RS-reduced kernel on `[0, Inf)` with a Fermi-surface breakpoint.
 
 The callback must already include the radial `q^2` measure. The implementation uses
 an in-repository adaptive 16/32-point Gauss-Legendre pair, with a compactified
 infinite tail. The returned local error estimate is the accumulated, safety-scaled
-difference between the paired rules. Breakpoint placement and refinement decisions
-use primal values only so ForwardDiff differentiates the physical integrand rather
-than the numerical node-selection rule.
+difference between the paired rules. At positive `thermal_scale`, energy windows
+around `E=|mu|` resolve both sides of the thermal Fermi surface before refinement.
+The error norm includes ForwardDiff components and derivative-stack extensions.
+Nodes use primal parameters; AD differentiates the physical integrand.
 """
 function integrate_rs_reduced_radial(
     f,
@@ -350,6 +374,17 @@ function integrate_rs_reduced_radial(
 
     q_fermi = _fermi_momentum_primal(mass, mu)
     tail_scale = _radial_tail_scale(mass, mu, thermal_scale)
+    if thermal_scale > 0.0
+        bounds = _thermal_radial_breakpoints(mass, mu, thermal_scale)
+        # A common error target over all finite panels also sees cancellation
+        # between the two sides of the Fermi surface in high-order responses.
+        finite_budget = maxevals - maxevals ÷ 4
+        finite = _adaptive_gauss_legendre_panels(f; rtol=rtol, atol=atol / 2,
+            maxevals=finite_budget, breakpoints=bounds)
+        tail = _adaptive_infinite_tail(f, last(bounds), tail_scale;
+            rtol=rtol, atol=atol / 2, maxevals=maxevals - finite_budget)
+        return (value=finite.value + tail.value, error=finite.error + tail.error)
+    end
     if q_fermi > 0.0
         maxevals >= 2 * _ADAPTIVE_PANEL_EVALS || throw(ArgumentError(
             "adaptive quadrature with a Fermi breakpoint requires maxevals >= $(2 * _ADAPTIVE_PANEL_EVALS), got $(maxevals)",
@@ -416,6 +451,55 @@ function _calculate_log_sum_rs_reduced_zero_temperature(masses, mu_vec, xi)
     return -convert(TT, 6) * radial_measure * total
 end
 
+@inline function _thermal_log_tail(y, phi, phibar)
+    z = exp(-y)
+    return _safe_log(one(z) + 3phi * z + 3phibar * z^2 + z^3)
+end
+
+"""Fermi sea plus thermal corrections in the comoving energy coordinate.
+
+For |mu|-m > 64T, differentiating the narrow distribution directly produces
+large cancelling terms in high-order responses. The identity
+log f(-y; phi, phibar) = 3y + log f(y; phibar, phi) extracts the analytic sea.
+The central correction uses E=|mu| +/- T*y, so derivatives act on its smooth
+measure. Both outer remainders are integrated; this is not a Sommerfeld truncation.
+"""
+function _degenerate_pressure_radial(mass, mu, T, phi, phibar;
+    rtol::Float64, atol::Float64, maxevals::Int)
+    m = abs(mass)
+    a = _primal_float(mu) >= 0 ? mu : -mu
+    plus_phi, plus_phibar = _primal_float(mu) >= 0 ? (phi, phibar) : (phibar, phi)
+    width = 32.0
+    measure = E -> E * sqrt((E - m) * (E + m))
+    central_integrand = y -> 2T^2 * (
+        measure(a + T * y) * _thermal_log_tail(y, plus_phi, plus_phibar) +
+        measure(a - T * y) * _thermal_log_tail(y, plus_phibar, plus_phi))
+    central = _adaptive_gauss_legendre_panels(central_integrand;
+        rtol=rtol, atol=atol / 4, maxevals=maxevals ÷ 2,
+        breakpoints=(0.0, 3.0, 12.0, width))
+
+    upper = _adaptive_infinite_tail(
+        y -> 2T^2 * measure(a + T * y) * _thermal_log_tail(y, plus_phi, plus_phibar),
+        width, 1.0; rtol=rtol, atol=atol / 4, maxevals=maxevals ÷ 6)
+
+    e_cut = a - width * T
+    q_cut = sqrt((e_cut - m) * (e_cut + m))
+    lower = _adaptive_gauss_legendre_panels(z -> begin
+        q = q_cut * z
+        energy = sqrt(q^2 + m^2)
+        2T * q_cut * q^2 * _thermal_log_tail((a - energy) / T, plus_phibar, plus_phi)
+    end; rtol=rtol, atol=atol / 4, maxevals=maxevals ÷ 6)
+
+    anti = _adaptive_infinite_tail(q -> begin
+        energy = sqrt(q^2 + m^2)
+        2T * q^2 * _thermal_log_tail((energy + a) / T, plus_phibar, plus_phi)
+    end, 0.0, _radial_tail_scale(mass, mu, _primal_float(T));
+        rtol=rtol, atol=atol / 4, maxevals=maxevals - maxevals ÷ 2 - 2 * (maxevals ÷ 6))
+    value = 6 * _zero_temperature_pressure_radial(m, a) +
+        central.value + upper.value + lower.value + anti.value
+    return (value=value, error=central.error + upper.error + lower.error + anti.error)
+end
+
 """RS-reduced adaptive PNJL thermal grand-potential contribution.
 
 This path applies only to scalar thermodynamic kernels whose angular dependence is
@@ -456,6 +540,13 @@ function calculate_log_sum_rs_reduced_adaptive_with_error(
     @inbounds for i in 1:3
         mass_i = convert(TT, masses[i])
         mu_i = convert(TT, mu_vec[i])
+        if abs(_primal_float(mu_i)) - abs(_primal_float(mass_i)) > 64.0 * T_value
+            pressure = _degenerate_pressure_radial(mass_i, mu_i, Tt, ΦT, Φ̄T;
+                rtol=rtol, atol=atol, maxevals=maxevals)
+            total -= pressure.value
+            total_error += pressure.error
+            continue
+        end
         integrand = q -> begin
             qT = convert(TT, q)
             E_dist = sqrt(qT * qT + mass_i * mass_i)

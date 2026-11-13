@@ -273,7 +273,7 @@ function validate_ledger(root::AbstractString=ROOT; ledger_rel::AbstractString=D
 
     _validate_keys(parsed, TOP_LEVEL_FIELDS, "ledger", violations)
     get(parsed, "schema_version", nothing) == 1 || push!(violations, "schema_version must be integer 1")
-    primary_track = _string(parsed, "primary_track", "ledger", violations)
+    primary_track = _string(parsed, "primary_track", "ledger", violations; required=false)
     updated_at = _string(parsed, "updated_at", "ledger", violations)
     _validate_date(updated_at, "ledger.updated_at", violations)
 
@@ -324,8 +324,13 @@ function validate_ledger(root::AbstractString=ROOT; ledger_rel::AbstractString=D
         end
     end
 
-    primary_track in keys(tracks) || push!(violations, "ledger.primary_track does not reference a track: $(primary_track)")
-    if haskey(tracks, primary_track)
+    if isempty(primary_track)
+        all(table -> get(table, "status", "") in ("archived", "cancelled"),
+            Iterators.flatten((track_tables, item_tables))) ||
+            push!(violations, "ledger.primary_track may be empty only when all tracks and items are terminal")
+    elseif !haskey(tracks, primary_track)
+        push!(violations, "ledger.primary_track does not reference a track: $(primary_track)")
+    else
         primary_status = String(get(tracks[primary_track], "status", ""))
         primary_status in ("archived", "cancelled") && push!(violations, "ledger.primary_track cannot be terminal")
     end
@@ -472,6 +477,12 @@ function preflight_report(
     parsed = TOML.parsefile(isabspath(ledger_rel) ? String(ledger_rel) : joinpath(root, ledger_rel))
     primary_track = String(parsed["primary_track"])
     selected = track_id === nothing ? primary_track : String(track_id)
+    if isempty(selected)
+        println(io, "  primary_track=")
+        println(io, "  selected_track=")
+        println(io, "  status=no_pending_tasks")
+        return String[]
+    end
     tracks = get(parsed, "tracks", Any[])
     selected_index = findfirst(table -> String(get(table, "id", "")) == selected, tracks)
     selected_index === nothing && return ["preflight track not found: $(selected)"]

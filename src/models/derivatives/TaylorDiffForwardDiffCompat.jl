@@ -2,11 +2,18 @@ module TaylorDiffForwardDiffCompat
 
 using ForwardDiff
 using TaylorDiff
+import ..PNJLIntegrals
 
 import Base: +, -, *, /, promote_rule
 
 const TDScalar = TaylorDiff.TaylorScalar
 const FDDual = ForwardDiff.Dual
+
+# A converged pressure value does not certify its Taylor coefficients. Include
+# every coefficient when the radial quadrature chooses panels for a response.
+@inline PNJLIntegrals._error_norm(x::TDScalar) = max(
+    PNJLIntegrals._error_norm(TaylorDiff.value(x)),
+    maximum(PNJLIntegrals._error_norm, TaylorDiff.partials(x)))
 
 # The PNJL Taylor-series gap path evaluates ForwardDiff gradients whose scalar
 # values are TaylorDiff polynomials. Keep this narrow interop shim local to the

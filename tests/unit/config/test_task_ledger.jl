@@ -85,6 +85,34 @@ end
     @test isempty(TL.validate_ledger(root))
 end
 
+@testset "task ledger with all work closed" begin
+    for status in ("archived", "cancelled")
+        root = _fixture_root(track_status=status, item_status=status)
+        ledger_path = joinpath(root, "config", "governance", "task_tracks.toml")
+        fixture = TOML.parsefile(ledger_path)
+        @test any(occursin("cannot be terminal", v) for v in TL.validate_ledger(root))
+        fixture["primary_track"] = ""
+        open(io -> TOML.print(io, fixture), ledger_path, "w")
+        @test isempty(TL.validate_ledger(root))
+        output = IOBuffer()
+        clean_git = (root, args...) -> args == ("status", "--porcelain=v1") ? "" : "fixture"
+        @test isempty(TL.preflight_report(root; io=output, git_output=clean_git))
+        @test occursin("status=no_pending_tasks", String(take!(output)))
+        # Explicit historical selection remains useful after all tasks close.
+        @test isempty(TL.preflight_report(root; track_id="track-a", io=output, git_output=clean_git))
+        @test occursin("selected_track=track-a", String(take!(output)))
+        fixture["items"][1]["status"] = "active"
+        open(io -> TOML.print(io, fixture), ledger_path, "w")
+        @test any(occursin("all tracks and items are terminal", v) for v in TL.validate_ledger(root))
+    end
+    root = _fixture_root()
+    ledger_path = joinpath(root, "config", "governance", "task_tracks.toml")
+    fixture = TOML.parsefile(ledger_path)
+    fixture["primary_track"] = ""
+    open(io -> TOML.print(io, fixture), ledger_path, "w")
+    @test any(occursin("all tracks and items are terminal", v) for v in TL.validate_ledger(root))
+end
+
 @testset "task ledger schema and triage classes" begin
     root = _fixture_root(backlog_file="docs/dev/backlog/research.md", extra="""
 [[items]]
