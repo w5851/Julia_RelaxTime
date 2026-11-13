@@ -278,7 +278,7 @@ end
 - `K_coeffs`: K系数NamedTuple（通过`EffectiveCouplings.calculate_effective_couplings`获取）
 
 # 返回值
-散射矩阵元平方 |M|²（单位：fm⁻⁴，包含色自旋平均因子1/(4N_c²)）
+散射矩阵元平方 |M|²（单位：无量纲，包含色自旋平均因子1/(4N_c²)）
 
 # 散射类型与公式
 - **qq散射**（4种）：|M|² = |M_u|² + |M_t|² - 2Re(M_u M_t*)
@@ -339,7 +339,7 @@ t = -0.5  # fm⁻²
 M_squared = scattering_amplitude_squared(
     :uu_to_uu, s, t, q, t_params, K_coeffs
 )
-println("|M|² = ", M_squared, " fm⁻⁴")
+println("|M|² = ", M_squared, " 无量纲")
 ```
 
 # 注意事项
@@ -564,7 +564,7 @@ end
 - `K_coeffs::NamedTuple`: 有效耦合常数，由`calculate_effective_couplings`计算
 
 # 返回值
-NamedTuple，包含 `SCATTERING_PROCESS_KEYS` 中全部散射过程的|M|²值（单位：fm⁻⁴）：
+NamedTuple，包含 `SCATTERING_PROCESS_KEYS` 中全部散射过程的|M|²值（单位：无量纲）：
 
 **夸克-夸克散射（4种）：**
 - `uu_to_uu`: u+u→u+u
@@ -608,8 +608,8 @@ K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 results = calculate_all_scattering_amplitudes_squared(s, t, q, t_params, K_coeffs)
 
 # 访问结果
-println("uu→uu: |M|² = ", results.uu_to_uu, " fm⁻⁴")
-println("ss→ss: |M|² = ", results.ss_to_ss, " fm⁻⁴")
+println("uu→uu: |M|² = ", results.uu_to_uu, " 无量纲")
+println("ss→ss: |M|² = ", results.ss_to_ss, " 无量纲")
 
 # 计算总散射率（示例）
 total_rate = sum(values(results))

@@ -25,54 +25,19 @@ dσ/dt = [1/(16π s₁₂⁺ s₁₂⁻)] · [1/(4Nc²) Σ|M|²]
 - **可组合性**: 适合与积分器等模块组合使用
 - **运动学检查**: 提供独立的阈值和边界检查函数
 
-## Dual Interface Pattern
-
-This module supports **both struct and NamedTuple parameters**:
-
-```julia
-# Using structs (recommended)
-using Main.ParameterTypes: QuarkParams, ThermoParams
-
-q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-t = ThermoParams(0.15, 0.5, 0.5, 0.0)
-dσ_dt = differential_cross_section(:uu_to_uu, 2.0, -0.5, q, t, K_coeffs)
-
-# Using NamedTuples (backward compatible)
-q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
-dσ_dt = differential_cross_section(:uu_to_uu, 2.0, -0.5, q_nt, t_nt, K_coeffs)
-```
-
-Both produce identical results. Internal normalization ensures type stability.
-
 ## 使用示例
 
+本模块只接受预计算的三个数值；`QuarkParams` / `ThermoParams` 的结构体或
+NamedTuple 支持属于上游 `ScatteringAmplitude.scattering_amplitude_squared`。
+
 ```julia
-# 使用 QuarkParams 和 ThermoParams 结构体（推荐）
-using Main.ParameterTypes: QuarkParams, ThermoParams
+s = 31.0
+m1 = m2 = 1.52
+s_plus = s - (m1 + m2)^2
+s_minus = s - (m1 - m2)^2
+M_squared = 100.0  # 示例：无量纲的色自旋平均矩阵元平方
 
-q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-t = ThermoParams(0.15, 0.5, 0.5, 0.0)
-
-# 预计算 Mandelstam 变量
-m1, m2, m3, m4 = get_quark_masses_for_process(:uu_to_uu, q)
-u = m1^2 + m2^2 + m3^2 + m4^2 - s - t
-mandelstam_vars = calculate_mandelstam_variables(s, t, u, m1, m2, m3, m4)
-
-# 计算散射矩阵元（接受结构体参数）
-M_squared = scattering_amplitude_squared(
-    :uu_to_uu, s, t, q, t, K_coeffs
-)
-
-# 计算微分截面（核心函数）
-dsigma_dt = differential_cross_section(
-    mandelstam_vars.s_12_plus, mandelstam_vars.s_12_minus, M_squared
-)
-
-# 使用 NamedTuple（向后兼容）
-q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
-# ... 其余代码相同
+dsigma_dt = differential_cross_section(s_plus, s_minus, M_squared)  # fm⁴
 ```
 """
 
@@ -114,14 +79,14 @@ dσ/dt = [1/(16π s₁₂⁺ s₁₂⁻)] · |M|²
 # 参数
 - `s_12_plus::Float64`: s - (m₁ + m₂)² [fm⁻²]
 - `s_12_minus::Float64`: s - (m₁ - m₂)² [fm⁻²]  
-- `M_squared::Float64`: 散射矩阵元平方 |M|² [fm⁻⁴]
+- `M_squared::Float64`: 散射矩阵元平方 |M|² [无量纲]
 
 # 返回值
-- `Float64`: 微分散射截面 dσ/dt [fm²]
+- `Float64`: 微分散射截面 dσ/dt [fm⁴]
 
 # 运动学约束
 - `s_12_plus > 0`: 入射能量必须超过产生两粒子的阈值
-- `s_12_minus ≠ 0`: 当 \$m_1 = m_2\$ 时需要特殊处理（自动正则化）
+- `s_12_minus ≠ 0`: 等质量时该量等于 s；接近零的输入由数值正则化处理
 
 # 错误处理
 - 如果 `s_12_plus ≤ 0`，抛出错误（违反阈值条件）
@@ -134,26 +99,11 @@ dσ/dt = [1/(16π s₁₂⁺ s₁₂⁻)] · |M|²
 
 # 示例
 ```julia
-# 使用 QuarkParams 结构体（推荐）
-using Main.ParameterTypes: QuarkParams, ThermoParams
-
-q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-t = ThermoParams(0.15, 0.5, 0.5, 0.0)
-
-# 从结构体获取质量
-m1, m2, m3, m4 = get_quark_masses_for_process(:uu_to_uu, q)
-# 计算运动学变量
-s_plus = 20.5   # fm⁻²
-s_minus = 15.3  # fm⁻²
-# 计算散射矩阵元（接受结构体）
-M_sq = scattering_amplitude_squared(:uu_to_uu, s, t_var, q, t, K_coeffs)
-
-dsigma_dt = differential_cross_section(s_plus, s_minus, M_sq)
-println("dσ/dt = ", dsigma_dt, " fm²")
-
-# 使用 NamedTuple（向后兼容）
-q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-# ... 其余代码相同
+s = 31.0
+m = 1.52
+M_squared = 100.0  # 无量纲，示例预计算值
+dsigma_dt = differential_cross_section(s - 4m^2, s, M_squared)
+println("dσ/dt = ", dsigma_dt, " fm⁴")
 ```
 
 # 参考
@@ -172,16 +122,16 @@ function differential_cross_section(
               "This indicates s < (m1 + m2)², violating energy conservation.")
     end
     
-    # 处理 m1 ≈ m2 的退化情况（s_12_minus ≈ 0）
+    # 对接近零的运动学分母作数值正则化
     s_12_minus_reg = s_12_minus
     if abs(s_12_minus) < EPS_REGULARIZATION
         emit_regularization_notice(
-            "s_12_minus is very small; this typically occurs when m1 ≈ m2",
+            "s_12_minus is very small; applying denominator regularization",
             s_12_minus,
             EPS_REGULARIZATION,
         )
         s_12_minus_reg = sign(s_12_minus) * EPS_REGULARIZATION
-        if s_12_minus == 0.0  # 完全相等
+        if s_12_minus == 0.0
             s_12_minus_reg = EPS_REGULARIZATION
         end
     end

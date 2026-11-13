@@ -4,7 +4,7 @@
 测试内容：
 1. 核心函数基本计算
 2. 运动学阈值检查
-3. 退化情况处理（m1 = m2）
+3. 等质量情况（m1 = m2）
 4. t 积分边界计算
 5. 与散射矩阵元的关系验证
 6. 物理一致性（同位旋对称、电荷共轭）
@@ -105,7 +105,7 @@ using Main.TotalCrossSection: calculate_t_bounds
         M_squared = scattering_amplitude_squared(
             process, s, t, quark_params, thermo_params, K_coeffs
         )
-        println("  |M|² = $(round(M_squared, digits=2)) fm⁻⁴")
+        println("  |M|² = $(round(M_squared, digits=2)) (无量纲)")
         
         # 步骤4：计算微分截面
         dsigma_dt = differential_cross_section(
@@ -113,7 +113,7 @@ using Main.TotalCrossSection: calculate_t_bounds
         )
         
         println("\n结果:")
-        println("  dσ/dt = $(round(dsigma_dt, digits=6)) fm²")
+        println("  dσ/dt = $(round(dsigma_dt, digits=6)) fm⁴")
         
         # 验证结果
         @test dsigma_dt > 0.0
@@ -158,10 +158,10 @@ using Main.TotalCrossSection: calculate_t_bounds
         println("✓ 阈值检查测试通过")
     end
     
-    # ========== 测试3：退化情况（m1 = m2）==========
-    @testset "退化情况处理（m1 = m2）" begin
+    # ========== 测试3：等质量情况（m1 = m2）==========
+    @testset "等质量情况（m1 = m2）" begin
         println("\n" * "="^70)
-        println("测试3：退化情况处理（m1 = m2）")
+        println("测试3：等质量情况（m1 = m2）")
         println("="^70)
         
         s = 31.0
@@ -187,8 +187,8 @@ using Main.TotalCrossSection: calculate_t_bounds
         @test dsigma_dt > 0.0
         @test !isnan(dsigma_dt) && !isinf(dsigma_dt)
         
-        println("  dσ/dt = $(round(dsigma_dt, digits=6)) fm²")
-        println("✓ 退化情况处理正确")
+        println("  dσ/dt = $(round(dsigma_dt, digits=6)) fm⁴")
+        println("✓ 等质量情况处理正确")
     end
     
     # ========== 测试4：t 积分边界计算 ==========
@@ -263,7 +263,7 @@ using Main.TotalCrossSection: calculate_t_bounds
             
             @test dsigma_dt ≈ expected rtol=1e-12
             
-            println("  $process: dσ/dt = $(round(dsigma_dt, digits=6)) fm² ✓")
+            println("  $process: dσ/dt = $(round(dsigma_dt, digits=6)) fm⁴ ✓")
         end
         
         println("✓ 关系验证测试通过")
@@ -292,7 +292,7 @@ using Main.TotalCrossSection: calculate_t_bounds
         
         # dd 应该与 uu 相同（m_u = m_d）
         # 注意：实际代码中可能没有 dd_to_dd，这里仅验证质量效应
-        println("  uu→uu: dσ/dt = $(round(dsigma_uu, digits=6)) fm²")
+        println("  uu→uu: dσ/dt = $(round(dsigma_uu, digits=6)) fm⁴")
         println("  （m_u = m_d 时，dd→dd 应相同）")
         
         # 测试6.2：电荷共轭对称（dubar 与 udbar）
@@ -317,8 +317,8 @@ using Main.TotalCrossSection: calculate_t_bounds
             mandelstam_vars_dubar.s_12_plus, mandelstam_vars_dubar.s_12_minus, M_squared_dubar
         )
         
-        println("  udbar: dσ/dt = $(round(dsigma_udbar, digits=6)) fm²")
-        println("  dubar: dσ/dt = $(round(dsigma_dubar, digits=6)) fm²")
+        println("  udbar: dσ/dt = $(round(dsigma_udbar, digits=6)) fm⁴")
+        println("  dubar: dσ/dt = $(round(dsigma_dubar, digits=6)) fm⁴")
         println("  相对差异: $(round(abs(dsigma_udbar - dsigma_dubar)/dsigma_udbar, digits=12))")
         
         @test dsigma_udbar ≈ dsigma_dubar rtol=1e-10
