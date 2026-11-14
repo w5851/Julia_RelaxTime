@@ -308,6 +308,7 @@ function solve_gap(
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
     iterations::Int=1000,
+    _convergence_ref=nothing,
     kwargs...
 )
     iterations > 0 || throw(ArgumentError("iterations must be positive"))
@@ -323,6 +324,7 @@ function solve_gap(
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
     result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
+    _record_gap_convergence!(_convergence_ref, result)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
@@ -342,6 +344,7 @@ function solve_gap(
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
     iterations::Int=1000,
+    _convergence_ref=nothing,
     kwargs...
 )
     iterations > 0 || throw(ArgumentError("iterations must be positive"))
@@ -360,6 +363,7 @@ function solve_gap(
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
     result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
+    _record_gap_convergence!(_convergence_ref, result)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
@@ -389,6 +393,7 @@ function solve_gap(
     initial_guess=nothing,
     residual_norm_max::Real=1e-6,
     iterations::Int=1000,
+    _convergence_ref=nothing,
     kwargs...
 )
     iterations > 0 || throw(ArgumentError("iterations must be positive"))
@@ -407,7 +412,8 @@ function solve_gap(
     # 如果提供了 initial_guess，走单种子路径（与旧行为一致）
     if initial_guess !== nothing
         x0 = _as_seed_vec5(initial_guess)
-        return _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations=iterations, kwargs...)
+        return _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max;
+            iterations=iterations, _convergence_ref, kwargs...)
     end
 
     # 多种子路径：尝试所有默认种子，收集收敛的物理解，选 Ω 最小者
@@ -437,9 +443,11 @@ function solve_gap(
 end
 
 """单种子求解（无兜底，失败直接报错）"""
-function _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; iterations::Int=1000, kwargs...)
+function _solve_gap_single_seed_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max;
+    iterations::Int=1000, _convergence_ref=nothing, kwargs...)
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
     result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol, iterations=iterations)
+    _record_gap_convergence!(_convergence_ref, result)
 
     resid = Float64(result.residual_norm)
     if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))

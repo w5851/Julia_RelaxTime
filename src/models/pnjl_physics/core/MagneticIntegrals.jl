@@ -39,8 +39,10 @@ const QUARK_CHARGE_ABS = SVector{3, Float64}(2 / 3, 1 / 3, 1 / 3)
 const MAGNETIC_EB_MIN_MEV2 = 100.0
 const MAGNETIC_EB_MIN_FM2 = MAGNETIC_EB_MIN_MEV2 / ħc_MeV_fm^2
 const _PZ_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
+const _PZ_NODE_LOCK = ReentrantLock()
 const DEFAULT_ZETA_COUNT = 64
 const _ZETA_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
+const _ZETA_NODE_LOCK = ReentrantLock()
 const _LOG_EPS = 1e-16
 const _EXP_LIMIT = 745.0
 
@@ -71,18 +73,23 @@ end
     return inv(sqrt(1 + ratio))
 end
 
+"""Cached nodes on [0, 1]; returned vectors are shared read-only data."""
 function pz_nodes(p_num::Int)
     p_num >= 4 || throw(ArgumentError("p_num must be >= 4, got $p_num"))
-    return get!(_PZ_NODE_CACHE, p_num) do
-        nodes, weights = gauleg(0.0, 1.0, p_num)
-        (nodes, weights)
+    return lock(_PZ_NODE_LOCK) do
+        get!(_PZ_NODE_CACHE, p_num) do
+            gauleg(0.0, 1.0, p_num)
+        end
     end
 end
 
+"""Cached Abel-Plana nodes; returned vectors are shared read-only data."""
 function zeta_nodes(zeta_num::Int=DEFAULT_ZETA_COUNT)
     zeta_num >= 8 || throw(ArgumentError("zeta_num must be >= 8, got $(zeta_num)"))
-    return get!(_ZETA_NODE_CACHE, zeta_num) do
-        gauleg(0.0, 1.0, zeta_num)
+    return lock(_ZETA_NODE_LOCK) do
+        get!(_ZETA_NODE_CACHE, zeta_num) do
+            gauleg(0.0, 1.0, zeta_num)
+        end
     end
 end
 

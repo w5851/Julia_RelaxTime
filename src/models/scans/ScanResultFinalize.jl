@@ -2,12 +2,13 @@ module ScanResultFinalize
 
 using StaticArrays
 
-using ..Models: SolverResult
+using ..Models: SolverResult, SolverConvergence, solver_convergence_view
 
 export finalize_solver_result
 export promote_near_converged
 export is_success
 export refine_near_converged
+export scan_acceptance_diagnostics
 
 """finalize_solver_result(result, T_fm, xi; solver_backend, p_num, t_num, model_kind=:PNJL)
 
@@ -52,7 +53,8 @@ function promote_near_converged(result; acceptable_residual::Real)
         result.masses,
         result.iterations,
         residual,
-        result.xi,
+        result.xi;
+        convergence=SolverConvergence(; solver_convergence_view(result)..., scan_promoted=true),
     )
     msg = "force-marked converged (residual $(residual))"
     return promoted, msg
@@ -70,6 +72,30 @@ function is_success(result; acceptable_residual::Real)
     result.converged && return true
     residual = result.residual_norm
     return isfinite(residual) && residual <= acceptable_residual
+end
+
+"""Explain an existing scan decision without changing its acceptance policy."""
+function scan_acceptance_diagnostics(result; acceptable_residual::Real,
+    accepted::Bool=is_success(result; acceptable_residual), physical_valid=nothing)
+    c = solver_convergence_view(result)
+    physical = c.physical_valid === nothing ? physical_valid : c.physical_valid
+    scan_physical = physical_valid === nothing ? physical : physical_valid
+    reason = if result === nothing
+        :no_result
+    elseif !accepted
+        scan_physical === false ? :physical_invalid :
+            !isfinite(result.residual_norm) ? :nonfinite_residual :
+            result.residual_norm > acceptable_residual ? :residual_rejected : :scan_rejected
+    elseif c.scan_promoted || !result.converged
+        :near_residual
+    elseif c.solver_converged === true && c.residual_ok === true && physical === true
+        :solver_converged
+    else
+        :legacy_converged
+    end
+    return (; solver_converged=c.solver_converged, solver_residual_ok=c.residual_ok,
+        physical_valid=physical, solver_residual_norm_max=c.residual_norm_max,
+        convergence_source=c.source, scan_accepted=accepted, acceptance_reason=reason)
 end
 
 """refine_near_converged(result; acceptable_residual, solve_again) -> (result, message)

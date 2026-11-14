@@ -43,6 +43,7 @@ export evaluate_hard_constraints
 export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
+export SolverConvergence, solver_convergence_view
 export FixedMuPath, FixedRhoPath, FixedAsymmetricRhoPath, solve_path, selected_path_results
 export ConstraintTPath, SingleSeedAnchor, EndpointAnchor
 export SeedContinuation, PALCContinuation, NaturalContinuation, SeedPoolAnchor, MultiSeedAnchor, CompositeAnchor, ProductionLikeAnchor

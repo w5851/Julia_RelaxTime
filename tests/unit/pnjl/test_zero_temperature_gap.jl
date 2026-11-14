@@ -14,7 +14,10 @@ end
 
     @testset "Vacuum and Silver Blaze interval" begin
         vacuum = Models.solve_gap(model, 0.0, 0.0; controls...)
-        dilute = Models.solve_gap(model, 0.0, 1.25; initial_guess=vacuum, xi=0.3, controls...)
+        convergence_ref = Ref{Union{Nothing,Bool}}(nothing)
+        dilute = Models.solve_gap(model, 0.0, 1.25; initial_guess=vacuum, xi=0.3,
+            controls..., _convergence_ref=convergence_ref)
+        @test convergence_ref[] === true
         @test dilute.phi ≈ vacuum.phi rtol=1e-11
         @test vacuum.Phi == vacuum.PhiBar == 0.0
         @test Models.omega(model, dilute, 0.0, 1.25; xi=0.3) ≈
@@ -79,8 +82,10 @@ end
         finite_solver = Models.NLsolveGapSolver(jacobian=:finite, ftol=1e-11)
         finite = Models.solve_gap(model, 0.0, 0.0; initial_guess=seed, solver=finite_solver)
         @test maximum(abs, Models.gap_residual(model, finite, 0.0, 0.0)) < 1e-9
+        convergence_ref = Ref{Union{Nothing,Bool}}(nothing)
         @test_throws ErrorException Models.solve_gap(model, 0.0, 0.0;
-            initial_guess=[-0.1, -0.1, -0.1], solver, iterations=1)
+            initial_guess=[-0.1, -0.1, -0.1], solver, iterations=1, _convergence_ref=convergence_ref)
+        @test convergence_ref[] === false
     end
 
     @testset "First-order branches and minimum selection" begin

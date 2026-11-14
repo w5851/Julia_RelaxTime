@@ -25,6 +25,49 @@ export PARAMETERIZED_MODEL_KIND_ALIASES
 const SUPPORTED_SCAN_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
 const PARAMETERIZED_MODEL_KIND_ALIASES = (:pnjl_aniso, :PNJL_ANISO)
 
+const CONVERGENCE_COLUMNS = ("solver_converged", "solver_residual_ok", "physical_valid",
+    "solver_residual_norm_max", "convergence_source", "scan_accepted", "acceptance_reason")
+const UNKNOWN_CONVERGENCE_COLUMNS = ("unknown", "unknown", "unknown", "unknown",
+    "not_recorded", "unknown", "not_recorded")
+
+"""Append diagnostic columns to a legacy scan before resuming it.
+
+Existing rows are copied verbatim; unavailable evidence stays unknown. The
+temporary file is replaced only after a complete write in the same directory.
+"""
+function ensure_convergence_header!(path::AbstractString, legacy_header::AbstractString,
+    current_header::AbstractString)
+    isfile(path) || return nothing
+    old_header = open(readline, path)
+    old_header == current_header && return nothing
+    old_header == legacy_header || throw(ArgumentError("incompatible scan CSV header: $path"))
+    temporary, output = mktemp(dirname(abspath(path)))
+    try
+        println(output, current_header)
+        open(path) do input
+            readline(input)
+            for line in eachline(input)
+                isempty(strip(line)) && (println(output, line); continue)
+                println(output, line, ',', join(UNKNOWN_CONVERGENCE_COLUMNS, ','))
+            end
+        end
+        close(output)
+        # Same-directory rename replaces the file without a delete/copy fallback.
+        Base.Filesystem.rename(temporary, path)
+    finally
+        isopen(output) && close(output)
+        isfile(temporary) && rm(temporary)
+    end
+    return nothing
+end
+
+function convergence_csv_values(diagnostics)
+    return map(CONVERGENCE_COLUMNS) do column
+        value = getproperty(diagnostics, Symbol(column))
+        value === nothing ? "unknown" : string(value)
+    end
+end
+
 fmt(x::Float64) = @sprintf("%.6f", x)
 fmt(x::Real) = fmt(Float64(x))
 fmt(x) = string(x)

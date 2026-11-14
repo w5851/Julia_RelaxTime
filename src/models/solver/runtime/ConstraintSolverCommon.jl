@@ -171,8 +171,10 @@ end
     iterations::Integer,
     converged::Bool,
     legacy_fallback_used::Bool=false,
+    solver_converged::Union{Nothing,Bool}=nothing,
+    residual_norm_max::Union{Nothing,Real}=nothing,
 )
-    return (
+    result = (
         converged=converged,
         solution=_pack_solution(x_state, mu_vec),
         x_state=x_state,
@@ -187,6 +189,10 @@ end
         residual_norm=residual_norm,
         legacy_fallback_used=legacy_fallback_used,
     )
+    convergence = residual_norm_max === nothing ? SolverConvergence() :
+        _convergence_from_candidate(result; solver_converged, residual_norm_max,
+            source=:joint_nlsolve)
+    return (; result..., convergence)
 end
 
 @inline function _is_mass_positive(masses)::Bool

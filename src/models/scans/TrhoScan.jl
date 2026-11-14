@@ -49,6 +49,7 @@ using ..Models: solve
 using ..ScanCommon
 using ..ScanConfig: TrhoScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
+using ..ScanResultFinalize: scan_acceptance_diagnostics
 
 export run_trho_scan, DEFAULT_T_VALUES, DEFAULT_RHO_VALUES, DEFAULT_OUTPUT_PATH
 export build_default_rho_grid
@@ -92,7 +93,7 @@ const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data"
 const SEED_KEY_DIGITS = 6
 const ACCEPTABLE_RESIDUAL = 1e-4
 
-const HEADER = join((
+const LEGACY_HEADER = join((
     "T_MeV",
     "rho",
     "xi",
@@ -122,6 +123,7 @@ const HEADER = join((
     "converged",
     "message",
 ), ",")
+const HEADER = LEGACY_HEADER * "," * join(ScanCommon.CONVERGENCE_COLUMNS, ',')
 
 @inline function _validate_real_vector(name::Symbol, values)
     values isa AbstractVector{<:Real} || throw(ArgumentError("$(name) must be AbstractVector{<:Real}, got $(typeof(values))"))
@@ -285,6 +287,7 @@ function run_trho_scan(;
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
+    io_mode == "a" && ScanCommon.ensure_convergence_header!(output_path, LEGACY_HEADER, HEADER)
 
     stats = Dict(
         :total => 0,
@@ -911,6 +914,8 @@ function _write_row(io, T, rho, xi, result, message;
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
 )
+    diagnostic_values = ScanCommon.convergence_csv_values(scan_acceptance_diagnostics(result;
+        acceptable_residual=ACCEPTABLE_RESIDUAL, accepted=_is_success(result)))
     if result === nothing
         values = (
             _fmt(T), _fmt(rho), _fmt(xi),
@@ -923,7 +928,7 @@ function _write_row(io, T, rho, xi, result, message;
             "-1", "NaN", "false",
             _quote(message),
         )
-        println(io, join(values, ','))
+        println(io, join((values..., diagnostic_values...), ','))
         return
     end
 
@@ -985,7 +990,7 @@ function _write_row(io, T, rho, xi, result, message;
         string(result.converged),
         _quote(message),
     )
-    println(io, join(values, ','))
+    println(io, join((values..., diagnostic_values...), ','))
 end
 
 # ============================================================================

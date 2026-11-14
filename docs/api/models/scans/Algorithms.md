@@ -78,7 +78,23 @@
 - T-μ 输出公共字段：`T_MeV`、`xi`、`pressure_fm4`、`entropy_fm3`、`energy_fm4`、`phi_u/phi_d/phi_s`、`Phi1/Phi2`、`M_u_MeV/M_d_MeV/M_s_MeV`、`iterations`、`residual_norm`、`converged`、`message`
 - T-μ 特有字段：`mu_MeV`、`rho`
 - T-ρ 特有字段：`rho`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`mu_avg_MeV`、`mu_B_MeV`、`mu_Q_MeV`、`mu_S_MeV`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`
+- Tμ/Tρ 在 `message` 后追加七个诊断列：`solver_converged`、`solver_residual_ok`、`physical_valid`、`solver_residual_norm_max`、`convergence_source`、`scan_accepted`、`acceptance_reason`。
 - [../phase/Algorithms.md](../phase/Algorithms.md)：phase 产线如何消费 T-ρ 结果
+
+前五列来自[求解收敛证据](../solver/ResultDiagnosticErrorContracts.md)。布尔列采用
+`true/false`；缺少原始信息时为 `unknown`，来源为 `not_recorded`。`scan_accepted`
+记录该扫描的既有成功判据，与历史 `converged` 分开；两种扫描的近似接受阈值仍为
+`1e-4`，Tμ 还检查有限热力学量、正质量与 Polyakov 范围。Tμ 对旧结果执行该检查后，
+也会记录其可得的物理性信息。
+
+`acceptance_reason` 为 `solver_converged`（求解器、残差及物理检查均通过）、
+`near_residual`（近似残差接受，包括扫描提升）、`legacy_converged`（沿用旧接受标志）、
+`physical_invalid`、`nonfinite_residual`、`residual_rejected`、`scan_rejected`
+或 `no_result`。理由解释实际扫描判定，不参与重新选择候选。
+
+续写旧版表头时，扫描及相图生产写入端先通过同目录临时文件追加诊断列，再写新行。
+旧行的数值和消息保留，七个新列填入 `unknown/not_recorded`，包括无法追溯的扫描接受
+状态。已升级文件重复续写不会再次追加列；不认识的表头抛 `ArgumentError` 并保留原文件。
 
 兼容性规则：
 

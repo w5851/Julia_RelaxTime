@@ -9,6 +9,8 @@
 - `Models.solver_result_view(result)`
 - `Models.solver_contract_version(result)`
 - `Models.solver_result_is_success(result; residual_norm_max=1e-6, require_converged=true)`
+- `Models.SolverConvergence`
+- `Models.solver_convergence_view(result)`
 
 - `Models.SolverDiagnosticSummary`
 - `Models.coerce_solver_diagnostic_summary(diag)`
@@ -55,6 +57,42 @@
 
 - 旧 raw NamedTuple 没有 `contract_version` 时，`coerce_solver_result` 自动补为 `:v1`。
 - 不支持未知版本；传入 `contract_version != :v1` 会抛 `ArgumentError`。
+
+### 收敛证据（`convergence`）
+
+`converged` 保留各求解路线既有的接受语义。新增的 `convergence::SolverConvergence`
+分别记录原始求解器状态、后处理残差及物理检查，便于解释两者不一致的情形。
+该扩展不改变残差阈值、候选排序或选枝策略；`contract_version` 和必需字段集合仍为 v1。
+旧位置参数构造器、旧 raw NamedTuple 可继续使用，未记录项默认为 `nothing`。
+
+`solver_convergence_view(result)` 接受结果对象、`SolverConvergence` 或 `nothing`，返回：
+
+| 字段 | 类型与含义 |
+| --- | --- |
+| `solver_converged` | `Bool` 或 `nothing`；NLsolve 的 `f_converged`，或路径 Newton 校正器的残差接受标志 |
+| `residual_ok` | `Bool` 或 `nothing`；已有后处理残差有限且不超过本次请求阈值 |
+| `physical_valid` | `Bool` 或 `nothing`；状态、化学势、热力学量有限，质量为正且 Polyakov 场通过 `is_physical_solution` |
+| `residual_norm_max` | `Float64` 或 `nothing`；上述残差检查采用的阈值，与对应残差使用相同单位/归一化 |
+| `source` | `Symbol`；原始记录来源，见下文 |
+| `scan_promoted` | `Bool`；是否由扫描层按既有近似残差规则提升过 `converged`，默认 `false` |
+
+`physical_valid` 描述基本状态可用性；全局热力学稳定性由选枝过程决定，自定义 hard
+constraints 的结果仍见原诊断。某些联合模式的旧接受阈值比请求阈值宽，可能出现
+`converged=true`、`residual_ok=false`。扫描提升也会保留原始 `solver_converged=false`。
+
+来源包括 `:gap_nlsolve`、`:joint_nlsolve`、`:path_nlsolve` 和 `:path_newton`。
+仅有后处理信息时为 `:gap_postprocess` 或 `:path_postprocess`；没有原始记录时为
+`:not_recorded`，未取得的项保持 `nothing`。失败占位结果、历史构造器及只返回平均场的直接
+`solve_gap` 适配路线可能缺少原始记录。不会从旧 `converged=true` 推断求解器标志。
+该诊断独立于 `diagnostic_level`，`solver_result_view` 和 `coerce_solver_result` 均保留它；
+`BranchPoint.convergence` 在路径选择与重建结果时同样传递原始求根标志。
+
+```julia
+evidence = Models.solver_convergence_view(res)
+# evidence.solver_converged / evidence.residual_ok / evidence.physical_valid
+```
+
+Tμ/Tρ 的实际扫描接受结果及理由见[扫描输出契约](../scans/Algorithms.md)。
 
 ## Batch-D 收口（2026-04-09）
 

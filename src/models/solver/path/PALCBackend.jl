@@ -222,7 +222,8 @@ function _workspace_root!(workspace::PathRootWorkspace, value, seed, iterations)
         iterations, false, false, false, 1.0, true, workspace.cache)
 end
 
-function _path_candidate(model, path, value, solution, residual, iterations, options)
+function _path_candidate(model, path, value, solution, residual, iterations, options;
+    solver_converged=nothing, source::Symbol=:path_postprocess)
     mu_vec = path isa FixedMuPath ? normalize_mu_vec(value) : solution[6:8]
     full_solution = path isa FixedMuPath ? vcat(solution, mu_vec) : solution
     thermo = compute_thermo_from_solution(model, full_solution, _path_temperature(path, value);
@@ -232,8 +233,10 @@ function _path_candidate(model, path, value, solution, residual, iterations, opt
         converged=isfinite(residual_norm) && residual_norm <= options.residual_tol,
         iterations, residual_norm_max=options.residual_tol)
     hard_ok, failed = evaluate_hard_constraints(raw, options.rules)
+    convergence = _convergence_from_candidate(raw; solver_converged,
+        residual_norm_max=options.residual_tol, source)
     return (; raw..., converged=raw.converged && hard_ok,
-        hard_constraint_ok=hard_ok, failed_constraints=failed)
+        hard_constraint_ok=hard_ok, failed_constraints=failed, convergence)
 end
 
 function _path_root(model, path, value, seed, residual, options, work;
@@ -287,7 +290,9 @@ function _path_root(model, path, value, seed, residual, options, work;
         work.postprocess_residual_calls += 1
         candidate_started = time_ns()
         candidate = _path_candidate(model, path, value, Float64.(root.zero),
-            residual, root.iterations, options)
+            residual, root.iterations, options;
+            solver_converged=local_root === nothing ? Bool(root.f_converged) : Bool(root.accepted),
+            source=local_root === nothing ? :path_nlsolve : :path_newton)
         work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         if !candidate.converged && local_root !== nothing
             work.corrector_fallbacks += 1
@@ -298,7 +303,8 @@ function _path_root(model, path, value, seed, residual, options, work;
             work.postprocess_residual_calls += 1
             candidate_started = time_ns()
             candidate = _path_candidate(model, path, value, Float64.(root.zero),
-                residual, root.iterations, options)
+                residual, root.iterations, options;
+                solver_converged=Bool(root.f_converged), source=:path_nlsolve)
             work.root_candidate_time_s += (time_ns() - candidate_started) / 1e9
         end
         !candidate.converged && (work.rejected_roots += 1)
@@ -358,7 +364,8 @@ function _single_pass_path_result(model, path, value, previous; kwargs...)
     return SolverResult(_path_mode(path, value), selected.converged, selected.solution,
         selected.x_state, selected.mu_vec, selected.omega, selected.pressure,
         selected.rho_norm, selected.entropy, selected.energy, selected.masses,
-        selected.iterations, selected.residual_norm, path.xi)
+        selected.iterations, selected.residual_norm, path.xi;
+        convergence=selected.convergence)
 end
 
 """Resolve the scan default; explicit strategies never silently change route."""
@@ -642,7 +649,8 @@ end
 function _candidate_path_point(value, candidate, source, step)
     return BranchPoint(Float64(value), copy(candidate.solution), collect(candidate.x_state),
         collect(candidate.mu_vec), Float64(candidate.pressure), Float64(candidate.rho_norm),
-        Float64(candidate.residual_norm), Bool(candidate.converged), source, step)
+        Float64(candidate.residual_norm), Bool(candidate.converged), source, step,
+        _result_convergence(candidate))
 end
 
 function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuation;
@@ -850,11 +858,13 @@ function selected_path_results(model, result::PathSolveResult; kwargs...)
         isempty(matches) && (push!(out, nothing); continue)
         point = matches[argmax(point.pressure for point in matches)]
         path_work === nothing || (path_work.postprocess_residual_calls += 1)
-        candidate = _path_candidate(model, path, value, point.solution, residual, 0, options)
+        candidate = _path_candidate(model, path, value, point.solution, residual, 0, options;
+            solver_converged=point.convergence.solver_converged, source=point.convergence.source)
         push!(out, SolverResult(_path_mode(path, value), candidate.converged, candidate.solution,
             candidate.x_state, candidate.mu_vec, candidate.omega, candidate.pressure,
             candidate.rho_norm, candidate.entropy, candidate.energy, candidate.masses,
-            candidate.iterations, candidate.residual_norm, path.xi))
+            candidate.iterations, candidate.residual_norm, path.xi;
+            convergence=candidate.convergence))
     end
     path_work === nothing || (path_work.selected_rebuild_time_s += (time_ns()-started)/1e9)
     return out

@@ -6,6 +6,37 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
+
+@testset "Magnetic node caches under concurrent first use" for M in
+    (Models.MagneticIntegrals, Models.MagneticThermodynamics.MagneticIntegrals)
+    # Unusual orders exercise initially empty entries, including shared orders.
+    orders = repeat([37, 41, 43, 47], 16)
+    for node_function in (M.pz_nodes, M.zeta_nodes)
+        tasks = [Threads.@spawn node_function(n) for n in orders]
+        results = fetch.(tasks)
+        for (n, (nodes, weights)) in zip(orders, results)
+            cached_nodes, cached_weights = node_function(n)
+            @test nodes === cached_nodes
+            @test weights === cached_weights
+            @test issorted(nodes) && all(x -> 0.0 < x < 1.0, nodes)
+            @test all(>(0.0), weights)
+            @test sum(weights) ≈ 1.0 atol=2e-14
+            @test sum(weights .* nodes.^4) ≈ 0.2 atol=2e-14
+        end
+    end
+
+    # Consumers integrate after releasing the node-cache lock.
+    kernel(mass) = (M.omega_magnetic_mfir(mass, 2/3, 0.15; zeta_num=43),
+        M.omegat_flavor_landau(mass, 0.2, 0.8, 0.3, 0.3, 2/3, 0.15;
+            n_max=3, p_num=37))
+    masses = collect(range(0.8, 1.4; length=8))
+    serial = kernel.(masses)
+    parallel = fetch.([Threads.@spawn kernel(mass) for mass in masses])
+    @test parallel == serial
+    @test all(value -> all(isfinite, value), parallel)
+    @test_throws ArgumentError M.pz_nodes(3)
+    @test_throws ArgumentError M.zeta_nodes(7)
+end
 Models.pnjl_module()
 const PNJL = Models.pnjl_module()
 const alpha_n = getproperty(PNJL, :alpha_n)

@@ -93,7 +93,8 @@ end
 - `x_state`: SVector{5}
 - `mu_vec`: SVector{3}
 - `masses`: SVector{3}
-- `iterations`, `residual_norm`: 预留字段（目前为 missing）
+- `iterations`, `residual_norm`: 转发 models 结果；直接 gap 路线为 missing
+- `convergence`: 转发 models 收敛证据；直接 gap 路线未记录项为 nothing
 
 关键词参数：
 - `solver_backend`: :legacy|:models
@@ -127,6 +128,7 @@ function solve_equilibrium_backend(
     solved_iterations = missing
     solved_residual_norm = missing
     solved_converged = true
+    solved_convergence = Models.solver_convergence_view(nothing)
 
     effective_solver_backend = if solver_backend === :auto
         :models
@@ -194,6 +196,7 @@ function solve_equilibrium_backend(
                 solved_mu_vec = solved.mu_vec
                 solved_iterations = solved.iterations
                 solved_residual_norm = solved.residual_norm
+                solved_convergence = Models.solver_convergence_view(solved)
                 st
             else
                 fallback_solver = NLsolveGapSolver(method=:trust_region, jacobian=:forward)
@@ -234,6 +237,7 @@ function solve_equilibrium_backend(
         masses=masses,
         iterations=solved_iterations,
         residual_norm=solved_residual_norm,
+        convergence=solved_convergence,
     )
 end
 

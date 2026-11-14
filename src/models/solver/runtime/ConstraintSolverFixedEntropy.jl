@@ -115,6 +115,8 @@ function _solve_constraint_fixedentropy(
             joint_residual_norm;
             iterations=joint.iterations,
             converged=joint_converged,
+            solver_converged=Bool(joint.f_converged),
+            residual_norm_max=residual_norm_max,
             legacy_fallback_used=false,
         )
 

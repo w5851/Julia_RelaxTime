@@ -53,6 +53,10 @@ end
         @test body.result.inputs.mu_mev == 0.0
         @test body.result.inputs.tau.u == 1.0
         @test body.result.equilibrium.converged isa Bool
+        @test body.result.equilibrium.convergence.solver_converged isa Bool
+        @test body.result.equilibrium.convergence.residual_ok === true
+        @test body.result.equilibrium.convergence.physical_valid === true
+        @test body.result.equilibrium.convergence.source == "gap_nlsolve"
         @test length(body.result.equilibrium.masses) == 3
         @test isfinite(body.result.thermo_background.pressure)
         @test isfinite(body.result.transport.eta)

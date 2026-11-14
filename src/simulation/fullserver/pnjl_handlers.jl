@@ -10,6 +10,8 @@ end
         return isfinite(value) ? value : nothing
     elseif value isa Integer || value isa Bool || value isa Nothing || value isa AbstractString
         return value
+    elseif value isa Symbol
+        return string(value)
     elseif value isa AbstractDict
         return Dict(string(k) => _pnjl_json_safe_value(v) for (k, v) in pairs(value))
     elseif value isa NamedTuple
@@ -61,6 +63,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
             "energy" => solver_result.energy,
             "iterations" => solver_result.iterations,
             "residual_norm" => solver_result.residual_norm,
+            "convergence" => Models.solver_convergence_view(solver_result),
             "xi" => solver_result.xi,
             "seed_fallback_used" => solver_result.seed_fallback_used,
             "x_state" => solver_result.x_state,

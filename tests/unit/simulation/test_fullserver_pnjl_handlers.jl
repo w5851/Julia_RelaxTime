@@ -57,8 +57,26 @@ end
         @test body.result.residual_norm === nothing
         @test body.result.entropy === nothing
         @test body.result.energy === nothing
+        @test body.result.convergence.solver_converged === nothing
+        @test body.result.convergence.residual_ok === nothing
+        @test body.result.convergence.physical_valid === nothing
+        @test body.result.convergence.source == "not_recorded"
+        @test body.result.convergence.scan_promoted === false
         @test length(body.result.masses) == 3
         @test all(isfinite, body.result.masses)
+    end
+
+    @testset "FixedRho forwards recorded convergence" begin
+        resp = FPH.handle_pnjl_single_point(_pnjl_req(Dict("params" => Dict(
+            "T_mev" => 150.0, "rho_target" => 0.2, "mu_mev" => 0.0,
+            "p_num" => 8, "t_num" => 4))))
+        body = _decode(resp)
+        @test resp.status == 200
+        @test body.result.convergence.solver_converged isa Bool
+        @test body.result.convergence.residual_ok isa Bool
+        @test body.result.convergence.physical_valid isa Bool
+        @test body.result.convergence.residual_norm_max == 1e-6
+        @test body.result.convergence.source == "joint_nlsolve"
     end
 
     @testset "invalid request includes message_id" begin

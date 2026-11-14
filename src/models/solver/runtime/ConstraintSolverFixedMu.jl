@@ -48,6 +48,7 @@ function _solve_constraint_fixedmu(
         accepted = false
         for local_solver in solver_pool
             try
+                convergence_ref = Ref{Union{Nothing,Bool}}(nothing)
                 st = solve_gap(
                     model,
                     T_fm,
@@ -64,6 +65,7 @@ function _solve_constraint_fixedmu(
                     thermo_quadrature_rtol=thermo_quadrature_rtol,
                     thermo_quadrature_atol=thermo_quadrature_atol,
                     thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+                    _convergence_ref=convergence_ref,
                 )
 
                 raw = _compute_fixedmu_candidate(
@@ -81,7 +83,11 @@ function _solve_constraint_fixedmu(
                     thermo_quadrature_maxevals=thermo_quadrature_maxevals,
                 )
                 ok, failed = evaluate_hard_constraints(raw, rules)
-                candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))
+                convergence = _convergence_from_candidate(raw;
+                    solver_converged=convergence_ref[], residual_norm_max,
+                    source=convergence_ref[] === nothing ? :gap_postprocess : :gap_nlsolve)
+                candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed,
+                    converged=ok, seed_index=Int(seed_index), convergence)
                 push!(candidates, candidate)
                 accepted = true
                 break
@@ -110,6 +116,7 @@ function _solve_constraint_fixedmu(
         masses=s.masses,
         iterations=s.iterations,
         residual_norm=s.residual_norm,
+        convergence=_result_convergence(s),
         hard_constraint_ok=s.hard_constraint_ok,
         failed_constraints=s.failed_constraints,
         selection_reason=selected.selection_reason,

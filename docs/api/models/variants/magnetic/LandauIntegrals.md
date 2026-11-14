@@ -54,3 +54,10 @@ $$E_{f,n} = \sqrt{2 n |q_f| eB + p_z^2 + M_f^2}$$
 ## `density_flavor_landau`
 
 提供单味数密度近似路径。该接口通常与 `calculate_magnetic_number_densities` 配合理解，而不是单独当作主题主入口。
+
+## 积分节点缓存
+
+`MagneticIntegrals.pz_nodes(p_num::Int)`（`p_num >= 4`）及
+`zeta_nodes(zeta_num::Int=64)`（`zeta_num >= 8`）返回 `[0,1]` 上的节点和权重向量。
+两种缓存分别用短锁保护读取与首次生成，实际积分在锁外执行。返回的向量按阶数共享，
+调用者按只读数据使用；需要修改时先复制。无效阶数抛 `ArgumentError`。

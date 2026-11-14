@@ -231,6 +231,7 @@ function _production_classify_temperature_cascade(
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
     out_csv = joinpath(eval_dir, "prod_eval_T$(token)_cascade.csv")
     io_mode = isfile(out_csv) ? "a" : "w"
+    io_mode == "a" && TrhoScan.ScanCommon.ensure_convergence_header!(out_csv, TrhoScan.LEGACY_HEADER, TrhoScan.HEADER)
     written = Set{Tuple{Float64, Float64, Float64}}()
     if io_mode == "a"
         union!(written, _existing_session_keys(out_csv))
@@ -419,6 +420,7 @@ function _production_classify_temperature_memoized_uniform(
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
     out_csv = joinpath(eval_dir, "prod_eval_T$(token)_$(output_suffix).csv")
     io_mode = isfile(out_csv) ? "a" : "w"
+    io_mode == "a" && TrhoScan.ScanCommon.ensure_convergence_header!(out_csv, TrhoScan.LEGACY_HEADER, TrhoScan.HEADER)
     written = Set{Tuple{Float64, Float64, Float64}}()
     if io_mode == "a"
         union!(written, _existing_session_keys(out_csv))
@@ -931,6 +933,7 @@ function _hybrid_endpoint_route(
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
     out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_endpoint_limit.csv")
     io_mode = isfile(out_csv) ? "a" : "w"
+    io_mode == "a" && TrhoScan.ScanCommon.ensure_convergence_header!(out_csv, TrhoScan.LEGACY_HEADER, TrhoScan.HEADER)
     written = Set{Tuple{Float64, Float64, Float64}}()
     io_mode == "a" && union!(written, _existing_session_keys(out_csv))
     stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
@@ -1154,6 +1157,7 @@ function _hybrid_endpoint_local_route(
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
     out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_endpoint_local_v2.csv")
     io_mode = isfile(out_csv) ? "a" : "w"
+    io_mode == "a" && TrhoScan.ScanCommon.ensure_convergence_header!(out_csv, TrhoScan.LEGACY_HEADER, TrhoScan.HEADER)
     written = Set{Tuple{Float64, Float64, Float64}}()
     io_mode == "a" && union!(written, _existing_session_keys(out_csv))
     stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
@@ -1672,6 +1676,7 @@ function _production_classify_temperature_hybrid(
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
     out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_stage_c.csv")
     io_mode = isfile(out_csv) ? "a" : "w"
+    io_mode == "a" && TrhoScan.ScanCommon.ensure_convergence_header!(out_csv, TrhoScan.LEGACY_HEADER, TrhoScan.HEADER)
     written = Set{Tuple{Float64, Float64, Float64}}()
     io_mode == "a" && union!(written, _existing_session_keys(out_csv))
     # Stage C always retains the complete Stage-B curve and adds only the
