@@ -317,7 +317,13 @@ struct BranchPoint
     converged::Bool
     source::Symbol
     step_index::Int
+    convergence::SolverConvergence
 end
+
+BranchPoint(param_value, solution, x_state, mu_vec, pressure, rho_norm,
+    residual_norm, converged, source, step_index) =
+    BranchPoint(param_value, solution, x_state, mu_vec, pressure, rho_norm,
+        residual_norm, converged, source, step_index, SolverConvergence())
 
 struct ContinuationBranch
     branch_id::Symbol
@@ -555,6 +561,7 @@ end
         Bool(result.converged),
         source,
         step_index,
+        result.convergence,
     )
 end
 
@@ -812,6 +819,7 @@ end
         converged=point.converged,
         source=point.source,
         step_index=point.step_index,
+        convergence=solver_convergence_view(point),
     )
 end
 

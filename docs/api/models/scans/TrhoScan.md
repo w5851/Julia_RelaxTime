@@ -86,14 +86,15 @@ resume 保留已有行；部分完成的等温线会重建所选路径，仅写�
 T-ρ 扫描的稳定跨模块产物同样是 CSV。当前 header 为：
 
 ```text
-T_MeV,rho,xi,mu_u_MeV,mu_d_MeV,mu_s_MeV,mu_avg_MeV,mu_B_MeV,mu_Q_MeV,mu_S_MeV,pressure_fm4,entropy_fm3,energy_fm4,rho_u_fm3,rho_d_fm3,rho_s_fm3,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message
+T_MeV,rho,xi,mu_u_MeV,mu_d_MeV,mu_s_MeV,mu_avg_MeV,mu_B_MeV,mu_Q_MeV,mu_S_MeV,pressure_fm4,entropy_fm3,energy_fm4,rho_u_fm3,rho_d_fm3,rho_s_fm3,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message,solver_converged,solver_residual_ok,physical_valid,solver_residual_norm_max,convergence_source,scan_accepted,acceptance_reason
 ```
 
 字段语义要点：
 
 - `mu_*_MeV` 来自 flavor 化学势分解，`mu_avg_MeV` 为三味平均
 - `rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3` 是分味粒子数密度
-- 失败或近似接受的点仍保留在输出中，并由 `message` 区分原因
+- 失败或近似接受的点仍保留在输出中；`scan_accepted` 和 `acceptance_reason` 记录扫描判定，`message` 提供文字说明。
+- 新诊断列的未知值与旧 CSV 续写升级规则见[输出契约](Algorithms.md#6-输出契约与下游边界)。
 
 同一个点的 joint solve、压力/密度/熵后处理、residual 复算和分味密度写出必须共享同一组热积分参数；入口不会把自适应策略只用于残差而在 CSV 后处理退回固定网格。
 当前 `:rs_reduced_adaptive` 在本入口明确限定为 `model_kind=:PNJL` 且 `constraint_mode=:fixed_rho`；其他模型或约束模式会提前报错，不会静默回退到 tensor。

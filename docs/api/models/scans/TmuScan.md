@@ -83,12 +83,13 @@ PNJL 默认采用三次目标预测、带回溯的 Newton 校正和中心有限�
 T-μ 扫描的稳定跨模块产物是 CSV，而不是 Julia 内部结构本身。当前 header 为：
 
 ```text
-T_MeV,mu_MeV,xi,pressure_fm4,rho,entropy_fm3,energy_fm4,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message
+T_MeV,mu_MeV,xi,pressure_fm4,rho,entropy_fm3,energy_fm4,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message,solver_converged,solver_residual_ok,physical_valid,solver_residual_norm_max,convergence_source,scan_accepted,acceptance_reason
 ```
 
 读取约束：
 
-- 失败点也会写入 CSV，并通过 `converged=false` 与 `message` 标记
+- 失败点也会写入 CSV；`scan_accepted` 是扫描成功标志，`acceptance_reason` 解释理由，`converged` 保留既有语义。
+- 新诊断列及旧 CSV 自动续写升级见[输出契约](Algorithms.md#6-输出契约与下游边界)。
 - 下游应按列名而不是列位置解析
 - 若将来扩展 schema，应优先追加列而不是重命名现有列
 - `T_values` 和 `mu_values` 使用 MeV，μ 是共同夸克化学势 μq；CSV 的 `rho` 与

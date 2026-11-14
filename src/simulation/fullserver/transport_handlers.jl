@@ -82,6 +82,7 @@ end
             "converged" => eq.converged,
             "iterations" => eq.iterations,
             "residual_norm" => _pnjl_json_safe_value(eq.residual_norm),
+            "convergence" => Models.solver_convergence_view(eq),
             "x_state" => _pnjl_json_safe_value(eq.x_state),
             "mu_vec" => _pnjl_json_safe_value(eq.mu_vec),
             "masses" => _pnjl_json_safe_value(eq.masses),

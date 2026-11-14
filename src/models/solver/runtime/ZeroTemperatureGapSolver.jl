@@ -43,9 +43,11 @@ function _zero_temperature_seeds()
     return unique(seeds)
 end
 
-function _zero_temperature_nlsolve(residual!, seed, solver, residual_norm_max, iterations)
+function _zero_temperature_nlsolve(residual!, seed, solver, residual_norm_max, iterations;
+    _convergence_ref=nothing)
     result = nlsolve(residual!, copy(seed); autodiff=solver.jacobian,
         method=solver.method, xtol=solver.xtol, ftol=solver.ftol, iterations)
+    _record_gap_convergence!(_convergence_ref, result)
     resid = Float64(result.residual_norm)
     result.f_converged && isfinite(resid) && resid <= residual_norm_max ||
         error("zero-temperature solve_gap did not converge (residual_norm=$resid, f_converged=$(result.f_converged))")
@@ -90,6 +92,7 @@ function _solve_gap_zero_temperature(model::PNJLModel, mu_vec;
     thermo_quadrature_rtol::Float64=1e-8,
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
+    _convergence_ref=nothing,
     kwargs...)
     mu = SVector{3, Float64}(normalize_mu_vec(mu_vec))
     foreach(value -> require_finite("mu_vec component", value), mu)
@@ -115,7 +118,7 @@ function _solve_gap_zero_temperature(model::PNJLModel, mu_vec;
 
     if initial_guess !== nothing
         return _zero_temperature_nlsolve(residual!, _zero_temperature_seed(initial_guess),
-            s, Float64(residual_norm_max), iterations)
+            s, Float64(residual_norm_max), iterations; _convergence_ref)
     end
 
     seeds = _zero_temperature_seeds()

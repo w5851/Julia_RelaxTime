@@ -215,7 +215,8 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 成功响应（`200`）：
 
 - `status="ok"`
-- `result`：`converged/omega/pressure/rho_norm/entropy/energy/iterations/residual_norm/xi/seed_fallback_used/x_state/mu_vec/masses`
+- `result`：`converged/omega/pressure/rho_norm/entropy/energy/iterations/residual_norm/xi/seed_fallback_used/x_state/mu_vec/masses/convergence`
+- `convergence`：`solver_converged/residual_ok/physical_valid/residual_norm_max/source/scan_promoted`，定义见[收敛证据](models/solver/ResultDiagnosticErrorContracts.md)。FixedRho 转发联合求解记录；当前 FixedMu 简化入口没有保存这些原始信息，前三项及阈值为 `null`、`source="not_recorded"`、`scan_promoted=false`。
 - `rho_norm`：净重子密度除以 `rho0`，即 `sum(n_quark - n_antiquark)/(3*rho0)`，与 `FixedRho` 的 `rho_target` 使用同一无量纲口径。旧版 FixedMu 单点漏减反夸克且漏除 `rho0`，该返回值已修正。
 - 对当前单点口径下未计算或不可得的浮点量，HTTP 响应中统一返回 `null`，不返回 JSON `NaN` 字面量。
 
@@ -275,7 +276,8 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
   - `T_mev/mu_mev/xi`
   - `tau.u/d/s/ubar/dbar/sbar`
 - `result.equilibrium`
-  - `converged/iterations/residual_norm/x_state/mu_vec/masses`
+  - `converged/iterations/residual_norm/x_state/mu_vec/masses/convergence`
+  - `convergence` 同上，转发平衡态求解结果；旧输入、直接 gap 或回退路线未记录的项为 `null`，不从 `converged` 推断。
 - `result.thermo_background`
   - `pressure/entropy/energy/rho_mass/c_p`
 - `result.densities`

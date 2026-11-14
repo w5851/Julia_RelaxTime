@@ -45,6 +45,14 @@ end
             @test abs(rows[mu].pressure - reference[mu].pressure) < 1e-6
             @test abs(rows[mu].rho_norm - reference[mu].rho_norm) < 1e-7
             @test rows[mu].rho_norm ≈ selected[index].rho_norm * rho0
+            for value in (rows[mu], reference[mu], selected[index])
+                c = Models.solver_convergence_view(value)
+                @test c.solver_converged isa Bool
+                @test c.residual_ok === true
+                @test c.physical_valid === true
+                @test c.source in (:path_nlsolve, :path_newton)
+                @test c.residual_norm_max == 1e-6
+            end
         end
         @test abs(rows[0.0].rho_norm) < 1e-8
         # At T=120 MeV the pressure-selected branch changes in this mu interval.
@@ -107,6 +115,8 @@ end
             @test abs(rows[rho].rho_norm - rho) < 1e-6
             @test maximum(abs.(rows[rho].solution .- reference[rho].solution)) < 1e-6
             @test abs(rows[rho].pressure - reference[rho].pressure) < 1e-6
+            @test Models.solver_convergence_view(rows[rho]).residual_ok === true
+            @test Models.solver_convergence_view(rows[rho]).source in (:path_nlsolve, :path_newton)
         end
         mu_q_MeV = [sum(rows[rho].mu_vec)/3 * Main.Constants_PNJL.ħc_MeV_fm for rho in grid]
         @test any(<(0), diff(mu_q_MeV))

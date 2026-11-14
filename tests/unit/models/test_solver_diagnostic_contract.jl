@@ -37,6 +37,12 @@ const P = Models.pnjl_module()
         )
 
         @test !haskey(default_path, :fixedmu_problem_spec_active)
+        c = Models.solver_convergence_view(default_path)
+        @test c.solver_converged === true
+        @test c.residual_ok === (isfinite(default_path.residual_norm) && default_path.residual_norm <= 1e-6)
+        @test c.physical_valid === true
+        @test c.source === :gap_nlsolve
+        @test c.residual_norm_max == 1e-6
     end
 
     @testset "diagnostic level none" begin
@@ -54,6 +60,10 @@ const P = Models.pnjl_module()
             iterations=120,
         )
         @test !haskey(result_none, :diagnostic)
+        c = Models.solver_convergence_view(result_none)
+        @test c.solver_converged isa Bool
+        @test c.residual_ok === (isfinite(result_none.residual_norm) && result_none.residual_norm <= 1e-6)
+        @test c.source === :joint_nlsolve
     end
 
     @testset "diagnostic level summary" begin
@@ -117,6 +127,10 @@ const P = Models.pnjl_module()
         @test haskey(result_full, :error_kind)
         @test haskey(result_full, :error_msg)
         @test haskey(result_full, :selection_reason)
+        c = Models.solver_convergence_view(result_full)
+        @test c.solver_converged isa Bool
+        @test c.residual_ok === (isfinite(result_full.residual_norm) && result_full.residual_norm <= 1e-6)
+        @test c.source === :joint_nlsolve
     end
 
     @testset "SolverResult contract version and public view" begin
@@ -137,6 +151,7 @@ const P = Models.pnjl_module()
         view = Models.solver_result_view(result)
         @test haskey(view, :contract_version)
         @test view.contract_version == Models.SOLVER_CONTRACT_VERSION_V1
+        @test view.convergence == Models.solver_convergence_view(raw)
         for key in Models.SOLVER_RESULT_REQUIRED_FIELDS
             @test haskey(view, key)
         end

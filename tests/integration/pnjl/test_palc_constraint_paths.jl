@@ -28,6 +28,11 @@ end
             @test length(value.solution) == 8
             @test maximum(abs, residual(value.solution, temperature)) < 1e-6
             @test value.masses[3] > value.masses[1] > 0
+            c = Models.solver_convergence_view(value)
+            @test c.solver_converged isa Bool
+            @test c.residual_ok === true
+            @test c.physical_valid === true
+            @test c.source in (:path_nlsolve, :path_newton)
         end
         for i in (1,11,21)
             legacy = Models.solve(model, mode, path.T_values[i];

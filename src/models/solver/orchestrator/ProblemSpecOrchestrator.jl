@@ -453,6 +453,8 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
             masses=pp.masses,
             residual_norm=pp.residual_norm,
             converged=converged,
+            convergence=_convergence_from_candidate((; pp..., solution);
+                solver_converged=Bool(res.f_converged), residual_norm_max, source=:joint_nlsolve),
         )
 
         return (
@@ -494,6 +496,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         masses=picked.masses,
         iterations=picked.res.iterations,
         residual_norm=picked.residual_norm,
+        convergence=picked.convergence,
         fixedrho_joint_solve_active=true,
         fixedrho_joint_selected_method=selected_method,
         fixedrho_joint_selected_quality=selected_attempt.quality_tag,
@@ -575,6 +578,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 masses=solved.masses,
                 iterations=Int(solved.iterations),
                 residual_norm=Float64(solved.residual_norm),
+                convergence=_result_convergence(solved),
                 residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
                 fixedrho_joint_solve_requested=fixedrho_joint_solve,
                 fixedrho_joint_solve_active=get(solved, :fixedrho_joint_solve_active, false),
@@ -630,6 +634,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        convergence=_result_convergence(s),
         error_kind=(hasproperty(s, :error_kind) ? Symbol(getproperty(s, :error_kind)) : :none),
         error_msg=(hasproperty(s, :error_msg) ? String(getproperty(s, :error_msg)) : ""),
         fixedrho_joint_solve_requested=fixedrho_joint_solve,
@@ -782,6 +787,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        convergence=_result_convergence(s),
         error_kind=(hasproperty(s, :error_kind) ? Symbol(getproperty(s, :error_kind)) : :none),
         error_msg=(hasproperty(s, :error_msg) ? String(getproperty(s, :error_msg)) : ""),
         governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),

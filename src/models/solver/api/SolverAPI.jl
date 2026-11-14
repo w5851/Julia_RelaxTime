@@ -20,6 +20,7 @@ struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:
     residual_norm::Float64
     xi::Float64
     contract_version::Symbol
+    convergence::SolverConvergence
 end
 
 const SOLVER_CONTRACT_VERSION_V1 = :v1
@@ -75,7 +76,8 @@ function SolverResult(
     masses::MM,
     iterations::Int,
     residual_norm::Float64,
-    xi::Float64,
+    xi::Float64;
+    convergence::SolverConvergence=SolverConvergence(),
 ) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
     return SolverResult(
         mode,
@@ -92,7 +94,8 @@ function SolverResult(
         iterations,
         residual_norm,
         xi,
-        SOLVER_CONTRACT_VERSION_V1,
+        SOLVER_CONTRACT_VERSION_V1;
+        convergence,
     )
 end
 
@@ -111,7 +114,8 @@ function SolverResult(
     iterations::Int,
     residual_norm::Float64,
     xi::Float64,
-    contract_version,
+    contract_version;
+    convergence::SolverConvergence=SolverConvergence(),
 ) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
     return SolverResult{VX, VM, MM}(
         mode,
@@ -129,6 +133,7 @@ function SolverResult(
         residual_norm,
         xi,
         _normalize_solver_contract_version(contract_version),
+        convergence,
     )
 end
 
@@ -151,6 +156,7 @@ end
         iterations=result.iterations,
         residual_norm=result.residual_norm,
         xi=result.xi,
+        convergence=solver_convergence_view(result),
     )
 end
 
@@ -178,7 +184,8 @@ end
         Int(getproperty(raw_result, :iterations)),
         Float64(getproperty(raw_result, :residual_norm)),
         xi_val,
-        contract_version,
+        contract_version;
+        convergence=_result_convergence(raw_result),
     )
 end
 
@@ -510,7 +517,8 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         raw.masses,
         Int(raw.iterations),
         Float64(raw.residual_norm),
-        Float64(opts.xi),
+        Float64(opts.xi);
+        convergence=_result_convergence(raw),
     )
 
     if single.converged || !opts.auto_multiseed_fallback
@@ -586,7 +594,8 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
         raw.masses,
         Int(raw.iterations),
         Float64(raw.residual_norm),
-        Float64(bridge.xi),
+        Float64(bridge.xi);
+        convergence=_result_convergence(raw),
     )
 end
 
@@ -667,6 +676,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 masses=raw.masses,
                 iterations=Int(raw.iterations),
                 residual_norm=Float64(raw.residual_norm),
+                convergence=_result_convergence(raw),
                 hard_constraint_ok=ok,
                 failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
             )
@@ -724,7 +734,8 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         s.masses,
         Int(s.iterations),
         Float64(s.residual_norm),
-        Float64(opts.xi),
+        Float64(opts.xi);
+        convergence=_result_convergence(s),
     )
 end
 
@@ -833,7 +844,8 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         raw.masses,
         Int(raw.iterations),
         Float64(raw.residual_norm),
-        Float64(bridge.xi),
+        Float64(bridge.xi);
+        convergence=_result_convergence(raw),
     )
 end
 

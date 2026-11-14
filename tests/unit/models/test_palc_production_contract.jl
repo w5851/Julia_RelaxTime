@@ -46,9 +46,10 @@ end
         mktempdir() do directory
             file = joinpath(directory, "scan.csv")
             open(file, "w") do io
-                println(io, "T,coordinate,xi")
+                scan = route === :tmu ? Models.TmuScan : Models.TrhoScan
+                println(io, scan.HEADER)
                 for coordinate in 1.0:5.0
-                    println(io, "120.0,$coordinate,0.0")
+                    scan._write_row(io, 120.0, coordinate, 0.0, nothing, "fixture: failed point retained")
                 end
             end
             result = P.scan_contract_check(route, strategy, [120.0], [0.0], collect(1.0:5.0), file)

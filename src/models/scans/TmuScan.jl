@@ -43,6 +43,7 @@ using ..SeedStrategies: auto_phase_hint
 using ..ScanCommon
 using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
+using ..ScanResultFinalize: scan_acceptance_diagnostics
 
 export run_tmu_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_OUTPUT_PATH
 
@@ -56,7 +57,7 @@ const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data"
 const SEED_KEY_DIGITS = 6
 const ACCEPTABLE_RESIDUAL = 1e-4
 
-const HEADER = join((
+const LEGACY_HEADER = join((
     "T_MeV",
     "mu_MeV",
     "xi",
@@ -77,6 +78,7 @@ const HEADER = join((
     "converged",
     "message",
 ), ",")
+const HEADER = LEGACY_HEADER * "," * join(ScanCommon.CONVERGENCE_COLUMNS, ',')
 
 @inline function _validate_real_vector(name::Symbol, values)
     values isa AbstractVector{<:Real} || throw(ArgumentError("$(name) must be AbstractVector{<:Real}, got $(typeof(values))"))
@@ -229,6 +231,7 @@ function run_tmu_scan(;
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
+    io_mode == "a" && ScanCommon.ensure_convergence_header!(output_path, LEGACY_HEADER, HEADER)
 
     stats = Dict(:total => 0, :success => 0, :failure => 0, :skipped => 0)
     
@@ -347,7 +350,7 @@ function _fixedmu_scan_units(result)
         result.mu_vec, result.omega, result.pressure,
         result.rho_norm * Main.Constants_PNJL.ρ0_inv_fm3,
         result.entropy, result.energy, result.masses, result.iterations,
-        result.residual_norm, result.xi)
+        result.residual_norm, result.xi; convergence=result.convergence)
 end
 
 """run_tmu_scan(config::TmuScanConfig; kwargs...) -> NamedTuple
@@ -554,14 +557,17 @@ function _refine_result(T_fm, μ_fm, xi, result;
     )
 end
 
-"""判断是否成功"""
-function _is_success(result)
+function _scan_physical_valid(result)
     result === nothing && return false
     thermo_finite = isfinite(result.omega) && isfinite(result.pressure) &&
                    isfinite(result.rho_norm) && isfinite(result.entropy) &&
                    isfinite(result.energy)
-    phys_ok = thermo_finite && is_physical_solution(result.x_state, result.masses)
-    return phys_ok && is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
+    return thermo_finite && is_physical_solution(result.x_state, result.masses)
+end
+
+"""判断是否成功"""
+function _is_success(result)
+    return _scan_physical_valid(result) && is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
 end
 
 """提升近似收敛为成功"""
@@ -625,6 +631,9 @@ end
 
 """写入一行结果"""
 function _write_row(io, T, mu, xi, result, message)
+    diagnostic_values = ScanCommon.convergence_csv_values(scan_acceptance_diagnostics(result;
+        acceptable_residual=ACCEPTABLE_RESIDUAL, accepted=_is_success(result),
+        physical_valid=result === nothing ? nothing : _scan_physical_valid(result)))
     if result === nothing
         values = (
             _fmt(T), _fmt(mu), _fmt(xi),
@@ -634,7 +643,7 @@ function _write_row(io, T, mu, xi, result, message)
             "-1", "NaN", "false",
             _quote(message),
         )
-        println(io, join(values, ','))
+        println(io, join((values..., diagnostic_values...), ','))
         return
     end
 
@@ -665,7 +674,7 @@ function _write_row(io, T, mu, xi, result, message)
         string(result.converged),
         _quote(message),
     )
-    println(io, join(values, ','))
+    println(io, join((values..., diagnostic_values...), ','))
 end
 
 # ============================================================================

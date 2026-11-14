@@ -27,9 +27,12 @@ if !isdefined(Main, :CorrectorPathTestModel)
     @eval Main struct CorrectorPathTestModel <: Models.AbstractQCDModel end
 end
 
-function Models._path_candidate(::Main.CorrectorPathTestModel, path, value, solution, residual, iterations, options)
+function Models._path_candidate(::Main.CorrectorPathTestModel, path, value, solution, residual, iterations, options;
+    solver_converged=nothing, source=:path_postprocess)
     residual_norm = maximum(abs, residual(solution,value))
-    return (; solution, iterations, residual_norm, converged=residual_norm < options.residual_tol)
+    convergence = Models.SolverConvergence(; solver_converged, source,
+        residual_ok=residual_norm < options.residual_tol, residual_norm_max=options.residual_tol)
+    return (; solution, iterations, residual_norm, converged=residual_norm < options.residual_tol, convergence)
 end
 
 Models._path_options(::Main.EndpointPathTestModel,path;kwargs...) = nothing
@@ -500,6 +503,8 @@ end
         candidate = Models._path_root(model,path,1.0,seed,residual,options,work;workspace)
         @test candidate !== nothing && candidate.converged
         @test candidate.solution ≈ [1.0] atol=1e-8
+        @test candidate.convergence.solver_converged === true
+        @test candidate.convergence.source === :path_nlsolve
         @test work.corrector_fallbacks == 1
         @test work.newton_corrections == 1
         @test seed == [0.01]
@@ -570,6 +575,7 @@ end
         @test nt.path.path_kind === :fixed_asymmetric_rho
         @test nt.path.rho_values == [0.1]
         @test nt.branches[1].branch_id === :high
+        @test nt.branches[1].points[1].convergence == Models.solver_convergence_view(branch.points[1])
         @test nt.selections[1].selected_branch_id === :high
         @test nt.diagnostics.continuation_backend === :seed_continuation
     end
