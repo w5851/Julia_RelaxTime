@@ -10,7 +10,7 @@ import argparse
 import copy
 import csv
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import shutil
 import sys
 
@@ -68,11 +68,15 @@ def resolve(record: dict, root: Path) -> Path:
 def load_sources(root: Path) -> tuple[dict, dict, list[Path]]:
     metadata_path = root / SOURCE / "phase_reference_source_manifest.json"
     metadata = read_json(metadata_path)
-    expected = {Path(item["path"]).name: item for item in metadata["artifacts"]}
+    # The frozen source records Windows-relative paths, including on Linux.
+    expected = {PureWindowsPath(item["path"]).as_posix(): item for item in metadata["artifacts"]}
     paths = [root / SOURCE / "reference" / f"{name}_{TAG}.csv" for name in ("boundary", "crossover", "cep")]
     rows = {}
     for name, path in zip(("boundary", "crossover", "cep"), paths):
-        if path.stat().st_size != expected[path.name]["bytes"] or sha256_file(path) != expected[path.name]["sha256"]:
+        record = expected.get(path.relative_to(root).as_posix())
+        if record is None:
+            raise ValueError(f"missing frozen numerical input record: {path}")
+        if path.stat().st_size != record["bytes"] or sha256_file(path) != record["sha256"]:
             raise ValueError(f"frozen numerical input drift: {path}")
         with path.open(encoding="utf-8-sig", newline="") as stream:
             rows[name] = list(csv.DictReader(line for line in stream if line.strip() and not line.startswith("#")))

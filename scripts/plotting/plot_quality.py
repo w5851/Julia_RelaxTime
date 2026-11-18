@@ -82,7 +82,8 @@ def _text_glyphs(artist: Any) -> list[tuple[str, float, str]]:
     properties = artist.get_fontproperties()
     if "$" in text:
         parsed = MathTextParser("path").parse(text, dpi=72, prop=properties)
-        return [(font.fname, float(size), chr(code)) for font, size, code, _, _ in parsed.glyphs]
+        # Matplotlib 3.11 adds a glyph index after the character code.
+        return [(font.fname, float(size), chr(code)) for font, size, code, *_ in parsed.glyphs]
     font_path = font_manager.findfont(properties)
     return [(font_path, float(properties.get_size_in_points()), char) for char in text]
 

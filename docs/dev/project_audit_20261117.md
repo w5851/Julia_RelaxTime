@@ -106,7 +106,7 @@ F9 涉及的文件是 `data/outputs/results/pnjl/phase_diagram/figure4_phase_dia
 | Python unit 全套，修复前 | 663 passed、1 failed、1 skipped，80 subtests passed，691 秒；失败为 F9，跳过为 F11 |
 | Python 初次修复后定向复验 | raw-curve archive 整个测试文件 + 原失败的来源校验，共 7 passed |
 | Python 全套复验 | 清理前 666 项通过（595.44 秒）；清理后 663 项通过（250.91 秒）；均有 80 子断言通过 |
-| Nightly Python 选择器 | 本地 11/11，含真实 PNG/PDF 和拒绝用例；远端未运行 |
+| Nightly Python 选择器 | Windows 和 Ubuntu 均 11/11，含真实 PNG/PDF 和拒绝用例；首次远端失败及修复见下文 |
 | Node 默认全套 | 4 passed、1 skipped（显式保留的 live integration），无需运行服务 |
 | 真 HTTP socket + Node 显式联调 | 健康、静态页面、400 路径拒绝、结果已完成/未完成、队列 429、测试任务清理通过；Julia 探针 10/10。实际 job/routing 实现配合确定性数值 stub，未进行真实大扫描压力测试；临时服务已关闭 |
 | 现行 Julia script-entrypoint gate | 370 个脚本通过 |
@@ -138,7 +138,8 @@ Remove-Item Env:REGRESSION_FILES
 
 完整 live integration 的显式启用方式见 [command reference](agent_command_reference.md#frontend-tests)。定向验证覆盖本次修改触及的边界。完整 CI 状态以修复提交对应 GitHub Actions run 为准，未做全参数域数值重算。
 
-## 提交前追查的 CI 失败（2026-11-18）
+## 提交与复验期间发现的 CI 失败（2026-11-18）
 
-- [旧版 Nightly](https://github.com/w5851/Julia_RelaxTime/actions/runs/44059054844) 的 unit 和 Models/PNJL integration 都报同名 `SolverConvergence` 无法派发。相图 CLI 在进程内 `include` 时重新定义了 `Models`，两份已退役的 `run_tmu_scan.jl` 测试也有同样的问题，先加载的平衡态 facade 仍持有旧模块。现行相图 CLI 复用已加载模块并校验模块对象一致；删除两份旧测试，保留已有的退役与统一 CLI 行为覆盖。
+- [旧版 Nightly](https://github.com/w5851/Julia_RelaxTime/actions/runs/44059054844) 的 unit 和 Models/PNJL integration 都报同名 `SolverConvergence` 无法派发。相图 CLI 在进程内 `include` 时重新定义了 `Models`，两份已退役的 `run_tmu_scan.jl` 测试也有同样的问题，先加载的平衡态 facade 仍持有旧模块。现行相图 CLI 复用已加载模块并校验模块对象一致；删除两份旧测试，保留已有的退役与统一 CLI 行为覆盖。本地复现原错误，修复后同一模块中的平衡态计算正常，相关 unit 60/60 通过。
 - [旧版预编译检查](https://github.com/w5851/Julia_RelaxTime/actions/runs/44069204694) 成功构建 sysimage，同一组测试在两种模式下均为 59/59。无 sysimage 1047 行、有 sysimage 401 行，只有覆盖差值 656 超出原上限 650。差值可能在覆盖改善时增大。改为约束两种模式的实际编译记录，分别最多 1100 和 450 行；保留总差值、重点差值和重点明细作为诊断。用 [11 月 12 日成功 run](https://github.com/w5851/Julia_RelaxTime/actions/runs/43196387013)、[11 月 13 日失败 run](https://github.com/w5851/Julia_RelaxTime/actions/runs/43404316698) 和上述最新失败数据复验，连同改善覆盖及超限负例共 7 项通过。
+- [首次 Nightly Python 检查](https://github.com/w5851/Julia_RelaxTime/actions/runs/44245187455/job/134602319216) 在 Ubuntu 上无法匹配冻结清单中的 Windows 相对路径。规范化读取后的路径，再按完整的相对路径核对记录、文件大小和 SHA256。真实渲染还复现了 Matplotlib 3.11 增加数学字形字段的问题；验收现只读取字体、字号和字符。Ubuntu 使用与该 CI 相同的 Matplotlib 3.11.2，配合 Poppler 复验 11/11（26.12 秒，含 PNG/PDF 及拒绝用例）；Windows 绘图相关复验 69/69。冻结来源与已验收图件的字节保持原样。
