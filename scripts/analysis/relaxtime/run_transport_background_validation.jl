@@ -1,7 +1,10 @@
 #!/usr/bin/env julia
 # Same-branch background and A-field quadrature checks, with tau held fixed.
 using CSV, NLsolve, StaticArrays
-include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+end
+import Main: Models
 if !isdefined(Main,:TerminalTransportQuadrature)
     include(joinpath(@__DIR__, "TerminalTransportQuadrature.jl"))
 end

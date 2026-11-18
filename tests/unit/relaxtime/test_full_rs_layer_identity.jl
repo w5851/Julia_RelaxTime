@@ -1,9 +1,16 @@
 using Test
+
+const _FULL_RS_TEST_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+if !isdefined(Main, :Models)
+    Base.include(Main, joinpath(_FULL_RS_TEST_ROOT, "src", "models", "Models.jl"))
+end
+const _FULL_RS_PRELOADED_MODELS = Main.Models
 if !isdefined(Main,:full_rs_identity)
-    include(joinpath(@__DIR__,"..","..","..","scripts","analysis","relaxtime","run_transport_full_rs_layer_validation.jl"))
+    include(joinpath(_FULL_RS_TEST_ROOT, "scripts", "analysis", "relaxtime", "run_transport_full_rs_layer_validation.jl"))
 end
 
 @testset "full-RS layer identity separates rounding from physics" begin
+    @test Main.Models === _FULL_RS_PRELOADED_MODELS
     state=(quark_params=(A=(u=-3.0,d=-3.0,s=-2.0),),K_coeffs=(K0_plus=0.5,K0_minus=0.75))
     @test full_rs_identity(state,state).passed
     rounded=merge(state,(K_coeffs=(K0_plus=nextfloat(0.5),K0_minus=0.75),))
