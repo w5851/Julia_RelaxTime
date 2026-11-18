@@ -238,6 +238,10 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
   - `trho + point`：`T_mev`、`rho_value`
   - 可选治理参数：`max_retries`（默认 `0`，最大 `3`）、`timeout_seconds`
 
+`params.output_path` 如有提供，必须指向 `data/outputs` 内的文件；服务端在登记任务前检查路径，
+拒绝目录、越界路径以及经已有符号链接指向该目录外的路径，返回 `400 INVALID_REQUEST`。
+不存在的父目录允许由扫描创建。此限制适用于 PNJL scan job，脚本任务的自定义参数另见对应契约。
+
 成功响应（`202`）：
 
 - `status="accepted"`
@@ -299,6 +303,7 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
 
 - `status="ok"`
 - `job_id/kind/job_status`
+- `worker_active`：是否仍占用扫描名额，队列的 `running` 计数包含正在退出的 worker。
 - `created_at/started_at/ended_at`
 - `progress.total/completed/percent`
 - `error`（仅失败态暴露用户可读摘要）
@@ -323,7 +328,14 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
 
 - 可取消状态：`queued | running`
 - 已终态或不可取消：返回 `409` + `JOB_NOT_CANCELLABLE`
-- 成功取消：`200`，`job_status="cancelled"`
+- 接受取消：`200`，`job_status="cancelled"`，附 `worker_active`。
+
+排队任务取消后不启动。运行中的扫描在点、延拓步及写入前检查停止请求；允许已经开始的
+单点求解或写入完成。已写行保留，可按相同网格用 `resume=true` 续扫。等待
+`worker_active=false` 后再操作同一输出路径。
+
+`timeout_seconds` 从取得 worker 后开始用单调时钟计时，覆盖所有尝试；`0` 关闭超时。
+到检查边界超时后为 `failed` / `TIMEOUT`。取消和超时都停止后续重试。
 
 #### 0.6.7 `GET /api/modules/script-tasks`（脚本任务目录）
 
@@ -379,20 +391,21 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
 
 - `status="ok"`
 - `job_id/kind/task_id/task_name/preset/job_status`
+- `worker_active`：是否仍占用脚本任务名额；`cancelled` 且为 `true` 时正在回收进程。
 - `created_at/started_at/ended_at`
 - `progress.total/completed/percent`
 - `queue.position/queued/running/max_running/max_pending`
 - `events[]`
 - `command`
 - `logs.stdout_path/stderr_path/stdout_tail/stderr_tail`：tail 为固定字节窗口截取，避免按全量日志读取。
-- `error/reason_code`（失败或取消时提供摘要）
+- `error`（失败摘要）、`reason_code`（失败或取消原因代码）
 
 #### 0.6.10 `GET /api/modules/script-tasks/jobs/{job_id}/result`（脚本任务结果）
 
-- 任务未结束（`409`）：返回 `JOB_NOT_FINISHED`。
+- 任务未结束或取消后仍在回收进程（`409`）：返回 `JOB_NOT_FINISHED`。
 - 任务已结束（`200`）：返回 `status="ok"`、`job_id`、`job_status`、`result`。
 - `result` 包含：
-  - `task_id/task_name/preset/exit_code`
+  - `task_id/task_name/preset/exit_code`（POSIX 信号退出使用 `128 + signal`）
   - `output_dir/stdout_path/stderr_path`
   - `stdout_tail/stderr_tail`
   - `artifacts[]`：`path/relative_path/bytes/mtime`
@@ -402,9 +415,13 @@ PNJL 与 transport 同步单点接口要求 JSON 根节点及可选 `params` 为
 #### 0.6.11 `POST /api/modules/script-tasks/jobs/{job_id}/cancel`（脚本任务取消）
 
 - 可取消状态：`queued | running`
-- 若底层进程已启动，服务端会尝试 kill 该进程。
 - 已终态或不可取消：返回 `409` + `JOB_NOT_CANCELLABLE`
-- 成功取消：`200`，`job_status="cancelled"`
+- 接受取消：`200`，`job_status="cancelled"`，附 `worker_active`。
+- 系统拒绝停止进程：`500` + `CANCEL_ERROR`。
+
+取消会阻止尚未启动的命令，或终止任务的 Windows Job Object / POSIX 进程组。
+进程退出后释放名额，已写文件和日志可从结果接口查看；取消时留下的文件可能不完整。
+脚本任务不使用 PNJL 扫描的 `timeout_seconds`。
 
 #### 0.6.12 统一错误响应最小契约
 

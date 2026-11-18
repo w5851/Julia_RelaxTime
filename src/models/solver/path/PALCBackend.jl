@@ -519,7 +519,16 @@ function _palc_jacobian(residual, seed, value, work, backend)
     end
 end
 
-function _palc_curve(residual, root, value, bounds, strategy, work; positive_parameter::Bool=false)
+struct ScanStopRequested <: Exception end
+Base.showerror(io::IO, ::ScanStopRequested) = print(io, "scan stopped at a work boundary")
+
+@inline function _check_scan_stop(stop_requested)
+    stop_requested !== nothing && stop_requested() && throw(ScanStopRequested())
+    return nothing
+end
+
+function _palc_curve(residual, root, value, bounds, strategy, work;
+    positive_parameter::Bool=false, stop_requested=nothing)
     f = function (x, p)
         work.continuation_residual_calls += 1
         residual(x, p.value)
@@ -535,10 +544,12 @@ function _palc_curve(residual, root, value, bounds, strategy, work; positive_par
         ds=strategy.ds, dsmax=strategy.dsmax, max_steps=strategy.max_steps,
         detect_bifurcation=0, newton_options=BifurcationKit.NewtonPar(
             tol=strategy.newton_tol, max_iterations=strategy.newton_max_iterations))
+    callbacks = stop_requested === nothing ? (;) : (;
+        finalise_solution=(args...; kwargs...) -> (_check_scan_stop(stop_requested); true))
     started = time_ns()
     curve = try
         BifurcationKit.continuation(problem, BifurcationKit.PALC(), options;
-            bothside=true, verbosity=0)
+            bothside=true, verbosity=0, callbacks...)
     finally
         work.continuation_time_s += (time_ns() - started) / 1e9
     end
@@ -589,7 +600,7 @@ end
 
 function _solve_endpoint_palc_path(model, path, strategy;
     branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry,
-    anchor_strategy::EndpointAnchor=EndpointAnchor(), kwargs...)
+    anchor_strategy::EndpointAnchor=EndpointAnchor(), stop_requested=nothing, kwargs...)
     started = time()
     options = _path_options(model, path; kwargs...)
     residual = _path_residual(model, path, options)
@@ -597,6 +608,7 @@ function _solve_endpoint_palc_path(model, path, strategy;
     messages = String[]
     attempted_roots = NamedTuple[]
     for (attempt_index, attempt) in enumerate(_endpoint_anchor_attempts(path, anchor_strategy))
+        _check_scan_stop(stop_requested)
         attempt_index == 1 && anchor_strategy.seed !== nothing && (path_work.reused_anchor_solves += 1)
         root = _path_root(model, path, attempt.value, attempt.seed, residual, options, path_work;
             source=:anchor, work_telemetry, workspace)
@@ -611,7 +623,7 @@ function _solve_endpoint_palc_path(model, path, strategy;
             initial_anchor=root, initial_residual=residual, initial_workspace=workspace,
             boundary_correction=true,
             branch_policy, diagnostic_level, branch_jump_tol,
-            path_work, work_telemetry, kwargs...)
+            path_work, work_telemetry, stop_requested, kwargs...)
         if result.diagnostics.failure_count > 0 && path_work.exceptions > exceptions_before
             append!(messages,result.diagnostics.messages)
             push!(messages,"Retrying endpoint PALC from the same root with smaller steps.")
@@ -623,7 +635,7 @@ function _solve_endpoint_palc_path(model, path, strategy;
                 anchor_strategy=SingleSeedAnchor(attempt.value,root.solution),
                 initial_anchor=root,initial_residual=residual,initial_workspace=workspace,
                 boundary_correction=true,
-                branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
+                branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,stop_requested,kwargs...)
         end
         if result.diagnostics.failure_count == 0
             diagnostics = PathDiagnostics(:bifurcationkit, :endpoint_anchor,
@@ -637,7 +649,7 @@ function _solve_endpoint_palc_path(model, path, strategy;
     end
     isempty(messages) && push!(messages, "Endpoint guesses did not establish a complete path; using catalog recovery.")
     result = _solve_palc_path(model, path, strategy; anchor_strategy=SeedPoolAnchor(),
-        branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, kwargs...)
+        branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry, stop_requested, kwargs...)
     append!(messages, result.diagnostics.messages)
     diagnostics = PathDiagnostics(:bifurcationkit, :endpoint_catalog_recovery,
         _policy_symbol(branch_policy), time()-started, path_work.anchor_solves,
@@ -659,7 +671,8 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     diagnostic_level::Symbol=:summary, branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
     path_work::PALCWorkTelemetry=PALCWorkTelemetry(), work_telemetry=nothing,
     anchor_values=nothing, initial_anchor=nothing, initial_residual=nothing,
-    initial_workspace=nothing, boundary_correction::Bool=false, kwargs...)
+    initial_workspace=nothing, boundary_correction::Bool=false, stop_requested=nothing, kwargs...)
+    _check_scan_stop(stop_requested)
     strategy = _resolved_palc_strategy(model, path, strategy)
     diagnostic_level in (:summary, :full) || throw(ArgumentError("diagnostic_level must be :summary or :full"))
     if anchor_strategy === nothing
@@ -669,7 +682,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         anchor_values === nothing || throw(ArgumentError("EndpointAnchor selects its own endpoint; omit anchor_values"))
         return _solve_endpoint_palc_path(model, path, strategy;
             branch_policy, diagnostic_level, branch_jump_tol, path_work, work_telemetry,
-            anchor_strategy, kwargs...)
+            anchor_strategy, stop_requested, kwargs...)
     end
     anchor_strategy isa Union{SeedPoolAnchor,MultiSeedAnchor,SingleSeedAnchor} || throw(ArgumentError(
         "select SeedPoolAnchor, MultiSeedAnchor or SingleSeedAnchor"))
@@ -700,6 +713,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         roots = NamedTuple[]
         seeds = single_seed ? [anchor_strategy.seed] : _path_catalog(path, value)
         for seed in seeds
+            _check_scan_stop(stop_requested)
             candidate = single_seed && initial_anchor !== nothing ? initial_anchor :
                 _path_root(model, path, value, seed, residual, options, path_work;
                     source=:anchor, work_telemetry, workspace)
@@ -707,22 +721,24 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
         end
         covered = NamedTuple[]
         for curve in curves, seed in _palc_target_seeds(curve, value; predictor=strategy.target_predictor)
+            _check_scan_stop(stop_requested)
             candidate = _path_root(model, path, value, seed, residual, options, path_work; work_telemetry, workspace)
             _push_distinct_path_root!(covered, candidate)
         end
         sort!(roots; by=root -> -root.pressure)
         for root in roots
             any(other -> _solution_distance(root.solution, other.solution) <= 1e-4, covered) && continue
+            _check_scan_stop(stop_requested)
             anchor_id = Symbol("anchor_", length(anchors) + 1)
             point = _candidate_path_point(value, root, single_seed ? :single_seed_anchor : :catalog_anchor, 0)
             push!(anchors, _anchor_from_branch_point(anchor_id, point, length(roots)))
             try
                 curve = length(values) == 1 ? [(; param=value, solution=copy(root.solution))] :
                     _palc_curve(residual, root, value, extrema(values), strategy, path_work;
-                        positive_parameter=path isa ConstraintTPath)
+                        positive_parameter=path isa ConstraintTPath, stop_requested)
                 push!(curves, curve)
             catch err
-                err isa InterruptException && rethrow()
+                err isa Union{InterruptException,ScanStopRequested} && rethrow()
                 err isa Union{MethodError,UndefVarError} && rethrow()
                 path_work.exceptions += 1
                 push!(messages, "continuation failed: " * normalize_error_message(err))
@@ -735,6 +751,7 @@ function _solve_palc_path(model, path::EquilibriumPath, strategy::PALCContinuati
     fallback_points = BranchPoint[]
     failure_count = 0
     for (step, value) in enumerate(values)
+        _check_scan_stop(stop_requested)
         accepted = NamedTuple[]
         for (i, curve) in enumerate(curves)
             nearest = boundary_correction && value in extrema(values)
@@ -782,7 +799,8 @@ end
 function _solve_natural_path(model, path; anchor_strategy=nothing,
     branch_policy=GroundStateBranchPolicy(),diagnostic_level=:summary,
     branch_jump_tol=DEFAULT_PATH_BRANCH_JUMP_TOL,path_work=PALCWorkTelemetry(),
-    work_telemetry=nothing,recovery_strategy::PALCContinuation=PALCContinuation(),kwargs...)
+    work_telemetry=nothing,recovery_strategy::PALCContinuation=PALCContinuation(),stop_requested=nothing,kwargs...)
+    _check_scan_stop(stop_requested)
     path isa Union{FixedRhoPath,FixedAsymmetricRhoPath} ||
         throw(ArgumentError("NaturalContinuation requires FixedRhoPath or FixedAsymmetricRhoPath"))
     anchor_strategy === nothing || anchor_strategy isa EndpointAnchor ||
@@ -797,6 +815,7 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
     root = nothing
     for (attempt_index, attempt) in enumerate(_endpoint_anchor_attempts(path, something(anchor_strategy, EndpointAnchor())))
         attempt.value == first(values) || continue
+        _check_scan_stop(stop_requested)
         attempt_index == 1 && anchor_strategy !== nothing && anchor_strategy.seed !== nothing &&
             (path_work.reused_anchor_solves += 1)
         candidate = _path_root(model,path,attempt.value,attempt.seed,residual,options,path_work;
@@ -810,6 +829,7 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
     anchors = AnchorRoot[]
     for (step,value) in enumerate(values)
         root === nothing && break
+        _check_scan_stop(stop_requested)
         if step > 1
             root = _path_root(model,path,value,root.solution,residual,options,path_work;work_telemetry,workspace)
             root === nothing && break
@@ -821,7 +841,7 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
     end
     if length(points) != length(values)
         result = _solve_endpoint_palc_path(model,path,recovery_strategy;
-            branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,kwargs...)
+            branch_policy,diagnostic_level,branch_jump_tol,path_work,work_telemetry,stop_requested,kwargs...)
         diagnostics = PathDiagnostics(:natural_palc_recovery,result.diagnostics.anchor_strategy,
             _policy_symbol(branch_policy),time()-started,path_work.anchor_solves,
             path_work.continuation_points,result.diagnostics.failure_count,
@@ -839,7 +859,7 @@ function _solve_natural_path(model, path; anchor_strategy=nothing,
 end
 
 """Rebuild SolverResult v1 at exactly the requested points, preserving input order."""
-function selected_path_results(model, result::PathSolveResult; kwargs...)
+function selected_path_results(model, result::PathSolveResult; stop_requested=nothing, kwargs...)
     started = time_ns()
     path = result.path
     options = _path_options(model, path; kwargs...)
@@ -848,6 +868,7 @@ function selected_path_results(model, result::PathSolveResult; kwargs...)
     selected = Dict(selection.param_value => selection for selection in result.selections)
     out = Union{Nothing,SolverResult}[]
     for value in _path_values(path)
+        _check_scan_stop(stop_requested)
         choice = get(selected, value, nothing)
         if choice === nothing || choice.selected_branch_id === nothing
             push!(out, nothing)

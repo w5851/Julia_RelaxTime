@@ -1,5 +1,7 @@
 using UUIDs: uuid4
 
+include(joinpath(@__DIR__, "script_task_process.jl"))
+
 const _SCRIPT_TASK_JOBS_LOCK = ReentrantLock()
 const _SCRIPT_TASK_JOBS = Dict{String, Dict{String, Any}}()
 const _SCRIPT_TASK_JOB_SEQ = Ref(0)
@@ -582,7 +584,7 @@ end
 function _script_task_queue_snapshot()
     lock(_SCRIPT_TASK_JOBS_LOCK) do
         queued = count(job -> get(job, "status", "") == _SCRIPT_TASK_STATUS_QUEUED, values(_SCRIPT_TASK_JOBS))
-        running = count(job -> get(job, "status", "") == _SCRIPT_TASK_STATUS_RUNNING, values(_SCRIPT_TASK_JOBS))
+        running = count(job -> get(job, "worker_active", false), values(_SCRIPT_TASK_JOBS))
         return (queued=queued, running=running)
     end
 end
@@ -753,6 +755,29 @@ function _build_script_task_result(job::Dict{String, Any}, exit_code)
     )
 end
 
+function _run_script_task_command(job_id::String, parts, out, err)
+    tree = _with_script_task_job(job_id) do job
+        job["status"] == _SCRIPT_TASK_STATUS_RUNNING || return nothing
+        tree = _start_script_task_process(parts, out, err)
+        job["process"] = tree
+        return tree
+    end
+    tree === nothing && return -1
+    try
+        return _wait_script_task_process(tree)
+    catch
+        _terminate_script_task_scope(tree.scope)
+        _wait_script_task_process(tree)
+        rethrow()
+    finally
+        lock(_SCRIPT_TASK_JOBS_LOCK) do
+            _close_script_task_scope(tree.scope)
+            job = get(_SCRIPT_TASK_JOBS, job_id, nothing)
+            job === nothing || (job["process"] = nothing)
+        end
+    end
+end
+
 function _launch_script_task_job(job_id::String)
     Threads.@spawn begin
         Base.acquire(_SCRIPT_TASK_SEMAPHORE)
@@ -775,36 +800,26 @@ function _launch_script_task_job(job_id::String)
             task === nothing && error("unknown task")
             args = String.(job_snapshot["args"])
             parts, _wrapper = _script_task_command_parts(task, args)
-            cmd = Cmd(Cmd(parts); dir=_PROJECT_ROOT)
 
-            exit_code = -1
-            open(String(job_snapshot["stdout_path"]), "w") do out
+            exit_code = open(String(job_snapshot["stdout_path"]), "w") do out
                 open(String(job_snapshot["stderr_path"]), "w") do err
-                    proc = run(pipeline(cmd, stdout=out, stderr=err); wait=false)
-                    _with_script_task_job(job_id) do job
-                        job["process"] = proc
-                    end
-                    wait(proc)
-                    exit_code = proc.exitcode
+                    _run_script_task_command(job_id, parts, out, err)
                 end
             end
 
             _with_script_task_job(job_id) do job
-                job["process"] = nothing
+                job["result"] = _build_script_task_result(job, exit_code)
                 if String(get(job, "status", "")) == _SCRIPT_TASK_STATUS_CANCELLED
-                    job["result"] = _build_script_task_result(job, exit_code)
                     return
                 end
                 if exit_code == 0
                     _set_script_task_status!(job, _SCRIPT_TASK_STATUS_SUCCEEDED)
                     job["progress"] = Dict("total" => 1, "completed" => 1, "percent" => 100.0)
-                    job["result"] = _build_script_task_result(job, exit_code)
                     _append_script_task_event!(job, "ended"; extras=Dict("outcome" => "succeeded", "exit_code" => exit_code))
                 else
                     _set_script_task_status!(job, _SCRIPT_TASK_STATUS_FAILED)
                     job["error"] = "script task failed"
                     job["reason_code"] = "EXECUTION_ERROR"
-                    job["result"] = _build_script_task_result(job, exit_code)
                     _append_script_task_event!(job, "ended"; extras=Dict("outcome" => "failed", "exit_code" => exit_code))
                 end
             end
@@ -819,12 +834,15 @@ function _launch_script_task_job(job_id::String)
                 end
             end
         finally
-            Base.release(_SCRIPT_TASK_SEMAPHORE)
-            _with_script_task_job(job_id) do job
-                job["worker_active"] = false
-                proc = get(job, "process", nothing)
-                if proc !== nothing && !process_running(proc)
-                    job["process"] = nothing
+            lock(_SCRIPT_TASK_JOBS_LOCK) do
+                Base.release(_SCRIPT_TASK_SEMAPHORE)
+                job = get(_SCRIPT_TASK_JOBS, job_id, nothing)
+                if job !== nothing && job["worker_active"]
+                    job["worker_active"] = false
+                    if job["status"] == _SCRIPT_TASK_STATUS_CANCELLED
+                        _set_script_task_status!(job, _SCRIPT_TASK_STATUS_CANCELLED)
+                        _append_script_task_event!(job, "ended"; extras=Dict("outcome" => "cancelled"))
+                    end
                 end
             end
             _prune_script_task_history!()
@@ -879,9 +897,9 @@ end
 
 function _script_task_status_payload(job_id::String)
     _prune_script_task_history!()
-    pos = _script_task_queue_position(job_id)
-    snap = _script_task_queue_snapshot()
     return _with_script_task_job(job_id) do job
+        pos = _script_task_queue_position(job_id)
+        snap = _script_task_queue_snapshot()
         Dict(
             "status" => "ok",
             "job_id" => job["job_id"],
@@ -890,6 +908,7 @@ function _script_task_status_payload(job_id::String)
             "task_name" => job["task_name"],
             "preset" => job["preset"],
             "job_status" => job["status"],
+            "worker_active" => job["worker_active"],
             "created_at" => job["created_at"],
             "started_at" => job["started_at"],
             "ended_at" => job["ended_at"],
@@ -897,7 +916,7 @@ function _script_task_status_payload(job_id::String)
             "error" => job["status"] == _SCRIPT_TASK_STATUS_FAILED ? job["error"] : nothing,
             "reason_code" => job["reason_code"],
             "queue" => Dict("position" => pos, "queued" => snap.queued, "running" => snap.running, "max_running" => _SCRIPT_TASK_MAX_RUNNING, "max_pending" => _SCRIPT_TASK_MAX_PENDING),
-            "events" => job["events"],
+            "events" => copy(job["events"]),
             "command" => job["command"],
             "logs" => Dict(
                 "stdout_path" => job["stdout_path"],
@@ -920,23 +939,32 @@ function handle_script_task_job_cancel(job_id::String)
     payload = _with_script_task_job(job_id) do job
         status = String(get(job, "status", ""))
         status in _SCRIPT_TASK_TERMINAL && return _error_payload("JOB_NOT_CANCELLABLE", "job already in terminal state"; extras=Dict("job_id" => job_id, "job_status" => status))
-        proc = get(job, "process", nothing)
-        if proc !== nothing
+        tree = get(job, "process", nothing)
+        if tree !== nothing
             try
-                kill(proc)
+                _terminate_script_task_scope(tree.scope)
             catch err
-                @warn "failed to kill script task process" job_id=job_id exception=(err, catch_backtrace())
+                @error "failed to terminate script task process group" job_id=job_id exception=(err, catch_backtrace())
+                return _error_payload("CANCEL_ERROR", "failed to stop script task processes";
+                    extras=Dict("job_id" => job_id, "job_status" => status))
             end
         end
-        _set_script_task_status!(job, _SCRIPT_TASK_STATUS_CANCELLED)
+        active = job["worker_active"]
         job["error"] = "script task cancelled"
         job["reason_code"] = "CANCELLED"
-        _append_script_task_event!(job, "ended"; extras=Dict("outcome" => "cancelled"))
-        return Dict("status" => "ok", "job_id" => job_id, "kind" => "script-task", "task_id" => job["task_id"], "job_status" => job["status"])
+        if active
+            job["status"] = _SCRIPT_TASK_STATUS_CANCELLED
+            _append_script_task_event!(job, "cancel_requested")
+        else
+            _set_script_task_status!(job, _SCRIPT_TASK_STATUS_CANCELLED)
+            _append_script_task_event!(job, "ended"; extras=Dict("outcome" => "cancelled"))
+        end
+        return Dict("status" => "ok", "job_id" => job_id, "kind" => "script-task", "task_id" => job["task_id"],
+            "job_status" => job["status"], "worker_active" => active)
     end
     payload === nothing && return _script_task_error_response(404, "JOB_NOT_FOUND", "job not found"; extras=Dict("job_id" => job_id))
     if payload["status"] == "error"
-        return _script_task_json_response(409, payload)
+        return _script_task_json_response(payload["error_code"] == "CANCEL_ERROR" ? 500 : 409, payload)
     end
     _prune_script_task_history!()
     return _script_task_json_response(200, payload)
@@ -946,7 +974,7 @@ function handle_script_task_job_result(job_id::String)
     _prune_script_task_history!()
     payload = _with_script_task_job(job_id) do job
         status = String(job["status"])
-        if !(status in _SCRIPT_TASK_TERMINAL)
+        if !(status in _SCRIPT_TASK_TERMINAL) || job["worker_active"]
             return _error_payload("JOB_NOT_FINISHED", "job is not finished"; extras=Dict("job_id" => job_id, "job_status" => status))
         end
         result = job["result"] === nothing ? _build_script_task_result(job, status == _SCRIPT_TASK_STATUS_CANCELLED ? -1 : 0) : job["result"]

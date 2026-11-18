@@ -114,6 +114,7 @@ const CORE_SMOKE_FILES = [
 
     # [RelaxTime Core] 输运核心模块
     joinpath(UNIT_DIR, "relaxtime", "test_oneloopintegrals.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_polarization_cache.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_transport_replay_identity.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_transport_validation_selection.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_transport_runner_timing.jl"),
@@ -158,7 +159,6 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_regulator_checks.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_causal_gbu_full_closure.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_freezeout_trho_overlay.jl"),
-    joinpath(UNIT_DIR, "relaxtime", "test_meson_scan_workflow_entry.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_mass.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_mott_transition.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
@@ -183,6 +183,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "simulation", "test_fullserver_http_utils.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_transport_handlers.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_script_task_jobs.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_pnjl_scan_job_execution.jl"),
 ]
 
 function _selected_unit_files()
@@ -230,6 +231,7 @@ function _include_dir(dir::String)
     files = sort(readdir(dir; join=true))
     verbose_include = get(ENV, "UNIT_VERBOSE_INCLUDE", "0") in ("1", "true", "TRUE", "yes", "YES")
     for f in files
+        isfile(f) || continue
         _should_include_unit_file(f) || continue
         rel = relpath(f, UNIT_DIR)
         if verbose_include
@@ -241,6 +243,12 @@ function _include_dir(dir::String)
             println(stderr, "[unit-full] include failed: " * rel)
             println(stderr, "[unit-full] reproduce: UNIT_PROFILE=full UNIT_FILES='" * replace(rel, '\\' => '/') * "' julia --project=. tests/unit/runtests.jl")
             rethrow(err)
+        end
+    end
+    for entry in files
+        isdir(entry) || continue
+        @testset "$(basename(entry))" begin
+            _include_dir(entry)
         end
     end
 end
@@ -297,13 +305,6 @@ end
 
         @testset "Models" begin
             _include_dir(joinpath(UNIT_DIR, "models"))
-        end
-
-        solver_dir = joinpath(UNIT_DIR, "models", "solver")
-        if isdir(solver_dir)
-            @testset "Models/Solver" begin
-                _include_dir(solver_dir)
-            end
         end
 
         @testset "PNJL" begin

@@ -27,22 +27,22 @@
 
 对应源码：
 
-- `src/models/workflow/PipelineTypes.jl`
+- `src/models/workflow_engine/PipelineTypes.jl`
 
 ### 2.2 编排层
 
 - `run_pipeline(...)` 在执行前做规则校验：
-  - stage id 唯一；
+  - stage id 唯一，`spec.stages` 内也不允许重复 id；
   - `provides` 不重复（首版无 merge policy）；
   - 依赖可满足；
   - 无依赖环；
   - `spec.stages` 与 catalog 对齐。
 - 运行时策略：fail-fast。
-- 统一写 manifest：成功/失败都写，包含 `stage_records`。
+- 执行完成或执行阶段失败时写 manifest，包含 `stage_records`；执行前的规则校验失败抛出 `ArgumentError`，不执行 stage，也不写 manifest。
 
 对应源码：
 
-- `src/models/workflow/PipelineRunner.jl`
+- `src/models/workflow_engine/PipelineRunner.jl`
 
 ### 2.3 目录层（phase 的标准 stage 集）
 
@@ -51,7 +51,7 @@
 
 对应源码：
 
-- `src/models/workflow/StageCatalog.jl`
+- `src/models/workflow_engine/StageCatalog.jl`
 
 ### 2.4 入口层
 
@@ -168,9 +168,9 @@ stages:
 想快速理解“谁依赖谁、谁产出谁”，建议按这个顺序：
 
 1. 本文（概览）
-2. `src/models/workflow/StageCatalog.jl`（看 7-stage 与 requires/provides）
-3. `src/models/workflow/PipelineRunner.jl`（看校验与失败语义）
-4. `src/models/workflow/PipelineTypes.jl`（看契约类型）
+2. `src/models/workflow_engine/StageCatalog.jl`（看 7-stage 与 requires/provides）
+3. `src/models/workflow_engine/PipelineRunner.jl`（看校验与失败语义）
+4. `src/models/workflow_engine/PipelineTypes.jl`（看契约类型）
 5. `scripts/pnjl/calculate_phase_structure.jl`（看 CLI 参数如何投影到 pipeline）
 
 这样读可以把“业务计算逻辑”和“工作流编排逻辑”分开理解。

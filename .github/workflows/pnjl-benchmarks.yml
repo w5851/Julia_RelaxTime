@@ -10,30 +10,28 @@ on:
       - "src/**"
       - "benchmark/**"
       - "scripts/analysis/**"
+      - "scripts/**/*.py"
       - "scripts/perf/**"
       - "scripts/pnjl/**"
       - "scripts/relaxtime/**"
-      - "scripts/plot_scan_csv.py"
       - "scripts/dev/check_script_entrypoints.jl"
-      - "scripts/dev/check_python_script_syntax.py"
       - "scripts/dev/check_benchmark_thresholds.jl"
-      - "scripts/dev/benchmark_trends.py"
       - "tests/unit/python/test_benchmark_trends.py"
+      - "tests/unit/config/test_script_entrypoints.jl"
       - ".github/workflows/pnjl-benchmarks.yml"
   pull_request:
     paths:
       - "src/**"
       - "benchmark/**"
       - "scripts/analysis/**"
+      - "scripts/**/*.py"
       - "scripts/perf/**"
       - "scripts/pnjl/**"
       - "scripts/relaxtime/**"
-      - "scripts/plot_scan_csv.py"
       - "scripts/dev/check_script_entrypoints.jl"
-      - "scripts/dev/check_python_script_syntax.py"
       - "scripts/dev/check_benchmark_thresholds.jl"
-      - "scripts/dev/benchmark_trends.py"
       - "tests/unit/python/test_benchmark_trends.py"
+      - "tests/unit/config/test_script_entrypoints.jl"
       - ".github/workflows/pnjl-benchmarks.yml"
 
 permissions:
@@ -109,7 +107,9 @@ jobs:
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
       - name: Check PNJL and relaxtime Julia script entrypoints
-        run: julia --project=. scripts/dev/check_script_entrypoints.jl
+        run: |
+          julia --project=. tests/unit/config/test_script_entrypoints.jl
+          julia --project=. scripts/dev/check_script_entrypoints.jl
 
   python-script-smoke:
     if: github.event_name != 'schedule'

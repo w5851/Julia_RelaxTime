@@ -10,7 +10,7 @@
 - 相同(k0, k_norm)但不同通道(:P vs :S)需分别缓存
 
 缓存键对 Float64 参数做 mantissa 量化；收益取决于实际命中率。
-字典与计数器为进程内共享状态，没有并发锁；不能由多个线程同时读写。
+字典和统计按 Julia Task 隔离；同一 Task 切换线程时仍复用自己的条目。
 接口、单位和完整示例见 `docs/api/relaxtime/polarization/PolarizationCache.md`。
 """
 module PolarizationCache
@@ -145,17 +145,30 @@ end
 end
 
 # ----------------------------------------------------------------------------
-# 全局缓存存储
+# Task 内缓存存储
 # ----------------------------------------------------------------------------
 
-"""全局缓存字典：PolarizationKey => (Π_real, Π_imag)"""
-const POLARIZATION_CACHE = Dict{PolarizationKey, Tuple{Float64, Float64}}()
+mutable struct PolarizationCacheState
+    entries::Dict{PolarizationKey, Tuple{Float64, Float64}}
+    total_calls::Int
+    hits::Int
+end
 
-"""缓存统计：总调用次数"""
-const CACHE_TOTAL_CALLS = Ref(0)
+PolarizationCacheState() = PolarizationCacheState(Dict{PolarizationKey,Tuple{Float64,Float64}}(), 0, 0)
+const _CACHE_TLS_KEY = gensym(:polarization_cache)
 
-"""缓存统计：缓存命中次数"""
-const CACHE_HIT_CALLS = Ref(0)
+@inline _task_cache() = get!(PolarizationCacheState, task_local_storage(), _CACHE_TLS_KEY)::PolarizationCacheState
+
+@inline _existing_task_cache() =
+    get(task_local_storage(), _CACHE_TLS_KEY, nothing)::Union{Nothing, PolarizationCacheState}
+
+# Diagnostic adapters can prefill a temporary cache without changing the caller's cache.
+function _with_isolated_cache(f::F) where {F}
+    state = PolarizationCacheState()
+    return task_local_storage(_CACHE_TLS_KEY, state) do
+        f(state.entries)
+    end
+end
 
 # ----------------------------------------------------------------------------
 # 带缓存的极化函数接口
@@ -173,28 +186,28 @@ const CACHE_HIT_CALLS = Ref(0)
 返回元组 `(Π_real, Π_imag)`
 
 能量、动量、质量、化学势和温度使用 fm⁻¹，A 函数与返回分量使用 fm⁻²。
-本层不做单位转换。缓存命中复用同一量化桶的结果；没有线程同步。
+本层不做单位转换。缓存命中复用当前 Task 中同一量化桶的结果。
 """
 function polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64, 
                                   m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, 
                                   T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, 
                                   A1_value::Float64, A2_value::Float64, num_s_quark::Int)
-    # 更新统计
-    CACHE_TOTAL_CALLS[] += 1
+    state = _task_cache()
+    state.total_calls += 1
     
     # 构造缓存键
     key = PolarizationKey(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
     
     # 单次查找：命中则直接返回，避免 haskey + getindex 的双查找
-    cached = get(POLARIZATION_CACHE, key, nothing)
+    cached = get(state.entries, key, nothing)
     if cached !== nothing
-        CACHE_HIT_CALLS[] += 1
+        state.hits += 1
         return cached
     end
 
     # 缓存未命中，计算并缓存
     result = polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
-    POLARIZATION_CACHE[key] = result
+    state.entries[key] = result
     return result
 end
 
@@ -205,7 +218,7 @@ end
 """
     reset_cache!()
 
-清空极化函数缓存和统计信息。
+清空当前 Julia Task 的极化函数缓存和统计信息。
 
 # 使用场景
 - 开始新的输运系数计算任务
@@ -229,16 +242,18 @@ reset_cache!()
 ```
 """
 function reset_cache!()
-    empty!(POLARIZATION_CACHE)
-    CACHE_TOTAL_CALLS[] = 0
-    CACHE_HIT_CALLS[] = 0
+    state = _existing_task_cache()
+    state === nothing && return nothing
+    empty!(state.entries)
+    state.total_calls = 0
+    state.hits = 0
     return nothing
 end
 
 """
     get_cache_stats()
 
-获取缓存统计信息。
+获取当前 Julia Task 的缓存统计信息。
 
 # 返回值
 返回NamedTuple，包含以下字段：
@@ -259,11 +274,12 @@ println("缓存大小: \$(stats.cache_size) 条目")
 ```
 """
 function get_cache_stats()
-    total = CACHE_TOTAL_CALLS[]
-    hits = CACHE_HIT_CALLS[]
+    state = _existing_task_cache()
+    total = state === nothing ? 0 : state.total_calls
+    hits = state === nothing ? 0 : state.hits
     misses = total - hits
     hit_rate = total > 0 ? hits / total : 0.0
-    cache_size = length(POLARIZATION_CACHE)
+    cache_size = state === nothing ? 0 : length(state.entries)
     
     return (
         total_calls = total,

@@ -14,10 +14,12 @@
 dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终分支上使用 `workflow_dispatch` 补跑，
 核对每次运行的 `headSha`，并在 PR 保存结果链接。未触发的检查不能视为通过；已有检查必须正常通过。
 
-`nightly-full-suite` 将 unit、regression、validation 和既有四组 integration 分为七个独立 job，
+`nightly-full-suite` 将 Julia unit、regression、validation 和四组 integration 分为七个独立 job，
 保留原 full profile、magnetic nightly 范围和 integration 文件选择。`fail-fast=false` 使其他分片
 在一个分片失败后继续给出结果；失败不使用 `continue-on-error` 改写，最终门禁要求所有分片成功。
 分片间不共享 Julia 进程状态，各 integration 分片内部仍按原顺序在同一进程运行。
+独立的 `Python artifact contracts` job 使用 Poppler 验证原始曲线归档与相图 PNG/PDF 交付，
+其结果也进入 nightly 最终门禁。全量 `tests/unit/python` 可本地运行。
 
 ---
 
@@ -100,7 +102,7 @@ dependency、models-entry、legacy-switch 和活动文档检查，在 PR 最终�
 运行档：
 - `UNIT_PROFILE=smoke`（默认）：精选、稳定、确定性的测试集合，长期保持绿色。
 - `UNIT_PROFILE=core`：CI 与合并前的较广行为覆盖；与 smoke 的职责不同。
-- `UNIT_PROFILE=full`：更大范围 include，由 nightly 检查；失败需定位并修复。
+- `UNIT_PROFILE=full`：递归运行各单元测试目录及其嵌套子目录中的 `test_*.jl`，由 nightly 检查；失败需定位并修复。每层先运行本层文件，再按目录名顺序进入子目录，仍遵守下述 performance/WIP 选择规则。
 
 环境变量（以入口实现为准）：
 - `UNIT_PROFILE=smoke|core|full`

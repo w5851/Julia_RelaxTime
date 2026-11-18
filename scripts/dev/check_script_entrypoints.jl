@@ -81,8 +81,23 @@ function check_joinpath_ref!(violations::Vector{NamedTuple}, file::String, line_
     push!(violations, (file=file, line=line_no, ref="joinpath($base, $(join(parts, ", ")))", resolved=target, kind=kind))
 end
 
+function find_syntax_error(expr)
+    expr isa Expr || return nothing
+    expr.head in (:error, :incomplete) && return first(expr.args)
+    for arg in expr.args
+        err = find_syntax_error(arg)
+        err === nothing || return err
+    end
+    return nothing
+end
+
 function scan_file(file::String, violations::Vector{NamedTuple})
     lines = readlines(file)
+    syntax_error = find_syntax_error(Meta.parseall(join(lines, '\n'); filename=file))
+    if syntax_error !== nothing
+        push!(violations, (file=file, line=1, ref=sprint(showerror, syntax_error), resolved=file, kind="syntax"))
+        return
+    end
     aliases = collect_root_aliases(lines, file)
 
     for (line_no, line) in enumerate(lines)
@@ -120,7 +135,7 @@ function main()
     end
 
     if !isempty(violations)
-        println("[script-entrypoints] FAILED: $(length(violations)) broken relative references")
+        println("[script-entrypoints] FAILED: $(length(violations)) syntax errors or broken relative references")
         for item in violations
             rel_file = relpath(item.file, ROOT)
             println(" - $(rel_file):$(item.line) [$(item.kind)] $(item.ref) -> $(item.resolved)")
@@ -136,4 +151,6 @@ function main()
     end
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

@@ -241,6 +241,7 @@ end
 function _validate_stage_coverage(spec::PipelineSpec, stages::Vector{<:PipelineStage})
     stage_ids = Set{Symbol}(stage.id for stage in stages)
     spec_ids = Set{Symbol}(spec.stages)
+    length(spec_ids) == length(spec.stages) || throw(ArgumentError("spec stages must not contain duplicate stage ids"))
     for id in spec.stages
         id in stage_ids || throw(ArgumentError("spec stage not provided: $(id)"))
     end

@@ -40,26 +40,36 @@ function _safe_parse(raw, fallback) {
 }
 
 function _read_local_storage(key) {
-    if (typeof window === 'undefined' || !window.localStorage) {
-        return null;
-    }
     try {
-        return window.localStorage.getItem(key);
+        return typeof window === 'undefined' ? null : window.localStorage?.getItem(key) ?? null;
     } catch (_error) {
         return null;
     }
 }
 
 function _write_local_storage(key, value) {
-    if (typeof window === 'undefined' || !window.localStorage) {
-        return false;
-    }
     try {
+        if (typeof window === 'undefined' || !window.localStorage) {
+            return false;
+        }
         window.localStorage.setItem(key, value);
         return true;
     } catch (_error) {
         return false;
     }
+}
+
+function _is_record(value) {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function _is_history_entry(value) {
+    return _is_record(value) && typeof value.job_id === 'string' && value.job_id.trim() !== '';
+}
+
+function _is_template(value) {
+    return _is_record(value) && typeof value.id === 'string' && value.id.trim() !== ''
+        && typeof value.name === 'string' && _is_record(value.payload);
 }
 
 export function load_task_history() {
@@ -68,17 +78,17 @@ export function load_task_history() {
         return [];
     }
     const parsed = _safe_parse(raw, []);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.filter(_is_history_entry).slice(0, TASK_HISTORY_MAX_ITEMS) : [];
 }
 
 export function save_task_history(history) {
-    const normalized = Array.isArray(history) ? history.slice(0, TASK_HISTORY_MAX_ITEMS) : [];
+    const normalized = Array.isArray(history) ? history.filter(_is_history_entry).slice(0, TASK_HISTORY_MAX_ITEMS) : [];
     _write_local_storage(TASK_HISTORY_STORAGE_KEY, JSON.stringify(normalized));
     return normalized;
 }
 
 export function upsert_task_history_entry(entry) {
-    if (!entry || !entry.job_id) {
+    if (!_is_history_entry(entry)) {
         return load_task_history();
     }
     const history = load_task_history().filter((item) => item.job_id !== entry.job_id);
@@ -89,21 +99,19 @@ export function upsert_task_history_entry(entry) {
 export function load_task_templates() {
     const raw = _read_local_storage(TASK_TEMPLATE_STORAGE_KEY);
     if (!raw) {
-        return DEFAULT_TEMPLATES;
+        return get_default_templates();
     }
-    const parsed = _safe_parse(raw, DEFAULT_TEMPLATES);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-        return DEFAULT_TEMPLATES;
-    }
-    return parsed;
+    const parsed = _safe_parse(raw, []);
+    const templates = Array.isArray(parsed) ? parsed.filter(_is_template) : [];
+    return templates.length > 0 ? templates : get_default_templates();
 }
 
 export function save_task_templates(templates) {
-    const normalized = Array.isArray(templates) ? templates : DEFAULT_TEMPLATES;
+    const normalized = Array.isArray(templates) ? templates.filter(_is_template) : get_default_templates();
     _write_local_storage(TASK_TEMPLATE_STORAGE_KEY, JSON.stringify(normalized));
     return normalized;
 }
 
 export function get_default_templates() {
-    return DEFAULT_TEMPLATES;
+    return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
 }

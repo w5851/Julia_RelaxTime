@@ -216,11 +216,16 @@ def test_archive_validation_rejects_curve_tampering(tmp_path):
         MODULE.validate_archive(archive_dir, expected_coverage=coverage_path, require_full_domain=True)
 
 
-def test_current_c2_artifact_has_no_recoverable_raw_source():
-    source_root = Path(r"D:\Temp\issue130_raw_only_c2_source_31862752226")
-    if not source_root.is_dir():
-        pytest.skip("local C2 audit artifact is not present")
+@pytest.mark.parametrize("has_production_directory", [False, True])
+def test_missing_source_manifest_is_not_recoverable(tmp_path, has_production_directory):
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    if has_production_directory:
+        production = source_root / "production_eval"
+        production.mkdir()
+        (production / "unverified.csv").write_text("rho,mu\n0.1,100\n", encoding="utf-8")
     audit = MODULE.assess_source_recovery(source_root)
     assert audit["status"] == "not_recoverable"
     assert audit["source_manifest_count"] == 0
-    assert "production_eval" in audit["reason"]
+    assert audit["coordinate_count"] == 0
+    assert audit["production_eval_directories"] == int(has_production_directory)

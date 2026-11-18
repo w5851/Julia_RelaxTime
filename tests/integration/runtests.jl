@@ -108,6 +108,7 @@ const INTEGRATION_CORE_FILES = [
     # PNJL: 1 e2e + 1 contract guard
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_trho_scan_semantic_modes_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "pnjl", "test_scan_stop_boundaries.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_palc_scan_default_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_palc_constraint_paths.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_palc_temperature_reuse.jl"),

@@ -1,6 +1,6 @@
 # 极化函数缓存
 
-`PolarizationCache` 为 `PolarizationAniso.polarization_aniso` 的结果提供进程内缓存，供传播子与输运链复用。普通计算优先使用 `Models` 工作流；直接调用缓存适用于已有同口径夸克参数和预计算 A 函数的调用方。
+`PolarizationCache` 在当前 Julia Task 内缓存 `PolarizationAniso.polarization_aniso` 的结果，供传播子与输运链复用。普通计算优先使用 `Models` 工作流；直接调用缓存适用于已有同口径夸克参数和预计算 A 函数的调用方。
 
 ## 接口与单位
 
@@ -26,8 +26,8 @@ polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64,
 
 | 函数 | 行为 |
 | --- | --- |
-| `reset_cache!()` | 清空条目和计数器，返回 `nothing` |
-| `get_cache_stats()` | 返回 `total_calls`、`cache_hits`、`cache_misses`、`hit_rate`、`cache_size` 的 `NamedTuple`；无调用时命中率为 `0.0` |
+| `reset_cache!()` | 清空当前 Task 的条目和计数器，返回 `nothing` |
+| `get_cache_stats()` | 返回当前 Task 的 `total_calls`、`cache_hits`、`cache_misses`、`hit_rate`、`cache_size` 的 `NamedTuple`；无调用时命中率为 `0.0` |
 
 ## 最小示例
 
@@ -61,8 +61,8 @@ cache.reset_cache!()
 
 - 缓存键包含全部输入参数。Float64 键保留 40 位 mantissa，量化尺度约为 `2⁻⁴⁰`；同桶复用首先写入的计算结果。相近参数也可能跨桶，不能把它理解为任意两值的 `isapprox` 比较。
 - 底层计算使用原始参数，键量化不代表极化函数误差或奇点附近误差已有同样的上界。
-- 全局字典和计数器没有锁，不能供多个线程并发读写。使用独立进程时，各进程分别加载、统计和清理缓存；当前没有每线程缓存实例接口。
-- 条目没有自动淘汰。可在任务结束时清理以控制内存；所有参数都进入键，改变温度本身不要求为正确性清空缓存。
+- 新启动的 Task 从空缓存开始。Task 在 Julia 线程之间迁移时保留自己的条目；调用方如需汇总并行任务的统计，应在各 Task 退出前取回统计。
+- 同一 Task 内条目不会自动淘汰；长寿命 Task 可定期清理。并行 Task 可能存储相同的桶。所有参数都进入键，改变温度本身不要求为正确性清空缓存。
 - 缓存仅减少重复求值，收益取决于实际命中率与工作负载；本页不承诺固定耗时或加速倍数。
 
 ## 实现与验证

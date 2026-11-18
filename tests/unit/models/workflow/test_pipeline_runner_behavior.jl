@@ -55,6 +55,20 @@ function _ok_stage(id::Symbol; requires::Vector{Symbol}=Symbol[], provides::Vect
 end
 
 @testset "pipeline runner behavior" begin
+    @testset "duplicate spec stages rejected before side effects" begin
+        calls = Ref(0)
+        stage = Models.PipelineStage(:a, Symbol[], [:x], ctx -> begin
+            calls[] += 1
+            Models.StageResult(Dict{Symbol,Any}(:x => calls[]), Models.PipelineArtifact[], Dict{Symbol,Float64}())
+        end)
+        mktempdir() do dir
+            manifest = joinpath(dir, "manifest.json")
+            @test_throws ArgumentError Models.run_pipeline(_mk_spec([:a, :a]), [stage], _mk_ctx(); manifest_path=manifest)
+            @test calls[] == 0
+            @test !isfile(manifest)
+        end
+    end
+
     @testset "missing dependency throws before run" begin
         spec = _mk_spec([:a])
         stages = [

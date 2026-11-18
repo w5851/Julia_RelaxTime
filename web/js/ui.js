@@ -595,7 +595,10 @@ export class UI {
                     this.setScriptTaskStatus('任务排队中', 'queued');
                 } else if (jobStatus === 'running') {
                     this.setScriptTaskStatus('任务运行中', 'running');
-                } else if (['succeeded', 'failed', 'cancelled'].includes(jobStatus)) {
+                } else if (jobStatus === 'cancelled' && statusPayload.worker_active) {
+                    this.setScriptTaskStatus('正在等待脚本及子进程退出', 'info');
+                    if (this.scriptTaskCancelBtn) this.scriptTaskCancelBtn.disabled = true;
+                } else if (!statusPayload.worker_active && ['succeeded', 'failed', 'cancelled'].includes(jobStatus)) {
                     this.stopScriptTaskPolling();
                     const resultPayload = await API.getScriptTaskJobResult(jobId);
                     this.updateScriptTaskResult(resultPayload);
@@ -691,8 +694,14 @@ export class UI {
         }
         try {
             const payload = await API.cancelScriptTaskJob(this.activeScriptTaskJobId);
-            this.stopScriptTaskPolling();
-            this.setScriptTaskStatus(`任务已取消: ${payload.job_id}`, 'success');
+            if (payload.worker_active) {
+                this.startScriptTaskPolling(payload.job_id);
+                if (this.scriptTaskCancelBtn) this.scriptTaskCancelBtn.disabled = true;
+                this.setScriptTaskStatus('正在等待脚本及子进程退出', 'info');
+            } else {
+                this.stopScriptTaskPolling();
+                this.setScriptTaskStatus(`任务已取消: ${payload.job_id}`, 'info');
+            }
             this.writeScriptTaskDetails(payload);
             upsert_task_history_entry({
                 job_id: payload.job_id,
@@ -739,8 +748,13 @@ export class UI {
                 this.selectScriptTask(statusPayload.task_id);
             }
             if (['succeeded', 'failed', 'cancelled'].includes(statusPayload.job_status)) {
-                const resultPayload = await API.getScriptTaskJobResult(jobId);
-                this.updateScriptTaskResult(resultPayload);
+                if (statusPayload.worker_active) {
+                    this.startScriptTaskPolling(jobId);
+                    if (this.scriptTaskCancelBtn) this.scriptTaskCancelBtn.disabled = true;
+                } else {
+                    const resultPayload = await API.getScriptTaskJobResult(jobId);
+                    this.updateScriptTaskResult(resultPayload);
+                }
             }
         } catch (error) {
             this.setScriptTaskStatus(API.formatError(error), 'error');
@@ -1437,8 +1451,14 @@ export class UI {
         }
         try {
             const payload = await API.cancelJob(this.activeJobId);
-            this.stopPolling();
-            this.setScanStatus(`任务已取消: ${payload.job_id}`, 'success');
+            if (payload.worker_active) {
+                this.startPolling(payload.job_id);
+                if (this.scanCancelBtn) this.scanCancelBtn.disabled = true;
+                this.setScanStatus('已请求取消，等待扫描到下一处停止边界', 'info');
+            } else {
+                this.stopPolling();
+                this.setScanStatus(`任务已取消: ${payload.job_id}`, 'info');
+            }
             this.writeScanDetails(payload);
             upsert_task_history_entry({
                 job_id: payload.job_id,
@@ -1551,6 +1571,10 @@ export class UI {
                     this.setScanStatus(`任务排队中 (${percent ?? 0}%)`, 'queued');
                 } else if (jobStatus === 'running') {
                     this.setScanStatus(`任务运行中 (${percent ?? 0}%)`, 'running');
+                } else if (statusPayload.worker_active && ['failed', 'cancelled'].includes(jobStatus)) {
+                    const reason = jobStatus === 'failed' ? '扫描已失败' : '已请求取消';
+                    this.setScanStatus(`${reason}，正在结束扫描`, 'info');
+                    if (this.scanCancelBtn) this.scanCancelBtn.disabled = true;
                 } else if (jobStatus === 'succeeded') {
                     this.setScanStatus('任务成功，正在加载结果...', 'success');
                     this.stopPolling();

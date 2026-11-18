@@ -14,13 +14,15 @@ using .CrossSectionLoopProbe, .ThresholdUpgradeCommon
         s=max((m[1]+m[2])^2,(m[3]+m[4])^2)+2.3
         pc.reset_cache!()
         baseline=CS.total_cross_section(process,s,qp,tp,kc;n_points=4)
-        saved=copy(pc.POLARIZATION_CACHE)
+        saved=pc.get_cache_stats()
         actual=probe_cross_section(probe,process,s,state;n_points=4)
         @test isapprox(actual,baseline;rtol=2e-12,atol=1e-14)
-        @test pc.POLARIZATION_CACHE==saved
+        @test pc.get_cache_stats()==saved
         failed=LoopProbe((args...)->(NaN,0.0))
         @test_throws DomainError probe_cross_section(failed,process,s,state;n_points=4)
-        @test pc.POLARIZATION_CACHE==saved
+        @test pc.get_cache_stats()==saved
+        @test CS.total_cross_section(process,s,qp,tp,kc;n_points=4)==baseline
+        @test pc.get_cache_stats().cache_misses==saved.cache_misses
     end
     @test_throws ArgumentError LoopProbe(backend;channels=:unknown)
 end

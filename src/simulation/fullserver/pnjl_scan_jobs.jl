@@ -89,7 +89,8 @@ function _configure_scan_queue!()
     pending > 0 || throw(ArgumentError("PNJL_SCAN_MAX_PENDING must be positive"))
     lock(_PNJL_SCAN_JOBS_LOCK) do
         (running == _PNJL_SCAN_MAX_RUNNING && pending == _PNJL_SCAN_MAX_PENDING) && return nothing
-        any(job -> get(job, "status", "") in (_SCAN_JOB_STATUS_QUEUED, _SCAN_JOB_STATUS_RUNNING),
+        any(job -> get(job, "worker_active", false) ||
+            get(job, "status", "") in (_SCAN_JOB_STATUS_QUEUED, _SCAN_JOB_STATUS_RUNNING),
             values(_PNJL_SCAN_JOBS)) && throw(ArgumentError("Cannot reconfigure the scan queue while jobs are active"))
         global _PNJL_SCAN_MAX_RUNNING = running
         global _PNJL_SCAN_MAX_PENDING = pending
@@ -158,12 +159,6 @@ function _set_job_status!(job::Dict{String, Any}, to_status::String)
     return nothing
 end
 
-function _job_elapsed_seconds(job::Dict{String, Any}; now_dt::DateTime=Dates.now())
-    started_at = _parse_job_ended_at(get(job, "started_at", nothing))
-    started_at === nothing && return nothing
-    return max(0, Dates.value(now_dt - started_at) ÷ 1000)
-end
-
 function _update_scan_runtime_metrics_on_terminal!(job::Dict{String, Any})
     status = String(get(job, "status", ""))
     if status == _SCAN_JOB_STATUS_SUCCEEDED
@@ -214,28 +209,29 @@ function _mark_job_timeout!(job::Dict{String, Any})
     job["reason_code"] = "TIMEOUT"
     job["internal_error"] = nothing
     _update_scan_runtime_metrics_on_terminal!(job)
+    _append_job_event!(job, "ended"; extras=Dict("outcome" => "failed", "reason_code" => "TIMEOUT"))
     return nothing
 end
 
-function _maybe_mark_job_timeout!(job_id::String; now_ts::Union{Nothing, String}=nothing)
-    now_dt = now_ts === nothing ? Dates.now() : DateTime(now_ts, dateformat"yyyy-mm-ddTHH:MM:SS")
-    return lock(_PNJL_SCAN_JOBS_LOCK) do
-        haskey(_PNJL_SCAN_JOBS, job_id) || return false
-        job = _PNJL_SCAN_JOBS[job_id]
-        status = String(get(job, "status", ""))
-        status == _SCAN_JOB_STATUS_RUNNING || return false
-
-        policy = get(job, "policy", Dict{String, Any}())
-        timeout_seconds = Int(get(policy, "timeout_seconds", _default_scan_job_timeout_seconds()))
-        timeout_seconds > 0 || return false
-
-        elapsed = _job_elapsed_seconds(job; now_dt=now_dt)
-        elapsed === nothing && return false
-        elapsed >= timeout_seconds || return false
-
+# Caller holds the registry lock. The wall clock is used only for reporting.
+function _scan_job_should_stop!(job::Dict{String, Any}, now_ns::UInt64=time_ns())
+    get(job, "status", "") == _SCAN_JOB_STATUS_RUNNING || return true
+    policy = get(job, "policy", nothing)
+    timeout_seconds = policy === nothing ? 0 : Int(get(policy, "timeout_seconds", 0))
+    started_ns = get(job, "started_ns", nothing)
+    if timeout_seconds > 0 && started_ns !== nothing &&
+       (now_ns - started_ns) ÷ UInt64(1_000_000_000) >= timeout_seconds
         _mark_job_timeout!(job)
         return true
     end
+    return false
+end
+
+function _scan_job_should_stop(job_id::String)
+    stopped = _with_job(job_id) do job
+        _scan_job_should_stop!(job)
+    end
+    return stopped !== false
 end
 
 function _request_header(req::HTTP.Request, name::String)
@@ -350,7 +346,25 @@ function _to_nonneg_int(x, default::Int; name::String)
 end
 
 @inline function _normalized_path_for_compare(path::AbstractString)
-    return replace(lowercase(abspath(normpath(path))), '/' => '\\')
+    normalized = abspath(normpath(path))
+    return Sys.iswindows() ? lowercase(normalized) : normalized
+end
+
+function _resolved_output_path(path::AbstractString)
+    ancestor = abspath(path)
+    suffix = String[]
+    while !ispath(ancestor) && !islink(ancestor)
+        parent = dirname(ancestor)
+        parent == ancestor && throw(ArgumentError("output_path has no existing ancestor"))
+        push!(suffix, basename(ancestor))
+        ancestor = parent
+    end
+    return joinpath(realpath(ancestor), reverse(suffix)...)
+end
+
+function _is_within_output_root(candidate::AbstractString, root::AbstractString)
+    relative = relpath(_normalized_path_for_compare(candidate), _normalized_path_for_compare(root))
+    return !isabspath(relative) && !(".." in splitpath(relative))
 end
 
 function _ensure_safe_output_path(path_raw)
@@ -363,12 +377,11 @@ function _ensure_safe_output_path(path_raw)
         abspath(normpath(joinpath(_PROJECT_ROOT, output_raw)))
     end
 
-    base_cmp = _normalized_path_for_compare(_SCAN_OUTPUT_ROOT)
-    candidate_cmp = _normalized_path_for_compare(candidate)
-    safe_prefix = string(base_cmp, "\\")
-    if !(candidate_cmp == base_cmp || startswith(candidate_cmp, safe_prefix))
+    if !_is_within_output_root(candidate, _SCAN_OUTPUT_ROOT) ||
+       !_is_within_output_root(_resolved_output_path(candidate), _resolved_output_path(_SCAN_OUTPUT_ROOT))
         throw(ArgumentError("output_path must be under data/outputs"))
     end
+    isdir(candidate) && throw(ArgumentError("output_path must name a file, not a directory"))
 
     return candidate
 end
@@ -529,7 +542,7 @@ function _prune_finished_jobs_locked!(
     expired_ids = String[]
     for (job_id, job) in _PNJL_SCAN_JOBS
         st = get(job, "status", "")
-        if st in _TERMINAL_SCAN_JOB_STATUSES
+        if st in _TERMINAL_SCAN_JOB_STATUSES && !get(job, "worker_active", false)
             ended_at = _parse_job_ended_at(get(job, "ended_at", nothing))
             if ended_at !== nothing && (now - ended_at) > Dates.Second(ttl_seconds)
                 push!(expired_ids, job_id)
@@ -574,7 +587,7 @@ function _queue_snapshot()
         for job in values(_PNJL_SCAN_JOBS)
             st = get(job, "status", "")
             st == "queued" && (queued += 1)
-            st == "running" && (running += 1)
+            (st == "running" || get(job, "worker_active", false)) && (running += 1)
         end
         return (queued=queued, running=running)
     end
@@ -671,6 +684,14 @@ function _estimate_total_points(kind::String, params::Dict{Symbol, Any})
     return nothing
 end
 
+function _scan_stop_callback(job_id::String)
+    return () -> begin
+        # Let the HTTP handler run even when Julia has only one worker thread.
+        yield()
+        _scan_job_should_stop(job_id)
+    end
+end
+
 function _run_tmu_scan_job!(job_id::String, params::Dict{Symbol, Any})
     output_path = _safe_output_path("tmu", params, job_id)
     kwargs = Dict{Symbol, Any}(
@@ -692,12 +713,12 @@ function _run_tmu_scan_job!(job_id::String, params::Dict{Symbol, Any})
     progress_cb = (_point, _result) -> begin
         processed_ref[] += 1
         _with_job(job_id) do job
-            _update_job_progress!(job, processed_ref[])
+            job["status"] == _SCAN_JOB_STATUS_RUNNING && _update_job_progress!(job, processed_ref[])
         end
         nothing
     end
 
-    stats = Models.run_tmu_scan(; kwargs..., progress_cb=progress_cb)
+    stats = Models.run_tmu_scan(; kwargs..., progress_cb, stop_requested=_scan_stop_callback(job_id))
     return Dict{String, Any}(
         "output_path" => stats.output,
         "stats" => Dict(
@@ -729,12 +750,12 @@ function _run_trho_scan_job!(job_id::String, params::Dict{Symbol, Any})
     progress_cb = (_point, _result) -> begin
         processed_ref[] += 1
         _with_job(job_id) do job
-            _update_job_progress!(job, processed_ref[])
+            job["status"] == _SCAN_JOB_STATUS_RUNNING && _update_job_progress!(job, processed_ref[])
         end
         nothing
     end
 
-    stats = Models.run_trho_scan(; kwargs..., progress_cb=progress_cb)
+    stats = Models.run_trho_scan(; kwargs..., progress_cb, stop_requested=_scan_stop_callback(job_id))
     return Dict{String, Any}(
         "output_path" => stats.output,
         "stats" => Dict(
@@ -764,6 +785,8 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                 if String(get(job, "status", "")) != _SCAN_JOB_STATUS_QUEUED
                     return false
                 end
+                job["started_ns"] = time_ns()
+                job["worker_active"] = true
                 _set_job_status!(job, _SCAN_JOB_STATUS_RUNNING)
                 _append_job_event!(job, "started")
                 return true
@@ -777,12 +800,11 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
             end
             max_retries === nothing && (max_retries = 0)
 
-            while true
-                _maybe_mark_job_timeout!(job_id) && break
+            while !_scan_job_should_stop(job_id)
                 try
                     result = _execute_scan_job!(job_id, kind, params)
                     _with_job(job_id) do job
-                        String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                        _scan_job_should_stop!(job) && return
                         _set_job_status!(job, _SCAN_JOB_STATUS_SUCCEEDED)
                         job["result"] = result
                         job["reason_code"] = nothing
@@ -796,10 +818,11 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                     end
                     break
                 catch e
+                    _scan_job_should_stop(job_id) && break
                     if attempt < max_retries
                         attempt += 1
                         _with_job(job_id) do job
-                            String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                            _scan_job_should_stop!(job) && return
                             _set_job_status!(job, _SCAN_JOB_STATUS_RUNNING)
                             job["error"] = "scan execution retrying"
                             job["internal_error"] = sprint(showerror, e, catch_backtrace())
@@ -807,7 +830,7 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                         end
                     else
                         _with_job(job_id) do job
-                            String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                            _scan_job_should_stop!(job) && return
                             _set_job_status!(job, _SCAN_JOB_STATUS_FAILED)
                             job["error"] = "scan execution failed"
                             job["reason_code"] = "EXECUTION_ERROR"
@@ -820,7 +843,11 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                 end
             end
         finally
-            Base.release(semaphore)
+            lock(_PNJL_SCAN_JOBS_LOCK) do
+                Base.release(semaphore)
+                job = get(_PNJL_SCAN_JOBS, job_id, nothing)
+                job === nothing || (job["worker_active"] = false)
+            end
         end
     end
 end
@@ -839,6 +866,7 @@ function _reserve_scan_job(kind::String, params::Dict{Symbol,Any}, idempotency_k
         max_retries <= 3 || error("max_retries must be <= 3")
         timeout_default = _default_scan_job_timeout_seconds()
         timeout_seconds = _to_nonneg_int(get(params, :timeout_seconds, timeout_default), timeout_default; name="timeout_seconds")
+        haskey(params, :output_path) && _ensure_safe_output_path(params[:output_path])
         total_points = _estimate_total_points(kind, params)
         mode = _resolve_scan_mode(params)
         request_snapshot = Dict{String,Any}(
@@ -973,6 +1001,7 @@ function handle_pnjl_scan_job_cancel(job_id::String)
             "job_id" => job_id,
             "kind" => job["kind"],
             "job_status" => job["status"],
+            "worker_active" => get(job, "worker_active", false),
             "diagnostics" => _build_job_diagnostics(job_id, job["kind"], job["status"]),
         )
     end
@@ -985,15 +1014,16 @@ function handle_pnjl_scan_job_cancel(job_id::String)
 end
 
 function handle_pnjl_scan_job_status(job_id::String)
-    pos = _queue_position(job_id)
-    snap = _queue_snapshot()
     policy = _scan_jobs_policy()
     payload = _with_job(job_id) do job
+        pos = _queue_position(job_id)
+        snap = _queue_snapshot()
         Dict{String, Any}(
             "status" => "ok",
             "job_id" => job["job_id"],
             "kind" => job["kind"],
             "job_status" => job["status"],
+            "worker_active" => get(job, "worker_active", false),
             "created_at" => job["created_at"],
             "started_at" => job["started_at"],
             "ended_at" => job["ended_at"],
@@ -1007,7 +1037,7 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
             "policy" => get(job, "policy", Dict{String, Any}()),
-            "events" => get(job, "events", Vector{Dict{String, Any}}()),
+            "events" => copy(get(job, "events", Vector{Dict{String, Any}}())),
             "governance" => Dict(
                 "finished_keep_max" => policy.keep_max,
                 "finished_ttl_seconds" => policy.ttl_seconds,

@@ -1,20 +1,15 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { API } from './api.js';
 
-async function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function waitForTerminal(jobId, timeoutMs = 120000) {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
-        const status = await API.getJobStatus(jobId);
-        if (status.job_status === 'succeeded' || status.job_status === 'failed') {
-            return status;
-        }
-        await sleep(800);
+async function createRecordedJob(payload, acceptedIds) {
+    const created = await API.createScanJob(payload);
+    if (typeof created.job_id === 'string') {
+        acceptedIds.push(created.job_id);
     }
-    throw new Error(`waitForTerminal timeout for ${jobId}`);
+    assert.equal(created.status, 'accepted');
+    assert.equal(typeof created.job_id, 'string');
+    return created;
 }
 
 function buildValidPayload() {
@@ -31,24 +26,23 @@ function buildValidPayload() {
     };
 }
 
-async function testResultNotReady() {
-    const created = await API.createScanJob(buildValidPayload());
-    assert.equal(created.status, 'accepted');
-
-    let gotExpected = false;
+async function testResultAvailability(acceptedIds) {
+    const created = await createRecordedJob(buildValidPayload(), acceptedIds);
+    let result;
     try {
-        await API.getJobResult(created.job_id);
+        result = await API.getJobResult(created.job_id);
     } catch (error) {
         assert.equal(error.code, 'JOB_NOT_SUCCEEDED');
         assert.equal(error.status, 409);
-        gotExpected = true;
+        return;
     }
-
-    assert.equal(gotExpected, true, 'result-not-ready should return JOB_NOT_SUCCEEDED');
-    return created.job_id;
+    // A fast server may finish before the result request arrives.
+    assert.equal(result.status, 'ok');
+    assert.equal(result.job_status, 'succeeded');
+    assert.equal(result.job_id, created.job_id);
 }
 
-async function testJobFailed() {
+async function testInvalidOutputPath(acceptedIds) {
     const badPayload = {
         kind: 'tmu',
         params: {
@@ -60,15 +54,13 @@ async function testJobFailed() {
         },
     };
 
-    const created = await API.createScanJob(badPayload);
-    assert.equal(created.status, 'accepted');
-
-    const terminal = await waitForTerminal(created.job_id, 90000);
-    assert.equal(terminal.job_status, 'failed');
-    return created.job_id;
+    await assert.rejects(() => createRecordedJob(badPayload, acceptedIds), {
+        code: 'INVALID_REQUEST',
+        status: 400,
+    });
 }
 
-async function testQueueFull() {
+async function testQueueFull(acceptedIds) {
     const heavyPayload = {
         kind: 'tmu',
         params: {
@@ -82,11 +74,9 @@ async function testQueueFull() {
     };
 
     let queueFullHit = false;
-    const acceptedIds = [];
     for (let i = 0; i < 60; i += 1) {
         try {
-            const created = await API.createScanJob(heavyPayload);
-            acceptedIds.push(created.job_id);
+            await createRecordedJob(heavyPayload, acceptedIds);
         } catch (error) {
             if (error.code === 'QUEUE_FULL' && error.status === 429) {
                 queueFullHit = true;
@@ -97,24 +87,33 @@ async function testQueueFull() {
     }
 
     assert.equal(queueFullHit, true, 'queue-full case should be reproducible');
-    return acceptedIds.length;
 }
 
-async function run() {
-    const healthy = await API.checkHealth();
-    assert.equal(healthy, true, 'server health should be OK before integration tests');
-
-    const resultNotReadyJobId = await testResultNotReady();
-    const failedJobId = await testJobFailed();
-    const acceptedBeforeQueueFull = await testQueueFull();
-
-    console.log('api.scan.integration.test.mjs: PASS');
-    console.log(`result-not-ready job: ${resultNotReadyJobId}`);
-    console.log(`failed job: ${failedJobId}`);
-    console.log(`accepted jobs before queue-full: ${acceptedBeforeQueueFull}`);
+async function cancelCreatedJobs(acceptedIds) {
+    const results = await Promise.allSettled(acceptedIds.map(async (jobId) => {
+        try {
+            await API.cancelJob(jobId);
+        } catch (error) {
+            if (error.status !== 409 || error.code !== 'JOB_NOT_CANCELLABLE') {
+                throw error;
+            }
+        }
+    }));
+    const failures = results.filter((result) => result.status === 'rejected');
+    assert.equal(failures.length, 0, `failed to cancel test jobs: ${failures.map((result) => result.reason.message).join('; ')}`);
 }
 
-run().catch((error) => {
-    console.error('api.scan.integration.test.mjs: FAIL', error);
-    process.exit(1);
+test('live scan API', { skip: process.env.JRT_RUN_LIVE_API_TESTS !== '1' }, async (t) => {
+    assert.ok(process.env.JRT_TEST_API_BASE_URL?.trim(), 'set JRT_TEST_API_BASE_URL to a dedicated test server');
+    globalThis.__JRT_API_BASE_URL__ = process.env.JRT_TEST_API_BASE_URL;
+    assert.equal(await API.checkHealth(), true, 'server health should be OK before integration tests');
+
+    const acceptedIds = [];
+    try {
+        await t.test('invalid output path is rejected before registration', () => testInvalidOutputPath(acceptedIds));
+        await t.test('result availability', () => testResultAvailability(acceptedIds));
+        await t.test('queue capacity', { skip: process.env.JRT_TEST_QUEUE_FULL !== '1' }, () => testQueueFull(acceptedIds));
+    } finally {
+        await cancelCreatedJobs(acceptedIds);
+    }
 });

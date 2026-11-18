@@ -1,4 +1,4 @@
-# Isolated, single-process comparisons of a loop backend through the unchanged
+# Isolated comparisons of a loop backend through the unchanged
 # production amplitude and t quadrature. This is not a production backend API.
 if !isdefined(Main, :ThresholdUpgradeCommon)
     include(joinpath(@__DIR__, "ThresholdUpgradeCommon.jl"))
@@ -37,7 +37,7 @@ function polarization_specs(info, qp)
     return unique(specs)
 end
 
-"""Evaluate a selected backend, restoring every overwritten cache key on exit.
+"""Evaluate a selected backend with a temporary polarization cache.
 
 The backend takes the same arguments as polarization_aniso and returns its
 real/imaginary pair. Its private cache belongs to one explicit backend object;
@@ -55,10 +55,9 @@ function probe_cross_section(probe::LoopProbe,process,s,state;n_points=24)
     thi-tlo>CS.EPS_KINEMATIC || return 0.0
     z,_=RT.GaussLegendre.standard_nodes_weights(n_points)
     ts=(thi-tlo)/2 .* z .+ (thi+tlo)/2
-    previous=Dict{PC.PolarizationKey,Union{Nothing,PolValue}}()
     # Bound diagnostic memory without changing the backend or tolerance.
     length(probe.cache)>100_000 && empty!(probe.cache)
-    try
+    return PC._with_isolated_cache() do entries
         for (channel,info) in TP.SCATTERING_MESON_MAP[process][:channels]
             probe.channels===:s && channel!==:s && continue
             probe.channels===:finite_k && channel===:s && continue
@@ -70,28 +69,21 @@ function probe_cross_section(probe::LoopProbe,process,s,state;n_points=24)
                     args=(spec.channel,cms.k0,cms.k,spec.m1,spec.m2,spec.μ1,spec.μ2,
                         tp.T,tp.Φ,tp.Φbar,tp.ξ,spec.A1,spec.A2,spec.num_s_quark)
                     key=PC.PolarizationKey(args...)
-                    haskey(previous,key) && continue
-                    previous[key]=get(PC.POLARIZATION_CACHE,key,nothing)
-                    value=get!(probe.cache,key) do
+                    haskey(entries,key) && continue
+                    entries[key]=get!(probe.cache,key) do
                         result=probe.backend(args...)
                         all(isfinite,result) || throw(DomainError(result,"nonfinite loop probe result"))
                         result
                     end
-                    PC.POLARIZATION_CACHE[key]=value
                 end
             end
         end
-        misses=PC.CACHE_TOTAL_CALLS[]-PC.CACHE_HIT_CALLS[]
         value=CS.total_cross_section(process,s,qp,tp,kc;n_points=n_points)
         if probe.channels===:all
-            PC.CACHE_TOTAL_CALLS[]-PC.CACHE_HIT_CALLS[]==misses ||
+            PC.get_cache_stats().cache_misses==0 ||
                 error("loop probe did not cover every production polarization query")
         end
         return value
-    finally
-        for (key,value) in previous
-            value===nothing ? delete!(PC.POLARIZATION_CACHE,key) : (PC.POLARIZATION_CACHE[key]=value)
-        end
     end
 end
 

@@ -168,4 +168,6 @@ function main(args::Vector{String})
     return result
 end
 
-abspath(PROGRAM_FILE) == @__FILE__ && main(ARGS)
+if abspath(PROGRAM_FILE) == @__FILE__
+    main(ARGS)
+end

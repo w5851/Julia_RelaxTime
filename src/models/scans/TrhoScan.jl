@@ -243,6 +243,7 @@ function run_trho_scan(;
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
+    stop_requested::Union{Nothing, Function}=nothing,
     diagnostic_level::Symbol=:none,
     thermo_quadrature_policy::Symbol=:tensor_gauss,
     thermo_quadrature_rtol::Float64=1e-8,
@@ -284,6 +285,7 @@ function run_trho_scan(;
         nlsolve_kwargs...,
     )
 
+    Models._check_scan_stop(stop_requested)
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
@@ -312,6 +314,7 @@ function run_trho_scan(;
 
         previous_path = nothing
         for xi in xi_values, T in T_values
+            Models._check_scan_stop(stop_requested)
             # 每个新温度重置连续性种子
             seed_key = _seed_continuation_key(T, xi)
             delete!(continuation_seeds, seed_key)
@@ -333,13 +336,14 @@ function run_trho_scan(;
                     continuation_strategy=continuation_mode === :palc ?
                         Models.PALCContinuation(; palc_options...) : Models.NaturalContinuation(),
                     (continuation_mode === :natural ? (;recovery_strategy=Models.PALCContinuation(;palc_options...)) : (;))...,
-                    solver_kwargs...)
-                path_results = Models.selected_path_results(create_model(model_kind), path_result; solver_kwargs...)
+                    stop_requested, solver_kwargs...)
+                path_results = Models.selected_path_results(create_model(model_kind), path_result; stop_requested, solver_kwargs...)
                 path_diagnostics_cb === nothing || path_diagnostics_cb((; T, xi), path_result)
                 previous_path = path_result
             end
 
             for (rho_index, rho) in enumerate(rho_scan_order)
+            Models._check_scan_stop(stop_requested)
             stats[:total] += 1
             key = ScanCommon.key3(T, rho, xi; digits=6)
             
@@ -406,6 +410,7 @@ function run_trho_scan(;
             end
 
             # 写入结果
+            Models._check_scan_stop(stop_requested)
             _write_row(io, T, rho, xi, result, message;
                 model_kind=model_kind,
                 p_num=p_num,

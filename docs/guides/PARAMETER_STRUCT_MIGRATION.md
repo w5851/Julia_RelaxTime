@@ -186,11 +186,13 @@ Phase G formalizes a dedicated, model-ready profiling path for `TotalCrossSectio
         - `calculate_all_total_cross_sections`
     - This avoids false failures caused by incomplete generic fixtures.
 
-3. **Smoke-test guardrail added**
-    - Added: `tests/unit/relaxtime/test_total_cross_section_model_ready_fixture_smoke.jl`
-    - Verifies single-point, scan, and batch-all TCS APIs on model-ready inputs.
+3. **Numerical coverage**
+    - The original model-ready smoke fixture has been retired.
+    - Current coverage: `tests/regression/relaxtime/test_total_cross_section_fixedpoint_regression.jl` compares fast and legacy paths against fixed-point baselines.
 
-### Quantitative result (latest local run)
+### Quantitative result (historical migration run)
+
+These timings describe the original migration run, not a current performance measurement.
 
 - `total_cross_section(:uu_to_uu, s0)` ≈ `0.0168 ms/call`
 - `scan_s_dependence(4 points)` ≈ `0.0529 ms/call`

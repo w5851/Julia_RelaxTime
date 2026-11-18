@@ -211,6 +211,124 @@ end
     end
 end
 
+@testset "Cancellation stops the script process tree before publishing results" begin
+    mktempdir() do dir
+        script = joinpath(dir, "process fixture.jl")
+        write(script, raw"""
+            dir, level, value = ARGS
+            write(joinpath(dir, "$level.pid"), string(getpid()))
+            if level == "leaf"
+                write(joinpath(dir, "argument.txt"), value)
+                deadline = time_ns() + UInt64(60_000_000_000)
+                while time_ns() < deadline
+                    open(io -> println(io, 'x'), joinpath(dir, "heartbeat"), "a")
+                    sleep(0.03)
+                end
+                exit(125) # Keep a failed cancellation fixture from leaving a live process.
+            else
+                next = level == "root" ? "child" : "leaf"
+                run(`$(Base.julia_cmd()) --startup-file=no $(@__FILE__) $dir $next $value`)
+            end
+            """)
+        id = "unit-script-tree"
+        task = Dict{String,Any}("id" => id, "name" => "Process fixture", "script" => script)
+        args = [dir, "root", "an argument with spaces"]
+        job = Dict{String,Any}(
+            "job_id" => id, "task_id" => id, "task_name" => task["name"], "preset" => "fixture",
+            "args" => args, "command" => STJ._script_task_command_preview(task, args),
+            "status" => "queued", "created_at" => STJ._timestamp_now(),
+            "started_at" => nothing, "ended_at" => nothing, "result" => nothing, "error" => nothing,
+            "reason_code" => nothing, "progress" => Dict(), "process" => nothing, "worker_active" => false,
+            "output_dir" => dir, "stdout_path" => joinpath(dir, "out.log"), "stderr_path" => joinpath(dir, "err.log"),
+        )
+        push!(STJ.SCRIPT_TASK_CATALOG, task)
+        lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+            STJ._SCRIPT_TASK_JOBS[id] = job
+        end
+        worker = nothing
+        try
+            # Cancel with the only slot occupied; the queued worker must never launch the command.
+            Base.acquire(STJ._SCRIPT_TASK_SEMAPHORE)
+            try
+                worker = STJ._launch_script_task_job(id)
+                response = STJ.handle_script_task_job_cancel(id)
+                @test response.status == 200
+                @test !_script_task_body(response).worker_active
+            finally
+                Base.release(STJ._SCRIPT_TASK_SEMAPHORE)
+            end
+            fetch(worker)
+            @test !isfile(joinpath(dir, "out.log"))
+
+            # A cancellation after entering the worker but before registering a process also skips spawn.
+            parts, _ = STJ._script_task_command_parts(task, args)
+            @test STJ._run_script_task_command(id, parts, devnull, devnull) == -1
+            @test !isfile(joinpath(dir, "root.pid"))
+
+            lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+                merge!(job, Dict("status" => "queued", "started_at" => nothing, "ended_at" => nothing,
+                    "reason_code" => nothing, "error" => nothing))
+            end
+            worker = STJ._launch_script_task_job(id)
+            heartbeat = joinpath(dir, "heartbeat")
+            ready = timedwait(() -> isfile(heartbeat) || istaskdone(worker), 60; pollint=0.05)
+            @test ready == :ok
+            if !isfile(heartbeat)
+                error("process tree did not start: " * STJ._tail_file(job["stderr_path"]))
+            end
+            @test read(joinpath(dir, "argument.txt"), String) == last(args)
+            pids = [parse(Int, read(joinpath(dir, "$level.pid"), String)) for level in ("root", "child", "leaf")]
+            lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+                response = STJ.handle_script_task_job_cancel(id)
+                @test response.status == 200
+                @test _script_task_body(response).worker_active
+                @test STJ._script_task_queue_snapshot().running == 1
+                @test STJ.handle_script_task_job_result(id).status == 409
+            end
+            @test timedwait(() -> istaskdone(worker), 20; pollint=0.05) == :ok
+            fetch(worker)
+            for pid in pids
+                if Sys.iswindows()
+                    handle = ccall((:OpenProcess, "kernel32"), stdcall, Ptr{Cvoid},
+                        (UInt32, Cint, UInt32), 0x00100000, 0, pid) # SYNCHRONIZE
+                    if handle == C_NULL
+                        @test ccall((:GetLastError, "kernel32"), stdcall, UInt32, ()) == 87 # ERROR_INVALID_PARAMETER
+                    else
+                        try
+                            @test ccall((:WaitForSingleObject, "kernel32"), stdcall, UInt32,
+                                (Ptr{Cvoid}, UInt32), handle, 0) == 0 # WAIT_OBJECT_0
+                        finally
+                            STJ._close_script_task_scope(handle)
+                        end
+                    end
+                else
+                    rows = read(`ps -Ao pid=,stat=`, String)
+                    @test !any(eachsplit(rows, '\n')) do row
+                        fields = split(row)
+                        length(fields) == 2 && tryparse(Int, fields[1]) == pid && first(fields[2]) != 'Z'
+                    end
+                end
+            end
+            @test STJ._script_task_queue_snapshot().running == 0
+            status = _script_task_body(STJ.handle_script_task_job_status(id))
+            @test status.job_status == "cancelled" && !status.worker_active
+            @test last(status.events).event_code == "ended"
+            response = STJ.handle_script_task_job_result(id)
+            @test response.status == 200
+            @test _script_task_body(response).result.exit_code != 0
+        finally
+            if worker !== nothing && !istaskdone(worker)
+                STJ.handle_script_task_job_cancel(id)
+                fetch(worker)
+            end
+            lock(STJ._SCRIPT_TASK_JOBS_LOCK) do
+                delete!(STJ._SCRIPT_TASK_JOBS, id)
+            end
+            filter!(item -> item !== task, STJ.SCRIPT_TASK_CATALOG)
+        end
+    end
+end
+
 @testset "script task terminal history retention" begin
     now = DateTime(2026, 11, 13, 12)
     fixture(id, status; ended_at=now, seq=0, worker_active=false, process=nothing) = Dict{String,Any}(

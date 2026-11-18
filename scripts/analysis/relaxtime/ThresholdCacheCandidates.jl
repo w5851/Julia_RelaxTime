@@ -145,8 +145,8 @@ end
 
 """Diagnostic-only temporary s-channel polarization injection.
 
-The four affected keys are restored even on failure. This is deliberately not
-a production backend API; use only in an isolated single-thread process.
+The four keys are installed in a temporary cache. The caller's production
+cache and counters are unchanged, including on failure.
 """
 function paired_cross_section(process,s,state,plans;n_points=24)
     process in (:uubar_to_uubar,:uubar_to_ddbar) ||
@@ -154,21 +154,15 @@ function paired_cross_section(process,s,state,plans;n_points=24)
     pc=RT.PolarizationCache
     qp,tp=state.quark_params,state.thermo_params
     pol=paired_polarizations(state,s,plans)
-    previous=Pair[]
-    try
+    return pc._with_isolated_cache() do entries
         for (flavor,ns) in ((:u,0),(:s,2)), channel in (:P,:S)
             m=getproperty(qp.m,flavor); mu=getproperty(qp.μ,flavor); a=getproperty(qp.A,flavor)
             key=pc.PolarizationKey(channel,sqrt(s),0.0,m,m,mu,mu,
                 tp.T,tp.Φ,tp.Φbar,tp.ξ,a,a,ns)
-            push!(previous,key=>get(pc.POLARIZATION_CACHE,key,nothing))
             value=getproperty(getproperty(pol,flavor),channel)
-            pc.POLARIZATION_CACHE[key]=(real(value),imag(value))
+            entries[key]=(real(value),imag(value))
         end
         return CS.total_cross_section(process,s,qp,tp,state.K_coeffs;n_points=n_points)
-    finally
-        for (key,value) in previous
-            value===nothing ? delete!(pc.POLARIZATION_CACHE,key) : (pc.POLARIZATION_CACHE[key]=value)
-        end
     end
 end
 

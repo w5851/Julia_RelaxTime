@@ -36,7 +36,7 @@ end
 @testset "PNJL scan cancel and timeout governance" begin
     _reset_cancel_timeout_fixture!()
 
-    @testset "cancel queued/running allowed" begin
+    @testset "cancel queued jobs before execution" begin
         payload = Dict(
             "kind" => "tmu",
             "params" => Dict(
@@ -46,14 +46,24 @@ end
                 "max_retries" => 0,
             ),
         )
-        created = _post_job(payload)
-        created_body = _json_body(created)
-        @test created.status == 202
-
-        cancel_resp = PSCT.handle_pnjl_scan_job_cancel(String(created_body.job_id))
-        cancel_body = _json_body(cancel_resp)
-        @test cancel_resp.status == 200
-        @test cancel_body.job_status == "cancelled"
+        slots = PSCT._PNJL_SCAN_MAX_RUNNING
+        semaphore = PSCT._PNJL_SCAN_SEMAPHORE
+        for _ in 1:slots
+            Base.acquire(semaphore)
+        end
+        try
+            created = _post_job(payload)
+            @test created.status == 202
+            cancel_resp = PSCT.handle_pnjl_scan_job_cancel(String(_json_body(created).job_id))
+            cancel_body = _json_body(cancel_resp)
+            @test cancel_resp.status == 200
+            @test cancel_body.job_status == "cancelled"
+            @test !cancel_body.worker_active
+        finally
+            for _ in 1:slots
+                Base.release(semaphore)
+            end
+        end
     end
 
     @testset "cancel terminal state rejected" begin
@@ -85,11 +95,14 @@ end
         lock(PSCT._PNJL_SCAN_JOBS_LOCK) do
             job = PSCT._PNJL_SCAN_JOBS[job_id]
             job["started_at"] = "2026-03-29T00:00:00"
+            job["started_ns"] = UInt64(0)
             job["status"] = "running"
             job["policy"] = Dict("timeout_seconds" => 1)
         end
 
-        changed = PSCT._maybe_mark_job_timeout!(job_id; now_ts="2026-03-29T00:00:01")
+        changed = PSCT._with_job(job_id) do job
+            PSCT._scan_job_should_stop!(job, UInt64(1_000_000_000))
+        end
         @test changed == true
 
         status_resp = PSCT.handle_pnjl_scan_job_status(job_id)

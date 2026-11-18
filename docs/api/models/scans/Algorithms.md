@@ -90,7 +90,10 @@
 `acceptance_reason` 为 `solver_converged`（求解器、残差及物理检查均通过）、
 `near_residual`（近似残差接受，包括扫描提升）、`legacy_converged`（沿用旧接受标志）、
 `physical_invalid`、`nonfinite_residual`、`residual_rejected`、`scan_rejected`
-或 `no_result`。理由解释实际扫描判定，不参与重新选择候选。
+或 `no_result`。一行如同时触发多个拒绝条件，主理由优先显示物理无效，其次是非有限残差，
+再显示残差超限。判断同一行的多项证据需组合独立诊断列与 `residual_norm`；这些列不枚举未选候选，
+历史未知值也无法反推。`physical_valid` 优先记录求解器证据；Tμ 扫描另有自己的物理门，其拒绝可见于
+`physical_invalid` 主理由。收紧成功条件会改变接受的行集和下游输入，单纯合并标签不会。
 
 续写旧版表头时，扫描及相图生产写入端先通过同目录临时文件追加诊断列，再写新行。
 旧行的数值和消息保留，七个新列填入 `unknown/not_recorded`，包括无法追溯的扫描接受
@@ -101,6 +104,10 @@
 - 下游读取方应按列名而不是列位置解析
 - 失败点也必须写入 CSV，而不是静默丢弃
 - 如需扩展 schema，优先追加列而不是重命名现有列
+
+两个扫描入口都可选传入 `stop_requested=() -> Bool`。请求停止后，在扫描点、延拓步或写入前
+的下一次检查抛出 `Models.ScanStopRequested`。已写并刷新的行可按原网格用 `resume=true, overwrite=false`
+续扫；正在求解的点可运行到该点结束，未写入的行可以丢弃。
 
 ## 7. 推荐模板与禁用组合
 

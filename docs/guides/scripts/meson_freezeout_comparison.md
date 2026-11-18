@@ -63,9 +63,12 @@ python scripts/analysis/relaxtime/freezeout_parameter_envelope.py prepare --outp
 评分；`refine --designs ... --assessment ... --output ...` 生成一轮轴向邻域配置。
 它们拒绝覆盖已有目录，且没有统计置信度或全局优化保证。
 `horn-map` 使用已计算的热力学峰点调整能量映射，并显式检查原参数包络；其输出
-仍必须经 Julia 直接计算核验。`run_freezeout_envelope_refinement.jl` 接收选择文件、
+仍必须经 Julia 直接计算核验。[现行分片入口](../../../scripts/analysis/relaxtime/run_freezeout_envelope_refinement.jl) 接收选择文件、
 数值计划和分片编号 `0/1`，以同一既有 runner 完成 standard/fine 批次；分片按
 整条参数曲线划分，保持每条曲线内部按能量降序延续求解。
+
+`freezeout_envelope_20261018_selected_design` 产物目录中的同名脚本是来源副本，保留原始字节。
+它不能从该目录直接执行；精确重放历史批次需恢复记录中的代码、相对目录布局、配置和输入。
 
 绘图和评分只读取已冻结数值与实验输入。实验按体系、中心度、快度和电荷口径标记；
 Au+Au 是主比较集合，Pb+Pb 的 horn 作为辅助集合。默认选择指标为 Au+Au 发布点上的

@@ -131,18 +131,9 @@ end
         @test final_resp.status == 200
         @test final_body.job_status in ("queued", "running", "cancelled", "succeeded", "failed")
 
-        for _ in 1:40
-            if !isfile(output_abs)
-                break
-            end
-            try
-                rm(output_abs; force=true)
-                break
-            catch
-                sleep(0.1)
-            end
-        end
-        @test true
+        finished = timedwait(() -> PSJ._with_job(job -> !get(job, "worker_active", false), job_id) !== false, 60)
+        @test finished == :ok
+        finished == :ok && rm(output_abs; force=true)
     end
 
     @testset "invalid mode rejected" begin

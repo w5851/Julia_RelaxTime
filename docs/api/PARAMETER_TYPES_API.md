@@ -428,12 +428,12 @@ Phase G introduces a dedicated model-ready benchmark lane for `TotalCrossSection
 
 ### Validation summary
 
-- Added smoke test: `tests/unit/relaxtime/test_total_cross_section_model_ready_fixture_smoke.jl`
-- Local baseline (ms/call):
+- Current numerical coverage: `tests/regression/relaxtime/test_total_cross_section_fixedpoint_regression.jl` compares the fast and legacy paths against fixed-point baselines.
+- Historical migration-run timings (ms/call; not a current performance measurement):
     - `total_cross_section(:uu_to_uu, s0)` = `0.0168`
     - `scan_s_dependence(4 points)` = `0.0529`
     - `calculate_all_total_cross_sections` = `1.0785`
-- New smoke test passed (`6/6`).
+- The original migration smoke passed (`6/6`); that dedicated fixture has since been retired.
 
 ---
 

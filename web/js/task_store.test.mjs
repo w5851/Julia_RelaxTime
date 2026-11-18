@@ -4,6 +4,7 @@ import {
     load_task_history,
     load_task_templates,
     save_task_history,
+    save_task_templates,
     upsert_task_history_entry,
 } from './task_store.js';
 
@@ -71,11 +72,46 @@ function test_template_load_fallback() {
     assert.ok(templates.length >= 1);
 }
 
+function test_storage_unavailable() {
+    globalThis.window = {};
+    Object.defineProperty(window, 'localStorage', {
+        get() { throw new DOMException('Storage blocked', 'SecurityError'); },
+    });
+    assert.deepEqual(load_task_history(), []);
+    assert.equal(save_task_history([{ job_id: 'offline' }])[0].job_id, 'offline');
+    assert.equal(load_task_templates()[0].id, 'tmu-smoke');
+    assert.doesNotThrow(() => save_task_templates(get_default_templates()));
+    delete globalThis.window;
+    assert.deepEqual(load_task_history(), []);
+}
+
+function test_malformed_records_are_ignored() {
+    const storage = setupStorage();
+    storage.setItem('JRT_TASK_HISTORY_V1', JSON.stringify([null, 7, {}, { job_id: 'valid' }]));
+    assert.deepEqual(load_task_history(), [{ job_id: 'valid' }]);
+    assert.equal(upsert_task_history_entry({ job_id: 'new' }).length, 2);
+    const template = get_default_templates()[0];
+    storage.setItem('JRT_TASK_TEMPLATES_V1', JSON.stringify([null, {}, template]));
+    assert.deepEqual(load_task_templates(), [template]);
+}
+
+function test_defaults_are_independent() {
+    setupStorage();
+    const templates = load_task_templates();
+    templates[0].payload.params.T_values[0] = -1;
+    templates.pop();
+    assert.equal(get_default_templates()[0].payload.params.T_values[0], 150);
+    assert.equal(load_task_templates().length, 2);
+}
+
 function run() {
     test_default_templates();
     test_history_roundtrip();
     test_upsert_history();
     test_template_load_fallback();
+    test_storage_unavailable();
+    test_malformed_records_are_ignored();
+    test_defaults_are_independent();
     console.log('task_store.test.mjs: PASS');
 }
 

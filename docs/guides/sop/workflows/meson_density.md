@@ -73,11 +73,14 @@ Density regimes：
 - 默认仍采用 `2K/(1-4KPi)` 的旧 scalar BU 分母，只用于隔离耦合变化；
 - 该路径不把介子密度写回 `Omega`，也不修改 BQS 平衡解。
 
-关键治理边界：
+关键治理与科学输出规范：
 
-- `current` 是兼容/对照 branch，GBU 是最终比较默认；二者当前都沿用
-  `domega/(2pi)` 文献 ratio adapter，尚未完成单电荷 `domega/pi` 迁移，因此均未
-  获得 strict 绝对密度 production 授权；
+- `current` 是兼容/对照 branch，GBU 是最终比较默认；
+- 通用 phase-shift 工作流仍默认 `omega_measure=:legacy_domega_over_2pi`，用于比值兼容；同一相位和单 Bose 因子下，它给出的单电荷绝对密度只有 `dω/π` 口径的一半。可显式选用 strict 测度，生产资格仍以具体路线的验收为准。独立 [charged GBU 后端](../../../api/relaxtime/meson_density/ChargedPhaseBackend.md) 默认使用 `dω/π`；
+- 产物元数据与下游论文物理对照：
+  1. **同背景分项对照**：解释 GBU 密度或 $K/\pi$ 时，优先保留并汇总同一背景、化学势、积分支持与权重下的 bound、pair、Landau 分项，同时检查分项之和重建总密度。已有逐壳分项时直接后处理，不为写作重复求解。束缚项本身包含介质质量与化学势效应，连续谱增量不能称为“全部关联效应”。独立理想极点基准还须声明色散、简并度和积分域是否匹配。
+  2. **失败与物理原因分开记录**：保留原始 status、错误消息、失败阶段及缺失值，不填补断点。另列已有证据支持的物理背景；没有控制证据时，原因记为 unknown，不能将求解失败直接归因于 CEP、相边界或初值分叉。正文解释已知失败条件及其对结果的影响即可。
+  3. **化学组成与产额边界**：BQS 约束采用实际联立解；$n_S=0$ 不能一般化为 $\mu_s=0$。零极点宽度不保证连续谱密度为零。共振衰变、纵向接受度或守恒荷背景对产额差异的贡献，须由相应对照量化。
 - `finite_eta` 与 `pv_b0_eta0` 必须在 metadata 中可区分；
 - `strict_normal_domain` 遇到 Bose unsafe domain 返回 `NaN/status`，不静默 clamp；
 - `x_min_cut` 与 `excitation_only_E_gt_mu` 是显式项目延拓策略；

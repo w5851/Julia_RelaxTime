@@ -154,6 +154,29 @@ using Main.PolarizationCache
         @test stats.cache_size == 6  # 3种(k0,k) × 2种通道
         @test stats.hit_rate ≈ 0.4
     end
+
+    @testset "缓存与计数按 Task 隔离" begin
+        reset_cache!()
+        args = (channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1, A2, num_s)
+        value = polarization_aniso_cached(args...)
+        parent_stats = get_cache_stats()
+        tasks = [Threads.@spawn begin
+            before = get_cache_stats()
+            first_value = polarization_aniso_cached(args...)
+            second_value = polarization_aniso_cached(args...)
+            filled = get_cache_stats()
+            reset_cache!()
+            (; before, first_value, second_value, filled, cleared=get_cache_stats())
+        end for _ in 1:4]
+        for task in tasks
+            result = fetch(task)
+            @test result.before.total_calls == result.cleared.total_calls == 0
+            @test result.first_value == result.second_value == value
+            @test (result.filled.cache_misses, result.filled.cache_hits, result.filled.cache_size) == (1, 1, 1)
+        end
+        @test get_cache_stats() == parent_stats
+        reset_cache!()
+    end
 end
 
 println("\n" * "="^70)

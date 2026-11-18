@@ -50,16 +50,16 @@
 
 当你需要维护 `ProblemSpec` 路径时，建议按以下顺序读源码：
 
-1. `src/models/solver/ProblemSpec.jl`：只看契约核心（`ExtraConstraints`、`ProblemSpec`、`build_problem_spec` 绑定入口）
-2. `src/models/solver/ProblemSpecOrchestrator.jl`：看 attempt plan 生成、governed attempt 执行编排、mode forward_solve 组织
-3. `src/models/solver/SolverDiagnostics.jl`：看 `diagnostic_level=:none/:summary/:full` 的摘要/全量候选诊断拼装逻辑
-4. `src/models/solver/Solver.jl`：看入口层如何将 runtime options 传入 `ProblemSpec.forward_solve`
+1. `src/models/solver/spec/ProblemSpec.jl`：只看契约核心（`ExtraConstraints`、`ProblemSpec`、`build_problem_spec` 绑定入口）
+2. `src/models/solver/orchestrator/ProblemSpecOrchestrator.jl`：看 attempt plan 生成、governed attempt 执行编排、mode forward_solve 组织
+3. `src/models/solver/diagnostics/SolverDiagnostics.jl`：看 `diagnostic_level=:none/:summary/:full` 的摘要/全量候选诊断拼装逻辑
+4. `src/models/solver/api/SolverAPI.jl`：看入口层如何将 runtime options 传入 `ProblemSpec.forward_solve`
 
 ## 维护者阅读顺序（治理主引擎）
 
 PR-4 后，solver 主链的 attempt/fallback/selection 采用单治理引擎语义；维护时建议按以下顺序阅读：
 
-1. `src/models/solver/CandidateGovernance.jl`：`execute_attempt_pool`、`governance_quality_tag`、`execute_governance_selector`（主治理入口）
-2. `src/models/solver/ConstraintSolverCommon.jl`：`select_pressure_max_candidate` / `select_residual_min_candidate`（统一排序规则）。`select_pressure_max_candidate` 的语义是硬约束通过优先，其后按压强最大选取候选，`residual_norm` 只作为压强并列时的 tie-break。
-3. `src/models/solver/ProblemSpecOrchestrator.jl`：模式求解如何接入主治理入口与诊断拼装
-4. `src/models/solver/GenericRootEngine.jl`：保留为通用根求解兼容层，不再承担 solver 主链治理语义
+1. `src/models/solver/governance/CandidateGovernance.jl`：`execute_attempt_pool`、`governance_quality_tag`、`execute_governance_selector`（主治理入口）
+2. `src/models/solver/runtime/ConstraintSolverCommon.jl`：`select_pressure_max_candidate` / `select_residual_min_candidate`（统一排序规则）。`select_pressure_max_candidate` 的语义是硬约束通过优先，其后按压强最大选取候选，`residual_norm` 只作为压强并列时的 tie-break。
+3. `src/models/solver/orchestrator/ProblemSpecOrchestrator.jl`：模式求解如何接入主治理入口与诊断拼装
+4. `src/models/solver/runtime/GenericRootEngine.jl`：保留为通用根求解兼容层，不再承担 solver 主链治理语义
