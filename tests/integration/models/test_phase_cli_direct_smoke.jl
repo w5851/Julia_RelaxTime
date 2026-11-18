@@ -5,7 +5,15 @@ using TOML
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const CLI_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_structure.jl")
 
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+const _PHASE_CLI_LOADED_MODELS = Models
 include(CLI_SCRIPT)
+
+@testset "Phase CLI reuses loaded Models" begin
+    @test Models === _PHASE_CLI_LOADED_MODELS
+end
 
 function _run_phase_cli_direct(; bracket_mode::String, mode::String, start::String="low")
     output_dir = mktempdir()

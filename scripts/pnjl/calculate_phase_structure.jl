@@ -15,7 +15,9 @@ PNJL 相结构计算脚本（薄 CLI）
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+if !isdefined(@__MODULE__, :Models)
+    include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+end
 using .Models
 
 include(joinpath(@__DIR__, "phase_cli_support.jl"))

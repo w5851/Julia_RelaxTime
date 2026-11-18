@@ -105,9 +105,33 @@ julia --project=. test/vscode_testitems.jl
 
 Local non-smoke profiles intentionally emit a smoke-first warning.
 
+### Frontend tests
+
+The default Node suite runs without a server; the live integration test is skipped:
+
+```sh
+node --test web/js/*.test.mjs
+```
+
+For live integration, start a dedicated disposable API server, then explicitly select it:
+
+```powershell
+$env:JRT_RUN_LIVE_API_TESTS = "1"
+$env:JRT_TEST_API_BASE_URL = "http://127.0.0.1:8080"
+node --test web/js/api.scan.integration.test.mjs
+```
+
+The live test submits a small scan and cancels the jobs it created in `finally`.
+An already running numerical scan may continue until it returns, and output files can remain;
+stop the disposable server after testing. Queue saturation is a separate opt-in
+(`JRT_TEST_QUEUE_FULL=1`): it can submit up to 60 scans of 2,304 points each.
+Use a small `PNJL_SCAN_MAX_PENDING` on that dedicated server and never target a shared research queue.
+
 ## Governance and audit commands
 
 There is no repository-wide JuliaFormatter or dedicated linter configuration. Preserve local style and use these checks as the nearest policy gate:
+
+The script-entrypoint check parses Julia syntax without executing the scripts and checks their static relative references.
 
 ```sh
 julia --project=. scripts/dev/check_unit_skip_policy.jl
@@ -132,6 +156,11 @@ julia --project=. scripts/dev/check_task_ledger.jl --preflight
 julia --project=. scripts/dev/check_task_ledger.jl --preflight --track rs-transport
 julia --project=. scripts/dev/check_task_ledger.jl --preflight --full-paths
 ```
+
+The scheduled precompile check runs on Ubuntu with Julia 1.12.5. It caps the trace at
+1100 lines without a sysimage and 450 with a fresh sysimage. Statements found only
+in the trace without the sysimage, including the focused AD subset, are reported as
+coverage diagnostics.
 
 Task ledger preflight is read-only. It reports branch, HEAD, the dirty-path count and up
 to 10 paths; `--full-paths` prints every path. A valid ledger also supplies the selected

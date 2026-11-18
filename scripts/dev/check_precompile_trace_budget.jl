@@ -12,14 +12,18 @@ const _TRACE_EXPR = "ENV[\"UNIT_FILES\"]=\"pnjl/test_conserved_charge_susceptibi
 const NO_SYS_CMD = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_no_sys.jl")) -e $(_TRACE_EXPR)`
 const WITH_SYS_CMD = `$(Base.julia_cmd()) --sysimage=$(SYSIMAGE_PATH) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_with_sys.jl")) -e $(_TRACE_EXPR)`
 
-# GitHub Actions (Ubuntu 24.04, Julia 1.12.5) previously stabilized at 1002
-# lines before TaylorDiff joined the sysimage package set. Including TaylorDiff
-# lowers the with-sys trace substantially and raises `delta` because more
-# no-sys lines are now covered by the sysimage; keep focus delta bounded so the
-# AD-facing specialization surface remains guarded.
-const MAX_WITH_SYS_LINES = 1025
-const MAX_DELTA_LINES = 650
-const MAX_FOCUS_DELTA_LINES = 120
+# Recent Ubuntu CI runs (Julia 1.12.5) observed up to 1047 lines without
+# the sysimage and 402 with it. Cap the work left in each mode; covering
+# more statements with the sysimage can increase both diagnostic deltas.
+const MAX_NO_SYS_LINES = 1100
+const MAX_WITH_SYS_LINES = 450
+
+function trace_budget_errors(no_sys_count::Int, with_sys_count::Int)
+    errors = String[]
+    no_sys_count <= MAX_NO_SYS_LINES || push!(errors, "no-sys lines exceed budget: $no_sys_count > $MAX_NO_SYS_LINES")
+    with_sys_count <= MAX_WITH_SYS_LINES || push!(errors, "with-sys lines exceed budget: $with_sys_count > $MAX_WITH_SYS_LINES")
+    return errors
+end
 
 mkpath(TRACE_DIR)
 isfile(SYSIMAGE_PATH) || error("sysimage not found at $(SYSIMAGE_PATH); run scripts/dev/build_sysimage.jl first")
@@ -33,7 +37,6 @@ run(WITH_SYS_CMD)
 no_lines = readlines(joinpath(TRACE_DIR, "unit_conserved_no_sys.jl"))
 with_lines = readlines(joinpath(TRACE_DIR, "unit_conserved_with_sys.jl"))
 
-no_set = Set(no_lines)
 with_set = Set(with_lines)
 delta = [line for line in no_lines if !(line in with_set)]
 
@@ -45,10 +48,7 @@ println("[trace-budget] with-sys lines = $(length(with_lines))")
 println("[trace-budget] delta lines    = $(length(delta))")
 println("[trace-budget] focus delta    = $(length(focus))")
 
-errors = String[]
-length(with_lines) <= MAX_WITH_SYS_LINES || push!(errors, "with-sys lines exceed budget: $(length(with_lines)) > $(MAX_WITH_SYS_LINES)")
-length(delta) <= MAX_DELTA_LINES || push!(errors, "delta lines exceed budget: $(length(delta)) > $(MAX_DELTA_LINES)")
-length(focus) <= MAX_FOCUS_DELTA_LINES || push!(errors, "focus delta exceeds budget: $(length(focus)) > $(MAX_FOCUS_DELTA_LINES)")
+errors = trace_budget_errors(length(no_lines), length(with_lines))
 
 open(joinpath(TRACE_DIR, "unit_conserved_delta_focus.jl"), "w") do io
     for line in focus
