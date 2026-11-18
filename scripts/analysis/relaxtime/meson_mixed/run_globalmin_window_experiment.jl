@@ -2,13 +2,12 @@
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"))
+isdefined(Main, :Models) || Base.include(Main, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
-using .Constants_PNJL: ħc_MeV_fm
-using .MesonMassWorkflow: solve_gap_and_meson_point, build_equilibrium_params
-using Main.MesonMass: solve_meson_mass
+import Main: Models
+using Main.Constants_PNJL: ħc_MeV_fm
+using Main.Models.MesonMassWorkflow: build_equilibrium_params
+using Main.RelaxTime.MesonMass: solve_meson_mass
 
 struct Opts
     outdir::String
@@ -435,7 +434,7 @@ function _run_single_point(T_MeV::Float64, muB_MeV::Float64, xi::Float64, seed::
     end
 
     seed_track = Dict{Symbol,Vector{Float64}}(:eta_plus => best_seed)
-    return solve_gap_and_meson_point(
+    return Models.solve_gap_and_meson_point(
         T_fm,
         mu_fm;
         xi=xi,

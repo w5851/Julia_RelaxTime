@@ -1,15 +1,17 @@
+module GlobalminWindowExperimentTests
+
 using Test
 
-const SCRIPT_PATH = joinpath(@__DIR__, "..", "..", "..", "scripts", "analysis", "relaxtime", "meson_mixed", "run_globalmin_window_experiment.jl")
-
-if !isdefined(Main, :_parse_args)
-    include(SCRIPT_PATH)
-end
+const TEST_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+isdefined(Main, :Models) || Base.include(Main, joinpath(TEST_ROOT, "src", "models", "Models.jl"))
+const PRELOADED_MODELS = Main.Models
+include(joinpath(TEST_ROOT, "scripts", "analysis", "relaxtime", "meson_mixed", "run_globalmin_window_experiment.jl"))
 
 @testset "meson mixed globalmin window script" begin
-    @test isfile(SCRIPT_PATH)
+    @test Main.Models === PRELOADED_MODELS
+    @test Models === PRELOADED_MODELS
 
-    opts = Main._parse_args([
+    opts = _parse_args([
         "--outdir", "tmp_out",
         "--libs", "nlopt,metaheuristics,evolutionary",
         "--tmin", "220",
@@ -27,7 +29,7 @@ end
 end
 
 @testset "parser accepts next-batch libraries" begin
-    opts = Main._parse_args([
+    opts = _parse_args([
         "--outdir", "tmp_out",
         "--libs", "cmaes,optim_samin",
     ])
@@ -41,7 +43,7 @@ end
         Dict{String,Any}("lib" => "nlopt", "T_MeV" => 224.0, "M_eta" => 2.2, "M_eta_prime" => 2.9, "Gamma_eta" => 0.55, "Gamma_eta_prime" => 0.65),
     ]
 
-    summary = Main._build_jump_summary(rows, 0.3)
+    summary = _build_jump_summary(rows, 0.3)
     @test length(summary) == 1
     s = summary[1]
     @test s["lib"] == "nlopt"
@@ -49,3 +51,5 @@ end
     @test s["jump_count_Gamma_eta_prime"] == 1
     @test s["jump_count_M_eta_prime"] == 1
 end
+
+end # module

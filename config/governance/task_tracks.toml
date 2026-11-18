@@ -988,7 +988,7 @@ evidence = [
   "file:scripts/pnjl/phase_reference_adapter.py",
   "file:scripts/relaxtime/phase_reference_adapter.jl",
   "file:scripts/relaxtime/run_gap_transport_scan.jl",
-  "file:tests/unit/python/test_issue130_phase_reference_accepted_primary_audit.py",
+  "file:tests/unit/python/test_issue130_phase_reference_retirement.py",
   "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v3/",
   "pr:280",
   "pr:285",
