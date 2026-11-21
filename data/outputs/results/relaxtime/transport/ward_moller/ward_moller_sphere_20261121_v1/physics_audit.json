@@ -1,0 +1,128 @@
+{
+  "status": "complete_grid_analyzed",
+  "points": 1867,
+  "sigma_decomposition_max_relative_error": 4.218847493575595e-15,
+  "channel_rate_reassembly_max_relative_error": 0.0,
+  "terminal_replay_max_relative_error": 8.881784197001252e-16,
+  "bulk_replay_max_relative_error": 7.049916206369744e-13,
+  "soft_pion_residual_max": 8.979977220713309e-07,
+  "soft_pion_residual_point": "a0203",
+  "isospin_tau_max_relative_error": 0.0,
+  "zero_density_particle_anti_max_relative_error": 3.458430208880259e-10,
+  "spectral_mott_fit_slopes_MeV": {
+    "pi": 35.956810684204136,
+    "K": 34.99833869934082
+  },
+  "extrema": {
+    "mode_a_eta_over_s": {
+      "point_id": "a0303",
+      "T_MeV": "240.10776913893946",
+      "muB_MeV": "0.0",
+      "xi": "0.5",
+      "alpha_T": "1.2",
+      "eta_over_s": "0.19710239382953285"
+    },
+    "mode_a_zeta_over_s": {
+      "point_id": "a0303",
+      "T_MeV": "240.10776913893946",
+      "muB_MeV": "0.0",
+      "xi": "0.5",
+      "alpha_T": "1.2",
+      "zeta_over_s": "0.023683634747481298"
+    },
+    "mode_a_sigma_over_T": {
+      "point_id": "a0303",
+      "T_MeV": "240.10776913893946",
+      "muB_MeV": "0.0",
+      "xi": "0.5",
+      "alpha_T": "1.2",
+      "sigma_over_T": "0.021728171628602296"
+    },
+    "mode_b_eta_over_s": {
+      "point_id": "b0631",
+      "T_MeV": "200.0",
+      "muB_MeV": "0.0",
+      "xi": "-0.26",
+      "alpha_T": "NaN",
+      "eta_over_s": "0.30470245298323695"
+    },
+    "mode_b_zeta_over_s": {
+      "point_id": "b0624",
+      "T_MeV": "200.0",
+      "muB_MeV": "0.0",
+      "xi": "-0.33",
+      "alpha_T": "NaN",
+      "zeta_over_s": "0.06376530220209903"
+    },
+    "mode_b_sigma_over_T": {
+      "point_id": "b0634",
+      "T_MeV": "200.0",
+      "muB_MeV": "0.0",
+      "xi": "-0.23",
+      "alpha_T": "NaN",
+      "sigma_over_T": "0.028416391961016755"
+    }
+  },
+  "windows": [
+    {
+      "left_point_id": "a0653",
+      "right_point_id": "a0654",
+      "T_MeV": 125.7360002645551,
+      "alpha_T": 1.0,
+      "xi_left": -0.04,
+      "xi_right": -0.03,
+      "w_left": 0.4862466387652086,
+      "w_right": 0.34791960536796335,
+      "w_change_percent": -28.447915598659502,
+      "tauinv_ubar_left": 0.8360250727188296,
+      "tauinv_ubar_right": 0.6878171375372032,
+      "tauinv_change_percent": -17.727690235370662,
+      "dubar_share_of_inverse_drop_percent": 59.05917566134291,
+      "tau_ubar_change_percent": 21.54757814152457,
+      "sigma_change_percent": -0.761888749578854,
+      "sigma_left": 0.15060603260807817,
+      "sigma_right": 0.14945858218945016,
+      "delta_tau_percent": 1.6159874342030147,
+      "delta_J_percent": -2.3778761837819,
+      "J_ubar_over_J_u_left_percent": 1.0202000405269647
+    },
+    {
+      "left_point_id": "a0776",
+      "right_point_id": "a0777",
+      "T_MeV": 138.3096002910106,
+      "alpha_T": 1.1,
+      "xi_left": 0.17,
+      "xi_right": 0.18,
+      "w_left": 0.5387288333969786,
+      "w_right": 0.44223345774812634,
+      "w_change_percent": -17.91167831882998,
+      "tauinv_ubar_left": 0.9813843780382167,
+      "tauinv_ubar_right": 0.8683590011901886,
+      "tauinv_change_percent": -11.516932547261993,
+      "dubar_share_of_inverse_drop_percent": 58.57624455147288,
+      "tau_ubar_change_percent": 13.015973427247651,
+      "sigma_change_percent": 0.03838372848663507,
+      "sigma_left": 0.11525356198465742,
+      "sigma_right": 0.11529780059896078,
+      "delta_tau_percent": 1.388529397732786,
+      "delta_J_percent": -1.350145669246053,
+      "J_ubar_over_J_u_left_percent": 1.635334802552645
+    }
+  ],
+  "near_threshold_pion_thermal_area": {
+    "point_id": "a0777",
+    "xi": 0.18,
+    "pion_binding_energy_MeV": 0.0003775204204714555,
+    "excess_energy_interval_MeV": [
+      0,
+      25
+    ],
+    "left_collision_contribution_inv_fm": 0.09694767877990931,
+    "right_collision_contribution_inv_fm": 0.050523946123110494,
+    "contribution_change_percent": -47.885347272924406
+  },
+  "inputs": {
+    "mode_a_grid.csv": "84383b7ea316ab849d7ea66fb55fa4acc83e89237f1771cc30687b14ef3bdb8b",
+    "mode_b_grid.csv": "2ff49a4586c1109fe41fd27ae276aa4e88615d3aebac158c4ef2b1b432f0fd20"
+  }
+}

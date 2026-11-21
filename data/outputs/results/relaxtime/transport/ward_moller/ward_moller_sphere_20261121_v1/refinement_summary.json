@@ -1,0 +1,9 @@
+{
+  "a_refinement.csv": 1.011565042841056e-06,
+  "cache_refinement.csv": 0.005918836544638317,
+  "joint_refinement.csv": 0.03520544465454023,
+  "t_refinement": 0.005147404655536647,
+  "tau_edge_refinement.csv": 0.09745492120131205,
+  "tau_refine_dense138_pos.csv": 0.03361373249373134,
+  "terminal_refinement.csv": 6.048364387112315e-06
+}
