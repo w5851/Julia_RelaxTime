@@ -2,11 +2,18 @@
 
 ## 当前结果
 
+2026-11-21 的输运稿审阅已改用
+[Ward/Møller 新结果](../../../../data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/README.md)：
+原 1867 个背景点逐值保留，重新计算全部过程率，并重绘谱、输运及高密机制图。
+新图为 `png_review`，正文为 `agent_review`；其数值、图件和来源由该目录的
+`numerical_manifest.json` 与五图 bundle 绑定。
+
 当前正式图层为 **publication_clean_v15**，唯一选择入口是
 [current](publication_clean_current.json)。
 [v15 正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)
 包含 76 张 PDF，直接引用已接受的 76 张彩色和 76 张灰度 PNG。
-论文已接入三张输运组合图；正文的科学解释与审阅状态由论文的 `writing_package/00_status.md` 管理。
+该接受记录保留为历史；当前稿件审阅采用上面的 Ward/Møller 候选。
+正文的科学解释与审阅状态由论文的 `writing_package/00_status.md` 管理。
 
 数值源为[η 加密正式网格](../../../../data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/README.md)：
 1867 点，1810 个前驱原值、9 个原坐标重算值和 48 个新增 ξ 点。

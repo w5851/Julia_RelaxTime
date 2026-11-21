@@ -45,7 +45,8 @@ end
         quark_params.μ.u, quark_params.μ.u,
         thermo_params.T, thermo_params.Φ, thermo_params.Φbar, ξ,
         quark_params.A.u, quark_params.A.u,
-        0,
+        0;
+        b0_direction=get(thermo_params, :b0_direction, :aligned),
     )
     Πss_re, Πss_im = polarization_with_width(
         channel, k0, gamma, k_norm,
@@ -53,7 +54,8 @@ end
         quark_params.μ.s, quark_params.μ.s,
         thermo_params.T, thermo_params.Φ, thermo_params.Φbar, ξ,
         quark_params.A.s, quark_params.A.s,
-        0,
+        0;
+        b0_direction=get(thermo_params, :b0_direction, :aligned),
     )
 
     Πuu = ComplexF64(Πuu_re, Πuu_im)
@@ -210,7 +212,8 @@ function meson_mass_equation(meson::Symbol, k0::Float64, gamma::Float64, k_norm:
         pol_params.μ1, pol_params.μ2,
         thermo_params.T, thermo_params.Φ, thermo_params.Φbar, ξ,
         pol_params.A1, pol_params.A2,
-        pol_params.num_s_quark,
+        pol_params.num_s_quark;
+        b0_direction=get(thermo_params, :b0_direction, :aligned),
     )
     Π = ComplexF64(Π_real, Π_imag)
     return 1.0 - 4.0 * K * Π

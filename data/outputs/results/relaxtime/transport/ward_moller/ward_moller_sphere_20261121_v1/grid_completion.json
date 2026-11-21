@@ -1,0 +1,18 @@
+{
+  "mode_a": {
+    "expected": 942,
+    "completed": 942,
+    "missing": [],
+    "output": "D:\\w\\pnjl-ward-moller\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\ward_moller\\ward_moller_sphere_20261121_v1\\mode_a_grid.csv",
+    "soft_pion_residual_max": 8.979977220713309e-07
+  },
+  "mode_b": {
+    "expected": 925,
+    "completed": 925,
+    "missing": [],
+    "output": "D:\\w\\pnjl-ward-moller\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\ward_moller\\ward_moller_sphere_20261121_v1\\mode_b_grid.csv",
+    "soft_pion_residual_max": 1.980655260913622e-07
+  },
+  "unknown_ids": [],
+  "complete": true
+}

@@ -1,0 +1,136 @@
+{
+  "mode_a": {
+    "file": "mode_a_grid.csv",
+    "sha256": "52ac5215ec33884366bcab02b86f91d110f362cbca9db1bd7345e700c9ee8ccc",
+    "rows": 942,
+    "groups": [
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "200.0898076157829",
+        "alpha_T": "1.0",
+        "points": 117
+      },
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "220.0987883773612",
+        "alpha_T": "1.1",
+        "points": 101
+      },
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "240.10776913893946",
+        "alpha_T": "1.2",
+        "points": 101
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "182.72820247485038",
+        "alpha_T": "1.0",
+        "points": 117
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "201.00102272233542",
+        "alpha_T": "1.1",
+        "points": 101
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "219.27384296982044",
+        "alpha_T": "1.2",
+        "points": 101
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "125.7360002645551",
+        "alpha_T": "1.0",
+        "points": 102
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "138.3096002910106",
+        "alpha_T": "1.1",
+        "points": 101
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "150.8832003174661",
+        "alpha_T": "1.2",
+        "points": 101
+      }
+    ],
+    "xi_min": -0.5,
+    "xi_max": 0.5,
+    "first_id": "a0001",
+    "last_id": "a0910"
+  },
+  "mode_b": {
+    "file": "mode_b_grid.csv",
+    "sha256": "e6ebbd861b097de3b26621d4a05784295704b39ee3954cbfc645f0086461a16c",
+    "rows": 925,
+    "groups": [
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "120.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "120.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "120.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "160.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "160.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "160.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "0.0",
+        "T_MeV": "200.0",
+        "alpha_T": "NaN",
+        "points": 117
+      },
+      {
+        "muB_MeV": "450.0",
+        "T_MeV": "200.0",
+        "alpha_T": "NaN",
+        "points": 101
+      },
+      {
+        "muB_MeV": "900.0",
+        "T_MeV": "200.0",
+        "alpha_T": "NaN",
+        "points": 101
+      }
+    ],
+    "xi_min": -0.5,
+    "xi_max": 0.5,
+    "first_id": "b0001",
+    "last_id": "b0909"
+  },
+  "additional_frozen_inputs": {
+    "zero_density_spectral_backgrounds.csv": "373038fb7b111eac1728c0e4ab1351580a0fa8bf6fcecd345646b2ac5814de9b",
+    "mott_mechanism_backgrounds.csv": "c2a12b6921d2f715a4907034bed6397e805d493802c28574dfbc29d414a9bb3c"
+  }
+}

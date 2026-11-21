@@ -9,7 +9,7 @@ module PolarizationAniso
 
 using Main.Constants_PNJL: N_color
 using ..OneLoopIntegrals: B0, EPS_SEGMENT
-using ..OneLoopIntegralsCorrection: B0_correction
+using ..OneLoopIntegralsCorrection: B0_correction, normalize_b0_direction
 
 """
     polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
@@ -18,7 +18,9 @@ using ..OneLoopIntegralsCorrection: B0_correction
 """
 function polarization_aniso(channel::Symbol, k0::Real, k_norm::Real, m1::Real, m2::Real,
                                   μ1::Real, μ2::Real, T::Real, Φ::Real, Φbar::Real,
-                                  ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int)
+                                  ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int;
+                                  b0_direction::Symbol=:aligned)
+    normalize_b0_direction(b0_direction)
     # 计算总系数
     factor = -N_color / (8π^2)
     # 计算能量-化学势组合参数
@@ -36,10 +38,10 @@ function polarization_aniso(channel::Symbol, k0::Real, k_norm::Real, m1::Real, m
 
     # 计算B0函数项的修正
     if abs(ξ) > EPS_SEGMENT
-        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
+        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ; b0_direction)
         # 当num_s_quark为1时,要恢复B0对k0的对称性
         if num_s_quark == 1
-            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
+            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ; b0_direction)
             B0_corr_real = 0.5 * (B0_corr_real + B0_corr_real_extra)
             B0_corr_imag = 0.5 * (B0_corr_imag + B0_corr_imag_extra)
         end
@@ -71,7 +73,9 @@ end
 function polarization_with_width(channel::Symbol, k0::T, gamma::Real, k_norm::Real,
                                  m1::Real, m2::Real, μ1::Real, μ2::Real,
                                  T0::Real, Φ::Real, Φbar::Real,
-                                 ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int) where {T<:Real}
+                                 ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int;
+                                 b0_direction::Symbol=:aligned) where {T<:Real}
+    normalize_b0_direction(b0_direction)
     Tout = promote_type(T, typeof(gamma), typeof(k_norm), typeof(m1), typeof(m2), typeof(μ1), typeof(μ2), typeof(T0), typeof(Φ), typeof(Φbar), typeof(ξ), typeof(A1_value), typeof(A2_value))
     factor = Tout(-N_color / (8π^2))
     λ = k0 + μ1 - μ2
@@ -87,9 +91,9 @@ function polarization_with_width(channel::Symbol, k0::T, gamma::Real, k_norm::Re
 
     # 计算B0函数项的修正
     if abs(ξ) > EPS_SEGMENT
-        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ)
+        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ; b0_direction)
         if num_s_quark == 1
-            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ)
+            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ; b0_direction)
             B0_corr_real = Tout(0.5) * (B0_corr_real + B0_corr_real_extra)
             B0_corr_imag = Tout(0.5) * (B0_corr_imag + B0_corr_imag_extra)
         end
@@ -123,12 +127,13 @@ end
 function polarization_complex(channel::Symbol, p0::Complex{<:Real}, k_norm::Real,
                               m1::Real, m2::Real, μ1::Real, μ2::Real,
                               T::Real, Φ::Real, Φbar::Real,
-                              ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int)
+                              ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int;
+                              b0_direction::Symbol=:aligned)
     k0 = real(p0)
     gamma = 2.0 * imag(p0)
     return polarization_with_width(channel, k0, gamma, k_norm,
                                    m1, m2, μ1, μ2, T, Φ, Φbar, ξ,
-                                   A1_value, A2_value, num_s_quark)
+                                   A1_value, A2_value, num_s_quark; b0_direction)
 end
 
 end # module Polarization

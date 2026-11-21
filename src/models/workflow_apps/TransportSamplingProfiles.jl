@@ -2,7 +2,8 @@ module TransportSamplingProfiles
 
 using TOML, SHA
 using ..Models: create_model, PNJLModel
-using ..TransportWorkflow: WorkflowCache, build_equilibrium_params, solve_transport_from_equilibrium
+using ..TransportWorkflow: WorkflowCache, build_equilibrium_params, solve_transport_from_equilibrium,
+    _transport_inputs_from_equilibrium
 
 const RT = Main.RelaxTime
 const AS = Main.AverageScatteringRate
@@ -17,6 +18,7 @@ struct SamplingProfile{B,A,Q,T}
     tau_integral::Q
     terminal_integral::T
     sampling::AS.ThermalSamplingConfig
+    physics::NamedTuple{(:a_method,:b0_direction),Tuple{Symbol,Symbol}}
 end
 
 function _section(data, name, int_keys, real_keys)
@@ -42,8 +44,11 @@ function load_profile(name_or_path::AbstractString)
     isfile(path) || throw(ArgumentError("transport sampling profile does not exist: $name_or_path"))
     bytes = read(path)
     data = TOML.parse(String(copy(bytes)))
-    Set(keys(data)) == Set(("schema_version", "id", "algorithm", "background", "a_integral",
-        "tau_integral", "terminal_integral", "sampling")) || throw(ArgumentError("unsupported sampling profile fields"))
+    required = Set(("schema_version", "id", "algorithm", "background", "a_integral",
+        "tau_integral", "terminal_integral", "sampling"))
+    fields = Set(keys(data))
+    required ⊆ fields && fields ⊆ union(required, Set(("physics",))) ||
+        throw(ArgumentError("unsupported sampling profile fields"))
     data["schema_version"] == 1 || throw(ArgumentError("unsupported sampling profile schema"))
     data["algorithm"] == "thermal_weighted" || throw(ArgumentError("sampling profile requires thermal_weighted"))
     id = String(data["id"])
@@ -57,7 +62,15 @@ function load_profile(name_or_path::AbstractString)
         sampling_values[:relative_velocity] = Symbol(sampling_values[:relative_velocity])
     end
     sampling = AS.ThermalSamplingConfig(; sampling_values...)
-    return SamplingProfile(id, abspath(path), bytes2hex(sha256(bytes)), background, a, q, terminal, sampling)
+    raw_physics = get(data, "physics", Dict("a_method"=>"quadrature", "b0_direction"=>"aligned"))
+    Set(keys(raw_physics)) == Set(("a_method", "b0_direction")) ||
+        throw(ArgumentError("physics requires a_method and b0_direction"))
+    a_method = RT.AFieldBuilder._normalize_a_build_method(Symbol(raw_physics["a_method"]))
+    a_method in (:quadrature, :ward_matched) ||
+        throw(ArgumentError("sampling profile requires quadrature or ward_matched A"))
+    b0_direction = RT.OneLoopIntegralsCorrection.normalize_b0_direction(Symbol(raw_physics["b0_direction"]))
+    physics = (; a_method, b0_direction)
+    return SamplingProfile(id, abspath(path), bytes2hex(sha256(bytes)), background, a, q, terminal, sampling, physics)
 end
 
 function profile_model(profile::SamplingProfile; template=create_model(:PNJL),
@@ -75,7 +88,10 @@ function effective_config(profile::SamplingProfile)
         algorithm="thermal_weighted", background=profile.background, a_integral=profile.a_integral,
         tau_integral=profile.tau_integral, terminal_integral=profile.terminal_integral,
         sampling=AS._thermal_sampling_identity(profile.sampling),
-        a_polarization="full_RS", a_coupling="full_RS", sigma_cutoff_inv_fm=Main.Constants_PNJL.Λ_inv_fm,
+        a_polarization=profile.physics.a_method===:ward_matched ? "ward_matched_RS" : "full_RS",
+        a_coupling=profile.physics.a_method===:ward_matched ? "ward_matched_RS" : "full_RS",
+        b0_direction=String(profile.physics.b0_direction),
+        sigma_cutoff_inv_fm=Main.Constants_PNJL.Λ_inv_fm,
         internal_density=(p_nodes=AS.DEFAULT_SEMI_INF_NODES, scale_inv_fm=AS.DEFAULT_SEMI_INF_SCALE,
             cos_nodes=profile.tau_integral.cos_nodes),
         external_density=(p_nodes=64, cos_nodes=8, p_max_inv_fm=profile.background.thermal_p_max_inv_fm),
@@ -109,9 +125,20 @@ function point_state(profile::SamplingProfile, equilibrium, T_inv_fm, mu_inv_fm;
     all(m->isfinite(m) && m>0,masses) || throw(ArgumentError("equilibrium masses must be positive and finite"))
     qp = merge(Main.ParameterAdapters.normalize_quark_input(parameters.quark_params),(m=masses,))
     tp = Main.ParameterAdapters.normalize_thermo_input(parameters.thermo_params)
+    return fixed_point_state(profile, qp, tp; propagator_xi_policy)
+end
+
+"""Construct loop inputs on a supplied background without solving mean field."""
+function fixed_point_state(profile::SamplingProfile, qp::NamedTuple, tp::NamedTuple;
+    propagator_xi_policy::Symbol=:match_thermo)
+    AS._normalize_propagator_xi_policy(propagator_xi_policy)
+    if profile.physics.b0_direction !== :aligned
+        tp = merge(tp, (b0_direction=profile.physics.b0_direction,))
+    end
     a = profile.a_integral
     p,w = AS._cached_semi_infinite_momentum_grid(a.p_nodes,a.scale_inv_fm)
-    av = RT.AFieldBuilder.build_A_triplet(qp,tp,p,w;cos_nodes=a.cos_nodes,use_aniso=true)
+    av = RT.AFieldBuilder.build_A_triplet(qp,tp,p,w;cos_nodes=a.cos_nodes,use_aniso=true,
+        a_method=profile.physics.a_method)
     iso = RT.AFieldBuilder.build_A_triplet(qp,tp,p,w;cos_nodes=a.cos_nodes,use_aniso=false)
     gu = RT.EffectiveCouplings.calculate_G_from_A(av.u,qp.m.u)
     gs = RT.EffectiveCouplings.calculate_G_from_A(av.s,qp.m.s)
@@ -119,6 +146,56 @@ function point_state(profile::SamplingProfile, equilibrium, T_inv_fm, mu_inv_fm;
         Main.Constants_PNJL.G_fm2,Main.Constants_PNJL.K_fm5,gu,gs)
     return (quark_params=merge(qp,(A=av,)),thermo_params=tp,K_coeffs=kc,
         propagator_quark_params=merge(qp,(A=propagator_xi_policy===:isotropic ? iso : av,)))
+end
+
+"""
+    solve_frozen_transport(runtime, qp, tp, densities, entropy; bulk_coeffs, on_channel)
+
+Recompute all 17 scattering channels and terminal transport at a frozen
+background. Densities, entropy and isentropic derivatives are supplied by the
+caller and never replaced by a new phase or mean-field solve.
+"""
+function solve_frozen_transport(runtime, qp::NamedTuple, tp::NamedTuple,
+    densities::NamedTuple, entropy::Real; bulk_coeffs=nothing, on_channel=nothing,
+    existing_rates::AbstractDict=Dict{Symbol,Float64}())
+    all(v -> isfinite(v) && v > 0, values(densities)) ||
+        throw(ArgumentError("frozen species densities must be positive and finite"))
+    isfinite(entropy) && entropy > 0 || throw(ArgumentError("frozen entropy must be positive and finite"))
+    state = fixed_point_state(runtime.profile, qp, tp)
+    rates = Dict{Symbol,Float64}()
+    diagnostics = NamedTuple[]
+    for process in RT.RelaxationTime.REQUIRED_RATE_KEYS_FOR_TAU
+        if haskey(existing_rates, process)
+            value = Float64(existing_rates[process])
+            isfinite(value) && value >= 0 || throw(ArgumentError("invalid resumed channel rate: $process"))
+            rates[process] = value
+            continue
+        end
+        GC.gc(false)
+        RT.PolarizationCache.reset_cache!()
+        measured = @timed AS.build_thermal_weighted_cache(process, state.quark_params,
+            state.thermo_params, state.K_coeffs; runtime.tau_kwargs...)
+        cache = measured.value
+        rates[process] = cache.rate
+        row = merge((channel=String(process),seconds=measured.time,rate=cache.rate,
+            estimated_error=cache.estimated_error), cache.statistics)
+        push!(diagnostics, row)
+        on_channel === nothing || on_channel(row, cache)
+    end
+    inverse = RT.RelaxationTime.relaxation_rates(densities, rates)
+    tau = map(inv, inverse)
+    config = runtime.transport_config
+    eta = RT.TransportCoefficients.shear_viscosity(qp,tp; tau,config)
+    sigma = RT.TransportCoefficients.electric_conductivity(qp,tp; tau,config)
+    zeta = bulk_coeffs === nothing ? NaN : RT.TransportCoefficients.bulk_viscosity_isentropic(
+        qp,tp; bulk_coeffs_isentropic=bulk_coeffs,tau,config)
+    all(v -> isfinite(v) && v > 0, (values(tau)..., eta, sigma)) ||
+        error("frozen transport returned invalid observables")
+    bulk_coeffs === nothing || (isfinite(zeta) && zeta >= 0) ||
+        error("frozen transport returned invalid bulk viscosity")
+    return (; tau, tau_inv=inverse, rates, transport=(; eta,sigma,zeta),
+        entropy=Float64(entropy), sampling_diagnostics=diagnostics,
+        sampling_profile=effective_config(runtime.profile), loop_state=state)
 end
 
 function solve_profile_transport(runtime, equilibrium, T_inv_fm, mu_inv_fm; xi=0.0,
@@ -141,17 +218,34 @@ function solve_profile_transport(runtime, equilibrium, T_inv_fm, mu_inv_fm; xi=0
         push!(diagnostics,row)
         on_channel === nothing || on_channel(row)
     end
-    kwargs = merge(options,(sigma_cache_policy=:thermal_weighted,interpolation_mode=:auto,cs_caches=caches))
-    result = solve_transport_from_equilibrium(equilibrium,T_inv_fm,mu_inv_fm;xi=xi,
-        compute_tau=true,compute_bulk=compute_bulk,p_num=profile.background.p_nodes,
-        t_num=profile.background.cos_nodes,K_coeffs=state.K_coeffs,tau_kwargs=kwargs,
-        transport_config=runtime.transport_config,workflow_cache=runtime.workflow_cache)
+    rates = Dict(process=>cache.rate for (process,cache) in caches)
+    result = if profile.physics === (a_method=:quadrature,b0_direction=:aligned)
+        kwargs = merge(options,(sigma_cache_policy=:thermal_weighted,interpolation_mode=:auto,cs_caches=caches))
+        solve_transport_from_equilibrium(equilibrium,T_inv_fm,mu_inv_fm;xi=xi,
+            compute_tau=true,compute_bulk=compute_bulk,p_num=profile.background.p_nodes,
+            t_num=profile.background.cos_nodes,K_coeffs=state.K_coeffs,tau_kwargs=kwargs,
+            transport_config=runtime.transport_config,workflow_cache=runtime.workflow_cache)
+    else
+        inputs = _transport_inputs_from_equilibrium(runtime.workflow_cache,
+            equilibrium,T_inv_fm,mu_inv_fm;xi=xi,p_num=profile.background.p_nodes,
+            t_num=profile.background.cos_nodes)
+        inverse = RT.RelaxationTime.relaxation_rates(inputs.densities, rates)
+        tau = map(inv, inverse)
+        computed = solve_transport_from_equilibrium(equilibrium,T_inv_fm,mu_inv_fm;xi=xi,
+            compute_tau=false,tau=tau,compute_bulk=compute_bulk,p_num=profile.background.p_nodes,
+            t_num=profile.background.cos_nodes,K_coeffs=state.K_coeffs,
+            transport_config=runtime.transport_config,workflow_cache=runtime.workflow_cache)
+        merge(computed,(tau_inv=inverse,))
+    end
     compute_bulk && result.bulk_coeffs===nothing && error("profile transport requires converged bulk derivatives")
     values = (Tuple(result.tau)...,result.transport.eta,result.transport.sigma,result.thermo_background.entropy)
     all(v->isfinite(v) && v>0,values) || error("profile transport returned invalid observables")
     compute_bulk && !(isfinite(result.transport.zeta) && result.transport.zeta>=0) &&
         error("profile transport returned invalid bulk viscosity")
-    return merge(result,(sampling_diagnostics=diagnostics,sampling_profile=effective_config(profile)))
+    rate_values = NamedTuple{RT.RelaxationTime.REQUIRED_RATE_KEYS_FOR_TAU}(
+        Tuple(rates[k] for k in RT.RelaxationTime.REQUIRED_RATE_KEYS_FOR_TAU))
+    return merge(result,(rates=rate_values,sampling_diagnostics=diagnostics,
+        sampling_profile=effective_config(profile)))
 end
 
 end # module TransportSamplingProfiles

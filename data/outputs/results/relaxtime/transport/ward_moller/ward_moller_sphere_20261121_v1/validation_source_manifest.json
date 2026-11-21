@@ -1,0 +1,34 @@
+{
+  "archive_sha256": "a5cf073cded92830555ee4e9f64982564f685a508b4740cca35acfa3963dcbc8",
+  "files": [
+    {
+      "name": "common.jl",
+      "sha256": "8fdd0b517416fc2c4963b14e99102b109706b4176d9089ccdd92dc0da4299d5c"
+    },
+    {
+      "name": "loops.jl",
+      "sha256": "8b561863dca2f231ba0bec94cae9f6c7508fa0c7da036d815d7cf09788f70dbc"
+    },
+    {
+      "name": "transport.jl",
+      "sha256": "cc07c09ebf4fe536da27e93e0d0ffa9e277c513dea00d634f15a0abf16e66d08"
+    },
+    {
+      "name": "backgrounds.csv",
+      "sha256": "cce105f7f833a4f1c97df45eb987187484aa6e5518664edbdf01a9bda77a8680"
+    },
+    {
+      "name": "final_b0_check.jl",
+      "sha256": "423035c019f673f451ce0c1bb45c980454e5063bdcd428b5279a292a7cd37292"
+    },
+    {
+      "name": "final_blocking_check.jl",
+      "sha256": "7b606546060f8baa9b16781eca480acb06005015fe6ec77b34e95be7bd0eb610"
+    },
+    {
+      "name": "direct_mott_and_direction.jl",
+      "sha256": "b65dfcff188c3ba7328d058b664477538f4bfb17d9dda02b40a88e4e7b112ac0"
+    }
+  ],
+  "replay": "Run with Julia1.12.5/root environment; common.jl ARGS[1] is the computation checkout; frozen mode_a grid is placed as final_checks_grid.csv for final_b0_check."
+}

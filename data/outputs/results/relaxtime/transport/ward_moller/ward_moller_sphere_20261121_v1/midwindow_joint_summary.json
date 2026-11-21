@@ -1,0 +1,11 @@
+{
+  "status": "four_point_joint_refinement_complete",
+  "sigma_drift_max_percent": 0.027602810885074547,
+  "all_observable_drift_max_percent": 0.43037011341400255,
+  "standard_crossing_change_percent": 0.03838372848663507,
+  "refined_crossing_change_percent": 0.07210571817777289,
+  "refined_next_change_percent": -0.17980912386925674,
+  "local_maximum_retained": true,
+  "interpretation": "small sampled maximum retained; its percent-level old magnitude is not retained",
+  "profile_sha256": "c3f4156dd2ae220ff7b8293467b6335f4f3a4787c0ed545053d8fd5b6cff795f"
+}

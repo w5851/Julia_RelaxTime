@@ -3,7 +3,7 @@
 """
 module OneLoopIntegralsCorrection
 
-export B0_correction, A_correction, A_aniso,
+export B0_correction, A_correction, A_aniso, A_aniso_ward,
     A_aniso_reduced,
     IntegrationDiagnostics
 
@@ -18,6 +18,28 @@ using ..OneLoopIntegrals: internal_momentum, EPS_K,
 
 @inline _primal_value(x::Float64) = x
 @inline _primal_value(x::ForwardDiff.Dual) = ForwardDiff.value(x)
+
+const B0_DIRECTION_POLICIES = (:aligned, :sphere_average)
+
+@inline function normalize_b0_direction(direction::Symbol)::Symbol
+    direction in B0_DIRECTION_POLICIES || throw(ArgumentError(
+        "unknown b0_direction=$direction; expected one of $B0_DIRECTION_POLICIES"))
+    return direction
+end
+
+# The sphere average is applied to the linear occupation before constructing
+# the propagator. It is not an average of the squared scattering amplitude.
+@inline function _real_direction_kernel(a::Float64, b::T, direction::Symbol) where {T<:Real}
+    direction === :aligned && return real_integral_tool(a, b)
+    if abs(a) < 1e-3 * abs(_primal_value(b))
+        r2 = (a / b)^2
+        return (2 / (3b)) * (1 + r2 / 3 + r2^2 / 5 + r2^3 / 7)
+    end
+    return log(abs((b + a) / (b - a))) / (3a)
+end
+
+@inline _imag_direction_kernel(a::Float64, b::Real, direction::Symbol) =
+    direction === :aligned ? imag_integral_tool(a, b) : π / (3a)
 
 """ k>0时
 对x积分所得结果的Sokhotski–Plemelj formula实部部分(柯西主值积分)
@@ -93,11 +115,12 @@ end
 
 """k>0时的积分实部被积函数"""
 function real_integrand_k_positive(sign_::Symbol, λ::R, k::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64;
+    b0_direction::Symbol=:aligned) where {R<:Real}
     coeff_x, denominator_const = compute_coefficients(λ, k, m, m_prime, E)
     p = internal_momentum(E,m)
     # 含各向异性修正项
-    real_ = 2.0*p*real_integral_tool(coeff_x, denominator_const)*
+    real_ = 2.0*p*_real_direction_kernel(coeff_x, denominator_const, b0_direction)*
         correction_cos_theta_coefficient(sign_, p, m, μ, T, Φ, Φbar, ξ)
     return real_
 end
@@ -120,13 +143,14 @@ end
 
 """k>0时的积分虚部被积函数"""
 function imag_integrand_k_positive(sign_::Symbol, λ::R, k::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64;
+    b0_direction::Symbol=:aligned) where {R<:Real}
 
     coeff_x, denominator_const = compute_coefficients(λ, k, m, m_prime, E)
     
     p = internal_momentum(E,m)
     # 含各向异性修正项
-    imag_ = 2.0*p*imag_integral_tool(coeff_x, denominator_const)*
+    imag_ = 2.0*p*_imag_direction_kernel(coeff_x, denominator_const, b0_direction)*
             correction_cos_theta_coefficient(sign_, p, m, μ, T, Φ, Φbar, ξ)
     return imag_
 end
@@ -306,15 +330,17 @@ end
 """
 function tilde_B0_correction_k_positive(sign_::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
     Φ::Float64, Φbar::Float64, ξ::Float64;
-    diagnostics::Bool=false) where {T<:Real}
+    diagnostics::Bool=false, b0_direction::Symbol=:aligned) where {T<:Real}
+
+    normalize_b0_direction(b0_direction)
     
     t_start = time()
     Emin = m
     Emax = energy_cutoff(m)
 
     # 被积函数闭包
-    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar)
-    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar)
+    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar; b0_direction)
+    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar; b0_direction)
 
     # 获取虚部积分区间
     intervals_imag, _ = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
@@ -386,10 +412,10 @@ end
 
 """含各向异性修正项的 B0分量 积分计算"""
 function tilde_B0_correction(sign_::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
+    Φ::Float64, Φbar::Float64, ξ::Float64; b0_direction::Symbol=:aligned) where {T<:Real}
     if k > EPS_K
         return tilde_B0_correction_k_positive(sign_, λ, k, m, m_prime, μ, T0,
-            Φ, Φbar, ξ)
+            Φ, Φbar, ξ; b0_direction)
     else
         return tilde_B0_correction_k_zero(sign_, λ, m, m_prime, μ, T0,
             Φ, Φbar, ξ)
@@ -401,12 +427,14 @@ end
 动量各向异性下B0的一阶修正
 """
 function B0_correction(λ::T, k::Float64, m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, T0::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
+    Φ::Float64, Φbar::Float64, ξ::Float64; b0_direction::Symbol=:aligned) where {T<:Real}
 
-    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ)
-    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ)
-    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ)
-    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ)
+    normalize_b0_direction(b0_direction)
+
+    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ; b0_direction)
+    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ; b0_direction)
+    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ; b0_direction)
+    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ; b0_direction)
 
     # 注意：B0 的 pm=-1(antiquark) 分支语义是 NJL 中的f(-E-μ)=1-f(E+μ)
     # 这里f(E+μ)是NJL中反粒子的分布函数，为避免 PNJL 分布在负能量下的数值溢出，
@@ -420,6 +448,33 @@ function B0_correction(λ::T, k::Float64, m1::Float64, m2::Float64, μ1::Float64
 end
 
 # -------------------------------------
+"""
+    A_aniso_ward(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p, nodes_cos, weights_cos)
+
+Use Eξ in the thermal denominator, matching the mass derivative of the RS
+variational potential. The vacuum term retains the ordinary dispersion and
+the NJL cutoff. This restores the static soft-pion relation; B0 still uses
+ordinary on-shell dispersion.
+"""
+function A_aniso_ward(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
+    ξ::Float64, nodes_p::AbstractVector, weights_p::AbstractVector,
+    nodes_cos::AbstractVector, weights_cos::AbstractVector)
+    isfinite(ξ) && ξ > -1 || throw(ArgumentError("Ward-matched A requires finite xi > -1"))
+    length(nodes_p) == length(weights_p) && length(nodes_cos) == length(weights_cos) ||
+        throw(ArgumentError("Ward-matched A requires paired quadrature nodes and weights"))
+    isfinite(T) && T > 0 && isfinite(m) && m > 0 ||
+        throw(ArgumentError("Ward-matched A requires positive finite mass and temperature"))
+    integral = 0.0
+    @inbounds for j in eachindex(nodes_cos, weights_cos), i in eachindex(nodes_p, weights_p)
+        p, x = nodes_p[i], nodes_cos[j]
+        energy = sqrt(m*m + p*p*(1 + ξ*x*x))
+        occupations = distribution_aniso(:quark, p, m, μ, T, Φ, Φbar, ξ, x) +
+            distribution_aniso(:antiquark, p, m, μ, T, Φ, Φbar, ξ, x)
+        integral += weights_p[i]*weights_cos[j]*p*p*occupations/energy
+    end
+    return 2integral - 4const_integral_term_A(m)
+end
+
 """
     A_correction(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p)
 计算单线积分函数A对ξ的一阶修正项(需要加上各向同性项才能进行后续计算，即零阶项),需要传入预生成的动量的积分节点与权重

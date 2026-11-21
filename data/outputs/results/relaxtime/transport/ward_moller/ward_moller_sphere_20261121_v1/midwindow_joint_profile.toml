@@ -1,0 +1,41 @@
+schema_version = 1
+id = "ward_sphere_refine_joint"
+algorithm = "thermal_weighted"
+
+[physics]
+a_method = "ward_matched"
+b0_direction = "sphere_average"
+
+[background]
+thermal_p_max_inv_fm = 25.0
+p_nodes = 96
+cos_nodes = 24
+residual_norm_max = 1.0e-8
+
+[a_integral]
+p_nodes = 64
+cos_nodes = 32
+scale_inv_fm = 5.0
+
+[tau_integral]
+p_nodes = 64
+cos_nodes = 48
+phi_nodes = 48
+t_nodes = 48
+scale_inv_fm = 10.0
+
+[terminal_integral]
+p_nodes = 64
+cos_nodes = 32
+scale_inv_fm = 5.0
+
+[sampling]
+relative_velocity = "medium_moller"
+rtol = 2.0e-5
+atol = 1.0e-12
+weighted_window = 0.6
+seed_order = 48
+max_evaluations = 40000
+max_nodes = 12000
+max_rounds = 40
+max_events = 65000000
