@@ -16,6 +16,7 @@
 module PolarizationCache
 
 using ..PolarizationAniso: polarization_aniso
+using ..OneLoopIntegralsCorrection: normalize_b0_direction
 
 # 导出函数
 export polarization_aniso_cached, reset_cache!, get_cache_stats
@@ -85,11 +86,13 @@ struct PolarizationKey
     A1::Float64
     A2::Float64
     num_s_quark::UInt8
+    b0_direction::Symbol
 
     function PolarizationKey(channel::Symbol, k0::Float64, k_norm::Float64,
                              m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
                              T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64,
-                             A1::Float64, A2::Float64, num_s_quark::Int)
+                             A1::Float64, A2::Float64, num_s_quark::Int;
+                             b0_direction::Symbol=:aligned)
         return new(
             _channel_code(channel),
             _round_cache(k0),
@@ -105,6 +108,7 @@ struct PolarizationKey
             _round_cache(A1),
             _round_cache(A2),
             UInt8(num_s_quark),
+            normalize_b0_direction(b0_direction),
         )
     end
 end
@@ -123,7 +127,8 @@ end
            isequal(a.ξ, b.ξ) &&
            isequal(a.A1, b.A1) &&
            isequal(a.A2, b.A2) &&
-           a.num_s_quark == b.num_s_quark
+           a.num_s_quark == b.num_s_quark &&
+           a.b0_direction === b.b0_direction
 end
 
 @inline function Base.hash(k::PolarizationKey, h::UInt)
@@ -141,6 +146,7 @@ end
     h = hash(k.A1, h)
     h = hash(k.A2, h)
     h = hash(k.num_s_quark, h)
+    h = hash(k.b0_direction, h)
     return h
 end
 
@@ -191,12 +197,13 @@ end
 function polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64, 
                                   m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, 
                                   T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, 
-                                  A1_value::Float64, A2_value::Float64, num_s_quark::Int)
+                                  A1_value::Float64, A2_value::Float64, num_s_quark::Int;
+                                  b0_direction::Symbol=:aligned)
     state = _task_cache()
     state.total_calls += 1
     
     # 构造缓存键
-    key = PolarizationKey(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
+    key = PolarizationKey(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark; b0_direction)
     
     # 单次查找：命中则直接返回，避免 haskey + getindex 的双查找
     cached = get(state.entries, key, nothing)
@@ -206,7 +213,7 @@ function polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64
     end
 
     # 缓存未命中，计算并缓存
-    result = polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
+    result = polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark; b0_direction)
     state.entries[key] = result
     return result
 end
