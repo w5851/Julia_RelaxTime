@@ -1,5 +1,17 @@
 # [有限温度有限密度场论中的单圈积分A（one-line integral）各向异性简化处理] - 实现文档
 
+本页以下推导记录普通在壳分母及线性占据修正。当前输运稿候选
+`ward_moller_sphere_v1` 采用变分匹配的完整热项：
+
+```math
+A_f^\xi=16\pi^2\int\frac{d^3p}{(2\pi)^3}\frac{f_f^\xi+\bar f_f^\xi}{2E_{f,\xi}}
+       -16\pi^2\int_{|p|<\Lambda}\frac{d^3p}{(2\pi)^3}\frac{1}{2E_f}.
+```
+
+其接口为 `A_aniso_ward`；与同一 A 构造的有效耦合匹配静态软 pion 关系。
+普通色散 B0 的有限动量约化仍是单独保留的近似。
+现行配置、范围及数据见[新结果](../../../../../../data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/README.md)。
+
 ## 1. 公式标识
 - **程序实现**: `A_aniso`
 - **对应文件**: `../../src/relaxtime/OneLoopIntegrals.jl`

@@ -3,6 +3,8 @@
 
 # Published backgrounds used by the Ward/Moller transport rerun.
 data/inputs/relaxtime/transport/frozen_v15_20261121/*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/relaxtime/transport/ward_moller/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261121_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 # Frozen thermal-transport baselines and retained numerical/source evidence.
 tests/baselines/relaxtime/baseline_thermal_weighted_transport_v*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

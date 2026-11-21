@@ -128,5 +128,9 @@
     "xi_max": 0.5,
     "first_id": "b0001",
     "last_id": "b0909"
+  },
+  "additional_frozen_inputs": {
+    "zero_density_spectral_backgrounds.csv": "373038fb7b111eac1728c0e4ab1351580a0fa8bf6fcecd345646b2ac5814de9b",
+    "mott_mechanism_backgrounds.csv": "c2a12b6921d2f715a4907034bed6397e805d493802c28574dfbc29d414a9bb3c"
   }
 }
