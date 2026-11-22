@@ -144,8 +144,8 @@ NNNN-title-in-kebab-case.md
 
 2. **创建ADR文件**
    ```bash
-   # 找到下一个序号
-   ls docs/decisions/*.md | wc -l
+   # 找到下一个序号（只数 ADR 文件，排除 README.md）
+   ls docs/decisions/[0-9]*.md | wc -l
    
    # 创建新文件
    touch docs/decisions/NNNN-your-decision-title.md
@@ -218,11 +218,11 @@ NNNN-title-in-kebab-case.md
 
 ## 相关文档
 
-- 架构设计规范：`docs/dev/active/2026_02_01_QCD模型库架构设计规范.md`
+- 架构设计规范（阶段收口归档）：[2026-02-13_QCD模型库架构设计规范_阶段收口归档.md](../dev/archived/2026-02-13_QCD模型库架构设计规范_阶段收口归档.md)
 - 开发规范：`docs/dev/开发规范与思考清单.md`
 - 代码审查指南：`docs/dev/code_review_guidelines.md`
 
 ---
 
 **维护者**：开发团队  
-**最后更新**：2026-02-01
+**最后更新**：2026-11-22（索引与相关链接校正）

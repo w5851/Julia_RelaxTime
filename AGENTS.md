@@ -50,10 +50,10 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 Documentation placement (first match wins):
 
 - Stable function/module/HTTP/data contract → `docs/api/`.
+- Internal cross-subsystem contracts, module topology or dependency direction → `docs/architecture/`.
 - How to run a command, workflow or production/plotting SOP → `docs/guides/`.
-- Cross-subsystem topology or dependency direction → `docs/architecture/`.
 - A decision that should not be silently reversed → `docs/decisions/` (ADR).
-- Physics formula, literature mapping, units or capability ledger → `docs/reference/`.
+- Physics formula, literature mapping, units, capability ledger or long-lived numerical-method derivations → `docs/reference/`.
 - Diagnostics of one specific run or dataset → `docs/analysis/<domain>/<case>_analysis/`.
 - Engineering governance, active designs, backlog → `docs/dev/`.
 - Anything else (one-off plans, debugging notes) → keep it in the conversation, issue or PR.

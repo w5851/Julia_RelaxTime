@@ -141,7 +141,7 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
   - API 入口：`docs/api/relaxtime/transport/README.md`
   - 当前默认算法：`thermal_weighted_v1`，采用完整 A^xi 与 cm 相对速度；背景、热平均、末端积分和采样误差统一配置。
   - 当前正式数值为η加密后的1867点；原1819点整批结果和各自晋升记录保留。完整状态与研究边界见[输运重算与分析](docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
-  - 当前正式图层为 `publication_clean_v14_pdf`（1819点）；v15的76对PNG已审阅，PDF暂缓，current仍为v14。
+  - 当前正式图层为 `publication_clean_v15_pdf`（76 张矢量 PDF，基于 1867 点 η 加密网格），v14 保留为上一版；图层状态以 [plot_manifest](data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/plot_manifest.json) 为准。
   - 工程源码、测试、逐文件清单和恢复方式见[工程交付](data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)；旧prod_v1/prod_v2及旧图层只保留历史证据和恢复用途。
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
