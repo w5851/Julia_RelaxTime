@@ -1,158 +1,209 @@
-name: Relaxtime Frozen Transport Production
-run-name: frozen transport ${{ inputs.case_name }} / ${{ inputs.mode }} / ${{ inputs.sampling_profile }}
+name: Ward Moller Mott local response
+run-name: Ward Moller Mott local response - ${{ inputs.case_name }}
 
 on:
   workflow_dispatch:
     inputs:
-      calculation_sha:
-        description: "Exact calculation commit"
-        required: true
-        type: string
       case_name:
-        description: "Result case"
+        description: "Unique production case name"
         required: true
         type: string
-      mode:
-        description: "Published frozen background grid"
-        required: true
-        type: choice
-        options: [mode_a, mode_b]
-      sampling_profile:
-        description: "Physical prescription with original quadrature"
-        required: true
-        type: choice
-        options: [ward_moller_aligned_v1, ward_moller_sphere_v1]
-      shards:
-        description: "Comma-separated shard indices from 1 to 64"
-        required: true
-        type: string
-      workers_per_runner:
-        description: "Independent one-thread Julia workers per runner"
-        required: true
-        default: "4"
-        type: choice
-        options: ["1", "2", "4"]
 
 permissions:
   contents: read
 
+env:
+  JULIA_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  JULIA_PKG_PRECOMPILE_AUTO: "0"
+  CORE: 096199b96d34045bf8e2d9611c2d786d6f92fb8e
+  DRIVER: scripts/analysis/relaxtime/run_ward_moller_mott_response.jl
+  SCALAR_DRIVER: scripts/analysis/relaxtime/run_ward_moller_scalar_asymptotics.jl
+
 jobs:
-  matrix:
+  centers:
     runs-on: ubuntu-latest
-    outputs:
-      indices: ${{ steps.prepare.outputs.indices }}
-    steps:
-      - id: prepare
-        env:
-          SHARDS: ${{ inputs.shards }}
-        run: |
-          python - <<'PY'
-          import json, os
-          indices = [int(s) for s in os.environ['SHARDS'].split(',')]
-          assert indices and len(set(indices)) == len(indices)
-          assert all(1 <= s <= 64 for s in indices)
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
-              stream.write('indices=' + json.dumps(indices) + '\n')
-          PY
-
-  generate:
-    needs: matrix
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        shard: ${{ fromJSON(needs.matrix.outputs.indices) }}
-    env:
-      JULIA_NUM_THREADS: "1"
-      OPENBLAS_NUM_THREADS: "1"
-      OMP_NUM_THREADS: "1"
-      JULIA_PKG_PRECOMPILE_AUTO: "0"
-      CALCULATION_SHA: ${{ inputs.calculation_sha }}
-      CASE_NAME: ${{ inputs.case_name }}
-      SCAN_MODE: ${{ inputs.mode }}
-      SAMPLING_PROFILE: ${{ inputs.sampling_profile }}
-      SHARD_INDEX: ${{ matrix.shard }}
-      WORKER_COUNT: ${{ inputs.workers_per_runner }}
-
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.calculation_sha }}
-
-      - name: Validate frozen input and source
-        shell: bash
-        run: |
-          set -euo pipefail
-          [[ "$CALCULATION_SHA" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$(git rev-parse HEAD)" == "$CALCULATION_SHA" ]]
-          [[ "$CASE_NAME" =~ ^[A-Za-z0-9_.-]+$ && "$CASE_NAME" != . && "$CASE_NAME" != .. ]]
-          test -f "config/models/pnjl/transport_sampling/$SAMPLING_PROFILE.toml"
-          python - <<'PY'
-          import hashlib, json, os, pathlib
-          root = pathlib.Path('data/inputs/relaxtime/transport/frozen_v15_20261121')
-          manifest = json.loads((root/'input_manifest.json').read_text())
-          for mode in ('mode_a','mode_b'):
-              entry = manifest[mode]
-              assert hashlib.sha256((root/entry['file']).read_bytes()).hexdigest() == entry['sha256']
-          PY
-
+          sparse-checkout: scripts/analysis/relaxtime
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CORE }}
+          path: core
+          sparse-checkout: |
+            src
+            scripts/relaxtime
+            config
       - uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
-
       - uses: julia-actions/cache@v2
         with:
-          cache-name: julia-cache-relaxtime-frozen-ward-v1
-
-      - name: Install dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
-      - name: Recompute frozen shard
-        shell: bash
+          cache-name: julia-cache-relaxtime-ward-moller-mott-v1
+      - name: Locate the three thresholds
         run: |
           set -euo pipefail
-          export PNJL_SOURCE_TREE_SHA256="$CALCULATION_SHA"
-          input="data/inputs/relaxtime/transport/frozen_v15_20261121/${SCAN_MODE}_grid.csv"
-          result="data/outputs/results/relaxtime/transport/ward_moller/$CASE_NAME/$SCAN_MODE/shard_$SHARD_INDEX"
-          mkdir -p "$result"
+          test "$(git -C core rev-parse HEAD)" = "$CORE"
+          julia --project=core -e 'using Pkg; Pkg.instantiate()'
+          julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" core results locate 2>&1 | tee centers.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mott-centers
+          path: |
+            results/center_*.json
+            results/*_scout.csv
+            centers.log
+
+  scan:
+    needs: centers
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 27
+      matrix:
+        meson: [pi, K, sigma]
+        slot: [1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/analysis/relaxtime
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CORE }}
+          path: core
+          sparse-checkout: |
+            src
+            scripts/relaxtime
+            config
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-ward-moller-mott-v1
+      - uses: actions/download-artifact@v4
+        with:
+          name: mott-centers
+          path: centers
+      - name: Sample the local slopes
+        env:
+          MESON: ${{ matrix.meson }}
+          SLOT: ${{ matrix.slot }}
+        run: |
+          set -euo pipefail
+          test "$(git -C core rev-parse HEAD)" = "$CORE"
+          julia --project=core -e 'using Pkg; Pkg.instantiate()'
+          mkdir -p results
+          cp "$(find centers -name "center_$MESON.json" -print -quit)" results/
           pids=()
-          for worker in $(seq 1 "$WORKER_COUNT"); do
-            # This runner subdivides only its original shard; every input row
-            # still belongs to exactly one of the 64 global shards.
-            python - "$input" "$result/input_$worker.csv" "$SHARD_INDEX" "$worker" "$WORKER_COUNT" <<'PY'
-          import csv, sys
-          source, target, shard, worker, count = sys.argv[1:]
-          shard, worker, count = map(int, (shard, worker, count))
-          with open(source, newline='') as stream:
-              reader = csv.DictReader(stream)
-              fields = reader.fieldnames
-              rows = [row for i, row in enumerate(reader) if i%64 == shard-1]
-          rows = [row for i,row in enumerate(rows) if i%count == worker-1]
-          with open(target, 'w', newline='') as stream:
-              writer = csv.DictWriter(stream, fieldnames=fields)
-              writer.writeheader()
-              writer.writerows(rows)
-          assert rows
-          PY
-            /usr/bin/time -v -o "$result/time_$worker.txt" \
-              julia --startup-file=no --threads=1 --heap-size-hint=1600M --project=. \
-                scripts/relaxtime/run_frozen_transport_scan.jl \
-                --input "$result/input_$worker.csv" --outdir "$result/worker_$worker" \
-                --sampling-profile "$SAMPLING_PROFILE" \
-                > "$result/run_$worker.log" 2> "$result/run_$worker.err" &
+          for worker in 1 2; do
+            index=$((2*(SLOT-1)+worker))
+            julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" \
+              core results scan "$MESON" both "$index" 18 > "worker_$index.log" 2>&1 &
             pids+=("$!")
           done
           rc=0
           for pid in "${pids[@]}"; do wait "$pid" || rc=1; done
-          for worker in $(seq 1 "$WORKER_COUNT"); do tail -n 4 "$result/run_$worker.log"; done
+          tail -n 10 worker_*.log
           exit "$rc"
-
-      - name: Upload frozen results and diagnostics
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: frozen-${{ inputs.case_name }}-${{ inputs.mode }}-${{ matrix.shard }}
-          path: data/outputs/results/relaxtime/transport/ward_moller/${{ inputs.case_name }}/${{ inputs.mode }}/shard_${{ matrix.shard }}/
-          retention-days: 14
+          name: mott-${{ matrix.meson }}-${{ matrix.slot }}
+          path: |
+            results/fine/
+            results/reference/
+            worker_*.log
+
+  scalar:
+    needs: centers
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [fine, reference]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/analysis/relaxtime
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CORE }}
+          path: core
+          sparse-checkout: |
+            src
+            scripts/relaxtime
+            config
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+      - uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-ward-moller-mott-v1
+      - uses: actions/download-artifact@v4
+        with:
+          name: mott-centers
+          path: results
+      - name: Recompute the isolated scalar threshold integral
+        env:
+          TIER: ${{ matrix.tier }}
+        run: |
+          set -euo pipefail
+          test "$(git -C core rev-parse HEAD)" = "$CORE"
+          julia --project=core -e 'using Pkg; Pkg.instantiate()'
+          julia --project=core --startup-file=no --heap-size-hint=1600M "$SCALAR_DRIVER" core results "$TIER" 2>&1 | tee scalar_$TIER.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mott-scalar-${{ matrix.tier }}
+          path: |
+            results/scalar_${{ matrix.tier }}/
+            scalar_${{ matrix.tier }}.log
+
+  freeze:
+    needs: [centers, scan, scalar]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/analysis/relaxtime
+      - uses: actions/download-artifact@v4
+        with:
+          name: mott-centers
+          path: results
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mott-pi-*
+          path: results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mott-K-*
+          path: results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mott-sigma-*
+          path: results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mott-scalar-*
+          path: results
+          merge-multiple: true
+      - name: Freeze the validated numerical inputs
+        run: |
+          set -euo pipefail
+          python scripts/analysis/relaxtime/assemble_ward_moller_mott_response.py \
+            --scan-root results --scalar-root results --out frozen \
+            --action-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mott-frozen-${{ inputs.case_name }}
+          path: frozen/
