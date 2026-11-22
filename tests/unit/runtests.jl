@@ -163,6 +163,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_mott_transition.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_afieldbuilder.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_ward_direction_prescriptions.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_average_scattering_rate.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_thermal_angular_reduction.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_thermal_weighted_sampling.jl"),
