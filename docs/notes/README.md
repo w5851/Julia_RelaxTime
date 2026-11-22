@@ -1,31 +1,31 @@
 # 历史笔记（已冻结）
 
-**状态：`frozen`。不再新增文件。** 这里的 18 份笔记是早期未归类的推导、方法与排障记录，逐步按下方「计划去向」迁入长期域；迁空后本目录退役。
+**状态：`frozen`。不再新增文件。** 原 18 份未归类笔记已按 2026-11 的迁移方案分流：13 份迁入长期域，5 份因审计路径锁定或已被现行规范取代而原地只读保留。
 
-迁移规则：只移动路径、不改正文语义；每次迁移前先全仓 grep 引用（含 `tests/`、`scripts/`、`config/`、`.agents/`），并同步更新域索引。
+迁移规则：只移动路径、不改正文语义；需改正文时另起提交并说明依据。
 
-| 文件 | 主题 | 计划去向 |
-| --- | --- | --- |
-| [ForwardDiff_nested_dual_issue.md](forwarddiff/ForwardDiff_nested_dual_issue.md) | AD 嵌套双数问题 | `docs/reference/domain-knowledge/` |
-| [ForwardDiff_NLsolve_issue.md](forwarddiff/ForwardDiff_NLsolve_issue.md) | AD 与 NLsolve 交互 | `docs/reference/domain-knowledge/` |
-| [对数奇点(B0)_奇点减法积分.md](<integrand_method/对数奇点(B0)_奇点减法积分.md>) | 奇点减法积分 | `docs/reference/domain-knowledge/` |
-| [含奇点积分处理方法参考.md](integrand_method/含奇点积分处理方法参考.md) | 奇点积分方法 | `docs/reference/domain-knowledge/` |
-| [稀疏网格与张量积对比_average_rate.md](integrand_method/稀疏网格与张量积对比_average_rate.md) | 积分网格对比 | `docs/reference/domain-knowledge/` |
-| [B0_k_positive_积分方法.md](integrand_method/B0_k_positive_积分方法.md) | B0 正 k 积分 | `docs/reference/domain-knowledge/` |
-| [cdf_sampling_for_expensive_functions.md](integrand_method/cdf_sampling_for_expensive_functions.md) | 采样策略 | `docs/reference/domain-knowledge/` |
-| [2026-01-22_PNJL二阶导符号现象说明.md](pnjl/2026-01-22_PNJL二阶导符号现象说明.md) | 二阶导符号现象 | `docs/reference/domain-knowledge/` |
-| [一阶相变方法对比.md](pnjl/一阶相变方法对比.md) | 一阶相变方法 | `docs/reference/domain-knowledge/` |
-| [一阶相变双分支扫描策略.md](pnjl/一阶相变双分支扫描策略.md) | 双分支扫描 | `docs/reference/domain-knowledge/` |
-| [PNJL计算工作流.md](pnjl/PNJL计算工作流.md) | 工作流草图 | `docs/reference/domain-knowledge/` |
-| [2026-03-13_T190_T200_阈值邻域与峰值邻域补点复测记录.md](relaxtime/2026-03-13_T190_T200_阈值邻域与峰值邻域补点复测记录.md) | 补点复测记录 | `docs/analysis/historical/` |
-| [散射截面在积分下限下的发散以及积分的可积性.md](relaxtime/散射截面在积分下限下的发散以及积分的可积性.md) | 积分可积性 | `docs/reference/domain-knowledge/` |
-| [2026-04-15-meson-debug-progress.md](relaxtime/meson/2026-04-15-meson-debug-progress.md) | 调试进度 | `docs/analysis/historical/` |
-| [结构体使用的必要性分析.md](structure/结构体使用的必要性分析.md) | 结构体与类型 | `docs/architecture/` |
-| [结构体使用指南.md](structure/结构体使用指南.md) | 结构体使用 | `docs/architecture/` |
-| [Julia模块配置文件设计指南.md](structure/Julia模块配置文件设计指南.md) | 模块与配置设计 | `docs/architecture/` |
-| [VScode以(md)为后缀的文档的注意事项.md](<md/VScode以(md)为后缀的文档的注意事项.md>) | 编辑器工具笔记 | `docs/dev/archived/` |
+| 文件 | 主题 | 状态 | 现址 |
+| --- | --- | --- | --- |
+| `forwarddiff/ForwardDiff_nested_dual_issue.md` | AD 嵌套双数 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/ForwardDiff_nested_dual_issue.md) |
+| `integrand_method/对数奇点(B0)_奇点减法积分.md` | 奇点减法积分 | 已迁出 | [reference/domain-knowledge/](<../reference/domain-knowledge/对数奇点(B0)_奇点减法积分.md>) |
+| `integrand_method/含奇点积分处理方法参考.md` | 奇点积分方法 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/含奇点积分处理方法参考.md) |
+| `integrand_method/稀疏网格与张量积对比_average_rate.md` | 积分网格对比 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/稀疏网格与张量积对比_average_rate.md) |
+| `integrand_method/B0_k_positive_积分方法.md` | B0 正 k 积分 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/B0_k_positive_积分方法.md) |
+| `integrand_method/cdf_sampling_for_expensive_functions.md` | 采样策略 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/cdf_sampling_for_expensive_functions.md) |
+| `pnjl/2026-01-22_PNJL二阶导符号现象说明.md` | 二阶导符号现象 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/2026-01-22_PNJL二阶导符号现象说明.md) |
+| `relaxtime/散射截面在积分下限下的发散以及积分的可积性.md` | 积分可积性 | 已迁出 | [reference/domain-knowledge/](../reference/domain-knowledge/散射截面在积分下限下的发散以及积分的可积性.md) |
+| `relaxtime/2026-03-13_T190_T200_…补点复测记录.md` | 补点复测记录 | 已迁出 | [analysis/historical/](../analysis/historical/2026-03-13_T190_T200_阈值邻域与峰值邻域补点复测记录.md) |
+| `relaxtime/meson/2026-04-15-meson-debug-progress.md` | 调试进度 | 已迁出 | [analysis/historical/](../analysis/historical/2026-04-15-meson-debug-progress.md) |
+| `structure/Julia模块配置文件设计指南.md` | 模块与配置设计 | 已迁出 | [architecture/](../architecture/Julia模块配置文件设计指南.md) |
+| `forwarddiff/ForwardDiff_NLsolve_issue.md` | AD 与 NLsolve 交互 | 待迁出（C3-2） | 计划迁往 `reference/domain-knowledge/`，先验证 archived 引用不断链 |
+| `pnjl/一阶相变双分支扫描策略.md` | 双分支扫描 | 待迁出（C3-2） | 计划迁往 `reference/domain-knowledge/`，先验证 archived 引用不断链 |
+| `pnjl/一阶相变方法对比.md` | 一阶相变边界方法对比 | 原地只读 | 本目录（issue130 v1–v4 审计表以该路径为历史契约，禁止移动或改写） |
+| `pnjl/PNJL计算工作流.md` | 历史导航 | 原地只读 | 本目录（已被现行架构总览与指南取代） |
+| `structure/结构体使用的必要性分析.md` | 结构体迁移论证 | 原地只读 | 本目录（已被参数容器契约与迁移指南取代） |
+| `structure/结构体使用指南.md` | 重构前问题分析 | 原地只读 | 本目录（已被参数容器契约取代） |
+| `md/VScode以(md)为后缀的文档的注意事项.md` | 编辑器提示 | 原地只读 | 本目录（无域归属，不迁入归档区） |
 
 ## 维护约定
 
 - 本目录**不接受**新文件；新笔记按 [AGENTS.md](../../AGENTS.md) 的文档落点判据直接写进对应长期域。
-- 迁移时保持原文件名，避免破坏历史链接；确需改名时在提交说明里列出旧名。
+- 表中仍标「原地只读」的文件只作历史追溯，不得作为现行权威依据引用。

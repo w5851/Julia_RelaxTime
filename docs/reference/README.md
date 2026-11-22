@@ -21,6 +21,17 @@
 - `usage/`：面向具体计算任务的使用说明。
 - `ops/`：运维与部署清单（如 `phase2_split_deployment_runbook.md`）。
 
+## 数值方法与推导笔记（`domain-knowledge/`）
+
+- [ForwardDiff 嵌套 Dual 类型问题](domain-knowledge/ForwardDiff_nested_dual_issue.md)
+- [含奇点积分处理方法参考](domain-knowledge/含奇点积分处理方法参考.md)
+- [对数奇点 (B0) 奇点减法积分](<domain-knowledge/对数奇点(B0)_奇点减法积分.md>)
+- [B0 正 k 区间积分方法](domain-knowledge/B0_k_positive_积分方法.md)
+- [稀疏网格与张量积对比（average_rate）](domain-knowledge/稀疏网格与张量积对比_average_rate.md)
+- [用 CDF 采样昂贵函数（w0cdf / cdf_wSigma）](domain-knowledge/cdf_sampling_for_expensive_functions.md)
+- [PNJL 二阶导符号现象说明](domain-knowledge/2026-01-22_PNJL二阶导符号现象说明.md)
+- [散射截面在积分下限下的发散与可积性](domain-knowledge/散射截面在积分下限下的发散以及积分的可积性.md)
+
 ## 建议阅读顺序
 
 1. 先读能力总账，确认路线、成熟度和非目标边界。

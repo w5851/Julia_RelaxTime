@@ -11,6 +11,7 @@
 - `diagnostic_only`：可用于观察、比较或作者复核，不是 production/reference 晋升结论。
 - `candidate`：有明确的后续验证或作者决策入口，不能直接当作最终物理结论。
 - `historical`：保留旧比较、旧图或旧实现上下文，不代表当前实现语义。
+  - 2026-11 从 `docs/notes/` 迁入（仅改路径，正文未动）：[T190/T200 补点复测记录](historical/2026-03-13_T190_T200_阈值邻域与峰值邻域补点复测记录.md)、[Meson Workflow Debug Progress](historical/2026-04-15-meson-debug-progress.md)。
 - `governance`：记录资产注册、清理、迁移或分析流程，不是物理结果。
 - `archive_pointer`：指向外部或 Actions/local artifact 的 provenance 入口，本身不是完整原始数据包。
 
