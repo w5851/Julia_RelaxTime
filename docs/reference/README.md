@@ -33,6 +33,7 @@
 - [稀疏网格与张量积对比（average_rate）](domain-knowledge/稀疏网格与张量积对比_average_rate.md)
 - [用 CDF 采样昂贵函数（w0cdf / cdf_wSigma）](domain-knowledge/cdf_sampling_for_expensive_functions.md)
 - [PNJL 二阶导符号现象说明](domain-knowledge/2026-01-22_PNJL二阶导符号现象说明.md)
+- [PNJL 模型一阶相变双分支扫描策略](domain-knowledge/一阶相变双分支扫描策略.md)
 - [散射截面在积分下限下的发散与可积性](domain-knowledge/散射截面在积分下限下的发散以及积分的可积性.md)
 - 只读历史指针：[PNJL 一阶相变边界计算方法对比](../notes/pnjl/一阶相变方法对比.md)（issue130 审计路径锁定，原地保留，不可移动或改写）
 
