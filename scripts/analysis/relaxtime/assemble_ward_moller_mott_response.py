@@ -169,8 +169,10 @@ def local_slopes(grids):
             a,b = line_fit([r["u_midpoint"] for r in sidebands],[r["slope"] for r in sidebands])
             for r in selected:
                 r["linear_background_residual"] = r["slope"]-a-b*r["u_midpoint"]
-            inset = [r["linear_background_residual"] for r in selected if abs(r["u_midpoint"])<=.001]
-            entry["inset"] = {"fit_range":[.003,.008],"intercept":a,"gradient":b,"display_half_width":.001,
+            # Show the central region covered entirely by the refined xi grid.
+            half_width = .0005
+            inset = [r["linear_background_residual"] for r in selected if abs(r["u_midpoint"])<=half_width]
+            entry["inset"] = {"fit_range":[.003,.008],"intercept":a,"gradient":b,"display_half_width":half_width,
                               "residual_min":min(inset),"residual_max":max(inset)}
         checks[meson] = entry
         slopes += selected

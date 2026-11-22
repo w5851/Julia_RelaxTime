@@ -128,13 +128,13 @@ def render(data, record, profile):
         pos = parent.get_position()
         # The inset shows computed residuals only. Its footprint is in the
         # clear part of panel (c), with dimensions defined at final width.
-        inset = fig.add_axes([pos.x0 + 0.515*pos.width, pos.y0 + 0.53*pos.height,
-                              0.345*pos.width, 0.33*pos.height])
+        inset = fig.add_axes([pos.x0 + 0.54*pos.width, pos.y0 + 0.53*pos.height,
+                              0.31*pos.width, 0.33*pos.height])
         half_width = record["transport_checks"]["sigma"]["inset"]["display_half_width"]
         subset = [pair for pair in rows if abs(float(pair[1]["u_midpoint"])) <= half_width]
         magnitude = max(abs(float(row["linear_background_residual"])) for _,row in subset)
         exponent = min(0, math.floor(math.log10(magnitude))) if magnitude else 0
-        residual_label = rf"Residual ($10^{{{exponent}}}$)" if exponent else "Slope residual"
+        residual_label = rf"Residual $\times 10^{{{-exponent}}}$" if exponent else "Slope residual"
         series.append(_curve(inset, subset, x="u_midpoint", y="linear_background_residual",
                              scale=1000.0, panel="c-inset", source="local_slopes.csv", y_scale=10.0**(-exponent),
                              description="local secants minus a line fitted to the two sidebands"))
@@ -145,7 +145,7 @@ def render(data, record, profile):
         inset.yaxis.set_major_locator(MaxNLocator(nbins=2, min_n_ticks=2))
         inset.yaxis.set_major_formatter(FormatStrFormatter("%g"))
         inset.yaxis.tick_right()
-        inset.set_title(residual_label, fontsize=13, loc="left", pad=3)
+        inset.set_title(residual_label, fontsize=12.5, loc="left", pad=3)
         configure_axis_ticks(inset, profile)
         inset.tick_params(which="major", length=3, labelsize=12, pad=1.5)
         inset.tick_params(which="minor", length=1.6)
