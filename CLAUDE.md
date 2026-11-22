@@ -42,7 +42,7 @@ julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regressi
 julia --project=. -e 'ENV["VALIDATION_PROFILE"]="smoke"; include("tests/validation/runtests.jl")'
 ```
 
-All layers support three profiles: `smoke` (fast, <1min), `core` (CI gate), `full` (everything). File selectors use env vars `UNIT_FILES`, `INTEGRATION_FILES`, `REGRESSION_FILES`, `VALIDATION_FILES`.
+All layers support three profiles: `smoke`, `core` (CI gate) and `full` (everything); per-layer time expectations are in `docs/dev/testing_governance.md`. File selectors use env vars `UNIT_FILES`, `INTEGRATION_FILES`, `REGRESSION_FILES`, `VALIDATION_FILES`.
 
 ### Governance / lint-equivalent checks
 ```sh
@@ -52,13 +52,15 @@ julia --project=. scripts/dev/check_solver_contract_leakage.jl
 julia --project=. scripts/dev/check_script_entrypoints.jl
 ```
 
+These four are the most frequently used subset of governance checks; the full list (including `check_sop_governance.jl`, `check_dependency_policy.jl` and `check_task_ledger.jl`) is in `docs/dev/agent_command_reference.md`.
+
 ### Key scripts (stable entrypoints)
 ```sh
 # Phase diagram
 julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke
 
-# T-mu scan
-julia --project=. scripts/pnjl/run_tmu_scan.jl --help
+# T-mu scan (unified entrypoint; `--help` lists the scan subcommands)
+julia --project=. scripts/models/run_unified_scan.jl --help
 
 # Transport coefficient scan
 julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
@@ -67,7 +69,7 @@ julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
 julia --project=. scripts/server/server_full.jl
 ```
 
-Full command reference and all profiles are in `AGENTS.md`.
+Full command reference and all profiles are in `docs/dev/agent_command_reference.md`; [AGENTS.md](AGENTS.md) links to it.
 
 ## Architecture
 
@@ -128,9 +130,9 @@ TOML-based with inheritance. Model params: `config/models/<model>/default.toml` 
 
 ## Key Conventions
 
-- **Naming**: modules/types in `PascalCase`, functions in `snake_case`, test files `test_*.jl`, benchmark files `bench_*.jl`
+- **Naming**: modules/types in `PascalCase`, functions in `snake_case`, test files `test_*.jl`, benchmark files `bench_*.jl` or `benchmark_*.jl`
 - **Units**: natural units internally; `_inv_fm` suffix for fm⁻¹ values; `T_MeV`, `mu_MeV` for external MeV-facing names; higher-order units like `sigma_fm4`, `coupling_inv_fm4`
-- **Tests**: four layers (`unit/`, `integration/`, `regression/`, `validation/`). Smoke tests must be deterministic, fast, no external deps. New core modules require unit tests. Stable public entrypoints must update `docs/api/`.
+- **Tests**: four test layers (`unit/`, `integration/`, `regression/`, `validation/`) plus the benchmark performance layer (`benchmark/`); definitions in `docs/dev/testing_governance.md`. Smoke tests must be deterministic, fast, no external deps. New core modules require unit tests. Stable public entrypoints must update `docs/api/`.
 - **Scripts**: analysis in `scripts/analysis/`, perf probes in `scripts/perf/`, never put non-test scripts in `tests/`
 - **Performance**: only `@inline`/`@inbounds` when justified by hot-path profiling. Benchmarks in `benchmark/`, not in smoke tests.
 - **Error handling**: validate public inputs early with `ArgumentError` naming the offending parameter. Use `@warn` for recoverable fallback. Never silently ignore invalid physics inputs.

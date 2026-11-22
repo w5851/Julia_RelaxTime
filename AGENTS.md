@@ -56,7 +56,7 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 - Check formulas, variables, units, implementation and actual evidence before writing a result or caption. Separate observations, conditional derivations and mechanism hypotheses.
 - Use [research evidence guidance](docs/analysis/governance/research_evidence.md) for retained studies, and the relevant production/plotting SOP for formal deliveries.
 - Document numerical API units, domains, missing/error values and ordering; map HTTP requests to implemented handlers before describing availability.
-- Literature-to-implementation agents are available when explicitly requested; see [the protocol](docs/analysis/governance/literature_to_implementation_protocol.md). Citation/BibTeX curation belongs in `D:/Desktop/paper`, especially `paper/bib`.
+- Literature-to-implementation agents are available when explicitly requested; see [the protocol](docs/analysis/governance/literature_to_implementation_protocol.md). Citation/BibTeX curation belongs in the separately maintained paper repository (its `paper/bib` directory), not in this repository.
 
 ## Reusable Guidance
 
