@@ -20,11 +20,12 @@ const MM_PAIR = MM_RT.PairLoopQuadrature
 const MM_HC = Main.Constants_PNJL.ħc_MeV_fm
 const MM_SHA = "096199b96d34045bf8e2d9611c2d786d6f92fb8e"
 const MM_PROFILE_SHA = "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313"
+const MM_SIGMA_ANCHOR = Ref{Any}(nothing)
 
 const MM_TARGETS = (
     (meson=:pi, T_MeV=138.3096002910106, muB_MeV=900.0, search=(0.17, 0.19), scout_nodes=5),
     (meson=:K, T_MeV=200.0898076157829, muB_MeV=0.0, search=(-0.20, -0.16), scout_nodes=5),
-    (meson=:sigma, T_MeV=125.7360002645551, muB_MeV=900.0, search=(-0.24, 0.24), scout_nodes=25),
+    (meson=:sigma, T_MeV=125.7360002645551, muB_MeV=900.0, search=(0.0, 0.03), scout_nodes=7),
 )
 mm_target(meson) = only(t for t in MM_TARGETS if t.meson === meson)
 mm_digest(p) = bytes2hex(sha256(read(p)))
@@ -52,10 +53,14 @@ end
 function mm_runtime(profile, tier)
     runtime = MM_SP.build_runtime(profile)
     tier == "production" && return runtime
-    rtol = tier == "fine" ? 2e-6 : tier == "reference" ? 2e-7 :
+    rtol = tier == "fine" ? 2e-6 : tier == "reference" ? 2e-7 : tier == "recheck" ? 1e-6 :
         throw(ArgumentError("unknown sampling tier $tier"))
+    # Use a separately identified, still finer cache audit if the reference
+    # budget is exhausted. This changes no thermal kinematics or quadrature.
+    recheck = tier == "recheck"
     cfg = MM_AS.ThermalSamplingConfig(; merge(MM_AS._thermal_sampling_identity(profile.sampling),
-        (rtol=rtol, atol=1e-13, max_evaluations=160_000, max_nodes=48_000, max_rounds=70))...)
+        (rtol=rtol, atol=1e-13, max_evaluations=recheck ? 300_000 : 160_000,
+            max_nodes=recheck ? 80_000 : 48_000, max_rounds=recheck ? 90 : 70))...)
     merge(runtime, (tau_kwargs=merge(runtime.tau_kwargs, (sampling_config=cfg,)),))
 end
 
@@ -64,16 +69,42 @@ function mm_equilibrium(runtime, target, xi; seed=nothing)
     T, mu = target.T_MeV/MM_HC, target.muB_MeV/(3MM_HC)
     opts = (model=runtime.model, p_num=p.p_nodes, t_num=p.cos_nodes,
         residual_norm_max=1e-11, max_iter=100)
+    # The sigma threshold is on the high-mass branch adjacent to the
+    # high-density first-order surface.  Anchor that branch at xi=0.0075 and
+    # continue it locally; a fresh multiseed minimum can jump branches inside
+    # the narrow Mott bracket.
+    if target.meson === :sigma
+        anchor = MM_SIGMA_ANCHOR[]
+        if anchor === nothing
+            branches = MM_PHASE.solve_two_branch_candidates(T, mu, 0.0075, opts)
+            anchor = branches.high_mass_hadron.x_state
+            MM_SIGMA_ANCHOR[] = anchor
+        end
+        eq = MM_PHASE.solve_phase_branch(T, mu, xi, anchor, opts)
+        eq === nothing && error("failed to continue the sigma high-mass branch at xi=$xi")
+        eq.masses[1]*MM_HC > 200.0 ||
+            error("sigma threshold scan left the selected high-mass branch at xi=$xi")
+        return (; eq, T, mu, xi,
+            state=MM_SP.point_state(runtime.profile, eq, T, mu; xi))
+    end
     eq = if seed === nothing
         MM_PHASE.solve_with_multiseed_governance(T, mu, xi, opts)
     else
         continuation = Float64.(collect(seed))
-        raw = Models.solve_constraint(runtime.model, Models.FixedMu(), T;
-            μ_fm=mu, seed_guess=continuation, seed_candidates=[continuation],
-            xi, p_num=p.p_nodes, t_num=p.cos_nodes,
-            solver=Models.NLsolveGapSolver(method=:newton,jacobian=:forward,xtol=1e-14,ftol=2e-14),
-            residual_norm_max=1e-12, iterations=100, physicality_check=Models.is_physical_solution)
-        MM_PHASE._normalize_equilibrium_result(raw;solver_backend=:models_strict_local)
+        try
+            raw = Models.solve_constraint(runtime.model, Models.FixedMu(), T;
+                μ_fm=mu, seed_guess=continuation, seed_candidates=[continuation],
+                xi, p_num=p.p_nodes, t_num=p.cos_nodes,
+                solver=Models.NLsolveGapSolver(method=:newton,jacobian=:forward,xtol=1e-14,ftol=2e-14),
+                residual_norm_max=1e-12, iterations=100, physicality_check=Models.is_physical_solution)
+            MM_PHASE._normalize_equilibrium_result(raw;solver_backend=:models_strict_local)
+        catch err
+            err isa InterruptException && rethrow()
+            # A continuation seed can sit on the wrong side of a narrow
+            # threshold bracket. Recover with the governed multiseed solve.
+            MM_PHASE.solve_with_multiseed_governance(T, mu, xi, opts;
+                continuation_seed=continuation)
+        end
     end
     eq !== nothing && eq.residual_norm <= opts.residual_norm_max ||
         error("mean-field solution failed for $(target.meson) at xi=$xi")
@@ -183,17 +214,24 @@ function mm_metadata(runtime)
         runtime_sampling=MM_AS._thermal_sampling_identity(runtime.tau_kwargs.sampling_config))
 end
 
-function mm_scan(runtime, target, location, rowdir, offsets, index, count, tier)
+function mm_scan(runtime, target, location, rowdir, offsets, index, count, tier; recheck=false)
     1 <= index <= count || error("invalid shard index")
     mkpath(rowdir)
     for i in index:count:length(offsets)
         path = joinpath(rowdir, lpad(i, 3, '0')*".json")
-        isfile(path) && error("refusing to overwrite completed node $path")
+        if isfile(path)
+            recheck && continue # Retain any converged original reference node.
+            error("refusing to overwrite completed node $path")
+        end
         u = offsets[i]
         bg = mm_equilibrium(runtime, target, Float64(location.xi)+u; seed=location.center_state)
         started = time()
+        on_channel = recheck ? (row->begin
+            println("RECHECK ", target.meson, " ", i, " ", row.channel, " evaluations=", row.evaluations)
+            flush(stdout)
+        end) : nothing
         result = MM_SP.solve_profile_transport(runtime, bg.eq, bg.T, bg.mu;
-            xi=bg.xi, compute_bulk=false)
+            xi=bg.xi, compute_bulk=false, on_channel)
         eta_s = result.transport.eta/result.thermo_background.entropy
         row = (; metadata=mm_metadata(runtime), meson=target.meson, target.T_MeV, target.muB_MeV,
             tier=tier, index=i, xi=bg.xi, xi_mott=Float64(location.xi), delta_xi=u, eta_over_s=eta_s,
@@ -231,9 +269,10 @@ function mm_main(args)
         index, count = parse.(Int, args[6:7])
         for precision in (tier=="both" ? ("fine","reference") : (tier,))
             runtime = mm_runtime(profile, precision)
-            offsets = precision == "reference" ? mm_reference_offsets() : mm_offsets()
-            mm_scan(runtime, target, location, joinpath(outdir, precision, String(meson)),
-                offsets, index, count, precision)
+            observed_tier = precision=="recheck" ? "reference" : precision
+            offsets = observed_tier == "reference" ? mm_reference_offsets() : mm_offsets()
+            mm_scan(runtime, target, location, joinpath(outdir, observed_tier, String(meson)),
+                offsets, index, count, observed_tier; recheck=precision=="recheck")
         end
     else
         error("unknown or malformed stage")

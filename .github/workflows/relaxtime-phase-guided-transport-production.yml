@@ -1,66 +1,56 @@
-name: Ward Moller Mott local windows
-run-name: Ward Moller Mott local windows - ${{ inputs.case_name }}
+name: Ward Moller Mott response recovery
+run-name: Ward Moller recovery - ${{ inputs.case_name }}
+
 on:
   workflow_dispatch:
     inputs:
       case_name:
-        description: "Unique case name for the local windows"
         required: true
         type: string
+      nodes:
+        required: true
+        type: string
+
 permissions:
   contents: read
+  actions: read
+
 env:
   JULIA_NUM_THREADS: "1"
   OPENBLAS_NUM_THREADS: "1"
   JULIA_PKG_PRECOMPILE_AUTO: "0"
   CORE: 096199b96d34045bf8e2d9611c2d786d6f92fb8e
   DRIVER: scripts/analysis/relaxtime/run_ward_moller_mott_response.jl
+  SOURCE_RUN: "45028496140"
+
 jobs:
-  centers:
+  choose:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    outputs:
+      nodes: ${{ steps.indexes.outputs.nodes }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: scripts/analysis/relaxtime
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CORE }}
-          path: core
-          sparse-checkout: |
-            src
-            scripts/relaxtime
-            config
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: "1.12.5"
-      - uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-relaxtime-frozen-ward-v1
-      - name: Locate the three thresholds
+      - id: indexes
+        env:
+          INPUT_NODES: ${{ inputs.nodes }}
         run: |
-          set -euo pipefail
-          test "$(git -C core rev-parse HEAD)" = "$CORE"
-          julia --project=core -e 'using Pkg; Pkg.instantiate()'
-          julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" core results locate 2>&1 | tee centers.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: mott-centers
-          path: |
-            results/center_*.json
-            results/*_scout.csv
-            centers.log
+          python - <<'PY_IN'
+          import json, os
+          nodes = json.loads(os.environ['INPUT_NODES'])
+          assert nodes and all(row['meson'] in ('pi', 'K', 'sigma')
+                             and isinstance(row['index'], int)
+                             and 1 <= row['index'] <= 11 for row in nodes)
+          assert len({tuple(sorted(row.items())) for row in nodes}) == len(nodes)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('nodes=' + json.dumps(nodes) + '\n')
+          PY_IN
   scan:
-    needs: centers
+    needs: choose
     runs-on: ubuntu-latest
     timeout-minutes: 110
     strategy:
       fail-fast: false
-      max-parallel: 27
       matrix:
-        meson: [pi, K, sigma]
-        slot: [1,2,3,4,5,6,7,8,9]
+        include: ${{ fromJSON(needs.choose.outputs.nodes) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,38 +68,29 @@ jobs:
           version: "1.12.5"
       - uses: julia-actions/cache@v2
         with:
-          cache-name: julia-cache-relaxtime-frozen-ward-v1
+          cache-name: julia-cache-relaxtime-ward-moller-mott-v1
       - uses: actions/download-artifact@v4
         with:
           name: mott-centers
           path: centers
-      - name: Sample the local slopes
+          run-id: ${{ env.SOURCE_RUN }}
+          github-token: ${{ github.token }}
+      - name: Converge the missing reference node
         env:
           MESON: ${{ matrix.meson }}
-          SLOT: ${{ matrix.slot }}
+          INDEX: ${{ matrix.index }}
         run: |
           set -euo pipefail
           test "$(git -C core rev-parse HEAD)" = "$CORE"
           julia --project=core -e 'using Pkg; Pkg.instantiate()'
           mkdir -p results
           cp "$(find centers -name "center_$MESON.json" -print -quit)" results/
-          pids=()
-          for worker in 1 2; do
-            index=$((2*(SLOT-1)+worker))
-            julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" \
-              core results scan "$MESON" both "$index" 18 > "worker_$index.log" 2>&1 &
-            pids+=($!)
-          done
-          rc=0
-          for pid in "${pids[@]}"; do wait "$pid" || rc=1; done
-          tail -n 10 worker_*.log
-          exit "$rc"
+          julia --project=core --startup-file=no --heap-size-hint=2300M "$DRIVER" \
+            core results scan "$MESON" recheck "$INDEX" 11 2>&1 | tee worker.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mott-${{ matrix.meson }}-${{ matrix.slot }}
+          name: mott-reference-rescue-${{ matrix.meson }}-${{ matrix.index }}
           path: |
-            results/fine/
             results/reference/
-            worker_*.log
-
+            worker.log
