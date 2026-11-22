@@ -12,6 +12,8 @@
 - [models_param_container_contract.md](models_param_container_contract.md)：参数容器的构造与校验约定。
 - [models_ad_implicit_contract.md](models_ad_implicit_contract.md)：隐式微分与 AD 后端约定。
 
+## 设计参考
+
 - [Julia模块配置文件设计指南.md](Julia模块配置文件设计指南.md)：2026-01 的设计参考；现行加载与配置契约以 [agent_overview.md](agent_overview.md) 为准。
 
 ## 依赖
