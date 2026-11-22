@@ -1,5 +1,4 @@
-"""Render the Appendix-A local-response composite from frozen Mott data."""
-
+"""Build the Appendix A figure from the verified Ward/Møller point tables."""
 from __future__ import annotations
 
 import argparse
@@ -7,6 +6,7 @@ import csv
 import hashlib
 import json
 import math
+import shlex
 import sys
 from pathlib import Path
 
@@ -14,206 +14,237 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.ticker import FormatStrFormatter, LogLocator
+from matplotlib.ticker import FixedLocator, FormatStrFormatter, MaxNLocator, ScalarFormatter
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from scripts.plotting.plot_manifest import (  # noqa: E402
-    build_manifest,
-    generator_record,
-    input_record,
-    output_record,
-    runtime_record,
-    sha256_file,
-    validate_manifest_record,
-    write_manifest,
+from scripts.analysis.relaxtime.assemble_ward_moller_mott_response import CORE, PROFILE
+from scripts.plotting.plot_accessibility import accessibility_record
+from scripts.plotting.plot_manifest import (
+    build_manifest, generator_record, input_record, output_record,
+    runtime_record, sha256_file, write_manifest,
 )
-from scripts.plotting.plot_quality import export_figure, inspect_export  # noqa: E402
-from scripts.plotting.plot_style import configure_axis_ticks, load_profile, style_context  # noqa: E402
+from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
+from scripts.plotting.plot_style import configure_axis_ticks, load_profile, style_context
+from scripts.plotting.validate_plot_artifact import validate_manifest_record
+
+STEM = "mott_threshold_local_response"
+CURVE = "#245a9b"
+REFERENCE = "#4d4d4d"
+SLOPE = r"$\Delta\ln(\eta/s)/\Delta\xi$"
+DETUNING = r"$\xi-\xi_{\mathrm{Mott}}$ ($10^{-3}$)"
+CURVATURE = r"$\sqrt{h}\,I_S''$ ($\mathrm{fm}^2$)"
+DISTANCE = r"$h$ ($10^{-6}$)"
 
 
-CORE = "096199b96d34045bf8e2d9611c2d786d6f92fb8e"
-PROFILE = "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313"
+def frozen_inputs(folder):
+    record = json.loads((folder / "numerical_manifest.json").read_text(encoding="utf-8"))
+    if (record["core_commit"], record["profile_sha256"], record["status"]) != (
+        CORE, PROFILE, "frozen_analysis"
+    ):
+        raise ValueError("Figure requires a frozen Ward/Møller numerical record")
+    for name, sha in record["files"].items():
+        if sha256_file(folder / name) != sha:
+            raise ValueError(f"Frozen input hash mismatch: {name}")
+    return record
 
 
-def read_csv(path: Path) -> list[dict[str, str]]:
+def read_csv(path):
     with path.open(encoding="utf-8-sig", newline="") as stream:
-        return list(csv.DictReader(stream))
+        return list(enumerate(csv.DictReader(stream), start=2))
 
 
-def f(row: dict[str, str], key: str) -> float:
-    return float(row[key])
-
-
-def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _series(vertices, panel, source, label, **extra):
+def _curve(ax, indexed_rows, *, x, y, scale, panel, source, description, y_scale=1.0):
+    vertices = [(scale * float(row[x]), y_scale * float(row[y])) for _, row in indexed_rows]
+    if len(vertices) < 2 or not all(math.isfinite(v) for pair in vertices for v in pair):
+        raise ValueError(f"Incomplete series for panel {panel}")
+    if any(a[0] >= b[0] for a, b in zip(vertices, vertices[1:])):
+        raise ValueError(f"Nonincreasing series for panel {panel}")
+    ax.plot(*zip(*vertices), color=CURVE, linewidth=1.35)
     return {
-        "series_id": label,
+        "series_id": panel,
         "panel": panel,
-        "state": "computed_native_series",
-        "source_csv": str(source),
+        "state": "computed_derived_series",
+        "source_csv": source,
+        "source_columns": [x, y],
+        "source_rows": [index for index, _ in indexed_rows],
         "point_count": len(vertices),
         "vertices_sha256": hashlib.sha256(
-            json.dumps(vertices, separators=(",", ":")).encode("utf-8")
+            json.dumps(vertices, separators=(",", ":"), allow_nan=False).encode("ascii")
         ).hexdigest(),
-        "support_rule": "all frozen computed vertices in the declared local window",
-        "mask_rule": "none",
-        **extra,
+        "support_rule": description,
+        "mask_rule": "none within the stated support",
+        "x_multiplier": scale,
+        "y_multiplier": y_scale,
     }
 
 
-def render(data: Path, profile):
-    slopes_path = data / "local_slopes.csv"
-    curvature_path = data / "scalar_curvature.csv"
-    slopes = read_csv(slopes_path)
-    curvature = read_csv(curvature_path)
+def _axis(panel, field, unit, label, transform="identity"):
+    return dict(panel=panel, field=field, source_unit=unit, display_unit=unit,
+                label=label, transform=transform)
 
+
+def _mott_axis(ax, panel, title, profile, *, show_xlabel=True):
+    ax.axvline(0.0, color=REFERENCE, linestyle="--", linewidth=0.85, zorder=1)
+    ax.set_xlim(-8.35, 8.35)
+    ax.xaxis.set_major_locator(FixedLocator([-8, -4, 0, 4, 8]))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=4, min_n_ticks=3))
+    ax.yaxis.set_major_formatter(ScalarFormatter(useOffset=False))
+    ax.set_title(f"({panel})  {title}", fontsize=13, loc="left", pad=7)
+    if show_xlabel:
+        ax.set_xlabel(DETUNING, fontsize=15)
+    configure_axis_ticks(ax, profile)
+
+
+def render(data, record, profile):
+    slopes = read_csv(data / "local_slopes.csv")
+    curvature = read_csv(data / "scalar_curvature.csv")
+    checks = record["scalar_checks"]
+    height = 5.2
     with style_context(profile) as context:
-        fig, axs = plt.subplots(2, 2, figsize=(6.75, 5.20))
+        fig, axs = plt.subplots(2, 2, figsize=(6.75, height))
         context.bind(fig)
-        fig.subplots_adjust(left=0.105, right=0.976, bottom=0.115, top=0.945,
-                            wspace=0.29, hspace=0.38)
-        series = []
-
-        for ax, meson, panel, title in (
-            (axs[0, 0], "pi", "a", r"$\pi$ threshold, $T=138.31$ MeV"),
-            (axs[0, 1], "K", "b", r"$K$ threshold, $T=200.09$ MeV"),
+        fig.subplots_adjust(left=0.122, right=0.973, bottom=0.113, top=0.929,
+                            wspace=0.43, hspace=0.32)
+        series, axes = [], []
+        for ax, panel, title, meson in (
+            (axs[0, 0], "a", r"$\pi$ threshold", "pi"),
+            (axs[0, 1], "b", r"$K$ threshold", "K"),
+            (axs[1, 0], "c", r"$\sigma$ threshold", "sigma"),
         ):
-            selected = sorted((row for row in slopes if row["meson"] == meson),
-                              key=lambda row: f(row, "u_midpoint"))
-            vertices = [(f(row, "u_midpoint"), f(row, "slope")) for row in selected]
-            ax.plot([x for x, _ in vertices], [y for _, y in vertices],
-                    color="#245a9b", lw=1.25, marker="o", ms=2.7,
-                    label=r"$\Delta\ln(\eta/s)/\Delta\xi$")
-            ax.axvline(0.0, color="#555555", ls="--", lw=0.8)
-            ax.set_xlim(-0.0083, 0.0083)
-            ax.set_title(title, fontsize=10.7, pad=5)
-            ax.text(0.97, 0.94, f"({panel})", transform=ax.transAxes,
-                    ha="right", va="top", fontsize=11)
-            ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-            configure_axis_ticks(ax, profile)
-            series.append(_series(vertices, panel, slopes_path,
-                                  f"{panel}.{meson}.log_eta_s_slope",
-                                  observable="Delta log(eta/s) / Delta xi"))
+            rows = sorted((pair for pair in slopes if pair[1]["meson"] == meson),
+                          key=lambda pair: float(pair[1]["u_midpoint"]))
+            series.append(_curve(ax, rows, x="u_midpoint", y="slope", scale=1000.0,
+                                 panel=panel, source="local_slopes.csv",
+                                 description="adjacent native log secants on a continuous branch"))
+            _mott_axis(ax, panel, title, profile, show_xlabel=panel == "c")
+            if panel != "b":
+                ax.set_ylabel(SLOPE, fontsize=15)
+                axes.append(_axis(panel, "slope", "dimensionless", SLOPE))
+            axes.append(_axis(panel, "u_midpoint", "dimensionless", DETUNING, "1000*u_midpoint"))
 
-        selected = sorted((row for row in slopes if row["meson"] == "sigma"),
-                          key=lambda row: f(row, "u_midpoint"))
-        vertices = [(f(row, "u_midpoint"), f(row, "slope")) for row in selected]
-        residuals = [(f(row, "u_midpoint"), f(row, "linear_background_residual"))
-                     for row in selected]
-        ax = axs[1, 0]
-        ax.plot([x for x, _ in vertices], [y for _, y in vertices],
-                color="#245a9b", lw=1.25, marker="o", ms=2.7)
-        ax.axvline(0.0, color="#555555", ls="--", lw=0.8)
-        ax.set_xlim(-0.0083, 0.0083)
-        ax.set_title(r"$\sigma$ threshold, $T=125.74$ MeV", fontsize=10.7, pad=5)
-        ax.text(0.97, 0.94, "(c)", transform=ax.transAxes,
-                ha="right", va="top", fontsize=11)
-        ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-        configure_axis_ticks(ax, profile)
-        series.append(_series(vertices, "c", slopes_path, "c.sigma.log_eta_s_slope",
-                              observable="Delta log(eta/s) / Delta xi"))
-
-        inset = ax.inset_axes([0.53, 0.15, 0.43, 0.42])
-        inset.plot([x for x, _ in residuals], [y for _, y in residuals],
-                   color="#b54a35", lw=1.0, marker="o", ms=1.9)
-        inset.axvline(0.0, color="#555555", ls="--", lw=0.65)
-        inset.set_xlim(-0.0011, 0.0011)
-        inset.set_title("background-subtracted", fontsize=7.3, pad=2)
-        inset.tick_params(labelsize=6.5, direction="in", length=2.2)
-        inset.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-        series.append(_series(residuals, "c-inset", slopes_path,
-                              "c.sigma.background_residual",
-                              observable="background-subtracted local slope"))
+        parent = axs[1, 0]
+        pos = parent.get_position()
+        # The inset shows computed residuals only. Its footprint is in the
+        # clear part of panel (c), with dimensions defined at final width.
+        inset = fig.add_axes([pos.x0 + 0.515*pos.width, pos.y0 + 0.53*pos.height,
+                              0.345*pos.width, 0.33*pos.height])
+        half_width = record["transport_checks"]["sigma"]["inset"]["display_half_width"]
+        subset = [pair for pair in rows if abs(float(pair[1]["u_midpoint"])) <= half_width]
+        magnitude = max(abs(float(row["linear_background_residual"])) for _,row in subset)
+        exponent = min(0, math.floor(math.log10(magnitude))) if magnitude else 0
+        residual_label = rf"Residual ($10^{{{exponent}}}$)" if exponent else "Slope residual"
+        series.append(_curve(inset, subset, x="u_midpoint", y="linear_background_residual",
+                             scale=1000.0, panel="c-inset", source="local_slopes.csv", y_scale=10.0**(-exponent),
+                             description="local secants minus a line fitted to the two sidebands"))
+        inset.axvline(0.0, color=REFERENCE, linestyle="--", linewidth=0.65, zorder=1)
+        inset.set_xlim(-1060*half_width, 1060*half_width)
+        inset.xaxis.set_major_locator(FixedLocator([-800*half_width, 0, 800*half_width]))
+        inset.xaxis.set_major_formatter(FormatStrFormatter("%g"))
+        inset.yaxis.set_major_locator(MaxNLocator(nbins=2, min_n_ticks=2))
+        inset.yaxis.set_major_formatter(FormatStrFormatter("%g"))
+        inset.yaxis.tick_right()
+        inset.set_title(residual_label, fontsize=13, loc="left", pad=3)
+        configure_axis_ticks(inset, profile)
+        inset.tick_params(which="major", length=3, labelsize=12, pad=1.5)
+        inset.tick_params(which="minor", length=1.6)
+        axes.extend([_axis("c-inset", "u_midpoint", "dimensionless", DETUNING, "1000*u_midpoint"),
+                     _axis("c-inset", "linear_background_residual", "dimensionless", residual_label,
+                           f"10^{(-exponent)}*linear_background_residual")])
 
         ax = axs[1, 1]
-        vertices = [(f(row, "h"), f(row, "scaled_curvature")) for row in curvature]
-        ax.plot([x for x, _ in vertices], [y for _, y in vertices],
-                color="#245a9b", lw=1.25, marker="o", ms=2.7,
-                label=r"$\sqrt{h}\,I_S''$")
-        limit = f(curvature[0], "analytic_limit")
-        ax.axhline(limit, color="#555555", ls="--", lw=0.8,
-                   label="analytic threshold constant")
+        usable = sorted((pair for pair in curvature
+                         if pair[1]["usable"] == "True"
+                         and checks["h_min"] <= float(pair[1]["h"]) <= checks["h_max"]),
+                        key=lambda pair: float(pair[1]["h"]))
+        series.append(_curve(ax, usable, x="h", y="scaled_curvature", scale=1e6, panel="d",
+                             source="scalar_curvature.csv",
+                             description="continuous scalar integral on the qualified resonance-side interval"))
+        limit = checks["analytic_limit_fm2"]
+        ax.axhline(limit, color=REFERENCE, linestyle="--", linewidth=0.85, zorder=1)
+        lo = min(limit, *(float(row["scaled_curvature"]) for _,row in usable))
+        hi = max(limit, *(float(row["scaled_curvature"]) for _,row in usable))
+        pad = 0.095 * (hi-lo)
+        ax.set_ylim(lo-pad, hi+pad)
         ax.set_xscale("log")
-        ax.set_xlim(min(x for x, _ in vertices) / 0.7, max(x for x, _ in vertices) * 1.25)
-        ax.set_title(r"Isolated scalar threshold integral", fontsize=10.7, pad=5)
-        ax.text(0.97, 0.94, "(d)", transform=ax.transAxes,
-                ha="right", va="top", fontsize=11)
-        ax.set_xlabel(r"$h=|\xi-\xi_{\rm Mott}|$")
-        ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))
-        ax.legend(frameon=False, fontsize=7.4, loc="lower left",
-                  handlelength=1.5, borderpad=0.1)
+        ax.set_xlim(0.78 * checks["h_min"] * 1e6, 1.26 * checks["h_max"] * 1e6)
+        ax.xaxis.set_major_formatter(FormatStrFormatter("%g"))
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=4, min_n_ticks=3))
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.4f"))
+        ax.set_title("(d)  Isolated scalar integral", fontsize=13, loc="left", pad=7)
+        ax.set_xlabel(DISTANCE, fontsize=16)
+        ax.set_ylabel(CURVATURE, fontsize=16)
         configure_axis_ticks(ax, profile)
-        series.append(_series(vertices, "d", curvature_path, "d.scalar.scaled_curvature",
-                              observable="sqrt(h) I_S second derivative",
-                              analytic_limit=limit))
-
-        for ax in axs.flat:
-            ax.set_xlabel(ax.get_xlabel() or r"$\xi-\xi_{\rm Mott}$")
-            ax.set_ylabel(ax.get_ylabel() or r"$\Delta\ln(\eta/s)/\Delta\xi$")
-        axs[1, 1].set_ylabel(r"$\sqrt{h}\,I_S''$")
-        return fig, series
+        axes.extend([_axis("d", "h", "dimensionless", DISTANCE, "1e6*h; logarithmic"),
+                     _axis("d", "scaled_curvature", "fm2", CURVATURE)])
+        return fig, axes, series
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--data", required=True, type=Path)
+    parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
-    args.out.mkdir(parents=True, exist_ok=False)
+    record = frozen_inputs(args.data)
     profile = load_profile("candidate_aps_v2")
-    fig, series = render(args.data, profile)
-    stem = args.out / "mott_threshold_local_response"
-    export_figure(fig, stem, profile, formats=["png", "pdf"], intended_width_inches=6.75)
-    png = stem.with_suffix(".png")
-    pdf = stem.with_suffix(".pdf")
+    fig, axes, series = render(args.data, record, profile)
+    args.out.mkdir(parents=True, exist_ok=False)
+    outputs, quality = export_figure(fig, args.out / STEM, profile,
+                                     formats=["png", "pdf"], intended_width_inches=6.75)
+    png = args.out / f"{STEM}.png"
+    gray = args.out / f"{STEM}_gray.png"
+    with Image.open(png) as image:
+        image.convert("L").save(gray, dpi=(profile.dpi, profile.dpi))
+    outputs[0]["role"] = "color_review"
+    outputs[1]["role"] = "vector_review"
+    outputs.append({**output_record(gray, fmt="png", dpi=profile.dpi, vector=False),
+                    "inspection": inspect_export(gray), "role": "grayscale_review",
+                    "source_color_sha256": sha256_file(png), "conversion": "Pillow L"})
     manifest = build_manifest(
         asset_id="ward_moller_mott_threshold_local_response",
-        figure_family="pnjl_transport_appendix_threshold_laws",
-        case_slug=args.out.name,
-        figure_mode="audit",
-        semantic_status="new_prescription_computed_samples",
-        style_profile=profile.profile_id,
-        publication_scope="internal_review",
-        generator=generator_record(__file__, command=" ".join(sys.argv),
+        figure_family="pnjl_transport_appendix_threshold_laws", case_slug=args.out.name,
+        figure_mode="audit", semantic_status="frozen_ward_moller_local_response",
+        style_profile=profile.profile_id, publication_scope="internal_review",
+        generator=generator_record(__file__, command=shlex.join(sys.argv),
                                    runtime=runtime_record({"matplotlib": matplotlib.__version__})),
         inputs=[input_record(args.data / name, role="frozen_numerical_input")
-                for name in ("local_slopes.csv", "scalar_curvature.csv", "numerical_manifest.json")],
-        outputs=[
-            {**output_record(png, fmt="png", dpi=600, vector=False),
-             "inspection": inspect_export(png), "role": "color_review"},
-            {**output_record(pdf, fmt="pdf", dpi=None, vector=True),
-             "inspection": inspect_export(pdf), "role": "vector_manuscript_delivery"},
-        ],
-        axes=[
-            {"panel": panel, "observable": observable, "support": "frozen local response"}
-            for panel, observable in (("a", "pi log eta/s slope"), ("b", "K log eta/s slope"),
-                                      ("c", "sigma log eta/s slope and residual inset"),
-                                      ("d", "isolated scalar curvature"))
-        ],
-        series=series,
-        selection_rule="all finite frozen vertices; no smoothing or extrapolation",
-        interpolation_policy="none",
-        connector_policy="forbidden",
-        missing_value_policy="reject missing/nonfinite rows",
-        validation={"finite": True, "duplicate_keys": True, "strict_gate": False},
-        rendering={"delivery_stage": "png_review", "manuscript_eligible": False,
-                   "vector_delivery_pending": False, "column": "double_column",
-                   "figure_size_inches": [6.75, 5.20],
-                   "reference_lines": ["xi=xi_Mott", "analytic scalar threshold constant"]},
-        calculation_sha={"core_commit": CORE, "profile_sha256": PROFILE,
-                         "numerical_manifest_sha256": digest(args.data / "numerical_manifest.json")},
+                for name in ("local_slopes.csv", "scalar_curvature.csv", "numerical_manifest.json")]
+               + [input_record(profile.path, role="figure_style")],
+        outputs=outputs, axes=axes, series=series,
+        selection_rule="native secants; resolved scalar stencil interval; no smoothing or extrapolation",
+        interpolation_policy="none", connector_policy="forbidden",
+        missing_value_policy="refuse missing or nonfinite series",
+        validation={"finite": True, "duplicate_keys": True, "support": True, "strict_gate": False},
+        rendering={
+            "column": "double_column", "figure_size_inches": quality["figure_size_inches"],
+            "size_override_reason": "Room for the resolved local inset and four independent axes",
+            "quality": quality, "placement_limits": placement_limits(quality, profile, outputs),
+            "legend_policy": "declared_geometry_checked", "legend_placements": [], "legend_outside": True,
+            "color_route": "color_print_and_online", "review_contract": "prd_review_v1",
+            "accessibility": accessibility_record([
+                {"value": "computed response", "color": CURVE, "noncolor_encoding": "solid"},
+                {"value": "threshold or analytic constant", "color": REFERENCE, "noncolor_encoding": "dashed"},
+            ], backgrounds=["#ffffff"], background_scope="opaque white panel backgrounds"),
+            "reference_lines": {"a": 0, "b": 0, "c": 0, "c-inset": 0,
+                                "d": record["scalar_checks"]["analytic_limit_fm2"]},
+            "sigma_inset_fit": record["transport_checks"]["sigma"]["inset"],
+            "panel_conditions": {m: {k: c["location"][k] for k in ("T_MeV", "muB_MeV", "xi")}
+                                 for m, c in record["centers"].items()},
+        },
+        calculation_sha=CORE,
+        source_run_id=record["action_url"].rsplit("/", 1)[-1],
     )
+    # The compiled review uses a vector figure, with no author acceptance asserted.
+    manifest.update(status="agent_review", manuscript_eligible=False, current_publication_layer=False)
     errors = validate_manifest_record(manifest)
     if errors:
+        print(json.dumps({k: quality[k] for k in (
+            "smallest_glyphs", "clipped_text", "text_overlap_pairs", "tick_axes")}, indent=2))
         raise ValueError("; ".join(errors))
     write_manifest(args.out / "plot_manifest.json", manifest)
-    print(json.dumps({"out": str(args.out), "png_sha256": sha256_file(png),
-                      "pdf_sha256": sha256_file(pdf), "series": len(series)}, indent=2))
+    print(json.dumps({"out": str(args.out), "minimum_glyph_mm": quality["minimum_capital_numeral_height_mm"],
+                      "minimum_curve_pt": quality["minimum_curve_linewidth_pt"]}, indent=2))
 
 
 if __name__ == "__main__":

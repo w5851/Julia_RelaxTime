@@ -99,11 +99,22 @@ jobs:
           julia --project=core -e 'using Pkg; Pkg.instantiate()'
           mkdir -p results
           cp "$(find centers -name "center_$MESON.json" -print -quit)" results/
+          run_worker() {
+            local index=$1
+            local -a runner=(julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" core results scan "$MESON")
+            "${runner[@]}" fine "$index" 18 || return "$?"
+            if "${runner[@]}" reference "$index" 18 > "reference_$index.log" 2>&1; then
+              cat "reference_$index.log"
+              return 0
+            fi
+            cat "reference_$index.log"
+            grep -qE 'thermal cache did not converge: (evaluation_or_seed_budget|node_budget|round_budget)' "reference_$index.log" || return 1
+            "${runner[@]}" recheck "$index" 18
+          }
           pids=()
           for worker in 1 2; do
             index=$((2*(SLOT-1)+worker))
-            julia --project=core --startup-file=no --heap-size-hint=1600M "$DRIVER" \
-              core results scan "$MESON" both "$index" 18 > "worker_$index.log" 2>&1 &
+            run_worker "$index" > "worker_$index.log" 2>&1 &
             pids+=("$!")
           done
           rc=0
@@ -202,7 +213,8 @@ jobs:
           set -euo pipefail
           python scripts/analysis/relaxtime/assemble_ward_moller_mott_response.py \
             --scan-root results --scalar-root results --out frozen \
-            --action-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --action-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --action-head-sha "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         with:
           name: mott-frozen-${{ inputs.case_name }}

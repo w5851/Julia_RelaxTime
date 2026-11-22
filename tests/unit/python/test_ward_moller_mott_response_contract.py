@@ -34,6 +34,23 @@ def test_secant_is_logarithmic_and_requires_positive_rates() -> None:
         MODULE.secant({"eta_over_s": 0.0, "delta_xi": 0.0}, right)
 
 
+def test_sigma_inset_removes_a_linear_log_slope_without_moving_points() -> None:
+    def grid(tier):
+        rows = []
+        for step in MODULE.STEPS[tier]:
+            x = 0.000125 * step
+            rows.append({"delta_xi": x, "eta_over_s": math.exp(2.0*x+3.0*x*x)})
+        return rows
+
+    rows, checks = MODULE.local_slopes({(meson, tier): grid(tier)
+                                       for meson in MODULE.MESONS for tier in MODULE.TIERS})
+    sigma = [row for row in rows if row["meson"] == "sigma"]
+    for row in sigma:
+        assert row["slope"] == pytest.approx(2.0 + 6.0*row["u_midpoint"], abs=2e-12)
+        assert row["linear_background_residual"] == pytest.approx(0.0, abs=2e-12)
+    assert checks["sigma"]["max_shared_endpoint_slope_defect"] == 0.0
+
+
 def test_metadata_rejects_a_nonproduction_flux() -> None:
     metadata = {
         "core_commit": MODULE.CORE,

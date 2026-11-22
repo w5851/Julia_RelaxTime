@@ -7,6 +7,21 @@ const SC_CS = MM_RT.TotalCrossSection
 const SC_PROP = MM_RT.MesonPropagator
 const SC_XMAX = 0.01 # invariant excess s-4M_u^2, in fm^-2
 
+function sc_background(runtime, target, xi, seed)
+    T, mu = target.T_MeV/MM_HC, target.muB_MeV/(3MM_HC)
+    p = runtime.profile.background
+    continuation = Float64.(collect(seed))
+    raw = Models.solve_constraint(runtime.model, Models.FixedMu(), T;
+        μ_fm=mu, seed_guess=continuation, seed_candidates=[continuation],
+        xi, p_num=p.p_nodes, t_num=p.cos_nodes,
+        solver=Models.NLsolveGapSolver(method=:newton,jacobian=:forward,xtol=1e-14,ftol=2e-14),
+        residual_norm_max=1e-12, iterations=100, physicality_check=Models.is_physical_solution)
+    eq = MM_PHASE._normalize_equilibrium_result(raw; solver_backend=:models_strict_local)
+    eq !== nothing && eq.residual_norm < 1e-12 && eq.masses[1]*MM_HC > 200.0 ||
+        error("unresolved high-mass stationary point in scalar stencil at xi=$xi")
+    (; eq, state=MM_SP.point_state(runtime.profile, eq, T, mu; xi))
+end
+
 # At fixed s, the two-particle measure in total momentum Q and CM angles
 # contains E1 E2 beta/(4E). Multiplying by the medium Møller flux gives
 # x/(8E), with x=s-4m^2 and E=sqrt(s+Q^2). The common azimuth and
@@ -307,11 +322,15 @@ function sc_main(args)
     else
         mm_location(runtime,target,folder)
     end
-    center = Float64(location.xi)
+    scan_center = Float64(location.xi)
     cache = Dict{Float64,NamedTuple}()
     bg(x) = get!(cache,x) do
-        mm_equilibrium(runtime,target,x;seed=location.center_state)
+        sc_background(runtime,target,x,location.center_state)
     end
+    root = mm_bisect(x->real(mm_endpoint(bg(x),:sigma; nodes=256)),
+        scan_center-1e-7,scan_center+1e-7; atol=5e-14)
+    center = root.xi
+    abs(center-scan_center) < 1e-9 || error("strict scalar root drifted from the scan center")
     lim = sc_limit(bg,center,runtime)
     nodes = Dict{Float64,NamedTuple}()
     reftier = tier=="reference"
@@ -325,7 +344,8 @@ function sc_main(args)
             w = sc_weight_table(st,sc_prefactor(runtime,st);fine=reftier,degree=reftier ? 10 : 8)
             integ = sc_integrate((x,dx)->x*w.weight(x)*sc_cross_square(st,x,dx,kernel),kernel.xr,kernel.width;
                 rtol=reftier ? 2e-12 : 2e-11)
-            (; u, xr=kernel.xr, width=kernel.width, integ..., kernel.interpolation_defect, weight_defect=w.defect)
+            (; u, xr=kernel.xr, width=kernel.width, integ..., kernel.interpolation_defect,
+                weight_defect=w.defect, background_residual=bg(center+u).eq.residual_norm)
         end
     end
     rows = NamedTuple[]
@@ -345,7 +365,8 @@ function sc_main(args)
         flush(stdout)
     end
     mm_json(joinpath(folder,"summary.json"),(; status="complete",metadata=mm_metadata(runtime),
-        scalar_driver_sha256=mm_digest(@__FILE__),center,lim,tier,xmax_inv_fm2=SC_XMAX,
+        scalar_driver_sha256=mm_digest(@__FILE__),center,scan_center,center_shift=center-scan_center,
+        strict_center_bracket=root.bracket,lim,tier,xmax_inv_fm2=SC_XMAX,
         loops=reftier ? 256 : 128,scope="continuous uubar elastic s-channel mixed scalar positive square",
         determinant_floor=false,files=Dict(name=>mm_digest(joinpath(folder,name))
             for name in ("curvatures.csv","integrals.csv"))))

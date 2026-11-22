@@ -6,12 +6,14 @@ import csv
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 
 CORE = "096199b96d34045bf8e2d9611c2d786d6f92fb8e"
 PROFILE = "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313"
 MESONS = ("pi", "K", "sigma")
 TIERS = ("fine", "reference")
+RATE_CONVERGENCE = "thermal_defect_and_two_shifted_audits"
 # Units of 0.000125 in xi. These mirror the driver and require complete grids.
 STEPS = {
     "fine": sorted(set(range(-64, 65, 8)) | set(range(-16, 17, 2)) | {-3, -1, 1, 3}),
@@ -71,7 +73,7 @@ def line_fit(xs, ys):
     return ybar-slope*xbar, slope
 
 
-def collect_transport(root, centers):
+def collect_transport(root, centers, sources=None):
     grids = {(m, t): {} for m in MESONS for t in TIERS}
     hashes = {}
     for path in sorted(root.rglob("*.json")):
@@ -80,6 +82,12 @@ def collect_transport(root, centers):
         row = read_json(path)
         meta = row["metadata"]
         check_meta(meta)
+        if sources is not None:
+            prefix = path.relative_to(root).parts[0]
+            source = sources.get(prefix, {})
+            if (source.get("driver_sha256") != meta["driver_sha256"]
+                    or (source.get("host") and source["host"] != meta["run_host"])):
+                raise ValueError(f"Transport node does not match the recorded source: {path}")
         meson, tier, index = row["meson"], row["tier"], row["index"]
         grid = grids[meson, tier]
         if index in grid:
@@ -92,15 +100,29 @@ def collect_transport(root, centers):
         if not (abs(row["xi_mott"]-loc["xi"]) < 1e-11 and row["T_MeV"] == loc["T_MeV"]
                 and row["muB_MeV"] == loc["muB_MeV"] and row["residual"] <= 1e-11):
             raise ValueError(f"Background mismatch: {path}")
-        if not (meta["runtime_sampling"]["rtol"] == {"fine": 2e-6, "reference": 2e-7}[tier]
-                and len(row["rates"]) == len(row["rate_diagnostics"]) == 17
-                and all(math.isfinite(v) and v > 0 for v in row["rates"].values())):
+        rates, diagnostics = row["rates"], row["rate_diagnostics"]
+        cfg = meta["runtime_sampling"]
+        recheck = (tier == "reference" and cfg["rtol"] == 1e-6 and cfg["max_evaluations"] == 300_000
+                   and cfg["max_nodes"] == 80_000 and cfg["max_rounds"] == 90)
+        if not ((recheck or cfg["rtol"] == {"fine": 2e-6, "reference": 2e-7}[tier])
+                and len(rates) == len(diagnostics) == 17
+                and set(rates) == {d["channel"] for d in diagnostics}
+                and all(math.isfinite(v) and v > 0 for v in rates.values())
+                and all(d["reason"] == RATE_CONVERGENCE and d["guard_phase"] == 2
+                        and d["rate"] == rates[d["channel"]]
+                        and 0 <= d["estimated_error"] <= cfg["atol"] + cfg["rtol"]*d["rate"]
+                        for d in diagnostics)):
             raise ValueError(f"Incomplete rate set or wrong sampling tier: {path}")
         if abs(row["m_u_MeV"]-loc["center_masses_inv_fm"][0]*197.3269804) > 20.0:
             raise ValueError(f"Unexpected phase jump: {path}")
         grid[index] = {k:row[k] for k in ("meson","tier","index","T_MeV","muB_MeV","xi","xi_mott",
             "delta_xi","eta_over_s","m_u_MeV","m_s_MeV","residual")}
         grid[index]["driver_sha256"] = meta["driver_sha256"]
+        grid[index]["sampling_rtol"] = cfg["rtol"]
+        grid[index]["sampling_recheck"] = recheck
+        grid[index]["run_host"] = meta["run_host"]
+        if not recheck and grid[index]["driver_sha256"] != centers[meson]["metadata"]["driver_sha256"]:
+            raise ValueError(f"Scan and center used different drivers: {path}")
         hashes[path.relative_to(root).as_posix()] = digest(path)
     missing = {f"{m}/{t}": sorted(set(range(1, len(STEPS[t])+1))-set(grids[m,t]))
                for m,t in grids if len(grids[m,t]) != len(STEPS[t])}
@@ -114,6 +136,8 @@ def local_slopes(grids):
     for meson in MESONS:
         fine, ref = [grids[meson,tier] for tier in TIERS]
         fine_at = {round(r["delta_xi"],12):r for r in fine}
+        eta_defect = max(abs(r["eta_over_s"] / fine_at[round(r["delta_xi"], 12)]["eta_over_s"] - 1)
+                         for r in ref)
         sampling = []
         for a,b in zip(ref[:-1],ref[1:]):
             d = secant(a,b)
@@ -136,6 +160,8 @@ def local_slopes(grids):
             around.append({"side":sign,"interval":0.00025,"slope":d,"half_step_slope":d2,
                            "difference":d2-d})
         entry = {"same_endpoint_sampling":sampling,"adjacent_to_mott":around,
+                 "max_shared_node_eta_relative_defect":eta_defect,
+                 "max_shared_endpoint_slope_defect":max(r["absolute_defect"] for r in sampling),
                  "slope_min":min(r["slope"] for r in selected),
                  "slope_max":max(r["slope"] for r in selected)}
         if meson == "sigma":
@@ -152,34 +178,58 @@ def local_slopes(grids):
 
 
 def scalar_results(root, center):
-    tiers, provenance = {}, {}
+    tiers, provenance, stencils = {}, {}, {}
     for t in TIERS:
         folder = root/f"scalar_{t}"
         p = folder/"summary.json"
         meta = read_json(p)
         check_meta(meta["metadata"])
         if not (meta["status"] == "complete" and meta["determinant_floor"] is False
+                and "strict_center_bracket" in meta
                 and meta["lim"]["resonance_sign"] == -1 and abs(meta["center"]-center)<1e-9):
             raise ValueError("Unexpected scalar integration provenance")
         for filename, expected in meta["files"].items():
             if digest(folder/filename) != expected:
                 raise ValueError(f"Changed scalar output: {filename}")
         tiers[t] = read_rows(folder/"curvatures.csv")
+        stencils[t] = read_rows(folder/"integrals.csv")
+        if not all(math.isfinite(v) for rows in (tiers[t],stencils[t]) for row in rows for v in row.values()):
+            raise ValueError(f"Nonfinite scalar data in {t}")
+        meta["max_background_residual"] = max(r["background_residual"] for r in stencils[t])
+        if meta["max_background_residual"] >= 1e-12:
+            raise ValueError(f"Unresolved scalar mean-field stencil in {t}")
+        verification = folder/"source_verification.json"
+        if verification.is_file():
+            verified = read_json(verification)
+            if verified["core_commit"] != CORE or verified["runtime_files_matched"] <= 0:
+                raise ValueError(f"Unverified remote scalar core in {t}")
+            meta["remote_source_verification"] = verified
         provenance[t] = {"sha256":digest(p), **meta}
     lim = provenance["fine"]["lim"]["expected"]
+    if not (lim > 0 and math.isclose(lim, provenance["reference"]["lim"]["expected"], rel_tol=1e-5)
+            and provenance["fine"]["scalar_driver_sha256"] == provenance["reference"]["scalar_driver_sha256"]):
+        raise ValueError("Scalar tiers must share the same driver and independent limit")
     references = {r["h"]:r for r in tiers["reference"]}
     comparisons = []
-    for r in tiers["fine"]:
+    segments, consecutive = [], []
+    for r in sorted(tiers["fine"], key=lambda r: r["h"], reverse=True):
         h = r["h"]
-        row = {**r, "analytic_limit":lim, "reference_relative_defect":""}
+        row = {**r, "analytic_limit":lim, "reference_scaled_curvature":"", "reference_relative_defect":""}
         if h in references:
             s = references[h]
+            row["reference_scaled_curvature"] = s["scaled_curvature"]
             row["reference_relative_defect"] = abs(r["scaled_curvature"]-s["scaled_curvature"])/lim
         error = (r["step_defect"]+r["quadrature_defect"])*math.sqrt(h)/lim
+        row["relative_numerical_defect"] = error
         row["usable"] = bool(r["xr"] > 0 and error <= .025
                              and (row["reference_relative_defect"] == "" or row["reference_relative_defect"] <= .025))
         comparisons.append(row)
-    plateau = [r for r in comparisons if r["usable"] and abs(r["relative_to_limit"]) <= .05]
+        if row["usable"] and abs(row["relative_to_limit"]) <= .05:
+            consecutive.append(row)
+        else:
+            segments.append(consecutive)
+            consecutive = []
+    plateau = max([*segments, consecutive], key=len)
     if len(plateau)<3 or max(r["h"] for r in plateau) < 4*min(r["h"] for r in plateau):
         raise ValueError("The independent scalar curvature plateau is not resolved over a factor four in h")
     if len([r for r in plateau if r["reference_relative_defect"] != ""])<2:
@@ -194,9 +244,12 @@ def scalar_results(root, center):
         "h_max":max(r["h"] for r in plateau),"fit_points":len(plateau),
         "curvature_exponent":curvature_exponent,"peak_area_exponent":area_exponent,
         "max_relative_to_limit":max(abs(r["relative_to_limit"]) for r in plateau),
+        "nearest_scaled_curvature_fm2":plateau[-1]["scaled_curvature"],
+        "nearest_relative_to_limit":plateau[-1]["relative_to_limit"],
+        "max_numerical_defect":max(r["relative_numerical_defect"] for r in plateau),
         "max_reference_defect":max(r["reference_relative_defect"] for r in plateau
                                    if r["reference_relative_defect"] != "")}
-    return comparisons, checks, provenance
+    return comparisons, checks, provenance, stencils
 
 
 def main():
@@ -205,22 +258,32 @@ def main():
     parser.add_argument("--scalar-root",required=True,type=Path)
     parser.add_argument("--out",required=True,type=Path)
     parser.add_argument("--action-url",required=True)
+    parser.add_argument("--action-head-sha",required=True)
+    parser.add_argument("--source-index",type=Path,
+                        help="Source records keyed by top-level folder when combining runs")
     args = parser.parse_args()
+    if not re.fullmatch(r"[0-9a-f]{40}", args.action_head_sha):
+        parser.error("--action-head-sha must be a full commit hash")
     centers = {}
     for meson in MESONS:
         path, = args.scan_root.rglob(f"center_{meson}.json")
         centers[meson] = {"sha256":digest(path), **read_json(path)}
         check_meta(centers[meson]["metadata"])
-    grids, node_hashes = collect_transport(args.scan_root, centers)
+    sources = read_json(args.source_index) if args.source_index else None
+    grids, node_hashes = collect_transport(args.scan_root, centers, sources)
     slopes, slope_checks = local_slopes(grids)
-    scalar, scalar_checks, scalar_provenance = scalar_results(args.scalar_root,centers["sigma"]["location"]["xi"])
+    scalar, scalar_checks, scalar_provenance, stencils = scalar_results(
+        args.scalar_root, centers["sigma"]["location"]["xi"])
     args.out.mkdir(parents=True, exist_ok=False)
     tables = {"transport_nodes.csv":[r for g in grids.values() for r in g],
-              "local_slopes.csv":slopes,"scalar_curvature.csv":scalar}
+              "local_slopes.csv":slopes,"scalar_curvature.csv":scalar,
+              **{f"scalar_stencil_{tier}.csv": rows for tier, rows in stencils.items()}}
     for name,rows in tables.items():
         write_rows(args.out/name,rows)
     result = {"status":"frozen_analysis","core_commit":CORE,"profile_sha256":PROFILE,
-              "action_url":args.action_url,"centers":centers,"transport_checks":slope_checks,
+              "action_url":args.action_url,"action_head_sha":args.action_head_sha,
+              "transport_sources":sources,
+              "centers":centers,"transport_checks":slope_checks,
               "scalar_checks":scalar_checks,"scalar_provenance":scalar_provenance,
               "transport_artifact_sha256":node_hashes,
               "postprocess_sha256":digest(Path(__file__)),
