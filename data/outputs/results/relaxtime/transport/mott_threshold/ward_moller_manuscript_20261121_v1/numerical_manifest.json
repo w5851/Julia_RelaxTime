@@ -1,0 +1,1202 @@
+{
+  "status": "frozen_analysis",
+  "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+  "profile_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+  "action_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45028496140",
+  "action_head_sha": "5a09c09fe75e4e6b72f2bc4fb84209cc38cb7c59",
+  "transport_sources": {
+    "actions-45028496140": {
+      "provider": "github-actions",
+      "run_id": 45028496140,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45028496140",
+      "head_sha": "5a09c09fe75e4e6b72f2bc4fb84209cc38cb7c59",
+      "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+      "artifact_ids": {
+        "mott-K-1": 14759745312,
+        "mott-K-2": 14758919609,
+        "mott-K-3": 14760616831,
+        "mott-K-4": 14759307468,
+        "mott-K-5": 14759332455,
+        "mott-K-6": 14760061776,
+        "mott-K-7": 14758665716,
+        "mott-K-8": 14758581368,
+        "mott-K-9": 14756874752,
+        "mott-pi-1": 14759777906,
+        "mott-pi-2": 14759736586,
+        "mott-pi-3": 14758994789,
+        "mott-pi-4": 14759611147,
+        "mott-pi-5": 14759977605,
+        "mott-pi-6": 14760001612,
+        "mott-pi-7": 14758391980,
+        "mott-pi-8": 14758656428,
+        "mott-pi-9": 14757419619,
+        "mott-sigma-1": 14759406624,
+        "mott-sigma-2": 14757979326,
+        "mott-sigma-3": 14757874547,
+        "mott-sigma-4": 14758164024,
+        "mott-sigma-5": 14758272453,
+        "mott-sigma-6": 14758611889,
+        "mott-sigma-7": 14758237790,
+        "mott-sigma-8": 14758002435,
+        "mott-sigma-9": 14758300959
+      }
+    },
+    "actions-45035785870": {
+      "provider": "github-actions",
+      "run_id": 45035785870,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45035785870",
+      "head_sha": "45b6bd6024d990f3a158be7a1c1b3c9c08966d24",
+      "driver_sha256": "de0f9ce0029679e695703b44e9e3a89e89a9438de44cffef4c944e655a94a508",
+      "artifact_ids": {
+        "mott-reference-rescue-pi-1": 14760163836,
+        "mott-reference-rescue-pi-2": 14760952107,
+        "mott-reference-rescue-pi-3": 14760448548,
+        "mott-reference-rescue-pi-4": 14760329060,
+        "mott-reference-rescue-pi-5": 14760569368,
+        "mott-reference-rescue-pi-6": 14760836450,
+        "mott-reference-rescue-pi-7": 14760951256,
+        "mott-reference-rescue-pi-8": 14760502231,
+        "mott-reference-rescue-pi-9": 14761135245,
+        "mott-reference-rescue-pi-10": 14761110647,
+        "mott-reference-rescue-pi-11": 14760457833
+      }
+    },
+    "actions-45035358531": {
+      "provider": "github-actions",
+      "run_id": 45035358531,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45035358531",
+      "head_sha": "45b6bd6024d990f3a158be7a1c1b3c9c08966d24",
+      "driver_sha256": "de0f9ce0029679e695703b44e9e3a89e89a9438de44cffef4c944e655a94a508",
+      "artifact_ids": {
+        "mott-reference-rescue-sigma-1": 14760790770,
+        "mott-reference-rescue-sigma-2": 14760252492,
+        "mott-reference-rescue-sigma-7": 14759154221,
+        "mott-reference-rescue-sigma-8": 14760826411
+      }
+    },
+    "actions-45037437234": {
+      "provider": "github-actions",
+      "run_id": 45037437234,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45037437234",
+      "head_sha": "45b6bd6024d990f3a158be7a1c1b3c9c08966d24",
+      "driver_sha256": "de0f9ce0029679e695703b44e9e3a89e89a9438de44cffef4c944e655a94a508",
+      "artifact_ids": {
+        "mott-reference-rescue-sigma-3": 14761621670,
+        "mott-reference-rescue-sigma-4": 14761770555,
+        "mott-reference-rescue-sigma-9": 14760434915,
+        "mott-reference-rescue-sigma-10": 14761295878
+      }
+    },
+    "actions-45036098189": {
+      "provider": "github-actions",
+      "run_id": 45036098189,
+      "run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/45036098189",
+      "head_sha": "45b6bd6024d990f3a158be7a1c1b3c9c08966d24",
+      "driver_sha256": "de0f9ce0029679e695703b44e9e3a89e89a9438de44cffef4c944e655a94a508",
+      "artifact_ids": {
+        "mott-reference-rescue-sigma-5": 14760273311,
+        "mott-reference-rescue-sigma-6": 14760583768,
+        "mott-reference-rescue-sigma-11": 14761151397
+      }
+    }
+  },
+  "centers": {
+    "pi": {
+      "sha256": "89d4be237ba0d1cf6534a80b65c8bbbf1adb30ac3798079abb10e1428d59e8a9",
+      "metadata": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "run_host": "x86_64-linux-gnu",
+        "julia_version": "1.12.5",
+        "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+        "profile": {
+          "id": "ward_moller_sphere_v1",
+          "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/core/config/models/pnjl/transport_sampling/ward_moller_sphere_v1.toml",
+          "source_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+          "algorithm": "thermal_weighted",
+          "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1e-08
+          },
+          "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+          },
+          "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "sampling": {
+            "rtol": 0.001,
+            "atol": 1e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 40000,
+            "max_nodes": 12000,
+            "max_rounds": 40,
+            "max_events": 30000000,
+            "relative_velocity": "medium_moller"
+          },
+          "a_polarization": "ward_matched_RS",
+          "a_coupling": "ward_matched_RS",
+          "b0_direction": "sphere_average",
+          "sigma_cutoff_inv_fm": 3.0522942112582996,
+          "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+          },
+          "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+          },
+          "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+        },
+        "runtime_sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "medium_moller"
+        }
+      },
+      "location": {
+        "meson": "pi",
+        "T_MeV": 138.3096002910106,
+        "muB_MeV": 900,
+        "search": [
+          0.17,
+          0.19
+        ],
+        "scout_nodes": 5,
+        "xi": 0.17997015183769693,
+        "bracket": [
+          0.17997015183762416,
+          0.17997015183776968
+        ],
+        "endpoint_values": [
+          7.993605777301127e-14,
+          -1.3988810110276972e-14
+        ],
+        "root_128_shift": 0,
+        "center_inverse": 3.2307490016592055e-14,
+        "native_offsets": [
+          {
+            "x_inv_fm2": -0.0001,
+            "re": 8.658177642362208e-05,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": -1e-06,
+            "re": 8.052635784405737e-06,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": 1e-06,
+            "re": -2.249559982736571e-08,
+            "im": -8.257071244043099e-06
+          },
+          {
+            "x_inv_fm2": 0.0001,
+            "re": -6.903867413088349e-06,
+            "im": -8.258120642648155e-05
+          }
+        ],
+        "branch_masses_MeV": [
+          90.48427126193656,
+          91.78518218002638,
+          93.11591485645074,
+          94.47745433755959,
+          95.87082431017333
+        ],
+        "center_masses_inv_fm": [
+          0.4718863820228546,
+          0.47188638202285305,
+          2.2476607968973736
+        ],
+        "center_state": [
+          -0.459037167052129,
+          -0.4590371670521264,
+          -1.9229177030148812,
+          0.34604375775151297,
+          0.3715285849880416
+        ]
+      }
+    },
+    "K": {
+      "sha256": "d46d006370c2e36f05264e409050d1b49804b476ab342984aa1d53ef8cc58963",
+      "metadata": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "run_host": "x86_64-linux-gnu",
+        "julia_version": "1.12.5",
+        "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+        "profile": {
+          "id": "ward_moller_sphere_v1",
+          "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/core/config/models/pnjl/transport_sampling/ward_moller_sphere_v1.toml",
+          "source_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+          "algorithm": "thermal_weighted",
+          "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1e-08
+          },
+          "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+          },
+          "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "sampling": {
+            "rtol": 0.001,
+            "atol": 1e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 40000,
+            "max_nodes": 12000,
+            "max_rounds": 40,
+            "max_events": 30000000,
+            "relative_velocity": "medium_moller"
+          },
+          "a_polarization": "ward_matched_RS",
+          "a_coupling": "ward_matched_RS",
+          "b0_direction": "sphere_average",
+          "sigma_cutoff_inv_fm": 3.0522942112582996,
+          "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+          },
+          "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+          },
+          "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+        },
+        "runtime_sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "medium_moller"
+        }
+      },
+      "location": {
+        "meson": "K",
+        "T_MeV": 200.0898076157829,
+        "muB_MeV": 0,
+        "search": [
+          -0.2,
+          -0.16
+        ],
+        "scout_nodes": 5,
+        "xi": -0.1774684525474004,
+        "bracket": [
+          -0.17746845254747315,
+          -0.17746845254732763
+        ],
+        "endpoint_values": [
+          1.630917623174355e-13,
+          -1.9095836023552692e-14
+        ],
+        "root_128_shift": 0,
+        "center_inverse": 7.538414337204813e-14,
+        "native_offsets": [
+          {
+            "x_inv_fm2": -0.0001,
+            "re": 0.0006179298092363616,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": -1e-06,
+            "re": 2.787053737329792e-05,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": 1e-06,
+            "re": 1.5906706065660359e-06,
+            "im": -5.8617173212025504e-05
+          },
+          {
+            "x_inv_fm2": 0.0001,
+            "re": -6.6033619097183305e-06,
+            "im": -0.0005861917299695772
+          }
+        ],
+        "branch_masses_MeV": [
+          82.73165113759535,
+          83.9392938327655,
+          85.15919437719194,
+          86.39086963072252,
+          87.63380336788669
+        ],
+        "center_masses_inv_fm": [
+          0.43156386523812607,
+          0.4315638652381276,
+          2.0812506686208567
+        ],
+        "center_state": [
+          -0.4258851313928091,
+          -0.4258851313928116,
+          -1.7151714710983321,
+          0.6223807782290056,
+          0.6223807782290056
+        ]
+      }
+    },
+    "sigma": {
+      "sha256": "d5cd323d308cdabf7dea3eb447c79a0f4b75a0d0b765f20a15785ab65205f8d0",
+      "metadata": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "run_host": "x86_64-linux-gnu",
+        "julia_version": "1.12.5",
+        "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+        "profile": {
+          "id": "ward_moller_sphere_v1",
+          "source_path": "/home/runner/work/Julia_RelaxTime/Julia_RelaxTime/core/config/models/pnjl/transport_sampling/ward_moller_sphere_v1.toml",
+          "source_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+          "algorithm": "thermal_weighted",
+          "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1e-08
+          },
+          "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+          },
+          "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "sampling": {
+            "rtol": 0.001,
+            "atol": 1e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 40000,
+            "max_nodes": 12000,
+            "max_rounds": 40,
+            "max_events": 30000000,
+            "relative_velocity": "medium_moller"
+          },
+          "a_polarization": "ward_matched_RS",
+          "a_coupling": "ward_matched_RS",
+          "b0_direction": "sphere_average",
+          "sigma_cutoff_inv_fm": 3.0522942112582996,
+          "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+          },
+          "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+          },
+          "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+        },
+        "runtime_sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "medium_moller"
+        }
+      },
+      "location": {
+        "meson": "sigma",
+        "T_MeV": 125.7360002645551,
+        "muB_MeV": 900,
+        "search": [
+          0,
+          0.03
+        ],
+        "scout_nodes": 7,
+        "xi": 0.014223785931753807,
+        "bracket": [
+          0.014223785931681047,
+          0.014223785931826567
+        ],
+        "endpoint_values": [
+          6.467049118441537e-15,
+          -3.91853216541449e-13
+        ],
+        "root_128_shift": 0,
+        "center_inverse": 2.9976021664879227e-15,
+        "native_offsets": [
+          {
+            "x_inv_fm2": -0.0001,
+            "re": 2.8254001689931307e-06,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": -1e-06,
+            "re": 2.830617629179244e-08,
+            "im": 0
+          },
+          {
+            "x_inv_fm2": 1e-06,
+            "re": -2.8312023225840477e-08,
+            "im": -5.7906484993328454e-12
+          },
+          {
+            "x_inv_fm2": 0.0001,
+            "re": -2.8311177142359423e-06,
+            "im": -5.790714929979547e-09
+          }
+        ],
+        "branch_masses_MeV": [
+          267.381799077192,
+          270.58411398763207,
+          273.3419003473909,
+          275.7752335302812,
+          277.95921281385364
+        ],
+        "center_masses_inv_fm": [
+          1.385223144819333,
+          1.3852231448193324,
+          2.557590670086903
+        ],
+        "center_state": [
+          -1.3775505477921326,
+          -1.3775505477921315,
+          -2.1165163930032165,
+          0.1819016115638715,
+          0.22980381034314284
+        ]
+      }
+    }
+  },
+  "transport_checks": {
+    "pi": {
+      "same_endpoint_sampling": [
+        {
+          "u_left": -0.008,
+          "u_right": -0.007,
+          "slope": 0.5946319405192375,
+          "reference_slope": 0.5946304724273161,
+          "absolute_defect": 1.4680919213638788e-06
+        },
+        {
+          "u_left": -0.007,
+          "u_right": -0.001,
+          "slope": 0.8774193927246625,
+          "reference_slope": 0.8774194648852708,
+          "absolute_defect": 7.216060826653603e-08
+        },
+        {
+          "u_left": -0.001,
+          "u_right": -0.00025,
+          "slope": 1.4208904193031013,
+          "reference_slope": 1.420890167634428,
+          "absolute_defect": 2.516686732345619e-07
+        },
+        {
+          "u_left": -0.00025,
+          "u_right": -0.000125,
+          "slope": 0.25059485109338914,
+          "reference_slope": 0.2506184283721886,
+          "absolute_defect": 2.357727879948035e-05
+        },
+        {
+          "u_left": -0.000125,
+          "u_right": 0,
+          "slope": -2.715993015082688,
+          "reference_slope": -2.715977972386985,
+          "absolute_defect": 1.5042695703293418e-05
+        },
+        {
+          "u_left": 0,
+          "u_right": 0.000125,
+          "slope": 7.881721815605012,
+          "reference_slope": 7.881706693653363,
+          "absolute_defect": 1.5121951649099685e-05
+        },
+        {
+          "u_left": 0.000125,
+          "u_right": 0.00025,
+          "slope": 3.8052373546243903,
+          "reference_slope": 3.805227188555686,
+          "absolute_defect": 1.0166068704187126e-05
+        },
+        {
+          "u_left": 0.00025,
+          "u_right": 0.001,
+          "slope": 1.8310739994541396,
+          "reference_slope": 1.8310718065422253,
+          "absolute_defect": 2.192911914278284e-06
+        },
+        {
+          "u_left": 0.001,
+          "u_right": 0.007,
+          "slope": 0.5578931122491207,
+          "reference_slope": 0.557892457476695,
+          "absolute_defect": 6.547724257233156e-07
+        },
+        {
+          "u_left": 0.007,
+          "u_right": 0.008,
+          "slope": 0.2941603347173407,
+          "reference_slope": 0.2941582079774147,
+          "absolute_defect": 2.1267399260005426e-06
+        }
+      ],
+      "adjacent_to_mott": [
+        {
+          "side": -1,
+          "interval": 0.00025,
+          "slope": -1.2326990819946493,
+          "half_step_slope": -2.715993015082688,
+          "difference": -1.4832939330880388
+        },
+        {
+          "side": 1,
+          "interval": 0.00025,
+          "slope": 5.8434795851147,
+          "half_step_slope": 7.881721815605012,
+          "difference": 2.0382422304903116
+        }
+      ],
+      "max_shared_node_eta_relative_defect": 1.1921142073489932e-08,
+      "max_shared_endpoint_slope_defect": 2.357727879948035e-05,
+      "slope_min": -2.715993015082688,
+      "slope_max": 7.881721815605012
+    },
+    "K": {
+      "same_endpoint_sampling": [
+        {
+          "u_left": -0.008,
+          "u_right": -0.007,
+          "slope": 1.5174337734777332,
+          "reference_slope": 1.5174440415123491,
+          "absolute_defect": 1.02680346159012e-05
+        },
+        {
+          "u_left": -0.007,
+          "u_right": -0.001,
+          "slope": 1.3633804335244795,
+          "reference_slope": 1.3633796732456505,
+          "absolute_defect": 7.602788290039797e-07
+        },
+        {
+          "u_left": -0.001,
+          "u_right": -0.00025,
+          "slope": 1.3179798241083305,
+          "reference_slope": 1.317984375921875,
+          "absolute_defect": 4.551813544528827e-06
+        },
+        {
+          "u_left": -0.00025,
+          "u_right": -0.000125,
+          "slope": 1.354518062533734,
+          "reference_slope": 1.3545297265325917,
+          "absolute_defect": 1.1663998857658342e-05
+        },
+        {
+          "u_left": -0.000125,
+          "u_right": 0,
+          "slope": 1.375285882656851,
+          "reference_slope": 1.3754006566542756,
+          "absolute_defect": 0.0001147739974245443
+        },
+        {
+          "u_left": 0,
+          "u_right": 0.000125,
+          "slope": 1.4323870754108097,
+          "reference_slope": 1.4323657950529614,
+          "absolute_defect": 2.1280357848318943e-05
+        },
+        {
+          "u_left": 0.000125,
+          "u_right": 0.00025,
+          "slope": 1.4614244214446959,
+          "reference_slope": 1.461402915262632,
+          "absolute_defect": 2.150618206386845e-05
+        },
+        {
+          "u_left": 0.00025,
+          "u_right": 0.001,
+          "slope": 1.4868218301995506,
+          "reference_slope": 1.4868171708289135,
+          "absolute_defect": 4.65937063709454e-06
+        },
+        {
+          "u_left": 0.001,
+          "u_right": 0.007,
+          "slope": 1.3565686094502332,
+          "reference_slope": 1.356566127013226,
+          "absolute_defect": 2.4824370070675172e-06
+        },
+        {
+          "u_left": 0.007,
+          "u_right": 0.008,
+          "slope": 1.2181369501832042,
+          "reference_slope": 1.2181368013887632,
+          "absolute_defect": 1.4879444099058503e-07
+        }
+      ],
+      "adjacent_to_mott": [
+        {
+          "side": -1,
+          "interval": 0.00025,
+          "slope": 1.364901972595293,
+          "half_step_slope": 1.375285882656851,
+          "difference": 0.010383910061558144
+        },
+        {
+          "side": 1,
+          "interval": 0.00025,
+          "slope": 1.446905748427753,
+          "half_step_slope": 1.4323870754108097,
+          "difference": -0.014518673016943318
+        }
+      ],
+      "max_shared_node_eta_relative_defect": 1.298280190020762e-07,
+      "max_shared_endpoint_slope_defect": 0.0001147739974245443,
+      "slope_min": 1.2181369501832042,
+      "slope_max": 1.5174337734777332
+    },
+    "sigma": {
+      "same_endpoint_sampling": [
+        {
+          "u_left": -0.008,
+          "u_right": -0.007,
+          "slope": 4.55839263548045,
+          "reference_slope": 4.55839401407863,
+          "absolute_defect": 1.3785981796132774e-06
+        },
+        {
+          "u_left": -0.007,
+          "u_right": -0.001,
+          "slope": 4.157893859606919,
+          "reference_slope": 4.157892220569951,
+          "absolute_defect": 1.6390369674823546e-06
+        },
+        {
+          "u_left": -0.001,
+          "u_right": -0.00025,
+          "slope": 3.840467072274878,
+          "reference_slope": 3.840467672461363,
+          "absolute_defect": 6.001864849558558e-07
+        },
+        {
+          "u_left": -0.00025,
+          "u_right": -0.000125,
+          "slope": 3.7940226832479316,
+          "reference_slope": 3.794022156170908,
+          "absolute_defect": 5.270770233600786e-07
+        },
+        {
+          "u_left": -0.000125,
+          "u_right": 0,
+          "slope": 3.7818299573007454,
+          "reference_slope": 3.7818284609920725,
+          "absolute_defect": 1.496308672965796e-06
+        },
+        {
+          "u_left": 0,
+          "u_right": 0.000125,
+          "slope": 3.7715267061390607,
+          "reference_slope": 3.771533921196698,
+          "absolute_defect": 7.2150576371221575e-06
+        },
+        {
+          "u_left": 0.000125,
+          "u_right": 0.00025,
+          "slope": 3.76984821485133,
+          "reference_slope": 3.76985222045088,
+          "absolute_defect": 4.005599549827821e-06
+        },
+        {
+          "u_left": 0.00025,
+          "u_right": 0.001,
+          "slope": 3.745283047412806,
+          "reference_slope": 3.745282740989908,
+          "absolute_defect": 3.064228977223138e-07
+        },
+        {
+          "u_left": 0.001,
+          "u_right": 0.007,
+          "slope": 3.5179078231853045,
+          "reference_slope": 3.517907734096891,
+          "absolute_defect": 8.90884135351655e-08
+        },
+        {
+          "u_left": 0.007,
+          "u_right": 0.008,
+          "slope": 3.314838215653208,
+          "reference_slope": 3.314839429389944,
+          "absolute_defect": 1.213736736005444e-06
+        }
+      ],
+      "adjacent_to_mott": [
+        {
+          "side": -1,
+          "interval": 0.00025,
+          "slope": 3.7879263202743387,
+          "half_step_slope": 3.7818299573007454,
+          "difference": -0.006096362973593283
+        },
+        {
+          "side": 1,
+          "interval": 0.00025,
+          "slope": 3.7706874604951954,
+          "half_step_slope": 3.7715267061390607,
+          "difference": 0.0008392456438652829
+        }
+      ],
+      "max_shared_node_eta_relative_defect": 8.146329133484898e-08,
+      "max_shared_endpoint_slope_defect": 7.2150576371221575e-06,
+      "slope_min": 3.314838215653208,
+      "slope_max": 4.55839263548045,
+      "inset": {
+        "fit_range": [
+          0.003,
+          0.008
+        ],
+        "intercept": 3.873391151429467,
+        "gradient": -81.22739716921758,
+        "display_half_width": 0.0005,
+        "residual_min": -0.09678773296733018,
+        "residual_max": -0.08831279960890855
+      }
+    }
+  },
+  "scalar_checks": {
+    "analytic_limit_fm2": 0.04516445744416648,
+    "h_min": 1.953125e-07,
+    "h_max": 0.0002,
+    "fit_points": 11,
+    "curvature_exponent": -0.4949897433241931,
+    "peak_area_exponent": 1.5002691623013829,
+    "max_relative_to_limit": 0.04372731472957825,
+    "nearest_scaled_curvature_fm2": 0.045280061848119085,
+    "nearest_relative_to_limit": 0.0025596322970451446,
+    "max_numerical_defect": 3.345902293249302e-05,
+    "max_reference_defect": 9.538245057015562e-08
+  },
+  "scalar_provenance": {
+    "fine": {
+      "sha256": "ef8934acffe4df2b70ef8d87ac2bd47fc0a50c6734884f74797c2f2d049c22a3",
+      "status": "complete",
+      "metadata": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "run_host": "W",
+        "julia_version": "1.12.5",
+        "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+        "profile": {
+          "id": "ward_moller_sphere_v1",
+          "source_path": "D:\\CodexCompute\\ward-moller-local-response-096199b9\\source\\config\\models\\pnjl\\transport_sampling\\ward_moller_sphere_v1.toml",
+          "source_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+          "algorithm": "thermal_weighted",
+          "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1e-08
+          },
+          "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+          },
+          "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "sampling": {
+            "rtol": 0.001,
+            "atol": 1e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 40000,
+            "max_nodes": 12000,
+            "max_rounds": 40,
+            "max_events": 30000000,
+            "relative_velocity": "medium_moller"
+          },
+          "a_polarization": "ward_matched_RS",
+          "a_coupling": "ward_matched_RS",
+          "b0_direction": "sphere_average",
+          "sigma_cutoff_inv_fm": 3.0522942112582996,
+          "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+          },
+          "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+          },
+          "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+        },
+        "runtime_sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "medium_moller"
+        }
+      },
+      "scalar_driver_sha256": "68398d46fc965f2b59cebacd05e61b0fd1a575c552419206cf062fa2efa94842",
+      "center": 0.014223785931825331,
+      "scan_center": 0.014223785931753807,
+      "center_shift": 7.152438363799973e-14,
+      "strict_center_bracket": [
+        0.01422378593180149,
+        0.014223785931849173
+      ],
+      "lim": {
+        "a": -0.004455490440787516,
+        "b": -0.0025729052386454926,
+        "c": -0.0005262525915006043,
+        "F0": 1.1389275872382653e-08,
+        "expected": 0.04516445744416648,
+        "resonance_sign": -1,
+        "sampling_check": [
+          2.375877272697835e-14,
+          -2.5868196473766147e-14,
+          2.4646951146678475e-14
+        ],
+        "coefficient_defects": [
+          1.4936901204798403e-07,
+          1.8578338867314415e-07,
+          1.898517422826984e-06
+        ]
+      },
+      "tier": "fine",
+      "xmax_inv_fm2": 0.01,
+      "loops": 128,
+      "scope": "continuous uubar elastic s-channel mixed scalar positive square",
+      "determinant_floor": false,
+      "files": {
+        "curvatures.csv": "1cd8a04e488485ecdbb7a4963beb4c80c28bb922a832ad7c5ba7a1b3781101ff",
+        "integrals.csv": "5d01df341e96c95282cd88917d4c907fddb20fb1d3a536f990915b0ca507d45c"
+      },
+      "max_background_residual": 3.14177178175863e-14,
+      "remote_source_verification": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "source_zip_sha256": "15b3b4b3f12ac094f439a2d769bdc8949a9cd3b1dcc77d93d342e273f3d5d93e",
+        "runtime_files_matched": 379
+      }
+    },
+    "reference": {
+      "sha256": "c61f4673ba5c3c87399ef678b6dfba126dc5b05a4ebc9722735e86af136a09fe",
+      "status": "complete",
+      "metadata": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "run_host": "DESKTOP-IQDD14J",
+        "julia_version": "1.12.5",
+        "driver_sha256": "75ce8cac2a40395d3e92303b85e7652abf5f38c3549fcc5d9fe654f31ce632a7",
+        "profile": {
+          "id": "ward_moller_sphere_v1",
+          "source_path": "D:\\CodexCompute\\ward-moller-local-response-096199b9\\source\\config\\models\\pnjl\\transport_sampling\\ward_moller_sphere_v1.toml",
+          "source_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+          "algorithm": "thermal_weighted",
+          "background": {
+            "p_nodes": 96,
+            "cos_nodes": 24,
+            "thermal_p_max_inv_fm": 25,
+            "residual_norm_max": 1e-08
+          },
+          "a_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "tau_integral": {
+            "p_nodes": 48,
+            "cos_nodes": 36,
+            "phi_nodes": 36,
+            "t_nodes": 24,
+            "scale_inv_fm": 10
+          },
+          "terminal_integral": {
+            "p_nodes": 32,
+            "cos_nodes": 16,
+            "scale_inv_fm": 5
+          },
+          "sampling": {
+            "rtol": 0.001,
+            "atol": 1e-12,
+            "weighted_window": 0.6,
+            "seed_order": 48,
+            "max_evaluations": 40000,
+            "max_nodes": 12000,
+            "max_rounds": 40,
+            "max_events": 30000000,
+            "relative_velocity": "medium_moller"
+          },
+          "a_polarization": "ward_matched_RS",
+          "a_coupling": "ward_matched_RS",
+          "b0_direction": "sphere_average",
+          "sigma_cutoff_inv_fm": 3.0522942112582996,
+          "internal_density": {
+            "p_nodes": 32,
+            "scale_inv_fm": 10,
+            "cos_nodes": 36
+          },
+          "external_density": {
+            "p_nodes": 64,
+            "cos_nodes": 8,
+            "p_max_inv_fm": 25
+          },
+          "cache_lifecycle": "REQUIRED_RATE_KEYS_FOR_TAU order; reset polarization cache before each channel"
+        },
+        "runtime_sampling": {
+          "rtol": 0.001,
+          "atol": 1e-12,
+          "weighted_window": 0.6,
+          "seed_order": 48,
+          "max_evaluations": 40000,
+          "max_nodes": 12000,
+          "max_rounds": 40,
+          "max_events": 30000000,
+          "relative_velocity": "medium_moller"
+        }
+      },
+      "scalar_driver_sha256": "68398d46fc965f2b59cebacd05e61b0fd1a575c552419206cf062fa2efa94842",
+      "center": 0.014223785931825331,
+      "scan_center": 0.014223785931753807,
+      "center_shift": 7.152438363799973e-14,
+      "strict_center_bracket": [
+        0.01422378593180149,
+        0.014223785931849173
+      ],
+      "lim": {
+        "a": -0.004455490440787516,
+        "b": -0.0025729052386454926,
+        "c": -0.0005262525915006043,
+        "F0": 1.1389275872382653e-08,
+        "expected": 0.04516445744416648,
+        "resonance_sign": -1,
+        "sampling_check": [
+          2.375877272697835e-14,
+          -2.5868196473766147e-14,
+          2.4646951146678475e-14
+        ],
+        "coefficient_defects": [
+          1.4936901204798403e-07,
+          1.8578338867314415e-07,
+          1.898517422826984e-06
+        ]
+      },
+      "tier": "reference",
+      "xmax_inv_fm2": 0.01,
+      "loops": 256,
+      "scope": "continuous uubar elastic s-channel mixed scalar positive square",
+      "determinant_floor": false,
+      "files": {
+        "curvatures.csv": "003487c54366032aa0a584fb8d4fc08d4892530dd0bc88e9aa23ded7fde9b171",
+        "integrals.csv": "ff98f4723039c25ab6ea08a50b7048aec56239b3be42598cef4e1ae2d90cf65d"
+      },
+      "max_background_residual": 3.14177178175863e-14,
+      "remote_source_verification": {
+        "core_commit": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
+        "source_zip_sha256": "15b3b4b3f12ac094f439a2d769bdc8949a9cd3b1dcc77d93d342e273f3d5d93e",
+        "runtime_files_matched": 379
+      }
+    }
+  },
+  "transport_artifact_sha256": {
+    "actions-45028496140/mott-K-1/results/fine/K/001.json": "77e81774827c0313d5ba27a4d83379821db08693520cdf53a6d15fe63e29f257",
+    "actions-45028496140/mott-K-1/results/fine/K/002.json": "36309c02735e3419e7c2ceeccd8225ad170bc91b561bb938994b7b7e6f858579",
+    "actions-45028496140/mott-K-1/results/fine/K/019.json": "70b90314506296f82ba03fef5efe4005ecb59568ba75bebc54b216536467099d",
+    "actions-45028496140/mott-K-1/results/fine/K/020.json": "0c7a5af3cb2b4d54b5ced851ff404ef679a3e72e9491de569edac7f6aaf530cd",
+    "actions-45028496140/mott-K-1/results/reference/K/001.json": "73e4224e7635f48fd0103604af047891c9e9fcdf40abfc5a4ba4787d0b156ac9",
+    "actions-45028496140/mott-K-1/results/reference/K/002.json": "62dc6be53024c16c4e7886c7edeca3214882654b7ee6e7e1696bd4b953196a9e",
+    "actions-45028496140/mott-K-2/results/fine/K/003.json": "8cb39a76ab7604c68bb41467802f80c25ac1362927532927be787855688b51ac",
+    "actions-45028496140/mott-K-2/results/fine/K/004.json": "86a565ad068ef9431c6055deea39da956b6f7e1970d3e196fa02380b42b090fd",
+    "actions-45028496140/mott-K-2/results/fine/K/021.json": "f15bf63cc8e01935929e30592085340a7e287602ece87c24d7d7f54fb4676c42",
+    "actions-45028496140/mott-K-2/results/fine/K/022.json": "14dccb0b0a0925c29916bd4a0ba8a9e64339f53e5b5e681570ccddb716a2af12",
+    "actions-45028496140/mott-K-2/results/reference/K/003.json": "1eb1ae572277f638e360063e8b96d8dd5741e4f90710632adf6d058504094320",
+    "actions-45028496140/mott-K-2/results/reference/K/004.json": "5736273091dcd7cd87157e78016d1b592bb854ebe443f2b2205e38800c18f480",
+    "actions-45028496140/mott-K-3/results/fine/K/005.json": "bf4be3611d3b5d6495d125cb19360d56f38274745539360a52a70e7f594076a0",
+    "actions-45028496140/mott-K-3/results/fine/K/006.json": "3b29d51aca15b661bbc780016811a412bf9e458080b8187f117e911c37e2d873",
+    "actions-45028496140/mott-K-3/results/fine/K/023.json": "b55b711498d0ec64db0df4eefc0ee72b578752cae270f61830b7f780df3ad3f9",
+    "actions-45028496140/mott-K-3/results/fine/K/024.json": "7202c419ae2cfe690f12d530cc1abf4b2e45d924127dd52902fe26c6ce128266",
+    "actions-45028496140/mott-K-3/results/reference/K/005.json": "4cb7e9db634be5ac63357a4235065dcab56d785ec0c2acb98a7943462c669f0c",
+    "actions-45028496140/mott-K-3/results/reference/K/006.json": "2c2de4c10556e22f5411227a2d879ef0b82f5da8ede5b9d652ded2dbc74c92a5",
+    "actions-45028496140/mott-K-4/results/fine/K/007.json": "60bdedd34f99ae44b3a5374f5eb127101b419d044abf4e0d3e19b59599069ed3",
+    "actions-45028496140/mott-K-4/results/fine/K/008.json": "495d6db371e8ddb924db76c23f12c3b78acc2dbb0245ac71f41a866548a07962",
+    "actions-45028496140/mott-K-4/results/fine/K/025.json": "88ae2b888aa3d7756a9d62352ee9bfa9587fcb0ed277863cccb13aac8c133098",
+    "actions-45028496140/mott-K-4/results/fine/K/026.json": "512d3c526e9793f2e31ba94ce7a7df123679f66f08c611ae4a6ab50610369605",
+    "actions-45028496140/mott-K-4/results/reference/K/007.json": "3abc54b71e4b309b0b8bf06331affb19010c60cc7d05270c5bfea9309e940e9f",
+    "actions-45028496140/mott-K-4/results/reference/K/008.json": "13a28a8b42a1a9375998d519e194bcfc012d1e67008dce8d75683fb98000153a",
+    "actions-45028496140/mott-K-5/results/fine/K/009.json": "d102ee6bf2c9b1ceadffc7eed925f86b724fd465b243f492542984132f47e834",
+    "actions-45028496140/mott-K-5/results/fine/K/010.json": "0ab43b44779f88f05bfb552e04e38e68465a7d5fef54991d349ebce713ed3501",
+    "actions-45028496140/mott-K-5/results/fine/K/027.json": "cdc4d89314ec4ebe04a45ea8d080adf27769f36ece65478f3c677f551d72def2",
+    "actions-45028496140/mott-K-5/results/fine/K/028.json": "d3b0e4a0ae170b7a8fbccbe5b6aa90c779bde1143e8134d87785b24f3fe467c6",
+    "actions-45028496140/mott-K-5/results/reference/K/009.json": "b71215a6673efbeae113d7bf7af0bdb6694177b9c8cf6f669218c1841bd26e21",
+    "actions-45028496140/mott-K-5/results/reference/K/010.json": "16691710ac02caf60a8507ffe061d7622eaa33deee118e9f25248127abf3a65d",
+    "actions-45028496140/mott-K-6/results/fine/K/011.json": "04b7793abe02b9fb94c6dcad54b0d78ff3454f731e757c6e7cf8d4c9ef7b6267",
+    "actions-45028496140/mott-K-6/results/fine/K/012.json": "26812e06cc18e5b0f717335165464a4ca605c751527b25e10e0d7c1ce35f7754",
+    "actions-45028496140/mott-K-6/results/fine/K/029.json": "2069c596bb684ef8f3eff34d07de5e7e06158375e4a43157dba0935ad9f48ccf",
+    "actions-45028496140/mott-K-6/results/fine/K/030.json": "75fa4cc67bae5bd2f0f7cc56206954f97fb3d7265368a124f8e24a39d78a46a5",
+    "actions-45028496140/mott-K-6/results/reference/K/011.json": "7858c5dc19babdd24317ded42c154b1aba3517ee3f9deefb08741b3cc6491da6",
+    "actions-45028496140/mott-K-7/results/fine/K/013.json": "0d92a5a30344c612c8ab61331b4951caf4b6d3d1aee3e286f9e942a1d680ffb8",
+    "actions-45028496140/mott-K-7/results/fine/K/014.json": "c46f5afea659ea398c6fc3a08a3840020dfac9aad3fd84208c562052d56cf4f9",
+    "actions-45028496140/mott-K-7/results/fine/K/031.json": "992c5ead48081e4b63af6eaadfc25244d801d035b037de7e11609fd1332b61d9",
+    "actions-45028496140/mott-K-7/results/fine/K/032.json": "68ec4e8f8663ba932c2e3d9b355b2927885ace0b70abd7def4cbf5eb075c5d01",
+    "actions-45028496140/mott-K-8/results/fine/K/015.json": "6832bf7e83c1db23dce733e8f9c014f40aa8c5af76451653e05ad5492cc998c0",
+    "actions-45028496140/mott-K-8/results/fine/K/016.json": "e62d297bfc4c6f6073e560ec31ac0884e5e4573a4c2470c96ba765994f350923",
+    "actions-45028496140/mott-K-8/results/fine/K/033.json": "cbb753be33953994a1148cea2bf6072e22593cd6194fd15657e2d5802ee7f4ed",
+    "actions-45028496140/mott-K-9/results/fine/K/017.json": "d8ce4a4e5ebe00f0bfef03485254a733474f8406982d9c67f3d5e2684e33bea4",
+    "actions-45028496140/mott-K-9/results/fine/K/018.json": "abdcca1788289b521c0a95f2f6f5c48402d766efb0afe8bf55501b9dfcf94691",
+    "actions-45028496140/mott-pi-1/results/fine/pi/001.json": "474faafb461cb0f51f64d03175ab6746cf507a61e886b1af7a0949caf376d7c2",
+    "actions-45028496140/mott-pi-1/results/fine/pi/002.json": "32acaff07cfe6ea58692e766f2b6321fff8c8eb5b772e88aa3cc890d897ea0c9",
+    "actions-45028496140/mott-pi-1/results/fine/pi/019.json": "14b2930d3efad371b6c80f06a9de5c234eda6d8d27f20164539a62db11ccfdbd",
+    "actions-45028496140/mott-pi-1/results/fine/pi/020.json": "5eea65fa7a3a65487baa08595c6466a6043b7279f7645072ae8da6a2f770769d",
+    "actions-45028496140/mott-pi-2/results/fine/pi/003.json": "b1539b616c264c7272873b7497f0c3b0f4134f5c2432641267bcdc2c42f1bbf6",
+    "actions-45028496140/mott-pi-2/results/fine/pi/004.json": "85a4cdd9f785a8831c72ae1cffcd034ac29cd9d0200efefed19066c8b0db00fa",
+    "actions-45028496140/mott-pi-2/results/fine/pi/021.json": "b5189347cc3472bb3304b6e44b1cc523738bed19f4ae6aecede8da49c5b29d63",
+    "actions-45028496140/mott-pi-2/results/fine/pi/022.json": "faf519e38022006d60e2422509a3d65487069e06eadacbf9554d4e4c4760330c",
+    "actions-45028496140/mott-pi-3/results/fine/pi/005.json": "8610fe360bad0dafcb48586054a428c6f4826f1ffcd788ead3a4b604f150ef55",
+    "actions-45028496140/mott-pi-3/results/fine/pi/006.json": "c0a13c1d9532394c79f4f1b34ca66e2680435f382425b31ab81a721a56f14551",
+    "actions-45028496140/mott-pi-3/results/fine/pi/023.json": "62ae9a05c2c6c1773ab4f6fc1533ee5f7c729ddff8af258af4aa9e7933e7fec0",
+    "actions-45028496140/mott-pi-3/results/fine/pi/024.json": "74681066795cbba6d6da61678e03426b802e4f96415dd96ba2f5233c9b168d70",
+    "actions-45028496140/mott-pi-4/results/fine/pi/007.json": "e228076407155e268e946e03bc09120f13d66df50dca3696a8790727a66462ab",
+    "actions-45028496140/mott-pi-4/results/fine/pi/008.json": "8461ed528e42873adef955450af2f6b259f78911c67801711d4d09b7909fcf8c",
+    "actions-45028496140/mott-pi-4/results/fine/pi/025.json": "39bcf6c5f4177a5c5a1200850ad6a4fb0274ad24690a93454876c6e561880aa8",
+    "actions-45028496140/mott-pi-4/results/fine/pi/026.json": "fb0bcb8bcd1a7c5b369bfa21fdfdce02b899bc9778c1ed5572dc04b997c6ccd8",
+    "actions-45028496140/mott-pi-5/results/fine/pi/009.json": "2bd290ef11847a7efe60a4bf45acab8fda0ce9c5b9d4b05eae2339a7bcf51b3d",
+    "actions-45028496140/mott-pi-5/results/fine/pi/010.json": "fa86135d3bd878b17d0eca3b6a44a4648ca21775a613e2a9b3905c42f90f9080",
+    "actions-45028496140/mott-pi-5/results/fine/pi/027.json": "f8cf9db5efb8a465f0371f262a4ca6fdedcdb7d5339259d0921f9db038789e82",
+    "actions-45028496140/mott-pi-5/results/fine/pi/028.json": "e80cdf670bc7d4437e05468d008c21fdf35c6e5d569b5f2d9de808db581150fe",
+    "actions-45028496140/mott-pi-6/results/fine/pi/011.json": "56b86659f135ceb1862d607c10f34839a411852862630d1045b7ac16a9693361",
+    "actions-45028496140/mott-pi-6/results/fine/pi/012.json": "2fa1873a759341446867157d775d96dd8449413b2d128371e655c665993aca4a",
+    "actions-45028496140/mott-pi-6/results/fine/pi/029.json": "1fe7757e945f85a81b0fe2305dca8b0ee6a90367acbda3fb1bd2d777b0824bf7",
+    "actions-45028496140/mott-pi-6/results/fine/pi/030.json": "c185037b277165fc0090bf11c851aa7422f0c5bd344b2d9fe0ae25e44bdd044f",
+    "actions-45028496140/mott-pi-7/results/fine/pi/013.json": "ad81ee8afa32738fcd16b4990a0f31d3fb016e1c0305cd90acddb464f9138f89",
+    "actions-45028496140/mott-pi-7/results/fine/pi/014.json": "b4a5660ca1e9974415dd46e62f82e544dbbbbb1f0d0a2fe5d77356d5af5ffbff",
+    "actions-45028496140/mott-pi-7/results/fine/pi/031.json": "bcdc079a091305b162d011772758fc86e63ee4f0a96dc01ab6e32bbd4126744a",
+    "actions-45028496140/mott-pi-7/results/fine/pi/032.json": "061eb67c8c4462abc3432cc2e2f3600c0e128bd439d0ee1a804cd17c9df2488a",
+    "actions-45028496140/mott-pi-8/results/fine/pi/015.json": "b9925f04a66bd41b4861d1986fe81590b47f91c0f1903ddef73c53fa6485233a",
+    "actions-45028496140/mott-pi-8/results/fine/pi/016.json": "724cd2b9ffb8c94f8521dbec0381a560451e96c9f056d77f2ce07c0b422d4fa7",
+    "actions-45028496140/mott-pi-8/results/fine/pi/033.json": "6996214cd6c8739b15a95c1d98f3579e4936d6f600ed959da8d4b5fd08227331",
+    "actions-45028496140/mott-pi-9/results/fine/pi/017.json": "b4e3b7a139b2e747281c472dec7b9ba1132b3caf241614ae4dd3e4c4918103de",
+    "actions-45028496140/mott-pi-9/results/fine/pi/018.json": "0614c5b1b3818fde4813a90493550c9780c1c098f933770e235b4d98d9d863e1",
+    "actions-45028496140/mott-sigma-1/results/fine/sigma/001.json": "11d1e0232843ab818e428b113a323ffddd028fcde6ad6d73a39e021f17da768f",
+    "actions-45028496140/mott-sigma-1/results/fine/sigma/002.json": "3991a6e386bd49a5e313192183369139fdf07af2f914be23fe7a1c8e411d613e",
+    "actions-45028496140/mott-sigma-1/results/fine/sigma/019.json": "c42e53682bb12ec991fc6394fe4eda526c25cdef8c2b69406f231616d51c396b",
+    "actions-45028496140/mott-sigma-1/results/fine/sigma/020.json": "e080b5a45b756a8f26d79cfcdfa370de5e6b2c5dd4c5bb5cf19e021c2c308cf3",
+    "actions-45028496140/mott-sigma-2/results/fine/sigma/003.json": "60fc9a035f6fb533a91650aa656146e0bfe1ab1f718214107ae06964f0137983",
+    "actions-45028496140/mott-sigma-2/results/fine/sigma/004.json": "353a8abeed8c4e2890028376b262f37e394dedbf9bde1cf9995694a51824c468",
+    "actions-45028496140/mott-sigma-2/results/fine/sigma/021.json": "49ba44dc1cd28a35538735c194cb416dbef101e5f62f0d185d0a4413bd507db8",
+    "actions-45028496140/mott-sigma-2/results/fine/sigma/022.json": "ea98f2c2e2bd60379aaff4f09328973ab5290938dc5f305b94c3065fd03d85e0",
+    "actions-45028496140/mott-sigma-3/results/fine/sigma/005.json": "ada37ce7e891e2cb359c479a9ec372b360627e0548c85278ba6ce694de2ad9c2",
+    "actions-45028496140/mott-sigma-3/results/fine/sigma/006.json": "64cd2483c3aa97d9550ff323a3cdee60e58ef2dfcada9e0fe511def235ac7f54",
+    "actions-45028496140/mott-sigma-3/results/fine/sigma/023.json": "3def1070a9773ee3bd04612741436af6d1dab5396032d802154e621ceb2a9270",
+    "actions-45028496140/mott-sigma-3/results/fine/sigma/024.json": "bf572e4f2054e556af9bc8c41bcf9dc79b50d4c4ec0b83d19ec156bdc5e36d09",
+    "actions-45028496140/mott-sigma-4/results/fine/sigma/007.json": "49263c16db983787865723fd6632a6acbcb15850be54ed7f023dfd5efdbc912f",
+    "actions-45028496140/mott-sigma-4/results/fine/sigma/008.json": "02fbdeebb0832c868a0f56a34966f14912b43f20c26e20a03f978b080ebc2123",
+    "actions-45028496140/mott-sigma-4/results/fine/sigma/025.json": "7fc486dd5b0179c9308eae3279386620d96aee51090c39f87f647d289f16018e",
+    "actions-45028496140/mott-sigma-4/results/fine/sigma/026.json": "96a7bc17423b87b6e362ac79b0b9e305dff1b890c8cf13f1b719f75481ec1d54",
+    "actions-45028496140/mott-sigma-5/results/fine/sigma/009.json": "9d61029d79491a28a2b6e0f955dfe5606ea100b4e8b92b2c7fdb4bd4e81dc44b",
+    "actions-45028496140/mott-sigma-5/results/fine/sigma/010.json": "4e694aa47b2c9c681fb7cda39a55622f6b411acc5aaa6dd2d344228b4a074947",
+    "actions-45028496140/mott-sigma-5/results/fine/sigma/027.json": "99a2eaea7e72e78562756834e98381e538ba116e0623cd3d869c82173122c364",
+    "actions-45028496140/mott-sigma-5/results/fine/sigma/028.json": "2fa4b30dc51bf96a4d6f7abff9210f6f153cd9924107d4fb95719d8ac844c06d",
+    "actions-45028496140/mott-sigma-6/results/fine/sigma/011.json": "edcd3c39d646674781139f8aa4d858fe0771f19922881dd23061651e6dc4d7cd",
+    "actions-45028496140/mott-sigma-6/results/fine/sigma/012.json": "5eff305ad7a4f943e91adf189f5202fe72b436e560a0fa4514eb38217cb3c082",
+    "actions-45028496140/mott-sigma-6/results/fine/sigma/029.json": "293119b31e175e03c36fab9a474d2d8118b323164706c3e8215c810058e3c3ad",
+    "actions-45028496140/mott-sigma-6/results/fine/sigma/030.json": "2feffdff18a4e7e676af8563b6defb336dc564afb0c94be0554987011aac5d19",
+    "actions-45028496140/mott-sigma-7/results/fine/sigma/013.json": "9bf7d6a4d15a934284512c3ee093abb897967d43d7e54fffc747c1d69573ccf3",
+    "actions-45028496140/mott-sigma-7/results/fine/sigma/014.json": "83484237d55489fb09a8dfe3f141d66e39d6773fefbfd8b4503c2e9a5cf5f81f",
+    "actions-45028496140/mott-sigma-7/results/fine/sigma/031.json": "1f941d0c2fb9d970d09fde5fab3353042979cabd9462cce334f2bd5d0e4637a9",
+    "actions-45028496140/mott-sigma-7/results/fine/sigma/032.json": "c5405137caae8378471e25aa038b41bb688bfa50dff30d44d7d849b524b3988d",
+    "actions-45028496140/mott-sigma-8/results/fine/sigma/015.json": "605e2a46c12ae63e3ec53b26c060f3d3c03fbe65f2b59e1952bc947f209ca641",
+    "actions-45028496140/mott-sigma-8/results/fine/sigma/016.json": "6a3281afef6586f012008c06ac7ac4ad503cc932e5b1b72ffbbd80d57df28c0e",
+    "actions-45028496140/mott-sigma-8/results/fine/sigma/033.json": "d809d8f97f797bffbe1b1b6680aef7b21de6c218c310b4f37f142867bff0db55",
+    "actions-45028496140/mott-sigma-9/results/fine/sigma/017.json": "6743a4e154e767b548f963c84d20401d0b796260f525e0df15bdbde0e8376fe7",
+    "actions-45028496140/mott-sigma-9/results/fine/sigma/018.json": "f26a80de293dd2fe104a35e7ebcb1f5b04664a043b83c9c072d6394d34833dd6",
+    "actions-45035358531/mott-reference-rescue-sigma-1/results/reference/sigma/001.json": "f29db3b1917c0a55f7e2e25762076e3bbf5b013a2be196a83e29e5bfde0e4713",
+    "actions-45035358531/mott-reference-rescue-sigma-2/results/reference/sigma/002.json": "1363d3e94700a11fed77d4d7882a45c17fe32610487b6a162b4a684f05563c5f",
+    "actions-45035358531/mott-reference-rescue-sigma-7/results/reference/sigma/007.json": "8e40e35c1ca7169cd6f6a56200724c99c9d030b68d96f5bd75c683870455a6bf",
+    "actions-45035358531/mott-reference-rescue-sigma-8/results/reference/sigma/008.json": "49abe86d6ef1ace33aa1ef310f5b5d0b7dc63f4b6616e60c5d1b697adf031854",
+    "actions-45035785870/mott-reference-rescue-pi-1/results/reference/pi/001.json": "dceaadc80388fd828ae93af67cef6c113d22bdbb78d963d4755a3949cafc9bb5",
+    "actions-45035785870/mott-reference-rescue-pi-10/results/reference/pi/010.json": "010c4bd1e8c82e7d1e8bd036285bf0eeae2e6a5e3ece45d57c93bfd4e00c1e82",
+    "actions-45035785870/mott-reference-rescue-pi-11/results/reference/pi/011.json": "7444e14ad3d5dc726e5fdf28c8ab1c6dcfb6f99ec3ba387e65aa2366e740f1dd",
+    "actions-45035785870/mott-reference-rescue-pi-2/results/reference/pi/002.json": "92ede738aa49971ed18bd19f114e0b2fa1048b74e117a455c076524d9225c47a",
+    "actions-45035785870/mott-reference-rescue-pi-3/results/reference/pi/003.json": "b4a88938fe7a7cbb635f84b7f8f05a8ace7dd3f1276adf8ed265cc8bf9818f20",
+    "actions-45035785870/mott-reference-rescue-pi-4/results/reference/pi/004.json": "23cf2b516981ea96220f2e74011498d6745e8a53f11d8583cbfb35616c2f554d",
+    "actions-45035785870/mott-reference-rescue-pi-5/results/reference/pi/005.json": "2b7d2fd1e0178470b6c482b645fd2c2cc9ae728977102346c464952f2edb7a1f",
+    "actions-45035785870/mott-reference-rescue-pi-6/results/reference/pi/006.json": "045e3ce60cde65bfaa4c4d7d59866d223806dcdaf0003d624b0356e4d5513999",
+    "actions-45035785870/mott-reference-rescue-pi-7/results/reference/pi/007.json": "973862e097497c4f4a468fa05c89fad8efea4b3fd3fc6d84d8f521e2d377380b",
+    "actions-45035785870/mott-reference-rescue-pi-8/results/reference/pi/008.json": "76ce357fc8b1b5d428f5603b0caf514e4506b84cdba8447bd205f8ee92097ffe",
+    "actions-45035785870/mott-reference-rescue-pi-9/results/reference/pi/009.json": "e39296e6909bf1e2fc4ce723dbedc52b61003c8344653d54fd004a83961117b8",
+    "actions-45036098189/mott-reference-rescue-sigma-11/results/reference/sigma/011.json": "3b9401a4158be2cc3f1f7255c6cbbba5ccee1ddf0fa8b30de8aa1bfe09c4c5cd",
+    "actions-45036098189/mott-reference-rescue-sigma-5/results/reference/sigma/005.json": "cc06ee86cb9f19087aa925a27fc3a97a85504a170a083ec0a7f5afe6377f274d",
+    "actions-45036098189/mott-reference-rescue-sigma-6/results/reference/sigma/006.json": "7730e3c10f9aaae6a07e4ca9eb74fd405d6c015df01a399ac50e9301d9f3ea4e",
+    "actions-45037437234/mott-reference-rescue-sigma-10/results/reference/sigma/010.json": "b075ff09e88e85945ba1c7adf55b80fcaf17352fb3089b56105866bea76cfb2f",
+    "actions-45037437234/mott-reference-rescue-sigma-3/results/reference/sigma/003.json": "8e987aa907c38738a9f4cff10f0da243b950e31581eb0d99b74e867d59353f23",
+    "actions-45037437234/mott-reference-rescue-sigma-4/results/reference/sigma/004.json": "26130ff1a7854283c3d052127cad4b03545100d1dc02f49488905924c99c04b1",
+    "actions-45037437234/mott-reference-rescue-sigma-9/results/reference/sigma/009.json": "3e17ff8f31c31231cfbc94196bde04ea587d479a7df0bc75dbf54f42b0d08fa3"
+  },
+  "postprocess_sha256": "a252ecf0911ec0eeb76788a9be0250d692c27b8c5c9784bdd1be2e02b271f4b6",
+  "files": {
+    "transport_nodes.csv": "2df24553ec4340ebb63e8891664c4ef169f78d75c099a4c0b1977101a91fdbc3",
+    "local_slopes.csv": "e627cb13cfab08004dffc9d517b2d074b9245e946d1e9cf78ef61297abd94a94",
+    "scalar_curvature.csv": "1932ba34a08aa516e8ea8b834aaff306be7c291f128db3447601fe6f5a54e2b1",
+    "scalar_stencil_fine.csv": "6db7e3649050ad04ab0f7f67298c5f2c51837c01ad6f94b322840170e7312d96",
+    "scalar_stencil_reference.csv": "22675d2ccc7e572a2034e8c1a3742f16b5b0186945687794bcbb92b272202496"
+  }
+}
