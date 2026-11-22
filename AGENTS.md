@@ -5,6 +5,7 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 ## Working Context
 
 - Julia project, include-driven rather than a packaged `src/PackageName.jl` layout.
+- Module and subsystem structure lives in [the agent architecture overview](docs/architecture/agent_overview.md); command details live in [the command reference](docs/dev/agent_command_reference.md).
 - Root environment: `Project.toml`; CI uses Julia `1.12.5`, root compatibility is Julia `1.10`.
 - Use unified entrypoints in `Models` and `src/models/entrypoints.jl`. `src/pnjl/PNJL.jl` is historical compatibility context.
 - Preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
