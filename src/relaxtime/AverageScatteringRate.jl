@@ -186,6 +186,7 @@ function _thermo_fingerprint(thermo_params::NamedTuple)
         Φ=_fingerprint_value(thermo_params.Φ),
         Φbar=_fingerprint_value(thermo_params.Φbar),
         ξ=hasproperty(thermo_params, :ξ) ? _fingerprint_value(thermo_params.ξ) : 0.0,
+        b0_direction=get(thermo_params, :b0_direction, :aligned),
     )
 end
 

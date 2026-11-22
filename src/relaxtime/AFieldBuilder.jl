@@ -2,11 +2,11 @@ module AFieldBuilder
 
 using ..GaussLegendre: gauleg, DEFAULT_COSΘ_NODES
 using ..OneLoopIntegrals: A
-using ..OneLoopIntegralsCorrection: A_aniso, A_aniso_reduced
+using ..OneLoopIntegralsCorrection: A_aniso, A_aniso_reduced, A_aniso_ward
 
 export build_A_triplet, ensure_quark_params_has_A, A_BUILD_METHODS
 
-const A_BUILD_METHODS = (:quadrature, :reduced)
+const A_BUILD_METHODS = (:quadrature, :reduced, :ward_matched)
 
 const _AUTO_A_WARNED_ANISO = Ref(false)
 const _AUTO_A_WARNED_ISO = Ref(false)
@@ -42,6 +42,10 @@ function _build_A_value(
     reduced_radial_nodes::Int,
     reduced_scale::Float64,
 )
+    if a_method === :ward_matched
+        return A_aniso_ward(m, μ, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
+            _xi(thermo_params), nodes_p, weights_p, nodes_cos, weights_cos)
+    end
     if a_method === :quadrature
         return A_aniso(m, μ, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
             _xi(thermo_params), collect(Float64, nodes_p), collect(Float64, weights_p),

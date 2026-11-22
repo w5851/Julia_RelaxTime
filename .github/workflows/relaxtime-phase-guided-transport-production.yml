@@ -1,180 +1,158 @@
-name: Relaxtime Phase-Guided Transport Production
-run-name: transport ${{ inputs.case_name }} / ${{ inputs.shard_label }} / ${{ inputs.run_tier }}
+name: Relaxtime Frozen Transport Production
+run-name: frozen transport ${{ inputs.case_name }} / ${{ inputs.mode }} / ${{ inputs.sampling_profile }}
 
 on:
   workflow_dispatch:
     inputs:
       calculation_sha:
-        description: "Full calculation commit; empty uses the workflow commit"
-        required: false
-        default: ""
+        description: "Exact calculation commit"
+        required: true
         type: string
       case_name:
-        description: "New result case name"
+        description: "Result case"
         required: true
-        default: "thermal_weighted_v1_preview"
         type: string
-      shard_label:
-        description: "Unique label within this case"
-        required: true
-        default: "preview"
-        type: string
-      sampling_profile:
-        description: "Versioned background, A, tau and terminal quadrature"
-        required: true
-        default: "thermal_weighted_v1"
-        type: choice
-        options: [thermal_weighted_v1]
       mode:
-        description: "Phase-guided scan mode"
+        description: "Published frozen background grid"
         required: true
-        default: "fixed-muB-phase-scaled"
         type: choice
-        options: [fixed-muB-phase-scaled, fixed-T-sparse-muB]
-      xi_list:
-        description: "Comma-separated xi values for this shard"
+        options: [mode_a, mode_b]
+      sampling_profile:
+        description: "Physical prescription with original quadrature"
         required: true
-        default: "-0.5,0,0.5"
-        type: string
-      muB_list:
-        description: "Comma-separated muB values in MeV"
-        required: true
-        default: "0"
-        type: string
-      alpha_t_list:
-        description: "Mode A: T / T_phase values"
-        required: true
-        default: "1.0"
-        type: string
-      t_list:
-        description: "Mode B: temperatures in MeV"
-        required: true
-        default: "200"
-        type: string
-      run_tier:
-        description: "Pilot and production points use the same numerical profile"
-        required: true
-        default: "dry-run"
         type: choice
-        options: [dry-run, production]
-      render_plots:
-        description: "Render raw review figures after successful numerical checks"
+        options: [ward_moller_aligned_v1, ward_moller_sphere_v1]
+      shards:
+        description: "Comma-separated shard indices from 1 to 64"
         required: true
-        default: false
-        type: boolean
+        type: string
+      workers_per_runner:
+        description: "Independent one-thread Julia workers per runner"
+        required: true
+        default: "4"
+        type: choice
+        options: ["1", "2", "4"]
 
 permissions:
   contents: read
 
 jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      indices: ${{ steps.prepare.outputs.indices }}
+    steps:
+      - id: prepare
+        env:
+          SHARDS: ${{ inputs.shards }}
+        run: |
+          python - <<'PY'
+          import json, os
+          indices = [int(s) for s in os.environ['SHARDS'].split(',')]
+          assert indices and len(set(indices)) == len(indices)
+          assert all(1 <= s <= 64 for s in indices)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('indices=' + json.dumps(indices) + '\n')
+          PY
+
   generate:
+    needs: matrix
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.matrix.outputs.indices) }}
     env:
       JULIA_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+      CALCULATION_SHA: ${{ inputs.calculation_sha }}
       CASE_NAME: ${{ inputs.case_name }}
-      SHARD_LABEL: ${{ inputs.shard_label }}
-      CALCULATION_SHA: ${{ inputs.calculation_sha || github.sha }}
-      SAMPLING_PROFILE: ${{ inputs.sampling_profile }}
       SCAN_MODE: ${{ inputs.mode }}
-      XI_LIST: ${{ inputs.xi_list }}
-      MUB_LIST: ${{ inputs.muB_list }}
-      ALPHA_T_LIST: ${{ inputs.alpha_t_list }}
-      T_LIST: ${{ inputs.t_list }}
-      RUN_TIER: ${{ inputs.run_tier }}
+      SAMPLING_PROFILE: ${{ inputs.sampling_profile }}
+      SHARD_INDEX: ${{ matrix.shard }}
+      WORKER_COUNT: ${{ inputs.workers_per_runner }}
 
     steps:
-      - name: Checkout exact calculation source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.calculation_sha || github.sha }}
+          ref: ${{ inputs.calculation_sha }}
 
-      - name: Check calculation identity
-        id: calculation_identity
+      - name: Validate frozen input and source
         shell: bash
         run: |
           set -euo pipefail
           [[ "$CALCULATION_SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$(git rev-parse HEAD)" == "$CALCULATION_SHA" ]]
-          [[ "$CASE_NAME" =~ ^[A-Za-z0-9_.=-]+$ ]]
-          [[ "$CASE_NAME" != . && "$CASE_NAME" != .. ]]
-          [[ "$SHARD_LABEL" =~ ^[A-Za-z0-9_.=-]+$ ]]
-          test -f "config/models/pnjl/transport_sampling/${SAMPLING_PROFILE}.toml"
-          printf 'inputs_valid=true\n' >> "$GITHUB_OUTPUT"
+          [[ "$CASE_NAME" =~ ^[A-Za-z0-9_.-]+$ && "$CASE_NAME" != . && "$CASE_NAME" != .. ]]
+          test -f "config/models/pnjl/transport_sampling/$SAMPLING_PROFILE.toml"
+          python - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path('data/inputs/relaxtime/transport/frozen_v15_20261121')
+          manifest = json.loads((root/'input_manifest.json').read_text())
+          for mode in ('mode_a','mode_b'):
+              entry = manifest[mode]
+              assert hashlib.sha256((root/entry['file']).read_bytes()).hexdigest() == entry['sha256']
+          PY
 
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: julia-actions/cache@v2
         with:
-          python-version: "3.11"
+          cache-name: julia-cache-relaxtime-frozen-ward-v1
 
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-relaxtime-thermal-weighted-v1
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Install Julia dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
-
-      - name: Run validated sampling profile
+      - name: Recompute frozen shard
         shell: bash
         run: |
           set -euo pipefail
-          audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
-          mkdir -p "$audit_root"
-          args=(--mode "$SCAN_MODE" --case-name "$CASE_NAME"
-            --sampling-profile "$SAMPLING_PROFILE" --xi-list "$XI_LIST"
-            --muB-list "$MUB_LIST" --channel-diagnostics)
-          if [[ "$SCAN_MODE" == "fixed-muB-phase-scaled" ]]; then
-            args+=(--alphaT-list "$ALPHA_T_LIST")
-            mode_dir="mode_a_fixed_muB_phase_scaled"
-          else
-            args+=(--T-list "$T_LIST")
-            mode_dir="mode_b_fixed_T_sparse_muB"
-          fi
-          [[ "$RUN_TIER" != "dry-run" ]] || args+=(--dry-run)
-          result_dir="data/outputs/results/relaxtime/transport/phase_guided/${mode_dir}/${CASE_NAME}"
-          export TRANSPORT_RUNNER_TIMING_PATH="$audit_root/runtime_timing.toml"
-          cmd=(julia --startup-file=no --project=. --heap-size-hint=1200M benchmark/relaxtime/transport_runner_timing.jl)
-          cmd+=("${args[@]}")
-          printf '%q ' "${cmd[@]}" > "$audit_root/command.txt"
-          printf '\n' >> "$audit_root/command.txt"
-          /usr/bin/time -v -o "$audit_root/process_time.txt" "${cmd[@]}" 2>&1 | tee "$audit_root/scan.log"
-          python scripts/relaxtime/check_transport_production_artifact.py "$result_dir" --profile "config/models/pnjl/transport_sampling/${SAMPLING_PROFILE}.toml" --calculation-sha "$CALCULATION_SHA" --tier "$RUN_TIER"
-          printf 'RESULT_DIR=%s\n' "$result_dir" >> "$GITHUB_ENV"
+          export PNJL_SOURCE_TREE_SHA256="$CALCULATION_SHA"
+          input="data/inputs/relaxtime/transport/frozen_v15_20261121/${SCAN_MODE}_grid.csv"
+          result="data/outputs/results/relaxtime/transport/ward_moller/$CASE_NAME/$SCAN_MODE/shard_$SHARD_INDEX"
+          mkdir -p "$result"
+          pids=()
+          for worker in $(seq 1 "$WORKER_COUNT"); do
+            # This runner subdivides only its original shard; every input row
+            # still belongs to exactly one of the 64 global shards.
+            python - "$input" "$result/input_$worker.csv" "$SHARD_INDEX" "$worker" "$WORKER_COUNT" <<'PY'
+          import csv, sys
+          source, target, shard, worker, count = sys.argv[1:]
+          shard, worker, count = map(int, (shard, worker, count))
+          with open(source, newline='') as stream:
+              reader = csv.DictReader(stream)
+              fields = reader.fieldnames
+              rows = [row for i, row in enumerate(reader) if i%64 == shard-1]
+          rows = [row for i,row in enumerate(rows) if i%count == worker-1]
+          with open(target, 'w', newline='') as stream:
+              writer = csv.DictWriter(stream, fieldnames=fields)
+              writer.writeheader()
+              writer.writerows(rows)
+          assert rows
+          PY
+            /usr/bin/time -v -o "$result/time_$worker.txt" \
+              julia --startup-file=no --threads=1 --heap-size-hint=1600M --project=. \
+                scripts/relaxtime/run_frozen_transport_scan.jl \
+                --input "$result/input_$worker.csv" --outdir "$result/worker_$worker" \
+                --sampling-profile "$SAMPLING_PROFILE" \
+                > "$result/run_$worker.log" 2> "$result/run_$worker.err" &
+            pids+=("$!")
+          done
+          rc=0
+          for pid in "${pids[@]}"; do wait "$pid" || rc=1; done
+          for worker in $(seq 1 "$WORKER_COUNT"); do tail -n 4 "$result/run_$worker.log"; done
+          exit "$rc"
 
-      - name: Render review plots
-        if: ${{ inputs.render_plots && inputs.run_tier == 'production' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install numpy pandas matplotlib
-          julia --startup-file=no --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$RESULT_DIR"
-
-      - name: Upload results and diagnostics
-        if: ${{ always() && steps.calculation_identity.outputs.inputs_valid == 'true' }}
+      - name: Upload frozen results and diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: transport-${{ inputs.case_name }}-${{ inputs.shard_label }}
-          path: |
-            data/outputs/results/relaxtime/transport/phase_guided/**/${{ inputs.case_name }}/**
-            data/outputs/figures/relaxtime/transport/phase_guided/**/${{ inputs.case_name }}/**
-            data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}/**
-          retention-days: 30
-          if-no-files-found: warn
-
-      - name: Report run scope
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          {
-            printf 'Calculation commit: %s\n\n' "$CALCULATION_SHA"
-            printf 'Sampling profile: %s; shard: %s; tier: %s.\n\n' "$SAMPLING_PROFILE" "$SHARD_LABEL" "$RUN_TIER"
-            printf 'Artifacts retain raw points, failed points, channel budgets, actual configuration, runtime/JIT timing and process peak RSS.\n'
-            printf 'Import into canonical data and paper use are separate from this artifact run.\n'
-          } >> "$GITHUB_STEP_SUMMARY"
+          name: frozen-${{ inputs.case_name }}-${{ inputs.mode }}-${{ matrix.shard }}
+          path: data/outputs/results/relaxtime/transport/ward_moller/${{ inputs.case_name }}/${{ inputs.mode }}/shard_${{ matrix.shard }}/
+          retention-days: 14

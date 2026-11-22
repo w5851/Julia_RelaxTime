@@ -27,6 +27,13 @@
 
 计算给定通道 (`:P` 赝标量或 `:S` 标量) 下的各向异性极化函数，返回 `(ReΠ, ImΠ)`。
 
+三个极化接口均接受 `b0_direction::Symbol=:aligned`。
+`:sphere_average` 只对有限动量两线圈的显式线性占据修正取球面方向平均，
+将角核 `x²/(Ax+B)` 替换为 `1/[3(Ax+B)]`。在 `k=0` 与 `ξ=0` 两处方一致；
+单线积分由调用方提供，方向处方不改变在壳色散或物理阈值。
+`TotalPropagator` 与 `MesonMass` 从 `thermo_params.b0_direction` 传入该选择，
+缺失时使用 `:aligned`。
+
 #### 函数签名
 
 ```julia

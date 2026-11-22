@@ -21,8 +21,20 @@
 
 - 所有动力学参数（`m`, `μ`, `T`, `λ`, `k`）单位为 fm⁻¹
 - 各向异性参数 `ξ` 为无量纲（典型取值范围 0~0.5）
-- `A_correction`、`A_aniso` 和 `A_aniso_reduced` 返回值单位：fm
-- `B0_correction` 返回值 `(real_part, imag_part)` 单位：fm
+- `A_correction`、`A_aniso`、`A_aniso_ward` 和 `A_aniso_reduced` 返回值单位：fm⁻²
+- `B0_correction` 返回值 `(real_part, imag_part)` 无量纲
+
+## 变分匹配与方向平均
+
+`A_aniso_ward(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p, nodes_cos, weights_cos)`
+把 RS 热项的分母改为 `sqrt(m^2+p^2*(1+ξ*cos^2θ))`，真空积分仍使用普通
+`sqrt(m^2+p^2)` 和模型 Λ。`AFieldBuilder` 的 `a_method=:ward_matched` 调用此函数。
+该 A 与耦合共同使用时匹配变分凝聚和静态软 pion 关系；有限动量 B0 仍保持普通在壳色散。
+
+`B0_correction(...; b0_direction=:sphere_average)` 对显式一阶占据修正的方向平均
+使用极角平方 `1/3`。默认 `:aligned` 保留历史共轴修正。
+平均发生在圈函数中、在传播子和散射振幅平方构造之前。
+完整配置和代表点对照见 [TransportSamplingProfiles](../relaxtime/transport/TransportSamplingProfiles.md)。
 
 ---
 

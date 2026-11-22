@@ -424,7 +424,8 @@ function total_propagator_simple(process::Symbol, channel::Symbol, meson_list::V
             pol_params.μ1, pol_params.μ2,
             thermo_params.T, thermo_params.Φ, thermo_params.Φbar, thermo_params.ξ,
             pol_params.A1, pol_params.A2,
-            pol_params.num_s_quark
+            pol_params.num_s_quark;
+            b0_direction=get(thermo_params, :b0_direction, :aligned)
         )
         
         Π = ComplexF64(Π_real, Π_imag)
@@ -508,7 +509,8 @@ function total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel:
         quark_params.μ.u, quark_params.μ.u,
         thermo_params.T, thermo_params.Φ, thermo_params.Φbar, thermo_params.ξ,
         quark_params.A.u, quark_params.A.u,
-        0  # num_s_quark = 0 for uu
+        0;  # num_s_quark = 0 for uu
+        b0_direction=get(thermo_params, :b0_direction, :aligned)
     )
     Π_uu = ComplexF64(Π_uu_real, Π_uu_imag)
     
@@ -519,7 +521,8 @@ function total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel:
         quark_params.μ.s, quark_params.μ.s,
         thermo_params.T, thermo_params.Φ, thermo_params.Φbar, thermo_params.ξ,
         quark_params.A.s, quark_params.A.s,
-        2  # num_s_quark = 2 for ss
+        2;  # num_s_quark = 2 for ss
+        b0_direction=get(thermo_params, :b0_direction, :aligned)
     )
     Π_ss = ComplexF64(Π_ss_real, Π_ss_imag)
     
@@ -900,7 +903,8 @@ function calculate_propagator_by_channel(process::Symbol, channel::Symbol,
             pol_params.μ1, pol_params.μ2,
             thermo_params.T, thermo_params.Φ, thermo_params.Φbar, thermo_params.ξ,
             pol_params.A1, pol_params.A2,
-            pol_params.num_s_quark
+            pol_params.num_s_quark;
+            b0_direction=get(thermo_params, :b0_direction, :aligned)
         )
         
         Π = ComplexF64(Π_real, Π_imag)

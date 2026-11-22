@@ -8,7 +8,8 @@
 polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64,
     m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
     T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64,
-    A1_value::Float64, A2_value::Float64, num_s_quark::Int)
+    A1_value::Float64, A2_value::Float64, num_s_quark::Int;
+    b0_direction::Symbol=:aligned)
 ```
 
 | 参数 | 含义与单位 |
@@ -60,6 +61,7 @@ cache.reset_cache!()
 ## 缓存语义与边界
 
 - 缓存键包含全部输入参数。Float64 键保留 40 位 mantissa，量化尺度约为 `2⁻⁴⁰`；同桶复用首先写入的计算结果。相近参数也可能跨桶，不能把它理解为任意两值的 `isapprox` 比较。
+- `b0_direction` 纳入缓存键；共轴与球面平均处方不能复用同一条极化缓存。
 - 底层计算使用原始参数，键量化不代表极化函数误差或奇点附近误差已有同样的上界。
 - 新启动的 Task 从空缓存开始。Task 在 Julia 线程之间迁移时保留自己的条目；调用方如需汇总并行任务的统计，应在各 Task 退出前取回统计。
 - 同一 Task 内条目不会自动淘汰；长寿命 Task 可定期清理。并行 Task 可能存储相同的桶。所有参数都进入键，改变温度本身不要求为正确性清空缓存。

@@ -89,7 +89,7 @@ using Main.GaussLegendre: gauleg
     end
 
     @testset "可选解析角约化保持完整 RS A 的数值口径" begin
-        @test A_BUILD_METHODS == (:quadrature, :reduced)
+        @test A_BUILD_METHODS == (:quadrature, :reduced, :ward_matched)
         m, μ, T, Φ, Φbar = 0.30, 0.10, 0.15, 0.20, 0.20
         for ξ in (-0.90, -0.22, 0.0, 0.30, 5.0)
             p, pw = gauleg(0.0, 20.0, 32)
