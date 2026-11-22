@@ -4,6 +4,7 @@
 
 ## 必须遵守
 
+- **开工前先完整读取 `AGENTS.md`**（可直接用 `@AGENTS.md` 导入）；本文件不替代它，只做路由。
 - 与用户沟通默认使用中文。
 - 规则冲突时以 `AGENTS.md` 为准；本文件不重复其中的编码规范、单位约定、测试分层与提交信息规则。
 - 命令一律查 `docs/dev/agent_command_reference.md`，不要在文档或示例里另写一套并行版本。
@@ -12,7 +13,6 @@
 
 - 技能：`.agents/skills/` 是权威定义，`.claude/skills/` 是由 `scripts/dev/sync_claude_skills.jl` 生成的适配副本；改技能只改 `.agents/skills/`，再重新生成。
 - 命令宏：`.claude/commands/` 存放参数化动作宏。
-- Copilot 的对应入口是 `.github/copilot-instructions.md`，同样指向 `AGENTS.md`。
 
 ## 需要细节时
 
