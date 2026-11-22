@@ -43,7 +43,20 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 | `scripts/analysis/` | Research and diagnostic scripts |
 | `data/outputs/results/`, `data/outputs/figures/` | Numerical results/metadata and rendered figures |
 | `docs/api/`, `docs/guides/`, `docs/analysis/` | Public contracts, usage and scientific interpretation |
+| `docs/architecture/`, `docs/decisions/`, `docs/reference/` | Module topology, ADRs and reference material |
+| `docs/notes/`, `docs/superpowers/` | Frozen registers (no new files; see each README for destinations) |
 | `docs/dev/active/`, `backlog/`, `archived/` | Shared ongoing work, deferred work and completed/superseded records |
+
+Documentation placement (first match wins):
+
+- Stable function/module/HTTP/data contract → `docs/api/`.
+- How to run a command, workflow or production/plotting SOP → `docs/guides/`.
+- Cross-subsystem topology or dependency direction → `docs/architecture/`.
+- A decision that should not be silently reversed → `docs/decisions/` (ADR).
+- Physics formula, literature mapping, units or capability ledger → `docs/reference/`.
+- Diagnostics of one specific run or dataset → `docs/analysis/<domain>/<case>_analysis/`.
+- Engineering governance, active designs, backlog → `docs/dev/`.
+- Anything else (one-off plans, debugging notes) → keep it in the conversation, issue or PR.
 
 ## Julia Conventions
 

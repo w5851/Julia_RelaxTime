@@ -19,6 +19,7 @@
 - `domain-knowledge/`：单位、运动学、数值策略与领域推导笔记。
 - `mathematica/`：解析积分、符号推导与归一化核对记录。
 - `usage/`：面向具体计算任务的使用说明。
+- `ops/`：运维与部署清单（如 `phase2_split_deployment_runbook.md`）。
 
 ## 建议阅读顺序
 

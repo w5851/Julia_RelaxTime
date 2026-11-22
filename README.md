@@ -179,25 +179,22 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 ### 用户/运行
 
-- `docs/guides/QUICKSTART.md`
-- `docs/guides/USER_GUIDE.md`
-- `docs/guides/STATUS.md`
-- `docs/guides/scripts/README.md`
-- `docs/guides/sop/README.md`
+- [指南总入口](docs/guides/README.md)
+- [QUICKSTART](docs/guides/QUICKSTART.md)、[USER_GUIDE](docs/guides/USER_GUIDE.md)、[STATUS](docs/guides/STATUS.md)
+- [稳定脚本白名单](docs/guides/scripts/README.md)
+- [生产/绘图 SOP](docs/guides/sop/README.md)
 - [PNJL benchmark 趋势与历史结果](docs/guides/benchmark_trends.md)
 
 ### 开发/治理
 
-- `docs/dev/README.md`
-- `docs/dev/active/`
-- `docs/dev/backlog/`
-- `docs/dev/archived/`
-- `docs/guides/RELEASE_GOVERNANCE_v0.1.1.md`
+- [工程治理总入口](docs/dev/README.md)（`active/`、`backlog/`、`archived/`）
+- [架构决策记录（ADR）](docs/decisions/README.md)
+- [发布治理（v0.1.1）](docs/guides/RELEASE_GOVERNANCE_v0.1.1.md)
 
 ### API/实现细节
 
-- `docs/api/README.md`
-- `docs/architecture/`
+- [API 总入口](docs/api/README.md)
+- [架构索引](docs/architecture/README.md)
 - [参考资料总入口](docs/reference/README.md)
 - [已实现计算能力与方法追踪清单](docs/reference/implemented_capabilities.md)
 
