@@ -355,3 +355,418 @@ rationale = "远端测试输入源码包：170 条目（147 .py + 22 .jl），�
 retired_at = "2026-11-23"
 git_blob = "5b8ea47ce83b47ba840d41969d6f67db69f10b15"
 retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+# ---------------------------------------------------------------------------
+# Batch 3：存量收口登记（2026-11-23，45 条，按 path 字典序）
+# ---------------------------------------------------------------------------
+[[retained_archives]]
+path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_delivery_before_relocation.zip"
+sha256 = "c6d8ee6a18fd270e77cd4b8fd9772b6d80a0fbed568194273115d4a2bcdb8994"
+entry_count = 24
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；1725622 B / 24 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_png_case.zip"
+sha256 = "a7f78c26d9b89ebadd2a1652295a1dec2dd52ee86334c0b132c89c930f91476e"
+entry_count = 18
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；833521 B / 18 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/raw_outputs.zip"
+sha256 = "4fb264ca2391f70b639708649231ab06591d8a9d5854d51c2ae14c26840a1e5e"
+entry_count = 64
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；354371 B / 64 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/source_snapshot.zip"
+sha256 = "6128ea697ab83baa22f8a579f7b005d6bc0ee2b37376b464c201b701b802ef6f"
+entry_count = 413
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；1101836 B / 413 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/andronic_envelope_20261018_raw.zip"
+sha256 = "9443de095a0e58cb8e9d4af3c03a4bb14d7c46fbf71b941503e68606e6ff7629"
+entry_count = 2594
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；5200698 B / 2594 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_defaults_20261017_raw.zip"
+sha256 = "9955ac3038e571c0b7f6454dc64706d15512698497140b473c648a78363562b7"
+entry_count = 454
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；1428830 B / 454 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_envelope_20261018_raw.zip"
+sha256 = "79c2c0b4b202c6d64e0f9de7f7f2067421b613cf5e19a32dc47dc61f6f186657"
+entry_count = 2574
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；5075548 B / 2574 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_literature_candidates_20261017_raw.zip"
+sha256 = "3aa7ddef0f2a54d9e077b36a96eac5305e9d92be99dfe56df90e700b533ff199"
+entry_count = 184
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；591059 B / 184 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/meson_density/freezeout_review_20261022/freezeout_literature_search_20261017_raw.zip"
+sha256 = "fc2b5e7ff69275d11a8dc250320bdfdabdd3f7f5db1f540df58941236539d4ef"
+entry_count = 3
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；3659014 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/review_followup_20261013/research_sources.zip"
+sha256 = "1f33974940d95fdbee8949203a94d485cada3476cdf9925a4b6e7d83c3733477"
+entry_count = 102
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；282641 B / 102 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/initial_ci_entrypoints.zip"
+sha256 = "13068cf3fde17ebdd21ee01acdf3e2c09dfb5a3211d019a1a35c4d4e9102cc75"
+entry_count = 1
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；17099 B / 1 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/validation/initial_failure_logs.zip"
+sha256 = "78ff0567bce05dd92e28492fec110bf26db8b19c23c1c47591038ec73ea58c11"
+entry_count = 2
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；1553 B / 2 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v1/returned_evidence.zip"
+sha256 = "827095787eeda6fa3aac5d4572cfa3618eb17c71f6ac9e7746dc4f207697b98c"
+entry_count = 7
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；84569 B / 7 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/returned_evidence.zip"
+sha256 = "6c383d09c43d91d36243c517750771fdd9b40a990af4a35ae4f0a9225467f87c"
+entry_count = 9
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；90581 B / 9 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/inputs.zip"
+sha256 = "933335f60db550a59c24c4a074f4e9a0d1cffec32bbd802eb159ad65ef4797d7"
+entry_count = 3
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；67643 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_review_v1/returned_review_and_candidate.zip"
+sha256 = "c0246d2220de5deeb9fea24b28a85af6ff7ce5b830004c164ef05850f42d3e40"
+entry_count = 25
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；1043097 B / 25 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/input_package_v1.zip"
+sha256 = "98ba28537c19cb69ce5a0bc4c9d340c637a7ca91e74ca3cf51323a2cf92e7560"
+entry_count = 39
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；1932670 B / 39 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_fortran_inputs_v1/fortran_inputs.zip"
+sha256 = "a00d15db35f8488b5ee7d830b44e85fe806554e880e682cdf2551a66edf8ca3d"
+entry_count = 68
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；55564 B / 68 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v1/inputs.zip"
+sha256 = "933335f60db550a59c24c4a074f4e9a0d1cffec32bbd802eb159ad65ef4797d7"
+entry_count = 3
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；67643 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/inputs.zip"
+sha256 = "933335f60db550a59c24c4a074f4e9a0d1cffec32bbd802eb159ad65ef4797d7"
+entry_count = 3
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；67643 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_a_runner_inputs_v1/returned_evidence.zip"
+sha256 = "db47413ea79c115fe8a85ff825039732acffd5ca4f4c47e9902d00b49ad627dc"
+entry_count = 3
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；7481 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_production_replay_v3/phase_reference_inputs.zip"
+sha256 = "2df44b801ebaee7f48a88bb59840f9bd99aaff520d06e05cd5af692404e022d7"
+entry_count = 24
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；2444255 B / 24 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/returned/runner-pilot-review-return-v1.zip"
+sha256 = "c72db886468929cd38385374932d9f4dfc74467ac5e3de1e5286fd8b83fa872b"
+entry_count = 9
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；14034 B / 9 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/review_foundation.zip"
+sha256 = "ee3149a4db0aba0639662f0fe7e62488557b3517e2dc91715ae26ba68d46c0d3"
+entry_count = 10
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；885016 B / 10 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/review_revision_v2.zip"
+sha256 = "2effc706637cbc188ca9fe4cfa682fadb1a958e80a905bb096d610a871308fd7"
+entry_count = 6
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；18110 B / 6 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runner-pilot-review-return-v2.zip"
+sha256 = "ef685164fcbdbb006d5198d06c20c6cc9a38273f618bbef566c31f7756c4f887"
+entry_count = 165
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；141888 B / 165 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runner_results.zip"
+sha256 = "90a4e97840a6c3f8b1c475953a11f5cb527e3f3d528fd1312e040bba80c47e6f"
+entry_count = 127
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；454847 B / 127 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224161650/artifact.zip"
+sha256 = "13d7dff2b4a511cd16eee9ef32a031fef0f41758e25dc6f3769c9477090d9afe"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；31390 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224178198/artifact.zip"
+sha256 = "c5c1f8a5bb90b33982db76e90de2ed179ac1f937d1f602e454512a0cf3b39c7b"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；30023 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224194586/artifact.zip"
+sha256 = "611ac1588a4421ac5a8bb2ed25c97293693172a63b0df3cbee73df1b3362cfa4"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；30373 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224212631/artifact.zip"
+sha256 = "5bfa8bf5bc694e573f0d6f116389de00185a614a0c7e469f58bec779bf2f4c00"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；32410 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224228254/artifact.zip"
+sha256 = "5add3f6966221b1749833255571cef33fa3b4c133336955142af55c661518685"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；30041 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224250574/artifact.zip"
+sha256 = "8f3b163ddf74001a17dc35caa4cc861484d9dba25eeceaa2f258e92c487bacf1"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；34289 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/runs/40224267466/artifact.zip"
+sha256 = "318f402e0700e4d647273768e790ec364f5b929acb69d03e9c18d7cd4cdfa99a"
+entry_count = 13
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；30292 B / 13 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_review_checks_v1/returned_evidence.zip"
+sha256 = "c22d4342b274a1b20c49c87b1589e273dd0b49336cb0e6ecf0da25480eba7925"
+entry_count = 6
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；2940 B / 6 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_timing_preflight_setup_v1/overlay.zip"
+sha256 = "81bb76785d84d586bd95f062e985c405210ea6b6bfffdc599f44d7304af15a35"
+entry_count = 5
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；10469 B / 5 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_timing_preflight_setup_v1/returned_evidence.zip"
+sha256 = "9832b714e9d655058fa51a4264ed735b527bf6c52996add0f2a40c65dea4b67e"
+entry_count = 22
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；128544 B / 22 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_wrapup_v1/wrapup-checks-return.zip"
+sha256 = "bfa0d8894deb8b2f5fbe26c2793f51597098ef90f488b46ab56beb27dc51cf4b"
+entry_count = 5
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；20473 B / 5 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_precheck_v1/returned_evidence.zip"
+sha256 = "96462d47f7813de6f7facbfca5216fcfc85cd83ed725cc374d9aa95c3e08d8a6"
+entry_count = 5
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；2673 B / 5 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/inputs.zip"
+sha256 = "933335f60db550a59c24c4a074f4e9a0d1cffec32bbd802eb159ad65ef4797d7"
+entry_count = 3
+status = "historical_evidence"
+role = "小体积历史过程/运行证据包，批量登记收口，不作现行数据源"
+rationale = "Batch 3 登记收口：小体积历史过程/运行证据包，批量登记收口，不作现行数据源；67643 B / 3 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_eta_fine_20261029_v1/eta_refinement_results_v1.zip"
+sha256 = "8d3961b1af46284a45ff62e283fd541cf5219bab9d7f1eb706b1feff5a139e24"
+entry_count = 158
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；1697418 B / 158 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/mott_other_slopes_20261029_v1/center_modulation_acceptance_v1/center_modulation_acceptance_v1.zip"
+sha256 = "fdee14d0aff48726fc39a9b560019491af84a2b5b5169263cb2204123d4bd2e9"
+entry_count = 10
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；178772 B / 10 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/asymptotics_background_return_v1.zip"
+sha256 = "ece646ce244f2637a3d4ea5743f2a118fc67811ef0cecb048d172b4cd5719db3"
+entry_count = 16
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；24371 B / 16 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/sigma_mott_asymptotics_20261103_v1/asymptotics_return_v1.zip"
+sha256 = "e3ddda9dfc77af3e75b4ad65b70d97c04f9f68352e45e7a5bef022296557f761"
+entry_count = 65
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+role = "v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代"
+rationale = "Batch 3 登记收口：v15 历史数值或输入记录，已被 ward_moller_sphere_20261121_v1 取代；830753 B / 65 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/validation_sources.zip"
+sha256 = "a5cf073cded92830555ee4e9f64982564f685a508b4740cca35acfa3963dcbc8"
+entry_count = 7
+status = "active"
+role = "现行专题的数值/图件来源或现行恢复库"
+rationale = "Batch 3 登记收口：现行专题的数值/图件来源或现行恢复库；22798 B / 7 条目，按 path 字典序批量生成。"
+approved_at = "2026-11-23"
+
