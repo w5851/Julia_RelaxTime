@@ -173,3 +173,176 @@ rationale = "包内两个文件的 blob 与 2e5c411c716d 版本逐字节一致�
 retired_at = "2026-11-23"
 git_blob = "243798c10a956ba8ac793faa08568371d6b305ab"
 retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
+
+# ---------------------------------------------------------------------------
+# Batch 1：2026-10 批次返回证据包（2026-11-23 退役）
+# ---------------------------------------------------------------------------
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/returned_evidence.zip"
+sha256 = "ee69a5206643d1b6eece71134d0ddbe2cfc68d66de5de24188529b8b7a9912c6"
+entry_count = 2824
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-23"
+replacement = "git cat-file blob 28a5c749383d2f141af93d76d417f4d8ff488bb8 > returned_evidence.zip（逐字节还原）"
+rationale = "返回证据包：2824 条目，主体为源码副本与中间验证数据；同目录 source.zip 已退役，package_manifest.json 与 returned_archive_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "28a5c749383d2f141af93d76d417f4d8ff488bb8"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_joint_representatives_p48_v1/returned_evidence.zip"
+sha256 = "54b7b9a39968f07c7a262afdf1453b01dc6fb88717125e5213eb195f109ff638"
+entry_count = 885
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob e077c36fc7181af825d00027e47624e47e33b761 > returned_evidence.zip（逐字节还原）"
+rationale = "2026-10-25 代表点中间返回包：885 条目，0 精确引用；returned_archive_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "e077c36fc7181af825d00027e47624e47e33b761"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/returned_evidence.zip"
+sha256 = "00f1bc01598c0c6f3aedc7be0cf2e1000fa1959594d723e4dfed0847e7374cdb"
+entry_count = 1131
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob ff19e17e6dee84819b95d39a278be73f686ada1d > returned_evidence.zip（逐字节还原）"
+rationale = "返回证据包：1131 条目，大量重复源码与中间验证数据；同目录 source.zip 已退役，两份 manifest 留底。"
+retired_at = "2026-11-23"
+git_blob = "ff19e17e6dee84819b95d39a278be73f686ada1d"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/remote_preflight_setup_v1/transport_preflight_source_v1.zip"
+sha256 = "bbd540a74d9b2eb8560747fb1e56f9fc2b4713e4bdb3a6ff0f6f4d3db18aa3bb"
+entry_count = 879
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-23"
+replacement = "git cat-file blob 29830920f5529091f32aff7a38e88b662eae849c > transport_preflight_source_v1.zip（逐字节还原）"
+rationale = "2026-10-23 远端预检源码包：879 条目（592 .jl / 189 .py / 85 .toml），与 Phase 2 退役的 source.zip 同性质；package_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "29830920f5529091f32aff7a38e88b662eae849c"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_production_replay_v3/returned_evidence.zip"
+sha256 = "7aebeb168137d9cd9f416c8b5427de736b578c95e0b9574977c0c5bbf3bb8ce5"
+entry_count = 942
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob 8d5b66d2b22e19b19fa63f682ca6f22be61b4269 > returned_evidence.zip（逐字节还原）"
+rationale = "2026-10-25 重放中间返回证据：942 条目，主体为源码副本；phase_reference_input_manifest.json 与 returned_archive_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "8d5b66d2b22e19b19fa63f682ca6f22be61b4269"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/returned_evidence.zip"
+sha256 = "410dee37d2bf93cc3ffaf8e3e124e43be16fbb52701b02dd7035cbc4b8db2402"
+entry_count = 374
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob 63f8623afd08b1047c0329f20d483a49b0b79888 > returned_evidence.zip（逐字节还原）"
+rationale = "返回证据包：374 条目，主体为源码副本；同目录 source.zip 已退役，两份 manifest 留底。"
+retired_at = "2026-11-23"
+git_blob = "63f8623afd08b1047c0329f20d483a49b0b79888"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_phase_validation_v1/returned_evidence.zip"
+sha256 = "3d0e193e0162fe91a9c02b976978953201cf94ad309bc00749b7432f7d62c1cd"
+entry_count = 410
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob d2a79399bd1952c08bc32b418d1dc09fd3d4c8f7 > returned_evidence.zip（逐字节还原）"
+rationale = "2026-10-25 阶段验证中间返回包：410 条目，主体为重复源码；returned_archive_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "d2a79399bd1952c08bc32b418d1dc09fd3d4c8f7"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_background_setup_v1/returned_evidence.zip"
+sha256 = "038beb374adffc64e0598e54f2550a8af52011ea45173cd9592e84232edd3dbc"
+entry_count = 410
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob b70c5f8513ec561574b0563a71dbf1d3c9cc8f03 > returned_evidence.zip（逐字节还原）"
+rationale = "2026-10-25 背景设置返回包：410 条目，主体为重复源码；returned_archive_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "b70c5f8513ec561574b0563a71dbf1d3c9cc8f03"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/returned_evidence.zip"
+sha256 = "f5619b5cb5604e19de858c65a9b073cd99b980e18a0881123b72b1b0e0a8fdbe"
+entry_count = 422
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob 8a186bae28c2010f4a49041f57e75303fe3c0a7d > returned_evidence.zip（逐字节还原）"
+rationale = "返回证据包：422 条目；同目录 source.zip 已退役，两份 manifest 留底。"
+retired_at = "2026-11-23"
+git_blob = "8a186bae28c2010f4a49041f57e75303fe3c0a7d"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_production_replay_v2/returned_failure.zip"
+sha256 = "63ed3a33375a88e90afc1f1c1ac6cb9c32a80c6e8202882ff2193f503323f19a"
+entry_count = 372
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob 39e75d6d6164369d0dbadc457fa763c34655232a > returned_failure.zip（逐字节还原）"
+rationale = "失败运行残留：372 条目，已被 v3 取代；returned_failure_manifest.json 与 wrapper_manifest.json 留底。"
+retired_at = "2026-11-23"
+git_blob = "39e75d6d6164369d0dbadc457fa763c34655232a"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_review_v1/old_baseline_evidence.zip"
+sha256 = "4475516e376ea6bfc00ece9d7699883c322bef50d007e8f47410d8fc94e05ea6"
+entry_count = 377
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-23"
+replacement = "git cat-file blob 76256147d7b54c5f7c15c3cbe3eaa49953dcb2b3 > old_baseline_evidence.zip（逐字节还原）"
+rationale = "旧基线证据包：377 条目（274 .jl + 82 .toml），已被后续基线取代；两份 manifest 留底。"
+retired_at = "2026-11-23"
+git_blob = "76256147d7b54c5f7c15c3cbe3eaa49953dcb2b3"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v1/failed_evidence.zip"
+sha256 = "c6a139c12850a9f8264203758a3fcddd8b5eefa21cffbb998656abd17294ab15"
+entry_count = 332
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-25"
+replacement = "git cat-file blob 13b9bfae601f81bc0020950b236fe5765faf99fe > failed_evidence.zip（逐字节还原）"
+rationale = "失败证据包：332 条目（225 .jl + 82 .toml），同目录 source.zip 已退役；两份 manifest 留底。"
+retired_at = "2026-11-23"
+git_blob = "13b9bfae601f81bc0020950b236fe5765faf99fe"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/validation/remote_test_input.zip"
+sha256 = "ce1c7635cea24b27d5d9b6a21afd2d5c691e4f53c9e9246e05297fe86c94925b"
+entry_count = 170
+declared_commit = ""
+uncommitted_source = false
+snapshot_mtime = "2026-10-17"
+replacement = "git cat-file blob 5b8ea47ce83b47ba840d41969d6f67db69f10b15 > remote_test_input.zip（逐字节还原）"
+rationale = "远端测试输入源码包：170 条目（147 .py + 22 .jl），纯 code-archive，批次外 0 引用。"
+retired_at = "2026-11-23"
+git_blob = "5b8ea47ce83b47ba840d41969d6f67db69f10b15"
+retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"

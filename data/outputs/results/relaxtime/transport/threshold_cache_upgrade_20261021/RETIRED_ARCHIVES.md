@@ -26,12 +26,37 @@
 `retired_before_commit` 的完整值见策略文件（`0483e5db58f68f65914d499398261682ed12e3de`、
 `b2021ffa112dad868e073c96163734ef2937a991`）。
 
+### Batch 1：2026-10 批次返回证据包（2026-11-23 退役）
+
+| 归档 | 条目 | 快照时间 | git_blob |
+| --- | --- | --- | --- |
+| `engineering_delivery_20261104_v1/validation/remote_test_input.zip` | 170 | 2026-10-17 | `5b8ea47ce83b…` |
+| `full_rs_baseline_acceptance_setup_v1/returned_evidence.zip` | 422 | 2026-10-25 | `8a186bae28c2…` |
+| `full_rs_baseline_review_v1/old_baseline_evidence.zip` | 377 | 2026-10-23 | `76256147d7b5…` |
+| `full_rs_joint_representatives_p48_v1/returned_evidence.zip` | 885 | 2026-10-25 | `e077c36fc718…` |
+| `full_rs_layer_validation_setup_v1/failed_evidence.zip` | 332 | 2026-10-25 | `13b9bfae601f…` |
+| `full_rs_layer_validation_setup_v2/returned_evidence.zip` | 1131 | 2026-10-25 | `ff19e17e6dee…` |
+| `full_rs_mode_b_background_setup_v1/returned_evidence.zip` | 410 | 2026-10-25 | `b70c5f8513ec…` |
+| `full_rs_mode_b_qualification_setup_v1/returned_evidence.zip` | 2824 | 2026-10-23 | `28a5c749383d…` |
+| `full_rs_phase_validation_v1/returned_evidence.zip` | 410 | 2026-10-25 | `d2a79399bd19…` |
+| `full_rs_production_replay_v2/returned_failure.zip` | 372 | 2026-10-25 | `39e75d6d6164…` |
+| `full_rs_production_replay_v3/returned_evidence.zip` | 942 | 2026-10-25 | `8d5b66d2b22e…` |
+| `full_rs_transport_validation_setup_v1/returned_evidence.zip` | 374 | 2026-10-25 | `63f8623afd08…` |
+| `remote_preflight_setup_v1/transport_preflight_source_v1.zip` | 879 | 2026-10-23 | `29830920f552…` |
+
+这 13 个包没有 `declared_commit`（`uncommitted_source = false`），是运行返回证据、失败残留与预检源码包。
+本批统一 `retired_before_commit = c8c9ef20dadc6259a47aa18324b1a98db8b2069c`。
+删除前已用 `git grep -F` 对**完整路径**与**父目录**在 `.github/ scripts/ src/ tests/ config/` 全量检索，均 0 命中；
+同目录的 `package_manifest.json` / `returned_archive_manifest.json` / `returned_failure_manifest.json` 等清单保留。
+完整 `git_blob` 与 `sha256` 见策略文件。
+
+
 ### 还原命令
 
 **请在 Git Bash / POSIX shell 下执行**。Windows PowerShell 5.1 的 `>` 重定向会按 UTF-16LE
-转码，破坏 zip 二进制；若只能用 PowerShell，请改用
-`[IO.File]::WriteAllBytes($dest, (git cat-file blob $blob | Out-String))` 之外的等价二进制方式，
-或先 `git cat-file blob <blob> | Out-File -Encoding Byte`。
+转码，破坏 zip 二进制；若只能用 PowerShell，请改用 `cmd /c` 形式：
+`cmd /c "git cat-file blob <blob> > <dest>"`。不要使用 `Out-File -Encoding Byte`，
+它同样经 stdout 文本解码，仍会损坏 zip。
 
 ```bash
 # 逐字节还原（把 BLOB 与 DEST 换成表里对应条目的值）
