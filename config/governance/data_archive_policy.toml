@@ -59,7 +59,7 @@ sha256 = "d3b0d5fd0a61416d45172f62fb03d30e68a1124696a6148c4059d24f27304580"
 entry_count = 77
 status = "active"
 role = "historical_figure_recovery_store"
-rationale = "2026-11-04 交付归档：76 个成员（70 张唯一 PNG + 4 份原退役说明 + 2 份原分析文档）+ 1 个 manifest；70 张 PNG 在工作区无同内容副本。现行文档把它作为历史图件恢复库：data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md#历史图片定位与恢复 给出 verify/restore 命令，docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/README.md 与 followup_20261022.md 以锚点链接到该节；工具 scripts/analysis/relaxtime/transport_delivery_archive.py 与 tests/unit/python/test_transport_delivery_archive.py 提供校验能力（测试使用合成归档）。"
+rationale = "2026-11-04 交付归档，共 77 条目：76 个恢复成员（70 张全仓唯一哈希 PNG（0/70 副本）+ 4 份原退役说明 + 2 份原分析文档）+ 1 个 __transport_delivery__/manifest.json。现行文档把它作为历史图件恢复库：data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/pr_wrapup/README.md#历史图片定位与恢复 给出 verify/restore 命令，docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/README.md 与 followup_20261022.md 以锚点链接到该节；工具 scripts/analysis/relaxtime/transport_delivery_archive.py 与 tests/unit/python/test_transport_delivery_archive.py 提供校验能力（测试使用合成归档）。已用 transport_delivery_archive.py verify 复核通过（status=verified, files=76）。"
 approved_at = "2026-11-23"
 
 # ---------------------------------------------------------------------------
