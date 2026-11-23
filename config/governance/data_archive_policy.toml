@@ -13,6 +13,34 @@
 schema = "data_archive_policy_v1"
 
 # ---------------------------------------------------------------------------
+# 快照孤本清单
+#
+# 2026-10-25 / 2026-10-26 那批 source.zip 是脏工作区快照：相对声明 commit
+# dffe4070eb5c，每包有 45 个同名文件内容不同、67–81 个文件尚未入库。
+# 按 CRLF 归一化后逐 blob 核对，下列 13 处内容从未进入任何提交，只能由
+# retired_archives 记录的 git_blob 精确取回。
+# 另有 12 处候选差异经归一化确认仅为换行符差异，可由历史提交还原。
+# ---------------------------------------------------------------------------
+
+[unique_snapshot_blobs]
+note = "内容从未进入任何提交的快照文件；13 处是 7 个 dffe4070eb5c 批次 source.zip 的并集（第 8 个 runner_review_checks 为干净包，可由 2e5c411c716d 重建），取回时先按所属包的 git_blob 解包再取对应路径；另 12 处候选差异经 CRLF 归一化确认仅为换行符差异，可由历史提交还原"
+paths = [
+  ".github/workflows/ci-integration.yml",
+  ".github/workflows/relaxtime-phase-guided-transport-production.yml",
+  "benchmark/relaxtime/bench_full_rs_a_reduction.jl",
+  "config/governance/task_tracks.toml",
+  "docs/guides/scripts/transport_sampling_qualification.md",
+  "scripts/analysis/relaxtime/ThresholdUpgradeCommon.jl",
+  "scripts/analysis/relaxtime/run_transport_full_rs_layer_validation.jl",
+  "scripts/analysis/relaxtime/run_transport_joint_validation.jl",
+  "scripts/analysis/relaxtime/run_transport_production_validation.jl",
+  "scripts/dev/export_thermal_weighted_transport_baseline.py",
+  "tests/regression/relaxtime/native_transport_fixture.jl",
+  "tests/unit/python/test_transport_production_baseline.py",
+  "tests/unit/runtests.jl",
+]
+
+# ---------------------------------------------------------------------------
 # 保留归档
 # ---------------------------------------------------------------------------
 
@@ -42,86 +70,106 @@ retired_at = "2026-11-23"
 git_blob = "75a52f6884f2dc70b2959896cfb373eece6f6821"
 retired_before_commit = "0483e5db58f68f65914d499398261682ed12e3de"
 
-# ---------------------------------------------------------------------------
-# 待退役（Phase 2）
-# ---------------------------------------------------------------------------
-
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v1/source.zip"
 sha256 = "e855bc17cbe4806da478624b6c57a6bffebcaffbebf4e706953fef681d8c757c"
 entry_count = 1598
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "相对声明 commit 有 45 处修改与 67 个未入库文件，属脏工作区快照；批次归档已结束。"
-planned_phase = "phase2"
+replacement = "git cat-file blob caa0218765dbe11b3e6d2f9fca393a22a0d689b9 > source.zip（逐字节还原）；声明 commit dffe4070eb5c 只是 head_base，无法据此重建该快照"
+rationale = "相对声明 commit 有 45 处修改与 67 个未入库文件，属脏工作区快照；批次归档已结束，同目录 package_manifest.json 保留。"
+retired_at = "2026-11-23"
+git_blob = "caa0218765dbe11b3e6d2f9fca393a22a0d689b9"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/source.zip"
 sha256 = "cbbe5ac6653c5d71ab3f619d773e5d65f69ce3ec6cd93dac422579a9675f01ae"
 entry_count = 1598
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "与 v1 条目数及差异统计同构；task_tracks 仅引用其 package_manifest 与结果 summary。"
-planned_phase = "phase2"
+replacement = "git cat-file blob 1537c2c11f0f641c2d037f5201647b094e2ec1df > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "与 v1 条目数及差异统计同构；task_tracks 仅引用其 package_manifest 与结果 summary。"
+retired_at = "2026-11-23"
+git_blob = "1537c2c11f0f641c2d037f5201647b094e2ec1df"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/source.zip"
 sha256 = "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031"
 entry_count = 1631
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "基线未提交快照；Phase 0.5 已确认 tests/baselines 的 JSON 指向另一 worktree 的 CSV/JSON，不引用 zip。"
-planned_phase = "phase2"
+replacement = "git cat-file blob 24e0475f90fd4a1b2078d48a0b4dc3dabae6d29c > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "基线未提交快照；tests/baselines/relaxtime 的 JSON 指向另一 worktree 的 CSV/JSON，不引用 zip。"
+retired_at = "2026-11-23"
+git_blob = "24e0475f90fd4a1b2078d48a0b4dc3dabae6d29c"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v1/source.zip"
 sha256 = "9fc7dac27790bf73c2b6cb9f57196067f078ca39fb2da7790de2e61962b4fddc"
 entry_count = 1601
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "同目录 failed_archive_manifest.json 已被 v2 取代；批次外无代码或测试引用。"
-planned_phase = "phase2"
+replacement = "git cat-file blob a65786ce84e36935465f5f707253f23683c45535 > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "同目录 failed_archive_manifest.json 已被 v2 取代；批次外无代码或测试引用。"
+retired_at = "2026-11-23"
+git_blob = "a65786ce84e36935465f5f707253f23683c45535"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/source.zip"
 sha256 = "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5"
 entry_count = 1602
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "基线未提交快照；同目录已有完整 receipt/manifest，批次外无消费者。"
-planned_phase = "phase2"
+replacement = "git cat-file blob f742ee09bd0e80acaf88c140ba33dfcd182dfbbc > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "基线未提交快照；同目录已有完整 receipt/manifest，批次外无消费者。"
+retired_at = "2026-11-23"
+git_blob = "f742ee09bd0e80acaf88c140ba33dfcd182dfbbc"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/source.zip"
 sha256 = "4b30436a7d84ce7089b5f7379b69c51e0c51b2eedf8654f40f76a7bc34afa123"
 entry_count = 1636
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "prepare_source_package.py 明确 uncommitted_source=True、calculation_commit=None；远端资格验收已归档。"
-planned_phase = "phase2"
+replacement = "git cat-file blob fa26925b1b76fa9ef7f5b5b47d248f53bdf89b33 > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "prepare_source_package.py 明确 uncommitted_source=True、calculation_commit=None；远端资格验收已归档。"
+retired_at = "2026-11-23"
+git_blob = "fa26925b1b76fa9ef7f5b5b47d248f53bdf89b33"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/source.zip"
 sha256 = "533bbc8dcb13681a3873d6b9e94f5734772311f5f52575ae12f9bbaf6955448a"
 entry_count = 1600
 declared_commit = "dffe4070eb5c"
 uncommitted_source = true
 snapshot_mtime = "2026-10-25"
-reason = "基线未提交快照；验证已归档，task_tracks 仅引用 returned/reviewed_result.json。"
-planned_phase = "phase2"
+replacement = "git cat-file blob f49ea7216d7e5a817b8e367035b413df730ba392 > source.zip（逐字节还原）；声明 commit 只是 head_base"
+rationale = "基线未提交快照；验证已归档，task_tracks 仅引用 returned/reviewed_result.json。"
+retired_at = "2026-11-23"
+git_blob = "f49ea7216d7e5a817b8e367035b413df730ba392"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"
 
-[[pending_retirement]]
+[[retired_archives]]
 path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_review_checks_v1/source.zip"
 sha256 = "6fd0d7cad0e87c2c72c7221f4f1aabcc9d4eaad64d3d220414a50e14f3ca3622"
 entry_count = 2
-declared_commit = "2e5c411c716d"
+declared_commit = "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
 uncommitted_source = false
 snapshot_mtime = "2026-10-26"
-reason = "Phase 0.5 已确认包内 review_transport_runner_pilot.py 与 test_transport_runner_pilot.py 的 blob 逐字节等于 2e5c411c716d 版本，可由该 commit 精确还原。"
-planned_phase = "phase2"
+replacement = "git cat-file blob 243798c10a956ba8ac793faa08568371d6b305ab > source.zip（逐字节还原）；包内 review_transport_runner_pilot.py 与 test_transport_runner_pilot.py 也可由 2e5c411c716d5cbc524c3fc6cfb335fe05b39444 精确重建"
+rationale = "包内两个文件的 blob 与 2e5c411c716d 版本逐字节一致，可由该 commit 精确还原；prepare_calculation_commit.py 仍把该包列为历史必需证据。"
+retired_at = "2026-11-23"
+git_blob = "243798c10a956ba8ac793faa08568371d6b305ab"
+retired_before_commit = "b2021ffa112dad868e073c96163734ef2937a991"

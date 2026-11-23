@@ -154,6 +154,31 @@ end
     @test isempty(collect_archive_advisories(root, load_archive_policy(root)))
 end
 
+@testset "Tombstone git_blob must still hash to its recorded sha256" begin
+    root = init_repo()
+    write(joinpath(root, ZIP_RELATIVE), "payload")
+    git_run(root, "add", "-A")
+    git_run(root, "commit", "-q", "-m", "add archive")
+    digest = sha256_of(joinpath(root, ZIP_RELATIVE))
+    before = git_run(root, "rev-parse", "HEAD")
+    blob = git_run(root, "rev-parse", "HEAD:$(ZIP_RELATIVE)")
+    git_run(root, "rm", "-q", ZIP_RELATIVE)
+    git_run(root, "commit", "-q", "-m", "drop archive")
+    tip = git_run(root, "rev-parse", "HEAD")
+    cfg = GuardConfig(:range, before, tip)
+
+    write_retired!(root, digest, blob, before)
+    @test isempty(collect_archive_violations(root, cfg, load_archive_policy(root)))
+
+    write_retired!(root, repeat("a", 64), blob, before)
+    violations = collect_archive_violations(root, cfg, load_archive_policy(root))
+    @test any(occursin("hashes to", v) for v in violations)
+
+    write_retired!(root, digest, repeat("f", 40), before)
+    violations = collect_archive_violations(root, cfg, load_archive_policy(root))
+    @test any(occursin("missing from the local object database", v) for v in violations)
+end
+
 @testset "Policy schema is validated" begin
     root = init_repo()
     write(joinpath(root, POLICY_RELATIVE), "schema = \"wrong\"\n")
