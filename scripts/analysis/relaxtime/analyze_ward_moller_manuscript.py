@@ -61,7 +61,7 @@ def audit(results):
             'u':u*(w['uu_to_uu']+w['ud_to_ud'])+
                 ub*(w['uubar_to_uubar']+w['uubar_to_ddbar']+w['uubar_to_ssbar']+w['udbar_to_udbar'])+
                 s*w['us_to_us']+sb*w['usbar_to_usbar'],
-            's':2*u*w['us_to_us']+2*ub*w['usbar_to_usbar']+s*w['ss_to_ss']+
+            's':2*u*w['us_to_us']+2*ub*w['subar_to_subar']+s*w['ss_to_ss']+
                 sb*(w['ssbar_to_ssbar']+2*w['ssbar_to_uubar']),
             'ubar':u*(w['uubar_to_uubar']+w['uubar_to_ddbar']+w['uubar_to_ssbar']+w['dubar_to_dubar'])+
                 ub*(w['ubardbar_to_ubardbar']+w['ubarubar_to_ubarubar'])+s*w['subar_to_subar']+sb*w['ubarsbar_to_ubarsbar'],

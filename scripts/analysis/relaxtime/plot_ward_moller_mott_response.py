@@ -117,41 +117,12 @@ def render(data, record, profile):
                           key=lambda pair: float(pair[1]["u_midpoint"]))
             series.append(_curve(ax, rows, x="u_midpoint", y="slope", scale=1000.0,
                                  panel=panel, source="local_slopes.csv",
-                                 description="adjacent native log secants on a continuous branch"))
+                                 description="log secants between computed vertices on a continuous branch"))
             _mott_axis(ax, panel, title, profile, show_xlabel=panel == "c")
             if panel != "b":
                 ax.set_ylabel(SLOPE, fontsize=15)
                 axes.append(_axis(panel, "slope", "dimensionless", SLOPE))
             axes.append(_axis(panel, "u_midpoint", "dimensionless", DETUNING, "1000*u_midpoint"))
-
-        parent = axs[1, 0]
-        pos = parent.get_position()
-        # The inset shows computed residuals only. Its footprint is in the
-        # clear part of panel (c), with dimensions defined at final width.
-        inset = fig.add_axes([pos.x0 + 0.54*pos.width, pos.y0 + 0.53*pos.height,
-                              0.31*pos.width, 0.33*pos.height])
-        half_width = record["transport_checks"]["sigma"]["inset"]["display_half_width"]
-        subset = [pair for pair in rows if abs(float(pair[1]["u_midpoint"])) <= half_width]
-        magnitude = max(abs(float(row["linear_background_residual"])) for _,row in subset)
-        exponent = min(0, math.floor(math.log10(magnitude))) if magnitude else 0
-        residual_label = rf"Residual $\times 10^{{{-exponent}}}$" if exponent else "Slope residual"
-        series.append(_curve(inset, subset, x="u_midpoint", y="linear_background_residual",
-                             scale=1000.0, panel="c-inset", source="local_slopes.csv", y_scale=10.0**(-exponent),
-                             description="local secants minus a line fitted to the two sidebands"))
-        inset.axvline(0.0, color=REFERENCE, linestyle="--", linewidth=0.65, zorder=1)
-        inset.set_xlim(-1060*half_width, 1060*half_width)
-        inset.xaxis.set_major_locator(FixedLocator([-800*half_width, 0, 800*half_width]))
-        inset.xaxis.set_major_formatter(FormatStrFormatter("%g"))
-        inset.yaxis.set_major_locator(MaxNLocator(nbins=2, min_n_ticks=2))
-        inset.yaxis.set_major_formatter(FormatStrFormatter("%g"))
-        inset.yaxis.tick_right()
-        inset.set_title(residual_label, fontsize=12.5, loc="left", pad=3)
-        configure_axis_ticks(inset, profile)
-        inset.tick_params(which="major", length=3, labelsize=12, pad=1.5)
-        inset.tick_params(which="minor", length=1.6)
-        axes.extend([_axis("c-inset", "u_midpoint", "dimensionless", DETUNING, "1000*u_midpoint"),
-                     _axis("c-inset", "linear_background_residual", "dimensionless", residual_label,
-                           f"10^{(-exponent)}*linear_background_residual")])
 
         ax = axs[1, 1]
         usable = sorted((pair for pair in curvature
@@ -212,13 +183,13 @@ def main():
                 for name in ("local_slopes.csv", "scalar_curvature.csv", "numerical_manifest.json")]
                + [input_record(profile.path, role="figure_style")],
         outputs=outputs, axes=axes, series=series,
-        selection_rule="native secants; resolved scalar stencil interval; no smoothing or extrapolation",
+        selection_rule="computed vertices; 0.001 scalar and coarser K-wing secants; resolved scalar stencil interval",
         interpolation_policy="none", connector_policy="forbidden",
         missing_value_policy="refuse missing or nonfinite series",
         validation={"finite": True, "duplicate_keys": True, "support": True, "strict_gate": False},
         rendering={
             "column": "double_column", "figure_size_inches": quality["figure_size_inches"],
-            "size_override_reason": "Room for the resolved local inset and four independent axes",
+            "size_override_reason": "Room for four independent axes",
             "quality": quality, "placement_limits": placement_limits(quality, profile, outputs),
             "legend_policy": "declared_geometry_checked", "legend_placements": [], "legend_outside": True,
             "color_route": "color_print_and_online", "review_contract": "prd_review_v1",
@@ -226,9 +197,10 @@ def main():
                 {"value": "computed response", "color": CURVE, "noncolor_encoding": "solid"},
                 {"value": "threshold or analytic constant", "color": REFERENCE, "noncolor_encoding": "dashed"},
             ], backgrounds=["#ffffff"], background_scope="opaque white panel backgrounds"),
-            "reference_lines": {"a": 0, "b": 0, "c": 0, "c-inset": 0,
+            "reference_lines": {"a": 0, "b": 0, "c": 0,
                                 "d": record["scalar_checks"]["analytic_limit_fm2"]},
-            "sigma_inset_fit": record["transport_checks"]["sigma"]["inset"],
+            "display_secants": {m: value["display_secants"] for m, value in record["transport_checks"].items()},
+            "rate_assembly_replay": record.get("rate_assembly_replay"),
             "panel_conditions": {m: {k: c["location"][k] for k in ("T_MeV", "muB_MeV", "xi")}
                                  for m, c in record["centers"].items()},
         },

@@ -123,12 +123,48 @@ def collect_transport(root, centers, sources=None):
         grid[index]["run_host"] = meta["run_host"]
         if not recheck and grid[index]["driver_sha256"] != centers[meson]["metadata"]["driver_sha256"]:
             raise ValueError(f"Scan and center used different drivers: {path}")
-        hashes[path.relative_to(root).as_posix()] = digest(path)
+        hashes[path.relative_to(root).as_posix()] = grid[index]["original_node_sha256"] = digest(path)
     missing = {f"{m}/{t}": sorted(set(range(1, len(STEPS[t])+1))-set(grids[m,t]))
                for m,t in grids if len(grids[m,t]) != len(STEPS[t])}
     if missing:
         raise ValueError(f"Missing independent transport nodes: {missing}")
     return {mt:list(dict(sorted(grid.items())).values()) for mt,grid in grids.items()}, hashes
+
+
+def apply_rate_replay(grids, hashes, folder):
+    receipt = read_json(folder/"rate_assembly_replay.json")
+    path = folder/"window_replay.csv"
+    if digest(path) != receipt["files"][path.name]:
+        raise ValueError("Incorrect terminal replay hash")
+    with path.open(encoding="utf-8", newline="") as stream:
+        replay = {(r["meson"], r["tier"], int(r["index"])): r for r in csv.DictReader(stream)}
+    if len(replay) != len(hashes) or sorted(r["original_node_sha256"] for r in replay.values()) != sorted(hashes.values()):
+        raise ValueError("Terminal replay does not cover the original nodes")
+    for (meson, tier), grid in grids.items():
+        for node in grid:
+            r = replay[meson, tier, node["index"]]
+            eta = float(r["eta_over_s"])
+            if (r["original_node_sha256"] != node["original_node_sha256"]
+                    or float(r["old_eta_over_s"]) != node["eta_over_s"]
+                    or not (math.isfinite(eta) and eta > 0)):
+                raise ValueError("Terminal replay disagrees with the original shear value")
+            node["eta_over_s"] = eta
+    scalar_center = next(node["index"] for node in grids["sigma", "fine"] if node["delta_xi"] == 0)
+    return {"sha256": digest(path), "receipt_sha256": digest(folder/"rate_assembly_replay.json"),
+            "assembly_source_sha256": receipt["assembly_source_sha256"],
+            "host": receipt["host"], "julia": receipt["julia"],
+            "max_legacy_rate_defect": receipt["max_window_legacy_rate_defect"],
+            "max_legacy_kernel_defect": receipt["max_window_legacy_kernel_defect"],
+            "scalar_threshold_n_ubar_over_u": float(replay["sigma", "fine", scalar_center]["n_ubar_over_u"])}
+
+
+def display_nodes(meson, fine_at):
+    """Range and step choices for the displayed, directly computed secants."""
+    if meson == "sigma":
+        return [fine_at[round(k*0.001, 12)] for k in range(-8, 9)]
+    # Retain the fine grid at the K crossing; widen only the negative wing.
+    return [r for x, r in sorted(fine_at.items())
+            if meson != "K" or not (-.002 < x < -.0005) or x == -.001]
 
 
 def local_slopes(grids):
@@ -145,10 +181,11 @@ def local_slopes(grids):
             sampling.append({"u_left":a["delta_xi"],"u_right":b["delta_xi"],"slope":native,
                              "reference_slope":d,"absolute_defect":abs(d-native)})
         selected = []
-        for a,b in zip(fine[:-1],fine[1:]):
+        shown = display_nodes(meson, fine_at)
+        for a,b in zip(shown[:-1],shown[1:]):
             aa, bb = a["delta_xi"],b["delta_xi"]
             selected.append({"meson":meson,"u_left":aa,"u_right":bb,"u_midpoint":(aa+bb)/2,
-                             "slope":secant(a,b),"linear_background_residual":0.0})
+                             "slope":secant(a,b)})
         around = []
         for sign in [-1,1]:
             z = fine_at[0.0]
@@ -164,16 +201,15 @@ def local_slopes(grids):
                  "max_shared_endpoint_slope_defect":max(r["absolute_defect"] for r in sampling),
                  "slope_min":min(r["slope"] for r in selected),
                  "slope_max":max(r["slope"] for r in selected)}
-        if meson == "sigma":
-            sidebands = [r for r in selected if .003 <= abs(r["u_midpoint"]) <= .008]
-            a,b = line_fit([r["u_midpoint"] for r in sidebands],[r["slope"] for r in sidebands])
-            for r in selected:
-                r["linear_background_residual"] = r["slope"]-a-b*r["u_midpoint"]
-            # Show the central region covered entirely by the refined xi grid.
-            half_width = .0005
-            inset = [r["linear_background_residual"] for r in selected if abs(r["u_midpoint"])<=half_width]
-            entry["inset"] = {"fit_range":[.003,.008],"intercept":a,"gradient":b,"display_half_width":half_width,
-                              "residual_min":min(inset),"residual_max":max(inset)}
+        ref_at = {round(r["delta_xi"], 12): r for r in ref}
+        overlap = [r for r in selected if round(r["u_left"],12) in ref_at and round(r["u_right"],12) in ref_at]
+        entry["display_secants"] = {
+            "count": len(selected),
+            "widths": sorted({round(r["u_right"]-r["u_left"], 12) for r in selected}),
+            "reference_overlap_count": len(overlap),
+            "max_same_endpoint_defect": max(abs(r["slope"]-secant(
+                ref_at[round(r["u_left"],12)], ref_at[round(r["u_right"],12)])) for r in overlap),
+        }
         checks[meson] = entry
         slopes += selected
     return slopes, checks
@@ -263,6 +299,8 @@ def main():
     parser.add_argument("--action-head-sha",required=True)
     parser.add_argument("--source-index",type=Path,
                         help="Source records keyed by top-level folder when combining runs")
+    parser.add_argument("--rate-replay", type=Path,
+                        help="Verified terminal replay from the original process rates")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.action_head_sha):
         parser.error("--action-head-sha must be a full commit hash")
@@ -273,6 +311,7 @@ def main():
         check_meta(centers[meson]["metadata"])
     sources = read_json(args.source_index) if args.source_index else None
     grids, node_hashes = collect_transport(args.scan_root, centers, sources)
+    replay = apply_rate_replay(grids, node_hashes, args.rate_replay) if args.rate_replay else None
     slopes, slope_checks = local_slopes(grids)
     scalar, scalar_checks, scalar_provenance, stencils = scalar_results(
         args.scalar_root, centers["sigma"]["location"]["xi"])
@@ -288,6 +327,7 @@ def main():
               "centers":centers,"transport_checks":slope_checks,
               "scalar_checks":scalar_checks,"scalar_provenance":scalar_provenance,
               "transport_artifact_sha256":node_hashes,
+              "rate_assembly_replay":replay,
               "postprocess_sha256":digest(Path(__file__)),
               "files":{name:digest(args.out/name) for name in tables}}
     write_json(args.out/"numerical_manifest.json",result)
