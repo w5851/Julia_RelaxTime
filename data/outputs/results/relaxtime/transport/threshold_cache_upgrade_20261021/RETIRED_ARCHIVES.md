@@ -45,6 +45,7 @@
 | `remote_preflight_setup_v1/transport_preflight_source_v1.zip` | 879 | 2026-10-23 | `29830920f552…` |
 
 这 13 个包没有 `declared_commit`（`uncommitted_source = false`），是运行返回证据、失败残留与预检源码包。
+本批统一 `retired_before_commit = c8c9ef20dadc6259a47aa18324b1a98db8b2069c`。
 删除前已用 `git grep -F` 对**完整路径**与**父目录**在 `.github/ scripts/ src/ tests/ config/` 全量检索，均 0 命中；
 同目录的 `package_manifest.json` / `returned_archive_manifest.json` / `returned_failure_manifest.json` 等清单保留。
 完整 `git_blob` 与 `sha256` 见策略文件。
@@ -53,9 +54,9 @@
 ### 还原命令
 
 **请在 Git Bash / POSIX shell 下执行**。Windows PowerShell 5.1 的 `>` 重定向会按 UTF-16LE
-转码，破坏 zip 二进制；若只能用 PowerShell，请改用
-`[IO.File]::WriteAllBytes($dest, (git cat-file blob $blob | Out-String))` 之外的等价二进制方式，
-或先 `git cat-file blob <blob> | Out-File -Encoding Byte`。
+转码，破坏 zip 二进制；若只能用 PowerShell，请改用 `cmd /c` 形式：
+`cmd /c "git cat-file blob <blob> > <dest>"`。不要使用 `Out-File -Encoding Byte`，
+它同样经 stdout 文本解码，仍会损坏 zip。
 
 ```bash
 # 逐字节还原（把 BLOB 与 DEST 换成表里对应条目的值）
