@@ -23,7 +23,7 @@ schema = "data_archive_policy_v1"
 # ---------------------------------------------------------------------------
 
 [unique_snapshot_blobs]
-note = "内容从未进入任何提交的快照文件；取回方式见各 retired_archives 条目的 replacement"
+note = "内容从未进入任何提交的快照文件；13 处是 7 个 dffe4070eb5c 批次 source.zip 的并集（第 8 个 runner_review_checks 为干净包，可由 2e5c411c716d 重建），取回时先按所属包的 git_blob 解包再取对应路径；另 12 处候选差异经 CRLF 归一化确认仅为换行符差异，可由历史提交还原"
 paths = [
   ".github/workflows/ci-integration.yml",
   ".github/workflows/relaxtime-phase-guided-transport-production.yml",

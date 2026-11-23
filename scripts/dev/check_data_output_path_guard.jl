@@ -313,6 +313,47 @@ end
 
 file_sha256(path::AbstractString) = bytes2hex(SHA.sha256(read(path)))
 
+function is_shallow_repository(root::AbstractString)
+    return strip(read(Cmd(["git", "-C", root, "rev-parse", "--is-shallow-repository"]), String)) == "true"
+end
+
+function git_blob_bytes(root::AbstractString, blob::AbstractString)
+    buffer = IOBuffer()
+    run(pipeline(Cmd(["git", "-C", root, "cat-file", "blob", blob]); stdout = buffer, stderr = devnull))
+    return take!(buffer)
+end
+
+"""
+Verify that every tombstone's `git_blob` really is in the object database and that its bytes
+still hash to the recorded `sha256`. Skipped on shallow clones, where historical blobs are absent.
+"""
+function collect_retired_blob_violations(root::AbstractString, policy::ArchivePolicy)
+    violations = String[]
+    isempty(policy.retired) && return violations
+    is_shallow_repository(root) && return violations
+
+    for entry in policy.retired
+        blob = string(get(entry, "git_blob", ""))
+        is_full_git_id(blob) || continue  # format violations are reported elsewhere
+        path = policy_path(entry)
+        try
+            actual = bytes2hex(SHA.sha256(git_blob_bytes(root, blob)))
+            expected = string(get(entry, "sha256", ""))
+            actual == expected ||
+                push!(violations, "$(path): recorded git_blob $(blob) hashes to $(actual), not the tombstone sha256 $(expected)")
+        catch err
+            push!(violations, "$(path): recorded git_blob $(blob) is missing from the local object database")
+        end
+    end
+    return violations
+end
+
+function collect_retired_blob_advisories(root::AbstractString, policy::ArchivePolicy)
+    isempty(policy.retired) && return String[]
+    is_shallow_repository(root) || return String[]
+    return ["shallow clone detected: $(length(policy.retired)) tombstones were not verified against the local object database"]
+end
+
 function registered_path_set(entries)
     return Set(policy_path(entry) for entry in entries)
 end
@@ -370,6 +411,8 @@ function collect_archive_violations(root::AbstractString, cfg::GuardConfig, poli
         end
     end
 
+    append!(violations, collect_retired_blob_violations(root, policy))
+
     return violations
 end
 
@@ -380,14 +423,16 @@ function collect_archive_advisories(root::AbstractString, policy::ArchivePolicy)
         registered_path_set(policy.retired),
     )
     unregistered = [path for path in tracked_archive_paths(root) if !(path in registered)]
-    isempty(unregistered) && return String[]
+    advisories = collect_retired_blob_advisories(root, policy)
+    isempty(unregistered) && return advisories
 
     total = 0
     for path in unregistered
         full = joinpath(root, path)
         isfile(full) && (total += filesize(full))
     end
-    return ["$(length(unregistered)) tracked archives under data/outputs are not registered yet ($(round(total / 1048576; digits = 2)) MiB); register the ones that must stay"]
+    push!(advisories, "$(length(unregistered)) tracked archives under data/outputs are not registered yet ($(round(total / 1048576; digits = 2)) MiB); register the ones that must stay")
+    return advisories
 end
 
 function main()
