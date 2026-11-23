@@ -22,8 +22,9 @@
 4) 新增/复制/重命名 tracked 非图像文件位于 `data/outputs/figures/**`，且不是 `plot_manifest.json`。
 5) 归档策略（config/governance/data_archive_policy.toml）：新增/改名的 `data/outputs/**` 下 .zip
    必须登记在 retained_archives 或 pending_retirement；删除必须登记在 retired_archives；
-   已登记条目的 sha256 必须与工作区文件一致，retired 条目不得仍在工作区存在。
-   现存但未登记的 .zip 仅作为 advisory 汇总，不阻断。
+   任何未被登记的 tracked .zip 都视为 violation（hard fail）；
+   已登记条目的 sha256 必须与工作区文件一致，retired 条目不得仍在工作区存在，
+   且其 git_blob 必须仍在对象库中且哈希回墓碑记录的 sha256。
 """
 
 import SHA
@@ -238,6 +239,7 @@ const RETIRED_REQUIRED_FIELDS = (
     "snapshot_mtime", "replacement", "rationale", "retired_at", "git_blob", "retired_before_commit",
 )
 const PENDING_REQUIRED_FIELDS = ("path", "sha256", "entry_count", "reason", "planned_phase")
+const ALLOWED_RETAINED_STATUS = ("active", "historical_superseded", "historical_evidence")
 
 struct ArchivePolicy
     retained::Vector{Dict{String, Any}}
@@ -284,6 +286,12 @@ function archive_policy_entry_violations(entry::Dict{String, Any}, required, lab
         count = entry["entry_count"]
         (count isa Integer && count > 0) ||
             push!(violations, "$(path): entry_count must be a positive integer")
+    end
+    if haskey(entry, "status") && !(entry["status"] in ALLOWED_RETAINED_STATUS)
+        push!(
+            violations,
+            "$(path): status must be one of $(join(ALLOWED_RETAINED_STATUS, " / ")), got $(repr(entry["status"]))",
+        )
     end
     return violations
 end
@@ -413,26 +421,17 @@ function collect_archive_violations(root::AbstractString, cfg::GuardConfig, poli
 
     append!(violations, collect_retired_blob_violations(root, policy))
 
+    for path in tracked_archive_paths(root)
+        if !(path in retained_paths) && !(path in pending_paths) && !(path in retired_paths)
+            push!(violations, "$(path): tracked archive under data/outputs is not registered in $(ARCHIVE_POLICY_RELATIVE_PATH)")
+        end
+    end
+
     return violations
 end
 
 function collect_archive_advisories(root::AbstractString, policy::ArchivePolicy)
-    registered = union(
-        registered_path_set(policy.retained),
-        registered_path_set(policy.pending),
-        registered_path_set(policy.retired),
-    )
-    unregistered = [path for path in tracked_archive_paths(root) if !(path in registered)]
-    advisories = collect_retired_blob_advisories(root, policy)
-    isempty(unregistered) && return advisories
-
-    total = 0
-    for path in unregistered
-        full = joinpath(root, path)
-        isfile(full) && (total += filesize(full))
-    end
-    push!(advisories, "$(length(unregistered)) tracked archives under data/outputs are not registered yet ($(round(total / 1048576; digits = 2)) MiB); register the ones that must stay")
-    return advisories
+    return collect_retired_blob_advisories(root, policy)
 end
 
 function main()
