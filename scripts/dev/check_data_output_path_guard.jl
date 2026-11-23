@@ -20,7 +20,14 @@
    已验收的 immutable charged GBU v2 bundle 是唯一保留的哈希绑定历史包例外；
    新生产运行仍必须把图像写入 `data/outputs/figures/`。
 4) 新增/复制/重命名 tracked 非图像文件位于 `data/outputs/figures/**`，且不是 `plot_manifest.json`。
+5) 归档策略（config/governance/data_archive_policy.toml）：新增/改名的 `data/outputs/**` 下 .zip
+   必须登记在 retained_archives 或 pending_retirement；删除必须登记在 retired_archives；
+   已登记条目的 sha256 必须与工作区文件一致，retired 条目不得仍在工作区存在。
+   现存但未登记的 .zip 仅作为 advisory 汇总，不阻断。
 """
+
+import SHA
+import TOML
 
 struct GuardConfig
     mode::Symbol
@@ -221,6 +228,168 @@ function collect_figure_asset_violations(root::String, cfg::GuardConfig)
     return violations
 end
 
+const ARCHIVE_POLICY_RELATIVE_PATH = "config/governance/data_archive_policy.toml"
+const ARCHIVE_POLICY_SCHEMA = "data_archive_policy_v1"
+const ARCHIVE_OUTPUT_PREFIX = "data/outputs/"
+
+const RETAINED_REQUIRED_FIELDS = ("path", "sha256", "entry_count", "rationale", "approved_at")
+const RETIRED_REQUIRED_FIELDS = (
+    "path", "sha256", "entry_count", "declared_commit", "uncommitted_source",
+    "snapshot_mtime", "replacement", "rationale", "retired_at", "git_blob", "retired_before_commit",
+)
+const PENDING_REQUIRED_FIELDS = ("path", "sha256", "entry_count", "reason", "planned_phase")
+
+struct ArchivePolicy
+    retained::Vector{Dict{String, Any}}
+    retired::Vector{Dict{String, Any}}
+    pending::Vector{Dict{String, Any}}
+end
+
+function load_archive_policy(root::AbstractString)
+    path = joinpath(root, ARCHIVE_POLICY_RELATIVE_PATH)
+    isfile(path) || return nothing
+    data = TOML.parsefile(path)
+    schema = get(data, "schema", "")
+    schema == ARCHIVE_POLICY_SCHEMA ||
+        error("archive policy schema mismatch in $(ARCHIVE_POLICY_RELATIVE_PATH): got $(repr(schema))")
+    to_entries(key) = [
+        Dict{String, Any}(String(k) => v for (k, v) in entry)
+        for entry in get(data, key, [])
+    ]
+    return ArchivePolicy(to_entries("retained_archives"), to_entries("retired_archives"), to_entries("pending_retirement"))
+end
+
+is_sha256_hex(text) = text isa AbstractString && occursin(r"^[0-9a-f]{64}$", text)
+is_full_git_id(text) = text isa AbstractString && occursin(r"^[0-9a-f]{40}$", text)
+policy_path(entry) = normalize_path(string(get(entry, "path", "")))
+
+function archive_policy_entry_violations(entry::Dict{String, Any}, required, label::AbstractString)
+    violations = String[]
+    path = policy_path(entry)
+    if isempty(path)
+        push!(violations, "$(label): entry without path")
+        return violations
+    end
+    startswith(path, ARCHIVE_OUTPUT_PREFIX) ||
+        push!(violations, "$(path): archive path must live under $(ARCHIVE_OUTPUT_PREFIX)")
+    endswith(lowercase(path), ".zip") ||
+        push!(violations, "$(path): archive entries must be .zip files")
+    for field in required
+        haskey(entry, field) || push!(violations, "$(path): missing field $(field)")
+    end
+    if haskey(entry, "sha256") && !is_sha256_hex(entry["sha256"])
+        push!(violations, "$(path): sha256 must be 64 lowercase hex characters")
+    end
+    if haskey(entry, "entry_count")
+        count = entry["entry_count"]
+        (count isa Integer && count > 0) ||
+            push!(violations, "$(path): entry_count must be a positive integer")
+    end
+    return violations
+end
+
+function changed_archive_paths(root::AbstractString, cfg::GuardConfig, filter::AbstractString)
+    args = if cfg.mode === :staged
+        ["diff", "--cached", "--name-status", "--diff-filter=$(filter)", "--", "data/outputs"]
+    elseif cfg.mode === :range
+        ["diff", "--name-status", "--diff-filter=$(filter)", "$(cfg.base)...$(cfg.head)", "--", "data/outputs"]
+    else
+        ["diff", "--name-status", "--diff-filter=$(filter)", "HEAD", "--", "data/outputs"]
+    end
+    paths = String[]
+    for line in git_read_lines(root, args)
+        path = changed_path_from_name_status(line)
+        path === nothing && continue
+        endswith(lowercase(path), ".zip") || continue
+        push!(paths, path)
+    end
+    return paths
+end
+
+function tracked_archive_paths(root::AbstractString)
+    files = git_read_lines(root, ["ls-files", "--", "data/outputs"])
+    return [normalize_path(file) for file in files if endswith(lowercase(file), ".zip")]
+end
+
+file_sha256(path::AbstractString) = bytes2hex(SHA.sha256(read(path)))
+
+function registered_path_set(entries)
+    return Set(policy_path(entry) for entry in entries)
+end
+
+function collect_archive_violations(root::AbstractString, cfg::GuardConfig, policy::ArchivePolicy)
+    violations = String[]
+
+    retained_paths = registered_path_set(policy.retained)
+    pending_paths = registered_path_set(policy.pending)
+    retired_paths = registered_path_set(policy.retired)
+
+    for path in changed_archive_paths(root, cfg, "ACR")
+        if !(path in retained_paths) && !(path in pending_paths)
+            push!(violations, "$(path): new or renamed archive is not registered in $(ARCHIVE_POLICY_RELATIVE_PATH)")
+        end
+    end
+
+    for path in changed_archive_paths(root, cfg, "D")
+        if !(path in retired_paths)
+            push!(violations, "$(path): deleted archive requires a retired_archives tombstone in $(ARCHIVE_POLICY_RELATIVE_PATH)")
+        end
+    end
+
+    for (label, entries, required) in (
+        ("retained_archives", policy.retained, RETAINED_REQUIRED_FIELDS),
+        ("pending_retirement", policy.pending, PENDING_REQUIRED_FIELDS),
+    )
+        for entry in entries
+            append!(violations, archive_policy_entry_violations(entry, required, label))
+            path = policy_path(entry)
+            isempty(path) && continue
+            full = joinpath(root, path)
+            if isfile(full)
+                expected = get(entry, "sha256", "")
+                actual = file_sha256(full)
+                actual == expected ||
+                    push!(violations, "$(path): sha256 mismatch (recorded $(expected), actual $(actual))")
+            else
+                push!(violations, "$(path): registered archive is missing from the working tree")
+            end
+        end
+    end
+
+    for entry in policy.retired
+        append!(violations, archive_policy_entry_violations(entry, RETIRED_REQUIRED_FIELDS, "retired_archives"))
+        path = policy_path(entry)
+        isempty(path) && continue
+        isfile(joinpath(root, path)) &&
+            push!(violations, "$(path): retired archive is still present in the working tree")
+        if haskey(entry, "git_blob") && !is_full_git_id(entry["git_blob"])
+            push!(violations, "$(path): git_blob must be a 40 character git object id")
+        end
+        if haskey(entry, "retired_before_commit") && !is_full_git_id(entry["retired_before_commit"])
+            push!(violations, "$(path): retired_before_commit must be a 40 character git object id")
+        end
+    end
+
+    return violations
+end
+
+function collect_archive_advisories(root::AbstractString, policy::ArchivePolicy)
+    registered = union(
+        registered_path_set(policy.retained),
+        registered_path_set(policy.pending),
+        registered_path_set(policy.retired),
+    )
+    unregistered = [path for path in tracked_archive_paths(root) if !(path in registered)]
+    isempty(unregistered) && return String[]
+
+    total = 0
+    for path in unregistered
+        full = joinpath(root, path)
+        isfile(full) && (total += filesize(full))
+    end
+    return ["$(length(unregistered)) tracked archives under data/outputs are not registered yet ($(round(total / 1048576; digits = 2)) MiB); register the ones that must stay"]
+end
+
 function main()
     cfg = parse_args(ARGS)
     root = project_root()
@@ -229,7 +398,15 @@ function main()
     figure_violations = collect_result_figure_violations(root, cfg)
     figure_asset_violations = collect_figure_asset_violations(root, cfg)
 
-    if !isempty(violations) || !isempty(figure_violations) || !isempty(figure_asset_violations)
+    policy = load_archive_policy(root)
+    archive_violations = String[]
+    archive_advisories = String[]
+    if policy !== nothing
+        archive_violations = collect_archive_violations(root, cfg, policy)
+        archive_advisories = collect_archive_advisories(root, policy)
+    end
+
+    if !isempty(violations) || !isempty(figure_violations) || !isempty(figure_asset_violations) || !isempty(archive_violations)
         println("[data-output-path-guard] FAILED")
         if !isempty(violations)
             println("  Detected new outputs/results paths outside data/outputs/results:")
@@ -249,12 +426,22 @@ function main()
                 println("   - " * item)
             end
         end
+        if !isempty(archive_violations)
+            println("  Detected archive policy violations ($(ARCHIVE_POLICY_RELATIVE_PATH)):")
+            for item in archive_violations
+                println("   - " * item)
+            end
+        end
         println("  hint: use data/outputs/results/<domain>/<category>/... as default output path")
         println("  hint: use data/outputs/figures/<domain>/<category>/... for PNG/SVG/PDF artifacts and plot_manifest.json only")
+        println("  hint: register archives in $(ARCHIVE_POLICY_RELATIVE_PATH); retired archives need a tombstone with git_blob")
         exit(1)
     end
 
     println("[data-output-path-guard] OK")
+    for item in archive_advisories
+        println("  [ADVISORY] " * item)
+    end
     if cfg.mode === :staged
         println("  mode=staged")
     elseif cfg.mode === :range
@@ -264,4 +451,6 @@ function main()
     end
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

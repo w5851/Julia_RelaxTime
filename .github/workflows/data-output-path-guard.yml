@@ -5,7 +5,10 @@ on:
     paths:
       - "scripts/**"
       - "data/outputs/results/**"
+      - "config/governance/data_archive_policy.toml"
+      - "tests/unit/config/test_data_archive_policy.jl"
       - "data/outputs/figures/**"
+      - "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/RETIRED_ARCHIVES.md"
       - ".github/workflows/data-output-path-guard.yml"
       - "Project.toml"
       - "Manifest.toml"
@@ -14,7 +17,10 @@ on:
     paths:
       - "scripts/**"
       - "data/outputs/results/**"
+      - "config/governance/data_archive_policy.toml"
+      - "tests/unit/config/test_data_archive_policy.jl"
       - "data/outputs/figures/**"
+      - "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/RETIRED_ARCHIVES.md"
       - ".github/workflows/data-output-path-guard.yml"
       - "Project.toml"
       - "Manifest.toml"
@@ -56,3 +62,6 @@ jobs:
           else
             julia --project=. scripts/dev/check_data_output_path_guard.jl
           fi
+
+      - name: Test archive policy bookkeeping
+        run: julia --project=. tests/unit/config/test_data_archive_policy.jl

@@ -1,0 +1,127 @@
+# 数据归档策略（单一事实源）
+#
+# 用途：登记 data/outputs/** 下应当保留的归档二进制（zip）与已退役归档的墓碑。
+# 门禁：scripts/dev/check_data_output_path_guard.jl（CI: data-output-path-guard）
+#
+# 判定语义：
+# - 新增/改名的 zip 必须登记在 retained_archives 或 pending_retirement 中；
+# - 删除 zip 必须登记在 retired_archives 中，且保留还原锚点（git_blob / declared_commit）；
+# - retained_archives 与 pending_retirement 的 sha256 必须与工作区实际文件一致；
+# - retired_archives 的 path 不得仍在工作区存在。
+# 现存但未登记的 zip 只作为 advisory 汇总，不阻断 CI。
+
+schema = "data_archive_policy_v1"
+
+# ---------------------------------------------------------------------------
+# 保留归档
+# ---------------------------------------------------------------------------
+
+[[retained_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/eta_augmented_results_v1.zip"
+sha256 = "213bc222dc2d7e821454c4357bec6cfb7d548ff33bd1202bd28e167d848b893f"
+entry_count = 67
+status = "historical_superseded"
+superseded_by = "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1"
+rationale = "v15 正式图层（76 份 PDF）的数值源，含 1810 原值 + 9 原坐标重算 + 48 个 η 加密点共 1867 点；已由 ward_moller_sphere_20261121_v1（2026-11-21）取代，保留为历史数值记录，不得当作现行数据源使用。"
+approved_at = "2026-11-23"
+
+# ---------------------------------------------------------------------------
+# 已退役归档（墓碑）
+# ---------------------------------------------------------------------------
+
+[[retired_archives]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_pilot_v1/calculation-source.zip"
+sha256 = "3289402c80f295969e090e801e59c5f127a981e1ce161ac1ed1a39905952e45f"
+entry_count = 340
+declared_commit = "2e5c411c716d5cbc524c3fc6cfb335fe05b39444"
+uncommitted_source = false
+snapshot_mtime = "2026-10-26"
+replacement = "git cat-file blob 75a52f6884f2dc70b2959896cfb373eece6f6821 > calculation-source.zip（逐字节还原）；等价重建：git archive --format=zip 2e5c411c716d5cbc524c3fc6cfb335fe05b39444（tag transport-full-rs-20261026-v1）"
+rationale = "340/340 条目与 tag transport-full-rs-20261026-v1 锚定的 2e5c411c716d 逐字节一致，唯一 100% 可复现的源码包；pilot 复核已归档，同目录 source_manifest.json 与 dispatch_manifest.json 保留。"
+retired_at = "2026-11-23"
+git_blob = "75a52f6884f2dc70b2959896cfb373eece6f6821"
+retired_before_commit = "0483e5db58f68f65914d499398261682ed12e3de"
+
+# ---------------------------------------------------------------------------
+# 待退役（Phase 2）
+# ---------------------------------------------------------------------------
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v1/source.zip"
+sha256 = "e855bc17cbe4806da478624b6c57a6bffebcaffbebf4e706953fef681d8c757c"
+entry_count = 1598
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "相对声明 commit 有 45 处修改与 67 个未入库文件，属脏工作区快照；批次归档已结束。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_a_reduction_probe_v2/source.zip"
+sha256 = "cbbe5ac6653c5d71ab3f619d773e5d65f69ce3ec6cd93dac422579a9675f01ae"
+entry_count = 1598
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "与 v1 条目数及差异统计同构；task_tracks 仅引用其 package_manifest 与结果 summary。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_baseline_acceptance_setup_v1/source.zip"
+sha256 = "a9015d74e1ed7928392c949b6370efbe635084a0876e71d090c6e619f153b031"
+entry_count = 1631
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "基线未提交快照；Phase 0.5 已确认 tests/baselines 的 JSON 指向另一 worktree 的 CSV/JSON，不引用 zip。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v1/source.zip"
+sha256 = "9fc7dac27790bf73c2b6cb9f57196067f078ca39fb2da7790de2e61962b4fddc"
+entry_count = 1601
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "同目录 failed_archive_manifest.json 已被 v2 取代；批次外无代码或测试引用。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_layer_validation_setup_v2/source.zip"
+sha256 = "789c20ef317b0327692772cb256a408cf0a7ed84b5ad3fa9637ca1ea266888e5"
+entry_count = 1602
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "基线未提交快照；同目录已有完整 receipt/manifest，批次外无消费者。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_mode_b_qualification_setup_v1/source.zip"
+sha256 = "4b30436a7d84ce7089b5f7379b69c51e0c51b2eedf8654f40f76a7bc34afa123"
+entry_count = 1636
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "prepare_source_package.py 明确 uncommitted_source=True、calculation_commit=None；远端资格验收已归档。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_transport_validation_setup_v1/source.zip"
+sha256 = "533bbc8dcb13681a3873d6b9e94f5734772311f5f52575ae12f9bbaf6955448a"
+entry_count = 1600
+declared_commit = "dffe4070eb5c"
+uncommitted_source = true
+snapshot_mtime = "2026-10-25"
+reason = "基线未提交快照；验证已归档，task_tracks 仅引用 returned/reviewed_result.json。"
+planned_phase = "phase2"
+
+[[pending_retirement]]
+path = "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_runner_review_checks_v1/source.zip"
+sha256 = "6fd0d7cad0e87c2c72c7221f4f1aabcc9d4eaad64d3d220414a50e14f3ca3622"
+entry_count = 2
+declared_commit = "2e5c411c716d"
+uncommitted_source = false
+snapshot_mtime = "2026-10-26"
+reason = "Phase 0.5 已确认包内 review_transport_runner_pilot.py 与 test_transport_runner_pilot.py 的 blob 逐字节等于 2e5c411c716d 版本，可由该 commit 精确还原。"
+planned_phase = "phase2"
