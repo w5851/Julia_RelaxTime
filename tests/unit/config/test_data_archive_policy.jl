@@ -139,19 +139,37 @@ end
     @test isempty(violations)
 end
 
-@testset "Unregistered legacy archives become an advisory only" begin
+@testset "Unregistered legacy archives are a hard failure" begin
     root = init_repo()
     write(joinpath(root, ZIP_RELATIVE), "payload")
     git_run(root, "add", "-A")
     git_run(root, "commit", "-q", "-m", "add archive")
 
     policy = load_archive_policy(root)
-    advisories = collect_archive_advisories(root, policy)
-    @test length(advisories) == 1
-    @test occursin("not registered", advisories[1])
+    violations = collect_archive_violations(root, GuardConfig(:working, nothing, nothing), policy)
+    @test any(occursin("is not registered in", v) for v in violations)
+    @test isempty(collect_archive_advisories(root, policy))
 
     write_retained!(root, sha256_of(joinpath(root, ZIP_RELATIVE)))
-    @test isempty(collect_archive_advisories(root, load_archive_policy(root)))
+    @test isempty(collect_archive_violations(root, GuardConfig(:working, nothing, nothing), load_archive_policy(root)))
+end
+
+@testset "Retained status is restricted to the documented tiers" begin
+    root = init_repo()
+    write(joinpath(root, ZIP_RELATIVE), "payload")
+    git_run(root, "add", "-A")
+    git_run(root, "commit", "-q", "-m", "add archive")
+    digest = sha256_of(joinpath(root, ZIP_RELATIVE))
+    cfg = GuardConfig(:working, nothing, nothing)
+
+    for status in ("active", "historical_superseded", "historical_evidence")
+        write_retained!(root, digest, "status = \"$(status)\"")
+        @test isempty(collect_archive_violations(root, cfg, load_archive_policy(root)))
+    end
+
+    write_retained!(root, digest, "status = \"current_data\"")
+    violations = collect_archive_violations(root, cfg, load_archive_policy(root))
+    @test any(occursin("status must be one of", v) for v in violations)
 end
 
 @testset "Tombstone git_blob must still hash to its recorded sha256" begin

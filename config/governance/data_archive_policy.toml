@@ -8,7 +8,8 @@
 # - 删除 zip 必须登记在 retired_archives 中，且保留还原锚点（git_blob / declared_commit）；
 # - retained_archives 与 pending_retirement 的 sha256 必须与工作区实际文件一致；
 # - retired_archives 的 path 不得仍在工作区存在。
-# 现存但未登记的 zip 只作为 advisory 汇总，不阻断 CI。
+# 任何未被登记的 tracked zip 都直接判 violation（hard fail）；retained 的 status 只能是
+# active / historical_superseded / historical_evidence 三档。
 
 schema = "data_archive_policy_v1"
 

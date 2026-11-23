@@ -4,7 +4,8 @@
 策略文件是唯一事实源；本文件只做检索入口与还原指引。
 
 门禁：`scripts/dev/check_data_output_path_guard.jl`（CI: `data-output-path-guard`）——
-新增/改名 zip 必须登记，删除必须留墓碑，已登记条目的 sha256 必须与工作区一致。
+**任何未登记的 tracked zip 都直接判 violation**；新增/改名必须登记，删除必须留墓碑，
+已登记条目的 sha256 必须与工作区一致，墓碑的 `git_blob` 必须仍能哈希回记录的 sha256。
 
 ## 已退役
 
