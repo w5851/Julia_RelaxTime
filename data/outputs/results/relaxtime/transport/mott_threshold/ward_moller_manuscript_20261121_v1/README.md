@@ -10,13 +10,14 @@ sampling relative to the production grid and keep the other quadratures fixed.
 
 [Numerical manifest](numerical_manifest.json) binds the effective profile,
 remote runs and driver hashes, the directly solved threshold roots, and
-the compact tables. The three transport windows each contain 33 nodes for
-the displayed curve and 11 same-coordinate reference nodes. The slope
-tables keep the fixed-endpoint sampling comparisons separate from the
-change of secant under halving of its \(\xi\) interval. The scalar inset
-subtracts a linear fit to the slope over the two sidebands
-\(0.003\leq |\xi-\xi_{\mathrm{Mott}}|\leq0.008\), without smoothing
-the plotted residuals.
+the compact tables. Each window retains 33 fine and 11 reference nodes.
+`window_replay.csv` records the terminal shear correction from the cached
+\(s\bar u\) rates on W. The displayed scalar secants use computed endpoints
+at \(\Delta\xi=10^{-3}\); the negative kaon wing also uses wider secants.
+The remaining pseudoscalar secants keep the native fine intervals. The
+maximum scalar display slope difference across the four intervals with
+matching reference endpoints is \(1.38\times 10^{-6}\). The former narrow
+scalar residual was below the numerical resolution and is omitted.
 
 The isolated scalar integral is the squared mixed \(\sigma/\sigma'\)
 contribution to elastic \(u\bar u\to u\bar u\), with the production
@@ -26,6 +27,7 @@ stencil, loop, and thermal quadrature refinement with an independently
 evaluated threshold coefficient. The integration domain is
 \(0<x<0.01\,\mathrm{fm}^{-2}\), where \(x=\hat{s}-4M_u^2\).
 The peak area uses 64 half widths on either side of the resonance.
+This integral does not enter the species-rate assembly, so its data are unchanged.
 These fits concern the isolated integral; panels (a)–(c) show complete
 shear slopes including the other collision channels.
 

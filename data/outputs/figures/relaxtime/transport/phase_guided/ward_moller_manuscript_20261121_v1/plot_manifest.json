@@ -16,7 +16,7 @@
       "path": "scripts/analysis/relaxtime/plot_ward_moller_manuscript.py",
       "path_kind": "repository_relative",
       "sha256": "160baf03eef00c7136e42f66f2f7fc2f156c1f8068855304aa24fe13a5320f65",
-      "command": "scripts\\analysis\\relaxtime\\plot_ward_moller_manuscript.py --results data\\outputs\\results\\relaxtime\\transport\\ward_moller\\ward_moller_sphere_20261121_v1 --out data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\ward_moller_manuscript_20261121_v1 --kind all",
+      "command": "scripts/analysis/relaxtime/plot_ward_moller_manuscript.py --results data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1 --out data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261121_v1 --kind all",
       "runtime": {
         "python": "3.13.2",
         "platform": "Windows-11-10.0.26300-SP0",
@@ -24,7 +24,7 @@
         "matplotlib": "3.10.1"
       }
     },
-    "git_commit": "1332f197ada908fe4dec2164d177579ccaecd91c",
+    "git_commit": "3cbcb78284a9bb2e967db84d65cd06801c4d13ac",
     "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
     "postprocess_sha": null,
     "source_run_id": null,
@@ -53,15 +53,15 @@
         "asset_id": "ward_moller_pion_kaon_spectra"
       },
       "record": {
-        "generated_at_utc": "2026-11-21T15:11:15.361234+00:00",
+        "generated_at_utc": "2026-11-23T07:18:39.091780+00:00",
         "asset_id": "ward_moller_pion_kaon_spectra",
         "inputs": [
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
             "path_kind": "repository_relative",
             "role": "frozen numerical provenance",
-            "bytes": 10251,
-            "sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59"
+            "bytes": 12345,
+            "sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42"
           },
           {
             "path": "config/plotting/candidate_aps_v2.toml",
@@ -4536,15 +4536,15 @@
         "asset_id": "ward_moller_relaxation_times"
       },
       "record": {
-        "generated_at_utc": "2026-11-21T15:11:25.593871+00:00",
+        "generated_at_utc": "2026-11-23T07:19:01.341956+00:00",
         "asset_id": "ward_moller_relaxation_times",
         "inputs": [
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
             "path_kind": "repository_relative",
             "role": "frozen numerical provenance",
-            "bytes": 10251,
-            "sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59"
+            "bytes": 12345,
+            "sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42"
           },
           {
             "path": "config/plotting/candidate_aps_v2.toml",
@@ -4571,15 +4571,15 @@
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed phase-referenced transport",
-            "bytes": 1736593,
-            "sha256": "84383b7ea316ab849d7ea66fb55fa4acc83e89237f1771cc30687b14ef3bdb8b"
+            "bytes": 1735600,
+            "sha256": "ddbec87fb870c45667dd177dd2f8a6d383f4d4e25b6bee7bca69528fe862252e"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_b_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed fixed-temperature transport",
-            "bytes": 1678731,
-            "sha256": "2ff49a4586c1109fe41fd27ae276aa4e88615d3aebac158c4ef2b1b432f0fd20"
+            "bytes": 1677937,
+            "sha256": "902b326c44057d1d8c26e28d5c5ace6eef9a6f2166e91e627ad6587c5e5d7a25"
           }
         ],
         "axes": [
@@ -13068,8 +13068,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 717060,
-            "sha256": "e2b55bd5fc64606da84e556ff0893c9fc94ee573e740ae8429c3eb77f39ec679",
+            "bytes": 717960,
+            "sha256": "3a7d883c456158c8b5ef01ba5d05c67fb7fe5fe217b4ecc362e9e7428b5a6b70",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -13092,8 +13092,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 318018,
-            "sha256": "454dc3f1eea5612d0a8286cac93d3c4120e8dae2513b4639dcf80a6e907a02a3",
+            "bytes": 318768,
+            "sha256": "8a2eaa83bc9ac665ac55603415e932e9bb6830e1a902af9bb94f1fad7d40a0f7",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -13109,7 +13109,7 @@
               ]
             },
             "role": "grayscale_review",
-            "source_color_sha256": "e2b55bd5fc64606da84e556ff0893c9fc94ee573e740ae8429c3eb77f39ec679"
+            "source_color_sha256": "3a7d883c456158c8b5ef01ba5d05c67fb7fe5fe217b4ecc362e9e7428b5a6b70"
           }
         ],
         "rendering": {
@@ -13574,7 +13574,7 @@
                 "scale": "log",
                 "minor_locator": "LogLocator",
                 "major_count": 3,
-                "minor_count": 5,
+                "minor_count": 6,
                 "inward": true,
                 "both_sides": true
               },
@@ -16786,11 +16786,11 @@
               "axis_scale": "log",
               "axis_scale_reason": "mode_A_relaxation_family_log",
               "data_min": 1.6266176999302704,
-              "data_max": 5.618192323917517,
+              "data_max": 5.618192323917519,
               "first_order_gap_present": false,
               "y_limits": [
                 1.5100343520038746,
-                6.051949125242923
+                6.051949125242926
               ],
               "x_limits": [
                 -0.52,
@@ -17520,12 +17520,12 @@
               "endpoints": [],
               "axis_scale": "log",
               "axis_scale_reason": "mode_A_relaxation_family_log",
-              "data_min": 2.7042025220115478,
-              "data_max": 8.213755471702203,
+              "data_min": 2.522984336365704,
+              "data_max": 8.124199685886461,
               "first_order_gap_present": false,
               "y_limits": [
-                2.529816729038211,
-                8.779947577549507
+                2.3520285665175757,
+                8.71470221271462
               ],
               "x_limits": [
                 -0.52,
@@ -18232,7 +18232,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.003,
-                  "value": 6.458796493976772,
+                  "value": 6.382863946849649,
                   "color": "#0072b2",
                   "csv_row": 690,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -18242,7 +18242,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": 0.003,
-                  "value": 11.93100831856338,
+                  "value": 11.913019661020314,
                   "color": "#0072b2",
                   "csv_row": 691,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -18250,12 +18250,12 @@
               ],
               "axis_scale": "log",
               "axis_scale_reason": "mode_A_relaxation_family_log",
-              "data_min": 4.563610573319024,
-              "data_max": 34.30220498618418,
+              "data_min": 4.274995567076689,
+              "data_max": 34.287448267021915,
               "first_order_gap_present": true,
               "y_limits": [
-                4.04340989960009,
-                38.71531930972156
+                3.772973013879841,
+                38.84965219964812
               ],
               "x_limits": [
                 -0.52,
@@ -22708,15 +22708,15 @@
         "asset_id": "ward_moller_transport_coefficients"
       },
       "record": {
-        "generated_at_utc": "2026-11-21T15:11:49.006618+00:00",
+        "generated_at_utc": "2026-11-23T07:20:13.565163+00:00",
         "asset_id": "ward_moller_transport_coefficients",
         "inputs": [
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
             "path_kind": "repository_relative",
             "role": "frozen numerical provenance",
-            "bytes": 10251,
-            "sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59"
+            "bytes": 12345,
+            "sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42"
           },
           {
             "path": "config/plotting/candidate_aps_v2.toml",
@@ -22743,15 +22743,15 @@
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed phase-referenced transport",
-            "bytes": 1736593,
-            "sha256": "84383b7ea316ab849d7ea66fb55fa4acc83e89237f1771cc30687b14ef3bdb8b"
+            "bytes": 1735600,
+            "sha256": "ddbec87fb870c45667dd177dd2f8a6d383f4d4e25b6bee7bca69528fe862252e"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_b_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed fixed-temperature transport",
-            "bytes": 1678731,
-            "sha256": "2ff49a4586c1109fe41fd27ae276aa4e88615d3aebac158c4ef2b1b432f0fd20"
+            "bytes": 1677937,
+            "sha256": "902b326c44057d1d8c26e28d5c5ace6eef9a6f2166e91e627ad6587c5e5d7a25"
           }
         ],
         "axes": [
@@ -29123,8 +29123,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 714866,
-            "sha256": "1bb28239ad1057fc65fd3ff421c0d1812860c60ce32ccbd8a1f41f89db2c4d12",
+            "bytes": 715216,
+            "sha256": "8d45cc18793fdbd7b661cb636086d463cc132837cc20bbfa1329523b7ae6ce46",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -29147,8 +29147,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 319486,
-            "sha256": "77ac8eaabed13b309e768e392c4aa47d3ca6a744f3fa30b5c2a145cee1dd3067",
+            "bytes": 319015,
+            "sha256": "5286d8a9d3d8f2c5ae1a4fa14058b7fffea4dbb6c04087adcb5ef902e809bdea",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -29164,7 +29164,7 @@
               ]
             },
             "role": "grayscale_review",
-            "source_color_sha256": "1bb28239ad1057fc65fd3ff421c0d1812860c60ce32ccbd8a1f41f89db2c4d12"
+            "source_color_sha256": "8d45cc18793fdbd7b661cb636086d463cc132837cc20bbfa1329523b7ae6ce46"
           }
         ],
         "rendering": {
@@ -30530,7 +30530,7 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.19710239382953285,
+              "data_min": 0.19710239382953287,
               "data_max": 0.45987499287804773,
               "first_order_gap_present": false,
               "y_limits": [
@@ -31267,12 +31267,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.2987851761244299,
-              "data_max": 0.7680511466253531,
+              "data_min": 0.2927648456676855,
+              "data_max": 0.7664738131111682,
               "first_order_gap_present": false,
               "y_limits": [
-                0.2706292178943745,
-                0.7962071048554085
+                0.2643423076210766,
+                0.7948963511577772
               ],
               "x_limits": [
                 -0.52,
@@ -31981,7 +31981,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.003,
-                  "value": 1.993239141238959,
+                  "value": 1.9917641373249557,
                   "color": "#0072b2",
                   "csv_row": 690,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -31991,7 +31991,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": 0.003,
-                  "value": 2.552198541693414,
+                  "value": 2.5518725807112808,
                   "color": "#0072b2",
                   "csv_row": 691,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -31999,12 +31999,12 @@
               ],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 1.0366654702282077,
-              "data_max": 5.188687220390785,
+              "data_min": 1.0290270586673718,
+              "data_max": 5.188476250382066,
               "first_order_gap_present": true,
               "y_limits": [
-                0.787544165218453,
-                5.4378085254005395
+                0.7794601071644901,
+                5.438043201884947
               ],
               "x_limits": [
                 -0.52,
@@ -32739,11 +32739,11 @@
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
               "data_min": 0.023683634747481298,
-              "data_max": 0.15583547576000426,
+              "data_max": 0.15583547576000417,
               "first_order_gap_present": false,
               "y_limits": [
-                0.015754524286729923,
-                0.16376458622075563
+                0.015754524286729927,
+                0.16376458622075554
               ],
               "x_limits": [
                 -0.52,
@@ -33473,12 +33473,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.04517733708507803,
-              "data_max": 0.36326081661372595,
+              "data_min": 0.04404784797079577,
+              "data_max": 0.3625678003930304,
               "first_order_gap_present": false,
               "y_limits": [
-                0.02609232831335916,
-                0.3823458253854448
+                0.024936650825461693,
+                0.3816789975383645
               ],
               "x_limits": [
                 -0.52,
@@ -34183,7 +34183,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.003,
-                  "value": 1.0970522997971939,
+                  "value": 1.0962090468495533,
                   "color": "#0072b2",
                   "csv_row": 690,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -34193,7 +34193,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": 0.003,
-                  "value": 1.8702276709361405,
+                  "value": 1.8699766297616567,
                   "color": "#0072b2",
                   "csv_row": 691,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -34201,12 +34201,12 @@
               ],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.34155695005020903,
-              "data_max": 3.96692483775444,
+              "data_min": 0.3376325627720714,
+              "data_max": 3.9667645204908615,
               "first_order_gap_present": true,
               "y_limits": [
-                0.12403487678795516,
-                4.184446911016694
+                0.11988464530894397,
+                4.184512437953989
               ],
               "x_limits": [
                 -0.52,
@@ -34938,12 +34938,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.021728171628602296,
-              "data_max": 0.04463081318904064,
+              "data_min": 0.021728171628602286,
+              "data_max": 0.04463081318904066,
               "first_order_gap_present": false,
               "y_limits": [
-                0.020354013134975996,
-                0.04600497168266694
+                0.020354013134975982,
+                0.04600497168266696
               ],
               "x_limits": [
                 -0.52,
@@ -35677,12 +35677,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.03148614252938765,
-              "data_max": 0.06456054568430267,
+              "data_min": 0.03125269788863492,
+              "data_max": 0.06419601950154939,
               "first_order_gap_present": false,
               "y_limits": [
-                0.029501678340092753,
-                0.06654500987359757
+                0.02927609859186005,
+                0.06617261879832426
               ],
               "x_limits": [
                 -0.52,
@@ -36389,7 +36389,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.003,
-                  "value": 0.14063155749878045,
+                  "value": 0.1406046665278389,
                   "color": "#0072b2",
                   "csv_row": 690,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -36399,7 +36399,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": 0.003,
-                  "value": 0.10118113581325847,
+                  "value": 0.10117772527713634,
                   "color": "#0072b2",
                   "csv_row": 691,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -36407,12 +36407,12 @@
               ],
               "axis_scale": "linear",
               "axis_scale_reason": "reviewed linear transport-ratio panels",
-              "data_min": 0.08290161678883344,
-              "data_max": 0.2342347971043045,
+              "data_min": 0.08289554551055596,
+              "data_max": 0.2340398989004492,
               "first_order_gap_present": true,
               "y_limits": [
-                0.07382162596990517,
-                0.24331478792323277
+                0.07382688430716236,
+                0.2431085601038428
               ],
               "x_limits": [
                 -0.52,
@@ -36459,15 +36459,15 @@
         "asset_id": "ward_moller_transport_fixed_T"
       },
       "record": {
-        "generated_at_utc": "2026-11-21T15:11:57.890796+00:00",
+        "generated_at_utc": "2026-11-23T07:20:29.779789+00:00",
         "asset_id": "ward_moller_transport_fixed_T",
         "inputs": [
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
             "path_kind": "repository_relative",
             "role": "frozen numerical provenance",
-            "bytes": 10251,
-            "sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59"
+            "bytes": 12345,
+            "sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42"
           },
           {
             "path": "config/plotting/candidate_aps_v2.toml",
@@ -36494,15 +36494,15 @@
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed phase-referenced transport",
-            "bytes": 1736593,
-            "sha256": "84383b7ea316ab849d7ea66fb55fa4acc83e89237f1771cc30687b14ef3bdb8b"
+            "bytes": 1735600,
+            "sha256": "ddbec87fb870c45667dd177dd2f8a6d383f4d4e25b6bee7bca69528fe862252e"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_b_grid.csv",
             "path_kind": "repository_relative",
             "role": "recomputed fixed-temperature transport",
-            "bytes": 1678731,
-            "sha256": "2ff49a4586c1109fe41fd27ae276aa4e88615d3aebac158c4ef2b1b432f0fd20"
+            "bytes": 1677937,
+            "sha256": "902b326c44057d1d8c26e28d5c5ace6eef9a6f2166e91e627ad6587c5e5d7a25"
           }
         ],
         "axes": [
@@ -42772,8 +42772,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 667337,
-            "sha256": "d0edefcba490322f63356e154cf5b4cd07e911f0991972b2ce21c256974b4760",
+            "bytes": 667186,
+            "sha256": "78221f2ffbaf59ef8346b1d6f6b127b691840ed7783596da90b99704f91315ee",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -42796,8 +42796,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 300486,
-            "sha256": "dc9c4c672966d62bf7ed657969dbdbb95e1377811718178842fce0073a92ba2e",
+            "bytes": 300553,
+            "sha256": "916a50e5e7bbccbf18937ec3416dd4bcf09bfedcf737b9344351407652578ddf",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -42813,7 +42813,7 @@
               ]
             },
             "role": "grayscale_review",
-            "source_color_sha256": "d0edefcba490322f63356e154cf5b4cd07e911f0991972b2ce21c256974b4760"
+            "source_color_sha256": "78221f2ffbaf59ef8346b1d6f6b127b691840ed7783596da90b99704f91315ee"
           }
         ],
         "rendering": {
@@ -44153,7 +44153,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.13,
-                  "value": 2.3542398035765775,
+                  "value": 2.351732897679396,
                   "color": "#009e73",
                   "csv_row": 241,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -44163,7 +44163,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": -0.12,
-                  "value": 3.678616852711652,
+                  "value": 3.6784267459483426,
                   "color": "#009e73",
                   "csv_row": 242,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -44171,12 +44171,12 @@
               ],
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 2.3542398035765775,
-              "data_max": 304.47784983841717,
+              "data_min": 2.351732897679396,
+              "data_max": 304.4778498384172,
               "first_order_gap_present": true,
               "y_limits": [
-                1.8461434672338322,
-                388.27636428010186
+                1.8440793682727639,
+                388.2970485974114
               ],
               "x_limits": [
                 -0.52,
@@ -44872,12 +44872,12 @@
               "endpoints": [],
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.8747581002976419,
+              "data_min": 0.8659234307244038,
               "data_max": 14.937969228505553,
               "first_order_gap_present": false,
               "y_limits": [
-                0.7590454711214037,
-                17.2151868126253
+                0.7509981856142317,
+                17.22392651564613
               ],
               "x_limits": [
                 -0.52,
@@ -45610,11 +45610,11 @@
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
               "data_min": 0.30470245298323695,
-              "data_max": 1.297727394217991,
+              "data_max": 1.2864564116255315,
               "first_order_gap_present": false,
               "y_limits": [
-                0.28340700098589994,
-                1.3952397751156433
+                0.28353063740557843,
+                1.38251875658006
               ],
               "x_limits": [
                 -0.52,
@@ -46315,7 +46315,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.13,
-                  "value": 1.0801446947465563,
+                  "value": 1.0788144731381293,
                   "color": "#009e73",
                   "csv_row": 241,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -46325,7 +46325,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": -0.12,
-                  "value": 2.806935078082246,
+                  "value": 2.8067871204819315,
                   "color": "#009e73",
                   "csv_row": 242,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -46333,12 +46333,12 @@
               ],
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.9599392003801301,
-              "data_max": 193.24541720329685,
+              "data_min": 0.9576425725706401,
+              "data_max": 193.24541720329688,
               "first_order_gap_present": true,
               "y_limits": [
-                0.7362926296951535,
-                251.94310493649976
+                0.7344431028123454,
+                251.97328119689047
               ],
               "x_limits": [
                 -0.52,
@@ -47036,12 +47036,12 @@
               "endpoints": [],
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.2606986638945528,
-              "data_max": 12.703019574598743,
+              "data_min": 0.2566226266218981,
+              "data_max": 12.703019574598736,
               "first_order_gap_present": false,
               "y_limits": [
-                0.21465964029426318,
-                15.42749361726546
+                0.2111369991625825,
+                15.43965416858414
               ],
               "x_limits": [
                 -0.52,
@@ -47769,12 +47769,12 @@
               "endpoints": [],
               "axis_scale": "log",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.06376530220209903,
-              "data_max": 0.15659180477498125,
+              "data_min": 0.06376530220209904,
+              "data_max": 0.15659180477498127,
               "first_order_gap_present": false,
               "y_limits": [
                 0.06096424390186286,
-                0.16378655937933578
+                0.16378655937933584
               ],
               "x_limits": [
                 -0.52,
@@ -48481,7 +48481,7 @@
                   "role": "left",
                   "phase": "quark",
                   "xi": -0.13,
-                  "value": 0.174503467267722,
+                  "value": 0.17445655593124512,
                   "color": "#009e73",
                   "csv_row": 241,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -48491,7 +48491,7 @@
                   "role": "right",
                   "phase": "hadron",
                   "xi": -0.12,
-                  "value": 0.1026376632724528,
+                  "value": 0.10263629394839145,
                   "color": "#009e73",
                   "csv_row": 242,
                   "meaning": "nearest original sample on this side of the reviewed discontinuity"
@@ -48499,12 +48499,12 @@
               ],
               "axis_scale": "linear",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.06070475694521788,
-              "data_max": 0.25427690564411687,
+              "data_min": 0.06070475694521803,
+              "data_max": 0.2541386721585006,
               "first_order_gap_present": true,
               "y_limits": [
-                0.05102614951027293,
-                0.26395551307906184
+                0.0510330611845539,
+                0.26381036791916473
               ],
               "x_limits": [
                 -0.52,
@@ -49204,12 +49204,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.041538364617872775,
-              "data_max": 0.18017440145826216,
+              "data_min": 0.041538364617872726,
+              "data_max": 0.17941387636453293,
               "first_order_gap_present": false,
               "y_limits": [
-                0.034606562775853306,
-                0.18710620330028163
+                0.03464458903053971,
+                0.18630765195186594
               ],
               "x_limits": [
                 -0.52,
@@ -49939,12 +49939,12 @@
               "endpoints": [],
               "axis_scale": "linear",
               "axis_scale_reason": "paper_FIG4_fixed_T_row_scale",
-              "data_min": 0.028416391961016755,
-              "data_max": 0.17073258442994296,
+              "data_min": 0.028416391961016724,
+              "data_max": 0.17006623198144571,
               "first_order_gap_present": false,
               "y_limits": [
-                0.021300582337570442,
-                0.17784839405338929
+                0.021333899959995274,
+                0.17714872398246717
               ],
               "x_limits": [
                 -0.52,
@@ -49991,15 +49991,15 @@
         "asset_id": "ward_moller_mott_transport_mechanism"
       },
       "record": {
-        "generated_at_utc": "2026-11-21T15:12:07.047602+00:00",
+        "generated_at_utc": "2026-11-23T07:20:47.711124+00:00",
         "asset_id": "ward_moller_mott_transport_mechanism",
         "inputs": [
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
             "path_kind": "repository_relative",
             "role": "frozen numerical provenance",
-            "bytes": 10251,
-            "sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59"
+            "bytes": 12345,
+            "sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42"
           },
           {
             "path": "config/plotting/candidate_aps_v2.toml",
@@ -50047,22 +50047,22 @@
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mechanism_transport.csv",
             "path_kind": "repository_relative",
             "role": "computed local Mott mechanism",
-            "bytes": 15126,
-            "sha256": "3ac32ac329b7c0d483354c69d3b8f0ac418d252deb1ec5a21ac77b2a0913c522"
+            "bytes": 15109,
+            "sha256": "0a50c9bed464b3b03e5b4e0afda8d863c570db47b815cbfe5685043b40e94418"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mott_window_summary.csv",
             "path_kind": "repository_relative",
             "role": "computed local Mott mechanism",
-            "bytes": 944,
-            "sha256": "45d4d22f767d653866be430ad2044624ad709a44369c2f12f28433e0ff491134"
+            "bytes": 946,
+            "sha256": "e9e29acf7667ee3597a98d511063313ec0f3b9fc21ec9a24a320cc5063fd09a7"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mott_species_decomposition.csv",
             "path_kind": "repository_relative",
             "role": "computed local Mott mechanism",
-            "bytes": 3006,
-            "sha256": "db833ae2686189a5346d2ce54f7d0f7a4d105a33c64491e93ecb83f6c4e390d7"
+            "bytes": 3004,
+            "sha256": "83762ec45d9585afe3330b358f85e03c86c8c1144a991cc0f444feb7094010e8"
           }
         ],
         "axes": [
@@ -53597,8 +53597,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 709757,
-            "sha256": "933cabfea427f79b67077279165dded656d5282fa61ff080967a5ab92fa3f4a6",
+            "bytes": 712131,
+            "sha256": "e5fe2022e2b9cc3403461bcdf44b8b2c4c66548201243a782bbddc9fcb262b81",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -53621,8 +53621,8 @@
             "format": "png",
             "dpi": 600,
             "vector": false,
-            "bytes": 330987,
-            "sha256": "b105bc303f89d750cd75669504b5a842a8ffb104a935874b4d2dd6a065589688",
+            "bytes": 332572,
+            "sha256": "ce65ec73f9e308247ca1fd588c35d7c868f012bc866075066924458b53813018",
             "inspection": {
               "size_pixels": [
                 4050,
@@ -53638,7 +53638,7 @@
               ]
             },
             "role": "grayscale_review",
-            "source_color_sha256": "933cabfea427f79b67077279165dded656d5282fa61ff080967a5ab92fa3f4a6"
+            "source_color_sha256": "e5fe2022e2b9cc3403461bcdf44b8b2c4c66548201243a782bbddc9fcb262b81"
           }
         ],
         "rendering": {

@@ -1,6 +1,6 @@
 {
   "schema_version": "plot_manifest_v1",
-  "generated_at_utc": "2026-11-22T15:55:28.958057+00:00",
+  "generated_at_utc": "2026-11-23T07:19:39.409919+00:00",
   "asset_id": "ward_moller_mott_threshold_local_response",
   "figure_family": "pnjl_transport_appendix_threshold_laws",
   "case_slug": "ward_moller_manuscript_20261121_v1",
@@ -12,8 +12,8 @@
   "generator": {
     "path": "scripts/analysis/relaxtime/plot_ward_moller_mott_response.py",
     "path_kind": "repository_relative",
-    "sha256": "276c614e030c5919538619cb9a20eda395bb211c8f16b2bbfb20af040c77d883",
-    "command": "scripts/analysis/relaxtime/plot_ward_moller_mott_response.py --data data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1 --out data/outputs/figures/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1",
+    "sha256": "f8e025b3149c68a031ece74682e800e89203ccfd326ddccc9d86a7d1bec76936",
+    "command": "scripts/analysis/relaxtime/plot_ward_moller_mott_response.py --data data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1 --out 'D:\\w\\pnjl-ward-moller\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\mott_threshold\\ward_moller_manuscript_20261121_v1'",
     "runtime": {
       "python": "3.13.2",
       "platform": "Windows-11-10.0.26300-SP0",
@@ -21,7 +21,7 @@
       "matplotlib": "3.10.1"
     }
   },
-  "git_commit": "a02445943f20b4089c1d0cb8ca1c8f8c32ddc72f",
+  "git_commit": "3cbcb78284a9bb2e967db84d65cd06801c4d13ac",
   "calculation_sha": "096199b96d34045bf8e2d9611c2d786d6f92fb8e",
   "postprocess_sha": null,
   "source_run_id": "45028496140",
@@ -30,8 +30,8 @@
       "path": "data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/local_slopes.csv",
       "path_kind": "repository_relative",
       "role": "frozen_numerical_input",
-      "bytes": 5734,
-      "sha256": "e627cb13cfab08004dffc9d517b2d074b9245e946d1e9cf78ef61297abd94a94"
+      "bytes": 3683,
+      "sha256": "d47a40c7298632d98faf2e8ed8ac514ace5c98e9f3a1beb564ac9f492faf5a5c"
     },
     {
       "path": "data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/scalar_curvature.csv",
@@ -44,8 +44,8 @@
       "path": "data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/numerical_manifest.json",
       "path_kind": "repository_relative",
       "role": "frozen_numerical_input",
-      "bytes": 53124,
-      "sha256": "70ea09a4cc70f257d358aff25820dd0b08a00df1dcfec7d150787cf5dc67ff6f"
+      "bytes": 55789,
+      "sha256": "5bcbca2b1a70898647208c42f6276d064909a85c9d7d6e5aade2d39a22e44df8"
     },
     {
       "path": "config/plotting/candidate_aps_v2.toml",
@@ -95,22 +95,6 @@
       "display_unit": "dimensionless",
       "label": "$\\xi-\\xi_{\\mathrm{Mott}}$ ($10^{-3}$)",
       "transform": "1000*u_midpoint"
-    },
-    {
-      "panel": "c-inset",
-      "field": "u_midpoint",
-      "source_unit": "dimensionless",
-      "display_unit": "dimensionless",
-      "label": "$\\xi-\\xi_{\\mathrm{Mott}}$ ($10^{-3}$)",
-      "transform": "1000*u_midpoint"
-    },
-    {
-      "panel": "c-inset",
-      "field": "linear_background_residual",
-      "source_unit": "dimensionless",
-      "display_unit": "dimensionless",
-      "label": "Residual $\\times 10^{2}$",
-      "transform": "10^2*linear_background_residual"
     },
     {
       "panel": "d",
@@ -174,8 +158,8 @@
         33
       ],
       "point_count": 32,
-      "vertices_sha256": "2bc7b2efea65ca6b939a3c261151bcbe515fedc34d2c2737601261dc2c35a197",
-      "support_rule": "adjacent native log secants on a continuous branch",
+      "vertices_sha256": "f973c01a754580b23757a68faaee9d39d10aa6c3dbdd57b718481d976da63947",
+      "support_rule": "log secants between computed vertices on a continuous branch",
       "mask_rule": "none within the stated support",
       "x_multiplier": 1000.0,
       "y_multiplier": 1.0
@@ -217,15 +201,11 @@
         58,
         59,
         60,
-        61,
-        62,
-        63,
-        64,
-        65
+        61
       ],
-      "point_count": 32,
-      "vertices_sha256": "f70260fcb38b78b9b5b181c212e27f1a601684e53bd21e6e2f968748d1afa8d4",
-      "support_rule": "adjacent native log secants on a continuous branch",
+      "point_count": 28,
+      "vertices_sha256": "1230ca2d936c60abf25f2b9685c25d47b42a0c2a5b726cd9488f50f7c3b2b953",
+      "support_rule": "log secants between computed vertices on a continuous branch",
       "mask_rule": "none within the stated support",
       "x_multiplier": 1000.0,
       "y_multiplier": 1.0
@@ -240,6 +220,10 @@
         "slope"
       ],
       "source_rows": [
+        62,
+        63,
+        64,
+        65,
         66,
         67,
         68,
@@ -251,60 +235,14 @@
         74,
         75,
         76,
-        77,
-        78,
-        79,
-        80,
-        81,
-        82,
-        83,
-        84,
-        85,
-        86,
-        87,
-        88,
-        89,
-        90,
-        91,
-        92,
-        93,
-        94,
-        95,
-        96,
-        97
+        77
       ],
-      "point_count": 32,
-      "vertices_sha256": "08a4410d50b7cc332f1bf38acbcba3402c30e97eafec463297fcfaac08924f07",
-      "support_rule": "adjacent native log secants on a continuous branch",
+      "point_count": 16,
+      "vertices_sha256": "4e52fec74461bd064c43fa010507fddd2b00db0c9ea33d7baf4467d3ee0a7dd3",
+      "support_rule": "log secants between computed vertices on a continuous branch",
       "mask_rule": "none within the stated support",
       "x_multiplier": 1000.0,
       "y_multiplier": 1.0
-    },
-    {
-      "series_id": "c-inset",
-      "panel": "c-inset",
-      "state": "computed_derived_series",
-      "source_csv": "local_slopes.csv",
-      "source_columns": [
-        "u_midpoint",
-        "linear_background_residual"
-      ],
-      "source_rows": [
-        78,
-        79,
-        80,
-        81,
-        82,
-        83,
-        84,
-        85
-      ],
-      "point_count": 8,
-      "vertices_sha256": "5a7ef744be95921095b2a171b47dda4327c51d2901409c7d537e04c3a20e0b95",
-      "support_rule": "local secants minus a line fitted to the two sidebands",
-      "mask_rule": "none within the stated support",
-      "x_multiplier": 1000.0,
-      "y_multiplier": 100.0
     },
     {
       "series_id": "d",
@@ -336,7 +274,7 @@
       "y_multiplier": 1.0
     }
   ],
-  "selection_rule": "native secants; resolved scalar stencil interval; no smoothing or extrapolation",
+  "selection_rule": "computed vertices; 0.001 scalar and coarser K-wing secants; resolved scalar stencil interval",
   "interpolation_policy": "none",
   "connector_policy": "forbidden",
   "missing_value_policy": "refuse missing or nonfinite series",
@@ -347,8 +285,8 @@
       "format": "png",
       "dpi": 600,
       "vector": false,
-      "bytes": 500055,
-      "sha256": "fd80c615acd05e53137f18a96d757bda0c472c3e4392ac298e6b88b36ce529cf",
+      "bytes": 455645,
+      "sha256": "aea9cc4c034bcc33e109b44e157ef66289c9c56ff3226e5d198e8be82d1bd8b2",
       "inspection": {
         "size_pixels": [
           4050,
@@ -371,8 +309,8 @@
       "format": "pdf",
       "dpi": null,
       "vector": true,
-      "bytes": 39974,
-      "sha256": "a1cb1f453da2a781cf6363899fb5107d2463804f3f532ba95abb7ef5968abc25",
+      "bytes": 37475,
+      "sha256": "c3029b82d7dd3a76095e02fb7e9ee921a9eac609dfb37b3f87e0546b2b97d948",
       "inspection": {
         "physical_size_inches": [
           6.75,
@@ -397,8 +335,8 @@
       "format": "png",
       "dpi": 600,
       "vector": false,
-      "bytes": 231508,
-      "sha256": "9710fdbd44b51940cca4d40e5ff68f2c11eb1ec5b1940fc9fc622b6440ed0b5b",
+      "bytes": 209811,
+      "sha256": "def3d8a43fec85312ac3e47d0912a96f6c67073b88d73b3d9dc169d791b95caf",
       "inspection": {
         "size_pixels": [
           4050,
@@ -414,7 +352,7 @@
         ]
       },
       "role": "grayscale_review",
-      "source_color_sha256": "fd80c615acd05e53137f18a96d757bda0c472c3e4392ac298e6b88b36ce529cf",
+      "source_color_sha256": "aea9cc4c034bcc33e109b44e157ef66289c9c56ff3226e5d198e8be82d1bd8b2",
       "conversion": "Pillow L"
     }
   ],
@@ -424,7 +362,7 @@
       6.75,
       5.2
     ],
-    "size_override_reason": "Room for the resolved local inset and four independent axes",
+    "size_override_reason": "Room for four independent axes",
     "quality": {
       "figure_size_inches": [
         6.75,
@@ -465,7 +403,7 @@
       ],
       "series_styles": [],
       "minimum_capital_numeral_height_mm": 2.4522740885416665,
-      "minimum_primary_capital_numeral_height_mm": 2.852869791666666,
+      "minimum_primary_capital_numeral_height_mm": 3.0906089409722224,
       "minimum_script_capital_numeral_height_mm": 2.4522740885416665,
       "smallest_glyphs": [
         {
@@ -509,31 +447,31 @@
           "role": "script"
         },
         {
-          "text": "-9.5",
+          "text": "1.5",
           "glyph": "5",
           "font": "times.ttf",
-          "source_size_pt": 12.0,
-          "final_height_mm": 2.852869791666666,
+          "source_size_pt": 13.0,
+          "final_height_mm": 3.0906089409722224,
           "role": "primary"
         },
         {
-          "text": "-0.4",
-          "glyph": "4",
+          "text": "0.0450",
+          "glyph": "5",
           "font": "times.ttf",
-          "source_size_pt": 12.0,
-          "final_height_mm": 2.8608072916666663,
+          "source_size_pt": 13.0,
+          "final_height_mm": 3.0906089409722224,
           "role": "primary"
         },
         {
-          "text": "0.4",
-          "glyph": "4",
+          "text": "0.0456",
+          "glyph": "5",
           "font": "times.ttf",
-          "source_size_pt": 12.0,
-          "final_height_mm": 2.8608072916666663,
+          "source_size_pt": 13.0,
+          "final_height_mm": 3.0906089409722224,
           "role": "primary"
         }
       ],
-      "minimum_curve_linewidth_pt": 0.65,
+      "minimum_curve_linewidth_pt": 0.85,
       "minimum_landmark_diameter_mm": null,
       "tick_axes": [
         {
@@ -607,24 +545,6 @@
           "minor_count": 4,
           "inward": true,
           "both_sides": true
-        },
-        {
-          "axis": "x",
-          "scale": "linear",
-          "minor_locator": "AutoMinorLocator",
-          "major_count": 3,
-          "minor_count": 2,
-          "inward": true,
-          "both_sides": true
-        },
-        {
-          "axis": "y",
-          "scale": "linear",
-          "minor_locator": "AutoMinorLocator",
-          "major_count": 2,
-          "minor_count": 1,
-          "inward": true,
-          "both_sides": true
         }
       ],
       "clipped_text": [],
@@ -667,7 +587,7 @@
       "maximum_width_inches": 6.75,
       "minimum_width_constraints": {
         "glyph": 5.505094256420685,
-        "curve": 5.1923076923076925
+        "curve": 3.9705882352941178
       },
       "maximum_width_constraints": {
         "project_profile": 7.0,
@@ -717,19 +637,53 @@
       "a": 0,
       "b": 0,
       "c": 0,
-      "c-inset": 0,
       "d": 0.04516445744416648
     },
-    "sigma_inset_fit": {
-      "fit_range": [
-        0.003,
-        0.008
-      ],
-      "intercept": 3.873391151429467,
-      "gradient": -81.22739716921758,
-      "display_half_width": 0.0005,
-      "residual_min": -0.09678773296733018,
-      "residual_max": -0.08831279960890855
+    "display_secants": {
+      "pi": {
+        "count": 32,
+        "widths": [
+          0.000125,
+          0.00025,
+          0.001
+        ],
+        "reference_overlap_count": 6,
+        "max_same_endpoint_defect": 2.4362873188077394e-05
+      },
+      "K": {
+        "count": 28,
+        "widths": [
+          0.000125,
+          0.00025,
+          0.0005,
+          0.001
+        ],
+        "reference_overlap_count": 6,
+        "max_same_endpoint_defect": 0.00011477399742476635
+      },
+      "sigma": {
+        "count": 16,
+        "widths": [
+          0.001
+        ],
+        "reference_overlap_count": 4,
+        "max_same_endpoint_defect": 1.379076446816896e-06
+      }
+    },
+    "rate_assembly_replay": {
+      "sha256": "c633715a0c58775a65e213b2db842b2a67bc7c3b374c105a130336d2e6580176",
+      "receipt_sha256": "3ebb122facf778c7dbcc357ddced83537c21cc3ea207f7fd2f51ad014619eea5",
+      "assembly_source_sha256": "a2d6adfad90efb96f38092d2183e86aadabff6c448ef8b41d7014baec5ba5e99",
+      "host": "W",
+      "julia": "1.12.5",
+      "max_legacy_rate_defect": 1.110710412532967e-10,
+      "max_legacy_kernel_defect": 3.010447446882836e-11,
+      "scalar_threshold_n_ubar_over_u": 0.006162029546843299,
+      "code_commit": "3cbcb78284a9bb2e967db84d65cd06801c4d13ac",
+      "table": "window_replay.csv",
+      "receipt_path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/rate_assembly_replay.json",
+      "original_mott_manifest_sha256": "70ea09a4cc70f257d358aff25820dd0b08a00df1dcfec7d150787cf5dc67ff6f",
+      "original_mott_manifest_commit": "e9dc4a46d2ef7a5aa7c2f61cb52e750e41bcd82d"
     },
     "panel_conditions": {
       "pi": {
