@@ -298,7 +298,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - 当前已验收数据和图层以[统一状态说明](../../analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)及[绘图专题入口](../../analysis/relaxtime/phase_guided_transport/README.md)为准：
     - 原1819点完整网格：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_full_grid_v1/`。
     - 最新η加密正式数值1867点：`data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/`。
-    - 当前正式图层v15：`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/`，对应1867点，76份PDF直接引用已接受的76对PNG；current及论文图已替换。
+    - 历史正式图层v15：`data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/`，对应1867点，76份PDF直接引用已接受的76对PNG，作为历史接受记录保留。2026-11-21起审阅数据已切换至Ward/Møller结果（`data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/`）；正式图层入口与现行口径以[输运专题](../../analysis/relaxtime/phase_guided_transport/README.md)及`publication_clean_current.json`为准。
   - 旧`first_canonical` raw/收敛表、v1–v13图层和v14重复图件已退役；在独立checkout恢复提交`6a3d08663c845587ae457fbe1c90173e0e5dcc25`可复核历史结果。
     当前正式来源、少量v14渲染依赖及Mott机制依据继续保留，范围见专题入口。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
