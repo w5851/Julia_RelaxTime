@@ -11,6 +11,7 @@
 - `diagnostic_only`：可用于观察、比较或作者复核，不是 production/reference 晋升结论。
 - `candidate`：有明确的后续验证或作者决策入口，不能直接当作最终物理结论。
 - `historical`：保留旧比较、旧图或旧实现上下文，不代表当前实现语义。
+  - 2026-11 从 `docs/notes/` 迁入（仅改路径，正文未动）：[T190/T200 补点复测记录](historical/2026-03-13_T190_T200_阈值邻域与峰值邻域补点复测记录.md)、[Meson Workflow Debug Progress](historical/2026-04-15-meson-debug-progress.md)。
 - `governance`：记录资产注册、清理、迁移或分析流程，不是物理结果。
 - `archive_pointer`：指向外部或 Actions/local artifact 的 provenance 入口，本身不是完整原始数据包。
 
@@ -22,7 +23,7 @@
 | PNJL / C1 surface views | `pnjl/c1_surface_views/` | 同一 C1 source run 的两个坐标投影 | 共享输入但图轴语义不同；保留为两个独立 view |
 | PNJL / Mott | [`pnjl/mott/`](pnjl/mott/) | 独立的 Mott/复极点和文献解释链 | 归入 PNJL 域，但不属于 Issue #130 phase-reference 线 |
 | Relaxation-time / transport | [`relaxtime/`](relaxtime/README.md) | phase-guided transport、T200 tau spike、传播子机制诊断 | v2 明确继承 v1；T200 已收纳为独立 diagnostic package |
-| Historical comparison | `relaxtime/historical/`、`historical/legacy/` | 历史图、文献比较和复用审计 | 保留上下文；不能自动升级为 strict、regression truth 或 external validation gate |
+| Historical comparison | `relaxtime/historical/`、`historical/`、`historical/legacy/` | 历史图、文献比较和复用审计 | 保留上下文；不能自动升级为 strict、regression truth 或 external validation gate |
 | Figure governance | `governance/figure_asset_registry_v1/` | 资产清理、迁移和 provenance 快照 | 这是治理材料，不与科学分析包合并 |
 | Analysis protocol | `governance/literature_to_implementation_protocol.md` | 文献到实现的工作协议 | 流程文档，不是具体 case 的结果包 |
 

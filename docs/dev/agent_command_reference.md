@@ -127,6 +127,18 @@ stop the disposable server after testing. Queue saturation is a separate opt-in
 (`JRT_TEST_QUEUE_FULL=1`): it can submit up to 60 scans of 2,304 points each.
 Use a small `PNJL_SCAN_MAX_PENDING` on that dedicated server and never target a shared research queue.
 
+## Unified scan entrypoint
+
+`scripts/models/run_unified_scan.jl` is the unified entrypoint for `Models` scans (`scan tmu`, `scan trho`, `scan magnetic`) and `workflow phase`; transport-coefficient scans keep using `scripts/relaxtime/run_gap_transport_scan.jl`. `--help` must be the first argument and prints the subcommand list:
+
+```sh
+julia --project=. scripts/models/run_unified_scan.jl --help
+julia --project=. scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true
+julia --project=. scripts/models/run_unified_scan.jl scan magnetic --model_kind=PNJLMagnetic --solver_mode=fixed_mu --T_values=150 --mu_values=0 --eB_values=20000 --xi_values=0 --output_path=data/outputs/results/pnjl/scan/magnetic/selected.csv
+```
+
+Full parameter examples and the sysimage wrappers for these entrypoints are in the [stable script entrypoints guide](../guides/scripts/README.md).
+
 ## Governance and audit commands
 
 There is no repository-wide JuliaFormatter or dedicated linter configuration. Preserve local style and use these checks as the nearest policy gate:
@@ -137,6 +149,7 @@ The script-entrypoint check parses Julia syntax without executing the scripts an
 julia --project=. scripts/dev/check_unit_skip_policy.jl
 julia --project=. scripts/dev/check_docs_consistency.jl
 julia --project=. scripts/dev/check_active_docs_governance.jl
+julia --project=. scripts/dev/check_sop_governance.jl
 julia --project=. scripts/dev/check_script_entrypoints.jl
 julia --project=. scripts/dev/check_models_entry_contract.jl
 julia --project=. scripts/dev/check_solver_contract_leakage.jl

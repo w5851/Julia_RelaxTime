@@ -1,0 +1,81 @@
+schema_version = 1
+
+# 本清单登记「已退役只读」目录中允许保留的历史文件（由 scripts/dev/check_active_docs_governance.jl 强制）。
+# 禁止为了让新文件通过检查而追加 allowed_files：新文档请按 AGENTS.md 的文档落点判据写入长期域。
+# 清单项从磁盘消失时脚本只给 advisory，请先核对 provenance（issue130 审计表、asset_registry.json）再删条目。
+
+[directories."docs/notes"]
+status = "retired_readonly"
+reason = "18 份未归类笔记已分流，13 份迁入长期域；残留因 issue130 审计路径锁定或已被现行规范取代。"
+allowed_files = [
+  "md/VScode以(md)为后缀的文档的注意事项.md",
+  "pnjl/一阶相变方法对比.md",
+  "pnjl/PNJL计算工作流.md",
+  "README.md",
+  "structure/结构体使用的必要性分析.md",
+  "structure/结构体使用指南.md",
+]
+
+[directories."docs/superpowers"]
+status = "retired_readonly"
+reason = "早期 AI 过程产物；asset_registry.json 以其中 plans/specs 路径作为图件 provenance，原地只读保留。"
+allowed_files = [
+  "plans/2026-03-16-pmu-phase-diagnostic-implementation-plan.md",
+  "plans/2026-03-18-relaxtime-core-kernel-refinement-implementation-plan.md",
+  "plans/2026-03-18-relaxtime-single-entry-scan-cli-implementation-plan.md",
+  "plans/2026-03-20-mott-validation-xi-scan-implementation-plan.md",
+  "plans/2026-03-22-generic-root-continuation-design-plan.md",
+  "plans/2026-03-27-relaxtime-config-platform-strong-governance-implementation-plan.md",
+  "plans/2026-03-27-src-transport-optimization-implementation-plan.md",
+  "plans/2026-03-28-mott-transition-temperature-xi-scan-implementation-plan.md",
+  "plans/2026-03-28-readme-v2-layered-entry-implementation-plan.md",
+  "plans/2026-03-29-frontend-localhost-80-20-implementation-plan.md",
+  "plans/2026-03-29-phase2-governance-observability-split-deployment-implementation-plan.md",
+  "plans/2026-03-31-pnjl-solver-decoupling-wave-a-implementation-plan.md",
+  "plans/2026-04-01-models-dimension-agnostic-plan-b.md",
+  "plans/2026-04-01-models-homomorphic-architecture-implementation-plan.md",
+  "plans/2026-04-01-pnjl-solver-decoupling-wave-b-implementation-plan.md",
+  "plans/2026-04-01-pnjl-solver-decoupling-wave-c-implementation-plan.md",
+  "plans/2026-04-01-pnjl-solver-decoupling-wave-d-implementation-plan.md",
+  "plans/2026-04-01-pnjl-solver-decoupling-wave-e-implementation-plan.md",
+  "plans/2026-04-02-auto-legacy-r1-pr0-micro-plan.md",
+  "plans/2026-04-10-solver-domain-split-and-declarative-pipeline-program-implementation-plan.md",
+  "plans/2026-04-11-unified-declarative-pipeline-2-3-4-implementation-plan.md",
+  "plans/2026-04-12-t150-fallback-and-t190-t200-spike-analysis-implementation-plan.md",
+  "plans/2026-04-13-mott-mode-ab-merge-implementation-plan.md",
+  "plans/2026-04-13-pnjl-mott-xi-aux-figures-implementation-plan.md",
+  "plans/2026-04-19-image-provenance-sidecar-82-implementation-plan.md",
+  "plans/2026-04-19-solver-diff-pilot-81-implementation-plan.md",
+  "plans/2026-04-20-models-global-decoupling-and-pnjl-fourth-derivatives-implementation-plan.md",
+  "plans/2026-04-21-models-homomorphism-implementation.md",
+  "plans/2026-04-27-relaxtime-xi-smoothness-sampling-implementation-plan.md",
+  "README.md",
+  "specs/2026-03-16-pmu-phase-diagnostic-design.md",
+  "specs/2026-03-17-relaxtime-core-kernel-refinement-design.md",
+  "specs/2026-03-18-relaxtime-single-entry-scan-cli-design.md",
+  "specs/2026-03-20-mott-validation-xi-scan-design.md",
+  "specs/2026-03-27-relaxtime-demand-oriented-scan-config-platform-design.md",
+  "specs/2026-03-27-src-transport-optimization-plan-design.md",
+  "specs/2026-03-28-mott-transition-temperature-xi-scan-design.md",
+  "specs/2026-03-28-readme-v2-layered-entry-design.md",
+  "specs/2026-03-29-frontend-localhost-80-20-design.md",
+  "specs/2026-03-29-phase2-governance-observability-split-deployment-design.md",
+  "specs/2026-03-31-pnjl-solver-decoupling-wave-a-design.md",
+  "specs/2026-04-01-models-dimension-agnostic-plan-b-design.md",
+  "specs/2026-04-01-models-homomorphic-architecture-design.md",
+  "specs/2026-04-01-pnjl-solver-decoupling-wave-b-design.md",
+  "specs/2026-04-01-pnjl-solver-decoupling-wave-c-design.md",
+  "specs/2026-04-01-pnjl-solver-decoupling-wave-d-design.md",
+  "specs/2026-04-01-pnjl-solver-decoupling-wave-e-design.md",
+  "specs/2026-04-10-solver-domain-split-and-declarative-pipeline-design.md",
+  "specs/2026-04-11-unified-declarative-pipeline-2-3-4-design.md",
+  "specs/2026-04-12-t150-fallback-and-t190-t200-spike-analysis-design.md",
+  "specs/2026-04-13-mott-mode-ab-merge-design.md",
+  "specs/2026-04-13-pnjl-mott-xi-aux-figures-design.md",
+  "specs/2026-04-19-image-provenance-sidecar-82-design.md",
+  "specs/2026-04-19-solver-diff-pilot-81-design.md",
+  "specs/2026-04-20-models-global-decoupling-and-pnjl-fourth-derivatives-design.md",
+  "specs/2026-04-21-models-homomorphism-design.md",
+  "specs/2026-04-27-relaxtime-xi-smoothness-sampling-design.md",
+]
+

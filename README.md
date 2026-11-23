@@ -67,6 +67,8 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
 
 </details>
 
+<a id="面向-llm--agent"></a>
+
 <details>
 <summary><b>面向 LLM / Agent</b></summary>
 
@@ -139,7 +141,7 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
   - API 入口：`docs/api/relaxtime/transport/README.md`
   - 当前默认算法：`thermal_weighted_v1`，采用完整 A^xi 与 cm 相对速度；背景、热平均、末端积分和采样误差统一配置。
   - 当前正式数值为η加密后的1867点；原1819点整批结果和各自晋升记录保留。完整状态与研究边界见[输运重算与分析](docs/analysis/relaxtime/threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
-  - 当前正式图层为 `publication_clean_v14_pdf`（1819点）；v15的76对PNG已审阅，PDF暂缓，current仍为v14。
+  - 当前正式图层为 v15（`publication_clean_v15_pdf`，76 张 PDF，基于 1867 点 η 加密网格）；图层状态总入口见[输运专题](docs/analysis/relaxtime/phase_guided_transport/README.md)，单批产物清单见 [plot_manifest](data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/plot_manifest.json)。v14 是已验收的前驱，其重复图件已退役，仅保留 v15 实际依赖与资格依据。
   - 工程源码、测试、逐文件清单和恢复方式见[工程交付](data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/engineering_delivery_20261104_v1/README.md)；旧prod_v1/prod_v2及旧图层只保留历史证据和恢复用途。
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
@@ -177,25 +179,27 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 ### 用户/运行
 
-- `docs/guides/QUICKSTART.md`
-- `docs/guides/USER_GUIDE.md`
-- `docs/guides/STATUS.md`
-- `docs/guides/scripts/README.md`
-- `docs/guides/sop/README.md`
+- [指南总入口](docs/guides/README.md)
+- [QUICKSTART](docs/guides/QUICKSTART.md)、[USER_GUIDE](docs/guides/USER_GUIDE.md)、[STATUS](docs/guides/STATUS.md)
+- [稳定脚本白名单](docs/guides/scripts/README.md)
+- [生产/绘图 SOP](docs/guides/sop/README.md)
 - [PNJL benchmark 趋势与历史结果](docs/guides/benchmark_trends.md)
 
 ### 开发/治理
 
-- `docs/dev/README.md`
-- `docs/dev/active/`
-- `docs/dev/backlog/`
-- `docs/dev/archived/`
-- `docs/guides/RELEASE_GOVERNANCE_v0.1.1.md`
+- [工程治理总入口](docs/dev/README.md)（`active/`、`backlog/`、`archived/`）
+- [架构决策记录（ADR）](docs/decisions/README.md)
+- [发布治理（v0.1.1）](docs/guides/RELEASE_GOVERNANCE_v0.1.1.md)
+
+### 科研分析与证据
+
+- [科研分析与证据索引](docs/analysis/README.md)
+- [科研证据留存规范](docs/analysis/governance/research_evidence.md)
 
 ### API/实现细节
 
-- `docs/api/README.md`
-- `docs/architecture/`
+- [API 总入口](docs/api/README.md)
+- [架构索引](docs/architecture/README.md)
 - [参考资料总入口](docs/reference/README.md)
 - [已实现计算能力与方法追踪清单](docs/reference/implemented_capabilities.md)
 
@@ -203,9 +207,9 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 ```text
 src/            Julia 核心实现（models/relaxtime/simulation/utils）
-scripts/        可执行脚本入口（pnjl/server 为稳定入口核心）
+scripts/        可执行脚本入口（models/pnjl/relaxtime/server 为稳定入口）
 tests/          unit/integration/regression/validation 分层测试
-docs/           guides/api/architecture/reference/dev 文档体系
+docs/           api/architecture/decisions/guides/reference/analysis/dev 文档体系
 config/         模型与物理配置（TOML）
 data/outputs/   默认运行产物目录
 web/            前端框架与静态资源

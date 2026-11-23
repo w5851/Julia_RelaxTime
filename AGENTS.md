@@ -5,6 +5,7 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 ## Working Context
 
 - Julia project, include-driven rather than a packaged `src/PackageName.jl` layout.
+- Module and subsystem structure lives in [the agent architecture overview](docs/architecture/agent_overview.md); command details live in [the command reference](docs/dev/agent_command_reference.md).
 - Root environment: `Project.toml`; CI uses Julia `1.12.5`, root compatibility is Julia `1.10`.
 - Use unified entrypoints in `Models` and `src/models/entrypoints.jl`. `src/pnjl/PNJL.jl` is historical compatibility context.
 - Preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
@@ -42,7 +43,20 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 | `scripts/analysis/` | Research and diagnostic scripts |
 | `data/outputs/results/`, `data/outputs/figures/` | Numerical results/metadata and rendered figures |
 | `docs/api/`, `docs/guides/`, `docs/analysis/` | Public contracts, usage and scientific interpretation |
+| `docs/architecture/`, `docs/decisions/`, `docs/reference/` | Module topology, ADRs and reference material |
+| `docs/notes/`, `docs/superpowers/` | Retired read-only registers (`retired_readonly`; no new files, enforced by `check_active_docs_governance.jl`) |
 | `docs/dev/active/`, `backlog/`, `archived/` | Shared ongoing work, deferred work and completed/superseded records |
+
+Documentation placement (first match wins):
+
+- Stable function/module/HTTP/data contract → `docs/api/`.
+- Internal cross-subsystem contracts, module topology or dependency direction → `docs/architecture/`.
+- How to run a command, workflow or production/plotting SOP → `docs/guides/`.
+- A decision that should not be silently reversed → `docs/decisions/` (ADR).
+- Physics formula, literature mapping, units, capability ledger or long-lived numerical-method derivations → `docs/reference/`.
+- Diagnostics of one specific run or dataset → `docs/analysis/<domain>/<case>_analysis/`.
+- Engineering governance, active designs, backlog → `docs/dev/`.
+- Anything else (one-off plans, debugging notes) → keep it in the conversation, issue or PR.
 
 ## Julia Conventions
 
@@ -56,7 +70,7 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 - Check formulas, variables, units, implementation and actual evidence before writing a result or caption. Separate observations, conditional derivations and mechanism hypotheses.
 - Use [research evidence guidance](docs/analysis/governance/research_evidence.md) for retained studies, and the relevant production/plotting SOP for formal deliveries.
 - Document numerical API units, domains, missing/error values and ordering; map HTTP requests to implemented handlers before describing availability.
-- Literature-to-implementation agents are available when explicitly requested; see [the protocol](docs/analysis/governance/literature_to_implementation_protocol.md). Citation/BibTeX curation belongs in `D:/Desktop/paper`, especially `paper/bib`.
+- Literature-to-implementation agents are available when explicitly requested; see [the protocol](docs/analysis/governance/literature_to_implementation_protocol.md). Citation/BibTeX curation belongs in the separately maintained paper repository (its `paper/bib` directory), not in this repository.
 
 ## Reusable Guidance
 

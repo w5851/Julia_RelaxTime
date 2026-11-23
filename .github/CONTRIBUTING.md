@@ -69,7 +69,7 @@ PR 请尽量包含：
 - **尽量不要**在同一个 PR 中混合“功能改动 + 大范围重排/格式化”。
 - 稳定入口、脚本契约、`Models` 公共 API 或前后端数据契约变更需要：
   - 更新对应 `docs/api/` 文档
-  - 必要时同步更新 `docs/guides/`、`docs/dev/`、`docs/notes/` 或 `CHANGELOG.md`
+  - 必要时同步更新 `docs/guides/`、`docs/dev/` 或 `CHANGELOG.md`
 
 ## 文档贡献
 
