@@ -59,7 +59,7 @@
 
 ## Relaxation-Time Timeline
 
-1. [输运专题](relaxtime/phase_guided_transport/README.md)指向当前v15正式图层、1867点η加密数值及复现合同。
+1. [输运专题](relaxtime/phase_guided_transport/README.md)是输运稿数据与图层的口径入口：v15（1867点η加密数值、76份PDF）为历史正式图层，2026-11-21起审阅数据已切换至[Ward/Møller结果](../../data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/README.md)。
 2. [Mott 分析](relaxtime/threshold_cache_upgrade_20261021_analysis/mott_local_bumps_20261028.md)收纳新采样下π、K、η、σ的局部检查，区分数值观察、解析条件和未认证的完整输运导数。
 3. 旧xi001 raw/显示包、v1–v13图层及其专用生成器已退役；历史核验从输运专题记录的Git版本恢复。v14是已验收的前驱，其重复图件也已退役，当前仍保留v15实际依赖和资格依据。
 4. `relaxtime/transport/t200_tauu_spikes/` 现在收纳 T200 tau-u 双窗口机制包，包括两份 Markdown 说明和 `tauu_pos_*.png` 机制图；其默认绘图输出已同步指向该目录。
