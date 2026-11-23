@@ -46,7 +46,9 @@ function load_retired_allowlist(path::AbstractString)
     allowlist = Dict{String,Vector{String}}()
     for (relative_dir, entry) in directories
         entry isa AbstractDict || throw(ArgumentError("invalid entry for $(relative_dir) in $(path)"))
-        status = get(entry, "status", RETIRED_STATUS)
+        status = get(entry, "status", nothing)
+        status isa AbstractString ||
+            throw(ArgumentError("missing status for $(relative_dir) in $(path); expected $(RETIRED_STATUS)"))
         status == RETIRED_STATUS ||
             throw(ArgumentError("unsupported status=$(status) for $(relative_dir); expected $(RETIRED_STATUS)"))
         files = get(entry, "allowed_files", nothing)

@@ -71,3 +71,40 @@ end
         @test isempty(result.advisories)
     end
 end
+
+@testset "Broken or missing allowlist fails closed" begin
+    mktempdir() do root
+        notes = joinpath(root, "docs", "notes")
+        mkpath(notes)
+        write(joinpath(notes, "README.md"), "# notes\n")
+
+        broken = joinpath(root, "broken_allowlist.toml")
+        write(broken, "schema_version = 1\n[directories.\"docs/notes\"\n")
+        result = ActiveDocsGovernance.review_retired_directories(root; allowlist_path=broken)
+        @test length(result.violations) == 1
+        @test occursin("invalid retired docs allowlist", only(result.violations))
+
+        unversioned = joinpath(root, "unversioned_allowlist.toml")
+        write(unversioned, """
+        schema_version = 99
+
+        [directories."docs/notes"]
+        status = "retired_readonly"
+        allowed_files = ["README.md"]
+        """)
+        result = ActiveDocsGovernance.review_retired_directories(root; allowlist_path=unversioned)
+        @test length(result.violations) == 1
+        @test occursin("schema_version", only(result.violations))
+
+        no_status = joinpath(root, "no_status_allowlist.toml")
+        write(no_status, """
+        schema_version = 1
+
+        [directories."docs/notes"]
+        allowed_files = ["README.md"]
+        """)
+        result = ActiveDocsGovernance.review_retired_directories(root; allowlist_path=no_status)
+        @test length(result.violations) == 1
+        @test occursin("missing status", only(result.violations))
+    end
+end
