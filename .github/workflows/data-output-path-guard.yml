@@ -63,5 +63,5 @@ jobs:
             julia --project=. scripts/dev/check_data_output_path_guard.jl
           fi
 
-        - name: Test archive policy bookkeeping
-          run: julia --project=. tests/unit/config/test_data_archive_policy.jl
+      - name: Test archive policy bookkeeping
+        run: julia --project=. tests/unit/config/test_data_archive_policy.jl
