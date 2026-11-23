@@ -1,8 +1,6 @@
 # 历史笔记（已退役，只读）
 
-**状态：`retired_readonly`。不再新增文件。** 原 18 份未归类笔记已按 2026-11 的迁移方案分流：13 份迁入长期域（正文零改动，git 记录为 100% rename），5 份因审计路径锁定或已被现行规范取代而原地只读保留。本目录只作历史追溯，不作为现行权威依据。
-
-迁移规则：只移动路径、不改正文语义；需改正文时另起提交并说明依据。
+**状态：`retired_readonly`（已退役，只读）。不再新增文件，也不作为现行权威依据引用。** 原 18 份未归类笔记已于 2026-11 完成分流：13 份按原正文迁入长期域（git 记录为 100% rename），5 份因审计路径锁定或已被现行规范取代而原地只读保留。禁止新增由 [`check_active_docs_governance.jl`](../../scripts/dev/check_active_docs_governance.jl) 与 [`retired_docs_allowlist.toml`](../../config/governance/retired_docs_allowlist.toml) 强制门禁。
 
 ## 已迁出（13 份）
 

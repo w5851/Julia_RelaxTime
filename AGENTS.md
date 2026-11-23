@@ -44,7 +44,7 @@ Repository guidance for `Julia_RelaxTime`. Default user-facing language: Chinese
 | `data/outputs/results/`, `data/outputs/figures/` | Numerical results/metadata and rendered figures |
 | `docs/api/`, `docs/guides/`, `docs/analysis/` | Public contracts, usage and scientific interpretation |
 | `docs/architecture/`, `docs/decisions/`, `docs/reference/` | Module topology, ADRs and reference material |
-| `docs/notes/`, `docs/superpowers/` | Retired registers (no new files; retained items are read-only history) |
+| `docs/notes/`, `docs/superpowers/` | Retired read-only registers (`retired_readonly`; no new files, enforced by `check_active_docs_governance.jl`) |
 | `docs/dev/active/`, `backlog/`, `archived/` | Shared ongoing work, deferred work and completed/superseded records |
 
 Documentation placement (first match wins):
