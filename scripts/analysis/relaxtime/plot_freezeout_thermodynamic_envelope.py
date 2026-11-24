@@ -16,11 +16,15 @@ from scripts.analysis.relaxtime.freezeout_parameter_envelope import (
     ANDRONIC_FAMILY, POLYNOMIAL_FAMILY, parameter_keys, load_designs, trajectory, write_csv, write_json,
 )
 from scripts.plotting.plot_manifest import (build_manifest, generator_record, input_record,
-    output_record, runtime_record, sha256_file, write_manifest)
-from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
+    runtime_record, sha256_file, write_manifest)
+from scripts.plotting.plot_quality import export_figure, placement_limits
 from scripts.plotting.plot_style import load_profile, style_context, configure_axis_ticks, figure_size_inches
 from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
 from scripts.plotting.plot_accessibility import accessibility_record
+from scripts.plotting.review_vector_delivery import (
+    COLOR_ROUTE, add_vector_arguments, add_vector_pdf, read_accepted_review,
+    require_fresh_case, require_paired_vector_arguments,
+)
 from scripts.plotting.validate_plot_artifact import validate_manifest
 
 
@@ -228,27 +232,39 @@ def render(args):
 
 
 def _render_figure(args, figure, ax, profile, font):
+    from scripts.plotting.publication_review import grayscale_review_record, write_sop_snapshot
+
     source, output = args.prepared_dir.resolve(), args.output_dir.resolve()
-    results = ROOT / "data/outputs/results/relaxtime/meson_density" / output.name
-    if output.exists() or results.exists():
-        raise ValueError("figure case exists; choose a new sibling case")
-    for name, digest in checked_json(source / "checksums.json").items():
+    results = (args.results_dir or ROOT / "data/outputs/results/relaxtime/meson_density" / output.name).resolve()
+    require_fresh_case(output, results)
+    acceptance = (read_accepted_review(args.acceptance, root=ROOT, generator=Path(__file__))
+                  if args.deliver_vector else None)
+    checksums = checked_json(source / "checksums.json")
+    for name, digest in checksums.items():
         if sha256_file(source / name) != digest:
             raise ValueError(f"prepared input changed: {name}")
     meta = checked_json(source / "preparation.json")
     is_andronic = meta["optimized_family"] == ANDRONIC_FAMILY
     best_label = "Best Andronic" if is_andronic else "Best polynomial"
+    asset_id = "meson_freezeout_" + ("andronic_" if is_andronic else "") + "Tmu_envelope_20261018"
+    if acceptance is not None and acceptance.record["asset_id"] != asset_id:
+        raise ValueError("acceptance selects a different thermodynamic envelope")
     bands, anchors = table(source / "thermodynamic_band.csv"), table(source / "energy_anchors.csv")
     import matplotlib
     matplotlib.use("Agg")
-    from matplotlib.ticker import MultipleLocator
-    from PIL import Image
+    from matplotlib.ticker import FixedLocator, MultipleLocator
     figure.subplots_adjust(left=.115,right=.975,bottom=.16,top=.96)
     x = [float(r["muB_MeV"]) for r in bands]
-    ax.fill_between(x,[float(r["minimum_T_MeV"]) for r in bands],[float(r["maximum_T_MeV"]) for r in bands],
-        facecolor="#E8E8E8",edgecolor="#595959",linewidth=.65,linestyle="--",label=f"Sampled band ({len(meta['band_members'])} sets)",zorder=1)
-    ax.fill_between(x,[float(r["near_minimum_T_MeV"]) for r in bands],[float(r["near_maximum_T_MeV"]) for r in bands],
-        facecolor="#C6DEF0",edgecolor="#0072B2",linewidth=.65,hatch="/",label=f"Near-best band ({len(meta['near_best_members'])} sets)",zorder=2)
+    for prefix, face, edge, line, width, hatch, label, level in (
+        ("", "#E8E8E8", "#595959", "--", .65, "", f"Sampled band ({len(meta['band_members'])} sets)", 1),
+        ("near_", "#C6DEF0", "#0072B2", "-", .60, "/", f"Near-best band ({len(meta['near_best_members'])} sets)", 2),
+    ):
+        bounds = [[float(row[f"{prefix}{side}_T_MeV"]) for row in bands] for side in ("minimum", "maximum")]
+        with matplotlib.rc_context({"hatch.color": edge, "hatch.linewidth": .55}):
+            ax.fill_between(x, *bounds, facecolor=face, edgecolor="none", linewidth=0,
+                            hatch=hatch, label=label, zorder=level)
+        for bound in bounds:
+            ax.plot(x, bound, color=edge, linestyle=line, linewidth=width, zorder=level)
     registry = curve_styles(meta)
     selected = [meta["best_selected"], "andronic2018"]
     for style,key,label in zip(registry.select(selected), ("best_T_MeV", "andronic_T_MeV"),
@@ -258,35 +274,35 @@ def _render_figure(args, figure, ax, profile, font):
         index = min(range(len(x)),key=lambda i:abs(x[i]-float(anchor["muB_MeV"])))
         if abs(x[index]-float(anchor["muB_MeV"])) > 1e-9:
             raise ValueError("7.7 GeV anchor outside frozen display grid")
-        ax.plot(x,[float(r[key]) for r in bands],**style.plot_kwargs(),linewidth=1.7,
-            markevery=[index],markersize=6,markerfacecolor="white",markeredgewidth=1.1,
-            label=label,zorder=3)
-    ax.set_xlim(0,meta["muB_range_MeV"][1]+10)
-    lowest = min(float(r["minimum_T_MeV"]) for r in bands)
-    highest = max(float(r["maximum_T_MeV"]) for r in bands)
-    ax.set_ylim(min(50,math.floor((lowest-5)/20)*20),max(180,math.ceil((highest+10)/20)*20))
-    ax.xaxis.set_major_locator(MultipleLocator(100))
-    ax.yaxis.set_major_locator(MultipleLocator(20))
-    configure_axis_ticks(ax,profile)
+        is_best = name == meta["best_selected"]
+        curve = [float(row[key]) for row in bands]
+        ax.plot(x, curve, **style.plot_kwargs(), linewidth=1.6 if is_best else 1.4,
+                markevery=[], markersize=6, markerfacecolor="white", markeredgewidth=1.1,
+                label=label, zorder=4 if is_best else 3)
+        ax.plot([x[index]], [curve[index]], linestyle="none", marker=style.marker, color=style.color,
+                markersize=6, markerfacecolor="white", markeredgewidth=1.1, zorder=5)
+    ax.set_xlim(0, 500)
+    ax.set_ylim(50, 180)
+    ax.xaxis.set_major_locator(FixedLocator(range(0, 501, 100)))
+    ax.yaxis.set_major_locator(FixedLocator(range(60, 181, 20)))
+    configure_axis_ticks(ax, profile)
+    ax.xaxis.set_minor_locator(MultipleLocator(50))
+    ax.yaxis.set_minor_locator(MultipleLocator(10))
     xlabel,ylabel = r"$\mu_B\;(\mathrm{MeV})$",r"$T\;(\mathrm{MeV})$"
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel,labelpad=8)
-    ax.text(.03,.975,"Chemical freezeout (analytic)",transform=ax.transAxes,va="top",fontsize=12)
+    family_label = "Andronic" if is_andronic else "Polynomial"
+    ax.text(.03, .975, f"{family_label} freezeout (analytic)", transform=ax.transAxes, va="top", fontsize=12)
     legend_title = r"Markers: $\sqrt{s_{NN}}=7.7\;\mathrm{GeV}$"
     ax.legend(loc="lower left",title=legend_title,title_fontsize=13,fontsize=12,handlelength=2.7,
         labelspacing=.4,borderaxespad=.6,frameon=False)
     labels = ax.get_legend_handles_labels()[1]
-    output.mkdir(parents=True)
-    results.mkdir(parents=True)
-    outputs,quality = export_figure(figure,output / "chemical_freezeout_T_muB_band",profile,formats=["png"])
-    gray = output / "chemical_freezeout_T_muB_band_gray.png"
-    with Image.open(output / "chemical_freezeout_T_muB_band.png") as im:
-        im.convert("L").convert("RGB").save(gray,dpi=(profile.dpi,profile.dpi))
-    gray_record = output_record(gray,fmt="png",dpi=profile.dpi,vector=False)
-    gray_record["inspection"] = inspect_export(gray)
-    outputs.append(gray_record)
-    snapshot = results / Path(__file__).name
-    shutil.copy2(__file__,snapshot)
+    results.mkdir(parents=True, exist_ok=True)
+    stem = output / "chemical_freezeout_T_muB_band"
+    outputs, quality = export_figure(figure, stem, profile, formats=["png"])
+    outputs[0]["role"] = "color_review"
+    outputs.append(grayscale_review_record(stem.with_suffix(".png")))
+    sop = write_sop_snapshot(results)
     caption = ("Chemical-freezeout T(muB) parameterizations. Gray and hatched blue use exactly the same "
         f"{len(meta['band_members'])} full and {len(meta['near_best_members'])} near-best parameter sets as the frozen K+/pi+ comparison. "
         "At each displayed muB, bounds are the minimum/maximum analytic temperature of those fixed sets. "
@@ -298,24 +314,29 @@ def _render_figure(args, figure, ax, profile, font):
         f"{meta['original_energy_range_GeV'][0]:g}-{meta['original_energy_range_GeV'][1]:g} GeV ratio-scan interval. "
         "These continuations and muB=0 limits are not additional q0 density results. No crossover curve is shown. "
         "The old Andronic K+ gate failure does not invalidate the analytic temperature parameterization; the original ratio gap is unchanged. "
-        "Bands describe finite sampled parameters, not confidence intervals. PNG review only.\n")
-    (results / "caption.md").write_text(caption,encoding="utf-8")
+        "Bands describe finite sampled parameters, not confidence intervals.\n")
+    (results / "caption.md").write_text(caption, encoding="utf-8", newline="\n")
     encodings = [dict(value="sampled band",color="#595959",noncolor_encoding="dashed boundary"),
         dict(value="near-best band",color="#0072B2",noncolor_encoding="hatched fill"),
         dict(value=best_label.lower(),color="#0072B2",noncolor_encoding="solid and circle"),
         dict(value="Andronic default",color="#A04800",noncolor_encoding="dashed and square")]
-    manifest = build_manifest(asset_id="meson_freezeout_"+("andronic_" if is_andronic else "")+"Tmu_envelope_20261018",figure_family="charged_meson_freezeout",
+    manifest = build_manifest(asset_id=asset_id, figure_family="charged_meson_freezeout",
         case_slug=output.name,figure_mode="audit",semantic_status="analytic_chemical_freezeout_parameter_envelope",
         style_profile=profile.profile_id,publication_scope="internal_review",
-        generator=generator_record(__file__,command=" ".join(sys.argv),source_snapshot=snapshot,
-            runtime=runtime_record({"matplotlib":matplotlib.__version__})),
-        inputs=[input_record(source / n,role="frozen_analytic_parameter_table") for n in
-            ("thermodynamic_band.csv","energy_anchors.csv","parameters.csv","preparation.json","checksums.json")] +
-            meta["inputs"] + [input_record(ROOT / "config/plotting/candidate_aps_v2.toml",role="plot_style_contract")] +
-            [input_record(ROOT / "scripts/plotting" / n,role="shared_plotting_code") for n in
-                ("plot_style.py","plot_series.py","plot_manifest.py","plot_quality.py","plot_accessibility.py","validate_plot_artifact.py")],
-        axes=[dict(field="muB_MeV",source_unit="MeV",display_unit="MeV",scale="linear",label=xlabel),
-            dict(field="T_MeV",source_unit="MeV",display_unit="MeV",scale="linear",label=ylabel)],
+        generator=generator_record(__file__, command=" ".join(sys.argv),
+            runtime=runtime_record({"matplotlib": matplotlib.__version__})),
+        inputs=[input_record(source / n, role="frozen_preparation_source" if n.endswith(".py")
+                             else "frozen_analytic_parameter_table") for n in (*sorted(checksums), "checksums.json")] +
+            meta["inputs"] + [input_record(profile.path, role="plot_style_contract"),
+                              input_record(sop, role="figure_production_sop")] +
+            [input_record(ROOT / "scripts/plotting" / n, role="shared_plotting_code") for n in
+                ("plot_style.py", "plot_series.py", "plot_manifest.py", "plot_quality.py", "plot_accessibility.py",
+                 "publication_review.py", "plot_provenance.py", "plot_bundle.py", "plot_delivery.py",
+                 "review_vector_delivery.py", "validate_plot_artifact.py")],
+        axes=[dict(field="muB_MeV", source_unit="MeV", display_unit="MeV", scale="linear", label=xlabel,
+                   limits=[0, 500], major_ticks=list(range(0, 501, 100)), minor_tick_step=50),
+              dict(field="T_MeV", source_unit="MeV", display_unit="MeV", scale="linear", label=ylabel,
+                   limits=[50, 180], major_ticks=list(range(60, 181, 20)), minor_tick_step=10)],
         series=[dict(series_id=name,state="analytic_parameterization",point_count=len(bands),
             support_rule="frozen direct analytic evaluations, including explicitly declared continuation",
             mask_rule="all fixed members have positive finite T throughout the display domain; no member removal",
@@ -332,21 +353,16 @@ def _render_figure(args, figure, ax, profile, font):
             legend_placements=[dict(legend_index=0,host_axes_index=0,title=legend_title,labels=labels,
                 placement="in_axes",location="lower left",scope="parameter bands, curve families and collision-energy positions")],
             legend_layout_reason="author requests in-panel legends; lower-left region is empty of curves",
-            color_route="undecided_review",quality=quality,placement_limits=placement_limits(quality,profile,outputs),
+            color_route=COLOR_ROUTE,quality=quality,placement_limits=placement_limits(quality,profile,outputs),
             accessibility=accessibility_record(encodings,backgrounds=["#FFFFFF","#E8E8E8","#C6DEF0"],
                 background_scope="white axes and light band fills; dark boundaries and hatching carry band semantics"),
             connections="straight display segments between frozen direct analytic evaluations; no interpolation of ratio data"),
         calculation_sha=meta["calculation_sha"],source_run_id=meta["source_run_id"])
     manifest.update(delivery_stage="png_review",manuscript_eligible=False,current_publication_layer=False,
         vector_delivery_pending=True,caption=input_record(results / "caption.md",role="figure_caption"))
-    for record in manifest["inputs"]:
-        if record["role"] in {"plot_style_contract", "shared_plotting_code"}:
-            code_path = ROOT / record["path"]
-            code_snapshot = results / "source" / record["path"]
-            code_snapshot.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(code_path, code_snapshot)
-            record["source_snapshot"] = input_record(code_snapshot, role="plotting_source_snapshot")
-    write_manifest(output / "plot_manifest.json",manifest)
+    if acceptance is not None:
+        add_vector_pdf(manifest, acceptance, figure=figure, stem=stem, profile=profile, root=ROOT)
+    write_manifest(output / "plot_manifest.json", manifest, newline="\n")
     issues = validate_manifest(output / "plot_manifest.json",repo_root=ROOT)
     if issues:
         raise ValueError("plot contract failed: " + "; ".join(issues))
@@ -364,8 +380,15 @@ def main():
     plot = sub.add_parser("render")
     plot.add_argument("--prepared-dir",type=Path,required=True)
     plot.add_argument("--output-dir",type=Path,required=True)
+    plot.add_argument("--results-dir", type=Path, help="Companion case directory for the caption and SOP")
+    add_vector_arguments(plot)
     args = parser.parse_args()
-    (prepare if args.command == "prepare" else render)(args)
+    if args.command == "prepare":
+        return prepare(args)
+    require_paired_vector_arguments(parser, args)
+    if args.deliver_vector and args.results_dir is None:
+        parser.error("vector delivery requires an explicit --results-dir")
+    render(args)
 
 
 if __name__ == "__main__":

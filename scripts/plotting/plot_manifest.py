@@ -203,8 +203,10 @@ def build_manifest(
     }
 
 
-def write_manifest(path: str | Path, manifest: Mapping[str, Any], *, overwrite: bool = False) -> None:
-    """Write a manifest atomically and refuse accidental historical overwrite."""
+def write_manifest(
+    path: str | Path, manifest: Mapping[str, Any], *, overwrite: bool = False, newline: str | None = None
+) -> None:
+    """Write a manifest atomically, with an optional explicit line ending."""
 
     target = Path(path).resolve()
     if target.exists() and not overwrite:
@@ -214,5 +216,6 @@ def write_manifest(path: str | Path, manifest: Mapping[str, Any], *, overwrite: 
     temporary.write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
+        newline=newline,
     )
     temporary.replace(target)
