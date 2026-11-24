@@ -815,6 +815,57 @@ def build_runtime_view(
     )
 
 
+def load_c2_review_sources(source_root: Path, xi_values: Iterable[float]):
+    """Read the hash-bound, accepted native C2 rows used by the manuscript figure."""
+    source_root = source_root.resolve()
+    xi_values = frozenset(xi_values)
+    manifest = source_root / "accepted" / "manifest.json"
+    meta = _read_json(manifest)
+    if meta["promotion_status"] != "accepted_for_downstream":
+        raise PhaseReferenceContractError("C2 source layer is not accepted_for_downstream")
+    sources = [(manifest, "accepted C2 phase map selection")]
+    rows = {}
+    for kind in ("boundary", "crossover", "cep"):
+        record = meta["tables"][kind]["output"]
+        source = (source_root / record["path"]).resolve()
+        if (not source.is_relative_to(source_root)
+                or (source.stat().st_size, sha256(source)) != (record["bytes"], record["sha256"])):
+            raise PhaseReferenceContractError(f"C2 {kind} table does not match the accepted manifest")
+        sources.append((source, "C2 " + kind))
+        with source.open(encoding="utf-8-sig", newline="") as stream:
+            rows[kind] = [row for row in csv.DictReader(stream) if float(row["xi"]) in xi_values]
+        if not rows[kind] or not all(
+            row["coverage_status"] == "native_support"
+            and row["source_status"] == "strict_certified"
+            and row["extrapolation"].lower() == "false"
+            and row["acceptance_status"] == "author_accepted_for_downstream"
+            for row in rows[kind]
+        ):
+            raise PhaseReferenceContractError(f"C2 {kind} selection lacks accepted native support")
+    return rows, sources, meta
+
+
+def estimate_c2_endpoint_density(temperature, low, high, cep_temperature: float) -> dict[str, Any]:
+    """Estimate the density marker from the nearest subcritical coexistence pair."""
+    if (len(temperature) == 0 or len(temperature) != len(low) or len(low) != len(high)
+            or not all(map(math.isfinite, (*temperature, *low, *high, cep_temperature)))
+            or not all(a < b for a, b in zip(low, high))):
+        raise PhaseReferenceContractError("density estimation requires finite, ordered coexistence pairs")
+    nearest = min(range(len(temperature)), key=lambda i: abs(temperature[i] - cep_temperature))
+    if nearest != len(temperature) - 1 or not 0 < cep_temperature - temperature[nearest] <= 5.0:
+        raise PhaseReferenceContractError(
+            "nearest native coexistence row must be subcritical and within the retained 5 MeV support"
+        )
+    return {
+        "state": "estimated_density", "estimated_field": "rho_over_rho0",
+        "method": "nearest_subcritical_coexistence_mean",
+        "native_density_pair": [float(low[nearest]), float(high[nearest])],
+        "rho_over_rho0": float((low[nearest] + high[nearest]) / 2),
+        "T_MeV": float(cep_temperature), "boundary_temperature_MeV": float(temperature[nearest]),
+        "interval_semantics": "coexistence_pair_not_cep_bracket", "creates_numerical_source_row": False,
+    }
+
+
 __all__ = [
     "LAYERS",
     "PhaseReferenceBundle",
@@ -828,4 +879,6 @@ __all__ = [
     "load_phase_reference_runtime",
     "sha256",
     "to_legacy_views",
+    "load_c2_review_sources",
+    "estimate_c2_endpoint_density",
 ]
