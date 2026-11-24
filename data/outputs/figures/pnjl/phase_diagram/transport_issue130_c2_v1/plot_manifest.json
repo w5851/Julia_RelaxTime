@@ -1,6 +1,6 @@
 {
   "schema_version": "plot_manifest_v1",
-  "generated_at_utc": "2026-11-24T06:54:30.987050+00:00",
+  "generated_at_utc": "2026-11-24T07:32:23.674489+00:00",
   "asset_id": "pnjl.transport.phase.native_issue130_c2",
   "figure_family": "phase_diagram",
   "case_slug": "transport_issue130_c2_v1",
@@ -21,7 +21,7 @@
       "matplotlib": "3.10.1"
     }
   },
-  "git_commit": "918b994dc8aeee6bc7a8663cc6a1fb39e935efee",
+  "git_commit": "25a1f1f576c3a2cd39b99b3617c0e81335f0a8ee",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "postprocess_sha": null,
   "source_run_id": "32354095831",
