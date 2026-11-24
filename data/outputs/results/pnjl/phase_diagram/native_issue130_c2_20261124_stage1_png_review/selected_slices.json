@@ -1,0 +1,140 @@
+{
+  "source_id": "32354095831",
+  "counts": [
+    {
+      "xi": -0.5,
+      "maxwell_rows": 100,
+      "crossover_rows": 12,
+      "maxwell_rows_in_view": 73
+    },
+    {
+      "xi": -0.25,
+      "maxwell_rows": 83,
+      "crossover_rows": 13,
+      "maxwell_rows_in_view": 60
+    },
+    {
+      "xi": 0.0,
+      "maxwell_rows": 75,
+      "crossover_rows": 15,
+      "maxwell_rows_in_view": 48
+    },
+    {
+      "xi": 0.25,
+      "maxwell_rows": 65,
+      "crossover_rows": 16,
+      "maxwell_rows_in_view": 37
+    },
+    {
+      "xi": 0.5,
+      "maxwell_rows": 63,
+      "crossover_rows": 16,
+      "maxwell_rows_in_view": 34
+    }
+  ],
+  "endpoint_estimates": [
+    {
+      "xi": -0.5,
+      "T_low": 147.0625,
+      "T_high": 147.125,
+      "T_midpoint_MeV": 147.09375,
+      "muB_proxy_MeV": 607.0164947718985,
+      "crossover_last_T_MeV": 147.35717798432486,
+      "state": "estimated_density",
+      "estimated_field": "rho_over_rho0",
+      "method": "nearest_subcritical_coexistence_mean",
+      "native_density_pair": [
+        2.1738599569627244,
+        2.2827009867994663
+      ],
+      "rho_over_rho0": 2.2282804718810953,
+      "T_MeV": 147.09375,
+      "boundary_temperature_MeV": 147.0625,
+      "interval_semantics": "coexistence_pair_not_cep_bracket",
+      "creates_numerical_source_row": false
+    },
+    {
+      "xi": -0.25,
+      "T_low": 139.25,
+      "T_high": 139.3125,
+      "T_midpoint_MeV": 139.28125,
+      "muB_proxy_MeV": 762.2218845134053,
+      "crossover_last_T_MeV": 141.65452211011925,
+      "state": "estimated_density",
+      "estimated_field": "rho_over_rho0",
+      "method": "nearest_subcritical_coexistence_mean",
+      "native_density_pair": [
+        2.065917182217849,
+        2.1898655438636276
+      ],
+      "rho_over_rho0": 2.1278913630407383,
+      "T_MeV": 139.28125,
+      "boundary_temperature_MeV": 139.25,
+      "interval_semantics": "coexistence_pair_not_cep_bracket",
+      "creates_numerical_source_row": false
+    },
+    {
+      "xi": 0.0,
+      "T_low": 131.0,
+      "T_high": 131.0625,
+      "T_midpoint_MeV": 131.03125,
+      "muB_proxy_MeV": 873.5862261137158,
+      "crossover_last_T_MeV": 131.33627090750227,
+      "state": "estimated_density",
+      "estimated_field": "rho_over_rho0",
+      "method": "nearest_subcritical_coexistence_mean",
+      "native_density_pair": [
+        1.8971134592881638,
+        1.9989451827243283
+      ],
+      "rho_over_rho0": 1.948029321006246,
+      "T_MeV": 131.03125,
+      "boundary_temperature_MeV": 131.0,
+      "interval_semantics": "coexistence_pair_not_cep_bracket",
+      "creates_numerical_source_row": false
+    },
+    {
+      "xi": 0.25,
+      "T_low": 120.8125,
+      "T_high": 120.875,
+      "T_midpoint_MeV": 120.84375,
+      "muB_proxy_MeV": 965.5042551227415,
+      "crossover_last_T_MeV": 120.88825137410446,
+      "state": "estimated_density",
+      "estimated_field": "rho_over_rho0",
+      "method": "nearest_subcritical_coexistence_mean",
+      "native_density_pair": [
+        1.6951321599931406,
+        1.8077625297165136
+      ],
+      "rho_over_rho0": 1.7514473448548271,
+      "T_MeV": 120.84375,
+      "boundary_temperature_MeV": 120.8125,
+      "interval_semantics": "coexistence_pair_not_cep_bracket",
+      "creates_numerical_source_row": false
+    },
+    {
+      "xi": 0.5,
+      "T_low": 106.9375,
+      "T_high": 107.0625,
+      "T_midpoint_MeV": 107.0,
+      "muB_proxy_MeV": 1045.1974138271378,
+      "crossover_last_T_MeV": 112.15803554839862,
+      "state": "estimated_density",
+      "estimated_field": "rho_over_rho0",
+      "method": "nearest_subcritical_coexistence_mean",
+      "native_density_pair": [
+        1.4748061092558742,
+        1.6124416556544714
+      ],
+      "rho_over_rho0": 1.5436238824551727,
+      "T_MeV": 107.0,
+      "boundary_temperature_MeV": 106.9375,
+      "interval_semantics": "coexistence_pair_not_cep_bracket",
+      "creates_numerical_source_row": false
+    }
+  ],
+  "chemical_potential": "muB = 3 * mu_quark, including the endpoint proxy",
+  "density": "source rho, rho_hadron, rho_quark already express nB/rho0",
+  "axis_order": "never sort by density"
+}
