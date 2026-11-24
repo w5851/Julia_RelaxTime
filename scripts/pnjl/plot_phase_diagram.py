@@ -63,7 +63,9 @@ PROJECT_ROOT = _find_project_root()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.pnjl.phase_reference_adapter import default_downstream_layer, load_phase_reference
+from scripts.pnjl.phase_reference_adapter import (
+    default_downstream_layer, estimate_c2_endpoint_density, load_c2_review_sources, load_phase_reference,
+)
 
 
 DEFAULT_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
@@ -655,44 +657,12 @@ _C2_REVIEW_XI = (-0.5, -0.25, 0.0, 0.25, 0.5)
 _C2_REVIEW_MARKERS = ("o", "s", "^", "D", "v")
 _C2_REVIEW_LABELS = (r"$-0.5$", r"$-0.25$", r"$0$", r"$+0.25$", r"$+0.5$")
 _C2_REVIEW_SIZE = (6.75, 3.50)
-_C2_REVIEW_SOURCE_KEYS = ("boundary", "crossover", "cep")
 DEFAULT_C2_REVIEW_OUTPUT = (
     PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl" / "phase_diagram" / "transport_issue130_c2_v1"
 )
 DEFAULT_C2_REVIEW_RESULTS = (
     PROJECT_ROOT / "data" / "outputs" / "results" / "pnjl" / "phase_diagram" / "transport_issue130_c2_v1"
 )
-
-
-def _c2_review_sources(source_root: Path):
-    """Read the accepted C2 tables and assert every selected row is native and certified."""
-    import json
-
-    from scripts.plotting.plot_manifest import input_record, sha256_file
-
-    manifest = source_root / "accepted" / "manifest.json"
-    meta = json.loads(manifest.read_bytes())
-    if meta["promotion_status"] != "accepted_for_downstream":
-        raise ValueError("C2 source layer is not accepted_for_downstream")
-    files = [input_record(manifest, role="accepted C2 phase map selection")]
-    rows = {}
-    for kind in _C2_REVIEW_SOURCE_KEYS:
-        record = meta["tables"][kind]["output"]
-        source = source_root / record["path"]
-        if (source.stat().st_size, sha256_file(source)) != (record["bytes"], record["sha256"]):
-            raise ValueError(f"C2 {kind} table does not match the accepted manifest")
-        files.append(input_record(source, role="C2 " + kind))
-        with source.open(encoding="utf-8-sig", newline="") as stream:
-            rows[kind] = [r for r in csv.DictReader(stream) if float(r["xi"]) in _C2_REVIEW_XI]
-        if not all(
-            r["coverage_status"] == "native_support"
-            and r["source_status"] == "strict_certified"
-            and r["extrapolation"].lower() == "false"
-            and r["acceptance_status"] == "author_accepted_for_downstream"
-            for r in rows[kind]
-        ):
-            raise ValueError(f"C2 {kind} selection contains rows outside the accepted native support")
-    return rows, files, meta
 
 
 def _c2_review_field(rows, key):
@@ -717,19 +687,16 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
     import matplotlib
     from matplotlib.lines import Line2D
     from matplotlib.ticker import FixedLocator
-    from PIL import Image, ImageOps
-
-    from scripts.analysis.pnjl.build_phase_diagram_prd import estimate_density
-    from scripts.analysis.relaxtime.build_phase_guided_full_rs_raw import (
-        LABEL_PT, LEGEND_PT, TICK_PT, figure_context,
+    from scripts.plotting.publication_review import (
+        LABEL_PT, LEGEND_PT, REVIEW_COLORS, TICK_PT, figure_context,
+        grayscale_review_record, register_shared_series_styles, write_sop_snapshot,
     )
-    from scripts.analysis.relaxtime.build_phase_guided_publication_clean_v14 import LEGACY_COLORS
     from scripts.plotting.plot_accessibility import accessibility_record
     from scripts.plotting.plot_manifest import (
-        build_manifest, generator_record, input_record, output_record, runtime_record,
-        sha256_file, write_manifest,
+        build_manifest, generator_record, input_record, runtime_record, write_manifest,
     )
-    from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
+    from scripts.plotting.plot_quality import export_figure, placement_limits
+    from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
     from scripts.plotting.plot_style import configure_axis_ticks, load_profile
     from scripts.plotting.validate_plot_artifact import validate_manifest
 
@@ -741,35 +708,32 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
         except ValueError:
             return str(path)
     profile = load_profile("candidate_aps_v2")
-    palette = (*LEGACY_COLORS, *profile.colors[3:])
+    palette = (*REVIEW_COLORS, *profile.colors[3:])
+    registry = SeriesStyleRegistry("c2_phase_slice_encoding_v1", tuple(
+        SeriesStyle(f"c2.{xi:g}.{field}", palette[index], linestyle, mark)
+        for index, (xi, marker) in enumerate(zip(_C2_REVIEW_XI, _C2_REVIEW_MARKERS))
+        for field, linestyle, mark in (
+            ("first_order", "-", ""), ("crossover", "--", ""), ("endpoint", "None", marker))
+    ))
+    styles = {style.series_id: style for style in registry.styles}
     if (output_dir / "plot_manifest.json").exists():
         raise FileExistsError("Choose a fresh --output-dir/--results-dir pair for this figure case.")
-    rows, inputs, meta = _c2_review_sources(source_root)
-    results_dir.mkdir(parents=True, exist_ok=True)
-    sop = results_dir / "figure_production_snapshot.md"
-    sop.write_bytes(
-        (PROJECT_ROOT / "docs/guides/sop/workflows/figure_production.md").read_bytes().replace(b"\r\n", b"\n")
-    )
-    inputs.extend(input_record(f, role=role) for f, role in (
-        (PROJECT_ROOT / "scripts/analysis/pnjl/build_phase_diagram_prd.py",
-         "documented nearest subcritical density estimator"),
-        (PROJECT_ROOT / "scripts/analysis/relaxtime/build_phase_guided_full_rs_raw.py",
-         "accepted transport composite font and line settings"),
-        (PROJECT_ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py",
-         "accepted v15 composite palette"),
-        (profile.path, "APS plot profile"),
-        (sop, "production figure SOP snapshot, LF as in Git"),
-    ))
+    rows, sources, meta = load_c2_review_sources(source_root, _C2_REVIEW_XI)
+    sop = write_sop_snapshot(results_dir)
+    inputs = [input_record(path, role=role) for path, role in (
+        *sources, (profile.path, "APS plot profile"), (sop, "production figure SOP snapshot, LF as in Git"),
+        (PROJECT_ROOT / "scripts/pnjl/phase_reference_adapter.py", "accepted C2 row and density adapter"),
+    )]
     inputs.extend(input_record(PROJECT_ROOT / f"scripts/plotting/{helper}.py", role="plotting helper")
-                  for helper in ("plot_style", "plot_quality", "plot_accessibility", "plot_manifest",
-                                 "validate_plot_artifact"))
+                  for helper in ("plot_style", "plot_series", "plot_quality", "plot_accessibility", "plot_manifest",
+                                 "plot_provenance", "publication_review", "validate_plot_artifact"))
     output_dir.mkdir(parents=True, exist_ok=True)
     series, landmarks, slices = [], [], []
     with figure_context(profile, compact=True) as ctx:
         fig, axes = plt.subplots(1, 2, figsize=_C2_REVIEW_SIZE, sharey=True)
         ctx.bind(fig)
         fig.subplots_adjust(left=.111, right=.974, bottom=.195, top=.915, wspace=.13)
-        for index, (xi, marker) in enumerate(zip(_C2_REVIEW_XI, _C2_REVIEW_MARKERS)):
+        for index, xi in enumerate(_C2_REVIEW_XI):
             def take(kind, key):
                 picked = sorted((r for r in rows[kind] if float(r["xi"]) == xi),
                                 key=lambda r: float(r[key]))
@@ -796,7 +760,7 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
             if (temperature[-1] != low or max(crossover_mu) * 3 >= mu_crit
                     or min(crossover_t) <= t_crit or not np.all(rho_low < rho_high)):
                 raise ValueError(f"C2 slice at xi={xi} violates the declared support rules")
-            density = estimate_density(temperature, rho_low, rho_high, t_crit)
+            density = estimate_c2_endpoint_density(temperature, rho_low, rho_high, t_crit)
             color = palette[index]
             for panel, thing, xx, yy, support, max_gap, linestyle in (
                 (0, "Maxwell", 3 * mu, temperature, temperature, 2.01, "-"),
@@ -806,28 +770,31 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
                 (1, "crossover", crossover_rho, crossover_t, crossover_mu, np.inf, "--"),
             ):
                 segments = np.split(np.arange(len(yy)), np.flatnonzero(np.diff(support) > max_gap) + 1)
+                series_id = f"{panel}_{thing}_{xi:g}"
+                style_id = f"c2.{xi:g}.{'crossover' if linestyle == '--' else 'first_order'}"
                 for chunk in segments:
-                    line, = axes[panel].plot(xx[chunk], yy[chunk], ls=linestyle, lw=1.2, color=color)
+                    line, = axes[panel].plot(xx[chunk], yy[chunk], lw=1.2, **styles[style_id].plot_kwargs())
                     if not np.array_equal(line.get_xydata(), np.column_stack((xx[chunk], yy[chunk]))):
                         raise ValueError("rendered vertices differ from the selected native rows")
                 series.append(dict(
-                    series_id=f"{panel}_{thing}_{xi:g}", state="native_C2", xi=xi, panel=panel,
+                    series_id=series_id, style_ids=[style_id], state="native_C2", xi=xi, panel=panel,
                     support_rule="exact xi, native and certified; order by T for coexistence and quark mu for crossover",
                     mask_rule="no omitted vertices; break native Maxwell gaps over 2 MeV; view T >= 60 MeV",
                     input_rows=len(yy), visible_rows=int(np.count_nonzero(yy >= 60)),
                     segments=len(segments), x=xx.tolist(), y=yy.tolist(),
                 ))
+            style_id = f"c2.{xi:g}.endpoint"
             for panel, x_cep, face in ((0, mu_crit, color), (1, density["rho_over_rho0"], "white")):
-                axes[panel].plot(x_cep, t_crit, marker=marker, ls="none", color=color,
-                                 markerfacecolor=face, markeredgewidth=1.05, markersize=6.1, zorder=5)
+                axes[panel].plot(x_cep, t_crit, markerfacecolor=face, markeredgewidth=1.05,
+                                 markersize=6.1, zorder=5, **styles[style_id].plot_kwargs())
             landmarks.append(dict(xi=xi, T_low=low, T_high=high, T_midpoint_MeV=t_crit,
                                   muB_proxy_MeV=mu_crit, crossover_last_T_MeV=crossover_t[-1], **density))
             series.extend([
-                dict(series_id=f"endpoint_mu_{xi:g}", state="estimated_midpoint", xi=xi, T_MeV=t_crit,
+                dict(series_id=f"endpoint_mu_{xi:g}", style_ids=[style_id], state="estimated_midpoint", xi=xi, T_MeV=t_crit,
                      muB_proxy_MeV=mu_crit,
                      support_rule="C2 bracket midpoint and the table's quark mu proxy times three",
                      mask_rule="none"),
-                dict(series_id=f"endpoint_density_{xi:g}", xi=xi,
+                dict(series_id=f"endpoint_density_{xi:g}", style_ids=[style_id], xi=xi,
                      support_rule="C2 nearest subcritical coexistence pair", mask_rule="none", **density),
             ])
             slices.append(dict(xi=xi, maxwell_rows=len(temperature), crossover_rows=len(crossover_t),
@@ -864,14 +831,8 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
         stem = output_dir / "phase_diagram_TmuB_Trho"
         outputs, quality = export_figure(fig, stem, profile, formats=["png"])
         plt.close(fig)
-    color = stem.with_suffix(".png")
-    gray = stem.with_name(stem.name + "_gray.png")
-    with Image.open(color) as image:
-        ImageOps.grayscale(image.convert("RGB")).save(gray, dpi=(600, 600))
-    gray_record = output_record(gray, fmt="png", dpi=600, vector=False)
-    gray_record.update(inspection=inspect_export(gray), role="grayscale_review",
-                       source_color_sha256=sha256_file(color))
-    outputs.append(gray_record)
+    outputs[0]["role"] = "color_review"
+    outputs.append(grayscale_review_record(stem.with_suffix(".png")))
     points = results_dir / "selected_slices.json"
     write_manifest(points, dict(source_id=meta["source_run_id"], counts=slices,
                                 endpoint_estimates=landmarks,
@@ -882,6 +843,7 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
     rendering = dict(delivery_stage="png_review", vector_delivery_pending=True, review_contract="prd_review_v1",
                      column="double_column", figure_size_inches=list(_C2_REVIEW_SIZE),
                      size_override_reason="two side-by-side phase planes with in-panel keys", quality=quality,
+                     series_styles=register_shared_series_styles(series, registry),
                      color_route="undecided_review",
                      accessibility=accessibility_record(
                          [dict(value=str(v), color=palette[i], noncolor_encoding=f"endpoint marker {_C2_REVIEW_MARKERS[i]}")
@@ -889,7 +851,7 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
                          backgrounds=["#ffffff"], background_scope="white axes"),
                      legend_policy="declared_geometry_checked", legend_outside=False,
                      legend_placements=placements,
-                     composite_style_reference="v15: Times/STIX, 13 pt axis labels, 11 pt ticks/keys, 1.2 pt curves",
+                     composite_style_reference="Times/STIX, 13 pt axis labels, 11 pt ticks/keys, 1.2 pt curves",
                      palette=list(palette[:5]), placement_limits=placement_limits(quality, profile, outputs))
     record = build_manifest(
         asset_id="pnjl.transport.phase.native_issue130_c2", figure_family="phase_diagram",
