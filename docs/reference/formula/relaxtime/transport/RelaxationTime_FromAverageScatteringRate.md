@@ -21,7 +21,7 @@
 |----------|----------------------------------------|
 | **u夸克** | \( n_u (\bar{w}_{uu \to uu} + \bar{w}_{ud \to ud}) \) <br> + \( n_{\bar{u}} (\bar{w}_{u\bar{u} \to u\bar{u}} + \bar{w}_{u\bar{u} \to d\bar{d}} + \bar{w}_{u\bar{u} \to s\bar{s}} + \bar{w}_{u\bar{d} \to u\bar{d}}) \) <br> + \( n_s \bar{w}_{us \to us} \) <br> + \( n_{\bar{s}} \bar{w}_{u\bar{s} \to u\bar{s}} \) |
 | **d夸克** | 同位旋对称下 \(\tau_d^{-1}=\tau_u^{-1}\)；实现中直接返回与 **u夸克** 相同的结果（\(d=u\)）。 |
-| **s夸克** | \( 2n_u \bar{w}_{us \to us} \) <br> + \( 2n_{\bar{u}} \bar{w}_{u\bar{s} \to u\bar{s}} \) <br> + \( n_s \bar{w}_{ss \to ss} \) <br> + \( n_{\bar{s}} (\bar{w}_{s\bar{s} \to s\bar{s}} + 2\bar{w}_{s\bar{s} \to u\bar{u}}) \) |
+| **s夸克** | \( 2n_u \bar{w}_{us \to us} \) <br> + \( 2n_{\bar{u}} \bar{w}_{s\bar{u} \to s\bar{u}} \) <br> + \( n_s \bar{w}_{ss \to ss} \) <br> + \( n_{\bar{s}} (\bar{w}_{s\bar{s} \to s\bar{s}} + 2\bar{w}_{s\bar{s} \to u\bar{u}}) \) |
 | **反u夸克** | \( n_u (\bar{w}_{u\bar{u} \to u\bar{u}} + \bar{w}_{u\bar{u} \to d\bar{d}} + \bar{w}_{u\bar{u} \to s\bar{s}} + \bar{w}_{d\bar{u} \to d\bar{u}}) \) <br> + \( n_{\bar{u}} (\bar{w}_{\bar{u}\bar{d} \to \bar{u}\bar{d}} + \bar{w}_{\bar{u}\bar{u} \to \bar{u}\bar{u}}) \) <br> + \( n_s \bar{w}_{s\bar{u} \to s\bar{u}} \) <br> + \( n_{\bar{s}} \bar{w}_{\bar{u}\bar{s} \to \bar{u}\bar{s}} \) |
 | **反d夸克** | 同位旋对称下 \(\tau_{\bar{d}}^{-1}=\tau_{\bar{u}}^{-1}\)；实现中直接返回与 **反u夸克** 相同的结果（\(\bar{d}=\bar{u}\)）。 |
 | **反s夸克** | \( 2n_u \bar{w}_{u\bar{s} \to u\bar{s}} \) <br> + \( 2n_{\bar{u}} \bar{w}_{\bar{u}\bar{s} \to \bar{u}\bar{s}} \) <br> + \( n_{\bar{s}} \bar{w}_{\bar{s}\bar{s} \to \bar{s}\bar{s}} \) <br> + \( n_s (\bar{w}_{s\bar{s} \to s\bar{s}} + 2\bar{w}_{s\bar{s} \to u\bar{u}}) \) |
@@ -39,7 +39,7 @@
 | \(\omega_u\) | \(n_s\) | `:us_to_us` | \(\bar{w}_{us\to us}\) |
 | \(\omega_u\) | \(n_{\bar{s}}\) | `:usbar_to_usbar` | \(\bar{w}_{u\bar{s}\to u\bar{s}}\) |
 | \(\omega_s\) | \(2n_u\) | `:us_to_us` | \(\bar{w}_{us\to us}\)（同位旋下合并 \(ds\to ds\)） |
-| \(\omega_s\) | \(2n_{\bar{u}}\) | `:usbar_to_usbar` | \(\bar{w}_{u\bar{s}\to u\bar{s}}\)（同位旋下合并 \(d\bar{s}\to d\bar{s}\)） |
+| \(\omega_s\) | \(2n_{\bar{u}}\) | `:subar_to_subar` | \(\bar{w}_{s\bar{u}\to s\bar{u}}\)（同位旋下合并 \(s\bar{d}\to s\bar{d}\)） |
 | \(\omega_s\) | \(n_s\) | `:ss_to_ss` | \(\bar{w}_{ss\to ss}\) |
 | \(\omega_s\) | \(n_{\bar{s}}\) | `:ssbar_to_ssbar`, `:ssbar_to_uubar` | \(\bar{w}_{s\bar{s}\to s\bar{s}}\), \(\bar{w}_{s\bar{s}\to u\bar{u}}\)（并代表 \(d\bar{d}\)，所以有系数 2） |
 | \(\omega_{\bar{u}}\) | \(n_u\) | `:uubar_to_uubar`, `:uubar_to_ddbar`, `:uubar_to_ssbar`, `:dubar_to_dubar` | \(\bar{w}_{u\bar{u}\to u\bar{u}}\), \(\bar{w}_{u\bar{u}\to d\bar{d}}\), \(\bar{w}_{u\bar{u}\to s\bar{s}}\), \(\bar{w}_{d\bar{u}\to d\bar{u}}\) |
@@ -70,7 +70,7 @@
 
 4. **为什么会出现系数 \(2\)**：
    - **\(2n_u\,\bar{w}_{us\to us}\)**：表示 \(s\) 与 \(u\) 和 \(d\) 两种轻夸克的散射贡献相同（\(\bar{w}_{us\to us}=\bar{w}_{ds\to ds}\) 且 \(n_d=n_u\)），因此 \(n_u\bar{w}_{us\to us} + n_d\bar{w}_{ds\to ds} = 2n_u\bar{w}_{us\to us}\)。
-   - **\(2n_{\bar{u}}\,\bar{w}_{u\bar{s}\to u\bar{s}}\)** 与 **\(2n_{\bar{u}}\,\bar{w}_{\bar{u}\bar{s}\to \bar{u}\bar{s}}\)**：同理，\(\bar{u}\) 与 \(\bar{d}\) 对 \(s\) 或 \(\bar{s}\) 的散射在同位旋下等价并且密度相同。
+   - **\(2n_{\bar{u}}\,\bar{w}_{s\bar{u}\to s\bar{u}}\)** 与 **\(2n_{\bar{u}}\,\bar{w}_{\bar{u}\bar{s}\to \bar{u}\bar{s}}\)**：同理，\(\bar{u}\) 与 \(\bar{d}\) 对 \(s\) 或 \(\bar{s}\) 的散射在同位旋下等价并且密度相同。
    - **\(2\bar{w}_{s\bar{s}\to u\bar{u}}\)**：\(s\bar{s}\) 湮灭/产生轻味对时，\(u\bar{u}\) 与 \(d\bar{d}\) 两个末态在同位旋下等价且贡献相同，因此用一个过程的平均速率代表两者并乘以 2。
    - 反过来，像 **\(\bar{u}\)** 的 \(n_u(\cdots + \bar{w}_{d\bar{u}\to d\bar{u}})\) 这种写法，是因为 \(\bar{u}\) 与轻夸克散射时允许的独立过程并不完全相同（例如 \(u\bar{u}\) 与 \(d\bar{u}\)），因此不能简单合并成一个 \(2\times\) 系数，需要显式保留电荷共轭/不同味过程。
 

@@ -1,0 +1,104 @@
+{
+  "0.0": {
+    "tau_s": {
+      "max_abs_percent": 2.1141977057936856e-10,
+      "signed_percent": -2.1141977057936856e-10,
+      "table": "mode_b_grid.csv",
+      "point": "b0027",
+      "T_MeV": 120.0,
+      "xi": -0.24
+    },
+    "eta_over_s": {
+      "max_abs_percent": 1.7574830479816228e-11,
+      "signed_percent": -1.7574830479816228e-11,
+      "table": "mode_b_grid.csv",
+      "point": "b0027",
+      "T_MeV": 120.0,
+      "xi": -0.24
+    },
+    "zeta_over_s": {
+      "max_abs_percent": 1.5409895581797173e-11,
+      "signed_percent": -1.5409895581797173e-11,
+      "table": "mode_b_grid.csv",
+      "point": "b0027",
+      "T_MeV": 120.0,
+      "xi": -0.24
+    },
+    "sigma_over_T": {
+      "max_abs_percent": 6.0396132539608516e-12,
+      "signed_percent": -6.0396132539608516e-12,
+      "table": "mode_b_grid.csv",
+      "point": "b0027",
+      "T_MeV": 120.0,
+      "xi": -0.24
+    }
+  },
+  "450.0": {
+    "tau_s": {
+      "max_abs_percent": 9.677478488754565,
+      "signed_percent": -9.677478488754565,
+      "table": "mode_a_grid.csv",
+      "point": "a0317",
+      "T_MeV": 182.72820247485038,
+      "xi": -0.37
+    },
+    "eta_over_s": {
+      "max_abs_percent": 2.092738179794018,
+      "signed_percent": -2.092738179794018,
+      "table": "mode_b_grid.csv",
+      "point": "b0749",
+      "T_MeV": 200.0,
+      "xi": -0.09
+    },
+    "zeta_over_s": {
+      "max_abs_percent": 2.500123263474352,
+      "signed_percent": -2.500123263474352,
+      "table": "mode_a_grid.csv",
+      "point": "a0606",
+      "T_MeV": 219.27384296982044,
+      "xi": 0.5
+    },
+    "sigma_over_T": {
+      "max_abs_percent": 0.745931221510876,
+      "signed_percent": -0.745931221510876,
+      "table": "mode_a_grid.csv",
+      "point": "a0430",
+      "T_MeV": 201.00102272233542,
+      "xi": -0.25
+    }
+  },
+  "900.0": {
+    "tau_s": {
+      "max_abs_percent": 7.2352591938228965,
+      "signed_percent": -7.2352591938228965,
+      "table": "mode_b_grid.csv",
+      "point": "b0909",
+      "T_MeV": 200.0,
+      "xi": 0.5
+    },
+    "eta_over_s": {
+      "max_abs_percent": 1.7576029525598003,
+      "signed_percent": -1.7576029525598003,
+      "table": "mode_b_grid.csv",
+      "point": "b0909",
+      "T_MeV": 200.0,
+      "xi": 0.5
+    },
+    "zeta_over_s": {
+      "max_abs_percent": 2.840853557171874,
+      "signed_percent": -2.840853557171874,
+      "table": "mode_b_grid.csv",
+      "point": "b0909",
+      "T_MeV": 200.0,
+      "xi": 0.5
+    },
+    "sigma_over_T": {
+      "max_abs_percent": 0.6867763300199781,
+      "signed_percent": -0.6867763300199781,
+      "table": "mode_b_grid.csv",
+      "point": "b0909",
+      "T_MeV": 200.0,
+      "xi": 0.5
+    }
+  }
+}

@@ -7,8 +7,10 @@
 ## 聚合关系
 
 `tau_i⁻¹ = Σ_j n_j * w_ij`，其中数密度单位为 fm⁻³，平均速率为 fm²，τ 为 fm。
-同位旋对称下 d/dbar 与 u/ubar 共用结果。各道的重数和粒子/反粒子密度组合保持原有公式，
-见 [公式说明](../../../reference/formula/relaxtime/transport/RelaxationTime_FromAverageScatteringRate.md)。
+同位旋对称下 d/dbar 与 u/ubar 共用结果。奇异夸克和轻反夸克的散射项
+使用 subar_to_subar；轻夸克和奇异反夸克的散射项使用 usbar_to_usbar。
+有限重子密度的完整输入应分别提供这两道，见
+[公式说明](../../../reference/formula/relaxtime/transport/RelaxationTime_FromAverageScatteringRate.md)。
 
 - `relaxation_rates(densities, rates)`：只做已给定密度、通道速率的代数组合。
 - `compute_average_rates(...; existing_rates, cs_caches, ...)`：补全缺失的通道。

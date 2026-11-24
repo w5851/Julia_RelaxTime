@@ -1,0 +1,32 @@
+{
+  "host": "W",
+  "julia": "1.12.5",
+  "driver_sha256": "860590af2cd201e5561821c1fadc01141ca99bbde3f558e58c1243a276a4f7d4",
+  "inputs": {
+    "final_blocking_mid_v1/dense138_180/rates.csv": "5d8f74cbbc73291f0f9cd56cbc7845a0022a8deca529bfd853d7afa0e09e2f40",
+    "direction_aligned_v2/warm_pos/rates.csv": "5e1ef29fb07444674d1bd0e04d3fd182d09222114836b2aba7445666d2ee0027",
+    "final_blocking_low_v1/dense126_-40/rates.csv": "11212ee2330a492328a26a10c2c60dbb31354dfb4ebddcf274a9a2cc57fbfc0a",
+    "direction_aligned_v2/dense_edge/rates.csv": "0940ffeabe57e19301b9cf349ed9a22bc7075aae5191002e4b82038f1463112e",
+    "direction_sphere_v2/dense138_pos/rates.csv": "03303560ab4d791a5b0494e527b09b7208381ffd2c09ed710b8ade906e7c9acc",
+    "direction_sphere_v2/transport.csv": "5ffe6b029469081f61792e69a81fff84d62d86497c9d4baf2bb14909f82ac1d9",
+    "direction_sphere_v2/dense_edge/rates.csv": "2b57990203252d44a87dcbe37e4f27fff35210e9c69fed34b5e78e31e482a773",
+    "final_blocking_low_v1/dense126_-40/transport.csv": "805196584f1977bffc4d2e9d82ca73861244b7255b3efaf5c0f9789fea70704b",
+    "final_blocking_low_v1/dense126_-30/transport.csv": "edae6e3ca8cd5b5c3cb257382354131265e515e93fb605b79ed4c68b99febd19",
+    "direction_aligned_v2/dense138_pos/rates.csv": "70d956e23c399fb544dd0a0249e6b2db1fbd306e4f536b230a1ab29ecc8b96d2",
+    "final_blocking_low_v1/dense126_-30/rates.csv": "f7cbca7325b2678b077846d422b10abe3c89d3711e58a67b4b7b7b911e83b430",
+    "final_blocking_mid_v1/dense138_170/transport.csv": "3558488e2dc2659bac03459ea3576d89870cee0ee78a38fcce3b1d80ffe35c2d",
+    "final_blocking_mid_v1/dense138_170/rates.csv": "9ae9c8efb629ad68c37d5ef52af0680767a52741872872cd855c5a6a53e4dce9",
+    "direction_aligned_v2/transport.csv": "3f6db1a6a1ab2535441c80f65697bee89e1ba71d48a3e404448eafbc5bc0417d",
+    "direction_sphere_v2/warm_pos/rates.csv": "69ea61701462e2d519e3dbaef5c4ea54fa85c26163de665f650599072b7f95fa",
+    "direction_sphere_v2/dense138_200/rates.csv": "934b383fc7670cfdac4fcbcbb63452d3af0c4f1234493a9e19fa874ef654e52f",
+    "final_blocking_mid_v1/dense138_180/transport.csv": "2c3563ef17528f7493ee59b2e7a7fc7ce01a6cb4befab1a5b06847f1a9f879cf",
+    "direction_aligned_v2/dense138_200/rates.csv": "da1c170268614ba6f81dbd8289c9325e0890b5cf4abd7b56e611b8be8e2fe42e"
+  },
+  "files": {
+    "direction_comparison.csv": "220dceb4759f6932fc59e351025b4dd9f6e199e418d9e8af789c3e4979abe146",
+    "final_blocking_comparison.csv": "61ba3c7b279037544666ead2c08edbf737041ea9777e804a9962ce75fe972293"
+  },
+  "original_archive_sha256": "6b9d139685a04b82a276bd7e81a4262ca83e5401a4ccb9d36166b7bd2eca1bb9",
+  "original_remote_receipt_sha256": "d37ddc15509ae96d53b8f12cc2ee7ba7799017e4973a9ad4c2f487615d26402c",
+  "metadata_normalization": "Windows input path separators converted to slashes; remote CSVs unchanged"
+}

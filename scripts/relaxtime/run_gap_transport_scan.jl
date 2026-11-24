@@ -158,7 +158,7 @@ function _fallback_relaxation_rate_contribution_rows(dens, rates)
 
     # s
     add_row(:s, :us_to_us, :u, 2.0)
-    add_row(:s, :usbar_to_usbar, :ubar, 2.0)
+    add_row(:s, :subar_to_subar, :ubar, 2.0)
     add_row(:s, :ss_to_ss, :s, 1.0)
     add_row(:s, :ssbar_to_ssbar, :sbar, 1.0)
     add_row(:s, :ssbar_to_uubar, :sbar, 2.0)

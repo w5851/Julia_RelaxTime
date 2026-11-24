@@ -171,7 +171,7 @@ end
 
 @inline function _species_omega_s(n, w)
     return 2.0 * n.u * w.us +
-           2.0 * n.ubar * w.usbar +
+           2.0 * n.ubar * w.subar +
            n.s * w.ss +
            n.sbar * (w.ssbar + 2.0 * w.ssbar_uubar)
 end

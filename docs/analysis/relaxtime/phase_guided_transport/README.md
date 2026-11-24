@@ -8,6 +8,10 @@
 新图为 `png_review`，正文为 `agent_review`；其数值、图件和来源由该目录的
 `numerical_manifest.json` 与五图 bundle 绑定。
 
+附录图 7 单独复算了 π、K、σ 的阈值窄窗和孤立混合标量热积分。入口见
+[冻结数值与复算说明](../../../../data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/README.md)
+及[图件清单](../../../../data/outputs/figures/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/plot_manifest.json)。
+
 当前正式图层为 **publication_clean_v15**，唯一选择入口是
 [current](publication_clean_current.json)。
 [v15 正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)

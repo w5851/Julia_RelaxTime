@@ -73,6 +73,18 @@ end
     @test RelaxationTime.rate_value(rates_dict, :sbarsbar_to_sbarsbar) == RATES_SAMPLE.ss_to_ss
 end
 
+@testset "strange and light mixed pairs at finite density" begin
+    # Charge-conjugate channel rates can differ in a baryon-rich bath.
+    base = (; (p => 0.0 for p in RelaxationTime.REQUIRED_RATE_KEYS_FOR_TAU)...)
+    for (key, expected) in (
+        (:subar_to_subar, (u=0.0, d=0.0, s=18.0, ubar=6.0, dbar=6.0, sbar=0.0)),
+        (:usbar_to_usbar, (u=12.0, d=12.0, s=0.0, ubar=0.0, dbar=0.0, sbar=6.0)),
+    )
+        rates = merge(base, NamedTuple{(key,)}((3.0,)))
+        @test relaxation_rates(DENSITIES_SAMPLE, rates) == expected
+    end
+end
+
 @testset "relaxation_rates warns and clamps negative totals" begin
     densities = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
     rates_negative = (; (k => -abs(v) for (k, v) in pairs(RATES_SAMPLE))...)

@@ -1,0 +1,44 @@
+{
+    "host": "W",
+    "julia": "1.12.5",
+    "assembly_source_sha256": "a2d6adfad90efb96f38092d2183e86aadabff6c448ef8b41d7014baec5ba5e99",
+    "driver_sha256": "bbd6b8c2d33c35a5fea196b6a1ee00d4de86914710efc8e5f12da47c2012290b",
+    "channel_rates_sha256": "64dac1f8a7f334de2840fc17b5d121e063f14b32cf6672353c5e4b026488fbdc",
+    "original_grid_manifest_sha256": "1bd976ecca873fd3ad164020febc00a211bb208889e13a091f5371b45c7e5f59",
+    "original_window_manifest_sha256": "70ea09a4cc70f257d358aff25820dd0b08a00df1dcfec7d150787cf5dc67ff6f",
+    "profile_sha256": "a26d470cf09730ba79d4a440bf9e3d7bc17c202f59323591edafe4a47d249313",
+    "joint_profile_sha256": "c3f4156dd2ae220ff7b8293467b6335f4f3a4787c0ed545053d8fd5b6cff795f",
+    "grid_channels": 31739,
+    "window_points": 132,
+    "max_window_legacy_rate_defect": 1.110710412532967e-10,
+    "max_window_legacy_kernel_defect": 3.010447446882836e-11,
+    "checks": {
+        "midwindow_joint_transport.csv": {
+            "points": 4,
+            "legacy_rate_defect": 2.220446049250313e-16,
+            "legacy_kernel_defect": 6.106226635438361e-15
+        },
+        "mechanism_transport.csv": {
+            "points": 8,
+            "legacy_rate_defect": 2.220446049250313e-16,
+            "legacy_kernel_defect": 3.552713678800501e-15
+        },
+        "mode_b_grid.csv": {
+            "points": 925,
+            "legacy_rate_defect": 4.440892098500626e-16,
+            "legacy_kernel_defect": 3.9968028886505635e-15
+        },
+        "mode_a_grid.csv": {
+            "points": 942,
+            "legacy_rate_defect": 4.440892098500626e-16,
+            "legacy_kernel_defect": 4.218847493575595e-15
+        }
+    },
+    "files": {
+        "midwindow_joint_transport.csv": "c557b700d137eba0640aa675353ae1878df02fc197099f8f65c44d4a59f6250d",
+        "mechanism_transport.csv": "0a50c9bed464b3b03e5b4e0afda8d863c570db47b815cbfe5685043b40e94418",
+        "mode_b_grid.csv": "902b326c44057d1d8c26e28d5c5ace6eef9a6f2166e91e627ad6587c5e5d7a25",
+        "window_replay.csv": "c633715a0c58775a65e213b2db842b2a67bc7c3b374c105a130336d2e6580176",
+        "mode_a_grid.csv": "ddbec87fb870c45667dd177dd2f8a6d383f4d4e25b6bee7bca69528fe862252e"
+    }
+}
