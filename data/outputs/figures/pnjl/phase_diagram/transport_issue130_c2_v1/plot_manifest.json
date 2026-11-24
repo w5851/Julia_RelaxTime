@@ -1,6 +1,6 @@
 {
   "schema_version": "plot_manifest_v1",
-  "generated_at_utc": "2026-11-24T06:37:57.285558+00:00",
+  "generated_at_utc": "2026-11-24T06:54:30.987050+00:00",
   "asset_id": "pnjl.transport.phase.native_issue130_c2",
   "figure_family": "phase_diagram",
   "case_slug": "transport_issue130_c2_v1",
@@ -12,7 +12,7 @@
   "generator": {
     "path": "scripts/pnjl/plot_phase_diagram.py",
     "path_kind": "repository_relative",
-    "sha256": "ecd2afffef7c418942ba2241288cbd7febb7723eee1589b1a372f44dcc9ec670",
+    "sha256": "dba6790fae90537a2b0c73a2601355530df51fb365cd7b819a267329fdf63a7e",
     "command": "python scripts/pnjl/plot_phase_diagram.py --review-c2 --output-dir data/outputs/figures/pnjl/phase_diagram/transport_issue130_c2_v1 --results-dir data/outputs/results/pnjl/phase_diagram/transport_issue130_c2_v1",
     "runtime": {
       "python": "3.13.2",
@@ -21,7 +21,7 @@
       "matplotlib": "3.10.1"
     }
   },
-  "git_commit": "fe01406c903a8a238a7a3c754614e50202693d5f",
+  "git_commit": "918b994dc8aeee6bc7a8663cc6a1fb39e935efee",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "postprocess_sha": null,
   "source_run_id": "32354095831",

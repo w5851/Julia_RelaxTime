@@ -17,6 +17,15 @@ PNJL 相图绘制脚本
     --format FMT      输出格式 png/pdf/svg (默认 png)
     --dpi VALUE       分辨率 (默认 200)
     --no-show         不显示图形窗口
+
+审阅交付模式（Issue 130 C2，PNG + manifest）：
+    python scripts/pnjl/plot_phase_diagram.py --review-c2 \
+        [--output-dir DIR --results-dir DIR] [--phase-reference-root PATH]
+
+    --review-c2 只接受 accepted 层的原生认证行，产出 171.45 mm 审阅 PNG、
+    灰度派生图与哈希绑定 manifest；--output-dir/--results-dir 必须成对给出，
+    省略时使用 transport_issue130_c2_v1 的默认目录。该模式与 --format、
+    --xi、--dpi、--type、--phase-reference-layer 等快速绘图参数互斥。
 """
 
 from __future__ import annotations
@@ -706,8 +715,6 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
     from pathlib import Path as _Path
 
     import matplotlib
-
-    matplotlib.use("Agg")
     from matplotlib.lines import Line2D
     from matplotlib.ticker import FixedLocator
     from PIL import Image, ImageOps
@@ -944,8 +951,8 @@ def main() -> None:
     )
     parser.add_argument("--xi", type=float, action="append", default=None,
                        help="ξ values to plot (can specify multiple times)")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
-                       help="Output directory")
+    parser.add_argument("--output-dir", type=Path, default=None,
+                       help="Output directory (quick plot defaults to data/outputs/figures/pnjl)")
     parser.add_argument("--format", type=str, default="png", choices=["png", "pdf", "svg"],
                        help="Output format")
     parser.add_argument("--dpi", type=int, default=200, help="DPI for raster formats")
@@ -959,15 +966,29 @@ def main() -> None:
                        help="Don't plot crossover lines")
     parser.add_argument("--review-c2", action="store_true",
                        help="Render the accepted C2 review figure with an SOP manifest instead of a quick plot")
-    parser.add_argument("--results-dir", type=Path, default=DEFAULT_C2_REVIEW_RESULTS,
-                       help="Metadata directory used by --review-c2")
+    parser.add_argument("--results-dir", type=Path, default=None,
+                       help="Metadata directory used by --review-c2 (must accompany --output-dir)")
     
     args = parser.parse_args()
 
     if args.review_c2:
+        ignored = [name for name, value, default in (
+            ("--format", args.format, "png"),
+            ("--dpi", args.dpi, 200),
+            ("--type", args.type, "all"),
+            ("--xi", args.xi, None),
+            ("--phase-reference-layer", args.phase_reference_layer, None),
+        ) if value != default]
+        if args.no_spinodal or args.no_crossover:
+            ignored.append("--no-spinodal/--no-crossover")
+        if ignored:
+            parser.error("--review-c2 does not accept " + ", ".join(ignored))
+        if (args.output_dir is None) != (args.results_dir is None):
+            parser.error("--review-c2 requires --output-dir and --results-dir together")
         render_c2_review_figure(
-            output_dir=DEFAULT_C2_REVIEW_OUTPUT if args.output_dir == DEFAULT_OUTPUT_DIR else args.output_dir,
-            results_dir=args.results_dir,
+            output_dir=(args.output_dir or DEFAULT_C2_REVIEW_OUTPUT).resolve(),
+            results_dir=(args.results_dir or DEFAULT_C2_REVIEW_RESULTS).resolve(),
+            source_root=(args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT),
         )
         return
     
@@ -1024,7 +1045,7 @@ def main() -> None:
         )
     
     show = not args.no_show
-    output_dir = args.output_dir
+    output_dir = args.output_dir or DEFAULT_OUTPUT_DIR
     fmt = args.format
     dpi = args.dpi
     
