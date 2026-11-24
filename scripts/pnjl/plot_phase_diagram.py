@@ -679,8 +679,9 @@ def _c2_review_axis(name, label, unit, transform, limits):
 
 def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
                             results_dir: Path = DEFAULT_C2_REVIEW_RESULTS,
-                            source_root: Path = DEFAULT_PHASE_REFERENCE_ROOT) -> None:
-    """Render the accepted C2 slices as an SOP-bound review figure (PNG + manifest)."""
+                            source_root: Path = DEFAULT_PHASE_REFERENCE_ROOT,
+                            acceptance_path: Path | None = None) -> None:
+    """Render the C2 review or export the PDF matching an accepted review."""
     import json
     from pathlib import Path as _Path
 
@@ -698,6 +699,9 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
     from scripts.plotting.plot_quality import export_figure, placement_limits
     from scripts.plotting.plot_series import SeriesStyle, SeriesStyleRegistry
     from scripts.plotting.plot_style import configure_axis_ticks, load_profile
+    from scripts.plotting.review_vector_delivery import (
+        COLOR_ROUTE, add_vector_pdf, read_accepted_review, require_fresh_case,
+    )
     from scripts.plotting.validate_plot_artifact import validate_manifest
 
     output_dir, results_dir = _Path(output_dir), _Path(results_dir)
@@ -716,8 +720,13 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
             ("first_order", "-", ""), ("crossover", "--", ""), ("endpoint", "None", marker))
     ))
     styles = {style.series_id: style for style in registry.styles}
-    if (output_dir / "plot_manifest.json").exists():
-        raise FileExistsError("Choose a fresh --output-dir/--results-dir pair for this figure case.")
+    require_fresh_case(output_dir, results_dir)
+    asset_id = "pnjl.transport.phase.native_issue130_c2"
+    acceptance = None
+    if acceptance_path is not None:
+        acceptance = read_accepted_review(acceptance_path, root=PROJECT_ROOT, generator=Path(__file__))
+        if acceptance.record["asset_id"] != asset_id:
+            raise ValueError("acceptance must select the C2 phase figure")
     rows, sources, meta = load_c2_review_sources(source_root, _C2_REVIEW_XI)
     sop = write_sop_snapshot(results_dir)
     inputs = [input_record(path, role=role) for path, role in (
@@ -726,7 +735,8 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
     )]
     inputs.extend(input_record(PROJECT_ROOT / f"scripts/plotting/{helper}.py", role="plotting helper")
                   for helper in ("plot_style", "plot_series", "plot_quality", "plot_accessibility", "plot_manifest",
-                                 "plot_provenance", "publication_review", "validate_plot_artifact"))
+                                 "plot_provenance", "publication_review", "plot_bundle", "plot_delivery",
+                                 "review_vector_delivery", "validate_plot_artifact"))
     output_dir.mkdir(parents=True, exist_ok=True)
     series, landmarks, slices = [], [], []
     with figure_context(profile, compact=True) as ctx:
@@ -830,7 +840,6 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
         ]
         stem = output_dir / "phase_diagram_TmuB_Trho"
         outputs, quality = export_figure(fig, stem, profile, formats=["png"])
-        plt.close(fig)
     outputs[0]["role"] = "color_review"
     outputs.append(grayscale_review_record(stem.with_suffix(".png")))
     points = results_dir / "selected_slices.json"
@@ -838,13 +847,13 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
                                 endpoint_estimates=landmarks,
                                 chemical_potential="muB = 3 * mu_quark, including the endpoint proxy",
                                 density="source rho, rho_hadron, rho_quark already express nB/rho0",
-                                axis_order="never sort by density"), overwrite=True)
+                                axis_order="never sort by density"), overwrite=True, newline="\n")
     inputs.append(input_record(points, role="slice and endpoint audit"))
     rendering = dict(delivery_stage="png_review", vector_delivery_pending=True, review_contract="prd_review_v1",
                      column="double_column", figure_size_inches=list(_C2_REVIEW_SIZE),
                      size_override_reason="two side-by-side phase planes with in-panel keys", quality=quality,
                      series_styles=register_shared_series_styles(series, registry),
-                     color_route="undecided_review",
+                     color_route=COLOR_ROUTE,
                      accessibility=accessibility_record(
                          [dict(value=str(v), color=palette[i], noncolor_encoding=f"endpoint marker {_C2_REVIEW_MARKERS[i]}")
                           for i, v in enumerate(_C2_REVIEW_XI)],
@@ -854,7 +863,7 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
                      composite_style_reference="Times/STIX, 13 pt axis labels, 11 pt ticks/keys, 1.2 pt curves",
                      palette=list(palette[:5]), placement_limits=placement_limits(quality, profile, outputs))
     record = build_manifest(
-        asset_id="pnjl.transport.phase.native_issue130_c2", figure_family="phase_diagram",
+        asset_id=asset_id, figure_family="phase_diagram",
         case_slug=output_dir.name, figure_mode="audit",
         semantic_status="native C2 slices with distinct estimated endpoint markers",
         style_profile=profile.profile_id, publication_scope="internal_review",
@@ -862,7 +871,9 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
         generator=generator_record(
             __file__,
             command=("python scripts/pnjl/plot_phase_diagram.py --review-c2 "
-                     f"--output-dir {_repo_relative(output_dir)} --results-dir {_repo_relative(results_dir)}"),
+                     f"--output-dir {_repo_relative(output_dir)} --results-dir {_repo_relative(results_dir)}"
+                     + (f" --deliver-vector --acceptance {_repo_relative(acceptance_path)}"
+                        if acceptance_path else "")),
             runtime=runtime_record({"matplotlib": matplotlib.__version__})),
         inputs=inputs, outputs=outputs, series=series,
         axes=[_c2_review_axis("muB", xlabels[0], "MeV", "muB=3*muq", [0, 1250]),
@@ -877,8 +888,13 @@ def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
         rendering=rendering)
     record.update(delivery_stage="png_review", vector_delivery_pending=True,
                   manuscript_eligible=False, current_publication_layer=False)
+    try:
+        if acceptance is not None:
+            add_vector_pdf(record, acceptance, figure=fig, stem=stem, profile=profile, root=PROJECT_ROOT)
+    finally:
+        plt.close(fig)
     manifest = output_dir / "plot_manifest.json"
-    write_manifest(manifest, record, overwrite=True)
+    write_manifest(manifest, record, newline="\n")
     errors = validate_manifest(manifest)
     if errors:
         raise ValueError(errors)
@@ -931,7 +947,15 @@ def main() -> None:
     parser.add_argument("--results-dir", type=Path, default=None,
                        help="Metadata directory used by --review-c2 (must accompany --output-dir)")
     
+    from scripts.plotting.review_vector_delivery import add_vector_arguments, require_paired_vector_arguments
+
+    add_vector_arguments(parser)
     args = parser.parse_args()
+    require_paired_vector_arguments(parser, args)
+    if args.deliver_vector and not args.review_c2:
+        parser.error("--deliver-vector requires --review-c2")
+    if args.deliver_vector and (args.output_dir is None or args.results_dir is None):
+        parser.error("vector delivery requires explicit --output-dir and --results-dir")
 
     if args.review_c2:
         ignored = [name for name, value, default in (
@@ -951,6 +975,7 @@ def main() -> None:
             output_dir=(args.output_dir or DEFAULT_C2_REVIEW_OUTPUT).resolve(),
             results_dir=(args.results_dir or DEFAULT_C2_REVIEW_RESULTS).resolve(),
             source_root=(args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT),
+            acceptance_path=args.acceptance,
         )
         return
     

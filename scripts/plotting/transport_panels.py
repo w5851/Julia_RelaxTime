@@ -17,7 +17,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import (
-    AutoLocator, FixedLocator, FormatStrFormatter, FuncFormatter, LogLocator,
+    AutoLocator, FixedLocator, FuncFormatter, LogLocator,
     MaxNLocator, NullFormatter, ScalarFormatter,
 )
 
@@ -140,6 +140,10 @@ def visible_ticks(axis):
     low, high = axis.get_ylim()
     return [float(value) for value in axis.get_yticks() if low <= value <= high]
 
+def numeric_formatter(precision):
+    return FuncFormatter(lambda value, _: f"{value:.{precision}f}".replace("-", "\u2212"))
+
+
 def decimal_places(ticks):
     step = min(b - a for a, b in zip(ticks, ticks[1:]))
     return max(0, -Decimal(f"{step:.12g}").normalize().as_tuple().exponent)
@@ -206,8 +210,8 @@ def render_panel(axis, mode, panel, observable, data, profile, *, composite=Fals
     reason = "mode_A_relaxation_family_log" if force_log else "raw_dynamic_range_at_least_20" if scale == "log" else "linear_raw_range"
     axis.set_yscale(scale)
     axis.set_xlim(-0.52, 0.52)
-    axis.set_xticks([-0.5, 0, 0.5], ["-0.5", "0", "0.5"])
-    axis.margins(y=0.06)
+    axis.set_xticks([-0.5, 0, 0.5], ["\u22120.5", "0", "0.5"])
+    axis.margins(y=0.08 if scale == "log" else 0.07)
     if scale == "log":
         axis.yaxis.set_major_locator(FixedLocator(readable_log_ticks(*axis.get_ylim())))
         axis.yaxis.set_major_formatter(FuncFormatter(lambda value, _: format(Decimal(f"{value:.10g}").normalize(), "f")))
@@ -215,7 +219,7 @@ def render_panel(axis, mode, panel, observable, data, profile, *, composite=Fals
         axis.yaxis.set_major_locator(MaxNLocator(nbins=4 if composite else 5, min_n_ticks=3,
                                                  steps=[1, 2, 5, 10]))
         precision = max(3 if observable == "sigma_over_T" else 0, decimal_places(visible_ticks(axis)))
-        axis.yaxis.set_major_formatter(FormatStrFormatter(f"%.{precision}f"))
+        axis.yaxis.set_major_formatter(numeric_formatter(precision))
     configure_axis_ticks(axis, profile)
     axis.tick_params(axis="y", which="major", pad=3)
     axis.set_ylabel(LABELS[observable], labelpad=3)
@@ -314,14 +318,15 @@ def render_composite(name, data, profile):
                 if row == len(observables) - 1:
                     axis.set_xlabel(r"$\xi$")
                 axis.text(0, 1.02, f"({chr(97 + row * 3 + col)})", transform=axis.transAxes,
-                          ha="left", va="bottom", fontsize=TICK_PT)
+                          ha="left", va="bottom", fontsize=TICK_PT, fontweight="normal")
             if all(axis.get_yscale() == "linear" for axis in axes[row]):
                 precision = max(decimal_places(visible_ticks(axis)) for axis in axes[row])
                 precision = max(precision, 3 if observable == "sigma_over_T" else 0)
                 for axis, spec in zip(axes[row], row_specs):
-                    axis.yaxis.set_major_formatter(FormatStrFormatter(f"%.{precision}f"))
+                    axis.yaxis.set_major_formatter(numeric_formatter(precision))
                     capture_ticks(axis, spec)
             specs.extend(row_specs)
+        figure.align_ylabels()
         placements = place_legends(figure, specs, profile)
         return figure, specs, placements
 
@@ -340,7 +345,8 @@ def parameter_legend(figure, specs, profile, *, host, location, anchor=None, siz
     figure.axes[host].legend(handles=handles, title=title, **settings)
     return dict(role="parameters", placement="in_axes", host_axes_index=host, location=location,
                 title=title, labels=labels, scope="all parameter curves", series_keys=list(PARAMETERS[mode]),
-                legend_index=0, anchor_axes=anchor, selection_reason="reviewed fixed-temperature panel layout")
+                legend_index=0, anchor_axes=list(anchor) if anchor is not None else None,
+                selection_reason="reviewed fixed-temperature panel layout")
 
 def render_fixed_T(data, profile):
     with figure_context(profile) as context:
@@ -356,7 +362,7 @@ def render_fixed_T(data, profile):
                 axis.set_yscale(scale)
                 axis.relim()
                 axis.autoscale_view(scalex=False)
-                axis.margins(y=0.05)
+                axis.margins(y=0.08 if scale == "log" else 0.07)
                 if scale == "log":
                     low, high = axis.get_ylim()
                     subs = (1.0,) if high / low > 10 ** 1.5 else (1.0, 2.0, 5.0)
@@ -380,13 +386,14 @@ def render_fixed_T(data, profile):
                 label = f"({chr(97 + row * 3 + col)})"
                 if row == 0:
                     label += rf"  $T={float(panel[1:]):.0f}$ MeV"
-                axis.text(0, 1.03, label, transform=axis.transAxes, ha="left", va="bottom", fontsize=13)
+                axis.text(0, 1.03, label, transform=axis.transAxes, ha="left", va="bottom", fontsize=13, fontweight="normal")
                 for collection in axis.collections:
                     collection.set_sizes([5.5 ** 2])
                     collection.set_linewidths([1.0])
                 spec.update(axis_scale=scale, axis_scale_reason="paper_FIG4_fixed_T_row_scale")
                 capture_ticks(axis, spec)
                 specs.append(spec)
+        figure.align_ylabels()
         placements = [parameter_legend(figure, specs, profile, host=6, location="lower left",
                                       anchor=(0.4466411003595683, 0.31293851991526406), size=13)]
         endpoints = [Line2D([], [], ls="None", marker=marker, mfc="white", mec="black", ms=6,
