@@ -169,3 +169,15 @@ data/outputs/figures/pnjl/phase_diagram/transport_issue130_c2_v1/** -text whites
 data/outputs/results/pnjl/phase_diagram/transport_issue130_c2_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 scripts/pnjl/plot_phase_diagram.py -text
 data/reference/pnjl/issue130_phase_reference_v2/accepted/** -text
+
+# Byte-exact hashed sources: manifests bind these files by sha256, keep checkout bytes stable.
+config/plotting/** -text
+scripts/plotting/** -text
+scripts/analysis/pnjl/render_issue130_phase_surface_v3.py -text
+scripts/analysis/relaxtime/plot_freezeout_comparison.py -text
+scripts/analysis/relaxtime/plot_freezeout_envelope.py -text
+scripts/analysis/relaxtime/plot_freezeout_thermodynamic_envelope.py -text
+scripts/analysis/relaxtime/plot_ward_moller_mott_response.py -text
+scripts/relaxtime/workflow/charged_gbu_plot.jl -text
+scripts/analysis/relaxtime/plot_ward_moller_manuscript.py -text
+scripts/pnjl/phase_reference_adapter.py -text
