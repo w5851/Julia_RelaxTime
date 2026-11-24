@@ -161,8 +161,10 @@ def main():
     frozen_catalog = tomllib.loads((BASE / "freezeout_envelope_20261018_design/literature_envelope_v1.toml").read_text(encoding="utf-8"))
     assert {k: v for k, v in catalog.items() if k != "source_root"} == {k: v for k, v in frozen_catalog.items() if k != "source_root"}
     source_hashes = verify_sources(catalog)
-    cases = ("freezeout_defaults_20261017_fine_png_review_r2", "freezeout_envelope_20261018_png_review_r2",
-             "freezeout_envelope_20261018_Tmu_png_review_r2", "andronic_envelope_20261018_png_review_r1",
+    # Batch 2 仓库侧退役后（2026-11-24）只剩 2026-10-18 T–muB 两个 case：
+    # freezeout_defaults_20261017_fine_png_review_r2 / freezeout_envelope_20261018_png_review_r2 /
+    # andronic_envelope_20261018_png_review_r1 已被 2026-11-08 矢量包取代并退役。
+    cases = ("freezeout_envelope_20261018_Tmu_png_review_r2",
              "andronic_envelope_20261018_Tmu_png_review_r1")
     figures = []
     for case in cases:
