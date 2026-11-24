@@ -161,3 +161,9 @@ data/outputs/results/relaxtime/transport/diagnostics/** -text whitespace=blank-a
 # Retained desktop research input and source bytes.
 data/outputs/results/relaxtime/transport/review_followup_20261013/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/analysis/relaxtime/meson_freezeout_experiment_20261017_analysis/evidence.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Byte-exact C2 review delivery: the manifest asserts these bytes and hashes.
+data/outputs/figures/pnjl/phase_diagram/transport_issue130_c2_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/results/pnjl/phase_diagram/transport_issue130_c2_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+scripts/pnjl/plot_phase_diagram.py -text
+data/reference/pnjl/issue130_phase_reference_v2/accepted/** -text

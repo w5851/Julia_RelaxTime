@@ -1,5 +1,7 @@
 # Phase-reference 决策证据层
 
+输运稿的[当前二维切片](../../../../data/outputs/figures/pnjl/phase_diagram/transport_issue130_c2_v1/phase_diagram_TmuB_Trho.png)使用 Issue #130 v2 accepted 的五个原生 ξ 切片；该图由 `scripts/pnjl/plot_phase_diagram.py --review-c2` 生成并带哈希绑定 manifest，替代其记录的早期 C1 图。
+
 Issue #130 的 phase-surface 版本系列另有统一只读索引 [`../phase_surface_series/`](../phase_surface_series/)。该索引的 figure layer 是显示层快照，不改变本目录下的 phase-reference package contract；source package、manifest 和历史 provenance 保持原位。
 
 本目录收纳 Issue #130 phase-reference 线的汇总、限定证据和人工 overlay 决策审计。三个包回答的问题不同，保留各自的 `manifest.json`、表格、图和 verdict；本目录只提供逻辑入口，不合并或改写下游 C1/C2/CEP/Maxwell evidence。
