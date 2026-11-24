@@ -17,6 +17,15 @@ PNJL 相图绘制脚本
     --format FMT      输出格式 png/pdf/svg (默认 png)
     --dpi VALUE       分辨率 (默认 200)
     --no-show         不显示图形窗口
+
+审阅交付模式（Issue 130 C2，PNG + manifest）：
+    python scripts/pnjl/plot_phase_diagram.py --review-c2 \
+        [--output-dir DIR --results-dir DIR] [--phase-reference-root PATH]
+
+    --review-c2 只接受 accepted 层的原生认证行，产出 171.45 mm 审阅 PNG、
+    灰度派生图与哈希绑定 manifest；--output-dir/--results-dir 必须成对给出，
+    省略时使用 transport_issue130_c2_v1 的默认目录。该模式与 --format、
+    --xi、--dpi、--type、--phase-reference-layer 等快速绘图参数互斥。
 """
 
 from __future__ import annotations
@@ -642,6 +651,279 @@ def plot_combined_phase_diagram(
         plt.close()
 
 
+_C2_REVIEW_XI = (-0.5, -0.25, 0.0, 0.25, 0.5)
+_C2_REVIEW_MARKERS = ("o", "s", "^", "D", "v")
+_C2_REVIEW_LABELS = (r"$-0.5$", r"$-0.25$", r"$0$", r"$+0.25$", r"$+0.5$")
+_C2_REVIEW_SIZE = (6.75, 3.50)
+_C2_REVIEW_SOURCE_KEYS = ("boundary", "crossover", "cep")
+DEFAULT_C2_REVIEW_OUTPUT = (
+    PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl" / "phase_diagram" / "transport_issue130_c2_v1"
+)
+DEFAULT_C2_REVIEW_RESULTS = (
+    PROJECT_ROOT / "data" / "outputs" / "results" / "pnjl" / "phase_diagram" / "transport_issue130_c2_v1"
+)
+
+
+def _c2_review_sources(source_root: Path):
+    """Read the accepted C2 tables and assert every selected row is native and certified."""
+    import json
+
+    from scripts.plotting.plot_manifest import input_record, sha256_file
+
+    manifest = source_root / "accepted" / "manifest.json"
+    meta = json.loads(manifest.read_bytes())
+    if meta["promotion_status"] != "accepted_for_downstream":
+        raise ValueError("C2 source layer is not accepted_for_downstream")
+    files = [input_record(manifest, role="accepted C2 phase map selection")]
+    rows = {}
+    for kind in _C2_REVIEW_SOURCE_KEYS:
+        record = meta["tables"][kind]["output"]
+        source = source_root / record["path"]
+        if (source.stat().st_size, sha256_file(source)) != (record["bytes"], record["sha256"]):
+            raise ValueError(f"C2 {kind} table does not match the accepted manifest")
+        files.append(input_record(source, role="C2 " + kind))
+        with source.open(encoding="utf-8-sig", newline="") as stream:
+            rows[kind] = [r for r in csv.DictReader(stream) if float(r["xi"]) in _C2_REVIEW_XI]
+        if not all(
+            r["coverage_status"] == "native_support"
+            and r["source_status"] == "strict_certified"
+            and r["extrapolation"].lower() == "false"
+            and r["acceptance_status"] == "author_accepted_for_downstream"
+            for r in rows[kind]
+        ):
+            raise ValueError(f"C2 {kind} selection contains rows outside the accepted native support")
+    return rows, files, meta
+
+
+def _c2_review_field(rows, key):
+    values = np.asarray([float(r[key]) for r in rows])
+    if not np.isfinite(values).all():
+        raise ValueError(f"nonfinite values in {key}")
+    return values
+
+
+def _c2_review_axis(name, label, unit, transform, limits):
+    return dict(field=name, label=label, source_unit=unit, display_unit=unit,
+                transform=transform, scale="linear", limits=limits)
+
+
+def render_c2_review_figure(*, output_dir: Path = DEFAULT_C2_REVIEW_OUTPUT,
+                            results_dir: Path = DEFAULT_C2_REVIEW_RESULTS,
+                            source_root: Path = DEFAULT_PHASE_REFERENCE_ROOT) -> None:
+    """Render the accepted C2 slices as an SOP-bound review figure (PNG + manifest)."""
+    import json
+    from pathlib import Path as _Path
+
+    import matplotlib
+    from matplotlib.lines import Line2D
+    from matplotlib.ticker import FixedLocator
+    from PIL import Image, ImageOps
+
+    from scripts.analysis.pnjl.build_phase_diagram_prd import estimate_density
+    from scripts.analysis.relaxtime.build_phase_guided_full_rs_raw import (
+        LABEL_PT, LEGEND_PT, TICK_PT, figure_context,
+    )
+    from scripts.analysis.relaxtime.build_phase_guided_publication_clean_v14 import LEGACY_COLORS
+    from scripts.plotting.plot_accessibility import accessibility_record
+    from scripts.plotting.plot_manifest import (
+        build_manifest, generator_record, input_record, output_record, runtime_record,
+        sha256_file, write_manifest,
+    )
+    from scripts.plotting.plot_quality import export_figure, inspect_export, placement_limits
+    from scripts.plotting.plot_style import configure_axis_ticks, load_profile
+    from scripts.plotting.validate_plot_artifact import validate_manifest
+
+    output_dir, results_dir = _Path(output_dir), _Path(results_dir)
+
+    def _repo_relative(path: _Path) -> str:
+        try:
+            return _Path(path).resolve().relative_to(PROJECT_ROOT).as_posix()
+        except ValueError:
+            return str(path)
+    profile = load_profile("candidate_aps_v2")
+    palette = (*LEGACY_COLORS, *profile.colors[3:])
+    if (output_dir / "plot_manifest.json").exists():
+        raise FileExistsError("Choose a fresh --output-dir/--results-dir pair for this figure case.")
+    rows, inputs, meta = _c2_review_sources(source_root)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    sop = results_dir / "figure_production_snapshot.md"
+    sop.write_bytes(
+        (PROJECT_ROOT / "docs/guides/sop/workflows/figure_production.md").read_bytes().replace(b"\r\n", b"\n")
+    )
+    inputs.extend(input_record(f, role=role) for f, role in (
+        (PROJECT_ROOT / "scripts/analysis/pnjl/build_phase_diagram_prd.py",
+         "documented nearest subcritical density estimator"),
+        (PROJECT_ROOT / "scripts/analysis/relaxtime/build_phase_guided_full_rs_raw.py",
+         "accepted transport composite font and line settings"),
+        (PROJECT_ROOT / "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v14.py",
+         "accepted v15 composite palette"),
+        (profile.path, "APS plot profile"),
+        (sop, "production figure SOP snapshot, LF as in Git"),
+    ))
+    inputs.extend(input_record(PROJECT_ROOT / f"scripts/plotting/{helper}.py", role="plotting helper")
+                  for helper in ("plot_style", "plot_quality", "plot_accessibility", "plot_manifest",
+                                 "validate_plot_artifact"))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    series, landmarks, slices = [], [], []
+    with figure_context(profile, compact=True) as ctx:
+        fig, axes = plt.subplots(1, 2, figsize=_C2_REVIEW_SIZE, sharey=True)
+        ctx.bind(fig)
+        fig.subplots_adjust(left=.111, right=.974, bottom=.195, top=.915, wspace=.13)
+        for index, (xi, marker) in enumerate(zip(_C2_REVIEW_XI, _C2_REVIEW_MARKERS)):
+            def take(kind, key):
+                picked = sorted((r for r in rows[kind] if float(r["xi"]) == xi),
+                                key=lambda r: float(r[key]))
+                if not picked or len(picked) != len(set(_c2_review_field(picked, key))):
+                    raise ValueError(f"C2 {kind} slice at xi={xi} is empty or has duplicate {key}")
+                return picked
+
+            boundary = take("boundary", "T_MeV")
+            crossover = take("crossover", "mu_MeV")
+            endpoint_rows = take("cep", "xi")
+            if len(endpoint_rows) != 1:
+                raise ValueError(f"C2 CEP slice at xi={xi} must contain exactly one row")
+            endpoint = endpoint_rows[0]
+            low, high, t_crit = (float(endpoint[k]) for k in ("T_low_MeV", "T_high_MeV", "T_midpoint_MeV"))
+            mu_crit = 3 * float(endpoint["mu_CEP_proxy_MeV"])
+            if not np.isclose((low + high) / 2, t_crit) or high <= low:
+                raise ValueError(f"C2 CEP bracket at xi={xi} is inconsistent")
+            temperature, mu, rho_low, rho_high = (
+                _c2_review_field(boundary, k) for k in ("T_MeV", "mu_MeV", "rho_hadron", "rho_quark")
+            )
+            crossover_t, crossover_mu, crossover_rho = (
+                _c2_review_field(crossover, k) for k in ("T_MeV", "mu_MeV", "rho")
+            )
+            if (temperature[-1] != low or max(crossover_mu) * 3 >= mu_crit
+                    or min(crossover_t) <= t_crit or not np.all(rho_low < rho_high)):
+                raise ValueError(f"C2 slice at xi={xi} violates the declared support rules")
+            density = estimate_density(temperature, rho_low, rho_high, t_crit)
+            color = palette[index]
+            for panel, thing, xx, yy, support, max_gap, linestyle in (
+                (0, "Maxwell", 3 * mu, temperature, temperature, 2.01, "-"),
+                (0, "crossover", 3 * crossover_mu, crossover_t, crossover_mu, np.inf, "--"),
+                (1, "low-density", rho_low, temperature, temperature, 2.01, "-"),
+                (1, "high-density", rho_high, temperature, temperature, 2.01, "-"),
+                (1, "crossover", crossover_rho, crossover_t, crossover_mu, np.inf, "--"),
+            ):
+                segments = np.split(np.arange(len(yy)), np.flatnonzero(np.diff(support) > max_gap) + 1)
+                for chunk in segments:
+                    line, = axes[panel].plot(xx[chunk], yy[chunk], ls=linestyle, lw=1.2, color=color)
+                    if not np.array_equal(line.get_xydata(), np.column_stack((xx[chunk], yy[chunk]))):
+                        raise ValueError("rendered vertices differ from the selected native rows")
+                series.append(dict(
+                    series_id=f"{panel}_{thing}_{xi:g}", state="native_C2", xi=xi, panel=panel,
+                    support_rule="exact xi, native and certified; order by T for coexistence and quark mu for crossover",
+                    mask_rule="no omitted vertices; break native Maxwell gaps over 2 MeV; view T >= 60 MeV",
+                    input_rows=len(yy), visible_rows=int(np.count_nonzero(yy >= 60)),
+                    segments=len(segments), x=xx.tolist(), y=yy.tolist(),
+                ))
+            for panel, x_cep, face in ((0, mu_crit, color), (1, density["rho_over_rho0"], "white")):
+                axes[panel].plot(x_cep, t_crit, marker=marker, ls="none", color=color,
+                                 markerfacecolor=face, markeredgewidth=1.05, markersize=6.1, zorder=5)
+            landmarks.append(dict(xi=xi, T_low=low, T_high=high, T_midpoint_MeV=t_crit,
+                                  muB_proxy_MeV=mu_crit, crossover_last_T_MeV=crossover_t[-1], **density))
+            series.extend([
+                dict(series_id=f"endpoint_mu_{xi:g}", state="estimated_midpoint", xi=xi, T_MeV=t_crit,
+                     muB_proxy_MeV=mu_crit,
+                     support_rule="C2 bracket midpoint and the table's quark mu proxy times three",
+                     mask_rule="none"),
+                dict(series_id=f"endpoint_density_{xi:g}", xi=xi,
+                     support_rule="C2 nearest subcritical coexistence pair", mask_rule="none", **density),
+            ])
+            slices.append(dict(xi=xi, maxwell_rows=len(temperature), crossover_rows=len(crossover_t),
+                               maxwell_rows_in_view=int(sum(temperature >= 60))))
+        xlabels = (r"$\mu_B$ (MeV)", r"$\rho/\rho_0$")
+        for index, axis in enumerate(axes):
+            axis.set_xlim(0, (1250, 3.15)[index])
+            axis.set_ylim(60, 240)
+            axis.xaxis.set_major_locator(FixedLocator(([0, 400, 800, 1200], [0, 1, 2, 3])[index]))
+            axis.yaxis.set_major_locator(FixedLocator([60, 100, 140, 180, 220]))
+            axis.set_xlabel(xlabels[index])
+            configure_axis_ticks(axis, profile)
+            axis.text(0, 1.025, "(a)" if index == 0 else "(b)", transform=axis.transAxes,
+                      va="bottom", ha="left", fontsize=TICK_PT)
+        axes[0].set_ylabel(r"$T$ (MeV)")
+        handles = [Line2D([], [], marker=m, color=palette[i], ls="none", ms=6)
+                   for i, m in enumerate(_C2_REVIEW_MARKERS)]
+        common = dict(fontsize=LEGEND_PT, title_fontsize=LABEL_PT, frameon=False, handletextpad=.32,
+                      labelspacing=.12, borderaxespad=.35, borderpad=.1, alignment="left")
+        cep_title = r"CEP at each $\xi$"
+        cep_key = axes[0].legend(handles, _C2_REVIEW_LABELS, title=cep_title, ncols=2,
+                                 loc="lower left", columnspacing=.45, handlelength=.8, **common)
+        axes[0].add_artist(cep_key)
+        line_types = ["First order", "Crossover"]
+        axes[0].legend([Line2D([], [], ls=style, color="#383838", lw=1.2) for style in ("-", "--")],
+                       line_types, loc="upper right", handlelength=1.35, **common)
+        placements = [
+            dict(legend_index=0, host_axes_index=0, title=cep_title, labels=list(_C2_REVIEW_LABELS),
+                 placement="in_axes", location="lower left",
+                 scope="CEP symbols for both panels; fill style is panel-specific"),
+            dict(legend_index=1, host_axes_index=0, title="", labels=line_types, placement="in_axes",
+                 location="upper right", scope="curve line styles in both panels"),
+        ]
+        stem = output_dir / "phase_diagram_TmuB_Trho"
+        outputs, quality = export_figure(fig, stem, profile, formats=["png"])
+        plt.close(fig)
+    color = stem.with_suffix(".png")
+    gray = stem.with_name(stem.name + "_gray.png")
+    with Image.open(color) as image:
+        ImageOps.grayscale(image.convert("RGB")).save(gray, dpi=(600, 600))
+    gray_record = output_record(gray, fmt="png", dpi=600, vector=False)
+    gray_record.update(inspection=inspect_export(gray), role="grayscale_review",
+                       source_color_sha256=sha256_file(color))
+    outputs.append(gray_record)
+    points = results_dir / "selected_slices.json"
+    write_manifest(points, dict(source_id=meta["source_run_id"], counts=slices,
+                                endpoint_estimates=landmarks,
+                                chemical_potential="muB = 3 * mu_quark, including the endpoint proxy",
+                                density="source rho, rho_hadron, rho_quark already express nB/rho0",
+                                axis_order="never sort by density"), overwrite=True)
+    inputs.append(input_record(points, role="slice and endpoint audit"))
+    rendering = dict(delivery_stage="png_review", vector_delivery_pending=True, review_contract="prd_review_v1",
+                     column="double_column", figure_size_inches=list(_C2_REVIEW_SIZE),
+                     size_override_reason="two side-by-side phase planes with in-panel keys", quality=quality,
+                     color_route="undecided_review",
+                     accessibility=accessibility_record(
+                         [dict(value=str(v), color=palette[i], noncolor_encoding=f"endpoint marker {_C2_REVIEW_MARKERS[i]}")
+                          for i, v in enumerate(_C2_REVIEW_XI)],
+                         backgrounds=["#ffffff"], background_scope="white axes"),
+                     legend_policy="declared_geometry_checked", legend_outside=False,
+                     legend_placements=placements,
+                     composite_style_reference="v15: Times/STIX, 13 pt axis labels, 11 pt ticks/keys, 1.2 pt curves",
+                     palette=list(palette[:5]), placement_limits=placement_limits(quality, profile, outputs))
+    record = build_manifest(
+        asset_id="pnjl.transport.phase.native_issue130_c2", figure_family="phase_diagram",
+        case_slug=output_dir.name, figure_mode="audit",
+        semantic_status="native C2 slices with distinct estimated endpoint markers",
+        style_profile=profile.profile_id, publication_scope="internal_review",
+        calculation_sha=meta["calculation_sha"], source_run_id=meta["source_run_id"],
+        generator=generator_record(
+            __file__,
+            command=("python scripts/pnjl/plot_phase_diagram.py --review-c2 "
+                     f"--output-dir {_repo_relative(output_dir)} --results-dir {_repo_relative(results_dir)}"),
+            runtime=runtime_record({"matplotlib": matplotlib.__version__})),
+        inputs=inputs, outputs=outputs, series=series,
+        axes=[_c2_review_axis("muB", xlabels[0], "MeV", "muB=3*muq", [0, 1250]),
+              _c2_review_axis("rho_over_rho0", xlabels[1], "dimensionless", "identity", [0, 3.15]),
+              _c2_review_axis("T_MeV", r"$T$ (MeV)", "MeV", "identity", [60, 240])],
+        selection_rule="same five native xi slices as the previous C1 figure, from the C2-based accepted map",
+        interpolation_policy="none; straight lines between adjacent native samples only",
+        connector_policy="forbidden",
+        missing_value_policy="no gap closure, extrapolation, or replacement of native points",
+        validation=dict(finite=True, duplicate_keys=True, support=True,
+                        all_selected_source_rows_native_certified=True, solver_called=False),
+        rendering=rendering)
+    record.update(delivery_stage="png_review", vector_delivery_pending=True,
+                  manuscript_eligible=False, current_publication_layer=False)
+    manifest = output_dir / "plot_manifest.json"
+    write_manifest(manifest, record, overwrite=True)
+    errors = validate_manifest(manifest)
+    if errors:
+        raise ValueError(errors)
+    print(json.dumps({"slices": slices, "minimum_capital_numeral_height_mm":
+                      quality["minimum_capital_numeral_height_mm"]}, ensure_ascii=False))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Plot PNJL phase diagrams",
@@ -669,8 +951,8 @@ def main() -> None:
     )
     parser.add_argument("--xi", type=float, action="append", default=None,
                        help="ξ values to plot (can specify multiple times)")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
-                       help="Output directory")
+    parser.add_argument("--output-dir", type=Path, default=None,
+                       help="Output directory (quick plot defaults to data/outputs/figures/pnjl)")
     parser.add_argument("--format", type=str, default="png", choices=["png", "pdf", "svg"],
                        help="Output format")
     parser.add_argument("--dpi", type=int, default=200, help="DPI for raster formats")
@@ -682,8 +964,33 @@ def main() -> None:
                        help="Don't plot spinodal lines")
     parser.add_argument("--no-crossover", action="store_true",
                        help="Don't plot crossover lines")
+    parser.add_argument("--review-c2", action="store_true",
+                       help="Render the accepted C2 review figure with an SOP manifest instead of a quick plot")
+    parser.add_argument("--results-dir", type=Path, default=None,
+                       help="Metadata directory used by --review-c2 (must accompany --output-dir)")
     
     args = parser.parse_args()
+
+    if args.review_c2:
+        ignored = [name for name, value, default in (
+            ("--format", args.format, "png"),
+            ("--dpi", args.dpi, 200),
+            ("--type", args.type, "all"),
+            ("--xi", args.xi, None),
+            ("--phase-reference-layer", args.phase_reference_layer, None),
+        ) if value != default]
+        if args.no_spinodal or args.no_crossover:
+            ignored.append("--no-spinodal/--no-crossover")
+        if ignored:
+            parser.error("--review-c2 does not accept " + ", ".join(ignored))
+        if (args.output_dir is None) != (args.results_dir is None):
+            parser.error("--review-c2 requires --output-dir and --results-dir together")
+        render_c2_review_figure(
+            output_dir=(args.output_dir or DEFAULT_C2_REVIEW_OUTPUT).resolve(),
+            results_dir=(args.results_dir or DEFAULT_C2_REVIEW_RESULTS).resolve(),
+            source_root=(args.phase_reference_root or DEFAULT_PHASE_REFERENCE_ROOT),
+        )
+        return
     
     # 默认加载作者接受的 v2 phase map。旧 CSV 仍可通过显式路径回放。
     candidate_diagnostics = None
@@ -738,7 +1045,7 @@ def main() -> None:
         )
     
     show = not args.no_show
-    output_dir = args.output_dir
+    output_dir = args.output_dir or DEFAULT_OUTPUT_DIR
     fmt = args.format
     dpi = args.dpi
     
