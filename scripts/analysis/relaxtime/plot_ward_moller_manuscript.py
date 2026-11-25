@@ -261,16 +261,20 @@ def render_mechanism(meta,profile):
                 top.legend(loc='upper left',fontsize=11,frameon=False,handlelength=1.4,handletextpad=.35,labelspacing=.10)
 
             ax=axs[1,col]
-            peak=0.
+            peak=0.;curve_max=0.
             for i,identifier in enumerate((left_id,right_id)):
                 selected=sorted([r for r in spectra if r['point_id']==identifier],key=lambda r:n(r,'excess_energy_MeV'))
                 xi=next(n(r,'xi') for r in grid if r['point_id']==identifier)
                 ax.plot([n(r,'excess_energy_MeV') for r in selected],[n(r,'sigma_fm2') for r in selected],
                     lw=1.25,label=rf'$\xi={xi:.2f}$',
                     **MECHANISM_LINES[('sigma_left','sigma_right')[i]].plot_kwargs())
+                curve_max=max(curve_max,*(n(r,'sigma_fm2') for r in selected))
                 peak=max(peak,*(n(r,'sigma_fm2') for r in selected if n(r,'excess_energy_MeV')<=80))
             ax.set_yscale('log');ax.margins(y=.08);ax.set_xlim(-3,80);ax.set_xlabel(r'$\sqrt{\hat s}-M_u-M_d$ (MeV)')
-            low,high=ax.get_ylim();ax.set_ylim(low,max(high,2.5*peak))
+            low,high=ax.get_ylim()
+            # 顶部留白：按真实峰值在对数轴上留 8% 的 span，避免阈值尖峰顶死上框线
+            span=math.log10(curve_max)-math.log10(max(low,1e-30))
+            ax.set_ylim(low,max(high,10**(math.log10(curve_max)+.08*span)))
             ax.tick_params(axis='y',labelsize=13)
             ax.set_ylabel(r'$\sigma_{d\bar u}$ (fm$^2$)' if col==0 else '')
             ax.legend(loc='upper right',fontsize=11,frameon=False,handlelength=1.4,handletextpad=.35,labelspacing=.10)
@@ -278,12 +282,14 @@ def render_mechanism(meta,profile):
             ax=axs[2,col]
             positions=[0,1];bottom=[0.,0.]
             interval_names=['0–25','25–75','75–150','>150']
-            fills=[COLORS[0],'#a84800','#007b65','#595959'];hatches=['','/','','x']
+            # 灰度可辨：四层用大跨度明度阶梯 + 纹理，避免薄层柱段在灰阶下塌缩
+            fills=['#0072b2','#f0ad4e','#bfe6d4','#595959'];hatches=['','//','','x']
+            edges=['white','#8a5a1a','#4d4d4d','white']
             for j,lo in enumerate((0.,25.,75.,150.)):
                 vals=[sum(n(r,'inverse_ubar_contribution') for r in areas if
                     r['point_id']==identifier and n(r,'lower_excess_MeV')==lo) for identifier in (left_id,right_id)]
                 ax.bar(positions,vals,bottom=bottom,width=.48,color=fills[j],hatch=hatches[j],
-                    edgecolor='white',linewidth=.5,label=interval_names[j])
+                    edgecolor=edges[j],linewidth=.6,label=interval_names[j])
                 bottom=[b+v for b,v in zip(bottom,vals)]
             total_line, = ax.plot(positions,[n(win,'tauinv_ubar_left'),n(win,'tauinv_ubar_right')],
                 ms=4.8,lw=1.1,**MECHANISM_LINES['total_rate'].plot_kwargs())
