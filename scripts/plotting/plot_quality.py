@@ -181,6 +181,33 @@ def _line_intersects_bbox(line: Any, bbox: Any) -> bool:
     return False
 
 
+def _tick_label_crowding(figure: Any, renderer: Any, dpi: float) -> list[list[str]]:
+    """Report adjacent visible tick labels whose gap falls below the readable minimum."""
+    horizontal_min = 2.0 * dpi / 72.0
+    vertical_min = 1.5 * dpi / 72.0
+    crowding: list[list[str]] = []
+    for ax in figure.axes:
+        for axis, minimum, horizontal in (
+            (ax.xaxis, horizontal_min, True),
+            (ax.yaxis, vertical_min, False),
+        ):
+            low, high = sorted(axis.get_view_interval())
+            entries = []
+            for tick in axis.get_major_ticks():
+                if not (low - 1e-10 <= tick.get_loc() <= high + 1e-10):
+                    continue
+                label = tick.label1
+                if not label.get_visible() or not label.get_text().strip():
+                    continue
+                entries.append((tick.get_loc(), label, label.get_window_extent(renderer)))
+            entries.sort(key=lambda item: item[0])
+            for (_, first, box), (_, second, other) in zip(entries, entries[1:]):
+                gap = (other.x0 - box.x1) if horizontal else (other.y0 - box.y1)
+                if gap < minimum:
+                    crowding.append([first.get_text(), second.get_text()])
+    return crowding
+
+
 def measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, Any]:
     """Measure under the creation style, also when drawing has been deferred."""
     with figure_style_context(figure) as context:
@@ -230,6 +257,7 @@ def _measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, A
             dy = min(box.y1, other.y1) - max(box.y0, other.y0)
             if dx > 1 and dy > 1:
                 overlaps.append([text, other_text])
+    tick_crowding = _tick_label_crowding(figure, renderer, float(figure.dpi))
     legends = visible_legends(figure)
     legend_axes_overlaps = int(sum(
         legend.get_window_extent(renderer).overlaps(ax.get_window_extent(renderer))
@@ -357,6 +385,7 @@ def _measure_figure(figure: Any, *, intended_width_inches: float) -> dict[str, A
         "tick_axes": tick_axes,
         "clipped_text": clipped,
         "text_overlap_pairs": overlaps,
+        "tick_label_crowding_pairs": tick_crowding,
         "legend_axes_overlap_count": legend_axes_overlaps,
         "legend_count": len(legends),
         "legend_layout": legend_layout,

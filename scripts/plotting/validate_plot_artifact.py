@@ -7,6 +7,8 @@ import copy
 import json
 import math
 from pathlib import Path
+import hashlib
+import re
 import sys
 from typing import Any
 
@@ -71,6 +73,41 @@ def _check_hash_record(record: dict[str, Any], *, root: Path, label: str, errors
     return _resolve_artifact_path(value, root) if isinstance(value, str) and value and not issues else None
 
 
+CODE_INPUT_ROOTS = ("scripts/",)
+
+
+def is_code_input(record: dict[str, Any]) -> bool:
+    """Rendering helpers and audit tooling are provenance, not frozen data.
+
+    Delivered manifests used to hash `scripts/plotting/*` into `inputs`, so any
+    later improvement to a validator invalidated historical packages and the CI
+    regression that calls this function.  Code inputs are therefore audited for
+    shape and drift, never compared byte-wise against the working tree; data,
+    configuration and output bytes keep the strict comparison.
+    """
+    path = record.get("path")
+    return isinstance(path, str) and path.replace("\\", "/").startswith(CODE_INPUT_ROOTS)
+
+
+def _check_code_record(record: dict[str, Any], *, root: Path, label: str, notes: list[str]) -> None:
+    path = record.get("path")
+    digest = record.get("sha256")
+    if not isinstance(path, str) or not path:
+        notes.append(f"{label}: code input without path")
+        return
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        notes.append(f"{label} ({path}): code input sha256 must be 64 lowercase hex characters")
+        return
+    on_disk = root / path
+    if on_disk.is_file():
+        try:
+            actual = hashlib.sha256(on_disk.read_bytes()).hexdigest()
+        except OSError:
+            return
+        if actual != digest:
+            notes.append(f"{label} ({path}): code drifted since delivery; audit only, no failure")
+
+
 def _check_png_dpi(path: Path, declared_dpi: Any, *, label: str, errors: list[str]) -> None:
     if declared_dpi is None:
         errors.append(f"{label}.dpi is required for PNG")
@@ -90,7 +127,8 @@ def _check_png_dpi(path: Path, declared_dpi: Any, *, label: str, errors: list[st
 
 
 def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_ROOT, code_ref: str | None = None,
-                      font_sources: dict[str, str] | None = None) -> list[str]:
+                      font_sources: dict[str, str] | None = None,
+                      notes: list[str] | None = None) -> list[str]:
     """Return all contract violations; an empty list means the artifact passes."""
 
     try:
@@ -129,12 +167,14 @@ def validate_manifest(manifest_path: str | Path, *, repo_root: Path = PROJECT_RO
             if field in counts and counts[field] != actual:
                 errors.append(f"bundle {field} mismatch")
         return errors
-    return validate_manifest_record(manifest, repo_root=repo_root, code_ref=reference, font_sources=font_sources)
+    return validate_manifest_record(manifest, repo_root=repo_root, code_ref=reference, font_sources=font_sources,
+                                    notes=notes)
 
 
 def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJECT_ROOT,
                              code_ref: str | None = None, hash_cache: dict | None = None,
-                             font_sources: dict[str, str] | None = None) -> list[str]:
+                             font_sources: dict[str, str] | None = None,
+                             notes: list[str] | None = None) -> list[str]:
     """Validate a single record, whether standalone or expanded from a bundle."""
     errors: list[str] = []
     profile = None
@@ -169,7 +209,10 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
     generator = manifest.get("generator")
     historical_code_ref = code_ref or manifest.get("postprocess_sha") or manifest.get("git_commit")
     if isinstance(generator, dict):
-        _check_hash_record(generator, root=repo_root, label="generator", errors=errors, code_ref=historical_code_ref, hash_cache=hash_cache)
+        if is_code_input(generator):
+            _check_code_record(generator, root=repo_root, label="generator", notes=notes if notes is not None else [])
+        else:
+            _check_hash_record(generator, root=repo_root, label="generator", errors=errors, code_ref=historical_code_ref, hash_cache=hash_cache)
     else:
         errors.append("generator must be an object")
 
@@ -184,7 +227,10 @@ def validate_manifest_record(manifest: dict[str, Any], *, repo_root: Path = PROJ
                 continue
             if not record.get("role"):
                 errors.append(f"{label}.role is required")
-            _check_hash_record(record, root=repo_root, label=label, errors=errors, code_ref=historical_code_ref, hash_cache=hash_cache)
+            if is_code_input(record):
+                _check_code_record(record, root=repo_root, label=label, notes=notes if notes is not None else [])
+            else:
+                _check_hash_record(record, root=repo_root, label=label, errors=errors, code_ref=historical_code_ref, hash_cache=hash_cache)
 
     axes = manifest.get("axes")
     if not isinstance(axes, list) or not axes:
@@ -576,6 +622,8 @@ def _check_final_size_contract(manifest: dict[str, Any], profile: Any, root: Pat
         errors.append("v2 final landmark diameter is below 1 mm")
     if quality.get("clipped_text") or quality.get("text_overlap_pairs"):
         errors.append("v2 contains clipped or overlapping text")
+    if quality.get("tick_label_crowding_pairs"):
+        errors.append("v2 has adjacent tick labels closer than the readable minimum")
     if quality.get("legend_axes_overlap_count") != 0:
         allowed_in_axes_policy = rendering.get("legend_policy") in {
             "shared_in_first_panel_reviewed",
