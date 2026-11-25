@@ -12,7 +12,7 @@
     "numerical_manifest": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
     "numerical_manifest_sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42",
     "promotion_record": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/formal_promotion_v1/promotion.json",
-    "promotion_record_sha256": "c1713a46fe7168e9825db3ae9dc9f8d6d061d7e2db02c01be60e2221a811e2f7",
+    "promotion_record_sha256": "f2dac572cdccbe31170b0b0c0dc285af8d02326807c1a8306e757a781ea46012",
     "profile": "ward_moller_sphere_v1",
     "relative_velocity_convention": "medium_moller",
     "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
@@ -36,7 +36,7 @@
         "plot_manifest_sha256": "43fa9bf35973f95d297af2861a4701fc3456b65327020f2d3223b478de6fd86e",
         "delivery_stage": "vector_delivery",
         "manuscript_eligible": true,
-        "scope": "C2 phase diagram (transport paper Fig. 1)"
+        "scope": "C2 phase diagram (transport paper Fig. 1; thesis Fig. 5.1)"
       },
       {
         "figure_root": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261125_Tmu_vector",
@@ -75,5 +75,13 @@
     "replaces_cm_layer": "publication_clean_v15_pdf (cm convention)",
     "replaced_by": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector",
     "permanent_red_line": "data/inputs/relaxtime/transport/frozen_v15_20261121/"
-  }
+  },
+  "legacy_filename_note": "文件名 publication_clean_current.json 保留不变，尽管 publication_clean_layer_status 已为 abolished。原因：scripts/plotting/plot_provenance.py 把该路径白名单化并哈希绑定进已交付矢量包的 inputs，改名会击穿 validate_plot_artifact.py 对现行矢量包的校验。语义以本文件内 layer_architecture 为准。",
+  "independent_active_vector_packages": [
+    {
+      "figure_root": "data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector",
+      "status": "active_independent",
+      "note": "独立活跃的 meson_density 矢量包，不属于本轮正式层；仍受 validate_plot_artifact.py 校验。"
+    }
+  ]
 }
