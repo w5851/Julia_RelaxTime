@@ -46,7 +46,7 @@ end
 
 normalize_path(path::AbstractString) = replace(path, '\\' => '/')
 
-function parse_args(args::Vector{String})
+function parse_guard_args(args::Vector{String})
     staged = false
     base = nothing
     head = nothing
@@ -435,7 +435,7 @@ function collect_archive_advisories(root::AbstractString, policy::ArchivePolicy)
 end
 
 function main()
-    cfg = parse_args(ARGS)
+    cfg = parse_guard_args(ARGS)
     root = project_root()
 
     violations = collect_violations(root, cfg)

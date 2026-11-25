@@ -103,7 +103,7 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          python -m pytest -q -rs tests/unit/python/test_pnjl_raw_curve_archive.py tests/unit/python/test_phase_diagram_prd.py
+          python -m pytest -q -rs tests/unit/python/test_pnjl_raw_curve_archive.py tests/unit/python/test_active_vector_packages.py tests/unit/python/test_stage1_vector_delivery_e2e.py
 
   final-gate:
     name: Final test gate
