@@ -23,7 +23,6 @@ DECISION_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/author_r
 OUTPUT_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_preflight_v1.json")
 
 DELETE_FILES = [
-    Path("data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf"),
 ]
 
 DELETE_ROOTS = [

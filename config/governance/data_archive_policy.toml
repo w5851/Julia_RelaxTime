@@ -361,24 +361,6 @@ retired_before_commit = "c8c9ef20dadc6259a47aa18324b1a98db8b2069c"
 # Batch 3：存量收口登记（2026-11-23，45 条，按 path 字典序）
 # ---------------------------------------------------------------------------
 [[retained_archives]]
-path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_delivery_before_relocation.zip"
-sha256 = "c6d8ee6a18fd270e77cd4b8fd9772b6d80a0fbed568194273115d4a2bcdb8994"
-entry_count = 24
-status = "active"
-role = "pnjl_phase_diagram_figure_source"
-rationale = "Batch 3 登记收口（active）；按 path 字典序批量生成，sha256 与 entry_count 由脚本计算。"
-approved_at = "2026-11-23"
-
-[[retained_archives]]
-path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_png_case.zip"
-sha256 = "a7f78c26d9b89ebadd2a1652295a1dec2dd52ee86334c0b132c89c930f91476e"
-entry_count = 18
-status = "active"
-role = "pnjl_phase_diagram_figure_source"
-rationale = "Batch 3 登记收口（active）；按 path 字典序批量生成，sha256 与 entry_count 由脚本计算。"
-approved_at = "2026-11-23"
-
-[[retained_archives]]
 path = "data/outputs/results/relaxtime/analysis/charged_rpa_phase_backend/muB_sensitivity_retained_20261022/raw_outputs.zip"
 sha256 = "4fb264ca2391f70b639708649231ab06591d8a9d5854d51c2ae14c26840a1e5e"
 entry_count = 64
@@ -771,3 +753,34 @@ role = "ward_moller_validation_sources"
 rationale = "Batch 3 登记收口（active）；按 path 字典序批量生成，sha256 与 entry_count 由脚本计算。"
 approved_at = "2026-11-23"
 
+
+# ---------------------------------------------------------------------------
+# Stage 4.1：prd_v3 退役（2026-11-25）。两条 active provenance zip 迁入墓碑，
+# 随 figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008 整目录退役；
+# 该图已由 native_issue130_c2_20261125_vector 取代并完成论文切换。
+# ---------------------------------------------------------------------------
+[[retired_archives]]
+path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_delivery_before_relocation.zip"
+sha256 = "c6d8ee6a18fd270e77cd4b8fd9772b6d80a0fbed568194273115d4a2bcdb8994"
+entry_count = 24
+declared_commit = "698feaf8fada670fde81c93bab6093b50093935f"
+uncommitted_source = false
+snapshot_mtime = "2026-10-23"
+replacement = "git cat-file blob 1a0400a09406ff2d31aaf9de438e1a801f691c97 > accepted_delivery_before_relocation.zip（逐字节还原）"
+rationale = "prd_v3 相图整目录退役（Stage 4.1）；该 zip 为旧交付快照，已被 native_issue130_c2_20261125_vector 的正式矢量交付取代。"
+retired_at = "2026-11-25"
+git_blob = "1a0400a09406ff2d31aaf9de438e1a801f691c97"
+retired_before_commit = "29227810b73eada3fa7d66455300cd22455b400a"
+
+[[retired_archives]]
+path = "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1__prd_v3__pdf_20261008/provenance/accepted_png_case.zip"
+sha256 = "a7f78c26d9b89ebadd2a1652295a1dec2dd52ee86334c0b132c89c930f91476e"
+entry_count = 18
+declared_commit = "698feaf8fada670fde81c93bab6093b50093935f"
+uncommitted_source = false
+snapshot_mtime = "2026-10-23"
+replacement = "git cat-file blob 29a2c57007c2ced5131a86d497415ebc23f0f1dd > accepted_png_case.zip（逐字节还原）"
+rationale = "prd_v3 相图整目录退役（Stage 4.1）；该 zip 为旧 PNG 验收快照，已被 native_issue130_c2_20261124_stage1_png_review 与 20261125 矢量包取代。"
+retired_at = "2026-11-25"
+git_blob = "29a2c57007c2ced5131a86d497415ebc23f0f1dd"
+retired_before_commit = "29227810b73eada3fa7d66455300cd22455b400a"
