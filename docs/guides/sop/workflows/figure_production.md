@@ -181,5 +181,73 @@ python scripts/plotting/validate_plot_artifact.py path/to/plot_manifest.json
   exporter／validator 或 `--snapshot`，不能将旧包缺少新字段解释为已通过新合同。
 - 已接受包的存储迁移或资产清理须单独授权，保留原图谱／hash 并证明引用与记录可恢复。
 
+## 7. 正文准入与跨图处方一致性（强制）
+
+本节约束「图件进入论文」这一步。计算仓侧的图包合同只管单包自身一致，管不到
+论文仓里究竟放了什么图、这些图是否来自同一处方；下面四条补上这个断层。
+
+### 7.1 论文仓准入闸门
+
+论文 `.tex` 中每一条 `\includegraphics` 指向的图件，必须登记在论文仓的
+`figures_provenance.tsv` 并受其校验器检查：
+
+```powershell
+python scripts/check_figures_provenance.py                  # 日常：逐字节比对源交付件
+python scripts/check_figures_provenance.py --strict-release  # 投稿/送审/定稿前
+```
+
+未登记、未纳入版本控制、或与源交付件字节不一致的图件一律阻断定稿。登记行至少
+包含 `paper_path`、`repo_path`、`pdf_sha256`、`figure_ref`、`status`、
+`observable_group`、`calculation_sha`、`delivery_status` 与 `exception_reason`。
+
+### 7.2 草图与过渡状态的时限
+
+- `traced_via_script`（由讨论脚本从冻结数据生成、无同字节交付件）与未溯源状态
+  只允许存在于内部草稿阶段。
+- 进入期刊投稿、学位论文送盲审或终稿定版前，必须升级为 SOP `vector_delivery`
+  （`manuscript_eligible = true`），或由作者在 `exception_reason` 列书面登记豁免；
+  `--strict-release` 对未豁免的非 `vector_delivery` 图件直接失败。
+- 讨论类临时脚本（`review_revision_*`、`reader_examples` 等）只准产出带 `_draft`
+  后缀的图像，**不准产出没有 `plot_manifest.json` 伴随的裸 PDF**，也不准把它们的
+  输出直接拷进论文的 `figures/`。正文要用的图必须先走第 4、5 节的审阅与交付。
+
+### 7.3 跨图／跨表处方一致性
+
+同一 `observable_group` 下的多张图及关联数值表必须共享同一处方指纹
+（`calculation_sha` 或等价的 `prescription_id`）。校检器按 `observable_group`
+聚合 `calculation_sha`：一旦同一族出现两个以上指纹且没有 `exception_reason`，
+即判失败并列出冲突图件。
+
+刻意对照不同处方（例如 `cm` 与 `medium_moller`、不同变分匹配或不同谱积分网格）
+是可接受的，但必须在 `exception_reason` 写明对照意图。同一物理量在相邻图／表中
+给出定性不同结果而无人解释，属于必须修复的缺陷，不是风格问题。
+
+### 7.4 独立纵轴与刻度间距（第 4 节审阅补充项）
+
+- 多面板图使用 `sharey=False` 时，审阅者必须核对各面板的相对变化幅度与跨面板
+  纵轴量程之比。变化不足 1–2% 的近平台面板要给足最小物理跨度，避免视觉夸大
+  斜率；纵轴独立时在图注明示。
+- 相邻主刻度标签之间必须留出可读间距；标签快要相碰时改用「少主刻度 + 次刻度」
+  （例如 3 主刻度配 2 次刻度），而不是压缩字号。
+- 上述两条目前是**人工审阅项**：`plot_quality` 的自动检查覆盖文字重叠与图例压线，
+  尚未覆盖相邻刻度标签间距，也未覆盖「独立纵轴是否误导」。相关工具改动排入下一
+  次绘图批次（见 `docs/dev/backlog/2026-11-25_绘图校验器规则补强待办.md`）。
+
+### 7.5 现行工具约定（在工具演进前按此执行）
+
+- **单色 + 填充编码**：在 `SeriesStyle` 支持 `markerfacecolor` 之前，允许把连线与
+  二元状态标记拆成两个 `SeriesStyle` ID 注册（例如 `..._line` 与 `..._point`），
+  并在 manifest 的 `accessibility` 节声明空心／实心各自的非色含义。
+- **SOP 快照早失败**：跑 `png_review` 就必须提供 `--review-results-dir`（或由脚本
+  自动定位同级 `results/` 目录写入 `figure_production_snapshot.md`）。缺失时应在
+  出图前报错退出，不得拖到 `--deliver-vector` 才以
+  `PNG/vector frozen input contents or roles changed` 暴露。
+- **禁止局部修补旧签收记录**：签收后若改动任何图面参数（轴范围、刻度、字号）或
+  数据，必须重新产出干净 `png_review` 并重新出具完整的 `plot_png_acceptance_v1`；
+  不得手工编辑旧签收 JSON 的局部字段或路径。
+- **不得把审计工具代码锁进历史产物的输入哈希**：历史包应绑定冻结快照，否则每次
+  升级校验规则都会反噬已签收包。新脚本把 `scripts/plotting/*` 列入 `inputs` 时，
+  须确认该文件的演进不会影响历史核验路径。
+
 图族专用规则：[输运案例](../../../analysis/relaxtime/phase_guided_transport/plotting_case_contract.md)、
 [PNJL 三维相图案例](../../../analysis/pnjl/phase_surface_series/plotting_case_contract.md)。

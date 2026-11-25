@@ -44,7 +44,7 @@ def test_pointer_declares_a_two_tier_formal_layer() -> None:
 def test_active_vector_manifests_exist() -> None:
     manifests = _active_package_manifests()
 
-    assert len(manifests) == 5
+    assert len(manifests) == 6
     for manifest in manifests:
         assert manifest.is_file(), f"missing active vector manifest: {manifest}"
 

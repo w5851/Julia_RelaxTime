@@ -82,6 +82,12 @@
       "figure_root": "data/outputs/figures/relaxtime/meson_density/freezeout_experiment_20261108_vector",
       "status": "active_independent",
       "note": "独立活跃的 meson_density 矢量包，不属于本轮正式层；仍受 validate_plot_artifact.py 校验。"
+    },
+    {
+      "figure_root": "data/outputs/figures/xjtu_thesis/chapter3_pion_mass_slices/pion_mass_slices_20261125_vector",
+      "status": "active_thesis_figure",
+      "scope": "thesis Fig. 3-3: pion pole mass at T=180/200/220 MeV (pion_mass_slices)",
+      "plot_manifest_sha256": "49f8f317d1a0398c4bc03a08f65de839ccff67efdc637980981f59bbdef8feeb"
     }
   ]
 }
