@@ -1,0 +1,39 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "我已审阅八张新图（C2 相图、两张 T–μB 带、π/K 谱、弛豫时间、输运系数、固定温度扫描、Mott 机制图），可以正式接受并完成矢量交付。",
+  "accepted_at": "2026-11-25",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 1408131,
+    "sha256": "7a00760e6b0254a3bb6010d0ee86d81468c149671520cfd0478ed0c701fb97fe"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/mott_transport_mechanism.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 700248,
+    "sha256": "57da81f3c6ce6a4948e00ff554485455b910076cd71a10bf29dc90b4cc562042",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        4770
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        7.950015900031801
+      ]
+    },
+    "role": "color_review"
+  },
+  "accepted_figure_id": "ward_moller_mott_transport_mechanism"
+}

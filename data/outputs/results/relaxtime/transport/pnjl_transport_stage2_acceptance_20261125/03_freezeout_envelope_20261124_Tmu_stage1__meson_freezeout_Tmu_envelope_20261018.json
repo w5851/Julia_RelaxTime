@@ -1,0 +1,38 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "我已审阅八张新图（C2 相图、两张 T–μB 带、π/K 谱、弛豫时间、输运系数、固定温度扫描、Mott 机制图），可以正式接受并完成矢量交付。",
+  "accepted_at": "2026-11-25",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261124_Tmu_stage1_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 26799,
+    "sha256": "99c2419a31923a6020b66d1c69d53a87439c5292eb05366454609312fd7deb2b"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261124_Tmu_stage1_png_review/chemical_freezeout_T_muB_band.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 445698,
+    "sha256": "ddf86152f1a565daecfd182a6dc536cae80ce4b31cdd05e961a9d1a66b9783d3",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        2760
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        4.6000092000184
+      ]
+    },
+    "role": "color_review"
+  }
+}

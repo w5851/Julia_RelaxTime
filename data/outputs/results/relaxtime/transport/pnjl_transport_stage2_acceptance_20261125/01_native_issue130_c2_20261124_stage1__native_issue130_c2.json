@@ -1,0 +1,38 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "我已审阅八张新图（C2 相图、两张 T–μB 带、π/K 谱、弛豫时间、输运系数、固定温度扫描、Mott 机制图），可以正式接受并完成矢量交付。",
+  "accepted_at": "2026-11-25",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/pnjl/phase_diagram/native_issue130_c2_20261124_stage1_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 109793,
+    "sha256": "e09b19ba03d8b04009958875d1f8321ac91cf6714352556c2dac3fb9cefad968"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/pnjl/phase_diagram/native_issue130_c2_20261124_stage1_png_review/phase_diagram_TmuB_Trho.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 517206,
+    "sha256": "6bb56b7f4df4d1df36e6f9aef1a372e950ef2e38768127b2d4429d91876c59b2",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        2100
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        3.5000070000140004
+      ]
+    },
+    "role": "color_review"
+  }
+}
