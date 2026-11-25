@@ -135,18 +135,17 @@ def main() -> None:
     parser.add_argument("--results", type=Path, required=True,
                         help="ward_moller_sphere case holding spectra.csv")
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--review-results-dir", type=Path,
-                        help="Case results directory for the frozen SOP snapshot")
+    parser.add_argument("--review-results-dir", type=Path, required=True,
+                        help="Case results directory for the frozen SOP snapshot (required: the "
+                             "snapshot must exist before the first PNG is written)")
     add_vector_arguments(parser, multiple=False)
     args = parser.parse_args()
 
     out, meta = args.out.resolve(), args.results.resolve()
-    results = args.review_results_dir.resolve() if args.review_results_dir else None
-    require_fresh_case(out, *([results] if results else []))
+    results = args.review_results_dir.resolve()
+    require_fresh_case(out, results)
     acceptance = None
     if args.deliver_vector:
-        if results is None:
-            parser.error("vector delivery requires --review-results-dir for the new SOP snapshot")
         acceptance = read_accepted_review(args.acceptance, root=ROOT, generator=Path(__file__))
         if acceptance.record["asset_id"] != STEM:
             parser.error(f"--acceptance is for {acceptance.record['asset_id']}, expected {STEM}")
@@ -167,8 +166,7 @@ def main() -> None:
         "publication_review", "plot_style", "plot_series", "plot_manifest", "plot_quality",
         "plot_provenance", "plot_bundle", "plot_accessibility", "plot_delivery",
         "review_vector_delivery", "validate_plot_artifact"))
-    if results is not None:
-        inputs.append((write_sop_snapshot(results), "production figure SOP snapshot, LF as in Git"))
+    inputs.append((write_sop_snapshot(results), "production figure SOP snapshot, LF as in Git"))
 
     fig = render(slices, profile)
     for artist in fig.findobj(match=Text):

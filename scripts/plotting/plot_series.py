@@ -16,6 +16,7 @@ class SeriesStyle:
     color: str
     linestyle: str = "-"
     marker: str = ""
+    markerfacecolor: str | None = None
 
     def __post_init__(self) -> None:
         from matplotlib.colors import to_hex, to_rgba

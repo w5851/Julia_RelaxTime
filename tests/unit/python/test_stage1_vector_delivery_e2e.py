@@ -1,5 +1,24 @@
 """Exercise all Stage 1 renderers through the hash-bound two-stage CLI."""
 
+def _times_new_roman_available() -> bool:
+    """The rendering profile needs the manuscript serif; Linux CI lacks it."""
+    from matplotlib import font_manager
+
+    try:
+        font_manager.findfont("Times New Roman", fallback_to_default=False)
+        return True
+    except Exception:
+        return False
+
+
+import pytest as _pytest  # noqa: E402  (module-level skip marker)
+
+_pytestmark = _pytest.mark.skipif(
+    not _times_new_roman_available(),
+    reason="module-level skip: Times New Roman is unavailable, so the rendering profile cannot run",
+)
+
+
 import json
 from pathlib import Path
 import shutil
