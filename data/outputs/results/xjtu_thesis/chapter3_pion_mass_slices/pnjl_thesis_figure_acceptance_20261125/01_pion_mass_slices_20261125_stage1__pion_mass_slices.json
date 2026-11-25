@@ -1,0 +1,38 @@
+{
+  "schema": "plot_png_acceptance_v1",
+  "status": "author_accepted",
+  "pdf_export_authorized": true,
+  "author_instruction": "OK，顺便拿目前SOP问问Gemini，看看目前这个图像问题是否要上升到SOP的改进，图我已经签收了",
+  "accepted_at": "2026-11-25",
+  "accepted_manifest": {
+    "path": "data/outputs/figures/xjtu_thesis/chapter3_pion_mass_slices/pion_mass_slices_20261125_stage1_png_review/plot_manifest.json",
+    "path_kind": "repository_relative",
+    "role": "accepted_png_manifest",
+    "bytes": 26380,
+    "sha256": "3468cd79e69eb1103dc2c2c828da8b57d95d0c0828a00dffabbe3ae44536e58c"
+  },
+  "accepted_png": {
+    "path": "data/outputs/figures/xjtu_thesis/chapter3_pion_mass_slices/pion_mass_slices_20261125_stage1_png_review/pion_mass_slices.png",
+    "path_kind": "repository_relative",
+    "format": "png",
+    "dpi": 600,
+    "vector": false,
+    "bytes": 195372,
+    "sha256": "817f49bececa3672494ad0db4aada4f33cfd84d07d3dd628595567269cfad2f1",
+    "inspection": {
+      "size_pixels": [
+        4050,
+        1530
+      ],
+      "actual_dpi": [
+        599.9988,
+        599.9988
+      ],
+      "physical_size_inches": [
+        6.750013500027,
+        2.5500051000102
+      ]
+    },
+    "role": "color_review"
+  }
+}
