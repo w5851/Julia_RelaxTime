@@ -4484,8 +4484,8 @@
   "external_layout": null,
   "delivery_stage": "vector_delivery",
   "vector_delivery_pending": false,
-  "manuscript_eligible": false,
-  "current_publication_layer": false,
+  "manuscript_eligible": true,
+  "current_publication_layer": true,
   "author_review": {
     "status": "author_accepted_png",
     "record": {

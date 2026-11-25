@@ -12,10 +12,13 @@
 [冻结数值与复算说明](../../../../data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/README.md)
 及[图件清单](../../../../data/outputs/figures/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1/plot_manifest.json)。
 
-当前正式图层为 **publication_clean_v15**，唯一选择入口是
+当前正式层为 **Møller 口径全网格 + 论文矢量交付**（两级制）。唯一选择入口是
 [current](publication_clean_current.json)。
-[v15 正式交付](../../../../data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/README.md)
-包含 76 张 PDF，直接引用已接受的 76 张彩色和 76 张灰度 PNG。
+独立的 `publication-clean` 图层概念已于 2026-11-25 废止：它只在早期数值精度不足时成立，
+而 `ward_moller_sphere_20261121_v1` 已提供精度达标的 1867 点全网格。
+旧 `publication_clean_v15`（cm 口径）与 `publication_clean_v14` 已随该废止令退役，
+历史可由 commit `f4b9aa0b` 追溯。
+[current](publication_clean_current.json)。
 该接受记录保留为历史；当前稿件审阅采用上面的 Ward/Møller 候选。
 正文的科学解释与审阅状态由论文的 `writing_package/00_status.md` 管理。
 
@@ -28,24 +31,16 @@
 - 计算、验收与研究边界：[统一状态](../threshold_cache_upgrade_20261021_analysis/production_plan_20261023.md)。
 - π、K、η、σ 的局部结构：[Mott 分析](../threshold_cache_upgrade_20261021_analysis/mott_local_bumps_20261028.md)。
 
-## 诊断图入口
+## 诊断图入口（2026-11-25 退役）
 
-`figures/relaxtime/transport/phase_guided/` 现在只放 v15 正式图层及它仍读取的 v14 版式 manifest。
-局部诊断集中在 [transport/diagnostics](../../../../data/outputs/figures/relaxtime/transport/diagnostics/)，
-对应图注、源码和审阅记录位于 `results/relaxtime/transport/diagnostics/`。
+`figures/` 与 `results/` 下的 `relaxtime/transport/diagnostics` 整目录（约 59.9 MB：eta_refinement、
+mott_slopes、sigma_spectrum、sigma_checks、sigma_curvature、sigma_asymptotics、sampling_anomalies）
+已随 publication-clean 层废止一并退役。需要考古时按 commit `f4b9aa0b` 取回：
 
-| 目录 | 保留内容与用途 |
-| --- | --- |
-| [eta_refinement](../../../../data/outputs/figures/relaxtime/transport/diagnostics/eta_refinement/) | η 最终加密与同端点精度对照，12 张 PNG |
-| [mott_slopes](../../../../data/outputs/results/relaxtime/transport/diagnostics/mott_slopes/README.md) | π、K、σ 等 13 个窗口、5 个输运量的完整参考，130 张 PNG |
-| [sigma_spectrum](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_spectrum/) | σ 完整截面近阈谱，2 张 PNG |
-| [sigma_checks](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_checks/) | 连续热权重、峰贡献和离散边界对照，4 张 PNG |
-| [sigma_curvature](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_curvature/) | 完整 τ 的有限窗口对数差商，2 张 PNG；不作极限幂律认证 |
-| [sigma_asymptotics](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sigma_asymptotics/) | σ 连续近阈局部积分的左右渐近、系数及误差，6 张 PNG |
-| [sampling_anomalies](../../../../data/outputs/figures/relaxtime/transport/diagnostics/sampling_anomalies/) | 早期采样误差的受控对照，2 张 PNG、2 张 PDF；不作为现行数值预测 |
-
-诊断图不因整理而获得论文使用资格。σ 的局部积分左侧支持 `h^(-1/2)`，右侧支持已分辨的对数段；
-这仍不是完整输运系数二阶导数的认证。正式数值和当前出版指针沿用上节。
+```bash
+git checkout f4b9aa0b -- data/outputs/figures/relaxtime/transport/diagnostics
+git checkout f4b9aa0b -- data/outputs/results/relaxtime/transport/diagnostics
+```
 
 2026-11-06 退役 8 组已被完整参考或新布局替代的中间图：η 初轮 fine、other-Mott 的
 pilot/pilot_precision/main_grid、σ 谱 v1、σ 渐近 v1–v3。共移除 251 个图件及配套文件（约 45 MiB），

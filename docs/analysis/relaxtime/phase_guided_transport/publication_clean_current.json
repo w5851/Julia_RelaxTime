@@ -1,47 +1,79 @@
 {
   "schema": "phase_guided_transport_publication_clean_current_v1",
-  "status": "author_accepted_formal_publication_figure_layer",
-  "updated_at": "2026-11-05T10:02:01.858006+00:00",
-  "current_analysis_package": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf",
-  "current_public_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf",
-  "current_figure_layer": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf",
-  "current_numerical_root": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/returned/grid",
-  "formalization_record": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/formalization.json",
-  "formalization_record_sha256": "cddcbe2be3922388475f2c437e03549a5b4ea481f0776437bf1a4c1f2a077679",
-  "plot_manifest_sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959",
-  "public_plot_manifest_sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959",
-  "numerical_promotion_record": "data/outputs/results/relaxtime/transport/threshold_cache_upgrade_20261021/full_rs_eta_augmented_20261029_v1/formal_promotion_v1/promotion.json",
-  "numerical_promotion_record_sha256": "08c39415a79b34031550ded0e21d816e26a28958dbac426569e667adb074e1f4",
-  "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
-  "manuscript_eligible": true,
-  "numerical_status": "formal_full_rs_eta_augmented_transport",
-  "figure_status": "author_accepted_formal_raw_layout",
-  "manuscript_eligibility_scope": "full_rs_1867_point_eta_augmented_grid_and_publication_clean_v15",
-  "raw_numerical_status": "formal_production",
-  "raw_manuscript_eligible": true,
-  "convergence_gate_status": "qualified_layers_joint_representatives_and_audited_full_grid",
-  "convergence_claim": true,
-  "convergence_claim_scope": "Existing layer and representative targets, complete-grid validity, and selected local Mott integral checks; no universal all-point error bound.",
-  "global_phase_diagram_certified": false,
-  "numerical_postprocessing": "explicit selection of computed values; no smoothing or interpolation",
-  "superseded_publication_layer": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf",
-  "superseded_intermediate": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v13_pdf",
-  "previous_pointer": {
-    "path": "data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/previous_state/publication_clean_current.json",
-    "path_kind": "repository_relative",
-    "role": "preserved_pre_promotion_selection",
-    "bytes": 2744,
-    "sha256": "48915f56f04e0ab52e7c30f9a543848dfa04c53a531e94fb0fb14e6d4f8069b3"
+  "status": "author_accepted_formal_layer",
+  "updated_at": "2026-11-25T08:21:17+00:00",
+  "layer_architecture": {
+    "model": "two_tier_frozen_numerical_to_manuscript_vector",
+    "publication_clean_layer_status": "abolished",
+    "abolition_reason": "The intermediate 76-figure publication-clean layer existed only when earlier numerical precision was insufficient. ward_moller_sphere_20261121_v1 now provides an accepted 1867-point full grid, and the 73 per-panel figures of that layer have zero manuscript citations."
   },
-  "manuscript_consumer": "Historical v15 acceptance; the current pnjl_aniso_transport review uses the Ward/Moller candidate below",
-  "current_manuscript_review": {
-    "status": "agent_review",
-    "author_accepted": false,
-    "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
+  "current_numerical_layer": {
+    "root": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1",
+    "numerical_manifest": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
+    "numerical_manifest_sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42",
+    "promotion_record": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/formal_promotion_v1/promotion.json",
+    "promotion_record_sha256": "c1713a46fe7168e9825db3ae9dc9f8d6d061d7e2db02c01be60e2221a811e2f7",
     "profile": "ward_moller_sphere_v1",
-    "numerical_root": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1",
-    "figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261121_v1",
-    "figure_stage": "png_review",
-    "manuscript": "D:/Desktop/paper/My_Paper/pnjl_aniso_transport"
+    "relative_velocity_convention": "medium_moller",
+    "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
+    "source_background_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "frozen_transport_points": 1867,
+    "full_grid_failures": 0,
+    "full_grid_missing": 0,
+    "raw_manuscript_eligible": true,
+    "auxiliary_mott_threshold_root": "data/outputs/results/relaxtime/transport/mott_threshold/ward_moller_manuscript_20261121_v1"
+  },
+  "current_manuscript_figures": {
+    "figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector",
+    "analysis_package": "data/outputs/results/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector",
+    "plot_manifest_sha256": "8b6933ed7d3cc7faf0d297354e30b8e20b17d8fa9870953fa3491675ba0d3925",
+    "delivery_stage": "vector_delivery",
+    "manuscript_eligible": true,
+    "scope": "5 manuscript transport figures (Fig. 2-6; pion_kaon_spectra shared with thesis Ch. 3)",
+    "additional_packages": [
+      {
+        "figure_root": "data/outputs/figures/pnjl/phase_diagram/native_issue130_c2_20261125_vector",
+        "plot_manifest_sha256": "43fa9bf35973f95d297af2861a4701fc3456b65327020f2d3223b478de6fd86e",
+        "delivery_stage": "vector_delivery",
+        "manuscript_eligible": true,
+        "scope": "C2 phase diagram (transport paper Fig. 1)"
+      },
+      {
+        "figure_root": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261125_Tmu_vector",
+        "plot_manifest_sha256": "a995c6cfc6d2c6154a828c14eb59d16237a44a1f4eab96088a6c525f74abc4e8",
+        "delivery_stage": "vector_delivery",
+        "manuscript_eligible": true,
+        "scope": "Andronic T-muB freezeout band (thesis Fig. 4.7 source)"
+      },
+      {
+        "figure_root": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261125_Tmu_vector",
+        "plot_manifest_sha256": "2690cba61440ea4db821139ccf95e4f40c996fd48fdadd847cde92d41153c9b5",
+        "delivery_stage": "vector_delivery",
+        "manuscript_eligible": true,
+        "scope": "Polynomial T-muB freezeout band (thesis Fig. 4.6 source)"
+      }
+    ]
+  },
+  "retired_publication_clean_layers": {
+    "v15_cm_layer": {
+      "status": "retired_in_git_history",
+      "relative_velocity_convention": "cm",
+      "calculation_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+      "former_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf",
+      "former_png_review_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review",
+      "former_plot_manifest_sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959",
+      "recoverable_from_git_commit": "f4b9aa0b",
+      "retirement_reason": "Abolition of the independent publication-clean layer; v15 used the obsolete cm convention with detail issues and its 73 per-panel figures had zero manuscript citations."
+    },
+    "v14_layer": {
+      "status": "retired_in_git_history",
+      "former_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf",
+      "recoverable_from_git_commit": "f4b9aa0b"
+    }
+  },
+  "supersession": {
+    "replaces_cm_layer": "publication_clean_v15_pdf (cm convention)",
+    "replaced_by": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector",
+    "permanent_red_line": "data/inputs/relaxtime/transport/frozen_v15_20261121/"
   }
 }

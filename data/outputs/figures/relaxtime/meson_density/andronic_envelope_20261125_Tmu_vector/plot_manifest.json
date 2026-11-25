@@ -805,8 +805,8 @@
   },
   "external_layout": null,
   "delivery_stage": "vector_delivery",
-  "manuscript_eligible": false,
-  "current_publication_layer": false,
+  "manuscript_eligible": true,
+  "current_publication_layer": true,
   "vector_delivery_pending": false,
   "caption": {
     "path": "data/outputs/results/relaxtime/meson_density/andronic_envelope_20261125_Tmu_vector/caption.md",

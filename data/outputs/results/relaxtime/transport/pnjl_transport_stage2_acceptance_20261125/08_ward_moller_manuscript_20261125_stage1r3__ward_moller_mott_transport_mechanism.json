@@ -12,7 +12,7 @@
     "sha256": "d38cc2d695b3976d060279f8b417906d35a8bab1ff4c4da70659b6b772730b5b"
   },
   "accepted_png": {
-    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/mott_transport_mechanism.png",
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r3_png_review/mott_transport_mechanism.png",
     "path_kind": "repository_relative",
     "format": "png",
     "dpi": 600,

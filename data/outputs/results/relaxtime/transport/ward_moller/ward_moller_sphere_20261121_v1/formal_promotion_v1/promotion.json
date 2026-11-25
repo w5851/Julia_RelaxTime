@@ -1,0 +1,67 @@
+{
+  "schema": "formal_layer_promotion_v1",
+  "status": "author_accepted_formal_layer",
+  "promoted_at": "2026-11-25T08:18:38+00:00",
+  "author_instruction": "同意这个裁定",
+  "author_instruction_scope": "同意 2026-11-25 的 publication-clean 层废止裁定：① 废止独立 publication-clean 图层概念并退役 v15（cm）与 v14 图形层；② 将 ward_moller_sphere_20261121_v1 升为现行正式数值层；③ 将 4 个 Stage 3 矢量包置 manuscript_eligible=true；④ 授权原地更新 publication_clean_current.json。",
+  "layer_architecture": {
+    "model": "two_tier_frozen_numerical_to_manuscript_vector",
+    "publication_clean_layer_status": "abolished",
+    "abolition_reason": "中间 76 图 publication-clean 层只在早期数值精度不足时成立；ward_moller_sphere_20261121_v1 已提供精度达标的 1867 点全网格，且三篇论文零引用那 73 张逐面板单图。"
+  },
+  "numerical_layer": {
+    "root": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1",
+    "numerical_manifest": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/numerical_manifest.json",
+    "numerical_manifest_sha256": "409480c09e900d95a875cdc849c31b002b36e60a052c4b4dc76e28c5706eec42",
+    "numerical_manifest_modified": false,
+    "profile": "ward_moller_sphere_v1",
+    "relative_velocity_convention": "medium_moller",
+    "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
+    "source_background_sha": "2e5c411c716d5cbc524c3fc6cfb335fe05b39444",
+    "frozen_transport_points": 1867,
+    "full_grid_failures": 0,
+    "full_grid_missing": 0,
+    "previously_agent_review_only": true
+  },
+  "manuscript_figure_layer": [
+    {
+      "plot_manifest": "data/outputs/figures/pnjl/phase_diagram/native_issue130_c2_20261125_vector/plot_manifest.json",
+      "plot_manifest_sha256": "43fa9bf35973f95d297af2861a4701fc3456b65327020f2d3223b478de6fd86e",
+      "kind": "single",
+      "manuscript_eligible": true
+    },
+    {
+      "plot_manifest": "data/outputs/figures/relaxtime/meson_density/andronic_envelope_20261125_Tmu_vector/plot_manifest.json",
+      "plot_manifest_sha256": "a995c6cfc6d2c6154a828c14eb59d16237a44a1f4eab96088a6c525f74abc4e8",
+      "kind": "single",
+      "manuscript_eligible": true
+    },
+    {
+      "plot_manifest": "data/outputs/figures/relaxtime/meson_density/freezeout_envelope_20261125_Tmu_vector/plot_manifest.json",
+      "plot_manifest_sha256": "2690cba61440ea4db821139ccf95e4f40c996fd48fdadd847cde92d41153c9b5",
+      "kind": "single",
+      "manuscript_eligible": true
+    },
+    {
+      "plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/plot_manifest.json",
+      "plot_manifest_sha256": "75735097dedf45ca3036edf7d2d7159276a33916f950b733aa3acabe2948ef79",
+      "kind": "bundle",
+      "manuscript_eligible": true
+    }
+  ],
+  "supersedes": {
+    "v15_cm_layer": {
+      "status": "retired_in_git_history",
+      "relative_velocity_convention": "cm",
+      "former_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf",
+      "former_png_review_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review",
+      "former_plot_manifest_sha256": "1dbedb65ffabaa1b53ca1af730b1d80dd0f4e4d67d75e49882a076cb1daa1959",
+      "retirement_reason": "废止独立 publication-clean 层；v15 采用已过时的 cm 约定且细节存在问题，其 73 张逐面板单图零论文引用。"
+    },
+    "v14_layer": {
+      "status": "retired_in_git_history",
+      "former_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf"
+    }
+  },
+  "permanent_red_line": "data/inputs/relaxtime/transport/frozen_v15_20261121/ 不随本次退役变动"
+}
