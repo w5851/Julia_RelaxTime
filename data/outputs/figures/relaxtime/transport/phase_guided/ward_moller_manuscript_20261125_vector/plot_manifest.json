@@ -1,12 +1,12 @@
 {
   "schema_version": "plot_manifest_bundle_v1",
   "package": {
-    "case": "ward_moller_manuscript_20261125_stage1r2_png_review"
+    "case": "ward_moller_manuscript_20261125_vector"
   },
   "shared": {
     "schema_version": "plot_manifest_v1",
     "figure_family": "pnjl_transport_manuscript",
-    "case_slug": "ward_moller_manuscript_20261125_stage1r2_png_review",
+    "case_slug": "ward_moller_manuscript_20261125_vector",
     "asset_kind": "figure",
     "figure_mode": "audit",
     "semantic_status": "new_prescription_computed_samples",
@@ -16,7 +16,7 @@
       "path": "scripts/analysis/relaxtime/plot_ward_moller_manuscript.py",
       "path_kind": "repository_relative",
       "sha256": "de9cadd08596b17378087d31e569b1833872dc406c2d6e47a7d3c829982ea444",
-      "command": "scripts/analysis/relaxtime/plot_ward_moller_manuscript.py --results data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1 --out data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review --kind all",
+      "command": "scripts/analysis/relaxtime/plot_ward_moller_manuscript.py --results data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1 --out data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector --kind all --deliver-vector --review-results-dir data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector --acceptance data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/04_ward_moller_manuscript_20261125_stage1r3__ward_moller_pion_kaon_spectra.json --acceptance data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/05_ward_moller_manuscript_20261125_stage1r3__ward_moller_relaxation_times.json --acceptance data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/06_ward_moller_manuscript_20261125_stage1r3__ward_moller_transport_coefficients.json --acceptance data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/07_ward_moller_manuscript_20261125_stage1r3__ward_moller_transport_fixed_T.json --acceptance data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/08_ward_moller_manuscript_20261125_stage1r3__ward_moller_mott_transport_mechanism.json",
       "runtime": {
         "python": "3.13.2",
         "platform": "Windows-11-10.0.26300-SP0",
@@ -24,7 +24,7 @@
         "matplotlib": "3.10.1"
       }
     },
-    "git_commit": "3eb0dda48d30e1c653db2f1245db34a59fcab8c7",
+    "git_commit": "9e46a4f42e3d6ca8d0c711b26520a535474f0a25",
     "calculation_sha": "2465c05d24d07c9c1c34949502e7243c4294bf15",
     "postprocess_sha": null,
     "source_run_id": null,
@@ -35,13 +35,14 @@
       "finite": true,
       "duplicate_keys": true,
       "support": true,
-      "strict_gate": false
+      "strict_gate": false,
+      "png_rerender_byte_identical": true
     },
     "external_layout": null,
     "manuscript_eligible": false,
     "current_publication_layer": false,
-    "delivery_stage": "png_review",
-    "vector_delivery_pending": true,
+    "delivery_stage": "vector_delivery",
+    "vector_delivery_pending": false,
     "solver_called": false,
     "canonical_data_modified": false
   },
@@ -53,7 +54,7 @@
         "asset_id": "ward_moller_pion_kaon_spectra"
       },
       "record": {
-        "generated_at_utc": "2026-11-25T04:16:50.312331+00:00",
+        "generated_at_utc": "2026-11-25T06:10:14.097504+00:00",
         "asset_id": "ward_moller_pion_kaon_spectra",
         "inputs": [
           {
@@ -153,6 +154,13 @@
             "role": "plotting helper",
             "bytes": 37748,
             "sha256": "eaad1c860856c3a3dea96fc527b9aa42ee1a5468b488fff2acef91297b06bdbd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector/figure_production_snapshot.md",
+            "path_kind": "repository_relative",
+            "role": "production figure SOP snapshot, LF as in Git",
+            "bytes": 15016,
+            "sha256": "cf1ca9fb3f9a100888ada8c451a98c8f8922ae3159c48a9e436be7ad64f32b0a"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/spectra.csv",
@@ -4280,7 +4288,7 @@
         "selection_rule": "pi/K at zero density; xi=-0.3,0,0.3; 201 computed temperatures; direct Mott roots",
         "outputs": [
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/pion_kaon_spectra.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/pion_kaon_spectra.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -4304,7 +4312,7 @@
             "role": "color_review"
           },
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/pion_kaon_spectra_gray.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/pion_kaon_spectra_gray.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -4327,6 +4335,31 @@
             },
             "role": "grayscale_review",
             "source_color_sha256": "7ff6aeae9f142c33b251af54759a17fadcb10c4b022695c285458cdd46019262"
+          },
+          {
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/pion_kaon_spectra.pdf",
+            "path_kind": "repository_relative",
+            "format": "pdf",
+            "dpi": null,
+            "vector": true,
+            "bytes": 62719,
+            "sha256": "efdd1af0d06d45fc9ef0ac1a01801ef469c36b87505b244c63ecfa3f41e2b858",
+            "inspection": {
+              "physical_size_inches": [
+                6.75,
+                4.199999999999999
+              ],
+              "page_count": 1,
+              "raster_image_count": 0,
+              "font_count": 3,
+              "fonts_embedded": true,
+              "type3_font_count": 0,
+              "inspection_tools": [
+                "pdfinfo",
+                "pdfimages -list",
+                "pdffonts"
+              ]
+            }
           }
         ],
         "rendering": {
@@ -4759,8 +4792,8 @@
           ],
           "legend_outside": false,
           "color_route": "color_print_and_online",
-          "delivery_stage": "png_review",
-          "vector_delivery_pending": true,
+          "delivery_stage": "vector_delivery",
+          "vector_delivery_pending": false,
           "review_contract": "prd_review_v1",
           "accessibility": {
             "schema": "plot_accessibility_v1",
@@ -4948,6 +4981,20 @@
             "fallback_used": false,
             "missing_candidates": [],
             "mathtext_fontset": "stix"
+          },
+          "output_formats": [
+            "png",
+            "pdf"
+          ]
+        },
+        "author_review": {
+          "status": "author_accepted_png",
+          "record": {
+            "path": "data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/04_ward_moller_manuscript_20261125_stage1r3__ward_moller_pion_kaon_spectra.json",
+            "path_kind": "repository_relative",
+            "role": "author_png_acceptance",
+            "bytes": 1394,
+            "sha256": "1bb5e5443b1b009362ba6c882f56418d76cfbe3e3f72297c938e049640ca94dc"
           }
         }
       }
@@ -4959,7 +5006,7 @@
         "asset_id": "ward_moller_relaxation_times"
       },
       "record": {
-        "generated_at_utc": "2026-11-25T04:17:22.525991+00:00",
+        "generated_at_utc": "2026-11-25T06:10:35.671734+00:00",
         "asset_id": "ward_moller_relaxation_times",
         "inputs": [
           {
@@ -5059,6 +5106,13 @@
             "role": "plotting helper",
             "bytes": 37748,
             "sha256": "eaad1c860856c3a3dea96fc527b9aa42ee1a5468b488fff2acef91297b06bdbd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector/figure_production_snapshot.md",
+            "path_kind": "repository_relative",
+            "role": "production figure SOP snapshot, LF as in Git",
+            "bytes": 15016,
+            "sha256": "cf1ca9fb3f9a100888ada8c451a98c8f8922ae3159c48a9e436be7ad64f32b0a"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
@@ -13724,7 +13778,7 @@
         "selection_rule": "original published scan points, recomputed with Ward A, Moller flux and sphere-averaged linear B0",
         "outputs": [
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/relaxation_times.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/relaxation_times.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -13748,7 +13802,7 @@
             "role": "color_review"
           },
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/relaxation_times_gray.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/relaxation_times_gray.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -13771,6 +13825,31 @@
             },
             "role": "grayscale_review",
             "source_color_sha256": "4d3e507813e65e2111b58484a6328da57b42bf07e0cb7343652fdb920d286eb9"
+          },
+          {
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/relaxation_times.pdf",
+            "path_kind": "repository_relative",
+            "format": "pdf",
+            "dpi": null,
+            "vector": true,
+            "bytes": 70933,
+            "sha256": "75072673451d3ae95d7c425f2606112185a3b15ae1f800d8b4d02580ed437090",
+            "inspection": {
+              "physical_size_inches": [
+                6.75,
+                7.1
+              ],
+              "page_count": 1,
+              "raster_image_count": 0,
+              "font_count": 3,
+              "fonts_embedded": true,
+              "type3_font_count": 0,
+              "inspection_tools": [
+                "pdfinfo",
+                "pdfimages -list",
+                "pdffonts"
+              ]
+            }
           }
         ],
         "rendering": {
@@ -14489,8 +14568,8 @@
           ],
           "legend_outside": false,
           "color_route": "color_print_and_online",
-          "delivery_stage": "png_review",
-          "vector_delivery_pending": true,
+          "delivery_stage": "vector_delivery",
+          "vector_delivery_pending": false,
           "review_contract": "prd_review_v1",
           "accessibility": {
             "schema": "plot_accessibility_v1",
@@ -23383,6 +23462,20 @@
             "fallback_used": false,
             "missing_candidates": [],
             "mathtext_fontset": "stix"
+          },
+          "output_formats": [
+            "png",
+            "pdf"
+          ]
+        },
+        "author_review": {
+          "status": "author_accepted_png",
+          "record": {
+            "path": "data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/05_ward_moller_manuscript_20261125_stage1r3__ward_moller_relaxation_times.json",
+            "path_kind": "repository_relative",
+            "role": "author_png_acceptance",
+            "bytes": 1391,
+            "sha256": "50cc117e181d2b42529548f4858e21eec057d13b9d78e529466655a7a935ae0d"
           }
         }
       }
@@ -23394,7 +23487,7 @@
         "asset_id": "ward_moller_transport_coefficients"
       },
       "record": {
-        "generated_at_utc": "2026-11-25T04:18:27.545859+00:00",
+        "generated_at_utc": "2026-11-25T06:11:58.784365+00:00",
         "asset_id": "ward_moller_transport_coefficients",
         "inputs": [
           {
@@ -23494,6 +23587,13 @@
             "role": "plotting helper",
             "bytes": 37748,
             "sha256": "eaad1c860856c3a3dea96fc527b9aa42ee1a5468b488fff2acef91297b06bdbd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector/figure_production_snapshot.md",
+            "path_kind": "repository_relative",
+            "role": "production figure SOP snapshot, LF as in Git",
+            "bytes": 15016,
+            "sha256": "cf1ca9fb3f9a100888ada8c451a98c8f8922ae3159c48a9e436be7ad64f32b0a"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
@@ -30006,7 +30106,7 @@
         "selection_rule": "original published scan points, recomputed with Ward A, Moller flux and sphere-averaged linear B0",
         "outputs": [
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/transport_coefficients.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_coefficients.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -30030,7 +30130,7 @@
             "role": "color_review"
           },
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/transport_coefficients_gray.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_coefficients_gray.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -30053,6 +30153,31 @@
             },
             "role": "grayscale_review",
             "source_color_sha256": "1658c2f509f6101e68e5cbfaeef7f50bd00b506a4f379970598ae193e5e44e96"
+          },
+          {
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_coefficients.pdf",
+            "path_kind": "repository_relative",
+            "format": "pdf",
+            "dpi": null,
+            "vector": true,
+            "bytes": 62233,
+            "sha256": "8f77686d45af27402cf711bb68337f3fc1fe5deda63d138312522bfef68bc235",
+            "inspection": {
+              "physical_size_inches": [
+                6.75,
+                5.9
+              ],
+              "page_count": 1,
+              "raster_image_count": 0,
+              "font_count": 3,
+              "fonts_embedded": true,
+              "type3_font_count": 0,
+              "inspection_tools": [
+                "pdfinfo",
+                "pdfimages -list",
+                "pdffonts"
+              ]
+            }
           }
         ],
         "rendering": {
@@ -30665,8 +30790,8 @@
           ],
           "legend_outside": false,
           "color_route": "color_print_and_online",
-          "delivery_stage": "png_review",
-          "vector_delivery_pending": true,
+          "delivery_stage": "vector_delivery",
+          "vector_delivery_pending": false,
           "review_contract": "prd_review_v1",
           "accessibility": {
             "schema": "plot_accessibility_v1",
@@ -37365,6 +37490,20 @@
             "fallback_used": false,
             "missing_candidates": [],
             "mathtext_fontset": "stix"
+          },
+          "output_formats": [
+            "png",
+            "pdf"
+          ]
+        },
+        "author_review": {
+          "status": "author_accepted_png",
+          "record": {
+            "path": "data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/06_ward_moller_manuscript_20261125_stage1r3__ward_moller_transport_coefficients.json",
+            "path_kind": "repository_relative",
+            "role": "author_png_acceptance",
+            "bytes": 1401,
+            "sha256": "50de1696d97de9eef067528a37b9b11b819683f8f1c71cde35718fdbb010a842"
           }
         }
       }
@@ -37376,7 +37515,7 @@
         "asset_id": "ward_moller_transport_fixed_T"
       },
       "record": {
-        "generated_at_utc": "2026-11-25T04:18:42.602309+00:00",
+        "generated_at_utc": "2026-11-25T06:12:26.950778+00:00",
         "asset_id": "ward_moller_transport_fixed_T",
         "inputs": [
           {
@@ -37476,6 +37615,13 @@
             "role": "plotting helper",
             "bytes": 37748,
             "sha256": "eaad1c860856c3a3dea96fc527b9aa42ee1a5468b488fff2acef91297b06bdbd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector/figure_production_snapshot.md",
+            "path_kind": "repository_relative",
+            "role": "production figure SOP snapshot, LF as in Git",
+            "bytes": 15016,
+            "sha256": "cf1ca9fb3f9a100888ada8c451a98c8f8922ae3159c48a9e436be7ad64f32b0a"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mode_a_grid.csv",
@@ -43886,7 +44032,7 @@
         "selection_rule": "original published scan points, recomputed with Ward A, Moller flux and sphere-averaged linear B0",
         "outputs": [
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/transport_fixed_T.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_fixed_T.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -43910,7 +44056,7 @@
             "role": "color_review"
           },
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/transport_fixed_T_gray.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_fixed_T_gray.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -43933,6 +44079,31 @@
             },
             "role": "grayscale_review",
             "source_color_sha256": "732a54dc9e731892bf9daa0a392928f8056fb87e7b0e35b8f0e63682bdd38ddf"
+          },
+          {
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/transport_fixed_T.pdf",
+            "path_kind": "repository_relative",
+            "format": "pdf",
+            "dpi": null,
+            "vector": true,
+            "bytes": 63626,
+            "sha256": "97af082610dd054974c2a79946b3a24b9973041c220d2fdfdbfca74a896c5000",
+            "inspection": {
+              "physical_size_inches": [
+                6.75,
+                7.3999999999999995
+              ],
+              "page_count": 1,
+              "raster_image_count": 0,
+              "font_count": 3,
+              "fonts_embedded": true,
+              "type3_font_count": 0,
+              "inspection_tools": [
+                "pdfinfo",
+                "pdfimages -list",
+                "pdffonts"
+              ]
+            }
           }
         ],
         "rendering": {
@@ -44546,8 +44717,8 @@
           ],
           "legend_outside": false,
           "color_route": "color_print_and_online",
-          "delivery_stage": "png_review",
-          "vector_delivery_pending": true,
+          "delivery_stage": "vector_delivery",
+          "vector_delivery_pending": false,
           "review_contract": "prd_review_v1",
           "accessibility": {
             "schema": "plot_accessibility_v1",
@@ -51130,6 +51301,20 @@
             "fallback_used": false,
             "missing_candidates": [],
             "mathtext_fontset": "stix"
+          },
+          "output_formats": [
+            "png",
+            "pdf"
+          ]
+        },
+        "author_review": {
+          "status": "author_accepted_png",
+          "record": {
+            "path": "data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/07_ward_moller_manuscript_20261125_stage1r3__ward_moller_transport_fixed_T.json",
+            "path_kind": "repository_relative",
+            "role": "author_png_acceptance",
+            "bytes": 1391,
+            "sha256": "2952d9a5682ffc3c72f231dc3746011ea441a2ade03e13209f9f18e221a3419d"
           }
         }
       }
@@ -51141,7 +51326,7 @@
         "asset_id": "ward_moller_mott_transport_mechanism"
       },
       "record": {
-        "generated_at_utc": "2026-11-25T04:18:53.945711+00:00",
+        "generated_at_utc": "2026-11-25T06:12:51.165530+00:00",
         "asset_id": "ward_moller_mott_transport_mechanism",
         "inputs": [
           {
@@ -51241,6 +51426,13 @@
             "role": "plotting helper",
             "bytes": 37748,
             "sha256": "eaad1c860856c3a3dea96fc527b9aa42ee1a5468b488fff2acef91297b06bdbd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_manuscript_20261125_vector/figure_production_snapshot.md",
+            "path_kind": "repository_relative",
+            "role": "production figure SOP snapshot, LF as in Git",
+            "bytes": 15016,
+            "sha256": "cf1ca9fb3f9a100888ada8c451a98c8f8922ae3159c48a9e436be7ad64f32b0a"
           },
           {
             "path": "data/outputs/results/relaxtime/transport/ward_moller/ward_moller_sphere_20261121_v1/mechanism_spectrum.csv",
@@ -54914,7 +55106,7 @@
         "selection_rule": "two complete fixed-temperature Mott windows at muB=900 MeV; exact conductivity decomposition",
         "outputs": [
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/mott_transport_mechanism.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/mott_transport_mechanism.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -54938,7 +55130,7 @@
             "role": "color_review"
           },
           {
-            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/mott_transport_mechanism_gray.png",
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/mott_transport_mechanism_gray.png",
             "path_kind": "repository_relative",
             "format": "png",
             "dpi": 600,
@@ -54961,6 +55153,31 @@
             },
             "role": "grayscale_review",
             "source_color_sha256": "57da81f3c6ce6a4948e00ff554485455b910076cd71a10bf29dc90b4cc562042"
+          },
+          {
+            "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/mott_transport_mechanism.pdf",
+            "path_kind": "repository_relative",
+            "format": "pdf",
+            "dpi": null,
+            "vector": true,
+            "bytes": 57765,
+            "sha256": "7c7eefac5f83fff3891c113f349dbce9f8d7ed6c400646beaff9a0b29b8e42dd",
+            "inspection": {
+              "physical_size_inches": [
+                6.75,
+                7.949999999999999
+              ],
+              "page_count": 1,
+              "raster_image_count": 0,
+              "font_count": 3,
+              "fonts_embedded": true,
+              "type3_font_count": 0,
+              "inspection_tools": [
+                "pdfinfo",
+                "pdfimages -list",
+                "pdffonts"
+              ]
+            }
           }
         ],
         "rendering": {
@@ -55579,8 +55796,8 @@
           ],
           "legend_outside": false,
           "color_route": "color_print_and_online",
-          "delivery_stage": "png_review",
-          "vector_delivery_pending": true,
+          "delivery_stage": "vector_delivery",
+          "vector_delivery_pending": false,
           "review_contract": "prd_review_v1",
           "accessibility": {
             "schema": "plot_accessibility_v1",
@@ -55856,6 +56073,20 @@
             "fallback_used": false,
             "missing_candidates": [],
             "mathtext_fontset": "stix"
+          },
+          "output_formats": [
+            "png",
+            "pdf"
+          ]
+        },
+        "author_review": {
+          "status": "author_accepted_png",
+          "record": {
+            "path": "data/outputs/results/relaxtime/transport/pnjl_transport_stage2_acceptance_20261125/08_ward_moller_manuscript_20261125_stage1r3__ward_moller_mott_transport_mechanism.json",
+            "path_kind": "repository_relative",
+            "role": "author_png_acceptance",
+            "bytes": 1407,
+            "sha256": "c3f122e358fd5773dc06d4c94e130c834eea915fcbdc7eb707319a0dbe671fca"
           }
         }
       }
