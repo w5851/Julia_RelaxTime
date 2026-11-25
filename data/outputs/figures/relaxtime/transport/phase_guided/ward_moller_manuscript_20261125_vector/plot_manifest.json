@@ -39,8 +39,8 @@
       "png_rerender_byte_identical": true
     },
     "external_layout": null,
-    "manuscript_eligible": false,
-    "current_publication_layer": false,
+    "manuscript_eligible": true,
+    "current_publication_layer": true,
     "delivery_stage": "vector_delivery",
     "vector_delivery_pending": false,
     "solver_called": false,
@@ -4994,7 +4994,7 @@
             "path_kind": "repository_relative",
             "role": "author_png_acceptance",
             "bytes": 1394,
-            "sha256": "1bb5e5443b1b009362ba6c882f56418d76cfbe3e3f72297c938e049640ca94dc"
+            "sha256": "31321c961a5229fa497da9369bbecaa99155c14437c1220cdacc6c0bb2a17b6c"
           }
         }
       }
@@ -23475,7 +23475,7 @@
             "path_kind": "repository_relative",
             "role": "author_png_acceptance",
             "bytes": 1391,
-            "sha256": "50cc117e181d2b42529548f4858e21eec057d13b9d78e529466655a7a935ae0d"
+            "sha256": "41f7f4981fb64f81a3ff0185f77eb0a4446f24427507e8ec32bf38790fa24fde"
           }
         }
       }
@@ -37503,7 +37503,7 @@
             "path_kind": "repository_relative",
             "role": "author_png_acceptance",
             "bytes": 1401,
-            "sha256": "50de1696d97de9eef067528a37b9b11b819683f8f1c71cde35718fdbb010a842"
+            "sha256": "f010703000418cf76ae243f2e1d744e8e4e4e77c9e5140bc92843ca3ddcb18a1"
           }
         }
       }
@@ -51314,7 +51314,7 @@
             "path_kind": "repository_relative",
             "role": "author_png_acceptance",
             "bytes": 1391,
-            "sha256": "2952d9a5682ffc3c72f231dc3746011ea441a2ade03e13209f9f18e221a3419d"
+            "sha256": "5d5bf20131d36b4f36461474180d03c7bbc28d17dc6e4e4378fc32a0bff466af"
           }
         }
       }
@@ -56086,7 +56086,7 @@
             "path_kind": "repository_relative",
             "role": "author_png_acceptance",
             "bytes": 1407,
-            "sha256": "c3f122e358fd5773dc06d4c94e130c834eea915fcbdc7eb707319a0dbe671fca"
+            "sha256": "7e095a4075f8ec6a457d1395a100d2bc14d667ec72830f6ee289526ddf717ee5"
           }
         }
       }

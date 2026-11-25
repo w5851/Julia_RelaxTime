@@ -138,22 +138,14 @@ data/outputs/figures/relaxtime/meson_density/sciplot_*/*.png binary
 
 # Frozen full-RS publication and Mott diagnostic delivery.
 data/outputs/figures/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_20261027_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/full_rs_raw_layout_preview_v1/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v2/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_layout_preview_v3/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v14_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_png_review/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v15_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/phase_guided/publication_clean_v15_pdf/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 # Retained diagnostics keep the exact bytes of their original figure/review packages.
-data/outputs/figures/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-data/outputs/results/relaxtime/transport/diagnostics/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 # Retained desktop research input and source bytes.
 data/outputs/results/relaxtime/transport/review_followup_20261013/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
