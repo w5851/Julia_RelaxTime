@@ -44,7 +44,7 @@
     },
     {
       "plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_vector/plot_manifest.json",
-      "plot_manifest_sha256": "75735097dedf45ca3036edf7d2d7159276a33916f950b733aa3acabe2948ef79",
+      "plot_manifest_sha256": "8b6933ed7d3cc7faf0d297354e30b8e20b17d8fa9870953fa3491675ba0d3925",
       "kind": "bundle",
       "manuscript_eligible": true
     }
@@ -63,5 +63,6 @@
       "former_figure_root": "data/outputs/figures/relaxtime/transport/phase_guided/publication_clean_v14_pdf"
     }
   },
-  "permanent_red_line": "data/inputs/relaxtime/transport/frozen_v15_20261121/ 不随本次退役变动"
+  "permanent_red_line": "data/inputs/relaxtime/transport/frozen_v15_20261121/ 不随本次退役变动",
+  "updated_at_note": "2026-11-25 收官修复：r3 accepted_png.path 更正并重钉 author_review.record 后，图包 manifest 哈希已更新。"
 }
