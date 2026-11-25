@@ -5,24 +5,24 @@
   "author_instruction": "我已审阅八张新图（C2 相图、两张 T–μB 带、π/K 谱、弛豫时间、输运系数、固定温度扫描、Mott 机制图），可以正式接受并完成矢量交付。",
   "accepted_at": "2026-11-25",
   "accepted_manifest": {
-    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/plot_manifest.json",
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r3_png_review/plot_manifest.json",
     "path_kind": "repository_relative",
     "role": "accepted_png_manifest",
-    "bytes": 1408131,
-    "sha256": "7a00760e6b0254a3bb6010d0ee86d81468c149671520cfd0478ed0c701fb97fe"
+    "bytes": 1410337,
+    "sha256": "d38cc2d695b3976d060279f8b417906d35a8bab1ff4c4da70659b6b772730b5b"
   },
   "accepted_png": {
-    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/transport_coefficients.png",
+    "path": "data/outputs/figures/relaxtime/transport/phase_guided/ward_moller_manuscript_20261125_stage1r2_png_review/pion_kaon_spectra.png",
     "path_kind": "repository_relative",
     "format": "png",
     "dpi": 600,
     "vector": false,
-    "bytes": 711923,
-    "sha256": "1658c2f509f6101e68e5cbfaeef7f50bd00b506a4f379970598ae193e5e44e96",
+    "bytes": 467671,
+    "sha256": "7ff6aeae9f142c33b251af54759a17fadcb10c4b022695c285458cdd46019262",
     "inspection": {
       "size_pixels": [
         4050,
-        3540
+        2520
       ],
       "actual_dpi": [
         599.9988,
@@ -30,10 +30,10 @@
       ],
       "physical_size_inches": [
         6.750013500027,
-        5.9000118000236
+        4.2000084000168005
       ]
     },
     "role": "color_review"
   },
-  "accepted_figure_id": "ward_moller_transport_coefficients"
+  "accepted_figure_id": "ward_moller_pion_kaon_spectra"
 }
