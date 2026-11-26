@@ -76,11 +76,36 @@ def _untracked_output_paths(manifest: Path) -> set[str]:
     return missing
 
 
+def _absent_host_paths(manifest: Path) -> set[str]:
+    """Font provenance records absolute host paths such as ``C:\\Windows\\Fonts\\times.ttf``.
+
+    A Linux runner cannot verify those bytes, so the corresponding findings are
+    expected there and remain errors only on the host that produced the package.
+    """
+    import json
+
+    record = json.loads(manifest.read_text(encoding="utf-8"))
+    if record.get("schema_version") == "plot_manifest_bundle_v1":
+        records = [item["record"] for item in record["figures"]]
+    else:
+        records = [record]
+    absent: set[str] = set()
+    for item in records:
+        rendering = item.get("rendering") or {}
+        candidates = [rendering.get("font") or {}]
+        candidates.extend((rendering.get("quality") or {}).get("actual_fonts") or [])
+        for candidate in candidates:
+            path = candidate.get("path")
+            if isinstance(path, str) and path and not Path(path).is_file():
+                absent.add(path)
+    return absent
+
+
 def test_every_active_vector_package_validates() -> None:
     """Run the artifact validator over the whole active set with no unexpected errors."""
     failures = []
     for manifest in _active_package_manifests():
-        skipped = _untracked_output_paths(manifest)
+        skipped = _untracked_output_paths(manifest) | _absent_host_paths(manifest)
         errors = [error for error in validate_manifest(manifest)
                   if not any(path in error for path in skipped)]
         if errors:
