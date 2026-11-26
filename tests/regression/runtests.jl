@@ -57,7 +57,6 @@ const CORE_SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "relaxtime", "test_phase_guided_transport_mode_b_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_phase_guided_first_order_branch_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_t190_mixed_p_chain_regression.jl"),
-    joinpath(REGRESSION_DIR, "relaxtime", "test_meson_density_plot_review_case_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_workflow_vs_direct_consistency.jl"),
 ]
