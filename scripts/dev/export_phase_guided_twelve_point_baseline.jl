@@ -36,15 +36,24 @@ const OBSERVABLES = ("tau_u", "tau_d", "tau_s", "tau_ubar", "tau_dbar", "tau_sba
                      "eta_over_s", "zeta_over_s", "sigma_over_T")
 
 function scan_point(; outdir, T_MeV, muB_MeV, xi, profile=nothing)
-    isdir(outdir) && error("refusing to reuse an existing scan directory: $outdir")
     mkpath(outdir)
+    path = joinpath(outdir, "phase_guided_transport_scan.csv")
+    # A 12-point sweep takes hours, so an interrupted run must be resumable: a
+    # finished point is read back instead of recomputed.  Only a header-only CSV
+    # (the orchestrator skipped the point) is rescanned.
+    if isfile(path)
+        cached = collect(CSV.File(path; comment="#"))
+        if !isempty(cached)
+            println("    reusing $path"); flush(stdout)
+            return only(cached)
+        end
+    end
     args = ["--outdir", outdir, "--mode", "fixed-T-sparse-muB", "--channel-diagnostics",
             "--T-list", string(T_MeV), "--muB-list", string(muB_MeV), "--xi-list", string(xi)]
     profile === nothing || append!(args, ["--sampling-profile", profile])
     opts = Main.PhaseGuidedCLI.parse_args(args)
     context = Main.ProvenanceMetadata.new_run_context("transport_baseline_refresh", args)
     Main.run_phase_guided_scan(opts, context; phase_reference=Main._load_runtime_phase_reference(opts))
-    path = joinpath(outdir, "phase_guided_transport_scan.csv")
     isfile(path) || error("scan produced no CSV at $path")
     scanned = collect(CSV.File(path; comment="#"))
     # A point the orchestrator skipped leaves a header-only CSV and logs
