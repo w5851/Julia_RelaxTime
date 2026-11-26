@@ -332,6 +332,9 @@ function resolve_magnetic_nmax(
     all(isfinite, mu_vec) || throw(ArgumentError("magnetic n_max resolution requires finite mu_vec"))
     eB_value = validate_magnetic_eB(magnetic.eB_fm2)
     magnetic.n_max !== nothing && return magnetic.n_max::Int
+    magnetic.route === :landau_legacy && throw(ArgumentError(
+        "landau_legacy requires explicit n_max qualified for its smooth vacuum sum; the thermal-tail policy does not bound the vacuum tail",
+    ))
 
     candidate = if magnetic.n_max_policy === :thermal_tail
         μ_abs = maximum(abs, mu_vec)
@@ -344,6 +347,7 @@ function resolve_magnetic_nmax(
         ))
         nvals = ntuple(i -> resolve_nmax_from_cutoff(
             masses[i], mu_vec[i], QUARK_CHARGE_ABS[i], eB_value,
+            Λ=magnetic.params.Λ_inv_fm,
         ), 3)
         maximum(nvals)
     end
@@ -441,7 +445,7 @@ function calculate_magnetic_omega_components(
     masses = _calculate_mass_vec_with_GB(φ, G_B; params=params)
     n_max = _resolve_nmax(masses, mu_vec, T_fm, conf.eB_fm2, conf)
 
-    pz_max_val = conf.pz_max > 0 ? conf.pz_max : max(8 * Main.Constants_PNJL.Λ_inv_fm, 25.0)
+    pz_max_val = conf.pz_max > 0 ? conf.pz_max : max(8 * params.Λ_inv_fm, 25.0)
 
     vac = 0.0
     therm = 0.0
@@ -465,6 +469,8 @@ function calculate_magnetic_omega_components(
                 p_num=conf.p_num,
                 pz_max=pz_max_val,
                 cutoff_N=conf.cutoff_N,
+                Λ=params.Λ_inv_fm,
+                N_c=params.N_color,
             )
         end
         therm += omegat_flavor_landau(
@@ -517,7 +523,7 @@ function _calculate_magnetic_net_density_vector(
     n_max = comp.n_max
     conf = _effective_magnetic_config(magnetic;
         p_num=p_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
-    pz_max_val = conf.pz_max > 0 ? conf.pz_max : max(8 * Main.Constants_PNJL.Λ_inv_fm, 25.0)
+    pz_max_val = conf.pz_max > 0 ? conf.pz_max : max(8 * conf.params.Λ_inv_fm, 25.0)
 
     q = MVector{3, Float64}(0.0, 0.0, 0.0)
     @inbounds for i in 1:3

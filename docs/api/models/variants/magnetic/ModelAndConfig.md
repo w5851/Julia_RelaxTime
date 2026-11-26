@@ -40,7 +40,7 @@
 
 - `eB_fm2`
 - `n_max`
-- `p_num`
+- `p_num`（热项每段的节点数；legacy 真空仍为整区间节点数）
 - `pz_max`
 - `cutoff_N`
 - `route`（默认 `:mfir`；可显式指定 `:landau_legacy` 做历史诊断）
@@ -75,12 +75,25 @@ Landau 真空项与平滑截断；该路线不属于生产或 acceptance。`solv
 估计热项所需的 Landau 层数，并应用 `n_max_floor`/`n_max_cap`。同一个物理点的全部
 seed、primary 和 fallback attempt 共用一次解析结果，避免候选之间比较不同截断。
 
+`:landau_legacy` 的真空采用 smooth Landau 求和，必须显式给出已检查收敛的
+`n_max`；缺省时抛出 `ArgumentError`。该真空核的 `Λ` 和 `N_c` 来自
+`MagneticConfig.params`；自动 `pz_max` 同样使用本模型的 `Λ`。
+
 ## AD residual 生产路径
 
 `magnetic_gap_residual(model, x_state, T_fm, mu_vec; ...)` 使用
 `ForwardDiff.gradient` 对固定 `n_max` 的 Landau `Omega` 构造五维 stationarity
 residual；`magnetic_gap_residual_autodiff` 仅保留为同一实现的兼容别名。
 `solve_magnetic_gap` 对 primary/fallback 都固定使用 `NLsolve(autodiff=:forward)`。
+
+`magnetic_condensate_residual(model, x_state, T_fm, mu_vec; ...)` 返回按
+`(u,d,s)` 排列的三维凝聚自洽残差
+`g_f=∂(Ωvac_f+ΩT_f)/∂M_f-phi_f`，单位为 `fm^-3`。状态和参数合同与
+`magnetic_gap_residual` 相同，也要求固定 `n_max`。两者满足
+`∇phi Ω=(∂M/∂phi)ᵀ g`；质量映射奇异时，势梯度很小仍可能有非零 `g`。
+求解器因此同时要求五场驻点残差和三味凝聚残差的范数不超过
+`residual_norm_max`，并检查正质量、合法 Polyakov 场及有限势。该数值阈值
+分别应用于两种自然单位残差；`candidate.residual` 仍表示五场势梯度。
 
 离散 Landau 截断不能在 ForwardDiff 内动态改变：如果调用方没有显式给出
 `n_max`，solver 会在进入 seed loop 前为该物理点解析一次，并在所有 seed 的
@@ -109,8 +122,8 @@ stationarity residual 或 NLsolve Jacobian。五维状态、branch candidate 和
 典型使用顺序：
 
 1. 用 `default_magnetic_config` 构造最小配置
-2. 生产默认使用 `magnetic_default.toml`；跨求解器 source-parity 诊断可显式选择
+2. 生产默认使用 `magnetic_default.toml`；复查历史外部锚点的物理条件和预算可显式选择
    `profile="magnetic_source_parity"`（固定 `n_max=79`、`p_num=128`、`pz_max=40`、
-   `zeta_num=256`）
+   `zeta_num=256`；当前热积分已采用分段变量变换，节点位置与历史外部实现不同）
 3. 必要时显式覆盖 `n_max` 或热尾项参数；显式值优先于自动 profile
 4. 运行后用 `magnetic_nmax_convergence_report` 检查代表点的截断质量

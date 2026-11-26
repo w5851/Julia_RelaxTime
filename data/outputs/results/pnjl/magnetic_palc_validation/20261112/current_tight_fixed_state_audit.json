@@ -1,0 +1,566 @@
+{
+  "julia_version": "1.12.5",
+  "records": [
+    {
+      "chain_rule_error": 7.323656099318729e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 7.168782886647505e-13,
+      "x_state": [
+        -2.3969774996669244,
+        -1.9325386189859697,
+        -2.2690421173016206,
+        1.1067279137882338e-10,
+        1.3005447236637206e-6
+      ],
+      "mass_jacobian_sigma_min": 0.39685322774233767,
+      "resolved_condensate_gap_norm": 7.168782886647505e-13,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 7.206335103605989e-16,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 2.7625051594170774e-13,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 7.327980721249966e-13,
+      "resolved_rho_delta": 6.68959212134702e-27,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 8.605290267597435e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 8.816105926075336e-13,
+      "x_state": [
+        -2.3267712443835054,
+        -1.3464847064063088,
+        -2.2108954778773233,
+        0.003561019731962382,
+        0.0031272437359273525
+      ],
+      "mass_jacobian_sigma_min": 0.38498432162436913,
+      "resolved_condensate_gap_norm": 0.00202723876266786,
+      "index": 2,
+      "physical": true,
+      "stationarity_norm": 3.8544331131897982e-16,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 0.7539654633011332,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0014271695911875803,
+      "resolved_rho_delta": 0.0023961165435358867,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 8.707154150468091e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 8.870339305571209e-13,
+      "x_state": [
+        -2.3207811884296397,
+        -1.300463058542171,
+        -2.206088843574818,
+        0.0021813822665502935,
+        0.001960261376984779
+      ],
+      "mass_jacobian_sigma_min": 0.3839891938526943,
+      "resolved_condensate_gap_norm": 0.0004771061224360107,
+      "index": 3,
+      "physical": true,
+      "stationarity_norm": 7.545703863786569e-15,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 0.8128463708575344,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0004155162376059774,
+      "resolved_rho_delta": 0.0004046717585203252,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 8.872585589181691e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 7.877409205770075e-10,
+      "x_state": [
+        -2.311876848931874,
+        -1.2330991384466674,
+        -2.198990321110689,
+        0.0034020815138223336,
+        0.003004096017096905
+      ],
+      "mass_jacobian_sigma_min": 0.38251989917965856,
+      "resolved_condensate_gap_norm": 0.003059159870302919,
+      "index": 4,
+      "physical": true,
+      "stationarity_norm": 5.542648812965594e-10,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 0.9020080022359357,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0021588170612637063,
+      "resolved_rho_delta": 0.003854508048506733,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 8.988283982762641e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.0720950252429752e-12,
+      "x_state": [
+        -2.306045972690508,
+        -1.1896488267920857,
+        -2.1943722577591553,
+        0.0020916327392222706,
+        0.0013469174724108377
+      ],
+      "mass_jacobian_sigma_min": 0.3815643614458267,
+      "resolved_condensate_gap_norm": 0.007101925353678373,
+      "index": 5,
+      "physical": true,
+      "stationarity_norm": 1.1348435600051438e-12,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 0.9594502275831227,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0049441144435864795,
+      "resolved_rho_delta": 0.008510830912586864,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 9.94088249156981e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.0663444790272246e-12,
+      "x_state": [
+        -2.04218119233471,
+        -0.9895943691578892,
+        -2.1619779756523276,
+        0.013673070026975407,
+        0.0174469900243451
+      ],
+      "mass_jacobian_sigma_min": 0.39308660955705294,
+      "resolved_condensate_gap_norm": 0.013299280406497652,
+      "index": 6,
+      "physical": true,
+      "stationarity_norm": 4.26995426840245e-15,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 1.4768374699401843,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.009140892786185935,
+      "resolved_rho_delta": 0.01898350402445496,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 1.6546472986383998e-8,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 2.5183940397376616e-8,
+      "x_state": [
+        -0.04306221051348365,
+        -0.0653440855409919,
+        -2.0571838963990032,
+        0.0027354909789825757,
+        0.000458402023353731
+      ],
+      "mass_jacobian_sigma_min": 0.4364103146986662,
+      "resolved_condensate_gap_norm": 0.002067571144218018,
+      "index": 7,
+      "physical": true,
+      "stationarity_norm": 2.0820120381523073e-11,
+      "muB_MeV": 900.0,
+      "rhoB_over_rho0": 5.064505386500437,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0020014029839487473,
+      "resolved_rho_delta": 0.044586472941442565,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 7.325028850402805e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.4825525189816427e-12,
+      "x_state": [
+        -2.3969663786930013,
+        -1.9324383299524783,
+        -2.2690326510155736,
+        6.866021681460918e-5,
+        0.0010242167557189845
+      ],
+      "mass_jacobian_sigma_min": 0.39685139418633025,
+      "resolved_condensate_gap_norm": 1.4825525189816427e-12,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 1.5331221290807502e-12,
+      "muB_MeV": 1000.0,
+      "rhoB_over_rho0": 0.00013501805678481807,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 1.936348703223718e-12,
+      "resolved_rho_delta": 7.411877101654163e-17,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 7.530344701832205e-13,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 3.117266863617311e-10,
+      "x_state": [
+        -2.386312780753447,
+        -1.8375254772710117,
+        -2.2600000764158463,
+        0.005613342642815226,
+        0.007882281928801414
+      ],
+      "mass_jacobian_sigma_min": 0.3950693340516173,
+      "resolved_condensate_gap_norm": 3.8627216314761965e-8,
+      "index": 2,
+      "physical": true,
+      "stationarity_norm": 2.1801286816291033e-10,
+      "muB_MeV": 1000.0,
+      "rhoB_over_rho0": 0.1265084958790073,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 2.7019381437674372e-8,
+      "resolved_rho_delta": 3.8249874843854226e-8,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 1.1528920346615838e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.7546629256769397e-7,
+      "x_state": [
+        -0.029052699358245327,
+        -0.051994266919885485,
+        -2.0571082824161726,
+        0.00618154125615178,
+        0.001704926332730392
+      ],
+      "mass_jacobian_sigma_min": 0.4364166963011079,
+      "resolved_condensate_gap_norm": 0.002410741008016031,
+      "index": 3,
+      "physical": true,
+      "stationarity_norm": 2.853183229894095e-10,
+      "muB_MeV": 1000.0,
+      "rhoB_over_rho0": 5.6874215293812735,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.002182900528056845,
+      "resolved_rho_delta": 0.07020724284993149,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 1.2281208932179216e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.869183215593985e-7,
+      "x_state": [
+        -0.028840974486686745,
+        -0.05178322781551523,
+        -2.0571072895250637,
+        0.0002693523479364669,
+        0.0010511284190643927
+      ],
+      "mass_jacobian_sigma_min": 0.436416788273939,
+      "resolved_condensate_gap_norm": 0.0007532732804757218,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 7.464402807192173e-12,
+      "muB_MeV": 1050.0,
+      "rhoB_over_rho0": 5.698857621284765,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.001552213149227837,
+      "resolved_rho_delta": 0.024075806402444402,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 4.021134254092511e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 6.118828728031729e-7,
+      "x_state": [
+        -0.022764579592378147,
+        -0.04587239791930098,
+        -2.057073158572301,
+        0.013321181801433334,
+        0.011787561608681198
+      ],
+      "mass_jacobian_sigma_min": 0.43641980106898076,
+      "resolved_condensate_gap_norm": 0.0005194436074069071,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 2.5073027934584625e-16,
+      "muB_MeV": 1100.0,
+      "rhoB_over_rho0": 6.0976678925662435,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0038141165863585483,
+      "resolved_rho_delta": 0.02037107176778611,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 4.778546863696284e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 7.361496418832203e-7,
+      "x_state": [
+        -0.021800295937100686,
+        -0.04468903332520945,
+        -1.7384224622593245,
+        0.01961472371555757,
+        0.01699158292822889
+      ],
+      "mass_jacobian_sigma_min": 0.46615034665492516,
+      "resolved_condensate_gap_norm": 0.0004972030289176234,
+      "index": 2,
+      "physical": true,
+      "stationarity_norm": 5.457987982483636e-10,
+      "muB_MeV": 1100.0,
+      "rhoB_over_rho0": 6.56704305133331,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.003746072871511524,
+      "resolved_rho_delta": 0.020284528814705292,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 3.2443725974147345e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 5.067450752336958e-7,
+      "x_state": [
+        -0.02053048779172681,
+        -0.04318608915777283,
+        -1.3009322840423332,
+        0.014619197444642547,
+        0.01334725496578884
+      ],
+      "mass_jacobian_sigma_min": 0.5069671048858748,
+      "resolved_condensate_gap_norm": 0.0049485468408057365,
+      "index": 3,
+      "physical": true,
+      "stationarity_norm": 1.8943945507502874e-10,
+      "muB_MeV": 1100.0,
+      "rhoB_over_rho0": 7.2289720027522675,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.00462014296716161,
+      "resolved_rho_delta": 0.021869511695211882,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 4.831213054557741e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 7.350370617807237e-7,
+      "x_state": [
+        -0.019251005778246302,
+        -0.042315540228994926,
+        -2.0569830514095386,
+        0.0008643841901315047,
+        0.0012254564166478935
+      ],
+      "mass_jacobian_sigma_min": 0.43642825420232284,
+      "resolved_condensate_gap_norm": 0.0004992182977117048,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 1.6683416485596258e-11,
+      "muB_MeV": 1150.0,
+      "rhoB_over_rho0": 6.367606875973615,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0015383554202533973,
+      "resolved_rho_delta": 0.018210832248047912,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 4.604188506125388e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 7.036517977507889e-7,
+      "x_state": [
+        -0.01898523770650944,
+        -0.04198429155300455,
+        -1.9456379720784904,
+        0.007399706029985575,
+        0.008740300354909074
+      ],
+      "mass_jacobian_sigma_min": 0.4468169654998702,
+      "resolved_condensate_gap_norm": 0.0004916011449660411,
+      "index": 2,
+      "physical": true,
+      "stationarity_norm": 3.084146281639917e-13,
+      "muB_MeV": 1150.0,
+      "rhoB_over_rho0": 6.533318149163864,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0015150341085441962,
+      "resolved_rho_delta": 0.018146849284704825,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 7.181547177950854e-7,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.128176351561881e-6,
+      "x_state": [
+        -0.017070066238295118,
+        -0.039697725623090284,
+        -1.0926903726027395,
+        0.0022221374573816815,
+        0.0008068877133302662
+      ],
+      "mass_jacobian_sigma_min": 0.5263941789540498,
+      "resolved_condensate_gap_norm": 0.009698437148556418,
+      "index": 3,
+      "physical": true,
+      "stationarity_norm": 6.049456311471887e-11,
+      "muB_MeV": 1150.0,
+      "rhoB_over_rho0": 7.855494748507405,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.0063850630651955675,
+      "resolved_rho_delta": 0.022402574508998983,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 1.048579425390265e-6,
+      "eB_GeV2": 0.4,
+      "family": "palc_roots",
+      "same_node_condensate_gap_norm": 1.6509581052179946e-6,
+      "x_state": [
+        -0.016778520274920775,
+        -0.039380979227125225,
+        -0.9904411462978866,
+        0.0027062216669980796,
+        0.0062965556626671864
+      ],
+      "mass_jacobian_sigma_min": 0.5359325913316022,
+      "resolved_condensate_gap_norm": 0.01101505880293037,
+      "index": 1,
+      "physical": true,
+      "stationarity_norm": 4.4245076293685375e-11,
+      "muB_MeV": 1200.0,
+      "rhoB_over_rho0": 8.063093360638712,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.00699558554301827,
+      "resolved_rho_delta": 0.07899054234949002,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 7.330434604965978e-13,
+      "eB_GeV2": 0.4,
+      "family": "branch",
+      "same_node_condensate_gap_norm": 7.168950697392963e-13,
+      "jacobian_checks": [
+        {
+          "step": 0.0001,
+          "relative_error": 6.520635007945514e-10
+        },
+        {
+          "step": 6.0e-6,
+          "relative_error": 5.1448482923368234e-11
+        },
+        {
+          "step": 1.0e-6,
+          "relative_error": 3.217592376002886e-10
+        },
+        {
+          "step": 1.0e-7,
+          "relative_error": 5.002927644410231e-9
+        }
+      ],
+      "residual_jacobian_sigma_min": 0.3151737885158177,
+      "x_state": [
+        -2.3969774996669457,
+        -1.9325386189861764,
+        -2.269042117301638,
+        -3.941023174872609e-21,
+        3.4114507536551528e-18
+      ],
+      "mass_jacobian_sigma_min": 0.3968532277423416,
+      "resolved_condensate_gap_norm": 7.168950697392963e-13,
+      "index": 1,
+      "physical": false,
+      "stationarity_norm": 1.3322676295507669e-15,
+      "muB_MeV": 500.00000000000006,
+      "rhoB_over_rho0": -3.4839620578042806e-37,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 7.323860381066655e-13,
+      "resolved_rho_delta": 6.259877181282322e-40,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 5.299833866607241e-6,
+      "eB_GeV2": 0.4,
+      "family": "branch",
+      "same_node_condensate_gap_norm": 8.481803154695528e-6,
+      "jacobian_checks": [
+        {
+          "step": 0.0001,
+          "relative_error": 1.7655754592534427e-7
+        },
+        {
+          "step": 6.0e-6,
+          "relative_error": 6.339829214446061e-10
+        },
+        {
+          "step": 1.0e-6,
+          "relative_error": 3.4969751038357866e-10
+        },
+        {
+          "step": 1.0e-7,
+          "relative_error": 1.6181201758214764e-9
+        }
+      ],
+      "residual_jacobian_sigma_min": 0.30290708564509133,
+      "x_state": [
+        9.430770340493101e-5,
+        -0.001924363783709357,
+        -0.18313222486119493,
+        0.01951854922561035,
+        0.01813190165043205
+      ],
+      "mass_jacobian_sigma_min": 0.61128359851793,
+      "resolved_condensate_gap_norm": 0.0071624612666516835,
+      "index": 1340,
+      "physical": true,
+      "stationarity_norm": 2.420956144807106e-12,
+      "muB_MeV": 1700.0,
+      "rhoB_over_rho0": 16.733525155681672,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.004561047850270623,
+      "resolved_rho_delta": 0.03494505500657778,
+      "p_num": 128
+    },
+    {
+      "chain_rule_error": 5.299833867085906e-6,
+      "eB_GeV2": 0.4,
+      "family": "branch",
+      "same_node_condensate_gap_norm": 8.481803041159464e-6,
+      "jacobian_checks": [
+        {
+          "step": 0.0001,
+          "relative_error": 1.7655818126035456e-7
+        },
+        {
+          "step": 6.0e-6,
+          "relative_error": 6.348578925818612e-10
+        },
+        {
+          "step": 1.0e-6,
+          "relative_error": 3.7293817578354e-10
+        },
+        {
+          "step": 1.0e-7,
+          "relative_error": 1.520418735214822e-9
+        }
+      ],
+      "residual_jacobian_sigma_min": 0.3029070856461357,
+      "x_state": [
+        9.430770351729131e-5,
+        -0.0019243637837240571,
+        -0.18313222485788705,
+        0.01951854922310808,
+        0.018131901651113117
+      ],
+      "mass_jacobian_sigma_min": 0.611283598518239,
+      "resolved_condensate_gap_norm": 0.007162461264467338,
+      "index": 1338,
+      "physical": true,
+      "stationarity_norm": 3.668348323133214e-12,
+      "muB_MeV": 1700.0,
+      "rhoB_over_rho0": 16.73352515568961,
+      "source": "current_mfir_p128_tight_ad.json",
+      "resolved_stationarity_norm": 0.004561047848979673,
+      "resolved_rho_delta": 0.0349450550056376,
+      "p_num": 128
+    }
+  ]
+}

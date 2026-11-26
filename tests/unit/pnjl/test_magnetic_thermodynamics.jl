@@ -46,7 +46,24 @@ const omega_magnetic_mfir = getproperty(PNJL, :omega_magnetic_mfir)
         @test isfinite(omega_magnetic_mfir(1.0, 2 / 3, MAGNETIC_EB_MIN_FM2; zeta_num=16))
         legacy = MagneticConfig(eB_fm2=MAGNETIC_EB_MIN_FM2, route=:landau_legacy)
         @test legacy.route == :landau_legacy
+        @test_throws ArgumentError resolve_magnetic_nmax(.1,SVector(.2,.2,.2),legacy)
         @test_throws ArgumentError MagneticConfig(eB_fm2=MAGNETIC_EB_MIN_FM2, route=:smooth_landau)
+    end
+
+    @testset "smooth vacuum uses model cutoff" begin
+        model = Models.PNJLMagneticModel(eB_fm2=5.,profile="unittest_lambda",
+            route=:landau_legacy,n_max=4,p_num=128,pz_max=40.)
+        conf = model.magnetic
+        x = SVector(-1.8,-1.8,-2.2,.01,.01)
+        comp = calculate_magnetic_omega_components(x,SVector(.4,.4,.4),.1,conf)
+        mi = Models.MagneticThermodynamics.MagneticIntegrals
+        expected = sum(mi.omega0_flavor_landau(comp.masses[f],mi.QUARK_CHARGE_ABS[f],5.;
+            n_max=4,p_num=128,pz_max=40.,Λ=conf.params.Λ_inv_fm,
+            N_c=conf.params.N_color) for f in 1:3)
+        @test comp.vac ≈ expected rtol=2e-13
+        old = sum(mi.omega0_flavor_landau(comp.masses[f],mi.QUARK_CHARGE_ABS[f],5.;
+            n_max=4,p_num=128,pz_max=40.) for f in 1:3)
+        @test abs(comp.vac-old)>1.
     end
 
     @testset "positive magnetic-field contract" begin

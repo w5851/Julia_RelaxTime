@@ -9,6 +9,7 @@ import ..Models
 export PNJLMagneticModel
 export MagneticGapCandidate, MagneticGapResult
 export magnetic_gap_residual, magnetic_gap_residual_autodiff, solve_magnetic_gap
+export magnetic_condensate_residual
 
 @inline function _magnetic_thermodynamics_module()
     if isdefined(Models, :MagneticThermodynamics)

@@ -1,0 +1,369 @@
+{
+  "julia_version": "1.12.5",
+  "source": "D:\\CodexCompute\\magnetic-palc-20261112-v1\\outputs\\current_mfir_p512_e0155.json",
+  "cases": [
+    {
+      "eB_GeV2": 0.155,
+      "T_MeV": 5.0,
+      "p_num": 1024,
+      "targets": [
+        {
+          "muB_MeV": 900.0,
+          "source_root_count": 3,
+          "corrected_root_count": 3,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -1.9541041908083459,
+                -1.860528581502405,
+                -2.2331587129353068,
+                1.462719321794634e-14,
+                1.1775413297735114e-8
+              ],
+              "residual_norm": 1.7242427584977616e-12,
+              "omega": -21.579092727426872,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -1.2834066963079844,
+                -1.4492952548166407,
+                -2.160233992533787,
+                0.003318819410446534,
+                0.0030548440038300996
+              ],
+              "residual_norm": 1.5713720679252716e-10,
+              "omega": -21.50771881418949,
+              "physical": true,
+              "iterations": 1
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -0.6628974877329964,
+                -0.8872746684903389,
+                -2.098661400055079,
+                0.001722081125064816,
+                0.0017110192816952828
+              ],
+              "residual_norm": 4.996095136590527e-16,
+              "omega": -21.519016224238634,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1000.0,
+          "source_root_count": 7,
+          "corrected_root_count": 7,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -1.9541041907599628,
+                -1.8605285812403232,
+                -2.23315871291274,
+                9.013874235754801e-9,
+                9.248491266349487e-6
+              ],
+              "residual_norm": 1.8754677578122636e-15,
+              "omega": -21.579092727428122,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -1.708294298983702,
+                -1.6243943103171732,
+                -2.199477096281321,
+                0.007536373822644909,
+                0.006763959726616225
+              ],
+              "residual_norm": 2.483673884706318e-12,
+              "omega": -21.560345257166947,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -1.6630245622703004,
+                -1.7068437060479278,
+                -2.202066727752375,
+                0.007805419439748129,
+                0.006990874663679741
+              ],
+              "residual_norm": 4.0337774129278814e-14,
+              "omega": -21.56019465570188,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 4,
+              "converged": true,
+              "x_state": [
+                -1.6092913424400277,
+                -1.7816726027445962,
+                -2.203230459700376,
+                0.004508279376399865,
+                0.004848613151434826
+              ],
+              "residual_norm": 6.400181139372446e-10,
+              "omega": -21.560508992592215,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 5,
+              "converged": true,
+              "x_state": [
+                -0.3770907995412212,
+                -0.5596838727043346,
+                -2.078570174795392,
+                0.002527843909420406,
+                0.004874168343433395
+              ],
+              "residual_norm": 2.2570306868809437e-10,
+              "omega": -21.67130174060221,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 6,
+              "converged": true,
+              "x_state": [
+                -0.31744761490052187,
+                -0.449025614912919,
+                -2.074819817937609,
+                0.005958990264318576,
+                0.00765315492269487
+              ],
+              "residual_norm": 8.014880420594181e-12,
+              "omega": -21.671175742260758,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 7,
+              "converged": true,
+              "x_state": [
+                -0.25390269029715373,
+                -0.3307231804374338,
+                -2.071588191630822,
+                0.007066583128232553,
+                0.00664950340707974
+              ],
+              "residual_norm": 1.7960203491105355e-15,
+              "omega": -21.671297623132606,
+              "physical": true,
+              "iterations": 3
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1050.0,
+          "source_root_count": 5,
+          "corrected_root_count": 5,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -1.9541031246339322,
+                -1.8605228059788448,
+                -2.233158215638584,
+                7.084972353747311e-6,
+                0.0002592821105214814
+              ],
+              "residual_norm": 2.7314501090655217e-13,
+              "omega": -21.57909275483266,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -1.9218227585599126,
+                -1.68534991649442,
+                -2.217995666745236,
+                0.0022294694645309844,
+                0.0024265509727444527
+              ],
+              "residual_norm": 1.7664966027945257e-11,
+              "omega": -21.57652162901902,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -1.9135281365017118,
+                -1.6430565455811124,
+                -2.214278354128549,
+                0.0018330046448786234,
+                0.002642959428017835
+              ],
+              "residual_norm": 9.065321864884084e-10,
+              "omega": -21.57653652053741,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 4,
+              "converged": true,
+              "x_state": [
+                -1.8777132566705188,
+                -1.5875880301097447,
+                -2.2078103604830033,
+                0.0036128052833741793,
+                0.006197281619569292
+              ],
+              "residual_norm": 3.8466963916265647e-13,
+              "omega": -21.576396943327843,
+              "physical": true,
+              "iterations": 1
+            },
+            {
+              "source_index": 5,
+              "converged": true,
+              "x_state": [
+                -0.15821158393116766,
+                -0.1727109752889174,
+                -2.068440211522911,
+                0.004351860948160892,
+                0.004024365713799154
+              ],
+              "residual_norm": 1.5057352462467404e-15,
+              "omega": -21.77689861357968,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1100.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.12787223735697062,
+                -0.1286170484161455,
+                -2.067833122973825,
+                0.0036705240905394306,
+                0.0035497809186131792
+              ],
+              "residual_norm": 3.91234049727697e-15,
+              "omega": -21.895940973189724,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1150.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.10939857772356278,
+                -0.10349464940407228,
+                -2.067546858680642,
+                0.0033845503731335424,
+                0.0033119536234157893
+              ],
+              "residual_norm": 3.900230751430062e-15,
+              "omega": -22.025745476984888,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1200.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.09643644747395977,
+                -0.08672785867989562,
+                -2.067381497934859,
+                0.0032055004887323007,
+                0.0031489594322914355
+              ],
+              "residual_norm": 1.0333691015363991e-15,
+              "omega": -22.165361963945102,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1500.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.015146413399432271,
+                -0.01773524907726864,
+                -0.9083903840675791,
+                0.012787916402344633,
+                0.012293451714573458
+              ],
+              "residual_norm": 1.290149371268353e-14,
+              "omega": -23.50199369934591,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1650.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.005697034691110121,
+                -0.009482627015797608,
+                -0.33403673198521167,
+                0.012890294301009884,
+                0.014788880780541575
+              ],
+              "residual_norm": 8.489695595770874e-14,
+              "omega": -24.88855271477885,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

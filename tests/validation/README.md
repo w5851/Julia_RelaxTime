@@ -64,40 +64,49 @@ acceptance suite. The magnetic external-source ledger is kept under
 `docs/analysis/historical/legacy/legacy_extraction_v1/` until model, unit,
 cutoff, and branch gates are closed.
 
-The magnetic external plan is now source-gated rather than dual-source. The
-legacy Fortran route remains diagnostic evidence only because it follows the
-disputed smooth-Landau kernel. The selected external MFIR source is
-`pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db`; its existing replay rows
-remain evidence until the remaining numerical gates are closed and lightweight
-targets are extracted. The Fortran entropy/density postprocessing
-rows with the documented flavor-charge bug and NaN exports are excluded from
-acceptance. The short v2 replay is recorded in
-`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_external_fixedmu_replay_v2.csv`;
-the same-route Julia/Fortran state deltas are in
-`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`.
-The paper-route audit and `pnjl_mag` source-gate are in
-`docs/analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md`.
-The repository and commit are fixed; the static formula and parameter source-gate
-is recorded in
-`docs/analysis/historical/legacy/legacy_extraction_v1/tables/pnjl_mag_source_gate_v1.csv`.
-The external locked environment has also been replayed locally through the author's
-descending one-seed temperature continuation. Nine representative equilibrium rows,
-source hashes, residuals, and exact comparison with the committed external CSV are in
-`docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_equilibrium_replay_v1/`.
-The follow-up cross-solver diagnostic is in
-`docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_cross_solver_replay_v1/`:
-all nine points were screened with Julia multi-seed solving, and three `T=240 MeV`
-points were replayed with matched quadrature nodes. The matched run remains diagnostic
-only; its branch and convergence gates are not acceptance targets.
-Until the remaining numerical
-convergence, ensemble adapter, branch policy, and output schema gates are closed,
-all equilibrium rows remain evidence/diagnostic rather than targets. One explicitly
-labelled fixed-state kernel-only Omega target is admitted under
-`tests/validation/data/targets/pnjl/reference/`; it does not validate root solving
-or branch completeness. Its source hashes and observed comparison delta are recorded
-under `tests/validation/data/provenance/pnjl/evidence/`. The point-list file is maintained with the historical
-extraction package at
-`docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.
+### Magnetic reference precision
+
+The magnetic reference family currently accepts one fixed-state MFIR kernel
+point and three `T=240 MeV` equilibrium candidate anchors from
+`pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db`. Their original numerical
+values and source hashes are retained. The 2026-11-13 audit separates source
+discretization from algebraic matching tolerance:
+
+- The fixed-state `p_num=16` source has a measured `1.2905e-5 fm^-4`
+  whole-interval quadrature error. Its target adds
+  `source_discretization_atol=1.5e-5` to the original algebraic tolerance.
+- The `eB=.8 GeV^2` source state has an independently measured `2.9288e-6`
+  displacement in the five-component state norm, mainly from small-argument
+  zeta quadrature. Its target adds `source_state_discretization_atol=3.0e-6`
+  to the original `state_atol=1e-7`. The other two anchors add zero.
+- The current kernel uses transformed, segmented thermal nodes. Equal node
+  counts no longer imply the historical matched-node discretization. The
+  kernel test also checks refinement of the current quadrature.
+
+Historical matched-node observations remain in provenance; appended columns
+point to the independent formula, old-quadrature refinement, and current-entry
+comparison. The source program was not rerun during this audit. See
+[magnetic cross-validation](../../docs/analysis/pnjl/magnetic_palc_validation_20261112_analysis.md).
+The full literature and branch scans stay in analysis; they do not become
+default test inputs. These anchors check fixed-state kernels or candidate
+membership, not a complete phase diagram.
+
+### Earlier magnetic admission stages
+
+The original smooth-Landau Fortran replay and its charge/sign discrepancies
+remain historical evidence under
+`docs/analysis/historical/legacy/legacy_extraction_v1/`. The MFIR source gate,
+original locked-environment replay, and early cross-solver comparisons are
+preserved there:
+
+- `magnetic_reference_route_audit_v3.md` and
+  `tables/pnjl_mag_source_gate_v1.csv`: source formulas, parameters, and hashes.
+- `pnjl_mag_equilibrium_replay_v1/`: nine original equilibrium rows and their
+  author-style descending-temperature continuation.
+- `pnjl_mag_cross_solver_replay_v1/`: early multi-seed and matched-node
+  comparisons. Only the three high-temperature candidate anchors and one
+  kernel point listed above are acceptance inputs.
+
 
 Practical rule:
 

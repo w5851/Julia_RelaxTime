@@ -1,0 +1,1883 @@
+{
+  "schema_version": "plot_manifest_bundle_v1",
+  "package": {
+    "case_slug": "20261112_png_review"
+  },
+  "shared": {
+    "schema_version": "plot_manifest_v1",
+    "figure_family": "magnetic_palc_validation",
+    "case_slug": "20261112_png_review",
+    "asset_kind": "figure",
+    "figure_mode": "audit",
+    "semantic_status": "isolated_low_temperature_validation",
+    "style_profile": "candidate_aps_v2",
+    "publication_scope": "internal_review",
+    "generator": {
+      "path": "scripts/analysis/pnjl_magnetic/plot_validation.py",
+      "path_kind": "repository_relative",
+      "sha256": "660acd92522d555bd4586c0b6ffe2ff944580396d05e7d584a40ebf063d8710e",
+      "command": "D:\\Python313\\python.exe scripts/analysis/pnjl_magnetic/plot_validation.py data/outputs/results/pnjl/magnetic_palc_validation/20261112 data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review",
+      "runtime": {
+        "python": "3.13.2",
+        "platform": "Windows-11-10.0.26300-SP0",
+        "executable": "D:\\Python313\\python.exe",
+        "matplotlib": "3.10.1"
+      }
+    },
+    "git_commit": "dc183dfa561dc79ef1f8594948b1a1e705679996",
+    "calculation_sha": null,
+    "postprocess_sha": null,
+    "source_run_id": null,
+    "inputs": [
+      {
+        "path": "data/outputs/results/pnjl/magnetic_palc_validation/20261112/current_mfir_p32_high.json",
+        "path_kind": "repository_relative",
+        "role": "native_validation_results_or_paper_readout",
+        "bytes": 309217,
+        "sha256": "0cd615c9fbc8cda525271795f31a0414492f603daccafa2703403ff9a26d5106"
+      },
+      {
+        "path": "data/outputs/results/pnjl/magnetic_palc_validation/20261112/resolved_mfir_o48_fine_v2.json",
+        "path_kind": "repository_relative",
+        "role": "native_validation_results_or_paper_readout",
+        "bytes": 19172561,
+        "sha256": "bb086ec91dd726a66977b7e6af0db4ebeb3c7b6a5432ec0ab2dcf9700d9f744f"
+      },
+      {
+        "path": "data/outputs/results/pnjl/magnetic_palc_validation/20261112/resolved_smooth_o48_fine_v2.json",
+        "path_kind": "repository_relative",
+        "role": "native_validation_results_or_paper_readout",
+        "bytes": 20256045,
+        "sha256": "801188ef09f07681b95df4b8fc2b6f8883b518b10b8071769ec711bfa91eb70c"
+      },
+      {
+        "path": "data/outputs/results/pnjl/magnetic_palc_validation/20261112/thesis_fig5_3_points.csv",
+        "path_kind": "repository_relative",
+        "role": "native_validation_results_or_paper_readout",
+        "bytes": 1190,
+        "sha256": "c10eabe22ca10610d108af51e5ac922a6792608b77940eb021d22fe420374ff9"
+      },
+      {
+        "path": "config/plotting/candidate_aps_v2.toml",
+        "path_kind": "repository_relative",
+        "role": "native_validation_results_or_paper_readout",
+        "bytes": 2221,
+        "sha256": "e0761af1b98bcbc53a6a011f514b507068f84fe73f60eaea04f91ee9df86f864"
+      }
+    ],
+    "interpolation_policy": "none; connected native continuation vertices in arclength order",
+    "connector_policy": "native adjacent vertices only",
+    "missing_value_policy": "error; no fill",
+    "validation": {
+      "finite": true,
+      "duplicate_keys": true,
+      "support": true,
+      "strict_gate": false
+    },
+    "external_layout": null,
+    "manuscript_eligible": false,
+    "current_publication_layer": false,
+    "production_default_changed": false
+  },
+  "figures": [
+    {
+      "figure_id": "rho_mu_three_fields",
+      "chart": {
+        "asset_id": "rho_mu_three_fields",
+        "png": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/rho_mu_three_fields.png"
+      },
+      "record": {
+        "generated_at_utc": "2026-11-12T08:23:55.604935+00:00",
+        "asset_id": "rho_mu_three_fields",
+        "axes": [
+          {
+            "field": "muB_MeV",
+            "source_unit": "MeV",
+            "display_unit": "MeV",
+            "label": "$\\mu_B\\;(\\mathrm{MeV})$"
+          },
+          {
+            "field": "rhoB_over_rho0",
+            "source_unit": "dimensionless",
+            "display_unit": "dimensionless",
+            "label": "$\\rho_B/\\rho_0$"
+          }
+        ],
+        "series": [
+          {
+            "series_id": "current_p32",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "mfir_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "smooth_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          }
+        ],
+        "selection_rule": "T=5 MeV; a=0.0108805 for all curves. Current diagnostic uses the unsplit p32 kernel; references use independent Fermi-surface-resolved quadrature. Regulators are different.",
+        "outputs": [
+          {
+            "path": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/rho_mu_three_fields.png",
+            "path_kind": "repository_relative",
+            "format": "png",
+            "dpi": 600,
+            "vector": false,
+            "bytes": 339372,
+            "sha256": "c24f75d775bf0543daf89370498729e178a2b6ddbe0037ccd8d9bd24a126ab00",
+            "inspection": {
+              "size_pixels": [
+                4050,
+                1950
+              ],
+              "actual_dpi": [
+                599.9988,
+                599.9988
+              ],
+              "physical_size_inches": [
+                6.750013500027,
+                3.2500065000130003
+              ]
+            }
+          }
+        ],
+        "rendering": {
+          "column": "double_column",
+          "figure_size_inches": [
+            6.75,
+            3.25
+          ],
+          "size_override_reason": "three magnetic panels with one shared key; heights vary with quantities",
+          "color_route": "undecided_review",
+          "legend_policy": "shared_external_then_case_review",
+          "quality": {
+            "figure_size_inches": [
+              6.75,
+              3.25
+            ],
+            "intended_width_inches": 6.75,
+            "placement_scale": 1.0,
+            "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+            "actual_fonts": [
+              {
+                "path": "C:\\Windows\\Fonts\\times.ttf",
+                "resolved": "Times New Roman",
+                "bytes": 1190952,
+                "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+                "roles": [
+                  "text"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneral.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 448228,
+                "sha256": "167378031e2dddc6216d67819c9260e9a06ffc4c478e4e23cb98a6fd44b183c2",
+                "roles": [
+                  "mathtext"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneralItalic.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 175040,
+                "sha256": "6cfcb333d22b7c3c623bdfd40174f14c85c3d6731ca6166c1edc80140eae8527",
+                "roles": [
+                  "mathtext"
+                ]
+              }
+            ],
+            "series_styles": [
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              }
+            ],
+            "minimum_capital_numeral_height_mm": 2.096211067708333,
+            "minimum_primary_capital_numeral_height_mm": 2.994587239583333,
+            "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+            "smallest_glyphs": [
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.05\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.155\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.4\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              }
+            ],
+            "minimum_curve_linewidth_pt": 1.2,
+            "minimum_landmark_diameter_mm": null,
+            "tick_axes": [
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 1,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 4,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 1,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 4,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 3,
+                "minor_count": 3,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 3,
+                "minor_count": 3,
+                "inward": true,
+                "both_sides": true
+              }
+            ],
+            "clipped_text": [],
+            "text_overlap_pairs": [],
+            "legend_axes_overlap_count": 0,
+            "legend_count": 1,
+            "legend_layout": [
+              {
+                "legend_index": 0,
+                "host_axes_index": null,
+                "overlapped_axes": [],
+                "contained_in_host": null,
+                "title": "",
+                "labels": [
+                  "Current p32",
+                  "Resolved MFIR",
+                  "Thesis regulator"
+                ],
+                "bbox_inches": [
+                  1.0046527777777783,
+                  2.816388888888889,
+                  5.2806944444444435,
+                  0.31083333333333313
+                ]
+              }
+            ],
+            "legend_pair_overlap_count": 0,
+            "legend_pair_overlaps": [],
+            "legend_curve_overlap_count": 0,
+            "legend_curve_overlaps": [],
+            "legend_landmark_overlap_count": 0,
+            "legend_landmark_overlaps": [],
+            "legend_in_axes_overflow_count": 0,
+            "legend_in_axes_overflows": [],
+            "human_visual_review": "required",
+            "font": {
+              "schema": "plot_font_resolution_v1",
+              "requested": "Times New Roman",
+              "candidates": [
+                "Times New Roman",
+                "Times",
+                "STIXGeneral"
+              ],
+              "policy": "candidate_fallback",
+              "resolved": "Times New Roman",
+              "selected": "Times New Roman",
+              "path": "C:\\Windows\\Fonts\\times.ttf",
+              "bytes": 1190952,
+              "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+              "fallback_used": false,
+              "missing_candidates": [],
+              "mathtext_fontset": "stix"
+            }
+          },
+          "delivery_stage": "png_review",
+          "vector_delivery_pending": true,
+          "review_contract": "prd_review_v1",
+          "accessibility": {
+            "schema": "plot_accessibility_v1",
+            "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+            "minimum_contrast": 3.0,
+            "backgrounds": [
+              "#ffffff"
+            ],
+            "background_scope": "white axes; no fills or overlapping shaded bands",
+            "parameters": [
+              {
+                "value": "current_p32",
+                "color": "#ad5e8d",
+                "noncolor_encoding": "://current_p32",
+                "contrasts": [
+                  4.409405986450337
+                ]
+              },
+              {
+                "value": "mfir_reference",
+                "color": "#0072b2",
+                "noncolor_encoding": "-//mfir_reference",
+                "contrasts": [
+                  5.185446345779855
+                ]
+              },
+              {
+                "value": "smooth_reference",
+                "color": "#d55e00",
+                "noncolor_encoding": "--//smooth_reference",
+                "contrasts": [
+                  3.8671837898669135
+                ]
+              }
+            ]
+          },
+          "series_styles": {
+            "schema": "plot_series_styles_v1",
+            "registry_id": "magnetic_palc_validation_v1",
+            "styles": [
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "o"
+              },
+              {
+                "series_id": "u_density",
+                "color": "#0072b2",
+                "linestyle": "-.",
+                "marker": ""
+              },
+              {
+                "series_id": "d_density",
+                "color": "#d55e00",
+                "linestyle": ":",
+                "marker": ""
+              }
+            ],
+            "selected_ids": [
+              "current_p32",
+              "mfir_reference",
+              "smooth_reference"
+            ]
+          },
+          "typography_exception": "dense_composite_review_compact_typography",
+          "font": {
+            "schema": "plot_font_resolution_v1",
+            "requested": "Times New Roman",
+            "candidates": [
+              "Times New Roman",
+              "Times",
+              "STIXGeneral"
+            ],
+            "policy": "candidate_fallback",
+            "resolved": "Times New Roman",
+            "selected": "Times New Roman",
+            "path": "C:\\Windows\\Fonts\\times.ttf",
+            "bytes": 1190952,
+            "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+            "fallback_used": false,
+            "missing_candidates": [],
+            "mathtext_fontset": "stix"
+          }
+        },
+        "scientific_note": "T=5 MeV; a=0.0108805 for all curves. Current diagnostic uses the unsplit p32 kernel; references use independent Fermi-surface-resolved quadrature. Regulators are different."
+      }
+    },
+    {
+      "figure_id": "weak_field_thesis_features",
+      "chart": {
+        "asset_id": "weak_field_thesis_features",
+        "png": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/weak_field_thesis_features.png"
+      },
+      "record": {
+        "generated_at_utc": "2026-11-12T08:23:56.867662+00:00",
+        "asset_id": "weak_field_thesis_features",
+        "axes": [
+          {
+            "field": "muB_MeV",
+            "source_unit": "MeV",
+            "display_unit": "MeV",
+            "label": "$\\mu_B\\;(\\mathrm{MeV})$"
+          },
+          {
+            "field": "rhoB_over_rho0",
+            "source_unit": "dimensionless",
+            "display_unit": "dimensionless",
+            "label": "$\\rho_B/\\rho_0$"
+          }
+        ],
+        "series": [
+          {
+            "series_id": "smooth_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "thesis_points",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          }
+        ],
+        "selection_rule": "T=5 MeV, eB=0.05 GeV2. Five preselected paper fold features; readout ranges are pixel-selection and calibration ranges, not statistical errors. Native curve is unshifted.",
+        "outputs": [
+          {
+            "path": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/weak_field_thesis_features.png",
+            "path_kind": "repository_relative",
+            "format": "png",
+            "dpi": 600,
+            "vector": false,
+            "bytes": 209727,
+            "sha256": "cbaf5f78a198c34b9cf94e96b6fb067287619a7a04b8296bb8b326e633367ed3",
+            "inspection": {
+              "size_pixels": [
+                4050,
+                2400
+              ],
+              "actual_dpi": [
+                599.9988,
+                599.9988
+              ],
+              "physical_size_inches": [
+                6.750013500027,
+                4.000008000016
+              ]
+            }
+          }
+        ],
+        "rendering": {
+          "column": "double_column",
+          "figure_size_inches": [
+            6.75,
+            4.0
+          ],
+          "size_override_reason": "three magnetic panels with one shared key; heights vary with quantities",
+          "color_route": "undecided_review",
+          "legend_policy": "shared_external_then_case_review",
+          "quality": {
+            "figure_size_inches": [
+              6.75,
+              4.0
+            ],
+            "intended_width_inches": 6.75,
+            "placement_scale": 1.0,
+            "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+            "actual_fonts": [
+              {
+                "path": "C:\\Windows\\Fonts\\times.ttf",
+                "resolved": "Times New Roman",
+                "bytes": 1190952,
+                "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+                "roles": [
+                  "text"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneral.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 448228,
+                "sha256": "167378031e2dddc6216d67819c9260e9a06ffc4c478e4e23cb98a6fd44b183c2",
+                "roles": [
+                  "mathtext"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneralItalic.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 175040,
+                "sha256": "6cfcb333d22b7c3c623bdfd40174f14c85c3d6731ca6166c1edc80140eae8527",
+                "roles": [
+                  "mathtext"
+                ]
+              }
+            ],
+            "series_styles": [
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "o"
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "|"
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "|"
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "_"
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "_"
+              }
+            ],
+            "minimum_capital_numeral_height_mm": 2.096211067708333,
+            "minimum_primary_capital_numeral_height_mm": 3.036148871527778,
+            "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+            "smallest_glyphs": [
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "M",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 3.036148871527778,
+                "role": "primary"
+              },
+              {
+                "text": "Thesis regulator",
+                "glyph": "T",
+                "font": "times.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 3.036865451388889,
+                "role": "primary"
+              },
+              {
+                "text": "Thesis Fig. 5-3",
+                "glyph": "T",
+                "font": "times.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 3.036865451388889,
+                "role": "primary"
+              },
+              {
+                "text": "Thesis Fig. 5-3",
+                "glyph": "F",
+                "font": "times.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 3.036865451388889,
+                "role": "primary"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "V",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 3.0863094618055555,
+                "role": "primary"
+              }
+            ],
+            "minimum_curve_linewidth_pt": 1.2,
+            "minimum_landmark_diameter_mm": 1.5875,
+            "tick_axes": [
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 7,
+                "minor_count": 8,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 6,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              }
+            ],
+            "clipped_text": [],
+            "text_overlap_pairs": [],
+            "legend_axes_overlap_count": 0,
+            "legend_count": 1,
+            "legend_layout": [
+              {
+                "legend_index": 0,
+                "host_axes_index": null,
+                "overlapped_axes": [],
+                "contained_in_host": null,
+                "title": "",
+                "labels": [
+                  "Thesis regulator",
+                  "Thesis Fig. 5-3"
+                ],
+                "bbox_inches": [
+                  1.8345138888888892,
+                  3.558888888888889,
+                  3.6209722222222216,
+                  0.31083333333333313
+                ]
+              }
+            ],
+            "legend_pair_overlap_count": 0,
+            "legend_pair_overlaps": [],
+            "legend_curve_overlap_count": 0,
+            "legend_curve_overlaps": [],
+            "legend_landmark_overlap_count": 0,
+            "legend_landmark_overlaps": [],
+            "legend_in_axes_overflow_count": 0,
+            "legend_in_axes_overflows": [],
+            "human_visual_review": "required",
+            "font": {
+              "schema": "plot_font_resolution_v1",
+              "requested": "Times New Roman",
+              "candidates": [
+                "Times New Roman",
+                "Times",
+                "STIXGeneral"
+              ],
+              "policy": "candidate_fallback",
+              "resolved": "Times New Roman",
+              "selected": "Times New Roman",
+              "path": "C:\\Windows\\Fonts\\times.ttf",
+              "bytes": 1190952,
+              "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+              "fallback_used": false,
+              "missing_candidates": [],
+              "mathtext_fontset": "stix"
+            }
+          },
+          "delivery_stage": "png_review",
+          "vector_delivery_pending": true,
+          "review_contract": "prd_review_v1",
+          "accessibility": {
+            "schema": "plot_accessibility_v1",
+            "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+            "minimum_contrast": 3.0,
+            "backgrounds": [
+              "#ffffff"
+            ],
+            "background_scope": "white axes; no fills or overlapping shaded bands",
+            "parameters": [
+              {
+                "value": "smooth_reference",
+                "color": "#d55e00",
+                "noncolor_encoding": "--//smooth_reference",
+                "contrasts": [
+                  3.8671837898669135
+                ]
+              },
+              {
+                "value": "thesis_points",
+                "color": "#000000",
+                "noncolor_encoding": "None/o/thesis_points",
+                "contrasts": [
+                  21.0
+                ]
+              }
+            ]
+          },
+          "series_styles": {
+            "schema": "plot_series_styles_v1",
+            "registry_id": "magnetic_palc_validation_v1",
+            "styles": [
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "o"
+              },
+              {
+                "series_id": "u_density",
+                "color": "#0072b2",
+                "linestyle": "-.",
+                "marker": ""
+              },
+              {
+                "series_id": "d_density",
+                "color": "#d55e00",
+                "linestyle": ":",
+                "marker": ""
+              }
+            ],
+            "selected_ids": [
+              "smooth_reference",
+              "thesis_points"
+            ]
+          },
+          "typography_exception": "dense_composite_review_compact_typography",
+          "font": {
+            "schema": "plot_font_resolution_v1",
+            "requested": "Times New Roman",
+            "candidates": [
+              "Times New Roman",
+              "Times",
+              "STIXGeneral"
+            ],
+            "policy": "candidate_fallback",
+            "resolved": "Times New Roman",
+            "selected": "Times New Roman",
+            "path": "C:\\Windows\\Fonts\\times.ttf",
+            "bytes": 1190952,
+            "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+            "fallback_used": false,
+            "missing_candidates": [],
+            "mathtext_fontset": "stix"
+          }
+        },
+        "scientific_note": "T=5 MeV, eB=0.05 GeV2. Five preselected paper fold features; readout ranges are pixel-selection and calibration ranges, not statistical errors. Native curve is unshifted."
+      }
+    },
+    {
+      "figure_id": "constituent_masses",
+      "chart": {
+        "asset_id": "constituent_masses",
+        "png": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/constituent_masses.png"
+      },
+      "record": {
+        "generated_at_utc": "2026-11-12T08:23:59.733059+00:00",
+        "asset_id": "constituent_masses",
+        "axes": [
+          {
+            "field": "muB_MeV",
+            "source_unit": "MeV",
+            "display_unit": "MeV",
+            "label": "$\\mu_B\\;(\\mathrm{MeV})$"
+          },
+          {
+            "field": "masses_MeV",
+            "source_unit": "MeV",
+            "display_unit": "MeV",
+            "label": "$M_{u,d}\\;(\\mathrm{MeV})$"
+          }
+        ],
+        "series": [
+          {
+            "series_id": "mfir_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "smooth_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          }
+        ],
+        "selection_rule": "T=5 MeV, flavors in separate rows. Strong-field smooth vacuum masses reproduce the chapter-5 431/400 MeV quoted values; no regulator retuning.",
+        "outputs": [
+          {
+            "path": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/constituent_masses.png",
+            "path_kind": "repository_relative",
+            "format": "png",
+            "dpi": 600,
+            "vector": false,
+            "bytes": 487942,
+            "sha256": "0e6b323a40b598c49cdab5b0333bcd1b712e6099169595a7eaea45d910487927",
+            "inspection": {
+              "size_pixels": [
+                4050,
+                3300
+              ],
+              "actual_dpi": [
+                599.9988,
+                599.9988
+              ],
+              "physical_size_inches": [
+                6.750013500027,
+                5.500011000022001
+              ]
+            }
+          }
+        ],
+        "rendering": {
+          "column": "double_column",
+          "figure_size_inches": [
+            6.75,
+            5.5
+          ],
+          "size_override_reason": "three magnetic panels with one shared key; heights vary with quantities",
+          "color_route": "undecided_review",
+          "legend_policy": "shared_external_then_case_review",
+          "quality": {
+            "figure_size_inches": [
+              6.75,
+              5.5
+            ],
+            "intended_width_inches": 6.75,
+            "placement_scale": 1.0,
+            "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+            "actual_fonts": [
+              {
+                "path": "C:\\Windows\\Fonts\\times.ttf",
+                "resolved": "Times New Roman",
+                "bytes": 1190952,
+                "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+                "roles": [
+                  "text"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneral.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 448228,
+                "sha256": "167378031e2dddc6216d67819c9260e9a06ffc4c478e4e23cb98a6fd44b183c2",
+                "roles": [
+                  "mathtext"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneralItalic.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 175040,
+                "sha256": "6cfcb333d22b7c3c623bdfd40174f14c85c3d6731ca6166c1edc80140eae8527",
+                "roles": [
+                  "mathtext"
+                ]
+              }
+            ],
+            "series_styles": [
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              }
+            ],
+            "minimum_capital_numeral_height_mm": 2.096211067708333,
+            "minimum_primary_capital_numeral_height_mm": 2.994587239583333,
+            "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+            "smallest_glyphs": [
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.05\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.155\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$eB=0.4\\;\\mathrm{GeV}^2$",
+                "glyph": "2",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.1699471354166664,
+                "role": "script"
+              },
+              {
+                "text": "$M_u\\;(\\mathrm{MeV})$",
+                "glyph": "M",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 2.994587239583333,
+                "role": "primary"
+              },
+              {
+                "text": "$eB=0.05\\;\\mathrm{GeV}^2$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 13.0,
+                "final_height_mm": 2.994587239583333,
+                "role": "primary"
+              }
+            ],
+            "minimum_curve_linewidth_pt": 1.2,
+            "minimum_landmark_diameter_mm": null,
+            "tick_axes": [
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 2,
+                "minor_count": 2,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              }
+            ],
+            "clipped_text": [],
+            "text_overlap_pairs": [
+              [
+                "500",
+                "0"
+              ],
+              [
+                "500",
+                "0"
+              ],
+              [
+                "500",
+                "0"
+              ]
+            ],
+            "legend_axes_overlap_count": 1,
+            "legend_count": 1,
+            "legend_layout": [
+              {
+                "legend_index": 0,
+                "host_axes_index": 0,
+                "overlapped_axes": [
+                  0
+                ],
+                "contained_in_host": false,
+                "title": "",
+                "labels": [
+                  "MFIR",
+                  "Thesis regulator"
+                ],
+                "bbox_inches": [
+                  0.8665277777777777,
+                  3.0488626834381547,
+                  1.815,
+                  0.5675
+                ]
+              }
+            ],
+            "legend_pair_overlap_count": 0,
+            "legend_pair_overlaps": [],
+            "legend_curve_overlap_count": 2,
+            "legend_curve_overlaps": [
+              {
+                "legend_index": 0,
+                "axis_index": 0,
+                "line_index": 0,
+                "label": "MFIR"
+              },
+              {
+                "legend_index": 0,
+                "axis_index": 0,
+                "line_index": 1,
+                "label": "Thesis regulator"
+              }
+            ],
+            "legend_landmark_overlap_count": 0,
+            "legend_landmark_overlaps": [],
+            "legend_in_axes_overflow_count": 1,
+            "legend_in_axes_overflows": [
+              0
+            ],
+            "human_visual_review": "required",
+            "font": {
+              "schema": "plot_font_resolution_v1",
+              "requested": "Times New Roman",
+              "candidates": [
+                "Times New Roman",
+                "Times",
+                "STIXGeneral"
+              ],
+              "policy": "candidate_fallback",
+              "resolved": "Times New Roman",
+              "selected": "Times New Roman",
+              "path": "C:\\Windows\\Fonts\\times.ttf",
+              "bytes": 1190952,
+              "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+              "fallback_used": false,
+              "missing_candidates": [],
+              "mathtext_fontset": "stix"
+            }
+          },
+          "delivery_stage": "png_review",
+          "vector_delivery_pending": true,
+          "review_contract": "prd_review_v1",
+          "accessibility": {
+            "schema": "plot_accessibility_v1",
+            "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+            "minimum_contrast": 3.0,
+            "backgrounds": [
+              "#ffffff"
+            ],
+            "background_scope": "white axes; no fills or overlapping shaded bands",
+            "parameters": [
+              {
+                "value": "mfir_reference",
+                "color": "#0072b2",
+                "noncolor_encoding": "-//mfir_reference",
+                "contrasts": [
+                  5.185446345779855
+                ]
+              },
+              {
+                "value": "smooth_reference",
+                "color": "#d55e00",
+                "noncolor_encoding": "--//smooth_reference",
+                "contrasts": [
+                  3.8671837898669135
+                ]
+              }
+            ]
+          },
+          "series_styles": {
+            "schema": "plot_series_styles_v1",
+            "registry_id": "magnetic_palc_validation_v1",
+            "styles": [
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "o"
+              },
+              {
+                "series_id": "u_density",
+                "color": "#0072b2",
+                "linestyle": "-.",
+                "marker": ""
+              },
+              {
+                "series_id": "d_density",
+                "color": "#d55e00",
+                "linestyle": ":",
+                "marker": ""
+              }
+            ],
+            "selected_ids": [
+              "mfir_reference",
+              "smooth_reference"
+            ]
+          },
+          "typography_exception": "dense_composite_review_compact_typography",
+          "font": {
+            "schema": "plot_font_resolution_v1",
+            "requested": "Times New Roman",
+            "candidates": [
+              "Times New Roman",
+              "Times",
+              "STIXGeneral"
+            ],
+            "policy": "candidate_fallback",
+            "resolved": "Times New Roman",
+            "selected": "Times New Roman",
+            "path": "C:\\Windows\\Fonts\\times.ttf",
+            "bytes": 1190952,
+            "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+            "fallback_used": false,
+            "missing_candidates": [],
+            "mathtext_fontset": "stix"
+          }
+        },
+        "scientific_note": "T=5 MeV, flavors in separate rows. Strong-field smooth vacuum masses reproduce the chapter-5 431/400 MeV quoted values; no regulator retuning."
+      }
+    },
+    {
+      "figure_id": "strong_field_flavor_and_antiS",
+      "chart": {
+        "asset_id": "strong_field_flavor_and_antiS",
+        "png": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/strong_field_flavor_and_antiS.png"
+      },
+      "record": {
+        "generated_at_utc": "2026-11-12T08:24:01.570338+00:00",
+        "asset_id": "strong_field_flavor_and_antiS",
+        "axes": [
+          {
+            "field": "muB_MeV",
+            "source_unit": "MeV",
+            "display_unit": "MeV",
+            "label": "$\\mu_B\\;(\\mathrm{MeV})$"
+          },
+          {
+            "field": "rhoB_over_rho0",
+            "source_unit": "dimensionless",
+            "display_unit": "dimensionless",
+            "label": "$\\rho_B/\\rho_0$"
+          },
+          {
+            "field": "rho_f/rho0",
+            "source_unit": "dimensionless",
+            "display_unit": "dimensionless",
+            "label": "$\\rho_f/\\rho_0$"
+          }
+        ],
+        "series": [
+          {
+            "series_id": "u_density",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "d_density",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          },
+          {
+            "series_id": "smooth_reference",
+            "state": "diagnostic",
+            "support_rule": "saved native branch vertices and separately calibrated paper features",
+            "mask_rule": "no synthetic point, smoothing, root rejection or gap fill"
+          }
+        ],
+        "selection_rule": "eB=0.4 GeV2, T=5 MeV, thesis regulator; density flavors split as in Fig5-4 and anti-S as in Fig5-5. No phase/Maxwell calculation.",
+        "outputs": [
+          {
+            "path": "data/outputs/figures/pnjl/magnetic_palc_validation/20261112_png_review/strong_field_flavor_and_antiS.png",
+            "path_kind": "repository_relative",
+            "format": "png",
+            "dpi": 600,
+            "vector": false,
+            "bytes": 229293,
+            "sha256": "76689644d144dc84a7d4a47053d1931a62a106544eaa285324ebe4b52e585325",
+            "inspection": {
+              "size_pixels": [
+                4050,
+                2130
+              ],
+              "actual_dpi": [
+                599.9988,
+                599.9988
+              ],
+              "physical_size_inches": [
+                6.750013500027,
+                3.5500071000142004
+              ]
+            }
+          }
+        ],
+        "rendering": {
+          "column": "double_column",
+          "figure_size_inches": [
+            6.75,
+            3.55
+          ],
+          "size_override_reason": "three magnetic panels with one shared key; heights vary with quantities",
+          "color_route": "undecided_review",
+          "legend_policy": "shared_external_then_case_review",
+          "quality": {
+            "figure_size_inches": [
+              6.75,
+              3.55
+            ],
+            "intended_width_inches": 6.75,
+            "placement_scale": 1.0,
+            "glyph_measurement": "font outline heights of displayed ASCII capitals/numerals, including math scripts; em size is not glyph height",
+            "actual_fonts": [
+              {
+                "path": "C:\\Windows\\Fonts\\times.ttf",
+                "resolved": "Times New Roman",
+                "bytes": 1190952,
+                "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+                "roles": [
+                  "text"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneral.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 448228,
+                "sha256": "167378031e2dddc6216d67819c9260e9a06ffc4c478e4e23cb98a6fd44b183c2",
+                "roles": [
+                  "mathtext"
+                ]
+              },
+              {
+                "path": "D:\\Python313\\Lib\\site-packages\\matplotlib\\mpl-data\\fonts\\ttf\\STIXGeneralItalic.ttf",
+                "resolved": "STIXGeneral",
+                "bytes": 175040,
+                "sha256": "6cfcb333d22b7c3c623bdfd40174f14c85c3d6731ca6166c1edc80140eae8527",
+                "roles": [
+                  "mathtext"
+                ]
+              }
+            ],
+            "series_styles": [
+              {
+                "series_id": "u_density",
+                "color": "#0072b2",
+                "linestyle": "-.",
+                "marker": ""
+              },
+              {
+                "series_id": "d_density",
+                "color": "#d55e00",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              }
+            ],
+            "minimum_capital_numeral_height_mm": 2.096211067708333,
+            "minimum_primary_capital_numeral_height_mm": 3.036148871527778,
+            "minimum_script_capital_numeral_height_mm": 2.096211067708333,
+            "smallest_glyphs": [
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\mu_B\\;(\\mathrm{MeV})$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "B",
+                "font": "STIXGeneralItalic.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.096211067708333,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_u/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_d/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_f/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              },
+              {
+                "text": "$\\rho_B/\\rho_0$",
+                "glyph": "0",
+                "font": "STIXGeneral.ttf",
+                "source_size_pt": 9.1,
+                "final_height_mm": 2.2150916666666665,
+                "role": "script"
+              }
+            ],
+            "minimum_curve_linewidth_pt": 1.2,
+            "minimum_landmark_diameter_mm": null,
+            "tick_axes": [
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 3,
+                "minor_count": 3,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 5,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "x",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 5,
+                "minor_count": 4,
+                "inward": true,
+                "both_sides": true
+              },
+              {
+                "axis": "y",
+                "scale": "linear",
+                "minor_locator": "AutoMinorLocator",
+                "major_count": 3,
+                "minor_count": 3,
+                "inward": true,
+                "both_sides": true
+              }
+            ],
+            "clipped_text": [],
+            "text_overlap_pairs": [],
+            "legend_axes_overlap_count": 0,
+            "legend_count": 1,
+            "legend_layout": [
+              {
+                "legend_index": 0,
+                "host_axes_index": null,
+                "overlapped_axes": [],
+                "contained_in_host": null,
+                "title": "",
+                "labels": [
+                  "$\\rho_u/\\rho_0$",
+                  "$\\rho_d/\\rho_0$"
+                ],
+                "bbox_inches": [
+                  2.5703153415256077,
+                  3.0797777777777777,
+                  2.1493693169487846,
+                  0.34444444444444455
+                ]
+              }
+            ],
+            "legend_pair_overlap_count": 0,
+            "legend_pair_overlaps": [],
+            "legend_curve_overlap_count": 0,
+            "legend_curve_overlaps": [],
+            "legend_landmark_overlap_count": 0,
+            "legend_landmark_overlaps": [],
+            "legend_in_axes_overflow_count": 0,
+            "legend_in_axes_overflows": [],
+            "human_visual_review": "required",
+            "font": {
+              "schema": "plot_font_resolution_v1",
+              "requested": "Times New Roman",
+              "candidates": [
+                "Times New Roman",
+                "Times",
+                "STIXGeneral"
+              ],
+              "policy": "candidate_fallback",
+              "resolved": "Times New Roman",
+              "selected": "Times New Roman",
+              "path": "C:\\Windows\\Fonts\\times.ttf",
+              "bytes": 1190952,
+              "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+              "fallback_used": false,
+              "missing_candidates": [],
+              "mathtext_fontset": "stix"
+            }
+          },
+          "delivery_stage": "png_review",
+          "vector_delivery_pending": true,
+          "review_contract": "prd_review_v1",
+          "accessibility": {
+            "schema": "plot_accessibility_v1",
+            "criterion": "WCAG 2.2 1.4.1 and 1.4.11 (AA)",
+            "minimum_contrast": 3.0,
+            "backgrounds": [
+              "#ffffff"
+            ],
+            "background_scope": "white axes; no fills or overlapping shaded bands",
+            "parameters": [
+              {
+                "value": "u_density",
+                "color": "#0072b2",
+                "noncolor_encoding": "-.//u_density",
+                "contrasts": [
+                  5.185446345779855
+                ]
+              },
+              {
+                "value": "d_density",
+                "color": "#d55e00",
+                "noncolor_encoding": "://d_density",
+                "contrasts": [
+                  3.8671837898669135
+                ]
+              },
+              {
+                "value": "smooth_reference",
+                "color": "#d55e00",
+                "noncolor_encoding": "--//smooth_reference",
+                "contrasts": [
+                  3.8671837898669135
+                ]
+              }
+            ]
+          },
+          "series_styles": {
+            "schema": "plot_series_styles_v1",
+            "registry_id": "magnetic_palc_validation_v1",
+            "styles": [
+              {
+                "series_id": "current_p32",
+                "color": "#ad5e8d",
+                "linestyle": ":",
+                "marker": ""
+              },
+              {
+                "series_id": "mfir_reference",
+                "color": "#0072b2",
+                "linestyle": "-",
+                "marker": ""
+              },
+              {
+                "series_id": "smooth_reference",
+                "color": "#d55e00",
+                "linestyle": "--",
+                "marker": ""
+              },
+              {
+                "series_id": "thesis_points",
+                "color": "#000000",
+                "linestyle": "None",
+                "marker": "o"
+              },
+              {
+                "series_id": "u_density",
+                "color": "#0072b2",
+                "linestyle": "-.",
+                "marker": ""
+              },
+              {
+                "series_id": "d_density",
+                "color": "#d55e00",
+                "linestyle": ":",
+                "marker": ""
+              }
+            ],
+            "selected_ids": [
+              "u_density",
+              "d_density",
+              "smooth_reference"
+            ]
+          },
+          "typography_exception": "dense_composite_review_compact_typography",
+          "font": {
+            "schema": "plot_font_resolution_v1",
+            "requested": "Times New Roman",
+            "candidates": [
+              "Times New Roman",
+              "Times",
+              "STIXGeneral"
+            ],
+            "policy": "candidate_fallback",
+            "resolved": "Times New Roman",
+            "selected": "Times New Roman",
+            "path": "C:\\Windows\\Fonts\\times.ttf",
+            "bytes": 1190952,
+            "sha256": "0bf1b21b27b370039b60eca23d532c3fe3fb308750d8f13816db70a6cb666804",
+            "fallback_used": false,
+            "missing_candidates": [],
+            "mathtext_fontset": "stix"
+          }
+        },
+        "scientific_note": "eB=0.4 GeV2, T=5 MeV, thesis regulator; density flavors split as in Fig5-4 and anti-S as in Fig5-5. No phase/Maxwell calculation."
+      }
+    }
+  ]
+}

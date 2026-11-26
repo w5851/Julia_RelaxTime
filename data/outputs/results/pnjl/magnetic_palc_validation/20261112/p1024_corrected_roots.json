@@ -1,0 +1,265 @@
+{
+  "julia_version": "1.12.5",
+  "source": "outputs\\current_mfir_p512_e04.json",
+  "cases": [
+    {
+      "eB_GeV2": 0.4,
+      "T_MeV": 5.0,
+      "p_num": 1024,
+      "targets": [
+        {
+          "muB_MeV": 900.0,
+          "source_root_count": 3,
+          "corrected_root_count": 3,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -2.396977499666926,
+                -1.9325386189859683,
+                -2.269042117301619,
+                1.1125314301384523e-10,
+                1.3021813606809551e-6
+              ],
+              "residual_norm": 5.158251205990983e-10,
+              "omega": -20.651969398233447,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -2.0561802721382283,
+                -0.9556983510890279,
+                -2.159373395008514,
+                0.013711208491965492,
+                0.01668614667660256
+              ],
+              "residual_norm": 9.08393211317452e-16,
+              "omega": -20.60678350213689,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -0.046936186210766014,
+                -0.06898668704028675,
+                -2.0572084984220593,
+                0.003862799165016295,
+                0.0038543297290373393
+              ],
+              "residual_norm": 4.728019036595194e-15,
+              "omega": -21.123557258151095,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1000.0,
+          "source_root_count": 3,
+          "corrected_root_count": 3,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -2.396966378692893,
+                -1.9324383299517327,
+                -2.2690326510154804,
+                6.86602184060865e-5,
+                0.0010242167562463593
+              ],
+              "residual_norm": 9.257048734309119e-13,
+              "omega": -20.65196994360548,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -2.3863127829780955,
+                -1.8375254968508177,
+                -2.260000078294187,
+                0.005613341194094556,
+                0.007882279307974522
+              ],
+              "residual_norm": 3.2045478398711515e-10,
+              "omega": -20.65073147719709,
+              "physical": true,
+              "iterations": 0
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -0.03283484814888513,
+                -0.055656086447280435,
+                -2.0571266691273946,
+                0.0038623382147768915,
+                0.0038484258919391397
+              ],
+              "residual_norm": 9.83321710101109e-15,
+              "omega": -21.54641581792682,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1050.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.027740068401019523,
+                -0.05072290782320538,
+                -2.0571021987985376,
+                0.003833761167630295,
+                0.0038443117364188807
+              ],
+              "residual_norm": 9.92618885420643e-14,
+              "omega": -21.77460369424361,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1100.0,
+          "source_root_count": 3,
+          "corrected_root_count": 3,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.02349066578108686,
+                -0.04654973182651577,
+                -2.057081745550475,
+                0.0038600969221730948,
+                0.003905408664050232
+              ],
+              "residual_norm": 1.7354781904287839e-13,
+              "omega": -22.013949624604155,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -0.022478599067494765,
+                -0.04531037576941399,
+                -1.7388066501014998,
+                0.010257559458845157,
+                0.009125107261453822
+              ],
+              "residual_norm": 1.479087038275727e-13,
+              "omega": -21.999703258242892,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -0.021119790126340392,
+                -0.04369777343669712,
+                -1.2816164924116569,
+                0.0061324336379715485,
+                0.00606828146642339
+              ],
+              "residual_norm": 1.6342188802390083e-13,
+              "omega": -22.0079469419297,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1150.0,
+          "source_root_count": 3,
+          "corrected_root_count": 3,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.019887646456241286,
+                -0.042961902612570706,
+                -2.0569256592232676,
+                0.003942297500773577,
+                0.004837794995849124
+              ],
+              "residual_norm": 4.1593685758003136e-14,
+              "omega": -22.264454222047096,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 2,
+              "converged": true,
+              "x_state": [
+                -0.019607435619881795,
+                -0.04261349167415933,
+                -1.9457130575076431,
+                0.010469421247175049,
+                0.012318453589930323
+              ],
+              "residual_norm": 3.384438388456793e-14,
+              "omega": -22.262687502345848,
+              "physical": true,
+              "iterations": 2
+            },
+            {
+              "source_index": 3,
+              "converged": true,
+              "x_state": [
+                -0.01765599735234891,
+                -0.04028307023369534,
+                -1.1177596638202345,
+                0.0057640160506723095,
+                0.005712805160874635
+              ],
+              "residual_norm": 2.8431554443601115e-14,
+              "omega": -22.311759538918157,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        },
+        {
+          "muB_MeV": 1200.0,
+          "source_root_count": 1,
+          "corrected_root_count": 1,
+          "roots": [
+            {
+              "source_index": 1,
+              "converged": true,
+              "x_state": [
+                -0.014862956202755045,
+                -0.037524199959661976,
+                -1.014760106810821,
+                0.005583992384042541,
+                0.005541706167855559
+              ],
+              "residual_norm": 1.0464085528391839e-13,
+              "omega": -22.636039893437914,
+              "physical": true,
+              "iterations": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

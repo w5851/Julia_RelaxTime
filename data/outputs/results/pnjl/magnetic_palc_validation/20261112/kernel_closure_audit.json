@@ -1,0 +1,881 @@
+{
+  "julia_version": "1.12.5",
+  "input": "kernel_closure_inputs.json",
+  "fold_source": "outputs/thesis_equation_audit.json",
+  "states": [
+    {
+      "input": {
+        "id": "mfir_vacuum",
+        "route": "mfir",
+        "eB_GeV2": 0.05,
+        "muB_MeV": 500.0,
+        "x_state": [
+          -1.8562381376402848,
+          -1.8454373138979618,
+          -2.227751215910609,
+          8.688502898492332e-15,
+          -2.7319082149520527e-11
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 8.637283209439813e-12,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -5.9188209888816345e-12,
+          "rho_delta": 1.028666783228886e-33,
+          "gap_delta": 8.318011993756241e-13,
+          "gradient_delta": 9.458453200833917e-13,
+          "chain_rule_error": 9.359769118707868e-16
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -5.9188209888816345e-12,
+          "rho_delta": 1.0286667832288893e-33,
+          "gap_delta": 8.318011993756241e-13,
+          "gradient_delta": 9.458453200833917e-13,
+          "chain_rule_error": 9.359769118707868e-16
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -5.9188209888816345e-12,
+          "rho_delta": 1.0286667832288888e-33,
+          "gap_delta": 8.318011993756241e-13,
+          "gradient_delta": 9.458453200833917e-13,
+          "chain_rule_error": 9.359769118707868e-16
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -5.9188209888816345e-12,
+          "rho_delta": 1.028666783228889e-33,
+          "gap_delta": 8.318011993756241e-13,
+          "gradient_delta": 9.458453200833917e-13,
+          "chain_rule_error": 9.359769118707868e-16
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -5.9188209888816345e-12,
+          "rho_delta": 1.0286667832288902e-33,
+          "gap_delta": 8.318011993756241e-13,
+          "gradient_delta": 9.458453200833917e-13,
+          "chain_rule_error": 9.359769118707868e-16
+        }
+      ],
+      "reference_high_gap_delta": 0.0,
+      "reference_high_rho_delta": 0.0,
+      "reference_tail_gap_delta": 0.0,
+      "reference_tail_rho_delta": 1.0286402858979378e-33
+    },
+    {
+      "input": {
+        "id": "mfir_low_T_fold_region",
+        "route": "mfir",
+        "eB_GeV2": 0.155,
+        "muB_MeV": 1050.0,
+        "x_state": [
+          -0.15824088193566105,
+          -0.17273752826013897,
+          -2.0684407280475203,
+          0.004348776062284236,
+          0.004027535211650463
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 5.030435172561888e-13,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -0.0008595887285665071,
+          "rho_delta": 0.006240306744251339,
+          "gap_delta": 0.0006087764722902989,
+          "gradient_delta": 0.0007469747066236037,
+          "chain_rule_error": 2.2338572057750554e-16
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -4.213849386758284e-6,
+          "rho_delta": 0.0016154895852337958,
+          "gap_delta": 0.00016769452178870537,
+          "gradient_delta": 0.00016136699738614308,
+          "chain_rule_error": 1.8128685476067995e-16
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -2.814456223632078e-9,
+          "rho_delta": 5.890656926483239e-5,
+          "gap_delta": 6.0896685357429125e-6,
+          "gradient_delta": 5.811885068538262e-6,
+          "chain_rule_error": 3.083645237614122e-16
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 7.369038712567999e-11,
+          "rho_delta": 6.74647917858371e-8,
+          "gap_delta": 6.9105058479163844e-9,
+          "gradient_delta": 6.570114471735141e-9,
+          "chain_rule_error": 2.386002506410999e-16
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -2.9949376312288223e-12,
+          "rho_delta": 5.608868256757743e-14,
+          "gap_delta": 2.2426660596814434e-12,
+          "gradient_delta": 2.1407253446600035e-12,
+          "chain_rule_error": 5.002273761057936e-17
+        }
+      ],
+      "reference_high_gap_delta": 0.0,
+      "reference_high_rho_delta": 5.048709793414476e-29,
+      "reference_tail_gap_delta": 0.0,
+      "reference_tail_rho_delta": 1.1102230246855936e-16
+    },
+    {
+      "input": {
+        "id": "mfir_worst_previous_p1024",
+        "route": "mfir",
+        "eB_GeV2": 0.4,
+        "muB_MeV": 1500.0,
+        "x_state": [
+          -0.004272484108051047,
+          -0.02665728377827982,
+          -0.6868466205458993,
+          0.005335251913605932,
+          0.006287267091507518
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 4.135402989028501e-13,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 0.005213924868826325,
+          "rho_delta": 0.08815304017729447,
+          "gap_delta": 0.017170461532819224,
+          "gradient_delta": 0.011426838978866647,
+          "chain_rule_error": 1.8044919110190372e-16
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -2.3529029675728452e-5,
+          "rho_delta": 0.007374684335109464,
+          "gap_delta": 0.0003767758804615945,
+          "gradient_delta": 0.0003014526165403872,
+          "chain_rule_error": 4.2020701394181067e-16
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.2429223374965659e-6,
+          "rho_delta": 0.0004116613263332035,
+          "gap_delta": 3.43574644952001e-5,
+          "gradient_delta": 2.4622536995715048e-5,
+          "chain_rule_error": 7.080323925611018e-16
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 4.828237365472887e-9,
+          "rho_delta": 3.7737679503487444e-7,
+          "gap_delta": 4.970246082206362e-8,
+          "gradient_delta": 7.132530810119348e-8,
+          "chain_rule_error": 1.3728434019356282e-15
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -4.260414243617561e-11,
+          "rho_delta": 2.0238728672809196e-11,
+          "gap_delta": 1.655041543578854e-8,
+          "gradient_delta": 1.0453508397347056e-8,
+          "chain_rule_error": 1.38630920332395e-16
+        }
+      ],
+      "reference_high_gap_delta": 0.0,
+      "reference_high_rho_delta": 0.0,
+      "reference_tail_gap_delta": 2.7755575615628914e-17,
+      "reference_tail_rho_delta": 2.220446049250313e-16
+    },
+    {
+      "input": {
+        "id": "landau_legacy_vacuum",
+        "route": "landau_legacy",
+        "eB_GeV2": 0.05,
+        "muB_MeV": 500.0,
+        "x_state": [
+          -1.9730860794311151,
+          -1.9612789183171673,
+          -2.3245474424603776,
+          -5.371169464814785e-21,
+          -1.2924697071141057e-26
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 7.531360728122733e-6,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -7.497487931829028e-6,
+          "rho_delta": 3.4045311075375785e-42,
+          "gap_delta": 4.7671312619641243e-7,
+          "gradient_delta": 5.281465516662495e-7,
+          "chain_rule_error": 1.6592026954321807e-15
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.7763568394002505e-14,
+          "rho_delta": 3.404531107537585e-42,
+          "gap_delta": 1.631687946612622e-15,
+          "gradient_delta": 1.6941898032496185e-15,
+          "chain_rule_error": 2.167956970184165e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.7763568394002505e-14,
+          "rho_delta": 3.404531107537585e-42,
+          "gap_delta": 2.5510982866352577e-15,
+          "gradient_delta": 2.8114439083347776e-15,
+          "chain_rule_error": 1.7695348880301608e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 6.750155989720952e-14,
+          "rho_delta": 3.404531107537587e-42,
+          "gap_delta": 5.777428238599253e-15,
+          "gradient_delta": 7.933009108692507e-15,
+          "chain_rule_error": 1.544496761777857e-15
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.0302869668521453e-13,
+          "rho_delta": 3.4045311075375765e-42,
+          "gap_delta": 7.007609531788139e-15,
+          "gradient_delta": 1.2301987417706548e-14,
+          "chain_rule_error": 4.178347522490307e-15
+        }
+      ],
+      "reference_high_gap_delta": 4.133802682441078e-10,
+      "reference_high_rho_delta": 0.0,
+      "reference_tail_gap_delta": 6.661338147750939e-16,
+      "reference_tail_rho_delta": 3.392947117739369e-42
+    },
+    {
+      "input": {
+        "id": "landau_legacy_low_T_fold_region",
+        "route": "landau_legacy",
+        "eB_GeV2": 0.155,
+        "muB_MeV": 1050.0,
+        "x_state": [
+          -0.21081046077353913,
+          -0.23122555485164925,
+          -2.153110882441904,
+          0.0044568189947181884,
+          0.004101009784060056
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 2.0694154917361528e-10,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -0.0009401971922571306,
+          "rho_delta": 0.004621751682451761,
+          "gap_delta": 0.0005847293145439042,
+          "gradient_delta": 0.0007809728470200524,
+          "chain_rule_error": 1.1446176296421193e-15
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 9.713421285084678e-6,
+          "rho_delta": 0.0014421091604925908,
+          "gap_delta": 0.00019062459438841625,
+          "gradient_delta": 0.00018311487877247475,
+          "chain_rule_error": 1.2451190692103855e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 2.9870366446971275e-7,
+          "rho_delta": 8.808991298082987e-6,
+          "gap_delta": 1.2213225522480758e-6,
+          "gradient_delta": 2.46330422900497e-6,
+          "chain_rule_error": 1.6696273806237505e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -8.313705279761052e-11,
+          "rho_delta": 6.057694371339103e-8,
+          "gap_delta": 7.996218566885286e-9,
+          "gradient_delta": 7.254228777564601e-9,
+          "chain_rule_error": 8.179797073867708e-16
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 6.039613253960852e-14,
+          "rho_delta": 6.005649833477858e-14,
+          "gap_delta": 1.0022222823284858e-14,
+          "gradient_delta": 7.403937636185272e-15,
+          "chain_rule_error": 2.770285320646877e-15
+        }
+      ],
+      "reference_high_gap_delta": 1.121174100459967e-14,
+      "reference_high_rho_delta": 9.466330862652142e-30,
+      "reference_tail_gap_delta": 2.7755575615628914e-16,
+      "reference_tail_rho_delta": 2.9770267290691575e-22
+    },
+    {
+      "input": {
+        "id": "landau_legacy_worst_previous_p1024",
+        "route": "landau_legacy",
+        "eB_GeV2": 0.4,
+        "muB_MeV": 1500.0,
+        "x_state": [
+          -0.007208496146236508,
+          -0.032812968950773715,
+          -0.8346865786329869,
+          0.00536802090432355,
+          0.006316048695912776
+        ],
+        "T_MeV": 5.0
+      },
+      "reference_gap": 3.276236274194185e-9,
+      "checks": [
+        {
+          "p_num": 128,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 0.003805699771383786,
+          "rho_delta": 0.08187825157619028,
+          "gap_delta": 0.009314299687649718,
+          "gradient_delta": 0.006578367184201249,
+          "chain_rule_error": 1.3534002307019225e-15
+        },
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -1.3119077539869295e-5,
+          "rho_delta": 0.007555110378939819,
+          "gap_delta": 0.0008917270019556033,
+          "gradient_delta": 0.0005812216441333383,
+          "chain_rule_error": 6.000263740828115e-16
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.4007690900541547e-6,
+          "rho_delta": 0.00040344629283006755,
+          "gap_delta": 1.09540074378454e-5,
+          "gradient_delta": 1.559449838858471e-5,
+          "chain_rule_error": 2.2111151073386653e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 4.949171739099256e-9,
+          "rho_delta": 3.4367338042520295e-7,
+          "gap_delta": 3.276353615583055e-8,
+          "gradient_delta": 6.783698328072818e-8,
+          "chain_rule_error": 3.042474539824558e-15
+        },
+        {
+          "p_num": 4096,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 5.3290705182007514e-14,
+          "rho_delta": 2.0134444553510165e-11,
+          "gap_delta": 3.0395695614726134e-13,
+          "gradient_delta": 5.363880093650637e-13,
+          "chain_rule_error": 4.7631157090669124e-15
+        }
+      ],
+      "reference_high_gap_delta": 1.5376188083298704e-15,
+      "reference_high_rho_delta": 0.0,
+      "reference_tail_gap_delta": 1.1102230246251565e-16,
+      "reference_tail_rho_delta": 4.965068306494546e-16
+    },
+    {
+      "input": {
+        "eB_GeV2": 0.05,
+        "T_MeV": 5.0,
+        "muB_MeV": 1154.0313523328255,
+        "route": "landau_legacy",
+        "id": "first_minimum",
+        "x_state": [
+          -1.8455629364016626,
+          -1.890195798741776,
+          -2.310242773325059,
+          0.0023825102542130126,
+          0.0019649496266357196
+        ]
+      },
+      "reference_gap": 1.8444418923678347e-15,
+      "checks": [
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.0658141036401503e-14,
+          "rho_delta": 4.241801378958812e-12,
+          "gap_delta": 4.1184834279202816e-12,
+          "gradient_delta": 3.430785255555149e-12,
+          "chain_rule_error": 1.0667420175035048e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 2.1316282072803006e-14,
+          "rho_delta": 2.7755575616144144e-17,
+          "gap_delta": 1.0175362097255202e-15,
+          "gradient_delta": 3.4751305733365605e-16,
+          "chain_rule_error": 4.406307803399269e-16
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 7.815970093361102e-14,
+          "rho_delta": 6.736447455069344e-17,
+          "gap_delta": 5.068262347813025e-15,
+          "gradient_delta": 5.389587678116313e-15,
+          "chain_rule_error": 1.2480361094510437e-15
+        }
+      ],
+      "reference_high_gap_delta": 4.036327483436316e-10,
+      "reference_high_rho_delta": 1.5515838457795457e-17,
+      "reference_tail_gap_delta": 5.438959822042073e-16,
+      "reference_tail_rho_delta": 6.938893905967802e-18
+    },
+    {
+      "input": {
+        "eB_GeV2": 0.05,
+        "T_MeV": 5.0,
+        "muB_MeV": 1192.1031363779489,
+        "route": "landau_legacy",
+        "id": "first_maximum",
+        "x_state": [
+          -1.711690556314699,
+          -1.7916635574966482,
+          -2.2937807200546465,
+          0.0018215361750841305,
+          0.002716339709234291
+        ]
+      },
+      "reference_gap": 3.250276274370909e-14,
+      "checks": [
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 2.8843416544077627e-10,
+          "rho_delta": 3.619388858183708e-6,
+          "gap_delta": 3.1578731599422564e-6,
+          "gradient_delta": 2.583776005519859e-6,
+          "chain_rule_error": 3.198449075861998e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 4.973799150320701e-14,
+          "rho_delta": 4.717033806672253e-10,
+          "gap_delta": 4.1052928246472626e-10,
+          "gradient_delta": 3.347824172855543e-10,
+          "chain_rule_error": 1.8989561381351943e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 7.815970093361102e-14,
+          "rho_delta": 1.5515838457803888e-16,
+          "gap_delta": 4.582949007081515e-15,
+          "gradient_delta": 6.051330666883802e-15,
+          "chain_rule_error": 2.252257758580941e-15
+        }
+      ],
+      "reference_high_gap_delta": 3.919623362542004e-10,
+      "reference_high_rho_delta": 3.1031676915590914e-17,
+      "reference_tail_gap_delta": 9.930136612989092e-16,
+      "reference_tail_rho_delta": 3.10316769160124e-17
+    },
+    {
+      "input": {
+        "eB_GeV2": 0.05,
+        "T_MeV": 5.0,
+        "muB_MeV": 1176.525123388724,
+        "route": "landau_legacy",
+        "id": "second_minimum",
+        "x_state": [
+          -1.6639093770024043,
+          -1.6636296912977306,
+          -2.281696566615942,
+          0.0024635651961796385,
+          0.002161159860430899
+        ]
+      },
+      "reference_gap": 5.164856770381574e-15,
+      "checks": [
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -2.366327933600587e-8,
+          "rho_delta": 7.579097975177974e-6,
+          "gap_delta": 6.4924545259047695e-6,
+          "gradient_delta": 6.3947742207182715e-6,
+          "chain_rule_error": 1.1738379535277494e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -4.927613872496295e-12,
+          "rho_delta": 1.8461946275599813e-9,
+          "gap_delta": 1.5919110667542627e-9,
+          "gradient_delta": 1.5601500080080309e-9,
+          "chain_rule_error": 9.526444284936417e-16
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 3.907985046680551e-14,
+          "rho_delta": 5.55111512317122e-17,
+          "gap_delta": 4.9848890172662694e-15,
+          "gradient_delta": 5.354989115561812e-15,
+          "chain_rule_error": 1.3509431827575815e-15
+        }
+      ],
+      "reference_high_gap_delta": 3.815028234955808e-10,
+      "reference_high_rho_delta": 4.237045877651919e-33,
+      "reference_tail_gap_delta": 5.438959822042073e-16,
+      "reference_tail_rho_delta": 2.2458484882527605e-22
+    },
+    {
+      "input": {
+        "eB_GeV2": 0.05,
+        "T_MeV": 5.0,
+        "muB_MeV": 1194.5402753843978,
+        "route": "landau_legacy",
+        "id": "second_maximum",
+        "x_state": [
+          -1.5793653950185589,
+          -1.5209134273260663,
+          -2.2663741176016035,
+          0.002313165683581064,
+          0.004187345370947683
+        ]
+      },
+      "reference_gap": 3.7582307755387395e-14,
+      "checks": [
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 2.2979637037678913e-7,
+          "rho_delta": 2.224034193924931e-5,
+          "gap_delta": 1.7040322465814487e-5,
+          "gradient_delta": 1.675934057876723e-5,
+          "chain_rule_error": 2.3562781166218484e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 1.5003109865574515e-10,
+          "rho_delta": 6.884179066965541e-8,
+          "gap_delta": 5.4042186699226824e-8,
+          "gradient_delta": 5.49851713676593e-8,
+          "chain_rule_error": 1.5580745395338673e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 4.263256414560601e-14,
+          "rho_delta": 2.72345409070415e-13,
+          "gap_delta": 2.1490579946955742e-13,
+          "gradient_delta": 1.9870664196003732e-13,
+          "chain_rule_error": 7.638520821014252e-16
+        }
+      ],
+      "reference_high_gap_delta": 3.692031812158798e-10,
+      "reference_high_rho_delta": 1.232595164407831e-31,
+      "reference_tail_gap_delta": 4.965068306494546e-16,
+      "reference_tail_rho_delta": 3.519046645702767e-22
+    },
+    {
+      "input": {
+        "eB_GeV2": 0.05,
+        "T_MeV": 5.0,
+        "muB_MeV": 1066.650752348911,
+        "route": "landau_legacy",
+        "id": "main_minimum",
+        "x_state": [
+          -0.6526660138955922,
+          -0.6505317952067977,
+          -2.1722253145462886,
+          0.004067219705410366,
+          0.003747511631587412
+        ]
+      },
+      "reference_gap": 2.3316378151290594e-15,
+      "checks": [
+        {
+          "p_num": 512,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -4.366479423367764e-6,
+          "rho_delta": 0.00019425300330577956,
+          "gap_delta": 7.467143614626806e-5,
+          "gradient_delta": 7.356773126757951e-5,
+          "chain_rule_error": 1.7056780984865006e-15
+        },
+        {
+          "p_num": 1024,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": -4.966280542362256e-8,
+          "rho_delta": 3.6585012410615437e-6,
+          "gap_delta": 1.3108655430892293e-6,
+          "gradient_delta": 1.366414899235569e-6,
+          "chain_rule_error": 2.0257402512159605e-15
+        },
+        {
+          "p_num": 2048,
+          "zeta_num": 512,
+          "n_max": 96,
+          "omega_delta": 3.147704319417244e-12,
+          "rho_delta": 6.553578184999323e-9,
+          "gap_delta": 2.448509851393511e-9,
+          "gradient_delta": 2.3401972383481513e-9,
+          "chain_rule_error": 2.2912282813494135e-15
+        }
+      ],
+      "reference_high_gap_delta": 3.012110144140207e-10,
+      "reference_high_rho_delta": 5.551115123125783e-17,
+      "reference_tail_gap_delta": 1.1102230246251565e-16,
+      "reference_tail_rho_delta": 5.551115123367855e-17
+    }
+  ],
+  "small_mass_zeta_checks": {
+    "input": {
+      "id": "mfir_worst_previous_p1024",
+      "route": "mfir",
+      "eB_GeV2": 0.4,
+      "muB_MeV": 1500.0,
+      "x_state": [
+        -0.004272484108051047,
+        -0.02665728377827982,
+        -0.6868466205458993,
+        0.005335251913605932,
+        0.006287267091507518
+      ],
+      "T_MeV": 5.0
+    },
+    "checks": [
+      {
+        "flavor": 1,
+        "mass_MeV": 6.366881233367825,
+        "zeta_argument": 7.600720619964635e-5,
+        "variants": [
+          {
+            "zeta_num": 128,
+            "omega_delta": 7.361265061511801e-6,
+            "condensate_delta": -0.0005874904505472622
+          },
+          {
+            "zeta_num": 256,
+            "omega_delta": -8.669996542920444e-8,
+            "condensate_delta": 1.5967455732512903e-5
+          },
+          {
+            "zeta_num": 512,
+            "omega_delta": -4.1453063204244245e-11,
+            "condensate_delta": 1.6550646658730628e-8
+          },
+          {
+            "zeta_num": 1024,
+            "omega_delta": 1.199040866595169e-13,
+            "condensate_delta": -4.3271775052033945e-12
+          },
+          {
+            "zeta_num": 2048,
+            "omega_delta": 1.2168044349891716e-13,
+            "condensate_delta": -4.360595218244612e-12
+          }
+        ]
+      },
+      {
+        "flavor": 2,
+        "mass_MeV": 8.859395529999324,
+        "zeta_argument": 0.0002943333343386449,
+        "variants": [
+          {
+            "zeta_num": 128,
+            "omega_delta": -9.357850228042253e-8,
+            "condensate_delta": 1.0999586653848148e-5
+          },
+          {
+            "zeta_num": 256,
+            "omega_delta": -4.948663701043188e-11,
+            "condensate_delta": 1.1273292577218541e-8
+          },
+          {
+            "zeta_num": 512,
+            "omega_delta": -1.1546319456101628e-14,
+            "condensate_delta": -2.5129343050878106e-12
+          },
+          {
+            "zeta_num": 1024,
+            "omega_delta": -1.1546319456101628e-14,
+            "condensate_delta": -2.533168119711604e-12
+          },
+          {
+            "zeta_num": 2048,
+            "omega_delta": -9.769962616701378e-15,
+            "condensate_delta": -2.5336677200726854e-12
+          }
+        ]
+      },
+      {
+        "flavor": 3,
+        "mass_MeV": 225.8675047011711,
+        "zeta_argument": 0.19131048629975075,
+        "variants": [
+          {
+            "zeta_num": 128,
+            "omega_delta": -1.1395329124752607e-12,
+            "condensate_delta": -7.87370169064161e-13
+          },
+          {
+            "zeta_num": 256,
+            "omega_delta": -1.1395329124752607e-12,
+            "condensate_delta": -7.87370169064161e-13
+          },
+          {
+            "zeta_num": 512,
+            "omega_delta": -1.1395329124752607e-12,
+            "condensate_delta": -7.87148124459236e-13
+          },
+          {
+            "zeta_num": 1024,
+            "omega_delta": -1.1395329124752607e-12,
+            "condensate_delta": -7.87592213669086e-13
+          },
+          {
+            "zeta_num": 2048,
+            "omega_delta": -1.1395329124752607e-12,
+            "condensate_delta": -7.87148124459236e-13
+          }
+        ]
+      }
+    ],
+    "combined": {
+      "p_num": 4096,
+      "zeta_num": 1024,
+      "n_max": 96,
+      "omega_delta": -1.0373923942097463e-12,
+      "rho_delta": 2.0238728672809196e-11,
+      "gap_delta": 5.3413488229602205e-12,
+      "gradient_delta": 3.6901423531848526e-12,
+      "chain_rule_error": 2.508256866243464e-16
+    }
+  },
+  "configuration_checks": {
+    "state": [
+      -1.8,
+      -1.8,
+      -2.2,
+      0.001,
+      0.001
+    ],
+    "T_MeV": 5.0,
+    "muB_MeV": 500.0,
+    "probes": [
+      {
+        "route": "mfir",
+        "requested_cutoff_MeV": 799.9999999999999,
+        "mass_delta": 0.0,
+        "production_vacuum": -67.00522837387848,
+        "configured_reference_vacuum": -67.00522837387076,
+        "default_cutoff_reference_vacuum": -22.714379932059728,
+        "configured_vacuum_delta": -7.716494110354688e-12,
+        "frozen_cutoff_vacuum_delta": -44.29084844181875
+      },
+      {
+        "route": "landau_legacy",
+        "requested_cutoff_MeV": 799.9999999999999,
+        "mass_delta": 0.0,
+        "production_vacuum": -24.10386974029926,
+        "configured_reference_vacuum": -71.31229213365152,
+        "default_cutoff_reference_vacuum": -24.10386974029928,
+        "configured_vacuum_delta": 47.208422393352265,
+        "frozen_cutoff_vacuum_delta": 2.1316282072803006e-14
+      }
+    ],
+    "legacy_automatic_thermal_budgets": [
+      {
+        "eB_GeV2": 0.05,
+        "n_max": 4
+      },
+      {
+        "eB_GeV2": 0.155,
+        "n_max": 3
+      },
+      {
+        "eB_GeV2": 0.4,
+        "n_max": 3
+      }
+    ]
+  }
+}

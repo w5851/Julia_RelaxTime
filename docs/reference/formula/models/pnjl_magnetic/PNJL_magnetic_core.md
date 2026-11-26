@@ -1,14 +1,14 @@
 ## 【提取报告：外磁场下的PNJL模型相关公式】
 
-> **路线审计更新（2026-08-24）**：贺伟博硕士论文第 4 章（PDF 页 33--39）给出的
-> 默认磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”。`pnjl_mag`
-> 作者补充说明其实现使用磁场无关正规化，并指出平滑截断路线存在问题；因此本项目
-> 将 MFIR 设为默认生产路线。旧的完整 Landau 真空项 + `smooth_cutoff(N=10)` 仅以
-> `route=:landau_legacy` 保留，不能作为物理 acceptance 参考。外部 MFIR 参考已固定为
-> [`pnjl_mag`](https://github.com/ZhouRui-xzit/pnjl_mag) commit
-> `e1fc81d3c3c9d220c49972e54307b66a604cb9db`；其 acceptance target 尚待 source-gate
-> 审计和轻量数据提取，见
-> [`magnetic_reference_route_audit_v3.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md)。
+> **路线与验证更新（2026-11-13）**：当前默认磁场真空项采用
+> “零场三动量截断 + MFIR 磁场修正”；`route=:landau_legacy` 提供文献中的
+> smooth 真空路线。两种正则化分别核对，参数口径随文献明确配置。
+> Fu 2013、Grunfeld 2014、Costa 2015 和 Ferreira 2018 的目标已完成独立公式、
+> 收敛性和项目入口交叉核验；低温单锚点 PALC 三条代表路径也已复核。
+> `pnjl_mag` 的一个固定态和三个高温候选锚点保留原数值，并记录来源离散误差。
+> 详细窗口、残余文献偏差与源码修复见
+> [磁场交叉验证](../../../../analysis/pnjl/magnetic_palc_validation_20261112_analysis.md)。
+> 修复位于 `codex/magnetic-palc-validation` 工作树，尚未合入主分支。
 
 ### 📍 源信息
 - **文献**：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》
@@ -84,7 +84,8 @@ $$
 `MagneticIntegrals.omega_magnetic_mfir`。
 
 `zeta'(-1,x)` 使用固定 Gauss-Legendre 节点的 Abel--Plana 表示，节点数由
-`MagneticConfig.zeta_num` 控制。该数值近似只承担特殊函数求值，不改变 MFIR 公式本身。
+`MagneticConfig.zeta_num` 控制。小参数 `0<x<1` 先使用精确递推
+`ζ′(-1,x)=ζ′(-1,x+1)-x log x`，消除小质量端的窄积分层。该处理保留原 MFIR 公式。
 
 **旧诊断路线**：`route=:landau_legacy` 才使用
 $$
@@ -93,7 +94,7 @@ $$
 \qquad
 f_\Lambda(p)=\sqrt{\frac{\Lambda^{2N}}{\Lambda^{2N}+p^{2N}}},\ N=10.
 $$
-该路线保留历史 replay 用途，不具备生产或 acceptance 资格。
+该路线用于复现采用 smooth 正则化的文献；需要显式指定已检查收敛的 `n_max`，并独立提高真空纵向积分阶数。
 
 ---
 
@@ -189,18 +190,18 @@ $$
 | 物理/数值对象 | 论文或公式来源 | 候选实现入口 | 主线现状 | 隔离候选状态 | 开发者审核要点 |
 |---|---|---|---|---|---|
 | 外场协变导数与 Maxwell 项 | 式(5-1) | `PNJLMagneticModel.magnetic.eB_fm2` | 仅以标量 `eB` 传入背景场 | **明确不包含** Maxwell 自能 | 没有 gauge-field 求解，也没有 `B^2/2` 输出；不能解释为总 EOS |
-| 巨热力学势分解 | 式(5-2) | `calculate_magnetic_omega_components` | 固定态内核已组装 | **已接入（诊断）** | 组装 `chi + poly + vac + therm`；尚无高节点 equilibrium 生产证据 |
+| 巨热力学势分解 | 式(5-2) | `calculate_magnetic_omega_components` | 固定态内核已组装 | **代表窗口已交叉核验** | 组装 `chi + poly + vac + therm`；完整窗口见磁场交叉验证报告 |
 | Landau 能谱 | 式(5-6) | `MagneticIntegrals.energy_landau` | **已接入（内核）** | **已接入（内核）** | `sqrt(pz^2 + M^2 + 2n|q|eB)`；有能谱单测 |
 | Landau 简并度 | `alpha_n=2-delta_{n0}` | `MagneticIntegrals.alpha_n` | **已接入（内核）** | **已接入（内核）** | `n=0` 为 1，其余为 2；有单测 |
 | 真空 Landau 项 | 历史诊断路线；与贺伟博论文 MFIR 式(4-3)--(4-8)不一致 | `omega0_flavor_landau` | **已接入（显式 legacy）** | **非 acceptance** | 仅在 `route=:landau_legacy` 使用；有限 `n_max`、pz Gauss 节点和平滑截断不代表生产正则化 |
-| 平滑截断 | 当前代码 `smooth_cutoff`; `pnjl_mag` 作者指出该路线存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（legacy diagnostic）** | **非 acceptance** | 不作为默认路由，不生成新外部 target |
-| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8)；磁场无关正规化约定 | `omega_magnetic_mfir` + `PNJLCore.vacuum_integral_with_cutoff` | **已接入（默认生产内核）** | **`pnjl_mag` cross-solver diagnostic** | 外部源码/SHA、单位映射和匹配节点已审计；仍不等于全分支或正式 equilibrium acceptance target |
-| Polyakov 热项 | 式(5-4) 及 `Z_f^+ + Z_f^-` | `omegat_flavor_landau`、`_log_polyakov_pair` | **已接入（内核）** | **已接入（内核）** | 使用一般温度双对数；低温指数稳定缩放已有短测试 |
-| 动力学质量与手征项 | 式(2-55)、式(5-2)中的 `G(eB)` | `_calculate_mass_vec_with_GB`、`_chiral_with_GB` | 固定态内核已接入 | **已接入（诊断）** | 质量核支持泛型实数；完整 Omega 仍以 Float64 finite-difference solver 为主 |
+| 平滑截断 | Fu 2013、Shao 2019 的 smooth 正则化 | `MagneticIntegrals.smooth_cutoff` | **已接入（legacy diagnostic）** | **非 acceptance** | 显式文献复现路线；Fu 2013 峰位与本轮收敛结果相符 |
+| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8)；磁场无关正规化约定 | `omega_magnetic_mfir` + `PNJLCore.vacuum_integral_with_cutoff` | **已接入（默认生产内核）** | **独立公式及文献交叉核验** | 小质量 loggamma 导数、Grunfeld/Costa 零温跃迁及 Ferreira 有限温 CEP 已核对 |
+| Polyakov 热项 | 式(5-4) 及 `Z_f^+ + Z_f^-` | `omegat_flavor_landau`、`_log_polyakov_pair` | **已接入（内核）** | **已接入（内核）** | 使用稳定双对数与逐层 asinh 分段；热项 `p_num` 为每段节点数；与独立填充海减除式核对 |
+| 动力学质量与手征项 | 式(2-55)、式(5-2)中的 `G(eB)` | `_calculate_mass_vec_with_GB`、`_chiral_with_GB` | 固定态内核已接入 | **已接入（诊断）** | 质量核支持泛型实数；五场势梯度及 solver Jacobian 使用 ForwardDiff |
 | 对数 Polyakov 势 | 式(2-50)--(2-51) | `PNJLCore.polyakov_potential` | 固定态内核已接入 | **已接入（诊断）** | 由 PNJL core 复用；未单独证明磁场全域参数适用性 |
 | 一般温度密度 | 式(5-10)--(5-12) | `density_flavor_landau`、`calculate_magnetic_rho` | **已接入（内核）** | **已接入（内核）** | 按用户确认采用 `q-qbar` 净密度和 `|q_f eB|` 相空间；独立差分交叉检查最大误差约 `6.1e-13` |
 | 低温三夸克近似 | 式(5-13) | 无独立默认实现 | **仅源公式/未实现** | **仅源公式/未实现** | 不能把论文近似当作默认密度；磁场 equilibrium 明确要求 `T_fm>0` |
-| 五维驻点条件 | 式(2-63) | `magnetic_gap_residual`、`solve_magnetic_gap` | **已接入（诊断）** | **外部验证未闭合** | 主线 solver 用五维 residual；有低节点 stationarity probe，尚未完成默认精度的外部验证 |
+| 五维驻点与凝聚自洽 | 式(2-63) 及 `∇phi Ω=JMᵀ g` | `magnetic_gap_residual`、`magnetic_condensate_residual`、`solve_magnetic_gap` | **已接入** | **代表窗口已交叉核验** | 同时检查势梯度和三味凝聚 gap，排除质量映射奇异伪驻点 |
 | 多分支候选 | 论文低温/高场多解讨论；五变量驻点条件 | `MagneticGapCandidate`、`MagneticGapResult` | **已接入（诊断）** | **分支覆盖未证明** | 多 seed、去重、Omega 排序可用；不能证明 seed 覆盖全部分支 |
 | 局部稳定性分类 | 由 `Omega` Hessian 判定局部极小 | `_magnetic_hessian`、`classify_stability=true` | **已接入（诊断）** | **研究诊断；不作默认过滤** | 当前为有限差分 Hessian；`saddle_or_maximum` 不能单独否定已收敛驻点 |
 | `G(eB)` IMC 参数化 | 式(5-9) | `coupling_GB` | **已接入（内核）** | **已接入（内核）** | 参数和单位已固定；不等于磁场 EOS 或磁化响应完整实现 |
@@ -218,7 +219,7 @@ $$
 1. 正式 profile 已决定为 `a=0.0108805`，并已接入 `magnetic_default.toml`；
 2. solver 的多 seed 不是全分支证明；
 3. Hessian 分类只是可选诊断，且不应提升为默认生产筛选条件；
-4. Fortran smooth-Landau 与当前 MFIR 不是同一正则化；旧 Fortran 仅保留 legacy，新的外部 target 应从固定 SHA 的 `pnjl_mag` 源码/输出合同提取；
+4. smooth 与 MFIR 按各自文献公式核验；当前有独立研究组的定量交叉支持，仍保留原学位论文五个转折点的未解释偏差；
 5. Maxwell、磁化响应、方向性压力、`T=0` 近似和 RS 联合路线均不在当前合同内。
 
 因此“公式已实现”只能用于描述内核覆盖，不能替代“已完成生产验证”。Hessian 标签应作为分支审计和显式研究信息保留，不应在没有额外物理约定时升级为默认生产资格门槛。
@@ -243,7 +244,7 @@ $$
 | $U(\Phi,\bar{\Phi},T)$ | Polyakov圈有效势 | MeV⁴ | 对数形式 |
 | $G$ | 四费米子耦合常数 | MeV⁻² | 磁场依赖 |
 | $K$ | 六费米子耦合常数 | MeV⁻⁵ | t'Hooft相互作用 |
-| $\phi_{i}$ | 夸克凝聚 | MeV | i=u,d,s |
+| $\phi_{i}$ | 夸克凝聚 | MeV³ | i=u,d,s |
 | $f_{\Lambda}(p)$ | 截断函数 | 无量纲 | 平滑截断用 |
 | $\Lambda$ | 动量截断 | MeV | 602.3 MeV |
 | $\Lambda_{QCD}$ | QCD能标 | MeV | 300 MeV |
@@ -309,7 +310,7 @@ $$
 ## 🔗 相关公式链
 
 1. **能隙方程**：式(2-55) - 夸克动力学质量 $M_i = m_i - 4G\phi_i + 2K\phi_j\phi_k$
-2. **稳定平衡条件**：式(2-63) $\frac{\partial\Omega_{PNJL}}{\partial\phi_u} = \frac{\partial\Omega_{PNJL}}{\partial\phi_d} = \frac{\partial\Omega_{PNJL}}{\partial\phi_s} = \frac{\partial\Omega_{PNJL}}{\partial\Phi} = \frac{\partial\Omega_{PNJL}}{\partial\bar{\Phi}} = 0$
+2. **驻点条件**：式(2-63) $\frac{\partial\Omega_{PNJL}}{\partial\phi_u} = \frac{\partial\Omega_{PNJL}}{\partial\phi_d} = \frac{\partial\Omega_{PNJL}}{\partial\phi_s} = \frac{\partial\Omega_{PNJL}}{\partial\Phi} = \frac{\partial\Omega_{PNJL}}{\partial\bar{\Phi}} = 0$
 3. **Polyakov圈有效势**：式(2-50)、(2-51) - 对数形式有效势
 4. **重子数密度**：$\rho_B = (\rho_u + \rho_d + \rho_s)/3$
 
@@ -321,7 +322,7 @@ $$
 
 本页所引原文为高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》：第 2 章第 2.2 节（印刷页 21--24，式(2-50)--(2-70)）和第 5 章第 5.1 节（印刷页 65--68，式(5-1)--(5-13)）。第 5.1 节给出磁场巨势、Landau 能谱、Polyakov 热项、$G(eB)$ 参数化和 $\mu_u=\mu_d=\mu_s$ 的计算约定；平滑截断属于论文/历史路线。当前生产真空项采用贺伟博硕士论文第 4 章式(4-3)--(4-8)的 MFIR/Hurwitz-zeta 形式，并以固定 SHA 的 `pnjl_mag` 作为同一公式家族的外部诊断参考；第 2.2 节给出对数 Polyakov 势、参数表、动力学质量和五变量驻点条件。
 
-论文版面本身存在需要保留的审计注记：式(2-63) 的等式链把 $\partial\Omega/\partial\phi_s$ 排成了重复的 $\partial\Omega/\partial\phi_u$；式(5-10) 的密度导数符号与第 2 章式(2-65)的热力学约定不一致；式(5-11) 使用了带符号的 $q_f B$，而真空/热项使用 $|q_f|eB$。因此这些字符不能在没有约定确认时直接作为实现合同；本页对反夸克分布函数按论文原页版式更正了明显的抽取错位，但没有替作者决定密度符号或电荷绝对值的最终约定。
+论文版面本身存在需要保留的审计注记：式(2-63) 的等式链把 $\partial\Omega/\partial\phi_s$ 排成了重复的 $\partial\Omega/\partial\phi_u$；式(5-10) 的密度导数符号与第 2 章式(2-65)的热力学约定不一致；式(5-11) 使用了带符号的 $q_f B$，而真空/热项使用 $|q_f|eB$。因此这些字符不能在没有约定确认时直接作为实现合同；本页对反夸克分布函数按论文原页版式更正了明显的抽取错位，当前实现采用由巨势导出的一致约定 `rho_f=-∂Ω/∂mu_f` 与 `|q_f|eB` 相空间；分布积分、势导数和独立文献核验相符。
 
 数值接口的 `p_num`、`pz_max`、Landau 求和起点、`n_max_policy`、`n_max_cap`、
 `delta_n`/`rtol` 收敛判据以及 quadrature 实现均不是论文式(5-1)--(5-13)给出的物理公式，

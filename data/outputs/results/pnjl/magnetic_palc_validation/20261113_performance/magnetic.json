@@ -1,0 +1,2426 @@
+{
+  "mode": "magnetic",
+  "telemetry_contract": "Diagnostic work counters are shared across BifurcationKit deepcopy; both continuation directions are counted without changing numerical state.",
+  "reference_sha256": "5a84991f1777cfa5c7802962b102502305ff94d0b3abc70f438491bc20f89beb",
+  "source_hashes_after": {
+    "src/models/solver/path/PALCBackend.jl": "acab1fd518c822e7991cb5b51cc739d87f61b5fd3f1b0480a2435b2c68025156",
+    "src/models/solver/path/PathContinuation.jl": "e2d624995debc6929699768444ab938c9b0fe8c4c99e1fedd18f985ac547c4d0",
+    "Project.toml": "c9d851e3bd99bfb76a6efe33d86d4e28b546109e3a5c4676f045005a46c5bf18",
+    "src/models/pnjl_physics/MagneticGapSolver.jl": "80f6c4fda999c1cab29fc660b107774a0c9d9ca63a42420afb0e2fc74a3cc512",
+    "Manifest.toml": "85e24ce27196cbdd46f7159b91c5f805fdc58cac447d771410a252cd83aff60a",
+    "src/models/pnjl_physics/PNJLMagneticModel.jl": "4c8f1945d39a0ed8f49e0b83d8a097c4eaf496032ad89f7df84a452eb5ba4331",
+    "src/models/pnjl_physics/core/MagneticIntegrals.jl": "281c810ca358408deae37813c99deeb411f86ddbe130b774ba99bdb9c5f62cf5",
+    "scripts/analysis/pnjl_magnetic/compare_single_anchor_palc.jl": "5a03a77239b8261c69de5a06bd63731a8e2fa30259c9b179395efe03e1726cd0",
+    "src/models/pnjl_physics/PNJLModel.jl": "d1d59889a47f979f34cd1ba857b2f22a76ef91d2784cddd108c635e15599f7b1",
+    "src/models/pnjl_physics/core/MagneticThermodynamics.jl": "16ad53085197427fba411a7953e7bf44edaa98bce93454b850338a7b24a3b730",
+    "benchmark/pnjl/benchmark_magnetic_palc.jl": "36781854356363fd79c8dbc254d213d0c2cce7c5f37571943763dec25ac6175b"
+  },
+  "julia_version": "1.12.5",
+  "threads": 1,
+  "cpu": "alderlake",
+  "controls": {
+    "jacobian": "forward",
+    "pz_max": 40,
+    "targets_muB_MeV": [
+      872.08,
+      900.0,
+      1000.0,
+      1050.0,
+      1100.0,
+      1150.0,
+      1200.0,
+      1500.0
+    ],
+    "muB_range_MeV": [
+      500,
+      1700
+    ],
+    "newton_max_iterations": 28,
+    "T_MeV": 5,
+    "dsmax": 0.006,
+    "linesearch": true,
+    "ds": 0.002,
+    "max_steps": 1800,
+    "newton_tol": 1.0e-10,
+    "n_max": 64
+  },
+  "source_sha": "dc183dfa561dc79ef1f8594948b1a1e705679996 + validated uncommitted magnetic corrections",
+  "generated_at": "2026-11-13T17:12:52.318",
+  "blas_threads": 1,
+  "timing_contract": "Warm same-process stage timing; first full pass excluded; cases rotated. Pre-pass GC, verification, profiling and JSON excluded; stage GC included. Magnetic all-vertex diagnostic output is reported separately. Nonmagnetic uses current production solve_path plus selected_path_results.",
+  "source_hashes_before": {
+    "src/models/solver/path/PALCBackend.jl": "acab1fd518c822e7991cb5b51cc739d87f61b5fd3f1b0480a2435b2c68025156",
+    "src/models/solver/path/PathContinuation.jl": "e2d624995debc6929699768444ab938c9b0fe8c4c99e1fedd18f985ac547c4d0",
+    "Project.toml": "c9d851e3bd99bfb76a6efe33d86d4e28b546109e3a5c4676f045005a46c5bf18",
+    "src/models/pnjl_physics/MagneticGapSolver.jl": "80f6c4fda999c1cab29fc660b107774a0c9d9ca63a42420afb0e2fc74a3cc512",
+    "Manifest.toml": "85e24ce27196cbdd46f7159b91c5f805fdc58cac447d771410a252cd83aff60a",
+    "src/models/pnjl_physics/PNJLMagneticModel.jl": "4c8f1945d39a0ed8f49e0b83d8a097c4eaf496032ad89f7df84a452eb5ba4331",
+    "src/models/pnjl_physics/core/MagneticIntegrals.jl": "281c810ca358408deae37813c99deeb411f86ddbe130b774ba99bdb9c5f62cf5",
+    "scripts/analysis/pnjl_magnetic/compare_single_anchor_palc.jl": "5a03a77239b8261c69de5a06bd63731a8e2fa30259c9b179395efe03e1726cd0",
+    "src/models/pnjl_physics/PNJLModel.jl": "d1d59889a47f979f34cd1ba857b2f22a76ef91d2784cddd108c635e15599f7b1",
+    "src/models/pnjl_physics/core/MagneticThermodynamics.jl": "16ad53085197427fba411a7953e7bf44edaa98bce93454b850338a7b24a3b730",
+    "benchmark/pnjl/benchmark_magnetic_palc.jl": "36781854356363fd79c8dbc254d213d0c2cce7c5f37571943763dec25ac6175b"
+  },
+  "microbenchmarks": [
+    {
+      "label": "cold_dense_e0.05",
+      "eB_GeV2": 0.05000000000000001,
+      "active_work": [
+        {
+          "active_levels": 8,
+          "nodes": 3712,
+          "flavor": 1,
+          "segments": 29
+        },
+        {
+          "active_levels": 15,
+          "nodes": 7040,
+          "flavor": 2,
+          "segments": 55
+        },
+        {
+          "active_levels": 12,
+          "nodes": 4864,
+          "flavor": 3,
+          "segments": 38
+        }
+      ],
+      "component_gradient_error": 3.469446951953614e-18,
+      "muB_MeV": 1500.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 2.035822610965841e-10,
+      "T_MeV": 5.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.0010362836879432623,
+          "gc_seconds": 0.0,
+          "samples": 141,
+          "max_seconds": 0.0010583170212765957,
+          "repetitions": 3,
+          "seconds": 0.0010580014184397163,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.005682796296296296,
+          "gc_seconds": 0.0,
+          "samples": 27,
+          "max_seconds": 0.005769940740740741,
+          "repetitions": 3,
+          "seconds": 0.005724648148148148,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.1269e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.3873499999999997e-6,
+          "repetitions": 3,
+          "seconds": 2.26778e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.0023697761904761905,
+          "gc_seconds": 0.0,
+          "samples": 63,
+          "max_seconds": 0.002411485714285714,
+          "repetitions": 3,
+          "seconds": 0.002404047619047619,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.014609645454545454,
+          "gc_seconds": 0.0,
+          "samples": 11,
+          "max_seconds": 0.0151885,
+          "repetitions": 3,
+          "seconds": 0.014905672727272728,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.57837e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.6974699999999999e-6,
+          "repetitions": 3,
+          "seconds": 1.5994700000000001e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.013268416666666666,
+          "gc_seconds": 0.0,
+          "samples": 12,
+          "max_seconds": 0.013642333333333333,
+          "repetitions": 3,
+          "seconds": 0.013481291666666666,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.00011466389976507439,
+          "gc_seconds": 0.0,
+          "samples": 1277,
+          "max_seconds": 0.00011762850430696945,
+          "repetitions": 3,
+          "seconds": 0.0001158822239624119,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.20685e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 4.35545e-6,
+          "repetitions": 3,
+          "seconds": 4.3316300000000006e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 0.002275031818181818,
+          "gc_seconds": 0.0,
+          "samples": 66,
+          "max_seconds": 0.0023391318181818182,
+          "repetitions": 3,
+          "seconds": 0.002307880303030303,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 6.668227646590608e-6,
+          "gc_seconds": 0.0,
+          "samples": 7538,
+          "max_seconds": 9.363372247280445e-6,
+          "repetitions": 3,
+          "seconds": 6.777288405412576e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.026342583333333332,
+          "gc_seconds": 0.0,
+          "samples": 6,
+          "max_seconds": 0.02663131666666667,
+          "repetitions": 3,
+          "seconds": 0.02650073333333333,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -0.02041133125116163,
+        -0.019905177970935325,
+        -1.0595170254419362,
+        0.011154766444766623,
+        0.011360896964612349
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 1.4770373812922344e-10,
+      "n_max": 64
+    },
+    {
+      "label": "cold_dense_e0.155",
+      "eB_GeV2": 0.15500000000000003,
+      "active_work": [
+        {
+          "active_levels": 3,
+          "nodes": 1536,
+          "flavor": 1,
+          "segments": 12
+        },
+        {
+          "active_levels": 5,
+          "nodes": 2560,
+          "flavor": 2,
+          "segments": 20
+        },
+        {
+          "active_levels": 4,
+          "nodes": 1920,
+          "flavor": 3,
+          "segments": 15
+        }
+      ],
+      "component_gradient_error": 3.469446951953614e-18,
+      "muB_MeV": 1500.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 1.2806233666611686e-10,
+      "T_MeV": 5.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.001066195,
+          "gc_seconds": 0.0,
+          "samples": 140,
+          "max_seconds": 0.0010783792857142858,
+          "repetitions": 3,
+          "seconds": 0.0010757278571428572,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.002201210447761194,
+          "gc_seconds": 0.0,
+          "samples": 67,
+          "max_seconds": 0.002254977611940299,
+          "repetitions": 3,
+          "seconds": 0.00225385671641791,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.21443e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.2515699999999998e-6,
+          "repetitions": 3,
+          "seconds": 2.23472e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.0009509704697986578,
+          "gc_seconds": 0.0,
+          "samples": 149,
+          "max_seconds": 0.0009823718120805368,
+          "repetitions": 3,
+          "seconds": 0.0009819630872483223,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.006126272,
+          "gc_seconds": 0.0,
+          "samples": 25,
+          "max_seconds": 0.006191556,
+          "repetitions": 3,
+          "seconds": 0.006186332,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.58458e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.73459e-6,
+          "repetitions": 3,
+          "seconds": 1.60026e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.004941151612903226,
+          "gc_seconds": 0.0,
+          "samples": 31,
+          "max_seconds": 0.004991312903225806,
+          "repetitions": 3,
+          "seconds": 0.004947077419354839,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.0001151328137178488,
+          "gc_seconds": 0.0,
+          "samples": 1283,
+          "max_seconds": 0.00011808565861262665,
+          "repetitions": 3,
+          "seconds": 0.00011544395946999221,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.26669e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 4.38946e-6,
+          "repetitions": 3,
+          "seconds": 4.2738e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 0.0008576169398907104,
+          "gc_seconds": 0.0,
+          "samples": 183,
+          "max_seconds": 0.0008761300546448087,
+          "repetitions": 3,
+          "seconds": 0.0008617158469945355,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 7.28008e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 7.82751e-6,
+          "repetitions": 3,
+          "seconds": 7.349419999999999e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.01059474,
+          "gc_seconds": 0.0,
+          "samples": 15,
+          "max_seconds": 0.010812480000000001,
+          "repetitions": 3,
+          "seconds": 0.010782573333333333,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -0.015149444701791945,
+        -0.017737180962273308,
+        -0.90840684936695,
+        0.012773157858806942,
+        0.012295254744353962
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 5.798908338380208e-11,
+      "n_max": 64
+    },
+    {
+      "label": "cold_dense_e0.4",
+      "eB_GeV2": 0.4000000000000001,
+      "active_work": [
+        {
+          "active_levels": 1,
+          "nodes": 768,
+          "flavor": 1,
+          "segments": 6
+        },
+        {
+          "active_levels": 2,
+          "nodes": 1152,
+          "flavor": 2,
+          "segments": 9
+        },
+        {
+          "active_levels": 2,
+          "nodes": 896,
+          "flavor": 3,
+          "segments": 7
+        }
+      ],
+      "component_gradient_error": 1.1245303956542025e-16,
+      "muB_MeV": 1500.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 8.135879125686571e-10,
+      "T_MeV": 5.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.0010620092857142856,
+          "gc_seconds": 0.0,
+          "samples": 140,
+          "max_seconds": 0.0011301321428571428,
+          "repetitions": 3,
+          "seconds": 0.0010903578571428573,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.0011255924812030075,
+          "gc_seconds": 0.0,
+          "samples": 133,
+          "max_seconds": 0.0011338270676691728,
+          "repetitions": 3,
+          "seconds": 0.0011337631578947369,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.2191499999999998e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.43963e-6,
+          "repetitions": 3,
+          "seconds": 2.31134e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.0005086198224852071,
+          "gc_seconds": 0.0,
+          "samples": 338,
+          "max_seconds": 0.0005172056213017752,
+          "repetitions": 3,
+          "seconds": 0.0005126210059171598,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.0032768444444444445,
+          "gc_seconds": 0.0,
+          "samples": 45,
+          "max_seconds": 0.0035523688888888885,
+          "repetitions": 3,
+          "seconds": 0.00344118,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.58636e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.6507399999999998e-6,
+          "repetitions": 3,
+          "seconds": 1.6291e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.0022627454545454547,
+          "gc_seconds": 0.0,
+          "samples": 66,
+          "max_seconds": 0.0023243787878787876,
+          "repetitions": 3,
+          "seconds": 0.002290807575757576,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.00011608625294579732,
+          "gc_seconds": 0.0,
+          "samples": 1273,
+          "max_seconds": 0.00012498703849175177,
+          "repetitions": 3,
+          "seconds": 0.00011693016496465043,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.29621e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 4.39202e-6,
+          "repetitions": 3,
+          "seconds": 4.29997e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 0.0003958314432989691,
+          "gc_seconds": 0.0,
+          "samples": 388,
+          "max_seconds": 0.00040184768041237113,
+          "repetitions": 3,
+          "seconds": 0.00039731417525773195,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 7.3095300000000005e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 7.618560000000001e-6,
+          "repetitions": 3,
+          "seconds": 7.43938e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.005506864285714286,
+          "gc_seconds": 0.0,
+          "samples": 28,
+          "max_seconds": 0.005611603571428572,
+          "repetitions": 3,
+          "seconds": 0.005528360714285714,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -0.004272484112847032,
+        -0.026657283782616992,
+        -0.6868466205472048,
+        0.0053352519082888895,
+        0.006287267091420926
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 6.499261599821754e-10,
+      "n_max": 64
+    },
+    {
+      "label": "cold_large_mass_e0.155",
+      "eB_GeV2": 0.15500000000000003,
+      "active_work": [
+        {
+          "active_levels": 1,
+          "nodes": 256,
+          "flavor": 1,
+          "segments": 2
+        },
+        {
+          "active_levels": 2,
+          "nodes": 384,
+          "flavor": 2,
+          "segments": 3
+        },
+        {
+          "active_levels": 0,
+          "nodes": 0,
+          "flavor": 3,
+          "segments": 0
+        }
+      ],
+      "component_gradient_error": 5.499546424058983e-16,
+      "muB_MeV": 1000.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 7.925925926287584e-11,
+      "T_MeV": 5.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.0010090771812080537,
+          "gc_seconds": 0.0,
+          "samples": 149,
+          "max_seconds": 0.0010231959731543624,
+          "repetitions": 3,
+          "seconds": 0.0010146651006711408,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.0003813235751295337,
+          "gc_seconds": 0.0,
+          "samples": 386,
+          "max_seconds": 0.00038885932642487045,
+          "repetitions": 3,
+          "seconds": 0.00038167720207253885,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.19416e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.24365e-6,
+          "repetitions": 3,
+          "seconds": 2.24193e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.0001990116192830655,
+          "gc_seconds": 0.0,
+          "samples": 809,
+          "max_seconds": 0.00020167861557478367,
+          "repetitions": 3,
+          "seconds": 0.0002012265760197775,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.0015021164948453608,
+          "gc_seconds": 0.0,
+          "samples": 97,
+          "max_seconds": 0.001588843298969072,
+          "repetitions": 3,
+          "seconds": 0.001546060824742268,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.6105999999999999e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.7295499999999998e-6,
+          "repetitions": 3,
+          "seconds": 1.6298300000000002e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.00045701577287066245,
+          "gc_seconds": 0.0,
+          "samples": 317,
+          "max_seconds": 0.00047039337539432174,
+          "repetitions": 3,
+          "seconds": 0.0004626041009463723,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.0001155550156739812,
+          "gc_seconds": 0.0,
+          "samples": 1276,
+          "max_seconds": 0.00011898887147335422,
+          "repetitions": 3,
+          "seconds": 0.00011765885579937305,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.27564e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 4.42213e-6,
+          "repetitions": 3,
+          "seconds": 4.28173e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 8.463179364127174e-5,
+          "gc_seconds": 0.0,
+          "samples": 1667,
+          "max_seconds": 8.713107378524295e-5,
+          "repetitions": 3,
+          "seconds": 8.611931613677264e-5,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 7.355050000000001e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 7.59547e-6,
+          "repetitions": 3,
+          "seconds": 7.364420000000001e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.0021539602739726028,
+          "gc_seconds": 0.0,
+          "samples": 73,
+          "max_seconds": 0.0023460520547945204,
+          "repetitions": 3,
+          "seconds": 0.002242817808219178,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -1.9541041907599652,
+        -1.860528581240326,
+        -2.23315871291274,
+        9.013867408945442e-9,
+        9.248491266348382e-6
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 4.744427073433144e-11,
+      "n_max": 64
+    },
+    {
+      "label": "warm_T120_e0.155",
+      "eB_GeV2": 0.15500000000000003,
+      "active_work": [
+        {
+          "active_levels": 127,
+          "nodes": 19072,
+          "flavor": 1,
+          "segments": 149
+        },
+        {
+          "active_levels": 149,
+          "nodes": 24448,
+          "flavor": 2,
+          "segments": 191
+        },
+        {
+          "active_levels": 149,
+          "nodes": 23808,
+          "flavor": 3,
+          "segments": 186
+        }
+      ],
+      "component_gradient_error": 3.925231146709438e-17,
+      "muB_MeV": 930.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 1.5914110700559668e-10,
+      "T_MeV": 120.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.0009879261744966442,
+          "gc_seconds": 0.0,
+          "samples": 149,
+          "max_seconds": 0.0011144382550335571,
+          "repetitions": 3,
+          "seconds": 0.0010223496644295301,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.022052842857142856,
+          "gc_seconds": 0.0,
+          "samples": 7,
+          "max_seconds": 0.022275871428571428,
+          "repetitions": 3,
+          "seconds": 0.02209394285714286,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.16195e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.37169e-6,
+          "repetitions": 3,
+          "seconds": 2.261e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.008743116666666667,
+          "gc_seconds": 0.0,
+          "samples": 18,
+          "max_seconds": 0.008861344444444445,
+          "repetitions": 3,
+          "seconds": 0.008802622222222223,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.046729775,
+          "gc_seconds": 0.0,
+          "samples": 4,
+          "max_seconds": 0.047907675,
+          "repetitions": 3,
+          "seconds": 0.047589225,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.57062e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.59161e-6,
+          "repetitions": 3,
+          "seconds": 1.59136e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.046490075,
+          "gc_seconds": 0.0,
+          "samples": 4,
+          "max_seconds": 0.0500947,
+          "repetitions": 3,
+          "seconds": 0.047054325,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.00011780886075949368,
+          "gc_seconds": 0.0,
+          "samples": 1422,
+          "max_seconds": 0.00012127932489451478,
+          "repetitions": 3,
+          "seconds": 0.00011979029535864979,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.2637599999999995e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 4.36246e-6,
+          "repetitions": 3,
+          "seconds": 4.28996e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 0.008632022222222223,
+          "gc_seconds": 0.0,
+          "samples": 18,
+          "max_seconds": 0.008785405555555556,
+          "repetitions": 3,
+          "seconds": 0.008743111111111111,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 7.2347599999999995e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 7.42443e-6,
+          "repetitions": 3,
+          "seconds": 7.38505e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.10728545,
+          "gc_seconds": 0.0,
+          "samples": 2,
+          "max_seconds": 0.1083684,
+          "repetitions": 3,
+          "seconds": 0.1080966,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -0.1962239329115098,
+        -0.2205086669955755,
+        -1.9558018063868434,
+        0.24860617960573356,
+        0.283063798037315
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 2.5026274386164005e-9,
+      "n_max": 148
+    },
+    {
+      "label": "warm_T200_e0.155",
+      "eB_GeV2": 0.15500000000000003,
+      "active_work": [
+        {
+          "active_levels": 335,
+          "nodes": 49152,
+          "flavor": 1,
+          "segments": 384
+        },
+        {
+          "active_levels": 387,
+          "nodes": 61824,
+          "flavor": 2,
+          "segments": 483
+        },
+        {
+          "active_levels": 387,
+          "nodes": 61568,
+          "flavor": 3,
+          "segments": 481
+        }
+      ],
+      "component_gradient_error": 1.1316993474494503e-16,
+      "muB_MeV": 930.0,
+      "zeta_num": 256,
+      "jacobian_fd_ad_relative": 2.120315551519327e-9,
+      "T_MeV": 200.0,
+      "measurements": {
+        "magnetic_vacuum_hessian": {
+          "min_seconds": 0.0010035782894736844,
+          "gc_seconds": 0.0,
+          "samples": 152,
+          "max_seconds": 0.0010291282894736842,
+          "repetitions": 3,
+          "seconds": 0.0010155644736842106,
+          "allocated_bytes": 13456.0
+        },
+        "output_state_record": {
+          "min_seconds": 0.0559069,
+          "gc_seconds": 0.0,
+          "samples": 3,
+          "max_seconds": 0.05779836666666666,
+          "repetitions": 3,
+          "seconds": 0.05702603333333334,
+          "allocated_bytes": 2256.0
+        },
+        "zero_field_vacuum_gradient": {
+          "min_seconds": 2.22308e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 2.24329e-6,
+          "repetitions": 3,
+          "seconds": 2.23774e-6,
+          "allocated_bytes": 4000.0
+        },
+        "residual": {
+          "min_seconds": 0.0222348,
+          "gc_seconds": 0.0,
+          "samples": 7,
+          "max_seconds": 0.022462442857142856,
+          "repetitions": 3,
+          "seconds": 0.022265385714285713,
+          "allocated_bytes": 2048.0
+        },
+        "jacobian_ad": {
+          "min_seconds": 0.119637,
+          "gc_seconds": 0.0,
+          "samples": 2,
+          "max_seconds": 0.12119665,
+          "repetitions": 3,
+          "seconds": 0.12036165,
+          "allocated_bytes": 12384.0
+        },
+        "local_potentials_gradient": {
+          "min_seconds": 1.6275e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 1.66017e-6,
+          "repetitions": 3,
+          "seconds": 1.6426099999999998e-6,
+          "allocated_bytes": 2304.0
+        },
+        "thermal_hessian": {
+          "min_seconds": 0.12041495,
+          "gc_seconds": 0.0,
+          "samples": 2,
+          "max_seconds": 0.12255355,
+          "repetitions": 3,
+          "seconds": 0.12072955,
+          "allocated_bytes": 15376.0
+        },
+        "magnetic_vacuum_gradient": {
+          "min_seconds": 0.00011692548713951675,
+          "gc_seconds": 0.0,
+          "samples": 1283,
+          "max_seconds": 0.00011873296960249416,
+          "repetitions": 3,
+          "seconds": 0.00011770046765393609,
+          "allocated_bytes": 4864.0
+        },
+        "local_potentials_hessian": {
+          "min_seconds": 4.24012e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 5.256890000000001e-6,
+          "repetitions": 3,
+          "seconds": 4.5319e-6,
+          "allocated_bytes": 7264.0
+        },
+        "thermal_gradient": {
+          "min_seconds": 0.022330514285714285,
+          "gc_seconds": 0.0,
+          "samples": 7,
+          "max_seconds": 0.022508328571428572,
+          "repetitions": 3,
+          "seconds": 0.022471114285714282,
+          "allocated_bytes": 5344.0
+        },
+        "zero_field_vacuum_hessian": {
+          "min_seconds": 7.1452799999999995e-6,
+          "gc_seconds": 0.0,
+          "samples": 10000,
+          "max_seconds": 7.342859999999999e-6,
+          "repetitions": 3,
+          "seconds": 7.24686e-6,
+          "allocated_bytes": 14000.0
+        },
+        "jacobian_fd": {
+          "min_seconds": 0.2725572,
+          "gc_seconds": 0.0,
+          "samples": 1,
+          "max_seconds": 0.2820272,
+          "repetitions": 3,
+          "seconds": 0.2759608,
+          "allocated_bytes": 23856.0
+        }
+      },
+      "x_state": [
+        -0.038081558852033695,
+        -0.038092318262473085,
+        -0.9612599413284972,
+        0.6892519707535857,
+        0.69451831936558
+      ],
+      "p_num": 128,
+      "jacobian_fd_ad_max_abs": 8.555953172617592e-7,
+      "n_max": 386
+    }
+  ],
+  "source_unchanged": true,
+  "cpu_affinity": "CPU0; inherited parent affinity=1",
+  "schema": "magnetic_palc_performance_v1",
+  "continuation_profile": {
+    "note": "Inclusive stack presence; categories overlap. Windows sampling interval is approximate.",
+    "inclusive_stack_counts": {
+      "polyakov_distribution": 1501,
+      "forwarddiff": 2437,
+      "thermal": 1808,
+      "zeta": 623,
+      "atan_series": 417,
+      "linear_algebra": 1
+    },
+    "inclusive_fractions": {
+      "polyakov_distribution": 0.613404168369432,
+      "forwarddiff": 0.9959133633020024,
+      "thermal": 0.7388639149979567,
+      "zeta": 0.25459746628524726,
+      "atan_series": 0.17041275030649775,
+      "linear_algebra": 0.0004086636697997548
+    },
+    "sampled_stacks": 2447
+  },
+  "complete": true,
+  "runs": [
+    {
+      "solve_seconds": 20.663551000000002,
+      "eB_GeV2": 0.05,
+      "total_with_vertex_seconds": 21.941400700000003,
+      "name": "magnetic_e0.05_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 448,
+        "folds": 16,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 2590,
+        "correction_solves": 12,
+        "dual_residual_calls": 816,
+        "jacobian_calls": 816,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 9,
+        "correction_attempts": 12,
+        "correction_iterations": 12
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0366707,
+          "seconds": 0.8470684,
+          "allocated_bytes": 15981610
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 1.2778497,
+          "allocated_bytes": 5472288
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 3.0420679,
+          "allocated_bytes": 389714911
+        },
+        "continuation": {
+          "gc_seconds": 0.0889533,
+          "seconds": 16.6476027,
+          "allocated_bytes": 693113831
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.126812,
+          "allocated_bytes": 7853520
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 12,
+        "residual_max": 1.0891678668305852e-9,
+        "root_counts": [
+          1,
+          1,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 0,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": true
+    },
+    {
+      "solve_seconds": 5.703437,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 6.2965874,
+      "name": "magnetic_e0.155_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1597307,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.5931504,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0840322,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 5.4424767,
+          "allocated_bytes": 33958659
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0171974,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 22,
+        "residual_max": 4.295077676590458e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 0,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": true
+    },
+    {
+      "solve_seconds": 4.103264,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 4.5679699000000005,
+      "name": "magnetic_e0.4_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1046336,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.4647059,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0451939,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.9407231,
+          "allocated_bytes": 36871541
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0127134,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 18,
+        "residual_max": 6.585877278612454e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 0,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": true
+    },
+    {
+      "solve_seconds": 3.5461931000000004,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 3.8955374000000003,
+      "name": "magnetic_e0.155_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.11453,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.3493443,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0460174,
+          "allocated_bytes": 115232
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.3748376,
+          "allocated_bytes": 33958355
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0108081,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 4.367126526455338e-14,
+        "total_roots": 22,
+        "residual_max": 4.295060021052335e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 0,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": true
+    },
+    {
+      "solve_seconds": 2.8551307999999995,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 3.1472242999999995,
+      "name": "magnetic_e0.4_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0758981,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.2920935,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0270204,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 2.743908,
+          "allocated_bytes": 36871557
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0083043,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 1.2512992542381159e-14,
+        "total_roots": 18,
+        "residual_max": 6.585882846678529e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 0,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": true
+    },
+    {
+      "solve_seconds": 2.8861532,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 3.1807054,
+      "name": "magnetic_e0.4_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0757008,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.2945522,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0287332,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 2.7734774,
+          "allocated_bytes": 36871493
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0082418,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 1.2512992542381159e-14,
+        "total_roots": 18,
+        "residual_max": 6.585882846678529e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 1,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 10.3847875,
+      "eB_GeV2": 0.05,
+      "total_with_vertex_seconds": 11.6141205,
+      "name": "magnetic_e0.05_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 448,
+        "folds": 16,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 2590,
+        "correction_solves": 12,
+        "dual_residual_calls": 816,
+        "jacobian_calls": 816,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 9,
+        "correction_attempts": 12,
+        "correction_iterations": 12
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.152431,
+          "allocated_bytes": 3154224
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 1.229333,
+          "allocated_bytes": 1037415
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.2087361,
+          "allocated_bytes": 111184
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 10.0016759,
+          "allocated_bytes": 27603850
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0219445,
+          "allocated_bytes": 35280
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 12,
+        "residual_max": 1.0891678668305852e-9,
+        "root_counts": [
+          1,
+          1,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 1,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 5.568140400000001,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 6.177352300000001,
+      "name": "magnetic_e0.155_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1576246,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.6092119,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0827638,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 5.3074091,
+          "allocated_bytes": 33958483
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0203429,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 22,
+        "residual_max": 4.295077676590458e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 1,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 4.1031214,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 4.5624757,
+      "name": "magnetic_e0.4_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1032024,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.4593543,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0455056,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.9419033,
+          "allocated_bytes": 36871605
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0125101,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 18,
+        "residual_max": 6.585877278612454e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 1,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 3.538709,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 3.8826488,
+      "name": "magnetic_e0.155_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1128326,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.3439398,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0446638,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.3708039,
+          "allocated_bytes": 33958595
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0104087,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 4.367126526455338e-14,
+        "total_roots": 22,
+        "residual_max": 4.295060021052335e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 1,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 3.5309625,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 3.8807883,
+      "name": "magnetic_e0.155_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1131328,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.3498258,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0456772,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.3614452,
+          "allocated_bytes": 33958595
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0107073,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 4.367126526455338e-14,
+        "total_roots": 22,
+        "residual_max": 4.295060021052335e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 2,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 2.8754747,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 3.1683607,
+      "name": "magnetic_e0.4_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0753721,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.292886,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0266338,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 2.7653228,
+          "allocated_bytes": 36871605
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.008146,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 1.2512992542381159e-14,
+        "total_roots": 18,
+        "residual_max": 6.585882846678529e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 2,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 10.442761099999998,
+      "eB_GeV2": 0.05,
+      "total_with_vertex_seconds": 11.669347299999998,
+      "name": "magnetic_e0.05_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 448,
+        "folds": 16,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 2590,
+        "correction_solves": 12,
+        "dual_residual_calls": 816,
+        "jacobian_calls": 816,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 9,
+        "correction_attempts": 12,
+        "correction_iterations": 12
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1513412,
+          "allocated_bytes": 3154224
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 1.2265862,
+          "allocated_bytes": 1037415
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1989235,
+          "allocated_bytes": 111184
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 10.0666033,
+          "allocated_bytes": 27603834
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0258931,
+          "allocated_bytes": 35280
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 12,
+        "residual_max": 1.0891678668305852e-9,
+        "root_counts": [
+          1,
+          1,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 2,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 5.5724319,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 6.160800699999999,
+      "name": "magnetic_e0.155_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1667836,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.5883688,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0831823,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 5.3052267,
+          "allocated_bytes": 33958483
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0172393,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 22,
+        "residual_max": 4.295077676590458e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 2,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 4.112078799999999,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 4.580239899999999,
+      "name": "magnetic_e0.4_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1058314,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.4681611,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0460366,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.9471586,
+          "allocated_bytes": 36871557
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0130522,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 18,
+        "residual_max": 6.585877278612454e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 2,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 4.217009399999999,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 4.670704799999999,
+      "name": "magnetic_e0.4_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1027412,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.4536954,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0454856,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 4.0559623,
+          "allocated_bytes": 36871541
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0128203,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 18,
+        "residual_max": 6.585877278612454e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 3,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 3.539984,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 3.8841958,
+      "name": "magnetic_e0.155_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1145453,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.3442118,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0468365,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 3.368014,
+          "allocated_bytes": 33958419
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0105882,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 4.367126526455338e-14,
+        "total_roots": 22,
+        "residual_max": 4.295060021052335e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 3,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 2.8538994,
+      "eB_GeV2": 0.4,
+      "total_with_vertex_seconds": 3.1457283,
+      "name": "magnetic_e0.4_p64",
+      "zeta_num": 256,
+      "branch": {
+        "points": 628,
+        "folds": 8,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3524,
+        "correction_solves": 18,
+        "dual_residual_calls": 1079,
+        "jacobian_calls": 1079,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 18,
+        "correction_iterations": 19
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0751393,
+          "allocated_bytes": 4558880
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.2918289,
+          "allocated_bytes": 1453639
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0274044,
+          "allocated_bytes": 111072
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 2.7430358,
+          "allocated_bytes": 36871605
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0083199,
+          "allocated_bytes": 49152
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 1.2512992542381159e-14,
+        "total_roots": 18,
+        "residual_max": 6.585882846678529e-10,
+        "root_counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          1,
+          1
+        ]
+      },
+      "repetition": 3,
+      "p_num": 64,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 10.557399199999999,
+      "eB_GeV2": 0.05,
+      "total_with_vertex_seconds": 11.7976785,
+      "name": "magnetic_e0.05_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 448,
+        "folds": 16,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 2590,
+        "correction_solves": 12,
+        "dual_residual_calls": 816,
+        "jacobian_calls": 816,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 9,
+        "correction_attempts": 12,
+        "correction_iterations": 12
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1529659,
+          "allocated_bytes": 3154224
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 1.2402793,
+          "allocated_bytes": 1037415
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1986248,
+          "allocated_bytes": 111184
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 10.1839321,
+          "allocated_bytes": 27603962
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0218764,
+          "allocated_bytes": 35280
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 12,
+        "residual_max": 1.0891678668305852e-9,
+        "root_counts": [
+          1,
+          1,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 3,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    },
+    {
+      "solve_seconds": 5.558913799999999,
+      "eB_GeV2": 0.155,
+      "total_with_vertex_seconds": 6.171479399999999,
+      "name": "magnetic_e0.155_p128",
+      "zeta_num": 256,
+      "branch": {
+        "points": 530,
+        "folds": 14,
+        "muB_min_MeV": 500.00000000000006,
+        "muB_max_MeV": 1700.0
+      },
+      "work": {
+        "scalar_residual_calls": 3236,
+        "correction_solves": 22,
+        "dual_residual_calls": 998,
+        "jacobian_calls": 998,
+        "anchor_attempts": 1,
+        "correction_failed_attempts": 0,
+        "anchor_iterations": 10,
+        "correction_attempts": 22,
+        "correction_iterations": 33
+      },
+      "T_MeV": 5.0,
+      "stages": {
+        "correction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.1590196,
+          "allocated_bytes": 4196336
+        },
+        "vertex_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.6125656,
+          "allocated_bytes": 1227047
+        },
+        "anchor": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0835633,
+          "allocated_bytes": 114080
+        },
+        "continuation": {
+          "gc_seconds": 0.0,
+          "seconds": 5.2992051,
+          "allocated_bytes": 33958419
+        },
+        "target_reconstruction": {
+          "gc_seconds": 0.0,
+          "seconds": 0.0171258,
+          "allocated_bytes": 58432
+        }
+      },
+      "validation": {
+        "all_physical": true,
+        "reference_max_state_distance": 0.0,
+        "total_roots": 22,
+        "residual_max": 4.295077676590458e-10,
+        "root_counts": [
+          3,
+          3,
+          7,
+          5,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "repetition": 3,
+      "p_num": 128,
+      "n_max": 64,
+      "warmup": false
+    }
+  ]
+}

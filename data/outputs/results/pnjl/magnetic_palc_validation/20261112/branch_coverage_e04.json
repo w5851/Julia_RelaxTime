@@ -1,0 +1,105 @@
+{
+  "julia_version": "1.12.5",
+  "production_source": "D:\\CodexCompute\\magnetic-palc-20261112-v1\\outputs\\current_mfir_p512_e04.json",
+  "reference_source": "D:\\CodexCompute\\magnetic-palc-20261112-v1\\reference_all_fields_coverage_input.json",
+  "corrected_source": "D:\\CodexCompute\\magnetic-palc-20261112-v1\\outputs\\p1024_corrected_roots.json",
+  "eB_GeV2": 0.4,
+  "targets": [
+    {
+      "muB_MeV": 900.0,
+      "production_count": 3,
+      "reference_count": 3,
+      "production_to_reference": [
+        1.6366375768253189e-9,
+        1.2218112775897332e-6,
+        1.3288736763391505e-5
+      ],
+      "reference_to_production": [
+        1.6366375768253189e-9,
+        1.2218112775897332e-6,
+        1.3288736763391505e-5
+      ],
+      "max_state_distance": 1.3288736763391505e-5,
+      "minimum_production_root_separation": 1.0406023588271869
+    },
+    {
+      "muB_MeV": 1000.0,
+      "production_count": 3,
+      "reference_count": 3,
+      "production_to_reference": [
+        2.248903010954425e-12,
+        2.580992824307347e-10,
+        1.5168759660584113e-5
+      ],
+      "reference_to_production": [
+        2.248903010954425e-12,
+        2.580992824307347e-10,
+        1.5168759660584113e-5
+      ],
+      "max_state_distance": 1.5168759660584113e-5,
+      "minimum_production_root_separation": 0.09633954986373734
+    },
+    {
+      "muB_MeV": 1050.0,
+      "production_count": 1,
+      "reference_count": 1,
+      "production_to_reference": [
+        1.9804036099889905e-5
+      ],
+      "reference_to_production": [
+        1.9804036099889905e-5
+      ],
+      "max_state_distance": 1.9804036099889905e-5,
+      "minimum_production_root_separation": null
+    },
+    {
+      "muB_MeV": 1100.0,
+      "production_count": 3,
+      "reference_count": 3,
+      "production_to_reference": [
+        2.2890560750484196e-5,
+        2.160427889170931e-5,
+        2.234958369630554e-5
+      ],
+      "reference_to_production": [
+        2.2890560750484196e-5,
+        2.160427889170931e-5,
+        2.234958369630554e-5
+      ],
+      "max_state_distance": 2.2890560750484196e-5,
+      "minimum_production_root_separation": 0.3183861954386199
+    },
+    {
+      "muB_MeV": 1150.0,
+      "production_count": 3,
+      "reference_count": 3,
+      "production_to_reference": [
+        2.2104383434006273e-5,
+        2.029283503828025e-5,
+        2.1722974653458174e-5
+      ],
+      "reference_to_production": [
+        2.2104383434006273e-5,
+        2.029283503828025e-5,
+        2.1722974653458174e-5
+      ],
+      "max_state_distance": 2.2104383434006273e-5,
+      "minimum_production_root_separation": 0.11165574900583931
+    },
+    {
+      "muB_MeV": 1200.0,
+      "production_count": 1,
+      "reference_count": 1,
+      "production_to_reference": [
+        2.4402896201885955e-5
+      ],
+      "reference_to_production": [
+        2.4402896201885955e-5
+      ],
+      "max_state_distance": 2.4402896201885955e-5,
+      "minimum_production_root_separation": null
+    }
+  ],
+  "unmatched_catalogue": [],
+  "narrow_window": []
+}

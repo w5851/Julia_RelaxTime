@@ -38,6 +38,18 @@ JULIA_LOAD_PATH='@:benchmark:@stdlib' julia --project=. benchmark/relaxtime/benc
 
 benchmark 输出不得自动晋升为 production 正确性证据。数值 claim 仍需独立节点/容差收敛、对应 validation/regression 和 provenance。
 
+## 磁场与无磁场 PALC
+
+`pnjl/benchmark_magnetic_palc.jl` 在各自源码目录使用根环境运行 `magnetic` 或
+`nonmagnetic` 模式，输出预热后的路径分项计时、调用数及积分/导数微基准。
+磁场模式复用三条已验证的低温多回弯路径；无磁场模式调用现有生产 PALC 比较入口。
+配置、数值核对和同机结果见[磁场 PALC 分析](../docs/analysis/pnjl/magnetic_palc_validation_20261112_analysis.md#性能基准2026-11-13)。
+
+```sh
+julia --startup-file=no --threads=1 --project=. benchmark/pnjl/benchmark_magnetic_palc.jl magnetic output.json 3
+julia --startup-file=no --threads=1 --project=. benchmark/pnjl/benchmark_magnetic_palc.jl nonmagnetic output.json 3
+```
+
 ## charged GBU 相图单点成本
 
 `relaxtime/bench_charged_gbu_contour_point.jl` 使用根环境，不额外引入 oracle。
