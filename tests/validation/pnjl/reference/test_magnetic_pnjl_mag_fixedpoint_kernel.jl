@@ -91,10 +91,17 @@ end
         x, mu, _magnetic_kernel_f(row, "T_MeV") / ext_hc, conf,
     )
     @test isfinite(components.omega)
-    @test isapprox(
-        components.omega,
-        _magnetic_kernel_f(row, "expected_omega_fm4");
-        rtol=_magnetic_kernel_f(row, "rtol"),
-        atol=_magnetic_kernel_f(row, "atol"),
+    # The unchanged external p16 value has a measured 1.29e-5 fm^-4
+    # whole-interval quadrature error. Keep that source resolution separate
+    # from the original algebraic tolerance; attribution is in provenance.
+    expected = _magnetic_kernel_f(row, "expected_omega_fm4")
+    algebraic_tolerance = max(_magnetic_kernel_f(row,"atol"),
+        _magnetic_kernel_f(row,"rtol")*abs(expected))
+    @test abs(components.omega-expected) <= algebraic_tolerance +
+        _magnetic_kernel_f(row,"source_discretization_atol")
+    refined = Models.MagneticThermodynamics.calculate_magnetic_omega_components(
+        x, mu, _magnetic_kernel_f(row, "T_MeV") / ext_hc, conf;
+        p_num=2*_magnetic_kernel_i(row,"p_num"),
     )
+    @test isapprox(components.omega,refined.omega;rtol=1e-10,atol=2e-9)
 end

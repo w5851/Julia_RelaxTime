@@ -1,0 +1,2499 @@
+{
+  "eB_GeV2": 0.05,
+  "julia_version": "1.12.5",
+  "T_MeV": 5.0,
+  "method": "F=0 and det(F_x)=0; finite-difference steps and two-sided neighbors",
+  "source": "thesis_smooth_input.json",
+  "folds": [
+    {
+      "id": "first_minimum",
+      "initial_muB_MeV": 1154.0274260508004,
+      "numerical": [
+        {
+          "id": "o48_n32",
+          "order": 48,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.1634600031202983e-12,
+            "gap_residual": 1.2755498184942387e-15,
+            "gap_sigma_min": 1.166031152956261e-12,
+            "mass_jacobian_sigma_min": 0.5693911954045785,
+            "muB_MeV": 1154.026846702912,
+            "rhoB_over_rho0": 0.18642308499738938,
+            "masses_MeV": [
+              371.8070564681748,
+              376.8218061174831,
+              562.8203323574155
+            ],
+            "x_state": [
+              -1.8455612249092284,
+              -1.8901847279371395,
+              -2.3102339277667703,
+              0.0023825145955735563,
+              0.0019649412305499264
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024633733227754358,
+                "rhoB_delta": -0.0015562590345781445,
+                "residual": 1.2755493055428145e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024620541284452605,
+                "rhoB_delta": 0.0015551475999477254,
+                "residual": 4.965069594729977e-16
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n32",
+          "order": 96,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 6.3803047314359326e-12,
+            "gap_residual": 2.852214888751499e-15,
+            "gap_sigma_min": 6.38031679393429e-12,
+            "mass_jacobian_sigma_min": 0.5693911954045785,
+            "muB_MeV": 1154.026846702912,
+            "rhoB_over_rho0": 0.18642308499738938,
+            "masses_MeV": [
+              371.8070564681748,
+              376.8218061174831,
+              562.8203323574155
+            ],
+            "x_state": [
+              -1.8455612249092284,
+              -1.8901847279371395,
+              -2.3102339277667703,
+              0.0023825145955735563,
+              0.0019649412305499264
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024633733234326665,
+                "rhoB_delta": -0.0015562590345775734,
+                "residual": 2.2752804599636024e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024620541279194758,
+                "rhoB_delta": 0.0015551475999493155,
+                "residual": 2.6829751883135792e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n64",
+          "order": 96,
+          "n_max": 64,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.9889145916033565e-11,
+            "gap_residual": 7.021680612427905e-16,
+            "gap_sigma_min": 1.9889187381570136e-11,
+            "mass_jacobian_sigma_min": 0.5693903240238226,
+            "muB_MeV": 1154.0313427855258,
+            "rhoB_over_rho0": 0.18642378009528837,
+            "masses_MeV": [
+              371.8080981466424,
+              376.82389012789207,
+              562.8221345674722
+            ],
+            "x_state": [
+              -1.845562932758188,
+              -1.8901957754707657,
+              -2.3102427543337294,
+              0.002382510263843187,
+              0.001964949609563806
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024635060749988347,
+                "rhoB_delta": -0.001556303571035891,
+                "residual": 1.4728774472676066e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024621845460531594,
+                "rhoB_delta": 0.00155519093271572,
+                "residual": 1.256074623102036e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.42917534581328e-11,
+            "gap_residual": 1.8444418923678347e-15,
+            "gap_sigma_min": 1.4291715884818436e-11,
+            "mass_jacobian_sigma_min": 0.5693903221514282,
+            "muB_MeV": 1154.0313523328255,
+            "rhoB_over_rho0": 0.18642378162556988,
+            "masses_MeV": [
+              371.8081003618818,
+              376.8238945332466,
+              562.8221384270865
+            ],
+            "x_state": [
+              -1.8455629364016626,
+              -1.890195798741776,
+              -2.310242773325059,
+              0.0023825102542130126,
+              0.0019649496266357196
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.00246350631909438,
+                "rhoB_delta": -0.0015563036645694704,
+                "residual": 6.661342372034738e-16
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002462184858369269,
+                "rhoB_delta": 0.0015551910237164655,
+                "residual": 2.2644201820207522e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_pz60",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 60.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 8.95040800882397e-12,
+            "gap_residual": 1.4217803311991164e-15,
+            "gap_sigma_min": 8.950309457213569e-12,
+            "mass_jacobian_sigma_min": 0.5693903221514282,
+            "muB_MeV": 1154.0313523328255,
+            "rhoB_over_rho0": 0.18642378162556988,
+            "masses_MeV": [
+              371.8081003618818,
+              376.8238945332466,
+              562.8221384270865
+            ],
+            "x_state": [
+              -1.8455629364016626,
+              -1.890195798741776,
+              -2.310242773325059,
+              0.0023825102542130126,
+              0.0019649496266357196
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002463506319225826,
+                "rhoB_delta": -0.0015563036645693763,
+                "residual": 6.661342298009845e-16
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002462184858369269,
+                "rhoB_delta": 0.001555191023716292,
+                "residual": 2.2752805126668268e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_fd5e6",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 5.0e-6,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.4365179789022865e-11,
+            "gap_residual": 2.3076124782075995e-15,
+            "gap_sigma_min": 1.4365170000101956e-11,
+            "mass_jacobian_sigma_min": 0.5693903221121079,
+            "muB_MeV": 1154.0313523328268,
+            "rhoB_over_rho0": 0.18642377543488323,
+            "masses_MeV": [
+              371.80810111237923,
+              376.82389514599413,
+              562.8221387339464
+            ],
+            "x_state": [
+              -1.8455629403809035,
+              -1.8901958014987805,
+              -2.3102427738071776,
+              0.0023825103183132577,
+              0.0019649496881165517
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024635259256057256,
+                "rhoB_delta": -0.0015563036690167736,
+                "residual": 2.4017799158071958e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002462165264082418,
+                "rhoB_delta": 0.0015551910281194105,
+                "residual": 4.440900137299139e-16
+              }
+            ]
+          }
+        }
+      ],
+      "convention": [
+        {
+          "id": "thesis_K12p56",
+          "a": 0.0108805,
+          "K_lambda5": 12.56,
+          "result": {
+            "converged": true,
+            "augmented_residual": 5.959752792175595e-12,
+            "gap_residual": 3.171431548775692e-15,
+            "gap_sigma_min": 5.915057978457204e-12,
+            "mass_jacobian_sigma_min": 0.5655815457763893,
+            "muB_MeV": 1163.299652644882,
+            "rhoB_over_rho0": 0.18742953510445173,
+            "masses_MeV": [
+              374.88941882771036,
+              379.8564595156794,
+              564.9662530542369
+            ],
+            "x_state": [
+              -1.8539758839842129,
+              -1.8984723190500712,
+              -2.3136005327966664,
+              0.002389762929746567,
+              0.0019700241651830013
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024756530137231714,
+                "rhoB_delta": -0.0015659273400770528,
+                "residual": 1.790180932282337e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024742757676360634,
+                "rhoB_delta": 0.0015648380928663809,
+                "residual": 1.421779429284965e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "printed_a0p108805",
+          "a": 0.108805,
+          "K_lambda5": 12.36,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.4756883166424648e-11,
+            "gap_residual": 1.748381593267145e-15,
+            "gap_sigma_min": 1.3833289188138779e-11,
+            "mass_jacobian_sigma_min": 0.590245439007944,
+            "muB_MeV": 1217.580008909241,
+            "rhoB_over_rho0": 0.19228667120463966,
+            "masses_MeV": [
+              392.6854235522199,
+              398.2565902355094,
+              582.2708823608968
+            ],
+            "x_state": [
+              -1.9003076516659838,
+              -1.9481292075517673,
+              -2.3399185194166274,
+              0.0024364862056554717,
+              0.0020161537832573775
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002600412426280223,
+                "rhoB_delta": -0.0016430043489297165,
+                "residual": 3.587240464443667e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0025981528904687238,
+                "rhoB_delta": 0.0016413347009782877,
+                "residual": 1.6764002041394941e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "polyakov_zero",
+          "result": {
+            "converged": true,
+            "augmented_residual": 3.923561611179706e-13,
+            "gap_residual": 1.4895204919483637e-14,
+            "gap_sigma_min": 3.9211237048778907e-13,
+            "mass_jacobian_sigma_min": 0.5693899723418343,
+            "muB_MeV": 1154.01426889862,
+            "rhoB_over_rho0": 0.18636382167065008,
+            "masses_MeV": [
+              371.81511787548106,
+              376.82941731858807,
+              562.8249598928782
+            ],
+            "x_state": [
+              -1.8456005561255333,
+              -1.8902201499923381,
+              -2.3102471932807522,
+              0.0,
+              0.0
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0024674741000734403,
+                "rhoB_delta": -0.0015566081963550664,
+                "residual": 1.0877919644084146e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.002465897750626007,
+                "rhoB_delta": 0.0015554698805277478,
+                "residual": 1.4390135079995448e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "vacuum_levels_below_Lambda",
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.276937532558688e-12,
+            "gap_residual": 9.155166710251265e-16,
+            "gap_sigma_min": 2.436524146984106e-12,
+            "mass_jacobian_sigma_min": 0.5831919590980723,
+            "muB_MeV": 1044.522045387489,
+            "rhoB_over_rho0": 0.1819652193877703,
+            "masses_MeV": [
+              336.6316130891768,
+              336.4309903407567,
+              529.0660747467605
+            ],
+            "x_state": [
+              -1.7006374338991608,
+              -1.6988940940768293,
+              -2.1635677593426914,
+              0.0022231543179282447,
+              0.0018059140899949113
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.00208996028840338,
+                "rhoB_delta": -0.001306783009966652,
+                "residual": 1.017536440943521e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 1,
+                "converged": true,
+                "muB_delta_MeV": 0.0020906409578361016,
+                "rhoB_delta": 0.0013086667637838287,
+                "residual": 1.1322105792771169e-15
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "first_maximum",
+      "initial_muB_MeV": 1192.0852583116327,
+      "numerical": [
+        {
+          "id": "o48_n32",
+          "order": 48,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.490668626996e-11,
+            "gap_residual": 2.8693415200342e-14,
+            "gap_sigma_min": 1.4981194713808088e-11,
+            "mass_jacobian_sigma_min": 0.5707324662091687,
+            "muB_MeV": 1192.098152924572,
+            "rhoB_over_rho0": 0.4000763031588576,
+            "masses_MeV": [
+              346.33388808804096,
+              355.3446053544957,
+              552.5057695602543
+            ],
+            "x_state": [
+              -1.711688156473534,
+              -1.7916539044273612,
+              -2.293771985584059,
+              0.0018215364568519138,
+              0.002716336692782006
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009709878413702317,
+                "rhoB_delta": -0.0013978522324502077,
+                "residual": 4.007448330357847e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009087149273397844,
+                "rhoB_delta": 0.001378079459151699,
+                "residual": 3.6935755196745455e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n32",
+          "order": 96,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 5.100973969721369e-12,
+            "gap_residual": 2.8268391262509987e-14,
+            "gap_sigma_min": 5.100886524849246e-12,
+            "mass_jacobian_sigma_min": 0.5707324662091687,
+            "muB_MeV": 1192.098152924572,
+            "rhoB_over_rho0": 0.4000763031588576,
+            "masses_MeV": [
+              346.33388808804096,
+              355.3446053544957,
+              552.5057695602543
+            ],
+            "x_state": [
+              -1.711688156473534,
+              -1.7916539044273612,
+              -2.293771985584059,
+              0.0018215364568519138,
+              0.002716336692782006
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009709878412913639,
+                "rhoB_delta": -0.0013978522324469694,
+                "residual": 4.852952827718038e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009087149273397844,
+                "rhoB_delta": 0.0013780794591518725,
+                "residual": 4.8736448890111115e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n64",
+          "order": 96,
+          "n_max": 64,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 3.26226880400044e-13,
+            "gap_residual": 4.965520234169559e-16,
+            "gap_sigma_min": 3.2628747664873835e-13,
+            "mass_jacobian_sigma_min": 0.5707315984654004,
+            "muB_MeV": 1192.1031258612097,
+            "rhoB_over_rho0": 0.4000783284056315,
+            "masses_MeV": [
+              346.33495340293047,
+              355.34647343714533,
+              552.5075023425618
+            ],
+            "x_state": [
+              -1.7116905511748246,
+              -1.7916635371958771,
+              -2.2937807013213796,
+              0.0018215361759234638,
+              0.002716339703139745
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009709913725928342,
+                "rhoB_delta": -0.0013978522087846185,
+                "residual": 6.395837813972576e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009087181458519384,
+                "rhoB_delta": 0.001378079495849167,
+                "residual": 2.8498236831059398e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.4606950257988507e-11,
+            "gap_residual": 3.250276274370909e-14,
+            "gap_sigma_min": 1.4606943877018294e-11,
+            "mass_jacobian_sigma_min": 0.5707315966034676,
+            "muB_MeV": 1192.1031363779489,
+            "rhoB_over_rho0": 0.40007833263230713,
+            "masses_MeV": [
+              346.334955674522,
+              355.3464773895136,
+              552.5075060539824
+            ],
+            "x_state": [
+              -1.711690556314699,
+              -1.7916635574966482,
+              -2.2937807200546465,
+              0.0018215361750841305,
+              0.002716339709234291
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009709913775352103,
+                "rhoB_delta": -0.00139785220835114,
+                "residual": 6.128445476049168e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009087181505840007,
+                "rhoB_delta": 0.001378079495738376,
+                "residual": 3.0012812250143737e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_pz60",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 60.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.2179984413316088e-11,
+            "gap_residual": 3.247848309517244e-14,
+            "gap_sigma_min": 1.217992441527403e-11,
+            "mass_jacobian_sigma_min": 0.5707315966034676,
+            "muB_MeV": 1192.1031363779489,
+            "rhoB_over_rho0": 0.40007833263230713,
+            "masses_MeV": [
+              346.334955674522,
+              355.3464773895136,
+              552.5075060539824
+            ],
+            "x_state": [
+              -1.711690556314699,
+              -1.7916635574966482,
+              -2.2937807200546465,
+              0.0018215361750841305,
+              0.002716339709234291
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.00970991377508921,
+                "rhoB_delta": -0.001397852208349463,
+                "residual": 7.0101501885646586e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009087181506102899,
+                "rhoB_delta": 0.001378079495738,
+                "residual": 3.37254477428918e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_fd5e6",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 5.0e-6,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.5761706670967982e-11,
+            "gap_residual": 1.1102249204671524e-15,
+            "gap_sigma_min": 1.57617627183122e-11,
+            "mass_jacobian_sigma_min": 0.5707315966630613,
+            "muB_MeV": 1192.1031363779755,
+            "rhoB_over_rho0": 0.40007833859048947,
+            "masses_MeV": [
+              346.33495514455643,
+              355.3464766192464,
+              552.5075057783387
+            ],
+            "x_state": [
+              -1.7116905541594076,
+              -1.7916635532029543,
+              -2.2937807196077875,
+              0.0018215363333767601,
+              0.0027163398612787314
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009709829008869061,
+                "rhoB_delta": -0.0013978521192065628,
+                "residual": 6.079977046585387e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.00908725830090126,
+                "rhoB_delta": 0.001378079414928509,
+                "residual": 3.901602655485995e-15
+              }
+            ]
+          }
+        }
+      ],
+      "convention": [
+        {
+          "id": "thesis_K12p56",
+          "a": 0.0108805,
+          "K_lambda5": 12.56,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.1906315221919225e-11,
+            "gap_residual": 2.5904465825474278e-14,
+            "gap_sigma_min": 1.1945511163452075e-11,
+            "mass_jacobian_sigma_min": 0.5669460546161283,
+            "muB_MeV": 1200.574314360456,
+            "rhoB_over_rho0": 0.3998044539078634,
+            "masses_MeV": [
+              349.64790178617903,
+              358.5338596086038,
+              554.5877573291855
+            ],
+            "x_state": [
+              -1.7218027513274299,
+              -1.801187189107709,
+              -2.297142439991899,
+              0.0018295624742817808,
+              0.0027267640146222405
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009784712974720148,
+                "rhoB_delta": -0.001410627028845321,
+                "residual": 5.4467603784974765e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009157091697781769,
+                "rhoB_delta": 0.001390501718703518,
+                "residual": 3.1849219274016193e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "printed_a0p108805",
+          "a": 0.108805,
+          "K_lambda5": 12.36,
+          "result": {
+            "converged": true,
+            "augmented_residual": 9.595252222760098e-12,
+            "gap_residual": 3.1027716540177918e-12,
+            "gap_sigma_min": 9.407935224149811e-12,
+            "mass_jacobian_sigma_min": 0.5914248406755857,
+            "muB_MeV": 1252.199750077798,
+            "rhoB_over_rho0": 0.40165664625130154,
+            "masses_MeV": [
+              368.3318766832198,
+              377.8258311212671,
+              572.4538932353782
+            ],
+            "x_state": [
+              -1.775513267534121,
+              -1.8568174104503756,
+              -2.3251570698803516,
+              0.001870916828465681,
+              0.0027857636666807056
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.010411420591910322,
+                "rhoB_delta": -0.001461783318898342,
+                "residual": 7.546585624277077e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009734054800354202,
+                "rhoB_delta": 0.0014384695887920014,
+                "residual": 5.398624361971505e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "polyakov_zero",
+          "result": {
+            "converged": true,
+            "augmented_residual": 9.094924793650409e-12,
+            "gap_residual": 6.661338147750939e-16,
+            "gap_sigma_min": 9.095779208247531e-12,
+            "mass_jacobian_sigma_min": 0.5707310252366985,
+            "muB_MeV": 1192.1492216955912,
+            "rhoB_over_rho0": 0.4000744571024704,
+            "masses_MeV": [
+              346.331031973665,
+              355.3508381330226,
+              552.5075262998374
+            ],
+            "x_state": [
+              -1.7116549010368354,
+              -1.7917014230146848,
+              -2.2937807401595616,
+              0.0,
+              0.0
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009787530529773797,
+                "rhoB_delta": -0.0013978672457452997,
+                "residual": 5.20267141095764e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.009157415064045778,
+                "rhoB_delta": 0.001377949014373109,
+                "residual": 3.807271875429452e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "vacuum_levels_below_Lambda",
+          "result": {
+            "converged": true,
+            "augmented_residual": 8.180535392088032e-12,
+            "gap_residual": 1.844494492003384e-15,
+            "gap_sigma_min": 9.266276221372613e-12,
+            "mass_jacobian_sigma_min": 0.584653300221399,
+            "muB_MeV": 1085.2049022281774,
+            "rhoB_over_rho0": 0.3900332813859782,
+            "masses_MeV": [
+              309.5161738632523,
+              314.6558013824451,
+              519.0533515328008
+            ],
+            "x_state": [
+              -1.554457273118782,
+              -1.59900005494536,
+              -2.14690618197836,
+              0.0017317988558684955,
+              0.0025876749723151475
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.00912286569943179,
+                "rhoB_delta": -0.0013077209506856535,
+                "residual": 4.011481437237962e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.008545335620217665,
+                "rhoB_delta": 0.0012907388455420978,
+                "residual": 2.0991993473597042e-15
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "second_minimum",
+      "initial_muB_MeV": 1176.522137118287,
+      "numerical": [
+        {
+          "id": "o48_n32",
+          "order": 48,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.5130079685625013e-12,
+            "gap_residual": 1.1322212704432225e-15,
+            "gap_sigma_min": 2.5114675781855148e-12,
+            "mass_jacobian_sigma_min": 0.572170635411519,
+            "muB_MeV": 1176.5202295370655,
+            "rhoB_over_rho0": 0.55896045994304,
+            "masses_MeV": [
+              333.15442285455356,
+              333.1220824283823,
+              545.1351056049872
+            ],
+            "x_state": [
+              -1.6639068066944496,
+              -1.6636203666712095,
+              -2.281687874423736,
+              0.002463564971473623,
+              0.0021611564765730324
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012241315724839932,
+                "rhoB_delta": -0.0013326745897193396,
+                "residual": 1.2070490520914191e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.001220629241093356,
+                "rhoB_delta": 0.001334445021675355,
+                "residual": 1.1476579375958073e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n32",
+          "order": 96,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.8616192264206775e-11,
+            "gap_residual": 1.017554612165094e-15,
+            "gap_sigma_min": 1.861617955726881e-11,
+            "mass_jacobian_sigma_min": 0.572170635411519,
+            "muB_MeV": 1176.5202295370655,
+            "rhoB_over_rho0": 0.5589604599430397,
+            "masses_MeV": [
+              333.15442285455356,
+              333.1220824283823,
+              545.1351056049872
+            ],
+            "x_state": [
+              -1.6639068066944496,
+              -1.6636203666712095,
+              -2.281687874423736,
+              0.002463564971473623,
+              0.0021611564765730324
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.001224131573929901,
+                "rhoB_delta": -0.0013326745897159857,
+                "residual": 1.2069549701555862e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012206292416191405,
+                "rhoB_delta": 0.0013344450216768006,
+                "residual": 1.1474908186662354e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n64",
+          "order": 96,
+          "n_max": 64,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.173735395423451e-11,
+            "gap_residual": 1.8039007582998346e-15,
+            "gap_sigma_min": 1.1737228669721415e-11,
+            "mass_jacobian_sigma_min": 0.5721698262682106,
+            "muB_MeV": 1176.5251130816928,
+            "rhoB_over_rho0": 0.5589629597897773,
+            "masses_MeV": [
+              333.15547678457676,
+              333.1238974116416,
+              545.1368129114061
+            ],
+            "x_state": [
+              -1.6639093715538351,
+              -1.6636296718039254,
+              -2.2816965480034024,
+              0.002463565196325675,
+              0.002161159853807261
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012241306682657608,
+                "rhoB_delta": -0.0013326751702144822,
+                "residual": 1.2067731073803538e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012206282768042218,
+                "rhoB_delta": 0.0013344455986363454,
+                "residual": 1.1476734865462873e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.922507803430084e-12,
+            "gap_residual": 5.164856770381574e-15,
+            "gap_sigma_min": 2.9224662543038733e-12,
+            "mass_jacobian_sigma_min": 0.5721698245318643,
+            "muB_MeV": 1176.525123388724,
+            "rhoB_over_rho0": 0.558962965115612,
+            "masses_MeV": [
+              333.15547901771254,
+              333.1239012306442,
+              545.1368165588815
+            ],
+            "x_state": [
+              -1.6639093770024043,
+              -1.6636296912977306,
+              -2.281696566615942,
+              0.0024635651961796385,
+              0.002161159860430899
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012241306757581928,
+                "rhoB_delta": -0.0013326751711165384,
+                "residual": 1.2069806032090984e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.001220628265499851,
+                "rhoB_delta": 0.0013344455995410037,
+                "residual": 1.1473526767293725e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_pz60",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 60.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.2044428437889228e-12,
+            "gap_residual": 5.202900720863977e-15,
+            "gap_sigma_min": 2.2044434457623136e-12,
+            "mass_jacobian_sigma_min": 0.5721698245318643,
+            "muB_MeV": 1176.525123388724,
+            "rhoB_over_rho0": 0.558962965115612,
+            "masses_MeV": [
+              333.15547901771254,
+              333.1239012306442,
+              545.1368165588815
+            ],
+            "x_state": [
+              -1.6639093770024043,
+              -1.6636296912977306,
+              -2.281696566615942,
+              0.0024635651961796385,
+              0.002161159860430899
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012241306749695157,
+                "rhoB_delta": -0.0013326751711174637,
+                "residual": 1.207043105196877e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012206282649740662,
+                "rhoB_delta": 0.0013344455995399629,
+                "residual": 1.1473751880416503e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_fd5e6",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 5.0e-6,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.872170955201925e-11,
+            "gap_residual": 2.4485892033638064e-12,
+            "gap_sigma_min": 1.856097953660353e-11,
+            "mass_jacobian_sigma_min": 0.5721698245069133,
+            "muB_MeV": 1176.5251233875424,
+            "rhoB_over_rho0": 0.5589629616361845,
+            "masses_MeV": [
+              333.15547933625794,
+              333.12390169681015,
+              545.1368167198794
+            ],
+            "x_state": [
+              -1.6639093782994199,
+              -1.6636296939022148,
+              -2.2816965668836895,
+              0.002463565225452664,
+              0.0021611598822594987
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012241382375937028,
+                "rhoB_delta": -0.0013326751603002485,
+                "residual": 1.2070992569514696e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012206230923042186,
+                "rhoB_delta": 0.0013344456011319186,
+                "residual": 1.1475857690130836e-11
+              }
+            ]
+          }
+        }
+      ],
+      "convention": [
+        {
+          "id": "thesis_K12p56",
+          "a": 0.0108805,
+          "K_lambda5": 12.56,
+          "result": {
+            "converged": true,
+            "augmented_residual": 3.8918185926882036e-13,
+            "gap_residual": 1.2755519146371041e-15,
+            "gap_sigma_min": 3.885549097647602e-13,
+            "mass_jacobian_sigma_min": 0.5684267890338071,
+            "muB_MeV": 1184.8584441413752,
+            "rhoB_over_rho0": 0.5604539490745859,
+            "masses_MeV": [
+              336.28233635563925,
+              336.18858346069067,
+              547.0381494653294
+            ],
+            "x_state": [
+              -1.6736323144456065,
+              -1.6727964734742804,
+              -2.2848398100961065,
+              0.00246920597460185,
+              0.0021679912358185936
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012246175033580507,
+                "rhoB_delta": -0.0013441201090748252,
+                "residual": 1.2042776852575835e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012211448095306515,
+                "rhoB_delta": 0.0013458958096393067,
+                "residual": 1.1452823027722384e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "printed_a0p108805",
+          "a": 0.108805,
+          "K_lambda5": 12.36,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.470837991272889e-11,
+            "gap_residual": 1.5383702144280474e-15,
+            "gap_sigma_min": 1.4521998155076443e-11,
+            "mass_jacobian_sigma_min": 0.5928551646327296,
+            "muB_MeV": 1235.4174285799227,
+            "rhoB_over_rho0": 0.5696868241145454,
+            "masses_MeV": [
+              355.1338624441115,
+              354.6218495110346,
+              564.8669293143041
+            ],
+            "x_state": [
+              -1.7302657610785424,
+              -1.7258890768580935,
+              -2.3134454689842507,
+              0.0025008037091510007,
+              0.0022102559464644593
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012353758684897705,
+                "rhoB_delta": -0.0013932955279586403,
+                "residual": 1.1885412059653768e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012320736445767832,
+                "rhoB_delta": 0.0013952756590874388,
+                "residual": 1.132162113883026e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "polyakov_zero",
+          "result": {
+            "converged": true,
+            "augmented_residual": 6.125475074379452e-12,
+            "gap_residual": 4.594982277249868e-14,
+            "gap_sigma_min": 6.125430666349107e-12,
+            "mass_jacobian_sigma_min": 0.572169169161415,
+            "muB_MeV": 1176.5123899518221,
+            "rhoB_over_rho0": 0.558867457959673,
+            "masses_MeV": [
+              333.16462767484444,
+              333.13548541526654,
+              545.1410637601423
+            ],
+            "x_state": [
+              -1.6639501390516263,
+              -1.6636920246140539,
+              -2.2817035958138434,
+              0.0,
+              0.0
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012246975133298316,
+                "rhoB_delta": -0.0013326965043580197,
+                "residual": 1.2102828344808892e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.001221148716899626,
+                "rhoB_delta": 0.0013344676713035928,
+                "residual": 1.1505604132012188e-11
+              }
+            ]
+          }
+        },
+        {
+          "id": "vacuum_levels_below_Lambda",
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.089988730556012e-11,
+            "gap_residual": 1.4728773764616134e-15,
+            "gap_sigma_min": 1.2391989044488646e-11,
+            "mass_jacobian_sigma_min": 0.5857796151350344,
+            "muB_MeV": 1070.710509459348,
+            "rhoB_over_rho0": 0.536173819749796,
+            "masses_MeV": [
+              296.4705430685322,
+              292.97216073949664,
+              512.3293138843995
+            ],
+            "x_state": [
+              -1.504176043695914,
+              -1.473912645969671,
+              -2.135419818804109,
+              0.0023712352182479624,
+              0.0020636794007841104
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0012168267803619407,
+                "rhoB_delta": -0.001244606268967855,
+                "residual": 1.1768463899594596e-11
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.001213148461735175,
+                "rhoB_delta": 0.001246178481760276,
+                "residual": 1.1175392150976039e-11
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "second_maximum",
+      "initial_muB_MeV": 1194.5334856175532,
+      "numerical": [
+        {
+          "id": "o48_n32",
+          "order": 48,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 3.4805751117135565e-12,
+            "gap_residual": 2.329727543950077e-15,
+            "gap_sigma_min": 3.4721253365487373e-12,
+            "mass_jacobian_sigma_min": 0.5734683499355651,
+            "muB_MeV": 1194.5357314172663,
+            "rhoB_over_rho0": 0.7602637007247323,
+            "masses_MeV": [
+              313.6323541112492,
+              307.01557369685946,
+              536.021593909841
+            ],
+            "x_state": [
+              -1.5793616932096273,
+              -1.5209027654573595,
+              -2.266365310520793,
+              0.0023131342252480373,
+              0.004187224970729321
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.0050688992681248496,
+                "rhoB_delta": -0.0013444632331070245,
+                "residual": 1.195939741890479e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.0049586012375366344,
+                "rhoB_delta": 0.001338215592839451,
+                "residual": 1.8311658028352865e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n32",
+          "order": 96,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.9204269061690036e-11,
+            "gap_residual": 9.9303038314111e-16,
+            "gap_sigma_min": 1.9204254421845926e-11,
+            "mass_jacobian_sigma_min": 0.5734683499355401,
+            "muB_MeV": 1194.5357314172652,
+            "rhoB_over_rho0": 0.7602637007200653,
+            "masses_MeV": [
+              313.6323541116799,
+              307.0155736974826,
+              536.0215939100459
+            ],
+            "x_state": [
+              -1.5793616932114078,
+              -1.5209027654608365,
+              -2.2663653105211403,
+              0.002313134225136315,
+              0.0041872249705445395
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005068899300986394,
+                "rhoB_delta": -0.0013444632331204975,
+                "residual": 1.7902885400139345e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004958601201783275,
+                "rhoB_delta": 0.0013382155928652404,
+                "residual": 1.831107654353756e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n64",
+          "order": 96,
+          "n_max": 64,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.1564542929331573e-11,
+            "gap_residual": 1.0878015607399862e-15,
+            "gap_sigma_min": 1.1564566463561357e-11,
+            "mass_jacobian_sigma_min": 0.573467561582853,
+            "muB_MeV": 1194.5402658357395,
+            "rhoB_over_rho0": 0.7602645671482943,
+            "masses_MeV": [
+              313.6336164327721,
+              307.01763162383367,
+              536.0233681773502
+            ],
+            "x_state": [
+              -1.579365387167927,
+              -1.5209134049885158,
+              -2.266374098768495,
+              0.0023131656186495208,
+              0.004187345121389275
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005068933039013036,
+                "rhoB_delta": -0.0013444771245140308,
+                "residual": 4.445197031197254e-16
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.0049586373166196395,
+                "rhoB_delta": 0.0013382296325613243,
+                "residual": 2.094848277668071e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 5.479150514776545e-12,
+            "gap_residual": 3.7582307755387395e-14,
+            "gap_sigma_min": 5.478998644385509e-12,
+            "mass_jacobian_sigma_min": 0.5734675598916662,
+            "muB_MeV": 1194.5402753843978,
+            "rhoB_over_rho0": 0.7602645689235471,
+            "masses_MeV": [
+              313.6336191084588,
+              307.0176359595149,
+              536.0233719642931
+            ],
+            "x_state": [
+              -1.5793653950185589,
+              -1.5209134273260663,
+              -2.2663741176016035,
+              0.002313165683581064,
+              0.004187345370947683
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.0050689331065763696,
+                "rhoB_delta": -0.0013444771530519667,
+                "residual": 2.9205878764983127e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004958637312413362,
+                "rhoB_delta": 0.0013382296616927091,
+                "residual": 1.6013818169697503e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_pz60",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 60.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.3245758366093825e-11,
+            "gap_residual": 3.7510741678935557e-14,
+            "gap_sigma_min": 1.3245707694666978e-11,
+            "mass_jacobian_sigma_min": 0.5734675598916662,
+            "muB_MeV": 1194.5402753843978,
+            "rhoB_over_rho0": 0.7602645689235471,
+            "masses_MeV": [
+              313.6336191084588,
+              307.0176359595149,
+              536.0233719642931
+            ],
+            "x_state": [
+              -1.5793653950185589,
+              -1.5209134273260663,
+              -2.2663741176016035,
+              0.002313165683581064,
+              0.004187345370947683
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005068933107102155,
+                "rhoB_delta": -0.0013444771530542795,
+                "residual": 2.5511760662329053e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004958637312413362,
+                "rhoB_delta": 0.0013382296616925356,
+                "residual": 1.616673306903593e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_fd5e6",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 5.0e-6,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.9821752634647054e-11,
+            "gap_residual": 7.251402659855444e-12,
+            "gap_sigma_min": 1.8447730394354134e-11,
+            "mass_jacobian_sigma_min": 0.5734675599252568,
+            "muB_MeV": 1194.5402753839421,
+            "rhoB_over_rho0": 0.7602645752009637,
+            "masses_MeV": [
+              313.6336185287323,
+              307.01763512029794,
+              536.0233716888266
+            ],
+            "x_state": [
+              -1.5793653926223346,
+              -1.5209134226416803,
+              -2.266374117135895,
+              0.0023131658247166494,
+              0.004187345603976857
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005068884915254195,
+                "rhoB_delta": -0.00134447711763724,
+                "residual": 1.1325006976050276e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004958683047532325,
+                "rhoB_delta": 0.001338229638593883,
+                "residual": 1.4896763227941446e-15
+              }
+            ]
+          }
+        }
+      ],
+      "convention": [
+        {
+          "id": "thesis_K12p56",
+          "a": 0.0108805,
+          "K_lambda5": 12.56,
+          "result": {
+            "converged": true,
+            "augmented_residual": 7.9260043210404e-12,
+            "gap_residual": 1.863274775575605e-14,
+            "gap_sigma_min": 7.948124062992301e-12,
+            "mass_jacobian_sigma_min": 0.5697440489581925,
+            "muB_MeV": 1202.3054730059798,
+            "rhoB_over_rho0": 0.7598584842122603,
+            "masses_MeV": [
+              316.95365572311846,
+              310.4390409182322,
+              537.8889771926595
+            ],
+            "x_state": [
+              -1.59041405879447,
+              -1.5324817065475889,
+              -2.2695456304157933,
+              0.0023213271373612285,
+              0.004202055305142906
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005105218186768082,
+                "rhoB_delta": -0.001356339655562171,
+                "residual": 1.2756872649637364e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004997573884082963,
+                "rhoB_delta": 0.0013500364301058884,
+                "residual": 1.0177345507580703e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "printed_a0p108805",
+          "a": 0.108805,
+          "K_lambda5": 12.36,
+          "result": {
+            "converged": true,
+            "augmented_residual": 9.261029293599668e-12,
+            "gap_residual": 1.9357457149702417e-15,
+            "gap_sigma_min": 9.375842027025619e-12,
+            "mass_jacobian_sigma_min": 0.5939275732353951,
+            "muB_MeV": 1249.7887646384909,
+            "rhoB_over_rho0": 0.7556806059959883,
+            "masses_MeV": [
+              337.89219371143236,
+              330.9845134452868,
+              556.6477053728114
+            ],
+            "x_state": [
+              -1.6583713189076084,
+              -1.5994450176920014,
+              -2.3004504666197434,
+              0.0023360732500796936,
+              0.0041371599736520276
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005263800784554733,
+                "rhoB_delta": -0.0013955830826672627,
+                "residual": 2.175713936755732e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005174190828882368,
+                "rhoB_delta": 0.0013880304403708534,
+                "residual": 1.4045248541904071e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "polyakov_zero",
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.1313754585287293e-12,
+            "gap_residual": 3.748544367384395e-15,
+            "gap_sigma_min": 2.129542292362682e-12,
+            "mass_jacobian_sigma_min": 0.5734679016728874,
+            "muB_MeV": 1194.6145776052808,
+            "rhoB_over_rho0": 0.7603619578269895,
+            "masses_MeV": [
+              313.6269034740398,
+              307.0008803429849,
+              536.0187638561748
+            ],
+            "x_state": [
+              -1.5793511714649668,
+              -1.5208105758312322,
+              -2.266366248984627,
+              0.0,
+              0.0
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005115122750110409,
+                "rhoB_delta": -0.0013413957852445822,
+                "residual": 2.286089127109703e-15
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.005002865607885242,
+                "rhoB_delta": 0.0013350508225088687,
+                "residual": 1.961044852356119e-15
+              }
+            ]
+          }
+        },
+        {
+          "id": "vacuum_levels_below_Lambda",
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.7554894774511782e-11,
+            "gap_residual": 8.559329132860752e-14,
+            "gap_sigma_min": 1.9837170194674884e-11,
+            "mass_jacobian_sigma_min": 0.5871324297654981,
+            "muB_MeV": 1095.8825355465103,
+            "rhoB_over_rho0": 0.7608811779250974,
+            "masses_MeV": [
+              272.76805558147936,
+              261.93409708549495,
+              502.32583662272435
+            ],
+            "x_state": [
+              -1.3971054196781212,
+              -1.3036454448197743,
+              -2.117875228252557,
+              0.002139229918262042,
+              0.0036539415263331415
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004625442830577593,
+                "rhoB_delta": -0.001228794213631026,
+                "residual": 9.15667097213176e-16
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": -0.004493580720316509,
+                "rhoB_delta": 0.0012236895563423754,
+                "residual": 7.023532185634688e-16
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "main_minimum",
+      "initial_muB_MeV": 1066.6484955867618,
+      "numerical": [
+        {
+          "id": "o48_n32",
+          "order": 48,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 2.2533621830408996e-13,
+            "gap_residual": 2.724008755831792e-15,
+            "gap_sigma_min": 2.2537777973399253e-13,
+            "mass_jacobian_sigma_min": 0.5823849531152867,
+            "muB_MeV": 1066.6481544404894,
+            "rhoB_over_rho0": 2.031996723889847,
+            "masses_MeV": [
+              132.62537045684135,
+              132.37977457275653,
+              485.02707787255855
+            ],
+            "x_state": [
+              -0.6526632398944108,
+              -0.650526142139918,
+              -2.172217326607771,
+              0.004067247455125196,
+              0.0037475320157353935
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032276894840706244,
+                "rhoB_delta": -0.001140991077975995,
+                "residual": 3.4752538304762013e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032287372402108055,
+                "rhoB_delta": 0.0011416590567747738,
+                "residual": 3.4047483217226375e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n32",
+          "order": 96,
+          "n_max": 32,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 4.3983648334771935e-12,
+            "gap_residual": 3.2042971678221654e-15,
+            "gap_sigma_min": 4.3983896106743506e-12,
+            "mass_jacobian_sigma_min": 0.5823849531152867,
+            "muB_MeV": 1066.6481544404894,
+            "rhoB_over_rho0": 2.031996723889847,
+            "masses_MeV": [
+              132.62537045684135,
+              132.37977457275653,
+              485.02707787255855
+            ],
+            "x_state": [
+              -0.6526632398944108,
+              -0.650526142139918,
+              -2.172217326607771,
+              0.004067247455125196,
+              0.0037475320157353935
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.000322768949590078,
+                "rhoB_delta": -0.0011409910779711378,
+                "residual": 3.4713931450548786e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003228737242839729,
+                "rhoB_delta": 0.0011416590567768555,
+                "residual": 3.4018832157766586e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "o96_n64",
+          "order": 96,
+          "n_max": 64,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.1293833374562579e-11,
+            "gap_residual": 5.144468475942656e-12,
+            "gap_sigma_min": 1.005404943491735e-11,
+            "mass_jacobian_sigma_min": 0.5823842096534021,
+            "muB_MeV": 1066.650746951127,
+            "rhoB_over_rho0": 2.0320050853638105,
+            "masses_MeV": [
+              132.62612040754,
+              132.38085502549987,
+              485.0284136492917
+            ],
+            "x_state": [
+              -0.6526660081585147,
+              -0.6505317836027747,
+              -2.1722252975849186,
+              0.004067219763133536,
+              0.00374751167357697
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032276047472944185,
+                "rhoB_delta": -0.0011409882872275756,
+                "residual": 3.47068684050371e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003228652298378568,
+                "rhoB_delta": 0.0011416562134393688,
+                "residual": 3.397286385133499e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.3009664480538205e-11,
+            "gap_residual": 2.3316378151290594e-15,
+            "gap_sigma_min": 1.30097211385732e-11,
+            "mass_jacobian_sigma_min": 0.5823842080713711,
+            "muB_MeV": 1066.650752348911,
+            "rhoB_over_rho0": 2.032005102856502,
+            "masses_MeV": [
+              132.62612196356375,
+              132.38085725642034,
+              485.0284164850296
+            ],
+            "x_state": [
+              -0.6526660138955922,
+              -0.6505317952067977,
+              -2.1722253145462886,
+              0.004067219705410366,
+              0.003747511631587412
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032276212674495935,
+                "rhoB_delta": -0.001140988271163111,
+                "residual": 3.464750248455087e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032286691195454817,
+                "rhoB_delta": 0.0011416562176597197,
+                "residual": 3.4067511181567094e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_pz60",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 60.0,
+          "fd_step": 2.0e-5,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.4326073839808617e-11,
+            "gap_residual": 2.3316378151290594e-15,
+            "gap_sigma_min": 1.432609017517383e-11,
+            "mass_jacobian_sigma_min": 0.5823842080713711,
+            "muB_MeV": 1066.650752348911,
+            "rhoB_over_rho0": 2.032005102856502,
+            "masses_MeV": [
+              132.62612196356375,
+              132.38085725642034,
+              485.0284164850296
+            ],
+            "x_state": [
+              -0.6526660138955922,
+              -0.6505317952067977,
+              -2.1722253145462886,
+              0.004067219705410366,
+              0.003747511631587412
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003227621270078517,
+                "rhoB_delta": -0.001140988271162186,
+                "residual": 3.464007709387512e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.000322866911034425,
+                "rhoB_delta": 0.0011416562176555563,
+                "residual": 3.409923753024866e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "o128_n96_fd5e6",
+          "order": 128,
+          "n_max": 96,
+          "pz_max": 40.0,
+          "fd_step": 5.0e-6,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.3501927054632893e-11,
+            "gap_residual": 1.2447366729369784e-11,
+            "gap_sigma_min": 5.2311708854060685e-12,
+            "mass_jacobian_sigma_min": 0.5823842080707736,
+            "muB_MeV": 1066.6507523327298,
+            "rhoB_over_rho0": 2.032005102717631,
+            "masses_MeV": [
+              132.62612196995565,
+              132.38085726567533,
+              485.02841648698006
+            ],
+            "x_state": [
+              -0.652666013922879,
+              -0.6505317952589964,
+              -2.1722253145527204,
+              0.004067219707397901,
+              0.0037475116329741486
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003227783411563331,
+                "rhoB_delta": -0.001140988191836288,
+                "residual": 3.474231675566153e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003228830597227116,
+                "rhoB_delta": 0.0011416562969217795,
+                "residual": 3.415898729442637e-13
+              }
+            ]
+          }
+        }
+      ],
+      "convention": [
+        {
+          "id": "thesis_K12p56",
+          "a": 0.0108805,
+          "K_lambda5": 12.56,
+          "result": {
+            "converged": true,
+            "augmented_residual": 7.058929766672448e-12,
+            "gap_residual": 4.965093507739156e-16,
+            "gap_sigma_min": 7.051737922064679e-12,
+            "mass_jacobian_sigma_min": 0.5790259165516028,
+            "muB_MeV": 1071.0736261118766,
+            "rhoB_over_rho0": 2.04577324804926,
+            "masses_MeV": [
+              134.41427489583864,
+              134.0098508272028,
+              485.4429589722855
+            ],
+            "x_state": [
+              -0.6598971768390842,
+              -0.6563575922508597,
+              -2.173052244926061,
+              0.004018137396066481,
+              0.003712406101151795
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.000313501653336763,
+                "rhoB_delta": -0.0011441808896258832,
+                "residual": 3.0036901003901923e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0003136347763698193,
+                "rhoB_delta": 0.0011447888221628336,
+                "residual": 2.944656059697568e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "printed_a0p108805",
+          "a": 0.108805,
+          "K_lambda5": 12.36,
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.9706767922423287e-11,
+            "gap_residual": 5.087682417902291e-16,
+            "gap_sigma_min": 1.9514070937420914e-11,
+            "mass_jacobian_sigma_min": 0.6030251408987218,
+            "muB_MeV": 1102.7326210602819,
+            "rhoB_over_rho0": 2.1400539684634627,
+            "masses_MeV": [
+              146.9436327040002,
+              145.34526393527543,
+              501.57353533168754
+            ],
+            "x_state": [
+              -0.7093421539148809,
+              -0.6959098028114543,
+              -2.2044150712377064,
+              0.0037387974961451413,
+              0.0035571228146069416
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0002700495722354854,
+                "rhoB_delta": -0.0011757802636939544,
+                "residual": 1.5264806750008012e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.0002702487589326851,
+                "rhoB_delta": 0.0011760948128288415,
+                "residual": 1.5153586420232552e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "polyakov_zero",
+          "result": {
+            "converged": true,
+            "augmented_residual": 1.4757254260625444e-12,
+            "gap_residual": 1.349514334009282e-13,
+            "gap_sigma_min": 1.4695609549096806e-12,
+            "mass_jacobian_sigma_min": 0.582383544136717,
+            "muB_MeV": 1066.6376825122281,
+            "rhoB_over_rho0": 2.031869372255155,
+            "masses_MeV": [
+              132.64635340694903,
+              132.40087946483348,
+              485.03198586083283
+            ],
+            "x_state": [
+              -0.6527697494027611,
+              -0.6506337075805809,
+              -2.1722324281015286,
+              0.0,
+              0.0
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032270294087043545,
+                "rhoB_delta": -0.0011410101130846645,
+                "residual": 3.478987791117229e-13
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00032280433674042227,
+                "rhoB_delta": 0.0011416773272919282,
+                "residual": 3.405540315230788e-13
+              }
+            ]
+          }
+        },
+        {
+          "id": "vacuum_levels_below_Lambda",
+          "result": {
+            "converged": true,
+            "augmented_residual": 9.871812375769335e-12,
+            "gap_residual": 2.7903299460549053e-13,
+            "gap_sigma_min": 1.1186045244940838e-11,
+            "mass_jacobian_sigma_min": 0.5946641458354935,
+            "muB_MeV": 1010.2345253359524,
+            "rhoB_over_rho0": 1.8633953326683381,
+            "masses_MeV": [
+              104.54318266784372,
+              104.52880907152155,
+              461.6972061046304
+            ],
+            "x_state": [
+              -0.5145676530419621,
+              -0.514445161184885,
+              -2.040619258150871,
+              0.004468806953167369,
+              0.004447650151832063
+            ],
+            "neighbors": [
+              {
+                "delta_coordinate": -0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00046036431950228135,
+                "rhoB_delta": -0.0011859289800953685,
+                "residual": 1.6664125882497183e-12
+              },
+              {
+                "delta_coordinate": 0.001,
+                "index": 2,
+                "converged": true,
+                "muB_delta_MeV": 0.00046416395282648917,
+                "rhoB_delta": 0.0011878224027627494,
+                "residual": 1.7232054272562986e-12
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "source_parameters",
+      "a": 0.0108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.05,
+        "converged": true,
+        "residual": 1.6495424854546658e-11,
+        "masses_MeV": [
+          395.10481349811687,
+          393.78176200117446,
+          572.0604706774571
+        ],
+        "G_over_G0": 0.9964710093031451,
+        "x_state": [
+          -1.973089368145024,
+          -1.961288568058137,
+          -2.3245563556624953,
+          0.0,
+          -2.7331535093282906e-37
+        ]
+      }
+    },
+    {
+      "id": "thesis_K12p56",
+      "a": 0.0108805,
+      "K_lambda5": 12.56,
+      "result": {
+        "eB_GeV2": 0.05,
+        "converged": true,
+        "residual": 2.0350724194510405e-15,
+        "masses_MeV": [
+          398.21949939623437,
+          396.9213990357142,
+          574.3648528726081
+        ],
+        "G_over_G0": 0.9964710093031451,
+        "x_state": [
+          -1.9812586104749546,
+          -1.9696015260550321,
+          -2.328064853557876,
+          0.0,
+          -7.074506418958364e-70
+        ]
+      }
+    },
+    {
+      "id": "printed_a0p108805",
+      "a": 0.108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.05,
+        "converged": true,
+        "residual": 4.2097221090934294e-14,
+        "masses_MeV": [
+          416.3875027793777,
+          415.07953867548895,
+          591.5213348576304
+        ],
+        "G_over_G0": 1.0264876817469355,
+        "x_state": [
+          -2.0273419516121227,
+          -2.016090666732747,
+          -2.3534351334733965,
+          0.0,
+          -7.074506418958364e-70
+        ]
+      }
+    },
+    {
+      "id": "source_parameters",
+      "a": 0.0108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.155,
+        "converged": true,
+        "residual": 2.589462819655575e-15,
+        "masses_MeV": [
+          401.6091789876339,
+          392.2047573369238,
+          567.2829379637701
+        ],
+        "G_over_G0": 0.9663271612582618,
+        "x_state": [
+          -2.0691584214214918,
+          -1.9814296048093547,
+          -2.337067128776617,
+          -1.504632769052528e-36,
+          -3.1497064055342915e-37
+        ]
+      }
+    },
+    {
+      "id": "thesis_K12p56",
+      "a": 0.0108805,
+      "K_lambda5": 12.56,
+      "result": {
+        "eB_GeV2": 0.155,
+        "converged": true,
+        "residual": 2.094764613337708e-15,
+        "masses_MeV": [
+          404.54895865127696,
+          395.3253102904055,
+          569.6235098628528
+        ],
+        "G_over_G0": 0.9663271612582618,
+        "x_state": [
+          -2.0762747415086933,
+          -1.9896152937163338,
+          -2.3406435311965845,
+          -7.418412301374843e-68,
+          -2.781904613015566e-68
+        ]
+      }
+    },
+    {
+      "id": "printed_a0p108805",
+      "a": 0.108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.155,
+        "converged": true,
+        "residual": 7.691850745534255e-16,
+        "masses_MeV": [
+          576.1859846837458,
+          567.4913317654692,
+          732.4095932077996
+        ],
+        "G_over_G0": 1.2383576368266744,
+        "x_state": [
+          -2.397022194145461,
+          -2.337386578315369,
+          -2.5376635502030305,
+          -1.6472184286297693e-83,
+          -4.118046071574423e-84
+        ]
+      }
+    },
+    {
+      "id": "source_parameters",
+      "a": 0.0108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.4,
+        "converged": true,
+        "residual": 5.71634418544907e-14,
+        "masses_MeV": [
+          431.25920473302983,
+          399.59063209507457,
+          558.8119325318089
+        ],
+        "G_over_G0": 0.7975790173005577,
+        "x_state": [
+          -2.610136028280644,
+          -2.202162295681285,
+          -2.5184952974157504,
+          -5.3897189854758935e-21,
+          6.462348535570529e-27
+        ]
+      }
+    },
+    {
+      "id": "thesis_K12p56",
+      "a": 0.0108805,
+      "K_lambda5": 12.56,
+      "result": {
+        "eB_GeV2": 0.4,
+        "converged": true,
+        "residual": 1.8321756599432044e-11,
+        "masses_MeV": [
+          434.12911544158925,
+          403.0858828598313,
+          561.7121625509723
+        ],
+        "G_over_G0": 0.7975790173005577,
+        "x_state": [
+          -2.6151482896704064,
+          -2.210887258133206,
+          -2.5229657987265903,
+          -1.6704779438076223e-52,
+          -4.176194859519056e-53
+        ]
+      }
+    },
+    {
+      "id": "printed_a0p108805",
+      "a": 0.108805,
+      "K_lambda5": 12.36,
+      "result": {
+        "eB_GeV2": 0.4,
+        "converged": true,
+        "residual": 6.280369834735101e-16,
+        "masses_MeV": [
+          1170.9934341355884,
+          1135.6088286036834,
+          1282.6825847400096
+        ],
+        "G_over_G0": 2.0767918860984667,
+        "x_state": [
+          -3.100023411995841,
+          -2.967696179254181,
+          -3.0123698960525735,
+          -8.236092143148846e-84,
+          -2.0590230357872116e-84
+        ]
+      }
+    }
+  ],
+  "generated_at": "2026-11-13T13:28:05.193"
+}

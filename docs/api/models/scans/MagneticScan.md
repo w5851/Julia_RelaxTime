@@ -46,6 +46,8 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 `
 - `p_num`、`t_num`、`pz_max`、`n_max`、`n_max_policy`、`thermal_tail_factor`、
   `n_max_floor`、`n_max_cap`、`cutoff_N` 和 solver 控制项会原样传给 magnetic
   solver。默认 profile 的自动截断在每个物理点共享；显式 `n_max` 优先。
+- 热项的 `p_num` 是每个费米面分段的节点数，详见
+  [Landau 积分接口](../variants/magnetic/LandauIntegrals.md)。
 - 默认 `p_num=128`、`pz_max=40 fm^-1`、`n_max_policy=thermal_tail`、
   `thermal_tail_factor=30`、`n_max_cap=10000` 是当前生产预算，不自动构成全域
   收敛证明；代表点仍应使用 `magnetic_nmax_convergence_report` 审计。
@@ -82,7 +84,8 @@ candidate CSV 都记录 `cutoff_policy` 与 `configured_n_max`，以便审计实
 ## 物理与流程边界
 
 - 这是完整五维 `FixedMu` equilibrium 路径：
-  `dOmega/d(phi_u,phi_d,phi_s,Phi,PhiBar)=0`。
+  `dOmega/d(phi_u,phi_d,phi_s,Phi,PhiBar)=0`；接纳候选时同时复核
+  `magnetic_condensate_residual`，剔除质量映射奇异造成的非自洽驻点。
 - `FixedRho`、普通 `T-rho`、phase/Maxwell/CEP magnetic 路径尚未实现；
   `run_tmu_scan`、`run_trho_scan` 和 phase pipeline 遇到 `:PNJLMagnetic` 会显式报错，
   不会静默使用普通 PNJL residual。

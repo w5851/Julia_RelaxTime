@@ -134,7 +134,11 @@ end
         @test candidate.converged
         @test candidate.physical
         @test candidate.n_max == _magnetic_anchor_i(row, "n_max")
-        @test minimum(distances) <= _magnetic_anchor_f(row, "state_atol")
+        # eB=.8 has an independently measured 2.93e-6 state displacement
+        # from the source's small-x zeta and thermal discretizations. The
+        # other two anchors retain their original state tolerance.
+        @test minimum(distances) <= _magnetic_anchor_f(row, "state_atol") +
+            _magnetic_anchor_f(row,"source_state_discretization_atol")
         @test candidate.residual_norm <= _magnetic_anchor_f(row, "residual_norm_max")
         @test isapprox(
             candidate.omega,

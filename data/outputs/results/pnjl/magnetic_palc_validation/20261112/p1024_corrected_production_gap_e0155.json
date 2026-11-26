@@ -1,0 +1,1754 @@
+{
+  "julia_version": "1.12.5",
+  "source": "D:\\CodexCompute\\magnetic-palc-20261112-v1\\outputs\\p1024_corrected_roots_e0155.json",
+  "eB_GeV2": 0.155,
+  "T_MeV": 5.0,
+  "targets": [
+    {
+      "muB_MeV": 900.0,
+      "root_index": 1,
+      "x_state": [
+        -1.9541041908083459,
+        -1.860528581502405,
+        -2.2331587129353068,
+        1.462719321794634e-14,
+        1.1775413297735114e-8
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            2.220446049250313e-16,
+            -1.3322676295501878e-15,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.616509124176106e-15,
+          "stationarity_norm": 1.7242427585047927e-12,
+          "rho": [
+            1.8955576073684592e-21,
+            3.016681056519035e-19,
+            7.47267980484692e-37
+          ],
+          "rhoB_over_rho0": 6.324242984568166e-19,
+          "mass_jacobian_sigma_min": 0.552284476378363,
+          "chain_rule_error": 1.2447515735475736e-15,
+          "reference_condensate_gap_norm": 7.984087040529806e-13,
+          "reference_stationarity_norm": 1.9431251644024533e-12,
+          "reference_rho": [
+            1.895557607375004e-21,
+            3.0166810565360115e-19,
+            0.0
+          ],
+          "rho_reference_delta": 1.6976717133178817e-30,
+          "reference_order_rho_delta": 9.644038777347102e-35,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            2.220446049250313e-16,
+            -1.3322676295501878e-15,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.616509124176106e-15,
+          "stationarity_norm": 1.7242427584927986e-12,
+          "rho": [
+            1.8955576073759587e-21,
+            3.0166810565360467e-19,
+            7.4726798048469285e-37
+          ],
+          "rhoB_over_rho0": 6.324242984603764e-19,
+          "mass_jacobian_sigma_min": 0.552284476378363,
+          "chain_rule_error": 1.244751573547575e-15,
+          "reference_condensate_gap_norm": 7.984087040529806e-13,
+          "reference_stationarity_norm": 1.9431251644024533e-12,
+          "reference_rho": [
+            1.895557607375004e-21,
+            3.0166810565360115e-19,
+            0.0
+          ],
+          "rho_reference_delta": 3.6421706879426835e-33,
+          "reference_order_rho_delta": 9.644038777347102e-35,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            2.220446049250313e-16,
+            -1.3322676295501878e-15,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.616509124176106e-15,
+          "stationarity_norm": 1.7242427584977616e-12,
+          "rho": [
+            1.89555760737595e-21,
+            3.0166810565360453e-19,
+            7.47267980484692e-37
+          ],
+          "rhoB_over_rho0": 6.32424298460376e-19,
+          "mass_jacobian_sigma_min": 0.552284476378363,
+          "chain_rule_error": 1.244751573547575e-15,
+          "reference_condensate_gap_norm": 7.984087040529806e-13,
+          "reference_stationarity_norm": 1.9431251644024533e-12,
+          "reference_rho": [
+            1.895557607375004e-21,
+            3.0166810565360115e-19,
+            0.0
+          ],
+          "rho_reference_delta": 3.5006330877747804e-33,
+          "reference_order_rho_delta": 9.644038777347102e-35,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 900.0,
+      "root_index": 2,
+      "x_state": [
+        -1.2834066963079844,
+        -1.4492952548166407,
+        -2.160233992533787,
+        0.003318819410446534,
+        0.0030548440038300996
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.006657130873906736,
+            0.0004796610740047669,
+            -8.999911926821369e-12
+          ],
+          "condensate_gap_norm": 0.006674388827318773,
+          "stationarity_norm": 0.005137835505282252,
+          "rho": [
+            0.31193667125489066,
+            0.12450878244303619,
+            1.0057638273032662e-21
+          ],
+          "rhoB_over_rho0": 0.909261361870681,
+          "mass_jacobian_sigma_min": 0.5587733021430036,
+          "chain_rule_error": 3.20917762675114e-16,
+          "reference_condensate_gap_norm": 1.6502085784116572e-10,
+          "reference_stationarity_norm": 1.601790562471772e-10,
+          "reference_rho": [
+            0.3196952082449525,
+            0.1240121582422,
+            3.533939804613754e-22
+          ],
+          "rho_reference_delta": 0.007774415207783422,
+          "reference_order_rho_delta": 2.82118644197349e-37,
+          "reference_order_gap_delta": 2.220446049250313e-16
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            3.732462522831881e-6,
+            -8.583192823152785e-9,
+            -8.999911926821369e-12
+          ],
+          "condensate_gap_norm": 3.7324723918100944e-6,
+          "stationarity_norm": 2.9847299210107688e-6,
+          "rho": [
+            0.31969948857921204,
+            0.12401215015778516,
+            1.0057638273032694e-21
+          ],
+          "rhoB_over_rho0": 0.9243992473687442,
+          "mass_jacobian_sigma_min": 0.5587733021430036,
+          "chain_rule_error": 2.9485875054768207e-16,
+          "reference_condensate_gap_norm": 1.6502085784116572e-10,
+          "reference_stationarity_norm": 1.601790562471772e-10,
+          "reference_rho": [
+            0.3196952082449525,
+            0.1240121582422,
+            3.533939804613754e-22
+          ],
+          "rho_reference_delta": 4.280341894181762e-6,
+          "reference_order_rho_delta": 2.82118644197349e-37,
+          "reference_order_gap_delta": 2.220446049250313e-16
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -7.045430905350258e-11,
+            -1.478910327534777e-10,
+            -8.999911926821369e-12
+          ],
+          "condensate_gap_norm": 1.6406268816457694e-10,
+          "stationarity_norm": 1.5713720679252716e-10,
+          "rho": [
+            0.31969520823987363,
+            0.12401215824212297,
+            1.0057638273032673e-21
+          ],
+          "rhoB_over_rho0": 0.924390346837493,
+          "mass_jacobian_sigma_min": 0.5587733021430036,
+          "chain_rule_error": 2.603328093885872e-16,
+          "reference_condensate_gap_norm": 1.6502085784116572e-10,
+          "reference_stationarity_norm": 1.601790562471772e-10,
+          "reference_rho": [
+            0.3196952082449525,
+            0.1240121582422,
+            3.533939804613754e-22
+          ],
+          "rho_reference_delta": 5.07946574687966e-12,
+          "reference_order_rho_delta": 2.82118644197349e-37,
+          "reference_order_gap_delta": 2.220446049250313e-16
+        }
+      ]
+    },
+    {
+      "muB_MeV": 900.0,
+      "root_index": 3,
+      "x_state": [
+        -0.6628974877329964,
+        -0.8872746684903389,
+        -2.098661400055079,
+        0.001722081125064816,
+        0.0017110192816952828
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            0.0051863925083796,
+            -0.004303801000090313,
+            0.0
+          ],
+          "condensate_gap_norm": 0.006739537840190113,
+          "stationarity_norm": 0.003845526018584821,
+          "rho": [
+            0.5539037037086142,
+            0.24877234596613543,
+            3.4710943054847993e-19
+          ],
+          "rhoB_over_rho0": 1.6722417701557284,
+          "mass_jacobian_sigma_min": 0.5642140475874261,
+          "chain_rule_error": 2.24164410197921e-16,
+          "reference_condensate_gap_norm": 2.7212896011115292e-6,
+          "reference_stationarity_norm": 1.7112736186192474e-6,
+          "reference_rho": [
+            0.5429901437534428,
+            0.25644493722100353,
+            3.4701093595245435e-19
+          ],
+          "rho_reference_delta": 0.013340706407810621,
+          "reference_order_rho_delta": 9.14816723583937e-34,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            9.814714966538407e-5,
+            -0.00013544937158982417,
+            0.0
+          ],
+          "condensate_gap_norm": 0.00016727042551365013,
+          "stationarity_norm": 9.880189506454485e-5,
+          "rho": [
+            0.5431849996588439,
+            0.2561996137887311,
+            3.471094305484803e-19
+          ],
+          "rhoB_over_rho0": 1.6653846113491149,
+          "mass_jacobian_sigma_min": 0.5642140475874261,
+          "chain_rule_error": 2.7336890411793946e-16,
+          "reference_condensate_gap_norm": 2.7212896011115292e-6,
+          "reference_stationarity_norm": 1.7112736186192474e-6,
+          "reference_rho": [
+            0.5429901437534428,
+            0.25644493722100353,
+            3.4701093595245435e-19
+          ],
+          "rho_reference_delta": 0.00031329285068707965,
+          "reference_order_rho_delta": 9.14816723583937e-34,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -1.1102230246251565e-16,
+            1.1102230246251565e-16,
+            0.0
+          ],
+          "condensate_gap_norm": 1.5700924586837752e-16,
+          "stationarity_norm": 4.996095136590527e-16,
+          "rho": [
+            0.5429847157397494,
+            0.256447088061141,
+            3.4710943054847997e-19
+          ],
+          "rhoB_over_rho0": 1.6654829245851883,
+          "mass_jacobian_sigma_min": 0.5642140475874261,
+          "chain_rule_error": 4.1635211358655375e-16,
+          "reference_condensate_gap_norm": 2.7212896011115292e-6,
+          "reference_stationarity_norm": 1.7112736186192474e-6,
+          "reference_rho": [
+            0.5429901437534428,
+            0.25644493722100353,
+            3.4701093595245435e-19
+          ],
+          "rho_reference_delta": 5.838616784212892e-6,
+          "reference_order_rho_delta": 9.14816723583937e-34,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 1,
+      "x_state": [
+        -1.9541041907599628,
+        -1.8605285812403232,
+        -2.23315871291274,
+        9.013874235754801e-9,
+        9.248491266349487e-6
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -6.661338147750939e-16,
+            -1.7763568394002505e-15,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 1.9484335006297032e-15,
+          "stationarity_norm": 1.8754681383261815e-15,
+          "rho": [
+            9.192079283031758e-13,
+            1.4635636019744002e-10,
+            3.6184570085364177e-28
+          ],
+          "rhoB_over_rho0": 3.06824100261965e-10,
+          "mass_jacobian_sigma_min": 0.5522844763777177,
+          "chain_rule_error": 1.2580493401680113e-15,
+          "reference_condensate_gap_norm": 7.977526528690993e-13,
+          "reference_stationarity_norm": 8.952094028519367e-13,
+          "reference_rho": [
+            9.192079283068036e-13,
+            1.4635636019826627e-10,
+            0.0
+          ],
+          "rho_reference_delta": 8.262579985851408e-22,
+          "reference_order_rho_delta": 2.585194992526726e-25,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            -6.661338147750939e-16,
+            -1.7763568394002505e-15,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 1.9484335006297032e-15,
+          "stationarity_norm": 1.875467758071379e-15,
+          "rho": [
+            9.192079283068077e-13,
+            1.4635636019826621e-10,
+            3.6184570085364245e-28
+          ],
+          "rhoB_over_rho0": 3.068241002636938e-10,
+          "mass_jacobian_sigma_min": 0.5522844763777177,
+          "chain_rule_error": 1.2580495590622924e-15,
+          "reference_condensate_gap_norm": 7.977526528690993e-13,
+          "reference_stationarity_norm": 8.952094028519367e-13,
+          "reference_rho": [
+            9.192079283068036e-13,
+            1.4635636019826627e-10,
+            0.0
+          ],
+          "rho_reference_delta": 5.185758289366579e-26,
+          "reference_order_rho_delta": 2.585194992526726e-25,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -6.661338147750939e-16,
+            -1.7763568394002505e-15,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 1.9484335006297032e-15,
+          "stationarity_norm": 1.8754677578122636e-15,
+          "rho": [
+            9.192079283068052e-13,
+            1.4635636019826583e-10,
+            3.6184570085364195e-28
+          ],
+          "rhoB_over_rho0": 3.0682410026369297e-10,
+          "mass_jacobian_sigma_min": 0.5522844763777177,
+          "chain_rule_error": 1.2580495589674665e-15,
+          "reference_condensate_gap_norm": 7.977526528690993e-13,
+          "reference_stationarity_norm": 8.952094028519367e-13,
+          "reference_rho": [
+            9.192079283068036e-13,
+            1.4635636019826627e-10,
+            0.0
+          ],
+          "rho_reference_delta": 4.394428192134439e-25,
+          "reference_order_rho_delta": 2.585194992526726e-25,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 2,
+      "x_state": [
+        -1.708294298983702,
+        -1.6243943103171732,
+        -2.199477096281321,
+        0.007536373822644909,
+        0.006763959726616225
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -1.4209763354866567e-5,
+            0.0001318467238888843,
+            -1.3322676295501878e-15
+          ],
+          "condensate_gap_norm": 0.00013261024083694668,
+          "stationarity_norm": 0.00010123958015577096,
+          "rho": [
+            0.1166271929802633,
+            0.09931574563544124,
+            1.9423447017659907e-20
+          ],
+          "rhoB_over_rho0": 0.44988112211605114,
+          "mass_jacobian_sigma_min": 0.5557440219719247,
+          "chain_rule_error": 5.098484201634798e-16,
+          "reference_condensate_gap_norm": 9.743592791863145e-13,
+          "reference_stationarity_norm": 2.3045446983141454e-12,
+          "reference_rho": [
+            0.11664157190322695,
+            0.09918368553818507,
+            1.8731464155197105e-20
+          ],
+          "rho_reference_delta": 0.00013284059136010401,
+          "reference_order_rho_delta": 4.163336342344337e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            2.220446049250313e-16,
+            1.5543122344752192e-15,
+            -1.3322676295501878e-15
+          ],
+          "condensate_gap_norm": 2.059156955057807e-15,
+          "stationarity_norm": 1.2509386908368939e-15,
+          "rho": [
+            0.1166415719032271,
+            0.09918368554074258,
+            1.942344701765989e-20
+          ],
+          "rhoB_over_rho0": 0.4496359530082702,
+          "mass_jacobian_sigma_min": 0.5557440219719247,
+          "chain_rule_error": 4.602629877133007e-16,
+          "reference_condensate_gap_norm": 9.743592791863145e-13,
+          "reference_stationarity_norm": 2.3045446983141454e-12,
+          "reference_rho": [
+            0.11664157190322695,
+            0.09918368553818507,
+            1.8731464155197105e-20
+          ],
+          "rho_reference_delta": 2.5575097640824566e-12,
+          "reference_order_rho_delta": 4.163336342344337e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -2.220446049250313e-16,
+            -1.340705324537339e-12,
+            -1.3322676295501878e-15
+          ],
+          "condensate_gap_norm": 1.3407060048659493e-12,
+          "stationarity_norm": 2.483673884706318e-12,
+          "rho": [
+            0.1166415719032269,
+            0.09918368553818506,
+            1.942344701765989e-20
+          ],
+          "rhoB_over_rho0": 0.44963595300294157,
+          "mass_jacobian_sigma_min": 0.5557440219719247,
+          "chain_rule_error": 5.356151347841914e-16,
+          "reference_condensate_gap_norm": 9.743592791863145e-13,
+          "reference_stationarity_norm": 2.3045446983141454e-12,
+          "reference_rho": [
+            0.11664157190322695,
+            0.09918368553818507,
+            1.8731464155197105e-20
+          ],
+          "rho_reference_delta": 5.72195849857122e-17,
+          "reference_order_rho_delta": 4.163336342344337e-17,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 3,
+      "x_state": [
+        -1.6630245622703004,
+        -1.7068437060479278,
+        -2.202066727752375,
+        0.007805419439748129,
+        0.006990874663679741
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            1.0229043782228331e-5,
+            2.8288987041769076e-7,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.023295477257322e-5,
+          "stationarity_norm": 9.221499373978453e-6,
+          "rho": [
+            0.1526185449053597,
+            0.048886011275941506,
+            1.4747962021470177e-20
+          ],
+          "rhoB_over_rho0": 0.4198011587110442,
+          "mass_jacobian_sigma_min": 0.5557530818429494,
+          "chain_rule_error": 8.79553422839977e-16,
+          "reference_condensate_gap_norm": 8.751945212592092e-13,
+          "reference_stationarity_norm": 9.578754366252312e-13,
+          "reference_rho": [
+            0.152610024392678,
+            0.0488857548637953,
+            1.3990040573291777e-20
+          ],
+          "rho_reference_delta": 8.524369979506116e-6,
+          "reference_order_rho_delta": 2.8609792490763984e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            4.440892098500626e-16,
+            -1.3322676295501878e-15,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.6616296724220897e-15,
+          "stationarity_norm": 7.607386729080147e-16,
+          "rho": [
+            0.1526100243927298,
+            0.048885754863795365,
+            1.4747962021470198e-20
+          ],
+          "rhoB_over_rho0": 0.4197828734510941,
+          "mass_jacobian_sigma_min": 0.5557530818429494,
+          "chain_rule_error": 8.977551765581305e-16,
+          "reference_condensate_gap_norm": 8.751945212592092e-13,
+          "reference_stationarity_norm": 9.578754366252312e-13,
+          "reference_rho": [
+            0.152610024392678,
+            0.0488857548637953,
+            1.3990040573291777e-20
+          ],
+          "rho_reference_delta": 5.179194174950056e-14,
+          "reference_order_rho_delta": 2.8609792490763984e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -4.9960036108132044e-14,
+            -1.3322676295501878e-15,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 4.998568801034778e-14,
+          "stationarity_norm": 4.0337774129278814e-14,
+          "rho": [
+            0.15261002439267785,
+            0.048885754863795275,
+            1.47479620214702e-20
+          ],
+          "rhoB_over_rho0": 0.41978287345098564,
+          "mass_jacobian_sigma_min": 0.5557530818429494,
+          "chain_rule_error": 9.105441294956397e-16,
+          "reference_condensate_gap_norm": 8.751945212592092e-13,
+          "reference_stationarity_norm": 9.578754366252312e-13,
+          "reference_rho": [
+            0.152610024392678,
+            0.0488857548637953,
+            1.3990040573291777e-20
+          ],
+          "rho_reference_delta": 1.6883057536330774e-16,
+          "reference_order_rho_delta": 2.8609792490763984e-17,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 4,
+      "x_state": [
+        -1.6092913424400277,
+        -1.7816726027445962,
+        -2.203230459700376,
+        0.004508279376399865,
+        0.004848613151434826
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            0.0005753676251525341,
+            5.958300519637305e-10,
+            -8.272493801086966e-12
+          ],
+          "condensate_gap_norm": 0.0005753676251528427,
+          "stationarity_norm": 0.00046392067949308906,
+          "rho": [
+            0.19328238769701372,
+            0.0014983545105040038,
+            7.40526295638433e-21
+          ],
+          "rhoB_over_rho0": 0.4057932129323286,
+          "mass_jacobian_sigma_min": 0.5542346406779439,
+          "chain_rule_error": 1.0183858322789108e-15,
+          "reference_condensate_gap_norm": 1.0936808200945083e-9,
+          "reference_stationarity_norm": 6.396597380761505e-10,
+          "reference_rho": [
+            0.1926868534875286,
+            0.0014983545104993912,
+            6.95520602418879e-21
+          ],
+          "rho_reference_delta": 0.0005955342094851324,
+          "reference_order_rho_delta": 1.0842021724855044e-18,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            -9.287715041494948e-10,
+            5.958178395104596e-10,
+            -8.272493801086966e-12
+          ],
+          "condensate_gap_norm": 1.10348712677254e-9,
+          "stationarity_norm": 6.470030116644139e-10,
+          "rho": [
+            0.19268685347447448,
+            0.0014983545104993931,
+            7.40526295638433e-21
+          ],
+          "rhoB_over_rho0": 0.40455251663536224,
+          "mass_jacobian_sigma_min": 0.5542346406779439,
+          "chain_rule_error": 1.0713950398493719e-15,
+          "reference_condensate_gap_norm": 1.0936808200945083e-9,
+          "reference_stationarity_norm": 6.396597380761505e-10,
+          "reference_rho": [
+            0.1926868534875286,
+            0.0014983545104993912,
+            6.95520602418879e-21
+          ],
+          "rho_reference_delta": 1.3054113345845199e-11,
+          "reference_order_rho_delta": 1.0842021724855044e-18,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -9.173135584461534e-10,
+            5.958178395104596e-10,
+            -8.272493801086966e-12
+          ],
+          "condensate_gap_norm": 1.093860821376168e-9,
+          "stationarity_norm": 6.400181139372446e-10,
+          "rho": [
+            0.19268685348752854,
+            0.001498354510499389,
+            7.405262956384338e-21
+          ],
+          "rhoB_over_rho0": 0.4045525166625582,
+          "mass_jacobian_sigma_min": 0.5542346406779439,
+          "chain_rule_error": 1.0671775817233733e-15,
+          "reference_condensate_gap_norm": 1.0936808200945083e-9,
+          "reference_stationarity_norm": 6.396597380761505e-10,
+          "reference_rho": [
+            0.1926868534875286,
+            0.0014983545104993912,
+            6.95520602418879e-21
+          ],
+          "rho_reference_delta": 5.555348673688644e-17,
+          "reference_order_rho_delta": 1.0842021724855044e-18,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 5,
+      "x_state": [
+        -0.3770907995412212,
+        -0.5596838727043346,
+        -2.078570174795392,
+        0.002527843909420406,
+        0.004874168343433395
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.005826942661337264,
+            -0.0029108482859453444,
+            -8.061995515618037e-12
+          ],
+          "condensate_gap_norm": 0.0065135473071363465,
+          "stationarity_norm": 0.006055173578827475,
+          "rho": [
+            0.636732574417923,
+            0.3182912259829404,
+            2.9046198845257048e-15
+          ],
+          "rhoB_over_rho0": 1.9896329175018046,
+          "mass_jacobian_sigma_min": 0.5665892997921123,
+          "chain_rule_error": 4.1086707863533433e-16,
+          "reference_condensate_gap_norm": 5.063905736240467e-6,
+          "reference_stationarity_norm": 3.298600573906317e-6,
+          "reference_rho": [
+            0.6595585920403659,
+            0.3276921833246353,
+            2.904619771369754e-15
+          ],
+          "rho_reference_delta": 0.02468613131781575,
+          "reference_order_rho_delta": 3.944304526105059e-30,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            -0.0002765189105124466,
+            6.175391526197505e-5,
+            -8.061995515618037e-12
+          ],
+          "condensate_gap_norm": 0.00028333064416185855,
+          "stationarity_norm": 0.00019969550231762543,
+          "rho": [
+            0.658456136907192,
+            0.32788463648271005,
+            2.90461988452571e-15
+          ],
+          "rhoB_over_rho0": 2.0548766112289685,
+          "mass_jacobian_sigma_min": 0.5665892997921123,
+          "chain_rule_error": 3.397270427694099e-16,
+          "reference_condensate_gap_norm": 5.063905736240467e-6,
+          "reference_stationarity_norm": 3.298600573906317e-6,
+          "reference_rho": [
+            0.6595585920403659,
+            0.3276921833246353,
+            2.904619771369754e-15
+          ],
+          "rho_reference_delta": 0.0011191271325075593,
+          "reference_order_rho_delta": 3.944304526105059e-30,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -3.4966474160569305e-12,
+            2.8695124054678445e-10,
+            -8.061995515618037e-12
+          ],
+          "condensate_gap_norm": 2.870857655234488e-10,
+          "stationarity_norm": 2.2570306868809437e-10,
+          "rho": [
+            0.6595686475302489,
+            0.32767792373902954,
+            2.9046198845257095e-15
+          ],
+          "rhoB_over_rho0": 2.056763690144336,
+          "mass_jacobian_sigma_min": 0.5665892997921123,
+          "chain_rule_error": 3.970141281161993e-16,
+          "reference_condensate_gap_norm": 5.063905736240467e-6,
+          "reference_stationarity_norm": 3.298600573906317e-6,
+          "reference_rho": [
+            0.6595585920403659,
+            0.3276921833246353,
+            2.904619771369754e-15
+          ],
+          "rho_reference_delta": 1.7448457193524795e-5,
+          "reference_order_rho_delta": 3.944304526105059e-30,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 6,
+      "x_state": [
+        -0.31744761490052187,
+        -0.449025614912919,
+        -2.074819817937609,
+        0.005958990264318576,
+        0.00765315492269487
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.001047148346556448,
+            -0.003035980081038614,
+            -1.8420820424580597e-12
+          ],
+          "condensate_gap_norm": 0.003211494155709945,
+          "stationarity_norm": 0.0030910739215546375,
+          "rho": [
+            0.6616744040671186,
+            0.36647768107773404,
+            9.843537176508205e-15
+          ],
+          "rhoB_over_rho0": 2.1419835107184637,
+          "mass_jacobian_sigma_min": 0.5673220012668988,
+          "chain_rule_error": 3.283221970530619e-16,
+          "reference_condensate_gap_norm": 7.497904295613534e-6,
+          "reference_stationarity_norm": 6.320527956311814e-6,
+          "reference_rho": [
+            0.6659751243384868,
+            0.378195127892979,
+            9.843536904663889e-15
+          ],
+          "rho_reference_delta": 0.012481776905579238,
+          "reference_order_rho_delta": 2.0510383535746307e-29,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            1.5151011358627287e-5,
+            -0.00011221765060309696,
+            -1.8420820424580597e-12
+          ],
+          "condensate_gap_norm": 0.00011323583466406739,
+          "stationarity_norm": 8.804339201599345e-5,
+          "rho": [
+            0.6660326674397775,
+            0.37774495742052816,
+            9.8435371765082e-15
+          ],
+          "rhoB_over_rho0": 2.1745367184589908,
+          "mass_jacobian_sigma_min": 0.5673220012668988,
+          "chain_rule_error": 3.8197905281444663e-16,
+          "reference_condensate_gap_norm": 7.497904295613534e-6,
+          "reference_stationarity_norm": 6.320527956311814e-6,
+          "reference_rho": [
+            0.6659751243384868,
+            0.378195127892979,
+            9.843536904663889e-15
+          ],
+          "rho_reference_delta": 0.00045383329843980445,
+          "reference_order_rho_delta": 2.0510383535746307e-29,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            1.5198953207118393e-13,
+            -4.759026506206965e-12,
+            -1.8420820424580597e-12
+          ],
+          "condensate_gap_norm": 5.105359963390059e-12,
+          "stationarity_norm": 8.014880420594181e-12,
+          "rho": [
+            0.6659397508242879,
+            0.3781912518138956,
+            9.843537176508206e-15
+          ],
+          "rhoB_over_rho0": 2.175272922162903,
+          "mass_jacobian_sigma_min": 0.5673220012668988,
+          "chain_rule_error": 3.4619360819655807e-16,
+          "reference_condensate_gap_norm": 7.497904295613534e-6,
+          "reference_stationarity_norm": 6.320527956311814e-6,
+          "reference_rho": [
+            0.6659751243384868,
+            0.378195127892979,
+            9.843536904663889e-15
+          ],
+          "rho_reference_delta": 3.55852426694135e-5,
+          "reference_order_rho_delta": 2.0510383535746307e-29,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1000.0,
+      "root_index": 7,
+      "x_state": [
+        -0.25390269029715373,
+        -0.3307231804374338,
+        -2.071588191630822,
+        0.007066583128232553,
+        0.00664950340707974
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            0.002942897366757735,
+            0.0005215346232544937,
+            0.0
+          ],
+          "condensate_gap_norm": 0.0029887527958201592,
+          "stationarity_norm": 0.002808256271489456,
+          "rho": [
+            0.689610793006368,
+            0.4536166074805786,
+            1.5932514925403814e-14
+          ],
+          "rhoB_over_rho0": 2.3817237510145053,
+          "mass_jacobian_sigma_min": 0.5678901907843305,
+          "chain_rule_error": 4.460321759020643e-16,
+          "reference_condensate_gap_norm": 6.9743971034492475e-6,
+          "reference_stationarity_norm": 4.920851125391788e-6,
+          "reference_rho": [
+            0.6715456031694185,
+            0.4505953104161013,
+            1.593251459534973e-14
+          ],
+          "rho_reference_delta": 0.01831609455634149,
+          "reference_order_rho_delta": 6.310887241768094e-29,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            0.00020742269415535697,
+            9.247219476254953e-5,
+            0.0
+          ],
+          "condensate_gap_norm": 0.00022710191732979633,
+          "stationarity_norm": 0.0002100825337495024,
+          "rho": [
+            0.6728095323082843,
+            0.451069762239021,
+            1.593251492540384e-14
+          ],
+          "rhoB_over_rho0": 2.341415196973586,
+          "mass_jacobian_sigma_min": 0.5678901907843305,
+          "chain_rule_error": 4.745661582226043e-16,
+          "reference_condensate_gap_norm": 6.9743971034492475e-6,
+          "reference_stationarity_norm": 4.920851125391788e-6,
+          "reference_rho": [
+            0.6715456031694185,
+            0.4505953104161013,
+            1.593251459534973e-14
+          ],
+          "rho_reference_delta": 0.0013500449623423804,
+          "reference_order_rho_delta": 6.310887241768094e-29,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -3.3306690738754696e-16,
+            -1.8318679906315083e-15,
+            0.0
+          ],
+          "condensate_gap_norm": 1.8619006149354546e-15,
+          "stationarity_norm": 1.7960203491105355e-15,
+          "rho": [
+            0.6715857962807754,
+            0.4505874065055976,
+            1.5932514925403826e-14
+          ],
+          "rhoB_over_rho0": 2.337860839138311,
+          "mass_jacobian_sigma_min": 0.5678901907843305,
+          "chain_rule_error": 3.566031112143967e-16,
+          "reference_condensate_gap_norm": 6.9743971034492475e-6,
+          "reference_stationarity_norm": 4.920851125391788e-6,
+          "reference_rho": [
+            0.6715456031694185,
+            0.4505953104161013,
+            1.593251459534973e-14
+          ],
+          "rho_reference_delta": 4.096288566254054e-5,
+          "reference_order_rho_delta": 6.310887241768094e-29,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1050.0,
+      "root_index": 1,
+      "x_state": [
+        -1.9541031246339322,
+        -1.8605228059788448,
+        -2.233158215638584,
+        7.084972353747311e-6,
+        0.0002592821105214814
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            4.440892098500626e-16,
+            3.3306690738754696e-15,
+            0.0
+          ],
+          "condensate_gap_norm": 3.360144595992222e-15,
+          "stationarity_norm": 2.7314468811668543e-13,
+          "rho": [
+            2.0252619070159028e-8,
+            3.225269370674669e-6,
+            7.973076632152376e-24
+          ],
+          "rhoB_over_rho0": 6.7615041453017255e-6,
+          "mass_jacobian_sigma_min": 0.5522844621499148,
+          "chain_rule_error": 7.715493798122162e-16,
+          "reference_condensate_gap_norm": 8.011524738486159e-13,
+          "reference_stationarity_norm": 9.393366788734921e-13,
+          "reference_rho": [
+            2.0252619070239006e-8,
+            3.2252693706933946e-6,
+            7.188492697158045e-24
+          ],
+          "rho_reference_delta": 1.8725951675945267e-17,
+          "reference_order_rho_delta": 4.236327799307431e-22,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            4.440892098500626e-16,
+            3.552713678800501e-15,
+            0.0
+          ],
+          "condensate_gap_norm": 3.580361673049448e-15,
+          "stationarity_norm": 2.731450160936614e-13,
+          "rho": [
+            2.0252619070238977e-8,
+            3.2252693706934027e-6,
+            7.973076632152387e-24
+          ],
+          "rhoB_over_rho0": 6.761504145340921e-6,
+          "mass_jacobian_sigma_min": 0.5522844621499148,
+          "chain_rule_error": 6.278564042199097e-16,
+          "reference_condensate_gap_norm": 8.011524738486159e-13,
+          "reference_stationarity_norm": 9.393366788734921e-13,
+          "reference_rho": [
+            2.0252619070239006e-8,
+            3.2252693706933946e-6,
+            7.188492697158045e-24
+          ],
+          "rho_reference_delta": 8.046868137000727e-21,
+          "reference_order_rho_delta": 4.236327799307431e-22,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            4.440892098500626e-16,
+            3.552713678800501e-15,
+            0.0
+          ],
+          "condensate_gap_norm": 3.580361673049448e-15,
+          "stationarity_norm": 2.7314501090655217e-13,
+          "rho": [
+            2.0252619070238977e-8,
+            3.2252693706933917e-6,
+            7.97307663215238e-24
+          ],
+          "rhoB_over_rho0": 6.761504145340898e-6,
+          "mass_jacobian_sigma_min": 0.5522844621499148,
+          "chain_rule_error": 6.278496531481792e-16,
+          "reference_condensate_gap_norm": 8.011524738486159e-13,
+          "reference_stationarity_norm": 9.393366788734921e-13,
+          "reference_rho": [
+            2.0252619070239006e-8,
+            3.2252693706933946e-6,
+            7.188492697158045e-24
+          ],
+          "rho_reference_delta": 2.9647649726414504e-21,
+          "reference_order_rho_delta": 4.236327799307431e-22,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1050.0,
+      "root_index": 2,
+      "x_state": [
+        -1.9218227585599126,
+        -1.68534991649442,
+        -2.217995666745236,
+        0.0022294694645309844,
+        0.0024265509727444527
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            3.0309088572266774e-13,
+            0.00024189367229565661,
+            3.552713678800501e-15
+          ],
+          "condensate_gap_norm": 0.00024189367229565661,
+          "stationarity_norm": 0.0001957709255845816,
+          "rho": [
+            4.5283204983155084e-5,
+            0.09547309334766337,
+            1.6902149311198333e-20
+          ],
+          "rhoB_over_rho0": 0.1989966178180136,
+          "mass_jacobian_sigma_min": 0.5510952413070992,
+          "chain_rule_error": 1.5211506828784203e-15,
+          "reference_condensate_gap_norm": 2.1398603807633397e-11,
+          "reference_stationarity_norm": 1.6856968232101127e-11,
+          "reference_rho": [
+            4.528320498331206e-5,
+            0.09522291140908892,
+            1.6723639100957495e-20
+          ],
+          "rho_reference_delta": 0.0002501819385744425,
+          "reference_order_rho_delta": 6.018531076210112e-36,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            3.0331293032759277e-13,
+            -1.563305040974683e-11,
+            3.552713678800501e-15
+          ],
+          "condensate_gap_norm": 1.563599297995378e-11,
+          "stationarity_norm": 1.2526937742650601e-11,
+          "rho": [
+            4.52832049833119e-5,
+            0.09522291141554712,
+            1.690214931119831e-20
+          ],
+          "rhoB_over_rho0": 0.1984754054594384,
+          "mass_jacobian_sigma_min": 0.5510952413070992,
+          "chain_rule_error": 1.533115203396202e-15,
+          "reference_condensate_gap_norm": 2.1398603807633397e-11,
+          "reference_stationarity_norm": 1.6856968232101127e-11,
+          "reference_rho": [
+            4.528320498331206e-5,
+            0.09522291140908892,
+            1.6723639100957495e-20
+          ],
+          "rho_reference_delta": 6.458195089820153e-12,
+          "reference_order_rho_delta": 6.018531076210112e-36,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            3.0331293032759277e-13,
+            -2.1975532504825424e-11,
+            3.552713678800501e-15
+          ],
+          "condensate_gap_norm": 2.1977625900586194e-11,
+          "stationarity_norm": 1.7664966027945257e-11,
+          "rho": [
+            4.528320498331205e-5,
+            0.09522291140908887,
+            1.6902149311198345e-20
+          ],
+          "rhoB_over_rho0": 0.19847540544598372,
+          "mass_jacobian_sigma_min": 0.5510952413070992,
+          "chain_rule_error": 1.586915360683492e-15,
+          "reference_condensate_gap_norm": 2.1398603807633397e-11,
+          "reference_stationarity_norm": 1.6856968232101127e-11,
+          "reference_rho": [
+            4.528320498331206e-5,
+            0.09522291140908892,
+            1.6723639100957495e-20
+          ],
+          "rho_reference_delta": 5.551115288590605e-17,
+          "reference_order_rho_delta": 6.018531076210112e-36,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1050.0,
+      "root_index": 3,
+      "x_state": [
+        -1.9135281365017118,
+        -1.6430565455811124,
+        -2.214278354128549,
+        0.0018330046448786234,
+        0.002642959428017835
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            1.7117418593670664e-12,
+            0.0008422433777430793,
+            1.865174681370263e-14
+          ],
+          "condensate_gap_norm": 0.0008422433777430793,
+          "stationarity_norm": 0.0006814240327495594,
+          "rho": [
+            0.0001946198402872882,
+            0.11871078663472669,
+            2.1991739962613356e-20
+          ],
+          "rhoB_over_rho0": 0.2477195968229458,
+          "mass_jacobian_sigma_min": 0.5506647413173835,
+          "chain_rule_error": 6.221501438550107e-16,
+          "reference_condensate_gap_norm": 1.1167345533377738e-9,
+          "reference_stationarity_norm": 9.057032785793666e-10,
+          "reference_rho": [
+            0.00019461984028879264,
+            0.1178158101466853,
+            2.185251238875959e-20
+          ],
+          "rho_reference_delta": 0.0008949764880413907,
+          "reference_order_rho_delta": 2.7756224117653114e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            1.7132961716015416e-12,
+            -1.060462828661457e-11,
+            1.865174681370263e-14
+          ],
+          "condensate_gap_norm": 1.0742154009161737e-11,
+          "stationarity_norm": 7.95519911474956e-12,
+          "rho": [
+            0.0001946198402887925,
+            0.11781581135718043,
+            2.1991739962613452e-20
+          ],
+          "rhoB_over_rho0": 0.24585506499472756,
+          "mass_jacobian_sigma_min": 0.5506647413173835,
+          "chain_rule_error": 5.459868505658743e-16,
+          "reference_condensate_gap_norm": 1.1167345533377738e-9,
+          "reference_stationarity_norm": 9.057032785793666e-10,
+          "reference_rho": [
+            0.00019461984028879264,
+            0.1178158101466853,
+            2.185251238875959e-20
+          ],
+          "rho_reference_delta": 1.2104951346847415e-9,
+          "reference_order_rho_delta": 2.7756224117653114e-17,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            1.7132961716015416e-12,
+            -1.1173402203468186e-9,
+            1.865174681370263e-14
+          ],
+          "condensate_gap_norm": 1.11734153406035e-9,
+          "stationarity_norm": 9.065321864884084e-10,
+          "rho": [
+            0.00019461984028879199,
+            0.11781581014668516,
+            2.1991739962613437e-20
+          ],
+          "rhoB_over_rho0": 0.2458550624728624,
+          "mass_jacobian_sigma_min": 0.5506647413173835,
+          "chain_rule_error": 5.710547715988879e-16,
+          "reference_condensate_gap_norm": 1.1167345533377738e-9,
+          "reference_stationarity_norm": 9.057032785793666e-10,
+          "reference_rho": [
+            0.00019461984028879264,
+            0.1178158101466853,
+            2.185251238875959e-20
+          ],
+          "rho_reference_delta": 1.3877940272914436e-16,
+          "reference_order_rho_delta": 2.7756224117653114e-17,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1050.0,
+      "root_index": 4,
+      "x_state": [
+        -1.8777132566705188,
+        -1.5875880301097447,
+        -2.2078103604830033,
+        0.0036128052833741793,
+        0.006197281619569292
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -3.010680593718007e-11,
+            0.001965026170470452,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 0.001965026170470452,
+          "stationarity_norm": 0.0015880662739655076,
+          "rho": [
+            0.015008619410820979,
+            0.14608550938506026,
+            9.558706652783719e-20
+          ],
+          "rhoB_over_rho0": 0.3356127683247526,
+          "mass_jacobian_sigma_min": 0.5509926682713739,
+          "chain_rule_error": 6.94842623907546e-16,
+          "reference_condensate_gap_norm": 1.3297552869970547e-12,
+          "reference_stationarity_norm": 1.4186528429210112e-12,
+          "reference_rho": [
+            0.015008619442512887,
+            0.14393665191590474,
+            9.533343109580909e-20
+          ],
+          "rho_reference_delta": 0.0021488574691555244,
+          "reference_order_rho_delta": 5.204170427930421e-18,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            4.856115509710435e-13,
+            8.439206644617059e-8,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 8.439206644756776e-8,
+          "stationarity_norm": 6.830256112825044e-8,
+          "rho": [
+            0.015008619442512857,
+            0.1439367459403677,
+            9.558706652783725e-20
+          ],
+          "rhoB_over_rho0": 0.3311361778810012,
+          "mass_jacobian_sigma_min": 0.5509926682713739,
+          "chain_rule_error": 8.362778173165088e-16,
+          "reference_condensate_gap_norm": 1.3297552869970547e-12,
+          "reference_stationarity_norm": 1.4186528429210112e-12,
+          "reference_rho": [
+            0.015008619442512887,
+            0.14393665191590474,
+            9.533343109580909e-20
+          ],
+          "rho_reference_delta": 9.402446296546962e-8,
+          "reference_order_rho_delta": 5.204170427930421e-18,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            4.856115509710435e-13,
+            -1.3100631690576847e-14,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 4.857890425360578e-13,
+          "stationarity_norm": 3.8466963916265647e-13,
+          "rho": [
+            0.015008619442512836,
+            0.14393665191572363,
+            9.558706652783729e-20
+          ],
+          "rhoB_over_rho0": 0.331135981996326,
+          "mass_jacobian_sigma_min": 0.5509926682713739,
+          "chain_rule_error": 7.365187965623627e-16,
+          "reference_condensate_gap_norm": 1.3297552869970547e-12,
+          "reference_stationarity_norm": 1.4186528429210112e-12,
+          "reference_rho": [
+            0.015008619442512887,
+            0.14393665191590474,
+            9.533343109580909e-20
+          ],
+          "rho_reference_delta": 1.811051378790592e-13,
+          "reference_order_rho_delta": 5.204170427930421e-18,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1050.0,
+      "root_index": 5,
+      "x_state": [
+        -0.15821158393116766,
+        -0.1727109752889174,
+        -2.068440211522911,
+        0.004351860948160892,
+        0.004024365713799154
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.00047346108766641026,
+            -0.00039201563840196574,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 0.0006146882643144906,
+          "stationarity_norm": 0.0007513867670084418,
+          "rho": [
+            0.7066614833195359,
+            0.6238166189060336,
+            3.7183170994695336e-13
+          ],
+          "rhoB_over_rho0": 2.7718293796373783,
+          "mass_jacobian_sigma_min": 0.5683146545267276,
+          "chain_rule_error": 3.9108935249134105e-16,
+          "reference_condensate_gap_norm": 6.088797277313706e-6,
+          "reference_stationarity_norm": 5.81117962554834e-6,
+          "reference_rho": [
+            0.7116242100469387,
+            0.6276007940605397,
+            3.718317087876283e-13
+          ],
+          "rho_reference_delta": 0.006240884406144599,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            0.0001423663000614528,
+            7.639185694027772e-5,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 0.00016156694959047616,
+          "stationarity_norm": 0.00015555490593349667,
+          "rho": [
+            0.7130612152266538,
+            0.6283385805461101,
+            3.718317099469535e-13
+          ],
+          "rhoB_over_rho0": 2.7945829078606996,
+          "mass_jacobian_sigma_min": 0.5683146545267276,
+          "chain_rule_error": 3.9524557744783373e-16,
+          "reference_condensate_gap_norm": 6.088797277313706e-6,
+          "reference_stationarity_norm": 5.81117962554834e-6,
+          "reference_rho": [
+            0.7116242100469387,
+            0.6276007940605397,
+            3.718317087876283e-13
+          ],
+          "rho_reference_delta": 0.0016153367403790662,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            5.551115123125783e-17,
+            -1.4432899320127035e-15,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 1.511086543539286e-15,
+          "stationarity_norm": 1.5057352462467404e-15,
+          "rho": [
+            0.7116770191695436,
+            0.6276268924959774,
+            3.718317099469531e-13
+          ],
+          "rhoB_over_rho0": 2.790216482637277,
+          "mass_jacobian_sigma_min": 0.5683146545267276,
+          "chain_rule_error": 5.002623995179964e-16,
+          "reference_condensate_gap_norm": 6.088797277313706e-6,
+          "reference_stationarity_norm": 5.81117962554834e-6,
+          "reference_rho": [
+            0.7116242100469387,
+            0.6276007940605397,
+            3.718317087876283e-13
+          ],
+          "rho_reference_delta": 5.8906126698335405e-5,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1100.0,
+      "root_index": 1,
+      "x_state": [
+        -0.12787223735697062,
+        -0.1286170484161455,
+        -2.067833122973825,
+        0.0036705240905394306,
+        0.0035497809186131792
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.00032385664140546777,
+            2.9429395558167037e-5,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 0.00032519104155149907,
+          "stationarity_norm": 0.0013478939333336558,
+          "rho": [
+            0.7436642505220039,
+            0.7292756585674592,
+            9.315963409340232e-12
+          ],
+          "rhoB_over_rho0": 3.068624810622456,
+          "mass_jacobian_sigma_min": 0.5683760600874311,
+          "chain_rule_error": 2.754273323292986e-16,
+          "reference_condensate_gap_norm": 5.4032488671822736e-6,
+          "reference_stationarity_norm": 5.311705956453815e-6,
+          "reference_rho": [
+            0.7470048861635404,
+            0.7286761450431885,
+            9.315963408541987e-12
+          ],
+          "rho_reference_delta": 0.003394003971018264,
+          "reference_order_rho_delta": 1.1309109937248425e-26,
+          "reference_order_gap_delta": 2.7755575615628914e-17
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            1.305793292466495e-5,
+            6.0143885700914e-6,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 1.4376455826701343e-5,
+          "stationarity_norm": 8.10500660982704e-5,
+          "rho": [
+            0.7471312963568049,
+            0.7287329146251662,
+            9.315963409340234e-12
+          ],
+          "rhoB_over_rho0": 3.074717106231848,
+          "mass_jacobian_sigma_min": 0.5683760600874311,
+          "chain_rule_error": 2.5873133394762585e-16,
+          "reference_condensate_gap_norm": 5.4032488671822736e-6,
+          "reference_stationarity_norm": 5.311705956453815e-6,
+          "reference_rho": [
+            0.7470048861635404,
+            0.7286761450431885,
+            9.315963408541987e-12
+          ],
+          "rho_reference_delta": 0.00013857244458794323,
+          "reference_order_rho_delta": 1.1309109937248425e-26,
+          "reference_order_gap_delta": 2.7755575615628914e-17
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            2.498001805406602e-16,
+            -2.7755575615628914e-17,
+            -8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 9.230554736292468e-16,
+          "stationarity_norm": 3.91234049727697e-15,
+          "rho": [
+            0.7469447628944421,
+            0.7286461649208188,
+            9.315963409340256e-12
+          ],
+          "rhoB_over_rho0": 3.074147766301202,
+          "mass_jacobian_sigma_min": 0.5683760600874311,
+          "chain_rule_error": 2.961140551821186e-16,
+          "reference_condensate_gap_norm": 5.4032488671822736e-6,
+          "reference_stationarity_norm": 5.311705956453815e-6,
+          "reference_rho": [
+            0.7470048861635404,
+            0.7286761450431885,
+            9.315963408541987e-12
+          ],
+          "rho_reference_delta": 6.718344457058416e-5,
+          "reference_order_rho_delta": 1.1309109937248425e-26,
+          "reference_order_gap_delta": 2.7755575615628914e-17
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1150.0,
+      "root_index": 1,
+      "x_state": [
+        -0.10939857772356278,
+        -0.10349464940407228,
+        -2.067546858680642,
+        0.0033845503731335424,
+        0.0033119536234157893
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            0.0005527134225332547,
+            2.8371046434549907e-5,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 0.0005534410932739053,
+          "stationarity_norm": 0.0009545722163522744,
+          "rho": [
+            0.7895600061688006,
+            0.8146418374626281,
+            2.4746552503741115e-10
+          ],
+          "rhoB_over_rho0": 3.3420871747476966,
+          "mass_jacobian_sigma_min": 0.5684019946405156,
+          "chain_rule_error": 6.66674377403169e-16,
+          "reference_condensate_gap_norm": 2.7897510394524313e-7,
+          "reference_stationarity_norm": 3.3868290187789636e-6,
+          "reference_rho": [
+            0.7817312103350578,
+            0.8145201304696689,
+            2.474655250368566e-10
+          ],
+          "rho_reference_delta": 0.007829741809189153,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            -9.735685104415859e-5,
+            -4.717405438198208e-5,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 0.00010818386132907572,
+          "stationarity_norm": 0.00011682082442770313,
+          "rho": [
+            0.7802782946226913,
+            0.8137995015298155,
+            2.4746552503741177e-10
+          ],
+          "rhoB_over_rho0": 3.3209954091666094,
+          "mass_jacobian_sigma_min": 0.5684019946405156,
+          "chain_rule_error": 6.576445349495576e-16,
+          "reference_condensate_gap_norm": 2.7897510394524313e-7,
+          "reference_stationarity_norm": 3.3868290187789636e-6,
+          "reference_rho": [
+            0.7817312103350578,
+            0.8145201304696689,
+            2.474655250368566e-10
+          ],
+          "rho_reference_delta": 0.001621810758441203,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            1.8041124150158794e-16,
+            2.7755575615628914e-17,
+            8.881784197001252e-16
+          ],
+          "condensate_gap_norm": 9.067411390572895e-16,
+          "stationarity_norm": 3.900230751430062e-15,
+          "rho": [
+            0.7817348448529438,
+            0.8145238978591757,
+            2.474655250374115e-10
+          ],
+          "rhoB_over_rho0": 3.325539047832469,
+          "mass_jacobian_sigma_min": 0.5684019946405156,
+          "chain_rule_error": 6.537586549571306e-16,
+          "reference_condensate_gap_norm": 2.7897510394524313e-7,
+          "reference_stationarity_norm": 3.3868290187789636e-6,
+          "reference_rho": [
+            0.7817312103350578,
+            0.8145201304696689,
+            2.474655250368566e-10
+          ],
+          "rho_reference_delta": 5.234782131047e-6,
+          "reference_order_rho_delta": 1.1102230246251565e-16,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    },
+    {
+      "muB_MeV": 1200.0,
+      "root_index": 1,
+      "x_state": [
+        -0.09643644747395977,
+        -0.08672785867989562,
+        -2.067381497934859,
+        0.0032055004887323007,
+        0.0031489594322914355
+      ],
+      "checks": [
+        {
+          "p_num": 128,
+          "condensate_gap": [
+            -0.0015145509781287758,
+            -0.0007150173812885269,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 0.001674847611245732,
+          "stationarity_norm": 0.0016450367760912669,
+          "rho": [
+            0.790304736620695,
+            0.879538814883506,
+            6.674655354674035e-9
+          ],
+          "rhoB_over_rho0": 3.478840746205951,
+          "mass_jacobian_sigma_min": 0.5684160814393586,
+          "chain_rule_error": 4.179883547022187e-16,
+          "reference_condensate_gap_norm": 5.266145977289771e-6,
+          "reference_stationarity_norm": 5.365817437063961e-6,
+          "reference_rho": [
+            0.8161973072729884,
+            0.8925254607569874,
+            6.674655354673557e-9
+          ],
+          "rho_reference_delta": 0.02896684632519075,
+          "reference_order_rho_delta": 2.481541837659083e-24,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 512,
+          "condensate_gap": [
+            0.00010317521241162697,
+            5.128586001482138e-5,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 0.00011521876537111565,
+          "stationarity_norm": 0.00011753844608786608,
+          "rho": [
+            0.8180469411689826,
+            0.8934892886423841,
+            6.6746553546740076e-9
+          ],
+          "rhoB_over_rho0": 3.565700492679212,
+          "mass_jacobian_sigma_min": 0.5684160814393586,
+          "chain_rule_error": 4.1572866207840887e-16,
+          "reference_condensate_gap_norm": 5.266145977289771e-6,
+          "reference_stationarity_norm": 5.365817437063961e-6,
+          "reference_rho": [
+            0.8161973072729884,
+            0.8925254607569874,
+            6.674655354673557e-9
+          ],
+          "rho_reference_delta": 0.0020856916698972433,
+          "reference_order_rho_delta": 2.481541837659083e-24,
+          "reference_order_gap_delta": 0.0
+        },
+        {
+          "p_num": 1024,
+          "condensate_gap": [
+            -1.1102230246251565e-16,
+            1.8041124150158794e-16,
+            4.440892098500626e-16
+          ],
+          "condensate_gap_norm": 4.920258062434079e-16,
+          "stationarity_norm": 1.0333691015363991e-15,
+          "rho": [
+            0.8162789966094549,
+            0.8925667611388377,
+            6.674655354673994e-9
+          ],
+          "rhoB_over_rho0": 3.5600953425478084,
+          "mass_jacobian_sigma_min": 0.5684160814393586,
+          "chain_rule_error": 4.194115076254097e-16,
+          "reference_condensate_gap_norm": 5.266145977289771e-6,
+          "reference_stationarity_norm": 5.365817437063961e-6,
+          "reference_rho": [
+            0.8161973072729884,
+            0.8925254607569874,
+            6.674655354673557e-9
+          ],
+          "rho_reference_delta": 9.153616352740371e-5,
+          "reference_order_rho_delta": 2.481541837659083e-24,
+          "reference_order_gap_delta": 0.0
+        }
+      ]
+    }
+  ]
+}

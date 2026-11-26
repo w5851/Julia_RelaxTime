@@ -16,6 +16,12 @@ module MagneticIntegrals
 using Base.MathConstants: π
 using StaticArrays
 
+const _VALIDATION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "ValidationUtils.jl"))
+if !isdefined(Main, :ValidationUtils)
+    Base.include(Main, _VALIDATION_PATH)
+end
+using Main.ValidationUtils: require_finite, require_positive_finite
+
 const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "integration", "GaussLegendre.jl"))
 if !isdefined(Main, :GaussLegendre)
     Base.include(Main, _GAUSSLEGENDRE_PATH)
@@ -121,6 +127,11 @@ function zeta_prime_minus_one(x::Real; zeta_num::Int=DEFAULT_ZETA_COUNT)
     isfinite(x) && x > zero(x) || throw(ArgumentError(
         "Hurwitz-zeta argument x must be finite and positive, got $(x)",
     ))
+    # Exact recurrence removes the t~x boundary layer in Abel-Plana at x<<1.
+    # Its mass logarithm is differentiated analytically through -x*log(x).
+    if x < one(x)
+        return zeta_prime_minus_one(x + one(x); zeta_num=zeta_num) - x * log(x)
+    end
     nodes, weights = zeta_nodes(zeta_num)
     scalar_term = x * (-x + 2 * (x - one(x)) * log(x)) / 4
     integral = zero(x)
@@ -217,21 +228,79 @@ function omega0_flavor_landau(
     p_num::Int=96,
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
     cutoff_N::Int=10,
+    Λ::Real=Λ_inv_fm,
+    N_c::Real=N_color,
 )
     eB_value = validate_magnetic_eB(eB)
-    pref = -3.0 * q_abs * eB_value / (2 * π)
+    require_positive_finite("Landau vacuum cutoff", Λ)
+    require_positive_finite("Landau color count", N_c)
+    pref = -N_c * q_abs * eB_value / (2 * π)
     total = 0.0
     @inbounds for n in 0:n_max
         an = alpha_n(n)
         int_val = _integrate_pz_even(p_num, pz_max) do pz
             E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
             p3 = sqrt(pz^2 + 2 * n * q_abs * eB_value)
-            fc = smooth_cutoff(p3; N=cutoff_N)
+            fc = smooth_cutoff(p3; Λ=Λ, N=cutoff_N)
             fc^2 * E
         end
         total += an * int_val / (2 * π)
     end
     return pref * total
+end
+
+@inline function _asinh_positive(x)
+    return log(x + sqrt(one(x) + x*x))
+end
+
+# Integrate in t=asinh(pz/m_n), splitting at energy offsets from the Fermi
+# surface. This resolves small masses and narrow thermal widths together.
+# Moving nodes remain in the AD graph; no T=0 discontinuity is subtracted.
+function _thermal_level_pair(mass, mu, T, Φ, Φbar, qB, n, nodes, weights, pz_max)
+    mn2 = mass*mass + 2n*qB
+    mn = sqrt(mn2 + oftype(mn2, 1e-24))
+    tail_energy = abs(mu) + 40T
+    scalar_zero = zero(mass+mu+T+Φ+Φbar)
+    tail_energy <= mn && return SVector(scalar_zero, scalar_zero)
+    tmax = _asinh_positive(pz_max/mn)
+    lo = zero(mn+mu+T)
+    total = SVector(scalar_zero, scalar_zero)
+    for width in (-12, -6, 0, 6, 12, 40)
+        energy = abs(mu) + width*T
+        energy <= mn && continue
+        hi = min(_asinh_positive(sqrt(energy*energy-mn*mn)/mn), tmax)
+        hi > lo || continue
+        span = hi-lo
+        for j in eachindex(nodes, weights)
+            t = lo + span*nodes[j]
+            ep, em = exp(t), exp(-t)
+            E = mn*(ep+em)/2
+            logs, net = _polyakov_log_and_net_density(E, mu, T, Φ, Φbar)
+            total += weights[j]*span*E*SVector(-T*logs, net)
+        end
+        lo = hi
+        hi >= tmax && break
+    end
+    return total
+end
+
+function _thermal_flavor_pair(mass, mu, T, Φ, Φbar, q_abs, eB;
+    n_max, p_num, pz_max)
+    eB_value = validate_magnetic_eB(eB)
+    require_finite("Landau mass", mass)
+    require_finite("Landau mu", mu)
+    require_positive_finite("Landau temperature", T)
+    require_positive_finite("Landau charge magnitude", q_abs)
+    require_positive_finite("Landau pz_max", pz_max)
+    n_max >= 0 || throw(ArgumentError("Landau n_max must be nonnegative"))
+    nodes, weights = pz_nodes(p_num)
+    qB = q_abs*eB_value
+    scalar_zero = zero(mass+mu+T+Φ+Φbar)
+    total = SVector(scalar_zero, scalar_zero)
+    for n in 0:n_max
+        total += alpha_n(n)*_thermal_level_pair(mass,mu,T,Φ,Φbar,qB,n,nodes,weights,pz_max)
+    end
+    return qB/(2π^2)*total
 end
 
 function omegat_flavor_landau(
@@ -246,20 +315,8 @@ function omegat_flavor_landau(
     p_num::Int=96,
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
 )
-    eB_value = validate_magnetic_eB(eB)
-    T <= 1e-12 && return 0.0
-
-    pref = -T * q_abs * eB_value / (2 * π)
-    total = 0.0
-    @inbounds for n in 0:n_max
-        an = alpha_n(n)
-        int_val = _integrate_pz_even(p_num, pz_max) do pz
-            E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
-            _log_polyakov_pair(E, mu, T, Φ, Φbar)
-        end
-        total += an * int_val / (2 * π)
-    end
-    return pref * total
+    return _thermal_flavor_pair(mass,mu,T,Φ,Φbar,q_abs,eB;
+        n_max,p_num,pz_max)[1]
 end
 
 function density_flavor_landau(
@@ -274,24 +331,8 @@ function density_flavor_landau(
     p_num::Int=96,
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
 )
-    eB_value = validate_magnetic_eB(eB)
-    T <= 1e-12 && return 0.0
-
-    # The Polyakov polynomial already contains the color trace. Its mu
-    # derivative therefore carries the color factor and the prefactor is the
-    # Landau phase-space measure only.
-    pref = q_abs * eB_value / (2 * π)
-    total = 0.0
-    @inbounds for n in 0:n_max
-        an = alpha_n(n)
-        int_val = _integrate_pz_even(p_num, pz_max) do pz
-            E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
-            _, net = _polyakov_log_and_net_density(E, mu, T, Φ, Φbar)
-            net
-        end
-        total += an * int_val / (2 * π)
-    end
-    return pref * total
+    return _thermal_flavor_pair(mass,mu,T,Φ,Φbar,q_abs,eB;
+        n_max,p_num,pz_max)[2]
 end
 
 end # module MagneticIntegrals

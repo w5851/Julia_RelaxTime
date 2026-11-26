@@ -53,6 +53,8 @@
 
 `pnjl/algorithmic_feasibility/` 收纳独立的解析算法可行性审计；它不替代 PNJL 数值验证，也不进入 phase-reference promotion。
 
+[磁场 PNJL 核验与 PALC 基准](pnjl/magnetic_palc_validation_20261112_analysis/README.md) 汇集低温积分、凝聚自洽性、多根路径的独立文献核验及与无磁场路径的同机计时。
+
 ### Mott and complex-pole evidence
 
 `pnjl/mott/` 收纳各向异性参数 `xi`、Mott 温度、介子质量/宽度、复极点机制和文献定位的独立分析线。该逻辑组与 Issue #130 的 phase-reference 决策层保持分离；其 `figures/` 和说明文档用于诊断与论文讨论准备，不是新的 production result root。

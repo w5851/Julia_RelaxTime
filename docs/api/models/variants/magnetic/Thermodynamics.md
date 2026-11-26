@@ -46,7 +46,10 @@
 
 ## `calculate_magnetic_rho`
 
-通过数值导数路径计算 flavor 相关密度。它更偏进阶入口，使用时应注意步长与数值敏感区的影响。
+直接积分 Polyakov 分布给出的三味净密度，返回顺序为 `(u,d,s)`，单位为
+`fm^-3`。它与固定均场、固定 `eB` 下的 `-∂Ω/∂mu_f` 一致，计算不使用有限
+差分步长。热势和净密度复用相同的逐 Landau 层分段积分，参见
+[Landau 积分接口](LandauIntegrals.md)。
 
 ## `calculate_magnetic_number_densities`
 
@@ -58,7 +61,8 @@
 - `baryon`
 
 其中 `quark` 是为兼容历史脚本保留的字段名，正式语义与 `net` 相同，表示
-`q - qbar` 净密度；`baryon` 由三味净密度求和得到。该返回值不满足普通 PNJL
+`q - qbar` 净密度；`baryon=(rho_u+rho_d+rho_s)/(3*rho0)` 为无量纲
+重子密度比。该返回值不满足普通 PNJL
 `(quark, antiquark)` 的独立分量合同，不应直接传入需要独立反夸克占据数的输运路径。
 这是受支持正 `eB` 的 magnetic core 语义；输入低于
 `MAGNETIC_EB_MIN_FM2` 会明确拒绝，不会转回普通 PNJL。
@@ -86,8 +90,12 @@
 - 调整 `eB_fm2`、`p_num` 或 `pz_max` 后
 - 更新实现后做 baseline 或 regression 检查前
 
-自动截断的直接诊断入口是 `resolve_magnetic_nmax`。默认 thermal-tail profile 使用
+此报告检查固定状态的势密度对层数的变化；它不单独检验 gap、密度或求根位置，
+这些目标需要在同一状态或重新求解后分别比较。自动截断的直接诊断入口是
+`resolve_magnetic_nmax`。默认 thermal-tail profile 使用
 `thermal_tail_factor`、`n_max_floor` 和 `n_max_cap`，并在同一点的所有 solver seed/
-fallback attempt 之间共享解析结果；显式 `n_max` 会覆盖自动策略。source-parity
-跨求解器复核可使用 `config/models/pnjl/magnetic_source_parity.toml` 的固定
-`n_max=79` 和 `p_num=128`/`pz_max=40`/`zeta_num=256` 设置。
+fallback attempt 之间共享解析结果；显式 `n_max` 会覆盖自动策略。
+`landau_legacy` 要求显式 `n_max` 以检查其真空求和收敛。
+历史外部锚点的预算可用 `config/models/pnjl/magnetic_source_parity.toml` 的固定
+`n_max=79` 和 `p_num=128`/`pz_max=40`/`zeta_num=256` 设置；当前积分节点已与
+历史实现不同，比较容差应包含已核对的来源离散误差。

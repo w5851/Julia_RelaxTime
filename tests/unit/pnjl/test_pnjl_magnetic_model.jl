@@ -8,6 +8,8 @@
 using Test
 using StaticArrays
 using ForwardDiff
+using NLsolve
+using LinearAlgebra: norm
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -21,6 +23,30 @@ Models.pnjl_module()
 # ============================================================================
 
 @testset "PNJLMagneticModel" begin
+
+    @testset "singular mass map needs condensate self consistency" begin
+        hc=197.3269804
+        model=Models.PNJLMagneticModel(eB_fm2=.155*(1000/hc)^2,n_max=32,p_num=64)
+        mu=SVector{3,Float64}(fill(1200/(3hc),3))
+        seed=SVector(-5.098514574531188,-5.059005458178179,1.836621743095373,
+            .0009645136653585244,.0009270413960519659)
+        # Re-solve the historical false stationary point with today's
+        # quadrature. This isolates the acceptance gate from seed drift.
+        residual! = (r,x) -> (r .= Models.magnetic_gap_residual(model,x,5/hc,mu))
+        stationary = nlsolve(residual!,collect(seed);autodiff=:forward,
+            method=:trust_region,ftol=1e-11,xtol=1e-12,iterations=80)
+        false_root = stationary.zero
+        @test stationary.f_converged
+        @test all(>(0.),Models.calculate_mass_vec(model,false_root[1:3]))
+        @test all(v -> 0. <= v <= 1.,false_root[4:5])
+        g=Models.magnetic_condensate_residual(model,false_root,5/hc,mu)
+        @test norm(g)>1.
+        @test norm(Models.magnetic_gap_residual(model,false_root,5/hc,mu)) < 1e-9
+        # The public API reports an empty accepted candidate set by throwing.
+        @test_throws ErrorException Models.solve_magnetic_gap(model,5/hc,mu;initial_guess=false_root,
+            include_default_seeds=false,fallback_method=nothing,iterations=60,
+            residual_norm_max=1e-7)
+    end
 
     @testset "正磁场构造合同" begin
         @test_throws ArgumentError Models.PNJLMagneticModel(; eB_fm2=0.0)
@@ -44,6 +70,12 @@ Models.pnjl_module()
             p_num=4, t_num=4, n_max=1, pz_max=5.0)
         @test length(residual) == 5
         @test all(isfinite, residual)
+        condensate_residual = Models.magnetic_condensate_residual(m, x5, 0.7, μ;
+            p_num=4, t_num=4, n_max=1, pz_max=5.0)
+        @test length(condensate_residual) == 3
+        mass_jacobian = ForwardDiff.jacobian(v -> Models.calculate_mass_vec(m,v),x5[1:3])
+        @test residual[1:3] ≈ mass_jacobian' * condensate_residual rtol=1e-10 atol=1e-12
+        @test_throws ArgumentError Models.magnetic_condensate_residual(m,x5,0.7,μ)
         @test_throws ArgumentError Models.magnetic_gap_residual(m, x5, 0.0, μ;
             p_num=4, t_num=4, n_max=1, pz_max=5.0)
         @test_throws ArgumentError Models.magnetic_gap_residual(m, x5, 0.7, μ;
@@ -90,6 +122,8 @@ Models.pnjl_module()
         @test result.attempt_count == 1
         @test result.state !== nothing
         @test result.candidates[1].residual_norm <= 1e-3
+        @test norm(Models.magnetic_condensate_residual(m,result.candidates[1].x_state,0.7,μ;
+            controls...)) <= 1e-3
 
         resolved_nmax = Models._resolve_magnetic_attempt_nmax(
             m,

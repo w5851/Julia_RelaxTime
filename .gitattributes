@@ -168,3 +168,10 @@ scripts/analysis/relaxtime/plot_ward_moller_mott_response.py -text
 scripts/relaxtime/workflow/charged_gbu_plot.jl -text
 scripts/analysis/relaxtime/plot_ward_moller_manuscript.py -text
 scripts/pnjl/phase_reference_adapter.py -text
+
+# Reproduce the frozen magnetic PALC study, including the Windows-generated digitization CSV.
+data/outputs/results/pnjl/magnetic_palc_validation/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+data/outputs/figures/pnjl/magnetic_palc_validation/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# The recorded generator hash includes a final blank line in the original Python script.
+scripts/analysis/pnjl_magnetic/plot_validation.py -text whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+scripts/analysis/pnjl_magnetic/plot_convergence.py -text

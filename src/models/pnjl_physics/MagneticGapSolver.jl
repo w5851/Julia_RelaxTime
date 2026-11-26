@@ -158,6 +158,48 @@ end
 """Compatibility alias for the historical explicit AD residual name."""
 @inline magnetic_gap_residual_autodiff(args...; kwargs...) = magnetic_gap_residual(args...; kwargs...)
 
+"""Condensate self-consistency residual `d(Omega_vac+Omega_T)/dM - phi`.
+
+Components are in fm^-3. Unlike the five-field potential gradient, this
+residual does not vanish spuriously when the map from condensates to masses
+has a singular Jacobian. Use a fixed `n_max`, as for `magnetic_gap_residual`.
+"""
+function magnetic_condensate_residual(model::PNJLMagneticModel, x, T_fm, mu_vec;
+    xi::Real=0.0, p_num::Union{Nothing,Int}=nothing, t_num::Int=8,
+    pz_max::Union{Nothing,Real}=nothing, n_max::Union{Nothing,Int}=nothing,
+    cutoff_N::Union{Nothing,Int}=nothing)
+    μ = _magnetic_solver_validate(model,T_fm,mu_vec,xi)
+    nvalue = n_max === nothing ? model.magnetic.n_max : n_max
+    nvalue === nothing && throw(ArgumentError("magnetic condensate residual requires a fixed n_max"))
+    thermo = _magnetic_thermodynamics_module()
+    conf = thermo._effective_magnetic_config(model.magnetic;
+        p_num,pz_max,n_max=nvalue,cutoff_N)
+    st = _magnetic_state_vec(x)
+    params = conf.params
+    G = thermo.coupling_GB(conf.eB_fm2;G0=params.G_fm2,imc=conf.imc)
+    masses = thermo._calculate_mass_vec_with_GB(SVector(st[1],st[2],st[3]),G;params)
+    pmax = conf.pz_max > 0 ? conf.pz_max : max(8params.Λ_inv_fm,25.)
+    values = ntuple(3) do f
+        loop = ForwardDiff.derivative(masses[f]) do mass
+            vacuum = if conf.route === :mfir
+                -2params.N_color*thermo.PNJLCore.vacuum_integral_with_cutoff(
+                    mass,convert(typeof(mass),params.Λ_inv_fm)) +
+                    thermo.omega_magnetic_mfir(mass,thermo.QUARK_CHARGE_ABS[f],conf.eB_fm2;
+                        zeta_num=conf.zeta_num,N_c=params.N_color)
+            else
+                thermo.omega0_flavor_landau(mass,thermo.QUARK_CHARGE_ABS[f],conf.eB_fm2;
+                    n_max=nvalue,p_num=conf.p_num,pz_max=pmax,cutoff_N=conf.cutoff_N,
+                    Λ=params.Λ_inv_fm,N_c=params.N_color)
+            end
+            vacuum + thermo.omegat_flavor_landau(mass,μ[f],T_fm,st[4],st[5],
+                thermo.QUARK_CHARGE_ABS[f],conf.eB_fm2;n_max=nvalue,
+                p_num=conf.p_num,pz_max=pmax)
+        end
+        loop-st[f]
+    end
+    return SVector(values)
+end
+
 function _resolve_magnetic_attempt_nmax(
     model::PNJLMagneticModel,
     seed::SVector{5, Float64},
@@ -247,8 +289,12 @@ function _magnetic_attempt(
         physical = all(m -> isfinite(m) && m > 0.0, comp.masses) &&
             all(v -> isfinite(v) && 0.0 <= v <= 1.0, x_state[4:5]) &&
             isfinite(comp.omega)
+        condensate_residual = physical ? magnetic_condensate_residual(
+            model,x_state,T_fm,μ;xi,p_num,t_num,pz_max,n_max,cutoff_N) :
+            SVector{3,Float64}(Inf,Inf,Inf)
         converged = Bool(result.f_converged) && isfinite(residual_norm) &&
-            residual_norm <= Float64(residual_norm_max) && physical
+            residual_norm <= Float64(residual_norm_max) && physical &&
+            norm(condensate_residual) <= Float64(residual_norm_max)
         iterations_used = hasproperty(result, :iterations) ? Int(result.iterations) : 0
         return (
             seed=seed,
