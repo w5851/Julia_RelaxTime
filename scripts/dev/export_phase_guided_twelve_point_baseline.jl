@@ -42,7 +42,16 @@ function scan_point(; outdir, T_MeV, muB_MeV, xi, profile=nothing)
     Main.run_phase_guided_scan(opts, context; phase_reference=Main._load_runtime_phase_reference(opts))
     path = joinpath(outdir, "phase_guided_transport_scan.csv")
     isfile(path) || error("scan produced no CSV at $path")
-    row = only(CSV.File(path; comment="#"))
+    scanned = collect(CSV.File(path; comment="#"))
+    # A point the orchestrator skipped leaves a header-only CSV and logs
+    # `SCAN POINT FAILED ... skipped`, so the failure surfaces here rather than
+    # in the scan.  The usual causes are an exhausted thermal-measure event
+    # budget or a multi-threaded run changing how many events are consumed.
+    if isempty(scanned)
+        error("scan skipped the point (empty CSV) at T=$T_MeV muB=$muB_MeV xi=$xi; " *
+              "check sampling.max_events and run with JULIA_NUM_THREADS=1")
+    end
+    row = only(scanned)
     Bool(row.converged) || error("point did not converge: T=$T_MeV muB=$muB_MeV xi=$xi")
     return row
 end
