@@ -226,7 +226,6 @@ CSV 必须保留 path、constraint、chemical profiles、regime、policy、integ
 - Combined contract/integration：`tests/integration/relaxtime/test_combined_meson_density_scan_smoke.jl`；
 - Regime regression：`tests/regression/relaxtime/test_meson_density_regimes_regression.jl`；
 - Freezeout path regression：`tests/regression/relaxtime/test_meson_density_freezeout_phase_shift_gbu_path_regression.jl`；
-- Plot-review regression：`tests/regression/relaxtime/test_meson_density_plot_review_case_regression.jl`；
 - Literature target smoke：`tests/validation/relaxtime/test_meson_density_literature_targets_smoke.jl`。
 
 Literature target 或 freezeout regression 只验证其登记的 profile/path/target，不能替代任意 combined production case 的 convergence 和 branch audit。
