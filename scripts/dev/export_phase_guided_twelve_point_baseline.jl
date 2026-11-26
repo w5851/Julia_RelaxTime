@@ -54,6 +54,12 @@ function main(args)
     isfile(_SOURCE_CSV) || error("missing recorded baseline: $_SOURCE_CSV")
     isfile(_REFERENCE_PROFILE) || error("missing reference profile: $_REFERENCE_PROFILE")
 
+    # The thermal measure draws from one seeded event stream: extra threads change
+    # how many events are consumed and can exhaust `sampling.max_events` on points
+    # that converge single-threaded (observed on quote-remote at 8 threads).  The
+    # regression and CI both run single-threaded, so the baseline must too.
+    Threads.nthreads() == 1 || error("run the baseline export with JULIA_NUM_THREADS=1 " *
+                                     "(current nthreads = $(Threads.nthreads()))")
     recorded = collect(CSV.File(_SOURCE_CSV))
     points = unique((p.point_id, Float64(p.T_MeV), Float64(p.muB_MeV), Float64(p.xi)) for p in recorded)
     sort!(points, by=p -> p[1])
