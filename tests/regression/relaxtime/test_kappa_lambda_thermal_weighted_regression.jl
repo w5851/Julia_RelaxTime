@@ -7,7 +7,7 @@ end
 module KappaLambdaThermalWeightedRegression
 using Test, CSV, JSON3, SHA
 
-const BASELINE = joinpath(@__DIR__, "..", "..", "baselines", "relaxtime", "baseline_kappa_lambda_thermal_weighted_v2.csv")
+const BASELINE = joinpath(@__DIR__, "..", "..", "baselines", "relaxtime", "baseline_kappa_lambda_thermal_weighted_v3.csv")
 
 @testset "Thermal-weighted kappa/lambda fixed-point regression" begin
     rows = collect(CSV.File(BASELINE))

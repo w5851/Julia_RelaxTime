@@ -40,6 +40,8 @@ def main(argv=None) -> int:
     parser.add_argument("candidate", type=Path, help="reviewed candidate CSV")
     parser.add_argument("version", help="target version, for example v3")
     parser.add_argument("--reason", required=True, help="why the numeric commitment changed")
+    parser.add_argument("--supersedes", default="baseline_kappa_lambda_thermal_weighted_v2.csv",
+                        help="baseline file this version replaces")
     args = parser.parse_args(argv)
 
     candidate: Path = args.candidate
@@ -91,7 +93,7 @@ def main(argv=None) -> int:
         "regression_rtol": previous.get("regression_rtol", 1e-6),
         "regression_atol": previous.get("regression_atol", 1e-8),
         "refinement_relative_limit": previous.get("refinement_relative_limit", 1e-3),
-        "supersedes": f"baseline_kappa_lambda_thermal_weighted_{previous.get('schema_version', 1) and 'v2'}.csv",
+        "supersedes": args.supersedes,
         "numeric_commitment_change": args.reason,
         "reproduction": (
             "Run scripts/dev/export_kappa_lambda_thermal_weighted_baseline.jl to a fresh path on the "
