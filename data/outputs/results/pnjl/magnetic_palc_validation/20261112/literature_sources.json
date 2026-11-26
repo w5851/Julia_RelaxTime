@@ -1,0 +1,60 @@
+{
+  "retrieved_at": "2026-11-13T07:10:06.284335+00:00",
+  "queries": [
+    "find doi 10.1103/PhysRevD.90.016012",
+    "find doi 10.1103/PhysRevD.92.036012",
+    "find doi 10.1103/PhysRevD.90.044024",
+    "find keyword PNJL and title magnetic"
+  ],
+  "notes": [
+    "INSPIRE REST used because MCP was unavailable. Additional broad queries later had TLS errors; selected papers retrieved as open PDFs.",
+    "Fu found from the published reference lists and downloaded from arXiv."
+  ],
+  "sources": [
+    {
+      "name": "Ferreira2014",
+      "inspire_id": "1300550",
+      "title": "Strange quark chiral phase transition in hot 2+1-flavor magnetized quark matter",
+      "doi": "10.1103/PhysRevD.90.016012",
+      "arxiv": "1406.3608",
+      "url": "https://arxiv.org/pdf/1406.3608",
+      "sha256": "d150c5c8ecfa05b9c7a973e85f2f2535f8994d42794b688ad340250e00f18b8c"
+    },
+    {
+      "name": "Costa2015",
+      "inspire_id": "1391183",
+      "title": "Influence of the inverse magnetic catalysis and the vector interaction in the location of the critical end point",
+      "doi": "10.1103/PhysRevD.92.036012",
+      "arxiv": "1508.07870",
+      "url": "https://arxiv.org/pdf/1508.07870",
+      "sha256": "aee47bc62936d903129a4c3afaa4bb6a754deaae8471d056c2f4fd76afcc1a76"
+    },
+    {
+      "name": "Grunfeld2014",
+      "inspire_id": "1281842",
+      "title": "Phase structure of cold magnetized quark matter within the SU(3) NJL model",
+      "doi": "10.1103/PhysRevD.90.044024",
+      "arxiv": "1402.4731",
+      "url": "https://arxiv.org/pdf/1402.4731",
+      "sha256": "9d9d37fb0dc12aa407c28a2254b8c60a1ccf2c3824da20402cc74e1496bfe9c4"
+    },
+    {
+      "name": "Fu2013",
+      "doi": "10.1103/PhysRevD.88.014009",
+      "arxiv": "1306.5804",
+      "url": "https://arxiv.org/pdf/1306.5804",
+      "sha256": "03103785f0dc0669fb52b198f345b466c2461406fdd8867859a73b5b2fe59b19",
+      "title": "Fluctuations and correlations of hot QCD matter in an external magnetic field"
+    },
+    {
+      "name": "Ferreira2018",
+      "doi": "10.1103/PhysRevD.97.014014",
+      "arxiv": "1712.08378",
+      "url": "https://doi.org/10.1103/PhysRevD.97.014014",
+      "sha256": "dbb8773a711db306bc52c0dd87005efd2ce261520691ae29172afe96bb5aa8ea",
+      "inspire_id": "1644805",
+      "version": "published open APS PDF",
+      "title": "Multiple critical endpoints in magnetized three flavor quark matter"
+    }
+  ]
+}

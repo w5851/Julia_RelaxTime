@@ -1,6 +1,7 @@
 [magnetic]
-# Discretization matched to pnjl_mag commit
-# e1fc81d3c3c9d220c49972e54307b66a604cb9db for source-parity diagnostics.
+# Historical pnjl_mag budgets at commit
+# e1fc81d3c3c9d220c49972e54307b66a604cb9db. The current thermal kernel uses
+# transformed, segmented nodes; p_num no longer means matched node locations.
 route = "mfir"
 n_max = 79
 n_max_policy = "thermal_tail"

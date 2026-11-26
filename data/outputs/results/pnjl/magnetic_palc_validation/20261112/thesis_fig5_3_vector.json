@@ -1,0 +1,225 @@
+{
+  "pdf_path": "D:\\Desktop\\PNJL论文\\02_学位论文\\同课题组\\高雪艳-2021-博士论文-强相互作用物质相变与重子数涨落.pdf",
+  "pdf_sha256": "421109ff06e8000d4bdd904eb27aaa1081f8692338480e1db0db92887086a904",
+  "pdf_page": 83,
+  "printed_page": 69,
+  "figure": "5-3",
+  "T_MeV": 5.0,
+  "eB_GeV2": 0.05,
+  "method": "native PDF polyline vertices, calibrated by vector axis ticks",
+  "path_sequence": 687,
+  "path_vertex_count": 343,
+  "line_width_pdf_points": 0.8573038578033447,
+  "x_ticks_pdf_points": [
+    191.8671875,
+    231.30235290527344,
+    270.61492919921875,
+    310.0505065917969,
+    349.48553466796875,
+    388.79815673828125,
+    428.2331848144531
+  ],
+  "x_tick_values_MeV": [
+    1000.0,
+    1100.0,
+    1200.0,
+    1300.0,
+    1400.0,
+    1500.0,
+    1600.0
+  ],
+  "y_ticks_pdf_points": [
+    603.22900390625,
+    580.5712890625,
+    558.0360107421875,
+    535.378173828125,
+    512.8427734375,
+    490.1854553222656,
+    467.5276184082031,
+    444.9927673339844,
+    422.3349304199219
+  ],
+  "y_tick_values": [
+    0.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0,
+    8.0
+  ],
+  "x_check_max_residual_MeV": 0.1041155465659358,
+  "y_check_max_residual": 0.002689143905807878,
+  "features": [
+    {
+      "id": "first_minimum",
+      "vertex_index": 29,
+      "pdf_point": [
+        241.09976196289062,
+        598.9423828125
+      ],
+      "muB_MeV": 1124.9737483959505,
+      "rhoB_over_rho0": 0.1895748605196391,
+      "adjacent_vertices": [
+        [
+          1125.2846231640824,
+          0.1624958224638665
+        ],
+        [
+          1124.9737483959505,
+          0.1895748605196391
+        ],
+        [
+          1125.5954979322141,
+          0.21124456920302648
+        ]
+      ],
+      "half_stroke_muB_MeV": 1.0881055662115613
+    },
+    {
+      "id": "first_maximum",
+      "vertex_index": 38,
+      "pdf_point": [
+        256.776123046875,
+        593.9209594726562
+      ],
+      "muB_MeV": 1164.7671905883883,
+      "rhoB_over_rho0": 0.4116461862658976,
+      "adjacent_vertices": [
+        [
+          1164.1454410521249,
+          0.3899872746471258
+        ],
+        [
+          1164.7671905883883,
+          0.4116461862658976
+        ],
+        [
+          1161.3475294054763,
+          0.4387279235878241
+        ]
+      ],
+      "half_stroke_muB_MeV": 1.0881055662115613
+    },
+    {
+      "id": "second_minimum",
+      "vertex_index": 44,
+      "pdf_point": [
+        250.89715576171875,
+        590.4916381835938
+      ],
+      "muB_MeV": 1149.84380731342,
+      "rhoB_over_rho0": 0.5633071543880704,
+      "adjacent_vertices": [
+        [
+          1150.1559990192686,
+          0.536225417066144
+        ],
+        [
+          1149.84380731342,
+          0.5633071543880704
+        ],
+        [
+          1150.4668737874006,
+          0.584974163805304
+        ]
+      ],
+      "half_stroke_muB_MeV": 1.0881055662115613
+    },
+    {
+      "id": "second_maximum",
+      "vertex_index": 52,
+      "pdf_point": [
+        258.6131286621094,
+        585.9600219726562
+      ],
+      "muB_MeV": 1169.4303121103655,
+      "rhoB_over_rho0": 0.7637168692494032,
+      "adjacent_vertices": [
+        [
+          1167.8759382697065,
+          0.7366270341290151
+        ],
+        [
+          1169.4303121103655,
+          0.7637168692494032
+        ],
+        [
+          1167.8759382697065,
+          0.785375780868175
+        ]
+      ],
+      "half_stroke_muB_MeV": 1.0881055662115613
+    },
+    {
+      "id": "main_minimum",
+      "vertex_index": 101,
+      "pdf_point": [
+        212.1968994140625,
+        558.2809448242188
+      ],
+      "muB_MeV": 1051.605676311428,
+      "rhoB_over_rho0": 1.9878178744392485,
+      "adjacent_vertices": [
+        [
+          1051.9178680172768,
+          1.960736137117322
+        ],
+        [
+          1051.605676311428,
+          1.9878178744392485
+        ],
+        [
+          1051.9178680172768,
+          2.014899611761175
+        ]
+      ],
+      "half_stroke_muB_MeV": 1.0881055662115613
+    }
+  ],
+  "uncertainty": "Stroke and adjacent vertices describe graphical resolution; no original numerical accuracy or statistical interval is inferred.",
+  "visual_review": {
+    "model": "deepseek-v4.1-flash",
+    "result": {
+      "axes": {
+        "x": "mu_B (MeV), 1000 to 1600",
+        "y": "rho_B/rho_0, 0 to 8"
+      },
+      "conditions": {
+        "T_MeV": 5.0,
+        "eB_GeV2": 0.05
+      },
+      "marker_checks": [
+        {
+          "id": 1,
+          "identified_feature": "lowest-density local minimum in mu_B",
+          "pass": true
+        },
+        {
+          "id": 2,
+          "identified_feature": "next local maximum in mu_B",
+          "pass": true
+        },
+        {
+          "id": 3,
+          "identified_feature": "second local minimum in mu_B",
+          "pass": true
+        },
+        {
+          "id": 4,
+          "identified_feature": "next local maximum in mu_B",
+          "pass": true
+        },
+        {
+          "id": 5,
+          "identified_feature": "main backbending minimum in mu_B near density 2",
+          "pass": true
+        }
+      ],
+      "issues": []
+    },
+    "independent_checks": "All native vector extrema and adjacent vertices checked; calibrated values agree with previous pixel feature intervals."
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "source_path": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\gaoxueyan_pages_5\\page-083.png",
+  "source_sha256": "9350eea042885d6b87e7b13898a80682743984eb7e1beae06a3ebe4aef7b1b05",
+  "page": null,
+  "figure": "5-3",
+  "page_render_size_px": [
+    1241,
+    1754
+  ],
+  "figure_crop_px": [
+    0,
+    0,
+    1241,
+    1754
+  ],
+  "dpi": null,
+  "pixel_coordinates": "figure_crop; pixel centers; crop boxes [left,top,right,bottom)",
+  "schema_version": 2,
+  "task": "points",
+  "mode": "rough",
+  "review_status": "pending",
+  "acceptance_ready": false,
+  "uncertainty_scope": "pixel footprint plus configured calibration_error_px; not a statistical CI or test tolerance",
+  "processing": {
+    "interpolation": false,
+    "smoothing": false,
+    "monotonicity_constraint": false
+  },
+  "effective_config": {
+    "image": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\gaoxueyan_pages_5\\page-083.png",
+    "output_dir": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitized_fig5_3",
+    "figure": "5-3",
+    "task": "points",
+    "plot_box": [
+      399,
+      879,
+      893,
+      1257
+    ],
+    "x_axis": {
+      "label": "muB",
+      "unit": "MeV",
+      "anchors": [
+        {
+          "px": 399,
+          "value": 1000
+        },
+        {
+          "px": 892,
+          "value": 1600
+        }
+      ],
+      "check_anchors": [
+        {
+          "px": 563,
+          "value": 1200
+        },
+        {
+          "px": 728,
+          "value": 1400
+        }
+      ],
+      "calibration_error_px": 1
+    },
+    "y_axis": {
+      "label": "rhoB/rho0",
+      "unit": "dimensionless",
+      "anchors": [
+        {
+          "px": 1256,
+          "value": 0
+        },
+        {
+          "px": 879,
+          "value": 8
+        }
+      ],
+      "check_anchors": [
+        {
+          "px": 1068,
+          "value": 4
+        }
+      ],
+      "calibration_error_px": 1
+    },
+    "features": [
+      {
+        "id": "first_minimum",
+        "curve": "eB005",
+        "kind": "minimum",
+        "pixel_bounds": [
+          501,
+          1245,
+          504,
+          1250
+        ]
+      },
+      {
+        "id": "first_maximum",
+        "curve": "eB005",
+        "kind": "peak",
+        "pixel_bounds": [
+          532,
+          1234,
+          535,
+          1240
+        ]
+      },
+      {
+        "id": "second_minimum",
+        "curve": "eB005",
+        "kind": "minimum",
+        "pixel_bounds": [
+          521,
+          1228,
+          524,
+          1233
+        ]
+      },
+      {
+        "id": "second_maximum",
+        "curve": "eB005",
+        "kind": "peak",
+        "pixel_bounds": [
+          535,
+          1219,
+          539,
+          1223
+        ]
+      },
+      {
+        "id": "main_minimum",
+        "curve": "eB005",
+        "kind": "minimum",
+        "pixel_bounds": [
+          440,
+          1159,
+          444,
+          1166
+        ]
+      }
+    ],
+    "source": {
+      "citation": "高雪艳 2021 博士论文",
+      "pdf_path": "D:/Desktop/PNJL论文/02_学位论文/同课题组/高雪艳-2021-博士论文-强相互作用物质相变与重子数涨落.pdf",
+      "pdf_page": 83,
+      "printed_page": 69,
+      "panel": "Figure 5-3",
+      "conditions": "T=5 MeV eB=0.05 GeV^2 smooth Landau cutoff N10; printed IMC a typo as documented"
+    },
+    "_config_path": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitize_fig5_3.json",
+    "mode": "rough",
+    "dpi": 300
+  },
+  "source_candidates": [],
+  "plot_box_px": [
+    399,
+    879,
+    893,
+    1257
+  ],
+  "x_axis": {
+    "label": "muB",
+    "unit": "MeV",
+    "scale": "linear",
+    "anchors": [
+      {
+        "px": 399.0,
+        "value": 1000.0
+      },
+      {
+        "px": 892.0,
+        "value": 1600.0
+      }
+    ],
+    "calibration_error_px": 1.0
+  },
+  "y_axis": {
+    "label": "rhoB/rho0",
+    "unit": "dimensionless",
+    "scale": "linear",
+    "anchors": [
+      {
+        "px": 1256.0,
+        "value": 0.0
+      },
+      {
+        "px": 879.0,
+        "value": 8.0
+      }
+    ],
+    "calibration_error_px": 1.0
+  },
+  "calibration_checks": {
+    "x": [
+      {
+        "px": 563,
+        "value": 1200,
+        "residual_px": 0.33333333333325754
+      },
+      {
+        "px": 728,
+        "value": 1400,
+        "residual_px": -0.33333333333337123
+      }
+    ],
+    "y": [
+      {
+        "px": 1068,
+        "value": 4,
+        "residual_px": -0.5
+      }
+    ]
+  },
+  "figure_crop_path": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitized_fig5_3\\figure_crop.png",
+  "figure_crop_sha256": "0ffaf316bcffe52ade920c9c1b8615d14487d432971e460fb2358fd985614818",
+  "points": [
+    {
+      "id": "first_minimum",
+      "curve": "eB005",
+      "kind": "minimum",
+      "status": "measured",
+      "method": "manual_pixel_region",
+      "x": 1125.9634888438134,
+      "y": 0.18037135278514588,
+      "x_lower": 1122.920892494929,
+      "x_upper": 1129.0060851926978,
+      "y_lower": 0.10610079575596817,
+      "y_upper": 0.2546419098143236,
+      "x_px": 502.5,
+      "y_px": 1247.5,
+      "px_left": 501.0,
+      "px_top": 1245.0,
+      "px_right": 504.0,
+      "px_bottom": 1250.0
+    },
+    {
+      "id": "first_maximum",
+      "curve": "eB005",
+      "kind": "peak",
+      "status": "measured",
+      "method": "manual_pixel_region",
+      "x": 1163.6916835699797,
+      "y": 0.40318302387267907,
+      "x_lower": 1160.6490872210952,
+      "x_upper": 1166.734279918864,
+      "y_lower": 0.3183023872679045,
+      "y_upper": 0.4880636604774536,
+      "x_px": 533.5,
+      "y_px": 1237.0,
+      "px_left": 532.0,
+      "px_top": 1234.0,
+      "px_right": 535.0,
+      "px_bottom": 1240.0
+    },
+    {
+      "id": "second_minimum",
+      "curve": "eB005",
+      "kind": "minimum",
+      "status": "measured",
+      "method": "manual_pixel_region",
+      "x": 1150.3042596348885,
+      "y": 0.5411140583554377,
+      "x_lower": 1147.261663286004,
+      "x_upper": 1153.346855983773,
+      "y_lower": 0.46684350132625996,
+      "y_upper": 0.6153846153846154,
+      "x_px": 522.5,
+      "y_px": 1230.5,
+      "px_left": 521.0,
+      "px_top": 1228.0,
+      "px_right": 524.0,
+      "px_bottom": 1233.0
+    },
+    {
+      "id": "second_maximum",
+      "curve": "eB005",
+      "kind": "peak",
+      "status": "measured",
+      "method": "manual_pixel_region",
+      "x": 1167.951318458418,
+      "y": 0.7427055702917772,
+      "x_lower": 1164.3002028397566,
+      "x_upper": 1171.6024340770791,
+      "y_lower": 0.6790450928381963,
+      "y_upper": 0.8063660477453581,
+      "x_px": 537.0,
+      "y_px": 1221.0,
+      "px_left": 535.0,
+      "px_top": 1219.0,
+      "px_right": 539.0,
+      "px_bottom": 1223.0
+    },
+    {
+      "id": "main_minimum",
+      "curve": "eB005",
+      "kind": "minimum",
+      "status": "measured",
+      "method": "manual_pixel_region",
+      "x": 1052.3326572008114,
+      "y": 1.9840848806366047,
+      "x_lower": 1048.6815415821502,
+      "x_upper": 1055.9837728194725,
+      "y_lower": 1.8885941644562334,
+      "y_upper": 2.079575596816976,
+      "x_px": 442.0,
+      "y_px": 1162.5,
+      "px_left": 440.0,
+      "px_top": 1159.0,
+      "px_right": 444.0,
+      "px_bottom": 1166.0
+    }
+  ],
+  "curves": [],
+  "points_csv": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitized_fig5_3\\points.csv",
+  "points_csv_sha256": "c10eabe22ca10610d108af51e5ac922a6792608b77940eb021d22fe420374ff9",
+  "figure_overlay_path": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitized_fig5_3\\figure_overlay.png",
+  "figure_overlay_sha256": "0ad89be99148af5073248519220ae6dbcd990e796bb6caeff5b8160c950ab0ca",
+  "warnings": [],
+  "metadata_path": "D:\\w\\e6bf\\Julia_RelaxTime\\tmp\\magnetic_palc\\digitized_fig5_3\\metadata.json",
+  "retained_points": "thesis_fig5_3_points.csv",
+  "retained_source_crop": "thesis_fig5_3_calibration.png",
+  "review_note": "Five feature identities and axis ticks inspected by Codex; no automatic acceptance baseline. Full-page rendered PNGs were temporary."
+}

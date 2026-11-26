@@ -1,0 +1,316 @@
+{
+  "anchors": [
+    {
+      "record_id": "magnetic_equilibrium_t240_eb02",
+      "expected": -26.613327494039062,
+      "old_omega": -26.61332749404024,
+      "source_independent_gap": 4.707772281688307e-10,
+      "reference_state": [
+        -0.08664994124072686,
+        -0.07771072295461408,
+        -1.2109558885045952,
+        0.7446455890071643,
+        0.7446455890071643
+      ],
+      "reference_state_delta": 1.532885320429072e-9,
+      "reference_refinement_delta": 0.0,
+      "production_state": [
+        -0.08664994124816994,
+        -0.0777107229606394,
+        -1.2109558885059204,
+        0.7446455890071506,
+        0.7446455890071506
+      ],
+      "production_state_delta": 1.5419454921360651e-9,
+      "production_reference_delta": 9.667484061058449e-12,
+      "checks": [
+        {
+          "p_num": 16,
+          "old_omega": -26.61551443453748,
+          "delta_to_reference": -0.0021869404944609983
+        },
+        {
+          "p_num": 32,
+          "old_omega": -26.613351827639665,
+          "delta_to_reference": -2.4333596645220723e-5
+        },
+        {
+          "p_num": 64,
+          "old_omega": -26.613327736426072,
+          "delta_to_reference": -2.42383052295736e-7
+        },
+        {
+          "p_num": 128,
+          "old_omega": -26.61332749404024,
+          "delta_to_reference": 2.7782220968219917e-12
+        },
+        {
+          "p_num": 256,
+          "old_omega": -26.613327494045247,
+          "delta_to_reference": -2.227551476607914e-12
+        },
+        {
+          "p_num": 512,
+          "old_omega": -26.61332749404525,
+          "delta_to_reference": -2.2311041902867146e-12
+        }
+      ],
+      "refinement": [
+        {
+          "p_num": 128,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 2.549075582980755e-12,
+          "state_delta": 0.0,
+          "reference_delta": 1.532885320429072e-9
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 2.99573693833866e-13,
+          "state_delta": 1.5419497615005247e-9,
+          "reference_delta": 9.672475052429933e-12
+        },
+        {
+          "p_num": 128,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 2.5481003435527744e-12,
+          "state_delta": 0.0,
+          "reference_delta": 1.532885320429072e-9
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 2.9957366297513443e-13,
+          "state_delta": 1.5419463571930438e-9,
+          "reference_delta": 9.66820766730401e-12
+        }
+      ]
+    },
+    {
+      "record_id": "magnetic_equilibrium_t240_eb04",
+      "expected": -26.395432780503448,
+      "old_omega": -26.395432780504517,
+      "source_independent_gap": 4.2001459810057856e-9,
+      "reference_state": [
+        -0.09765939023248837,
+        -0.07004525776346776,
+        -1.1273140863033086,
+        0.7520519901692817,
+        0.7520519901692817
+      ],
+      "reference_state_delta": 1.1968712385503763e-8,
+      "reference_refinement_delta": 0.0,
+      "production_state": [
+        -0.09765939024331939,
+        -0.07004525777037589,
+        -1.1273140863046351,
+        0.7520519901692674,
+        0.7520519901692674
+      ],
+      "production_state_delta": 1.1980604238213714e-8,
+      "production_reference_delta": 1.2914841687007975e-11,
+      "checks": [
+        {
+          "p_num": 16,
+          "old_omega": -26.399534212391224,
+          "delta_to_reference": -0.004101431915351839
+        },
+        {
+          "p_num": 32,
+          "old_omega": -26.395516492626836,
+          "delta_to_reference": -8.371215096403262e-5
+        },
+        {
+          "p_num": 64,
+          "old_omega": -26.39543315998467,
+          "delta_to_reference": -3.7950879772097323e-7
+        },
+        {
+          "p_num": 128,
+          "old_omega": -26.395432780504212,
+          "delta_to_reference": -2.8339997015791596e-11
+        },
+        {
+          "p_num": 256,
+          "old_omega": -26.39543278047902,
+          "delta_to_reference": -3.147704319417244e-12
+        },
+        {
+          "p_num": 512,
+          "old_omega": -26.395432780479027,
+          "delta_to_reference": -3.154809746774845e-12
+        }
+      ],
+      "refinement": [
+        {
+          "p_num": 128,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 3.3223195844988937e-13,
+          "state_delta": 1.30982605695101e-11,
+          "reference_delta": 1.1956617642451162e-8
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 4.898869317747924e-14,
+          "state_delta": 1.1847039132272886e-8,
+          "reference_delta": 1.7625673368532662e-10
+        },
+        {
+          "p_num": 128,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 3.455074210001005e-14,
+          "state_delta": 2.0019422542740348e-10,
+          "reference_delta": 1.1823157700006033e-8
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 1.902957747776962e-13,
+          "state_delta": 1.198060882212881e-8,
+          "reference_delta": 1.2919096272122151e-11
+        }
+      ]
+    },
+    {
+      "record_id": "magnetic_equilibrium_t240_eb08",
+      "expected": -24.122964202440905,
+      "old_omega": -24.122964202441956,
+      "source_independent_gap": 1.218768450306793e-6,
+      "reference_state": [
+        -0.11454061142787585,
+        -0.06021429304366946,
+        -1.0169062446461326,
+        0.7712158504298383,
+        0.7712158504298383
+      ],
+      "reference_state_delta": 2.928788281058598e-6,
+      "reference_refinement_delta": 0.0,
+      "production_state": [
+        -0.11454061144436957,
+        -0.06021429305180708,
+        -1.0169062446478219,
+        0.7712158504298272,
+        0.7712158504298272
+      ],
+      "production_state_delta": 2.9287705741645616e-6,
+      "production_reference_delta": 1.8469375553877327e-11,
+      "checks": [
+        {
+          "p_num": 16,
+          "old_omega": -24.129328040188543,
+          "delta_to_reference": -0.0063638341201865956
+        },
+        {
+          "p_num": 32,
+          "old_omega": -24.123365925343855,
+          "delta_to_reference": -0.00040171927549792485
+        },
+        {
+          "p_num": 64,
+          "old_omega": -24.12296240766027,
+          "delta_to_reference": 1.7984080855626416e-6
+        },
+        {
+          "p_num": 128,
+          "old_omega": -24.122964206154307,
+          "delta_to_reference": -8.595080203122052e-11
+        },
+        {
+          "p_num": 256,
+          "old_omega": -24.122964206071256,
+          "delta_to_reference": -2.8990143619012088e-12
+        },
+        {
+          "p_num": 512,
+          "old_omega": -24.122964206071273,
+          "delta_to_reference": -2.9167779302952113e-12
+        }
+      ],
+      "refinement": [
+        {
+          "p_num": 128,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 2.799991623742826e-12,
+          "state_delta": 0.0,
+          "reference_delta": 2.928788281058598e-6
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 256,
+          "converged": true,
+          "residual": 1.5575354038602537e-13,
+          "state_delta": 1.0564238624668991e-7,
+          "reference_delta": 2.9064153674740146e-6
+        },
+        {
+          "p_num": 128,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 6.119273688431185e-13,
+          "state_delta": 2.9063699289128656e-6,
+          "reference_delta": 1.0566954939707842e-7
+        },
+        {
+          "p_num": 256,
+          "zeta_num": 1024,
+          "converged": true,
+          "residual": 8.322899689868287e-13,
+          "state_delta": 2.9287705686581783e-6,
+          "reference_delta": 1.847058797948397e-11
+        }
+      ]
+    }
+  ],
+  "source": "unchanged external pnjl_mag fixtures; old discretization reconstructed only for attribution",
+  "kernel": {
+    "record_id": "magnetic_kernel_p01",
+    "expected": -21.421667264009713,
+    "old_omega": -21.421667254450778,
+    "reference_omega": -21.421680159236647,
+    "old_minus_expected": 9.558934976894307e-9,
+    "reference_minus_expected": -1.2895226934261927e-5,
+    "checks": [
+      {
+        "p_num": 16,
+        "old_omega": -21.421667254450778,
+        "delta_to_reference": 1.2904785869238822e-5
+      },
+      {
+        "p_num": 32,
+        "old_omega": -21.421680163489814,
+        "delta_to_reference": -4.253166707712808e-9
+      },
+      {
+        "p_num": 64,
+        "old_omega": -21.42168015924182,
+        "delta_to_reference": -5.172751116333529e-12
+      },
+      {
+        "p_num": 128,
+        "old_omega": -21.42168015924182,
+        "delta_to_reference": -5.172751116333529e-12
+      },
+      {
+        "p_num": 256,
+        "old_omega": -21.42168015924182,
+        "delta_to_reference": -5.172751116333529e-12
+      },
+      {
+        "p_num": 512,
+        "old_omega": -21.42168015924182,
+        "delta_to_reference": -5.172751116333529e-12
+      }
+    ]
+  },
+  "generated_at": "2026-11-13T15:36:27.649"
+}
