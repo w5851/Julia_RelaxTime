@@ -36,12 +36,17 @@ scale_inv_fm = 5.0
 # quadrature nodes only; it keeps the default sampling block.  Raising `rtol`
 # here instead exhausts `max_events` on the first point (thermal measure event
 # budget), which silently drops the point from the scan.
+# Sampling keeps the default `rtol`, but the reference quadrature needs a larger
+# event cap than `thermal_weighted_v1`: the adaptive sampler must reach the same
+# tolerance with 128/48/54/48 tau nodes, so 3e7 events are not enough and the
+# point is dropped with `thermal measure event budget exhausted`.  The cap is a
+# safety bound, not a target, so raising it does not change the tolerance.
 [sampling]
 rtol = 1.0e-3
 atol = 1.0e-12
 weighted_window = 0.6
 seed_order = 48
-max_evaluations = 40000
-max_nodes = 12000
-max_rounds = 40
-max_events = 30000000
+max_evaluations = 200000
+max_nodes = 40000
+max_rounds = 60
+max_events = 150000000
