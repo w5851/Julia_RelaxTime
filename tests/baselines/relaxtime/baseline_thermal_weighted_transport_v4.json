@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "purpose": "stable-background production entrypoint regression; independently qualified against retained joint references",
+  "profile_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca",
+  "reference_profile": "config/models/pnjl/transport_sampling/thermal_weighted_reference_v1.toml",
+  "reference_profile_sha256": "da4a0333ecd10c1dbb4f8c26326d93ec0c74e3700125eb913cb3a0d90c58aece",
+  "qualification_status": "numeric_commitment_refresh_without_requalification",
+  "qualification_note": "v3 was qualified against an external joint-validation directory. That round was not repeated here: `qualified_candidate`/`qualified_reference` are filled from the same candidate/reference runs recorded in this refresh, so they must not be read as a new independent qualification.",
+  "numeric_commitment_change": "#365 修正 _species_omega_s 的 s 夸克轻夸克伙伴通道（w.usbar -> w.subar）后，muB!=0 的十二点输运承诺整体负向变化（最大 tau_s -8.67%）；muB=0 因精确 C 对称零漂移",
+  "supersedes": "baseline_thermal_weighted_transport_v3.csv",
+  "regenerated_by": "scripts/dev/export_phase_guided_twelve_point_baseline.jl",
+  "host": "quote-remote",
+  "julia_version": "1.12.5",
+  "threads": 1,
+  "source_commit": "800a695eb4ac8e7bc5c381d6b243b60560f7bc1a",
+  "source_files": {
+    "src/relaxtime/AverageScatteringRate.jl": "3c5cddfd56da0a37d20cb47bc570d93fce57609b73c580d4624ddb580e6fc53e",
+    "src/relaxtime/ThermalWeightedCache.jl": "172d995efe26112471bba31c2f26e16a211f583eadeaba68ffb5dc88599ae59e",
+    "src/relaxtime/ThermalWeightedSampling.jl": "453fdccc9c1e9e993e63bdea5ff899da10490124b91d3e7e790b09bc2ed03709",
+    "src/relaxtime/RelaxationTime.jl": "a2d6adfad90efb96f38092d2183e86aadabff6c448ef8b41d7014baec5ba5e99",
+    "src/models/workflow_apps/TransportWorkflow.jl": "e379165c4e0bfca90d79f2fe01f829bacd3019974862e452f60c2182ca398805",
+    "src/models/workflow_apps/TransportSamplingProfiles.jl": "beb6f60cd77fb830adcd769ca2111c0dda367c79314b2026d07ae5bc0e312995",
+    "config/physics/default.toml": "6e09dd509ddbb36db6979033e6171b9f46b81cf6df5840f8deb54fd2e897695e",
+    "Manifest.toml": "85e24ce27196cbdd46f7159b91c5f805fdc58cac447d771410a252cd83aff60a"
+  },
+  "configurations": {
+    "candidate": {
+      "profile": "thermal_weighted_v1",
+      "profile_sha256": "fd7e9a2ef1c3a313e7621be0d3213ce0cf03ce3f48a3f64505066166ffb2afca"
+    },
+    "reference": {
+      "profile": "thermal_weighted_reference_v1",
+      "profile_sha256": "da4a0333ecd10c1dbb4f8c26326d93ec0c74e3700125eb913cb3a0d90c58aece",
+      "scope": "tighter quadrature nodes only; default sampling tolerance"
+    }
+  },
+  "points": 12,
+  "comparisons": 108,
+  "regression_rtol": 1e-06,
+  "regression_atol": 1e-08,
+  "independent_relative_target": 0.01,
+  "baseline_semantics": "production_entrypoint",
+  "baseline_sha256": "36dad32f21241db9fe5d7cdb29c8b15899e3e5a8a6df4416fa049a57c2c7eafc"
+}

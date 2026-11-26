@@ -145,6 +145,49 @@ resume_transport_joint_validation.jl SOURCE_RUN NEW_OUTPUT [SOURCE_RUN NEW_OUTPU
 核验时仅恢复原配置绝对位置用于重建身份哈希，所有数值参数、采样选项和源码哈希仍精确匹配，
 并核对保存的身份内容。当前生产续算接口保持原有合同。
 
+## v4：`#365` 修正后的数值承诺刷新（2026-11-26）
+
+`#365` 修正 `_species_omega_s` 的 s 夸克轻夸克伙伴通道（`w.usbar` → `w.subar`）
+后，十二点基线的 `candidate` 与 `reference` 两列同时失去承诺，nightly 的
+`full (regression)` 自 2026-11-24 起报 28 处失配。
+
+**判据**：μB=0 的四个点漂移 `< 1e-6`（精确 C 对称下两通道速率相等）；μB≠0 的
+八个点全部负向漂移，最大 `tau_s` −8.6725%（`muB450_alpha1.1_xi+0.35`），且受
+τ_s 支配的 `eta/s`、`zeta/s` 同向移动。
+
+**刷新方式**：
+
+| 列 | 来源 |
+| --- | --- |
+| `candidate` | 生产入口 + `thermal_weighted_v1` |
+| `reference` | 生产入口 + `thermal_weighted_reference_v1`（只收紧求积节点，采样容差不变） |
+| `qualified_*` | 同两次运行填入，**不是**新的独立资格认定 |
+
+元数据 `qualification_status = numeric_commitment_refresh_without_requalification`
+显式记录「未重做外部资格认定」，避免把本次刷新误读为重新合格。
+
+**两条必须遵守的运行条件**：
+
+1. **单线程**。热测度从一条带种子的单一事件流取样，线程数改变事件消耗；8 线程时
+   首个点即以 `thermal measure event budget exhausted` 被跳过。导出器现在对此硬
+   失败。
+2. **充足的 `max_events`**。reference 配置节点加密后，默认 3e7 事件不足以在同
+   容差下收敛，`thermal_weighted_reference_v1` 提高到 1.5e8。上限只是安全界，
+   不改变容差。
+
+两种失败都表现为 `SCAN POINT FAILED ... skipped` + **表头空 CSV**，扫描本身不
+报错退出，因此导出器在读到空表时直接给出可操作诊断。
+
+生成与晋升：
+
+```powershell
+$env:JULIA_NUM_THREADS = '1'
+$env:TRANSPORT_BASELINE_WORKROOT = 'D:\Julia\workroot_v4'   # 断点复用
+julia --project=. scripts/dev/export_phase_guided_twelve_point_baseline.jl <new-candidate.csv>
+python scripts/dev/compare_phase_guided_twelve_point_candidate.py <new-candidate.csv>
+python scripts/dev/promote_phase_guided_twelve_point_baseline.py <new-candidate.csv> v4 --reason '...'
+```
+
 ## 完整单点计时
 
 当前默认入口使用：

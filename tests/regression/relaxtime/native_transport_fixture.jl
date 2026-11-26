@@ -6,9 +6,14 @@ module NativeTransportRegression
 using Test, CSV, JSON3, SHA
 
 const ROOT=normpath(joinpath(@__DIR__,"..","..",".."))
-# The v3 production baseline uses full-RS effective couplings; v1/v2 and their
-# qualified candidates and independent references remain historical evidence.
-const BASELINE=joinpath(ROOT,"tests","baselines","relaxtime","baseline_thermal_weighted_transport_v3.csv")
+# The v4 production baseline uses full-RS effective couplings and was regenerated
+# after `#365` corrected the strange-quark scattering partner in
+# `_species_omega_s`.  It records the same candidate/reference pair as v3 but from
+# a single-threaded rerun, so `JULIA_NUM_THREADS` must stay 1: extra threads change
+# how many thermal-measure events are consumed and can silently drop a point.
+# v1/v2/v3 and their qualified candidates and independent references remain
+# historical evidence.
+const BASELINE=joinpath(ROOT,"tests","baselines","relaxtime","baseline_thermal_weighted_transport_v4.csv")
 
 function _model_config_relative(path,root)
     normalized=replace(String(path),'\\'=>'/')
