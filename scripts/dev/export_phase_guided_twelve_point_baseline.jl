@@ -28,8 +28,12 @@ const _REFERENCE_PROFILE = joinpath(_ROOT, "config", "models", "pnjl", "transpor
 
 Base.include(Main, joinpath(_ROOT, "scripts", "relaxtime", "run_phase_guided_transport_scan.jl"))
 
-const OBSERVABLES = ("tau_u", "tau_s", "tau_ubar", "tau_sbar",
-                     "eta_over_s", "zeta_over_s", "sigma_over_T", "eta", "sigma")
+# Exactly the nine columns recorded in the v3 fixture: six relaxation times plus
+# three dimensionless ratios.  Keeping the set identical matters — the regression
+# asserts `length(expected) == 9` per point, and `eta`/`sigma` are not part of the
+# contract even though the scan CSV carries them.
+const OBSERVABLES = ("tau_u", "tau_d", "tau_s", "tau_ubar", "tau_dbar", "tau_sbar",
+                     "eta_over_s", "zeta_over_s", "sigma_over_T")
 
 function scan_point(; outdir, T_MeV, muB_MeV, xi, profile=nothing)
     isdir(outdir) && error("refusing to reuse an existing scan directory: $outdir")
@@ -75,7 +79,9 @@ function main(args)
     println("  points = ", length(points), "  observables = ", length(OBSERVABLES))
     flush(stdout)
 
-    workroot = mktempdir()
+    workroot = get(ENV, "TRANSPORT_BASELINE_WORKROOT", tempname())
+    mkpath(workroot)
+    println("  workroot = $workroot"); flush(stdout)
     rows = NamedTuple[]
     for (id, T, muB, xi) in points
         println("  computing $id (T=$T muB=$muB xi=$xi)"); flush(stdout)
