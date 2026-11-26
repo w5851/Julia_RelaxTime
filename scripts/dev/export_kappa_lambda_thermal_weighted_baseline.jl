@@ -70,6 +70,22 @@ function transport_point(T_MeV::Float64, muB_MeV::Float64, tau_kwargs)
     return result.transport
 end
 
+"""Reproduce the identifier convention of the recorded v2/v3 fixture.
+
+`kappa_mu100_t210_bb` / `lambda_mu100_t210` — module, chemical potential,
+temperature, then the component suffix.  Keeping the labels stable matters
+because the baseline metadata references them in its comparison table.
+"""
+function record_id(csv_field::Symbol, muB::Float64, T::Float64)
+    stem = string(csv_field)
+    if stem == "lambda"
+        return "lambda_mu$(Int(round(muB)))_t$(Int(round(T)))"
+    end
+    suffix = Dict("kappa_BB" => "bb", "kappa_QQ" => "qq", "kappa_SS" => "ss")[stem]
+    return "kappa_mu$(Int(round(muB)))_t$(Int(round(T)))_$(suffix)"
+end
+
+
 function main(args)
     length(args) == 1 || error("usage: export_kappa_lambda_thermal_weighted_baseline.jl <new-candidate.csv>")
     target = abspath(args[1])
@@ -87,7 +103,7 @@ function main(args)
             end
         end
         for (_, csv_field) in fields_for(muB)
-            push!(rows, (record_id="$(csv_field)_mu$(Int(round(muB)))_t$(Int(T))",
+            push!(rows, (record_id=record_id(csv_field, muB, T),
                          T_MeV=T, muB_MeV=muB, field=String(csv_field),
                          expected=record["$(csv_field).expected"], refined=record["$(csv_field).refined"]))
         end
