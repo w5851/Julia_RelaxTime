@@ -85,7 +85,6 @@ data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/
 data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv -text
 data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json -text
 data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv -text
-data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_current.json -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_formalization_v1.json -text
 docs/analysis/relaxtime/phase_guided_transport/publication_clean_v4_manuscript_eligibility_v1.json -text
@@ -160,7 +159,6 @@ data/reference/pnjl/issue130_phase_reference_v2/accepted/** -text
 # Byte-exact hashed sources: manifests bind these files by sha256, keep checkout bytes stable.
 config/plotting/** -text
 scripts/plotting/** -text
-scripts/analysis/pnjl/render_issue130_phase_surface_v3.py -text
 scripts/analysis/relaxtime/plot_freezeout_comparison.py -text
 scripts/analysis/relaxtime/plot_freezeout_envelope.py -text
 scripts/analysis/relaxtime/plot_freezeout_thermodynamic_envelope.py -text
