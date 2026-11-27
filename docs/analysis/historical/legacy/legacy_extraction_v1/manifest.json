@@ -91,6 +91,19 @@
     "magnetic_external_convergence_matrix": "diagnostic_recorded_production_auto_nmax_blocker_found",
     "magnetic_external_validation_plan": "fix_common_temperature_aware_auto_nmax_then_repeat_production_convergence_and_branch_gate; legacy_fortran_diagnostic_only",
     "mott_integral_external_acceptance": "diagnostic_only_convention_not_promoted",
-    "cleanup_status": "deferred_until_review"
+    "cleanup_status": "deleted_2026-11-27"
+  },
+  "cleanup_execution": {
+    "executed_at": "2026-11-27",
+    "operator": "author (manual deletion on the Windows host)",
+    "scope": "exactly the eight child directories; the parent path D:\\Desktop\\legacy no longer exists",
+    "pre_deletion_verification": {
+      "method": "per-directory file count and byte total against tables/legacy_extraction_index_v1.csv",
+      "result": "8/8 directories matched on both count and bytes",
+      "tree_hash": "not reproducible",
+      "tree_hash_note": "The documented rule (sorted UTF-8 lines relative_path|file_sha256|file_size joined by LF without trailing LF) and 32 construction variants did not reproduce any recorded tree_sha256. Verification therefore rests on count+bytes, which matched exactly for all eight directories. Repairing the rule is out of scope here; do not claim hash-level verification for this batch."
+    },
+    "post_deletion_state": "the eight child directories are gone; this artifact remains as the provenance record",
+    "residual_risk": "Legacy binaries and unmanifested scans are no longer available for re-inspection. The admitted conclusions in tables/ remain, and no current production input depended on the removed trees."
   }
 }
