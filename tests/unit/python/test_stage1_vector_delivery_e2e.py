@@ -11,9 +11,13 @@ def _times_new_roman_available() -> bool:
         return False
 
 
-import pytest as _pytest  # noqa: E402  (module-level skip marker)
+import pytest  # noqa: E402  (module-level skip marker)
 
-_pytestmark = _pytest.mark.skipif(
+# pytest only honours a module-level variable named exactly `pytestmark`; the
+# earlier `_pytestmark` spelling meant this skip never fired and the module ran on
+# font-less runners, where the declared serif substitute raised a UserWarning that
+# the strict warning policy turned into an error.
+pytestmark = pytest.mark.skipif(
     not _times_new_roman_available(),
     reason="module-level skip: Times New Roman is unavailable, so the rendering profile cannot run",
 )
@@ -27,7 +31,6 @@ import sys
 from tempfile import TemporaryDirectory
 
 from PIL import Image
-import pytest
 
 from scripts.plotting.plot_bundle import BUNDLE_SCHEMA, expand_bundle
 from scripts.plotting.plot_manifest import input_record, sha256_file
