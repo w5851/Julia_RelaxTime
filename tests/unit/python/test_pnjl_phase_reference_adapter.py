@@ -22,6 +22,7 @@ from scripts.relaxtime.build_paper_p1_figure_assets import load_phase_candidate_
 
 ROOT = Path(__file__).parents[3]
 CANDIDATE = ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v1"
+ACCEPTED_V2 = ROOT / "data" / "reference" / "pnjl" / "issue130_phase_reference_v2"
 
 
 TABLES = {
@@ -180,8 +181,15 @@ def test_duplicate_and_nonfinite_keys_are_rejected(tmp_path: Path) -> None:
 
 
 def test_imported_candidate_is_solver_free_and_has_real_manifest() -> None:
-    bundle = load_phase_reference(CANDIDATE, layer="strict")
-    assert bundle.manifest["runtime_consumption"] is False
+    # The candidate's own `strict/` tables were deduplicated on 2026-11-27: they
+    # are byte-identical to the accepted layer's copy, so the tables now live only
+    # under `issue130_phase_reference_v2`. The candidate keeps its manifest, which
+    # is what this contract is about; row counts are asserted where the bytes are.
+    manifest = json.loads((CANDIDATE / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["runtime_consumption"] is False
+    assert manifest["calculation_sha"]
+
+    bundle = load_phase_reference(ACCEPTED_V2, layer="strict")
     assert bundle.diagnostics["manifest_sha256"]
     assert bundle.diagnostics["row_counts"]["boundary"] > 0
 
