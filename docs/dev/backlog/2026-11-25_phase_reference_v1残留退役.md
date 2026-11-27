@@ -1,6 +1,44 @@
 # 1c 残留：`issue130_phase_reference_v1` 与 v2/v3/v9 渲染链退役
 
-> 状态：`deferred_task`，独立治理重构任务。本批次**不做**，理由是它的引用面远超一次收尾改动的范围，且会触碰现行 C2 正式数据源的消费者。
+> 状态：**已完成（2026-11-27）**。两轮执行：第一轮退役图件与渲染链（PR #388），
+> 第二轮去重 `derived/tables/`（本 PR）。原 `deferred_task` 休眠已解除。
+
+## 执行结果（2026-11-27）
+
+### 消费者矩阵
+
+| 引用层 | 对象 | 处置 |
+| --- | --- | --- |
+| 图件 | `figures/pnjl/phase_reference/issue130_phase_reference_v1/`（14.75 MB） | **删除**（2026-08-22 审阅件） |
+| 渲染链 | `render_issue130_phase_surface_v{2,3,9}.py` | **删除**（只服务上述图件） |
+| 测试 | `test_pnjl_phase_surface_v{2,3,9}.py` | **退役**（只覆盖上述渲染链） |
+| 数据（重复） | `v1/render/tables/`、`v1/strict/tables/`（7.5 MB） | **删除**（与 v2 同目录 sha256 字节相同） |
+| 数据（唯一副本） | `v1/derived/tables/`（6.09 MB） | **删除**（唯一消费者是已退役渲染链；四张面与 v2 accepted 数值最大差 `0.000e+00`；删前把 sha256/行数写入 `derived/manifest.json`） |
+| 簿记 | `manifest.json` / `README.md` / `IMPORT_AUDIT.md` / `RETIREMENT.md` / 三个层的 manifest+README | **保留**（`v2` 的 `source_manifest` 按 sha256 `7d37aedd…` 指向 v1 manifest；`internal_build_inputs` 指向 `v1/derived`） |
+| 证据树 | `docs/analysis/pnjl/**` 中的 v1 路径引用 | **不动**（历史审计记录，改写等于修改审计结论） |
+| 台账 | `task_tracks.toml` 里两条 `file:` 证据 | **改 `note:` 墓碑**（台账校验文件存在性） |
+
+净效果：`data/reference/pnjl/issue130_phase_reference_v1` 从 **33.8 MB 降到 30.2 KB**；
+`data/outputs/figures/pnjl/phase_reference/` 下不再有 `issue130_phase_reference_v1` 图包。
+
+### 运行时结论
+
+- v1 的 `manifest.json` 记 `runtime_consumption = false`；现行 C2 相位参考消费链
+  （`phase_diagram/*` 三个图包）读的是 v2 `accepted`，不受影响。
+- `import_issue130_phase_reference.py` 读的是外部分区源包，不读仓内 v1 引用，未受影响。
+
+### 验证
+
+`check_task_ledger` / `check_active_docs_governance` / `check_docs_consistency` /
+`check_data_output_path_guard` 全绿；`test_issue130_phase_reference_v2.py`、
+`test_pnjl_phase_reference_adapter.py`、`test_pnjl_phase_reference_import.py` 共 23 passed；
+`tests/unit/python` 全量 629 passed。
+
+### 未做（按裁定保留）
+
+- 证据树的 v1 路径引用（见上表"不动"一行）；
+- `phase_reference` v2/v3 现行数据与 `data/inputs/pnjl/**` 未触碰（原任务禁止项）；
+- 上述两项若将来需要，另开专题。
 
 ## 为什么单独拆出来
 

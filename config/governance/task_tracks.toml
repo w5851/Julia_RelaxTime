@@ -935,7 +935,7 @@ backlog_file = ""
 evidence = [
   "file:docs/dev/archived/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md",
   "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
-  "file:data/reference/pnjl/issue130_phase_reference_v1/derived/tables/spinodal_surface_derived_reference_v1.csv",
+  "note:retired_2026-11-27_derived_tables_deduplicated_into_v2_accepted_hashes_kept_in_v1_derived_manifest",
   "file:data/reference/pnjl/issue130_phase_reference_v1/render/manifest.json",
   "file:data/reference/pnjl/issue130_phase_reference_v2/manifest.json",
   "review:author_accepted_downstream_default",

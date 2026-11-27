@@ -51,5 +51,48 @@
     "crossover": 161,
     "maxwell": 161,
     "spinodal": 161
+  },
+  "retired_tables": {
+    "retired_at_utc": "2026-11-27",
+    "reason": "The v1-format tables were the input of the retired render chain. Their only consumer is gone and every value is reproduced cell-for-cell by the accepted tables of issue130_phase_reference_v2.",
+    "identity_evidence": "scripts/plotting/validate_plot_artifact.py comparisons: 0.000e+00 max |value| difference on all four surfaces",
+    "retains": "these sha256/row records; the tables themselves live only in v2's accepted layer",
+    "tables": [
+      {
+        "file": "cep_boundary_derived_reference_v1.csv",
+        "bytes": 27047,
+        "rows": 161,
+        "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+        "canonical_equivalent": "cep_boundary_accepted_phase_map_v1.csv"
+      },
+      {
+        "file": "crossover_surface_derived_reference_v1.csv",
+        "bytes": 785310,
+        "rows": 3135,
+        "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+        "canonical_equivalent": "crossover_surface_accepted_phase_map_v1.csv"
+      },
+      {
+        "file": "maxwell_surface_derived_reference_v1.csv",
+        "bytes": 3042004,
+        "rows": 12537,
+        "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+        "canonical_equivalent": "maxwell_surface_accepted_phase_map_v1.csv"
+      },
+      {
+        "file": "spinodal_surface_derived_reference_v1.csv",
+        "bytes": 2219976,
+        "rows": 11989,
+        "sha256": "2f506187195bbd6e27143a1a122dcd6308ac1ceb092c5f8fb5e41f009c50a32f",
+        "canonical_equivalent": "spinodal_surface_accepted_phase_map_v1.csv"
+      },
+      {
+        "file": "surface_coverage_mask.csv",
+        "bytes": 40523,
+        "rows": 483,
+        "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+        "canonical_equivalent": "surface_coverage_mask.csv"
+      }
+    ]
   }
 }
